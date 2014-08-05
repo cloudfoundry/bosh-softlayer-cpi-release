@@ -1,0 +1,87 @@
+{
+	"ImportPath": "bosh-warden-cpi",
+	"GoVersion": "go1.2.2",
+	"Packages": [
+		"github.com/maximilien/bosh-softlayer-cpi/..."
+	],
+	"Deps": [
+		{
+			"ImportPath": "bosh/errors",
+			"Rev": "90291ecec5e8d462fb36fe40a44e629b3a423a4a"
+		},
+		{
+			"ImportPath": "bosh/logger",
+			"Rev": "90291ecec5e8d462fb36fe40a44e629b3a423a4a"
+		},
+		{
+			"ImportPath": "bosh/platform/commands",
+			"Rev": "90291ecec5e8d462fb36fe40a44e629b3a423a4a"
+		},
+		{
+			"ImportPath": "bosh/system",
+			"Rev": "90291ecec5e8d462fb36fe40a44e629b3a423a4a"
+		},
+		{
+			"ImportPath": "bosh/uuid",
+			"Rev": "90291ecec5e8d462fb36fe40a44e629b3a423a4a"
+		},
+		{
+			"ImportPath": "code.google.com/p/gogoprotobuf/proto",
+			"Rev": "dc9b8350fb4568b6562900df872672f378242552"
+		},
+		{
+			"ImportPath": "code.google.com/p/goprotobuf/proto",
+			"Comment": "go.r60-130",
+			"Rev": "61664b8425f3e0e4371d4b56016b224b9d69cbbb"
+		},
+		{
+			"ImportPath": "github.com/bmizerany/pat",
+			"Rev": "b8a35001b773c267eb260a691f4e5499a3531600"
+		},
+		{
+			"ImportPath": "github.com/cloudfoundry-incubator/garden/client",
+			"Comment": "go-wshd-585-ge505dfe",
+			"Rev": "e505dfe1e7f4d1a55e9230b81358f2c76726d688"
+		},
+		{
+			"ImportPath": "github.com/cloudfoundry-incubator/garden/protocol",
+			"Comment": "go-wshd-585-ge505dfe",
+			"Rev": "e505dfe1e7f4d1a55e9230b81358f2c76726d688"
+		},
+		{
+			"ImportPath": "github.com/cloudfoundry-incubator/garden/routes",
+			"Comment": "go-wshd-585-ge505dfe",
+			"Rev": "e505dfe1e7f4d1a55e9230b81358f2c76726d688"
+		},
+		{
+			"ImportPath": "github.com/cloudfoundry-incubator/garden/transport",
+			"Comment": "go-wshd-585-ge505dfe",
+			"Rev": "e505dfe1e7f4d1a55e9230b81358f2c76726d688"
+		},
+		{
+			"ImportPath": "github.com/cloudfoundry-incubator/garden/warden",
+			"Comment": "go-wshd-585-ge505dfe",
+			"Rev": "e505dfe1e7f4d1a55e9230b81358f2c76726d688"
+		},
+		{
+			"ImportPath": "github.com/cloudfoundry/gofileutils/glob",
+			"Rev": "a4a0cae5ff8a342ba01fce700b9e41c6942c0e5e"
+		},
+		{
+			"ImportPath": "github.com/nu7hatch/gouuid",
+			"Rev": "179d4d0c4d8d407a32af483c2354df1d2c91e6c3"
+		},
+		{
+			"ImportPath": "github.com/onsi/ginkgo",
+			"Rev": "51ddbbc2ace9f9ad4cf06ba63442ea2ef2019837"
+		},
+		{
+			"ImportPath": "github.com/onsi/gomega",
+			"Rev": "d53f20ed6065e75dd459ceb4904b3e0a5cadbf0d"
+		},
+		{
+			"ImportPath": "github.com/tedsuo/rata",
+			"Rev": "ffbc6810b2dff37aade33e5bf1ee8deadafe867d"
+		}
+	]
+}
