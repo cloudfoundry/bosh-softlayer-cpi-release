@@ -3,7 +3,7 @@ package action
 import (
 	bosherr "bosh/errors"
 
-	bslcdisk "github.com/maximilien/bosh-softlayer-cpi/disk"
+	bslcdisk "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk"
 )
 
 type DeleteDisk struct {

@@ -8,10 +8,10 @@ import (
 	boshuuid "bosh/uuid"
 	wrdnclient "github.com/cloudfoundry-incubator/garden/client"
 
-	bslcdisk "github.com/maximilien/bosh-softlayer-cpi/disk"
-	bslcstem "github.com/maximilien/bosh-softlayer-cpi/stemcell"
+	bslcdisk "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk"
+	bslcstem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell"
 	bslcutil "github.com/maximilien/bosh-softlayer-cpi/util"
-	bslcvm "github.com/maximilien/bosh-softlayer-cpi/vm"
+	bslcvm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
 )
 
 type concreteFactory struct {

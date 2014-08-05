@@ -3,7 +3,7 @@ package action
 import (
 	bosherr "bosh/errors"
 
-	bslcstem "github.com/maximilien/bosh-softlayer-cpi/stemcell"
+	bslcstem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell"
 )
 
 type DeleteStemcell struct {

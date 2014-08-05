@@ -7,9 +7,9 @@ import (
 	. "github.com/onsi/gomega"
 
 	. "github.com/maximilien/bosh-softlayer-cpi/action"
-	fakestem "github.com/maximilien/bosh-softlayer-cpi/stemcell/fakes"
-	bslcvm "github.com/maximilien/bosh-softlayer-cpi/vm"
-	fakevm "github.com/maximilien/bosh-softlayer-cpi/vm/fakes"
+	fakestem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell/fakes"
+	bslcvm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
+	fakevm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm/fakes"
 )
 
 var _ = Describe("CreateVM", func() {

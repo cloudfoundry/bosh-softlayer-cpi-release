@@ -3,7 +3,7 @@ package action
 import (
 	bosherr "bosh/errors"
 
-	bslcvm "github.com/maximilien/bosh-softlayer-cpi/vm"
+	bslcvm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
 )
 
 type HasVM struct {

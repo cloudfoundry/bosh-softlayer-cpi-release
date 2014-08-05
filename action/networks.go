@@ -1,7 +1,7 @@
 package action
 
 import (
-	bslcvm "github.com/maximilien/bosh-softlayer-cpi/vm"
+	bslcvm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
 )
 
 type Networks map[string]Network

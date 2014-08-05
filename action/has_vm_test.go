@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	. "github.com/maximilien/bosh-softlayer-cpi/action"
-	fakevm "github.com/maximilien/bosh-softlayer-cpi/vm/fakes"
+	fakevm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm/fakes"
 )
 
 var _ = Describe("HasVM", func() {

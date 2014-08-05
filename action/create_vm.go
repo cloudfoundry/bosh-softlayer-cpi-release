@@ -3,8 +3,8 @@ package action
 import (
 	bosherr "bosh/errors"
 
-	bslcstem "github.com/maximilien/bosh-softlayer-cpi/stemcell"
-	bslcvm "github.com/maximilien/bosh-softlayer-cpi/vm"
+	bslcstem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell"
+	bslcvm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
 )
 
 type CreateVM struct {

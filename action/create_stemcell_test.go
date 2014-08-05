@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	. "github.com/maximilien/bosh-softlayer-cpi/action"
-	fakestem "github.com/maximilien/bosh-softlayer-cpi/stemcell/fakes"
+	fakestem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell/fakes"
 )
 
 var _ = Describe("CreateStemcell", func() {

@@ -10,7 +10,7 @@ import (
 
 	bslcaction "github.com/maximilien/bosh-softlayer-cpi/action"
 	. "github.com/maximilien/bosh-softlayer-cpi/main"
-	bslcvm "github.com/maximilien/bosh-softlayer-cpi/vm"
+	bslcvm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
 )
 
 var validConfig = Config{

@@ -3,6 +3,9 @@
 *.a
 *.so
 
+out/*
+gobin/*
+
 # Folders
 _obj
 _test

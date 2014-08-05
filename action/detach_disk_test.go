@@ -7,8 +7,8 @@ import (
 	. "github.com/onsi/gomega"
 
 	. "github.com/maximilien/bosh-softlayer-cpi/action"
-	fakedisk "github.com/maximilien/bosh-softlayer-cpi/disk/fakes"
-	fakevm "github.com/maximilien/bosh-softlayer-cpi/vm/fakes"
+	fakedisk "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk/fakes"
+	fakevm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm/fakes"
 )
 
 var _ = Describe("DetachDisk", func() {

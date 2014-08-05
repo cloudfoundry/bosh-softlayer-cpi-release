@@ -3,8 +3,8 @@ package action
 import (
 	bosherr "bosh/errors"
 
-	bslcdisk "github.com/maximilien/bosh-softlayer-cpi/disk"
-	bslcvm "github.com/maximilien/bosh-softlayer-cpi/vm"
+	bslcdisk "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk"
+	bslcvm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
 )
 
 type DetachDisk struct {

@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	. "github.com/maximilien/bosh-softlayer-cpi/action"
-	fakedisk "github.com/maximilien/bosh-softlayer-cpi/disk/fakes"
+	fakedisk "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk/fakes"
 )
 
 var _ = Describe("CreateDisk", func() {
