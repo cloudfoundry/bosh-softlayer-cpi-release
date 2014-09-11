@@ -7,7 +7,7 @@ import (
 	bslcpi "github.com/maximilien/bosh-softlayer-cpi/softlayer/cpi"
 )
 
-const wardenFinderLogTag = "WardenFinder"
+const softLayerFinderLogTag = "SoftLayerFinder"
 
 type SoftLayerFinder struct {
 	softLayerClient        bslcpi.Client
@@ -38,7 +38,7 @@ func NewSoftLayerFinder(
 }
 
 func (f SoftLayerFinder) Find(id string) (VM, bool, error) {
-	f.logger.Debug(wardenFinderLogTag, "Finding container with ID '%s'", id)
+	f.logger.Debug(softLayerFinderLogTag, "Finding container with ID '%s'", id)
 
 	// Cannot just use Lookup(id) since we need to differentiate between error and not found
 	containers, err := f.softLayerClient.Containers()
@@ -48,7 +48,7 @@ func (f SoftLayerFinder) Find(id string) (VM, bool, error) {
 
 	for _, container := range containers {
 		if container.Handle() == id {
-			f.logger.Debug(wardenFinderLogTag, "Found container with ID '%s'", id)
+			f.logger.Debug(softLayerFinderLogTag, "Found container with ID '%s'", id)
 
 			agentEnvService := f.agentEnvServiceFactory.New(container)
 
@@ -65,7 +65,7 @@ func (f SoftLayerFinder) Find(id string) (VM, bool, error) {
 		}
 	}
 
-	f.logger.Debug(wardenFinderLogTag, "Did not find container with ID '%s'", id)
+	f.logger.Debug(softLayerFinderLogTag, "Did not find container with ID '%s'", id)
 
 	return nil, false, nil
 }

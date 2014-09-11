@@ -8,17 +8,18 @@ import (
 
 	fakesys "bosh/system/fakes"
 
-	bslcaction "github.com/maximilien/bosh-softlayer-cpi/action"
 	. "github.com/maximilien/bosh-softlayer-cpi/main"
+
+	bslcaction "github.com/maximilien/bosh-softlayer-cpi/action"
 	bslcvm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
 )
 
 var validConfig = Config{
-	SoftLayer: validWardenConfig,
+	SoftLayer: validSoftLayerConfig,
 	Actions:   validActionsOptions,
 }
 
-var validWardenConfig = SoftLayerConfig{
+var validSoftLayerConfig = SoftLayerConfig{
 	ConnectNetwork: "fake-tcp",
 	ConnectAddress: "fake-address",
 }
@@ -92,17 +93,17 @@ var _ = Describe("Config", func() {
 			config = validConfig
 		})
 
-		It("does not return error if all warden and agent sections are valid", func() {
+		It("does not return error if all softlayer and agent sections are valid", func() {
 			err := config.Validate()
 			Expect(err).ToNot(HaveOccurred())
 		})
 
-		It("returns error if warden section is not valid", func() {
+		It("returns error if softlayer section is not valid", func() {
 			config.SoftLayer.ConnectNetwork = ""
 
 			err := config.Validate()
 			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring("Validating Warden configuration"))
+			Expect(err.Error()).To(ContainSubstring("Validating SoftLayer configuration"))
 		})
 
 		It("returns error if actions section is not valid", func() {
@@ -115,14 +116,14 @@ var _ = Describe("Config", func() {
 	})
 })
 
-var _ = Describe("WardenConfig", func() {
+var _ = Describe("SoftLayerConfig", func() {
 	var (
 		config SoftLayerConfig
 	)
 
 	Describe("Validate", func() {
 		BeforeEach(func() {
-			config = validWardenConfig
+			config = validSoftLayerConfig
 		})
 
 		It("does not return error if all fields are valid", func() {

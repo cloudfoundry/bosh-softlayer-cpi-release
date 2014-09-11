@@ -6,44 +6,44 @@ import (
 	bslcpi "github.com/maximilien/bosh-softlayer-cpi/softlayer/cpi"
 )
 
-type FakeConnection struct {	
-	streamOutReturns *io.Reader
-	streamOutError error
-	streamOutCallCount int
+type FakeConnection struct {
+	streamOutReturns    *io.Reader
+	streamOutError      error
+	streamOutCallCount  int
 	streamOutArgsHandle string
-	streamsOutArgsPath string
+	streamsOutArgsPath  string
 
-	streamInArgsHandle string 
-	streamsInArgsPath string
-	streamInReader io.Reader
-	streamInCallCount int
+	streamInArgsHandle string
+	streamsInArgsPath  string
+	streamInReader     io.Reader
+	streamInCallCount  int
 
 	createReturns bslcpi.Container
 
 	runReturnsProcess bslcpi.Process
-	runError error
-	runCallCount int
-	runHandle string
-	runProcessSpec bslcpi.ProcessSpec
-	runProcessIO bslcpi.ProcessIO
+	runError          error
+	runCallCount      int
+	runHandle         string
+	runProcessSpec    bslcpi.ProcessSpec
+	runProcessIO      bslcpi.ProcessIO
 
 	fakeError error
 
-	createCallCount int
+	createCallCount         int
 	createCallContainerSpec bslcpi.ContainerSpec
 
-	stopCallCount int
+	stopCallCount  int
 	stopCallHandle string
-	stopCallForce bool
-	stopCallError error
+	stopCallForce  bool
+	stopCallError  error
 
 	listCallReturns []string
-	listCallCount int
-	listCallError error
+	listCallCount   int
+	listCallError   error
 
 	destroyCallReturns string
-	destroyCallCount int
-	destroyCallError error
+	destroyCallCount   int
+	destroyCallError   error
 }
 
 func (fc *FakeConnection) CreateReturns(vmId string, err error) {
@@ -56,7 +56,7 @@ func (fc *FakeConnection) RunReturns(process bslcpi.Process, err error) {
 	fc.runCallCount += 1
 }
 
-func (fc *FakeConnection) RunArgsForCall(arg int) (string, bslcpi.ProcessSpec, bslcpi.ProcessIO ) {
+func (fc *FakeConnection) RunArgsForCall(arg int) (string, bslcpi.ProcessSpec, bslcpi.ProcessIO) {
 	return fc.runHandle, fc.runProcessSpec, fc.runProcessIO
 }
 
@@ -104,7 +104,7 @@ func (fc *FakeConnection) StopReturns(err error) {
 	fc.stopCallCount += 1
 }
 
-func (fc *FakeConnection) StopArgsForCall(arg int) (string, bool){
+func (fc *FakeConnection) StopArgsForCall(arg int) (string, bool) {
 	return fc.stopCallHandle, fc.stopCallForce
 }
 

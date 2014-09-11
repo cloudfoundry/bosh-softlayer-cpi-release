@@ -2,7 +2,7 @@ package cpi_fakes
 
 type FakeProcess struct {
 	waitReturns int
-	waitError error
+	waitError   error
 }
 
 func (fp *FakeProcess) Wait() (int, error) {

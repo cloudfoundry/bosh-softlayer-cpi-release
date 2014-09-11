@@ -5,9 +5,9 @@ import (
 )
 
 type FakeClient struct {
-	FakeContainer Container
+	FakeContainer  Container
 	FakeContainers []Container
-	FakeError error
+	FakeError      error
 
 	Connection FakeConnection
 }

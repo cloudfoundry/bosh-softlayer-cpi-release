@@ -6,16 +6,16 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	boshlog "bosh/logger"
-	fakeuuid "bosh/uuid/fakes"
-
 	. "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
 
+	boshlog "bosh/logger"
+
+	fakeuuid "bosh/uuid/fakes"
 	fakebslcpi "github.com/maximilien/bosh-softlayer-cpi/softlayer/cpi/fakes"
 	fakestem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell/fakes"
 	fakevm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm/fakes"
 
-	wrdn "github.com/cloudfoundry-incubator/garden/warden"
+	slcpi "github.com/maximilien/bosh-softlayer-cpi/softlayer/cpi"
 )
 
 var _ = Describe("SoftLayerCreator", func() {
@@ -140,18 +140,18 @@ var _ = Describe("SoftLayerCreator", func() {
 
 				containerSpec := softLayerClient.Connection.CreateArgsForCall(0)
 				Expect(containerSpec.BindMounts).To(Equal(
-					[]wrdn.BindMount{
-						wrdn.BindMount{
+					[]slcpi.BindMount{
+						slcpi.BindMount{
 							SrcPath: "/fake-host-ephemeral-bind-mount-path",
 							DstPath: "/fake-guest-ephemeral-bind-mount-path",
-							Mode:    wrdn.BindMountModeRW,
-							Origin:  wrdn.BindMountOriginHost,
+							Mode:    slcpi.BindMountModeRW,
+							Origin:  slcpi.BindMountOriginHost,
 						},
-						wrdn.BindMount{
+						slcpi.BindMount{
 							SrcPath: "/fake-host-persistent-bind-mounts-dir",
 							DstPath: "/fake-guest-persistent-bind-mounts-dir",
-							Mode:    wrdn.BindMountModeRW,
-							Origin:  wrdn.BindMountOriginHost,
+							Mode:    slcpi.BindMountModeRW,
+							Origin:  slcpi.BindMountOriginHost,
 						},
 					},
 				))
@@ -207,7 +207,7 @@ var _ = Describe("SoftLayerCreator", func() {
 				Expect(err).ToNot(HaveOccurred())
 
 				containerSpec := softLayerClient.Connection.CreateArgsForCall(0)
-				Expect(containerSpec.Properties).To(Equal(wrdn.Properties{}))
+				Expect(containerSpec.Properties).To(Equal( slcpi.Properties{}))
 			})
 
 			Context("when creating container succeeds", func() {
@@ -272,7 +272,7 @@ var _ = Describe("SoftLayerCreator", func() {
 						count := softLayerClient.Connection.RunCallCount()
 						Expect(count).To(Equal(1))
 
-						expectedProcessSpec := wrdn.ProcessSpec{
+						expectedProcessSpec := slcpi.ProcessSpec{
 							Path:       "/usr/sbin/runsvdir-start",
 							Privileged: true,
 						}
@@ -280,7 +280,7 @@ var _ = Describe("SoftLayerCreator", func() {
 						handle, processSpec, processIO := softLayerClient.Connection.RunArgsForCall(0)
 						Expect(handle).To(Equal("fake-vm-id"))
 						Expect(processSpec).To(Equal(expectedProcessSpec))
-						Expect(processIO).To(Equal(wrdn.ProcessIO{}))
+						Expect(processIO).To(Equal(slcpi.ProcessIO{}))
 					})
 
 					Context("when BOSH Agent fails to start", func() {

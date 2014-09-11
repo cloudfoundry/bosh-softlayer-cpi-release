@@ -47,7 +47,7 @@ func NewConfigFromPath(path string, fs boshsys.FileSystem) (Config, error) {
 func (c Config) Validate() error {
 	err := c.SoftLayer.Validate()
 	if err != nil {
-		return bosherr.WrapError(err, "Validating Warden configuration")
+		return bosherr.WrapError(err, "Validating SoftLayer configuration")
 	}
 
 	err = c.Actions.Validate()

@@ -1,5 +1,5 @@
 {
-	"ImportPath": "bosh-warden-cpi",
+	"ImportPath": "bosh-softlayer-cpi",
 	"GoVersion": "go1.2.2",
 	"Packages": [
 		"github.com/maximilien/bosh-softlayer-cpi/..."
@@ -37,31 +37,6 @@
 		{
 			"ImportPath": "github.com/bmizerany/pat",
 			"Rev": "b8a35001b773c267eb260a691f4e5499a3531600"
-		},
-		{
-			"ImportPath": "github.com/cloudfoundry-incubator/garden/client",
-			"Comment": "go-wshd-585-ge505dfe",
-			"Rev": "e505dfe1e7f4d1a55e9230b81358f2c76726d688"
-		},
-		{
-			"ImportPath": "github.com/cloudfoundry-incubator/garden/protocol",
-			"Comment": "go-wshd-585-ge505dfe",
-			"Rev": "e505dfe1e7f4d1a55e9230b81358f2c76726d688"
-		},
-		{
-			"ImportPath": "github.com/cloudfoundry-incubator/garden/routes",
-			"Comment": "go-wshd-585-ge505dfe",
-			"Rev": "e505dfe1e7f4d1a55e9230b81358f2c76726d688"
-		},
-		{
-			"ImportPath": "github.com/cloudfoundry-incubator/garden/transport",
-			"Comment": "go-wshd-585-ge505dfe",
-			"Rev": "e505dfe1e7f4d1a55e9230b81358f2c76726d688"
-		},
-		{
-			"ImportPath": "github.com/cloudfoundry-incubator/garden/warden",
-			"Comment": "go-wshd-585-ge505dfe",
-			"Rev": "e505dfe1e7f4d1a55e9230b81358f2c76726d688"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/gofileutils/glob",

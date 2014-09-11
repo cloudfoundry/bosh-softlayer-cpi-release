@@ -14,7 +14,7 @@ type ConcreteFactoryOptions struct {
 	HostPersistentBindMountsDir string // e.g. /var/vcap/store/persistent_disks
 
 	GuestEphemeralBindMountPath  string // e.g. /var/vcap/data
-	GuestPersistentBindMountsDir string // e.g. /warden-cpi-dev
+	GuestPersistentBindMountsDir string // e.g. /softlayer-cpi-dev
 
 	Agent bslcvm.AgentOptions
 }

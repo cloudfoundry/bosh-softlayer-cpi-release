@@ -41,7 +41,7 @@ var _ = Describe("SoftLayerFinder", func() {
 	})
 
 	Describe("Find", func() {
-		It("returns VM and found as true if warden has container with VM ID as its handle", func() {
+		It("returns VM and found as true if softlayer has container with VM ID as its handle", func() {
 			agentEnvService := &fakevm.FakeAgentEnvService{}
 			agentEnvServiceFactory.NewAgentEnvService = agentEnvService
 
@@ -65,7 +65,7 @@ var _ = Describe("SoftLayerFinder", func() {
 			Expect(softLayerClient.Connection.ListArgsForCall(0)).To(BeNil())
 		})
 
-		It("returns found as false if warden does not have container with VM ID as its handle", func() {
+		It("returns found as false if softlayer does not have container with VM ID as its handle", func() {
 			softLayerClient.Connection.ListReturns([]string{"non-matching-vm-id"}, nil)
 
 			vm, found, err := finder.Find("fake-vm-id")
@@ -74,7 +74,7 @@ var _ = Describe("SoftLayerFinder", func() {
 			Expect(vm).To(BeNil())
 		})
 
-		It("returns error if warden container listing fails", func() {
+		It("returns error if softlayer container listing fails", func() {
 			softLayerClient.Connection.ListReturns(nil, errors.New("fake-list-err"))
 
 			vm, found, err := finder.Find("fake-vm-id")
