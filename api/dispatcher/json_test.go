@@ -3,12 +3,15 @@ package dispatcher_test
 import (
 	"errors"
 
-	boshlog "bosh/logger"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	fakeaction "github.com/maximilien/bosh-softlayer-cpi/action/fakes"
+
 	. "github.com/maximilien/bosh-softlayer-cpi/api/dispatcher"
+
+	boshlog "bosh/logger"
+
+	fakeaction "github.com/maximilien/bosh-softlayer-cpi/action/fakes"
 	fakedisp "github.com/maximilien/bosh-softlayer-cpi/api/dispatcher/fakes"
 	fakeapi "github.com/maximilien/bosh-softlayer-cpi/api/fakes"
 )

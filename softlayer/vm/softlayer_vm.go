@@ -8,10 +8,10 @@ import (
 	bslcdisk "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk"
 )
 
-type WardenVM struct {
+type SoftLayerVM struct {
 	id string
 
-	wardenClient    wrdnclient.Client
+	softLayerClient wrdnclient.Client
 	agentEnvService AgentEnvService
 
 	hostBindMounts  HostBindMounts
@@ -20,18 +20,18 @@ type WardenVM struct {
 	logger boshlog.Logger
 }
 
-func NewWardenVM(
+func NewSoftLayerVM(
 	id string,
-	wardenClient wrdnclient.Client,
+	softLayerClient wrdnclient.Client,
 	agentEnvService AgentEnvService,
 	hostBindMounts HostBindMounts,
 	guestBindMounts GuestBindMounts,
 	logger boshlog.Logger,
-) WardenVM {
-	return WardenVM{
+) SoftLayerVM {
+	return SoftLayerVM{
 		id: id,
 
-		wardenClient:    wardenClient,
+		softLayerClient: softLayerClient,
 		agentEnvService: agentEnvService,
 
 		hostBindMounts:  hostBindMounts,
@@ -41,9 +41,9 @@ func NewWardenVM(
 	}
 }
 
-func (vm WardenVM) ID() string { return vm.id }
+func (vm SoftLayerVM) ID() string { return vm.id }
 
-func (vm WardenVM) Delete() error {
+func (vm SoftLayerVM) Delete() error {
 	err := vm.hostBindMounts.DeleteEphemeral(vm.id)
 	if err != nil {
 		return err
@@ -54,10 +54,10 @@ func (vm WardenVM) Delete() error {
 		return err
 	}
 
-	return vm.wardenClient.Destroy(vm.id)
+	return vm.softLayerClient.Destroy(vm.id)
 }
 
-func (vm WardenVM) AttachDisk(disk bslcdisk.Disk) error {
+func (vm SoftLayerVM) AttachDisk(disk bslcdisk.Disk) error {
 	agentEnv, err := vm.agentEnvService.Fetch()
 	if err != nil {
 		return bosherr.WrapError(err, "Fetching agent env")
@@ -80,7 +80,7 @@ func (vm WardenVM) AttachDisk(disk bslcdisk.Disk) error {
 	return nil
 }
 
-func (vm WardenVM) DetachDisk(disk bslcdisk.Disk) error {
+func (vm SoftLayerVM) DetachDisk(disk bslcdisk.Disk) error {
 	agentEnv, err := vm.agentEnvService.Fetch()
 	if err != nil {
 		return bosherr.WrapError(err, "Fetching agent env")

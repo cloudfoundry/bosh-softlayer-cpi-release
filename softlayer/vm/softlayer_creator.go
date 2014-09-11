@@ -9,12 +9,12 @@ import (
 	bslcstem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell"
 )
 
-const wardenCreatorLogTag = "WardenCreator"
+const softLayerCreatorLogTag = "SoftLayerCreator"
 
-type WardenCreator struct {
+type SoftLayerCreator struct {
 	uuidGen boshuuid.Generator
 
-	wardenClient           wrdn.Client
+	softLayerClient        wrdn.Client
 	agentEnvServiceFactory AgentEnvServiceFactory
 
 	hostBindMounts  HostBindMounts
@@ -24,19 +24,19 @@ type WardenCreator struct {
 	logger       boshlog.Logger
 }
 
-func NewWardenCreator(
+func NewSoftLayerCreator(
 	uuidGen boshuuid.Generator,
-	wardenClient wrdn.Client,
+	softLayerClient wrdn.Client,
 	agentEnvServiceFactory AgentEnvServiceFactory,
 	hostBindMounts HostBindMounts,
 	guestBindMounts GuestBindMounts,
 	agentOptions AgentOptions,
 	logger boshlog.Logger,
-) WardenCreator {
-	return WardenCreator{
+) SoftLayerCreator {
+	return SoftLayerCreator{
 		uuidGen: uuidGen,
 
-		wardenClient:           wardenClient,
+		softLayerClient:        softLayerClient,
 		agentEnvServiceFactory: agentEnvServiceFactory,
 
 		hostBindMounts:  hostBindMounts,
@@ -47,20 +47,20 @@ func NewWardenCreator(
 	}
 }
 
-func (c WardenCreator) Create(agentID string, stemcell bslcstem.Stemcell, networks Networks, env Environment) (VM, error) {
+func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, networks Networks, env Environment) (VM, error) {
 	id, err := c.uuidGen.Generate()
 	if err != nil {
-		return WardenVM{}, bosherr.WrapError(err, "Generating VM id")
+		return SoftLayerVM{}, bosherr.WrapError(err, "Generating VM id")
 	}
 
 	networkIP, err := c.resolveNetworkIP(networks)
 	if err != nil {
-		return WardenVM{}, err
+		return SoftLayerVM{}, err
 	}
 
 	hostEphemeralBindMountPath, hostPersistentBindMountsDir, err := c.makeHostBindMounts(id)
 	if err != nil {
-		return WardenVM{}, err
+		return SoftLayerVM{}, err
 	}
 
 	containerSpec := wrdn.ContainerSpec{
@@ -84,11 +84,11 @@ func (c WardenCreator) Create(agentID string, stemcell bslcstem.Stemcell, networ
 		Properties: wrdn.Properties{},
 	}
 
-	c.logger.Debug(wardenCreatorLogTag, "Creating container with spec %#v", containerSpec)
+	c.logger.Debug(softLayerCreatorLogTag, "Creating container with spec %#v", containerSpec)
 
-	container, err := c.wardenClient.Create(containerSpec)
+	container, err := c.softLayerClient.Create(containerSpec)
 	if err != nil {
-		return WardenVM{}, bosherr.WrapError(err, "Creating container")
+		return SoftLayerVM{}, bosherr.WrapError(err, "Creating container")
 	}
 
 	agentEnv := NewAgentEnvForVM(agentID, id, networks, env, c.agentOptions)
@@ -98,18 +98,18 @@ func (c WardenCreator) Create(agentID string, stemcell bslcstem.Stemcell, networ
 	err = agentEnvService.Update(agentEnv)
 	if err != nil {
 		c.cleanUpContainer(container)
-		return WardenVM{}, bosherr.WrapError(err, "Updating container's agent env")
+		return SoftLayerVM{}, bosherr.WrapError(err, "Updating container's agent env")
 	}
 
 	err = c.startAgentInContainer(container)
 	if err != nil {
 		c.cleanUpContainer(container)
-		return WardenVM{}, err
+		return SoftLayerVM{}, err
 	}
 
-	vm := NewWardenVM(
+	vm := NewSoftLayerVM(
 		id,
-		c.wardenClient,
+		c.softLayerClient,
 		agentEnvService,
 		c.hostBindMounts,
 		c.guestBindMounts,
@@ -119,7 +119,7 @@ func (c WardenCreator) Create(agentID string, stemcell bslcstem.Stemcell, networ
 	return vm, nil
 }
 
-func (c WardenCreator) resolveNetworkIP(networks Networks) (string, error) {
+func (c SoftLayerCreator) resolveNetworkIP(networks Networks) (string, error) {
 	var network Network
 
 	switch len(networks) {
@@ -138,7 +138,7 @@ func (c WardenCreator) resolveNetworkIP(networks Networks) (string, error) {
 	return network.IP, nil
 }
 
-func (c WardenCreator) makeHostBindMounts(id string) (string, string, error) {
+func (c SoftLayerCreator) makeHostBindMounts(id string) (string, string, error) {
 	ephemeralBindMountPath, err := c.hostBindMounts.MakeEphemeral(id)
 	if err != nil {
 		return "", "", bosherr.WrapError(err, "Making host ephemeral bind mount path")
@@ -152,7 +152,7 @@ func (c WardenCreator) makeHostBindMounts(id string) (string, string, error) {
 	return ephemeralBindMountPath, persistentBindMountsDir, nil
 }
 
-func (c WardenCreator) startAgentInContainer(container wrdn.Container) error {
+func (c SoftLayerCreator) startAgentInContainer(container wrdn.Container) error {
 	processSpec := wrdn.ProcessSpec{
 		Path:       "/usr/sbin/runsvdir-start",
 		Privileged: true,
@@ -167,10 +167,10 @@ func (c WardenCreator) startAgentInContainer(container wrdn.Container) error {
 	return nil
 }
 
-func (c WardenCreator) cleanUpContainer(container wrdn.Container) {
+func (c SoftLayerCreator) cleanUpContainer(container wrdn.Container) {
 	// false is to kill immediately
 	err := container.Stop(false)
 	if err != nil {
-		c.logger.Error(wardenCreatorLogTag, "Failed destroying container '%s': %s", container.Handle, err.Error())
+		c.logger.Error(softLayerCreatorLogTag, "Failed destroying container '%s': %s", container.Handle, err.Error())
 	}
 }

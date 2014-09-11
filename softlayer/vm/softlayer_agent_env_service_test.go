@@ -8,38 +8,41 @@ import (
 	"io"
 	"io/ioutil"
 
-	boshlog "bosh/logger"
-	fakewrdnclient "github.com/cloudfoundry-incubator/garden/client/fake_warden_client"
-	wrdn "github.com/cloudfoundry-incubator/garden/warden"
-	fakewrdn "github.com/cloudfoundry-incubator/garden/warden/fakes"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
 	. "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
+
+	boshlog "bosh/logger"
+
+	wrdn "github.com/cloudfoundry-incubator/garden/warden"
+
+	fakewrdnclient "github.com/cloudfoundry-incubator/garden/client/fake_warden_client"
+	fakewrdn "github.com/cloudfoundry-incubator/garden/warden/fakes"
 )
 
-var _ = Describe("WardenAgentEnvService", func() {
+var _ = Describe("SoftLayerAgentEnvService", func() {
 	var (
-		wardenClient    *fakewrdnclient.FakeClient
+		softLayerClient *fakewrdnclient.FakeClient
 		logger          boshlog.Logger
-		agentEnvService WardenAgentEnvService
+		agentEnvService SoftLayerAgentEnvService
 	)
 
 	BeforeEach(func() {
-		wardenClient = fakewrdnclient.New()
+		softLayerClient = fakewrdnclient.New()
 
-		wardenClient.Connection.CreateReturns("fake-vm-id", nil)
+		softLayerClient.Connection.CreateReturns("fake-vm-id", nil)
 
 		containerSpec := wrdn.ContainerSpec{
 			Handle:     "fake-vm-id",
 			RootFSPath: "fake-root-fs-path",
 		}
 
-		container, err := wardenClient.Create(containerSpec)
+		container, err := softLayerClient.Create(containerSpec)
 		Expect(err).ToNot(HaveOccurred())
 
 		logger = boshlog.NewLogger(boshlog.LevelNone)
-		agentEnvService = NewWardenAgentEnvService(container, logger)
+		agentEnvService = NewSoftLayerAgentEnvService(container, logger)
 	})
 
 	Describe("Fetch", func() {
@@ -51,7 +54,7 @@ var _ = Describe("WardenAgentEnvService", func() {
 		BeforeEach(func() {
 			runProcess = &fakewrdn.FakeProcess{}
 			runProcess.WaitReturns(0, nil)
-			wardenClient.Connection.RunReturns(runProcess, nil)
+			softLayerClient.Connection.RunReturns(runProcess, nil)
 		})
 
 		makeValidAgentEnvTar := func(agentEnv AgentEnv) io.ReadCloser {
@@ -63,7 +66,7 @@ var _ = Describe("WardenAgentEnvService", func() {
 			Expect(err).ToNot(HaveOccurred())
 
 			fileHeader := &tar.Header{
-				Name: "warden-cpi-agent-env.json",
+				Name: "softlayer-cpi-agent-env.json",
 				Size: int64(len(jsonBytes)),
 			}
 
@@ -81,24 +84,24 @@ var _ = Describe("WardenAgentEnvService", func() {
 
 		BeforeEach(func() {
 			outAgentEnv = AgentEnv{AgentID: "fake-agent-id"}
-			wardenClient.Connection.StreamOutReturns(makeValidAgentEnvTar(outAgentEnv), nil)
+			softLayerClient.Connection.StreamOutReturns(makeValidAgentEnvTar(outAgentEnv), nil)
 		})
 
 		It("copies agent env into temporary location", func() {
 			_, err := agentEnvService.Fetch()
 			Expect(err).ToNot(HaveOccurred())
 
-			count := wardenClient.Connection.RunCallCount()
+			count := softLayerClient.Connection.RunCallCount()
 			Expect(count).To(Equal(1))
 
 			expectedProcessSpec := wrdn.ProcessSpec{
 				Path: "bash",
-				Args: []string{"-c", "cp /var/vcap/bosh/warden-cpi-agent-env.json /tmp/warden-cpi-agent-env.json && chown vcap:vcap /tmp/warden-cpi-agent-env.json"},
+				Args: []string{"-c", "cp /var/vcap/bosh/softlayer-cpi-agent-env.json /tmp/softlayer-cpi-agent-env.json && chown vcap:vcap /tmp/softlayer-cpi-agent-env.json"},
 
 				Privileged: true,
 			}
 
-			handle, processSpec, processIO := wardenClient.Connection.RunArgsForCall(0)
+			handle, processSpec, processIO := softLayerClient.Connection.RunArgsForCall(0)
 			Expect(handle).To(Equal("fake-vm-id"))
 			Expect(processSpec).To(Equal(expectedProcessSpec))
 			Expect(processIO).To(Equal(wrdn.ProcessIO{}))
@@ -111,18 +114,18 @@ var _ = Describe("WardenAgentEnvService", func() {
 					Expect(err).ToNot(HaveOccurred())
 					Expect(agentEnv).To(Equal(outAgentEnv))
 
-					count := wardenClient.Connection.StreamOutCallCount()
+					count := softLayerClient.Connection.StreamOutCallCount()
 					Expect(count).To(Equal(1))
 
-					handle, srcPath := wardenClient.Connection.StreamOutArgsForCall(0)
+					handle, srcPath := softLayerClient.Connection.StreamOutArgsForCall(0)
 					Expect(handle).To(Equal("fake-vm-id"))
-					Expect(srcPath).To(Equal("/tmp/warden-cpi-agent-env.json"))
+					Expect(srcPath).To(Equal("/tmp/softlayer-cpi-agent-env.json"))
 				})
 			})
 
 			Context("when container fails to stream out because tar stream contains bad header", func() {
 				BeforeEach(func() {
-					wardenClient.Connection.StreamOutReturns(ioutil.NopCloser(&bytes.Buffer{}), nil)
+					softLayerClient.Connection.StreamOutReturns(ioutil.NopCloser(&bytes.Buffer{}), nil)
 				})
 
 				It("returns error", func() {
@@ -139,13 +142,13 @@ var _ = Describe("WardenAgentEnvService", func() {
 
 					tarWriter := tar.NewWriter(tarBytes)
 
-					err := tarWriter.WriteHeader(&tar.Header{Name: "warden-cpi-agent-env.json"})
+					err := tarWriter.WriteHeader(&tar.Header{Name: "softlayer-cpi-agent-env.json"})
 					Expect(err).ToNot(HaveOccurred())
 
 					err = tarWriter.Close()
 					Expect(err).ToNot(HaveOccurred())
 
-					wardenClient.Connection.StreamOutReturns(ioutil.NopCloser(tarBytes), nil)
+					softLayerClient.Connection.StreamOutReturns(ioutil.NopCloser(tarBytes), nil)
 				})
 
 				It("returns error", func() {
@@ -158,7 +161,7 @@ var _ = Describe("WardenAgentEnvService", func() {
 
 			Context("when container fails to stream out", func() {
 				BeforeEach(func() {
-					wardenClient.Connection.StreamOutReturns(nil, errors.New("fake-stream-out-err"))
+					softLayerClient.Connection.StreamOutReturns(nil, errors.New("fake-stream-out-err"))
 				})
 
 				It("returns error", func() {
@@ -198,7 +201,7 @@ var _ = Describe("WardenAgentEnvService", func() {
 
 		Context("when copying agent env into temporary location cannot start", func() {
 			BeforeEach(func() {
-				wardenClient.Connection.RunReturns(nil, errors.New("fake-run-err"))
+				softLayerClient.Connection.RunReturns(nil, errors.New("fake-run-err"))
 			})
 
 			It("returns error", func() {
@@ -223,17 +226,17 @@ var _ = Describe("WardenAgentEnvService", func() {
 		BeforeEach(func() {
 			runProcess = &fakewrdn.FakeProcess{}
 			runProcess.WaitReturns(0, nil)
-			wardenClient.Connection.RunReturns(runProcess, nil)
+			softLayerClient.Connection.RunReturns(runProcess, nil)
 		})
 
-		It("places infrastructure settings into the container at /tmp/warden-cpi-agent-env.json", func() {
+		It("places infrastructure settings into the container at /tmp/softlayer-cpi-agent-env.json", func() {
 			err := agentEnvService.Update(newAgentEnv)
 			Expect(err).ToNot(HaveOccurred())
 
-			count := wardenClient.Connection.StreamInCallCount()
+			count := softLayerClient.Connection.StreamInCallCount()
 			Expect(count).To(Equal(1))
 
-			handle, dstPath, reader := wardenClient.Connection.StreamInArgsForCall(0)
+			handle, dstPath, reader := softLayerClient.Connection.StreamInArgsForCall(0)
 			Expect(handle).To(Equal("fake-vm-id"))
 			Expect(dstPath).To(Equal("/tmp/"))
 
@@ -241,7 +244,7 @@ var _ = Describe("WardenAgentEnvService", func() {
 
 			header, err := tarStream.Next()
 			Expect(err).ToNot(HaveOccurred())
-			Expect(header.Name).To(Equal("warden-cpi-agent-env.json")) // todo more?
+			Expect(header.Name).To(Equal("softlayer-cpi-agent-env.json")) // todo more?
 
 			jsonBytes := make([]byte, header.Size)
 
@@ -261,17 +264,17 @@ var _ = Describe("WardenAgentEnvService", func() {
 				err := agentEnvService.Update(newAgentEnv)
 				Expect(err).ToNot(HaveOccurred())
 
-				count := wardenClient.Connection.RunCallCount()
+				count := softLayerClient.Connection.RunCallCount()
 				Expect(count).To(Equal(1))
 
 				expectedProcessSpec := wrdn.ProcessSpec{
 					Path: "bash",
-					Args: []string{"-c", "mv /tmp/warden-cpi-agent-env.json /var/vcap/bosh/warden-cpi-agent-env.json"},
+					Args: []string{"-c", "mv /tmp/softlayer-cpi-agent-env.json /var/vcap/bosh/softlayer-cpi-agent-env.json"},
 
 					Privileged: true,
 				}
 
-				handle, processSpec, processIO := wardenClient.Connection.RunArgsForCall(0)
+				handle, processSpec, processIO := softLayerClient.Connection.RunArgsForCall(0)
 				Expect(handle).To(Equal("fake-vm-id"))
 				Expect(processSpec).To(Equal(expectedProcessSpec))
 				Expect(processIO).To(Equal(wrdn.ProcessIO{}))
@@ -303,7 +306,7 @@ var _ = Describe("WardenAgentEnvService", func() {
 
 			Context("when moving agent env into final location cannot start", func() {
 				BeforeEach(func() {
-					wardenClient.Connection.RunReturns(nil, errors.New("fake-run-err"))
+					softLayerClient.Connection.RunReturns(nil, errors.New("fake-run-err"))
 				})
 
 				It("returns error", func() {
@@ -329,7 +332,7 @@ var _ = Describe("WardenAgentEnvService", func() {
 
 		Context("when container fails to stream in", func() {
 			BeforeEach(func() {
-				wardenClient.Connection.StreamInReturns(errors.New("fake-stream-in-err"))
+				softLayerClient.Connection.StreamInReturns(errors.New("fake-stream-in-err"))
 			})
 
 			It("returns error", func() {

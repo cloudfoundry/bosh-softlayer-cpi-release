@@ -1,15 +1,18 @@
 package action_test
 
 import (
-	boshlog "bosh/logger"
-	fakecmd "bosh/platform/commands/fakes"
-	fakesys "bosh/system/fakes"
-	fakeuuid "bosh/uuid/fakes"
-	fakewrdnclient "github.com/cloudfoundry-incubator/garden/client/fake_warden_client"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
 	. "github.com/maximilien/bosh-softlayer-cpi/action"
+
+	boshlog "bosh/logger"
+
+	fakecmd "bosh/platform/commands/fakes"
+	fakesys "bosh/system/fakes"
+	fakeuuid "bosh/uuid/fakes"
+	fakewrdnclient "github.com/cloudfoundry-incubator/garden/client/fake_warden_client"
+
 	bslcdisk "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk"
 	bslcstem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell"
 	bslcutil "github.com/maximilien/bosh-softlayer-cpi/util"
@@ -18,7 +21,7 @@ import (
 
 var _ = Describe("concreteFactory", func() {
 	var (
-		wardenClient *fakewrdnclient.FakeClient
+		SoftLayerClient *fakewrdnclient.FakeClient
 		fs           *fakesys.FakeFileSystem
 		cmdRunner    *fakesys.FakeCmdRunner
 		uuidGen      *fakeuuid.FakeGenerator
@@ -52,7 +55,7 @@ var _ = Describe("concreteFactory", func() {
 	)
 
 	BeforeEach(func() {
-		wardenClient = fakewrdnclient.New()
+		SoftLayerClient = fakewrdnclient.New()
 		fs = fakesys.NewFakeFileSystem()
 		cmdRunner = fakesys.NewFakeCmdRunner()
 		uuidGen = &fakeuuid.FakeGenerator{}
@@ -61,7 +64,7 @@ var _ = Describe("concreteFactory", func() {
 		logger = boshlog.NewLogger(boshlog.LevelNone)
 
 		factory = NewConcreteFactory(
-			wardenClient,
+			SoftLayerClient,
 			fs,
 			cmdRunner,
 			uuidGen,
@@ -88,12 +91,12 @@ var _ = Describe("concreteFactory", func() {
 			logger,
 		)
 
-		agentEnvServiceFactory = bslcvm.NewWardenAgentEnvServiceFactory(logger)
+		agentEnvServiceFactory = bslcvm.NewSoftLayerAgentEnvServiceFactory(logger)
 
 		stemcellFinder = bslcstem.NewFSFinder("/tmp/stemcells", fs, logger)
 
-		vmFinder = bslcvm.NewWardenFinder(
-			wardenClient,
+		vmFinder = bslcvm.NewSoftLayerFinder(
+			SoftLayerClient,
 			agentEnvServiceFactory,
 			hostBindMounts,
 			guestBindMounts,
@@ -130,9 +133,9 @@ var _ = Describe("concreteFactory", func() {
 	})
 
 	It("create_vm", func() {
-		vmCreator := bslcvm.NewWardenCreator(
+		vmCreator := bslcvm.NewSoftLayerCreator(
 			uuidGen,
-			wardenClient,
+			SoftLayerClient,
 			agentEnvServiceFactory,
 			hostBindMounts,
 			guestBindMounts,

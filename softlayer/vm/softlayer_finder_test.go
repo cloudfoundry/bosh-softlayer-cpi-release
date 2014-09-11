@@ -12,25 +12,25 @@ import (
 	fakevm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm/fakes"
 )
 
-var _ = Describe("WardenFinder", func() {
+var _ = Describe("SoftLayerFinder", func() {
 	var (
-		wardenClient           *fakewrdnclient.FakeClient
+		softLayerClient        *fakewrdnclient.FakeClient
 		agentEnvServiceFactory *fakevm.FakeAgentEnvServiceFactory
 		hostBindMounts         *fakevm.FakeHostBindMounts
 		guestBindMounts        *fakevm.FakeGuestBindMounts
 		logger                 boshlog.Logger
-		finder                 WardenFinder
+		finder                 SoftLayerFinder
 	)
 
 	BeforeEach(func() {
-		wardenClient = fakewrdnclient.New()
+		softLayerClient = fakewrdnclient.New()
 		agentEnvServiceFactory = &fakevm.FakeAgentEnvServiceFactory{}
 		hostBindMounts = &fakevm.FakeHostBindMounts{}
 		guestBindMounts = &fakevm.FakeGuestBindMounts{}
 		logger = boshlog.NewLogger(boshlog.LevelNone)
 
-		finder = NewWardenFinder(
-			wardenClient,
+		finder = NewSoftLayerFinder(
+			softLayerClient,
 			agentEnvServiceFactory,
 			hostBindMounts,
 			guestBindMounts,
@@ -43,11 +43,11 @@ var _ = Describe("WardenFinder", func() {
 			agentEnvService := &fakevm.FakeAgentEnvService{}
 			agentEnvServiceFactory.NewAgentEnvService = agentEnvService
 
-			wardenClient.Connection.ListReturns([]string{"non-matching-vm-id", "fake-vm-id"}, nil)
+			softLayerClient.Connection.ListReturns([]string{"non-matching-vm-id", "fake-vm-id"}, nil)
 
-			expectedVM := NewWardenVM(
+			expectedVM := NewSoftLayerVM(
 				"fake-vm-id",
-				wardenClient,
+				softLayerClient,
 				agentEnvService,
 				hostBindMounts,
 				guestBindMounts,
@@ -59,12 +59,12 @@ var _ = Describe("WardenFinder", func() {
 			Expect(found).To(BeTrue())
 			Expect(vm).To(Equal(expectedVM))
 
-			Expect(wardenClient.Connection.ListCallCount()).To(Equal(1))
-			Expect(wardenClient.Connection.ListArgsForCall(0)).To(BeNil())
+			Expect(softLayerClient.Connection.ListCallCount()).To(Equal(1))
+			Expect(softLayerClient.Connection.ListArgsForCall(0)).To(BeNil())
 		})
 
 		It("returns found as false if warden does not have container with VM ID as its handle", func() {
-			wardenClient.Connection.ListReturns([]string{"non-matching-vm-id"}, nil)
+			softLayerClient.Connection.ListReturns([]string{"non-matching-vm-id"}, nil)
 
 			vm, found, err := finder.Find("fake-vm-id")
 			Expect(err).ToNot(HaveOccurred())
@@ -73,7 +73,7 @@ var _ = Describe("WardenFinder", func() {
 		})
 
 		It("returns error if warden container listing fails", func() {
-			wardenClient.Connection.ListReturns(nil, errors.New("fake-list-err"))
+			softLayerClient.Connection.ListReturns(nil, errors.New("fake-list-err"))
 
 			vm, found, err := finder.Find("fake-vm-id")
 			Expect(err).To(HaveOccurred())

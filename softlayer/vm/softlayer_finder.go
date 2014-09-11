@@ -8,8 +8,8 @@ import (
 
 const wardenFinderLogTag = "WardenFinder"
 
-type WardenFinder struct {
-	wardenClient           wrdnclient.Client
+type SoftLayerFinder struct {
+	softLayerClient        wrdnclient.Client
 	agentEnvServiceFactory AgentEnvServiceFactory
 
 	hostBindMounts  HostBindMounts
@@ -18,15 +18,15 @@ type WardenFinder struct {
 	logger boshlog.Logger
 }
 
-func NewWardenFinder(
-	wardenClient wrdnclient.Client,
+func NewSoftLayerFinder(
+	softLayerClient wrdnclient.Client,
 	agentEnvServiceFactory AgentEnvServiceFactory,
 	hostBindMounts HostBindMounts,
 	guestBindMounts GuestBindMounts,
 	logger boshlog.Logger,
-) WardenFinder {
-	return WardenFinder{
-		wardenClient:           wardenClient,
+) SoftLayerFinder {
+	return SoftLayerFinder{
+		softLayerClient:        softLayerClient,
 		agentEnvServiceFactory: agentEnvServiceFactory,
 
 		hostBindMounts:  hostBindMounts,
@@ -36,11 +36,11 @@ func NewWardenFinder(
 	}
 }
 
-func (f WardenFinder) Find(id string) (VM, bool, error) {
+func (f SoftLayerFinder) Find(id string) (VM, bool, error) {
 	f.logger.Debug(wardenFinderLogTag, "Finding container with ID '%s'", id)
 
 	// Cannot just use Lookup(id) since we need to differentiate between error and not found
-	containers, err := f.wardenClient.Containers(nil)
+	containers, err := f.softLayerClient.Containers(nil)
 	if err != nil {
 		return nil, false, bosherr.WrapError(err, "Listing all containers")
 	}
@@ -51,9 +51,9 @@ func (f WardenFinder) Find(id string) (VM, bool, error) {
 
 			agentEnvService := f.agentEnvServiceFactory.New(container)
 
-			vm := NewWardenVM(
+			vm := NewSoftLayerVM(
 				id,
-				f.wardenClient,
+				f.softLayerClient,
 				agentEnvService,
 				f.hostBindMounts,
 				f.guestBindMounts,

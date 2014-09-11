@@ -3,28 +3,30 @@ package vm_test
 import (
 	"errors"
 
-	boshlog "bosh/logger"
-	fakewrdnclient "github.com/cloudfoundry-incubator/garden/client/fake_warden_client"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	fakedisk "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk/fakes"
 	. "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
+
+	boshlog "bosh/logger"
+
+	fakewrdnclient "github.com/cloudfoundry-incubator/garden/client/fake_warden_client"
+	fakedisk "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk/fakes"
 	fakevm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm/fakes"
 )
 
-var _ = Describe("WardenVM", func() {
+var _ = Describe("SoftLayerVM", func() {
 	var (
-		wardenClient    *fakewrdnclient.FakeClient
+		softLayerClient *fakewrdnclient.FakeClient
 		agentEnvService *fakevm.FakeAgentEnvService
 		hostBindMounts  *fakevm.FakeHostBindMounts
 		guestBindMounts *fakevm.FakeGuestBindMounts
 		logger          boshlog.Logger
-		vm              WardenVM
+		vm              SoftLayerVM
 	)
 
 	BeforeEach(func() {
-		wardenClient = fakewrdnclient.New()
+		softLayerClient = fakewrdnclient.New()
 		agentEnvService = &fakevm.FakeAgentEnvService{}
 		hostBindMounts = &fakevm.FakeHostBindMounts{}
 		guestBindMounts = &fakevm.FakeGuestBindMounts{
@@ -33,9 +35,9 @@ var _ = Describe("WardenVM", func() {
 		}
 		logger = boshlog.NewLogger(boshlog.LevelNone)
 
-		vm = NewWardenVM(
+		vm = NewSoftLayerVM(
 			"fake-vm-id",
-			wardenClient,
+			softLayerClient,
 			agentEnvService,
 			hostBindMounts,
 			guestBindMounts,
@@ -64,13 +66,13 @@ var _ = Describe("WardenVM", func() {
 					err := vm.Delete()
 					Expect(err).ToNot(HaveOccurred())
 
-					Expect(wardenClient.Connection.DestroyCallCount()).To(Equal(1))
-					Expect(wardenClient.Connection.DestroyArgsForCall(0)).To(Equal("fake-vm-id"))
+					Expect(softLayerClient.Connection.DestroyCallCount()).To(Equal(1))
+					Expect(softLayerClient.Connection.DestroyArgsForCall(0)).To(Equal("fake-vm-id"))
 				})
 
 				Context("when destroying container fails", func() {
 					BeforeEach(func() {
-						wardenClient.Connection.DestroyReturns(errors.New("fake-destroy-err"))
+						softLayerClient.Connection.DestroyReturns(errors.New("fake-destroy-err"))
 					})
 
 					It("returns error", func() {
@@ -96,7 +98,7 @@ var _ = Describe("WardenVM", func() {
 					err := vm.Delete()
 					Expect(err).To(HaveOccurred())
 
-					Expect(wardenClient.Connection.DestroyCallCount()).To(Equal(0))
+					Expect(softLayerClient.Connection.DestroyCallCount()).To(Equal(0))
 				})
 			})
 		})
@@ -116,7 +118,7 @@ var _ = Describe("WardenVM", func() {
 				err := vm.Delete()
 				Expect(err).To(HaveOccurred())
 
-				Expect(wardenClient.Connection.DestroyCallCount()).To(Equal(0))
+				Expect(softLayerClient.Connection.DestroyCallCount()).To(Equal(0))
 			})
 		})
 	})

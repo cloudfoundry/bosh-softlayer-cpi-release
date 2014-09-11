@@ -4,12 +4,14 @@ import (
 	"errors"
 	"io"
 
-	boshlog "bosh/logger"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	fakedisp "github.com/maximilien/bosh-softlayer-cpi/api/dispatcher/fakes"
 	. "github.com/maximilien/bosh-softlayer-cpi/api/transport"
+
+	boshlog "bosh/logger"
+
+	fakedisp "github.com/maximilien/bosh-softlayer-cpi/api/dispatcher/fakes"
 )
 
 type FakeReader struct {

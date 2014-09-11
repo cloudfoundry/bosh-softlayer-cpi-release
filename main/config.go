@@ -10,12 +10,12 @@ import (
 )
 
 type Config struct {
-	Warden WardenConfig
+	SoftLayer SoftLayerConfig
 
 	Actions bslcaction.ConcreteFactoryOptions
 }
 
-type WardenConfig struct {
+type SoftLayerConfig struct {
 	// e.g. tcp, udp, unix
 	ConnectNetwork string
 
@@ -45,7 +45,7 @@ func NewConfigFromPath(path string, fs boshsys.FileSystem) (Config, error) {
 }
 
 func (c Config) Validate() error {
-	err := c.Warden.Validate()
+	err := c.SoftLayer.Validate()
 	if err != nil {
 		return bosherr.WrapError(err, "Validating Warden configuration")
 	}
@@ -58,7 +58,7 @@ func (c Config) Validate() error {
 	return nil
 }
 
-func (c WardenConfig) Validate() error {
+func (c SoftLayerConfig) Validate() error {
 	if c.ConnectNetwork == "" {
 		return bosherr.New("Must provide non-empty ConnectNetwork")
 	}

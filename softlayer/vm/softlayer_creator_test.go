@@ -15,21 +15,21 @@ import (
 	fakevm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm/fakes"
 )
 
-var _ = Describe("WardenCreator", func() {
+var _ = Describe("SoftLayerCreator", func() {
 	var (
 		uuidGen                *fakeuuid.FakeGenerator
-		wardenClient           *fakewrdnclient.FakeClient
+		softLayerClient        *fakewrdnclient.FakeClient
 		agentEnvServiceFactory *fakevm.FakeAgentEnvServiceFactory
 		hostBindMounts         *fakevm.FakeHostBindMounts
 		guestBindMounts        *fakevm.FakeGuestBindMounts
 		agentOptions           AgentOptions
 		logger                 boshlog.Logger
-		creator                WardenCreator
+		creator                SoftLayerCreator
 	)
 
 	BeforeEach(func() {
 		uuidGen = &fakeuuid.FakeGenerator{}
-		wardenClient = fakewrdnclient.New()
+		softLayerClient = fakewrdnclient.New()
 		agentEnvServiceFactory = &fakevm.FakeAgentEnvServiceFactory{}
 		hostBindMounts = &fakevm.FakeHostBindMounts{}
 		guestBindMounts = &fakevm.FakeGuestBindMounts{
@@ -39,9 +39,9 @@ var _ = Describe("WardenCreator", func() {
 		agentOptions = AgentOptions{Mbus: "fake-mbus"}
 		logger = boshlog.NewLogger(boshlog.LevelNone)
 
-		creator = NewWardenCreator(
+		creator = NewSoftLayerCreator(
 			uuidGen,
-			wardenClient,
+			softLayerClient,
 			agentEnvServiceFactory,
 			hostBindMounts,
 			guestBindMounts,
@@ -74,9 +74,9 @@ var _ = Describe("WardenCreator", func() {
 			agentEnvService := &fakevm.FakeAgentEnvService{}
 			agentEnvServiceFactory.NewAgentEnvService = agentEnvService
 
-			expectedVM := NewWardenVM(
+			expectedVM := NewSoftLayerVM(
 				"fake-vm-id",
-				wardenClient,
+				softLayerClient,
 				agentEnvService,
 				hostBindMounts,
 				guestBindMounts,
@@ -97,7 +97,7 @@ var _ = Describe("WardenCreator", func() {
 				vm, err := creator.Create("fake-agent-id", stemcell, Networks{}, env)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(Equal("Expected exactly one network; received zero"))
-				Expect(vm).To(Equal(WardenVM{}))
+				Expect(vm).To(Equal(SoftLayerVM{}))
 			})
 
 			It("returns error if more than one network is provided", func() {
@@ -106,17 +106,17 @@ var _ = Describe("WardenCreator", func() {
 				vm, err := creator.Create("fake-agent-id", stemcell, networks, env)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(Equal("Expected exactly one network; received multiple"))
-				Expect(vm).To(Equal(WardenVM{}))
+				Expect(vm).To(Equal(SoftLayerVM{}))
 			})
 
 			It("creates one container with generated VM id", func() {
 				_, err := creator.Create("fake-agent-id", stemcell, networks, env)
 				Expect(err).ToNot(HaveOccurred())
 
-				count := wardenClient.Connection.CreateCallCount()
+				count := softLayerClient.Connection.CreateCallCount()
 				Expect(count).To(Equal(1))
 
-				containerSpec := wardenClient.Connection.CreateArgsForCall(0)
+				containerSpec := softLayerClient.Connection.CreateArgsForCall(0)
 				Expect(containerSpec.Handle).To(Equal("fake-vm-id"))
 			})
 
@@ -124,7 +124,7 @@ var _ = Describe("WardenCreator", func() {
 				_, err := creator.Create("fake-agent-id", stemcell, networks, env)
 				Expect(err).ToNot(HaveOccurred())
 
-				containerSpec := wardenClient.Connection.CreateArgsForCall(0)
+				containerSpec := softLayerClient.Connection.CreateArgsForCall(0)
 				Expect(containerSpec.RootFSPath).To(Equal("/fake-stemcell-path"))
 			})
 
@@ -135,7 +135,7 @@ var _ = Describe("WardenCreator", func() {
 				_, err := creator.Create("fake-agent-id", stemcell, networks, env)
 				Expect(err).ToNot(HaveOccurred())
 
-				containerSpec := wardenClient.Connection.CreateArgsForCall(0)
+				containerSpec := softLayerClient.Connection.CreateArgsForCall(0)
 				Expect(containerSpec.BindMounts).To(Equal(
 					[]wrdn.BindMount{
 						wrdn.BindMount{
@@ -182,7 +182,7 @@ var _ = Describe("WardenCreator", func() {
 				_, err := creator.Create("fake-agent-id", stemcell, networks, env)
 				Expect(err).ToNot(HaveOccurred())
 
-				containerSpec := wardenClient.Connection.CreateArgsForCall(0)
+				containerSpec := softLayerClient.Connection.CreateArgsForCall(0)
 				Expect(containerSpec.Network).To(Equal("fake-ip"))
 			})
 
@@ -195,7 +195,7 @@ var _ = Describe("WardenCreator", func() {
 				_, err := creator.Create("fake-agent-id", stemcell, networks, env)
 				Expect(err).ToNot(HaveOccurred())
 
-				containerSpec := wardenClient.Connection.CreateArgsForCall(0)
+				containerSpec := softLayerClient.Connection.CreateArgsForCall(0)
 				Expect(containerSpec.Network).To(BeEmpty()) // fake-ip is not used
 			})
 
@@ -203,7 +203,7 @@ var _ = Describe("WardenCreator", func() {
 				_, err := creator.Create("fake-agent-id", stemcell, networks, env)
 				Expect(err).ToNot(HaveOccurred())
 
-				containerSpec := wardenClient.Connection.CreateArgsForCall(0)
+				containerSpec := softLayerClient.Connection.CreateArgsForCall(0)
 				Expect(containerSpec.Properties).To(Equal(wrdn.Properties{}))
 			})
 
@@ -215,7 +215,7 @@ var _ = Describe("WardenCreator", func() {
 				BeforeEach(func() {
 					agentEnvService = &fakevm.FakeAgentEnvService{}
 					agentEnvServiceFactory.NewAgentEnvService = agentEnvService
-					wardenClient.Connection.CreateReturns("fake-vm-id", nil)
+					softLayerClient.Connection.CreateReturns("fake-vm-id", nil)
 				})
 
 				It("updates container's agent env", func() {
@@ -239,24 +239,24 @@ var _ = Describe("WardenCreator", func() {
 						_, err := creator.Create("fake-agent-id", stemcell, networks, env)
 						Expect(err).To(HaveOccurred())
 
-						count := wardenClient.Connection.StopCallCount()
+						count := softLayerClient.Connection.StopCallCount()
 						Expect(count).To(Equal(1))
 
-						handle, force := wardenClient.Connection.StopArgsForCall(0)
+						handle, force := softLayerClient.Connection.StopArgsForCall(0)
 						Expect(handle).To(Equal("fake-vm-id"))
 						Expect(force).To(BeFalse())
 					})
 
 					Context("when destroying created container fails", func() {
 						BeforeEach(func() {
-							wardenClient.Connection.StopReturns(errors.New("fake-stop-err"))
+							softLayerClient.Connection.StopReturns(errors.New("fake-stop-err"))
 						})
 
 						It("returns running error and not destroy error", func() {
 							vm, err := creator.Create("fake-agent-id", stemcell, networks, env)
 							Expect(err).To(HaveOccurred())
 							Expect(err.Error()).To(ContainSubstring(errMsg))
-							Expect(vm).To(Equal(WardenVM{}))
+							Expect(vm).To(Equal(SoftLayerVM{}))
 						})
 					})
 				}
@@ -266,7 +266,7 @@ var _ = Describe("WardenCreator", func() {
 						_, err := creator.Create("fake-agent-id", stemcell, networks, env)
 						Expect(err).ToNot(HaveOccurred())
 
-						count := wardenClient.Connection.RunCallCount()
+						count := softLayerClient.Connection.RunCallCount()
 						Expect(count).To(Equal(1))
 
 						expectedProcessSpec := wrdn.ProcessSpec{
@@ -274,7 +274,7 @@ var _ = Describe("WardenCreator", func() {
 							Privileged: true,
 						}
 
-						handle, processSpec, processIO := wardenClient.Connection.RunArgsForCall(0)
+						handle, processSpec, processIO := softLayerClient.Connection.RunArgsForCall(0)
 						Expect(handle).To(Equal("fake-vm-id"))
 						Expect(processSpec).To(Equal(expectedProcessSpec))
 						Expect(processIO).To(Equal(wrdn.ProcessIO{}))
@@ -282,14 +282,14 @@ var _ = Describe("WardenCreator", func() {
 
 					Context("when BOSH Agent fails to start", func() {
 						BeforeEach(func() {
-							wardenClient.Connection.RunReturns(nil, errors.New("fake-run-err"))
+							softLayerClient.Connection.RunReturns(nil, errors.New("fake-run-err"))
 						})
 
 						It("returns error if starting BOSH Agent fails", func() {
 							vm, err := creator.Create("fake-agent-id", stemcell, networks, env)
 							Expect(err).To(HaveOccurred())
 							Expect(err.Error()).To(ContainSubstring("fake-run-err"))
-							Expect(vm).To(Equal(WardenVM{}))
+							Expect(vm).To(Equal(SoftLayerVM{}))
 						})
 
 						ItDestroysContainer("fake-run-err")
@@ -305,7 +305,7 @@ var _ = Describe("WardenCreator", func() {
 						vm, err := creator.Create("fake-agent-id", stemcell, networks, env)
 						Expect(err).To(HaveOccurred())
 						Expect(err.Error()).To(ContainSubstring("fake-update-err"))
-						Expect(vm).To(Equal(WardenVM{}))
+						Expect(vm).To(Equal(SoftLayerVM{}))
 					})
 
 					ItDestroysContainer("fake-update-err")
@@ -314,14 +314,14 @@ var _ = Describe("WardenCreator", func() {
 
 			Context("when creating container fails", func() {
 				BeforeEach(func() {
-					wardenClient.Connection.CreateReturns("fake-vm-id", errors.New("fake-create-err"))
+					softLayerClient.Connection.CreateReturns("fake-vm-id", errors.New("fake-create-err"))
 				})
 
 				It("returns error if creating container fails", func() {
 					vm, err := creator.Create("fake-agent-id", stemcell, networks, env)
 					Expect(err).To(HaveOccurred())
 					Expect(err.Error()).To(ContainSubstring("fake-create-err"))
-					Expect(vm).To(Equal(WardenVM{}))
+					Expect(vm).To(Equal(SoftLayerVM{}))
 				})
 			})
 		})
@@ -335,7 +335,7 @@ var _ = Describe("WardenCreator", func() {
 				vm, err := creator.Create("fake-agent-id", stemcell, networks, env)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("fake-generate-err"))
-				Expect(vm).To(Equal(WardenVM{}))
+				Expect(vm).To(Equal(SoftLayerVM{}))
 			})
 		})
 	})

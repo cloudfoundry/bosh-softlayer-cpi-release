@@ -19,7 +19,7 @@ type concreteFactory struct {
 }
 
 func NewConcreteFactory(
-	wardenClient wrdnclient.Client,
+	SoftLayerClient wrdnclient.Client,
 	fs boshsys.FileSystem,
 	cmdRunner boshsys.CmdRunner,
 	uuidGen boshuuid.Generator,
@@ -53,11 +53,11 @@ func NewConcreteFactory(
 		logger,
 	)
 
-	agentEnvServiceFactory := bslcvm.NewWardenAgentEnvServiceFactory(logger)
+	agentEnvServiceFactory := bslcvm.NewSoftLayerAgentEnvServiceFactory(logger)
 
-	vmCreator := bslcvm.NewWardenCreator(
+	vmCreator := bslcvm.NewSoftLayerCreator(
 		uuidGen,
-		wardenClient,
+		SoftLayerClient,
 		agentEnvServiceFactory,
 		hostBindMounts,
 		guestBindMounts,
@@ -65,8 +65,8 @@ func NewConcreteFactory(
 		logger,
 	)
 
-	vmFinder := bslcvm.NewWardenFinder(
-		wardenClient,
+	vmFinder := bslcvm.NewSoftLayerFinder(
+		SoftLayerClient,
 		agentEnvServiceFactory,
 		hostBindMounts,
 		guestBindMounts,

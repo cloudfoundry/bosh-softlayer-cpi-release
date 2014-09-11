@@ -9,8 +9,8 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	bslcutil "github.com/maximilien/bosh-softlayer-cpi/util"
 	. "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
+	bslcutil "github.com/maximilien/bosh-softlayer-cpi/util"
 )
 
 var _ = Describe("FSHostBindMounts", func() {

@@ -67,8 +67,8 @@ func buildDispatcher(
 	uuidGen boshuuid.Generator,
 ) bslcdisp.Dispatcher {
 	wardenConn := wrdnconn.New(
-		config.Warden.ConnectNetwork,
-		config.Warden.ConnectAddress,
+		config.SoftLayer.ConnectNetwork,
+		config.SoftLayer.ConnectAddress,
 	)
 
 	wardenClient := wrdnclient.New(wardenConn)

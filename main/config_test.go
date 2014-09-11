@@ -14,11 +14,11 @@ import (
 )
 
 var validConfig = Config{
-	Warden:  validWardenConfig,
-	Actions: validActionsOptions,
+	SoftLayer: validWardenConfig,
+	Actions:   validActionsOptions,
 }
 
-var validWardenConfig = WardenConfig{
+var validWardenConfig = SoftLayerConfig{
 	ConnectNetwork: "fake-tcp",
 	ConnectAddress: "fake-address",
 }
@@ -98,7 +98,7 @@ var _ = Describe("Config", func() {
 		})
 
 		It("returns error if warden section is not valid", func() {
-			config.Warden.ConnectNetwork = ""
+			config.SoftLayer.ConnectNetwork = ""
 
 			err := config.Validate()
 			Expect(err).To(HaveOccurred())
@@ -117,7 +117,7 @@ var _ = Describe("Config", func() {
 
 var _ = Describe("WardenConfig", func() {
 	var (
-		config WardenConfig
+		config SoftLayerConfig
 	)
 
 	Describe("Validate", func() {
