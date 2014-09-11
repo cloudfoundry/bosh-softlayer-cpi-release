@@ -10,14 +10,14 @@ import (
 
 	boshlog "bosh/logger"
 
-	fakewrdnclient "github.com/cloudfoundry-incubator/garden/client/fake_warden_client"
+	fakebslcpi "github.com/maximilien/bosh-softlayer-cpi/softlayer/cpi/fakes"
 	fakedisk "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk/fakes"
 	fakevm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm/fakes"
 )
 
 var _ = Describe("SoftLayerVM", func() {
 	var (
-		softLayerClient *fakewrdnclient.FakeClient
+		softLayerClient *fakebslcpi.FakeClient
 		agentEnvService *fakevm.FakeAgentEnvService
 		hostBindMounts  *fakevm.FakeHostBindMounts
 		guestBindMounts *fakevm.FakeGuestBindMounts
@@ -26,7 +26,7 @@ var _ = Describe("SoftLayerVM", func() {
 	)
 
 	BeforeEach(func() {
-		softLayerClient = fakewrdnclient.New()
+		softLayerClient = fakebslcpi.New()
 		agentEnvService = &fakevm.FakeAgentEnvService{}
 		hostBindMounts = &fakevm.FakeHostBindMounts{}
 		guestBindMounts = &fakevm.FakeGuestBindMounts{

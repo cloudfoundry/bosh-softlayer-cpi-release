@@ -15,25 +15,24 @@ import (
 
 	boshlog "bosh/logger"
 
-	wrdn "github.com/cloudfoundry-incubator/garden/warden"
+	fakeslcpi "github.com/maximilien/bosh-softlayer-cpi/softlayer/cpi/fakes"
 
-	fakewrdnclient "github.com/cloudfoundry-incubator/garden/client/fake_warden_client"
-	fakewrdn "github.com/cloudfoundry-incubator/garden/warden/fakes"
+	bslcpi "github.com/maximilien/bosh-softlayer-cpi/softlayer/cpi"
 )
 
 var _ = Describe("SoftLayerAgentEnvService", func() {
 	var (
-		softLayerClient *fakewrdnclient.FakeClient
+		softLayerClient *fakeslcpi.FakeClient
 		logger          boshlog.Logger
 		agentEnvService SoftLayerAgentEnvService
 	)
 
 	BeforeEach(func() {
-		softLayerClient = fakewrdnclient.New()
+		softLayerClient = fakeslcpi.New()
 
 		softLayerClient.Connection.CreateReturns("fake-vm-id", nil)
 
-		containerSpec := wrdn.ContainerSpec{
+		containerSpec := bslcpi.ContainerSpec{
 			Handle:     "fake-vm-id",
 			RootFSPath: "fake-root-fs-path",
 		}
@@ -47,12 +46,12 @@ var _ = Describe("SoftLayerAgentEnvService", func() {
 
 	Describe("Fetch", func() {
 		var (
-			runProcess  *fakewrdn.FakeProcess
+			runProcess  *fakeslcpi.FakeProcess
 			outAgentEnv AgentEnv
 		)
 
 		BeforeEach(func() {
-			runProcess = &fakewrdn.FakeProcess{}
+			runProcess = &fakeslcpi.FakeProcess{}
 			runProcess.WaitReturns(0, nil)
 			softLayerClient.Connection.RunReturns(runProcess, nil)
 		})
@@ -94,7 +93,7 @@ var _ = Describe("SoftLayerAgentEnvService", func() {
 			count := softLayerClient.Connection.RunCallCount()
 			Expect(count).To(Equal(1))
 
-			expectedProcessSpec := wrdn.ProcessSpec{
+			expectedProcessSpec := bslcpi.ProcessSpec{
 				Path: "bash",
 				Args: []string{"-c", "cp /var/vcap/bosh/softlayer-cpi-agent-env.json /tmp/softlayer-cpi-agent-env.json && chown vcap:vcap /tmp/softlayer-cpi-agent-env.json"},
 
@@ -104,7 +103,7 @@ var _ = Describe("SoftLayerAgentEnvService", func() {
 			handle, processSpec, processIO := softLayerClient.Connection.RunArgsForCall(0)
 			Expect(handle).To(Equal("fake-vm-id"))
 			Expect(processSpec).To(Equal(expectedProcessSpec))
-			Expect(processIO).To(Equal(wrdn.ProcessIO{}))
+			Expect(processIO).To(Equal(bslcpi.ProcessIO{}))
 		})
 
 		Context("when copying agent env into temporary location succeeds", func() {
@@ -216,7 +215,7 @@ var _ = Describe("SoftLayerAgentEnvService", func() {
 	Describe("Update", func() {
 		var (
 			newAgentEnv AgentEnv
-			runProcess  *fakewrdn.FakeProcess
+			runProcess  *fakeslcpi.FakeProcess
 		)
 
 		BeforeEach(func() {
@@ -224,7 +223,7 @@ var _ = Describe("SoftLayerAgentEnvService", func() {
 		})
 
 		BeforeEach(func() {
-			runProcess = &fakewrdn.FakeProcess{}
+			runProcess = &fakeslcpi.FakeProcess{}
 			runProcess.WaitReturns(0, nil)
 			softLayerClient.Connection.RunReturns(runProcess, nil)
 		})
@@ -267,7 +266,7 @@ var _ = Describe("SoftLayerAgentEnvService", func() {
 				count := softLayerClient.Connection.RunCallCount()
 				Expect(count).To(Equal(1))
 
-				expectedProcessSpec := wrdn.ProcessSpec{
+				expectedProcessSpec := bslcpi.ProcessSpec{
 					Path: "bash",
 					Args: []string{"-c", "mv /tmp/softlayer-cpi-agent-env.json /var/vcap/bosh/softlayer-cpi-agent-env.json"},
 
@@ -277,7 +276,7 @@ var _ = Describe("SoftLayerAgentEnvService", func() {
 				handle, processSpec, processIO := softLayerClient.Connection.RunArgsForCall(0)
 				Expect(handle).To(Equal("fake-vm-id"))
 				Expect(processSpec).To(Equal(expectedProcessSpec))
-				Expect(processIO).To(Equal(wrdn.ProcessIO{}))
+				Expect(processIO).To(Equal(bslcpi.ProcessIO{}))
 			})
 
 			Context("when moving agent env into final location fails because command exits with non-0 code", func() {

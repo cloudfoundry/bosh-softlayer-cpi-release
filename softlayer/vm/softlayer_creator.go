@@ -4,8 +4,8 @@ import (
 	bosherr "bosh/errors"
 	boshlog "bosh/logger"
 	boshuuid "bosh/uuid"
-	wrdn "github.com/cloudfoundry-incubator/garden/warden"
 
+	bslcpi "github.com/maximilien/bosh-softlayer-cpi/softlayer/cpi"
 	bslcstem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell"
 )
 
@@ -14,7 +14,7 @@ const softLayerCreatorLogTag = "SoftLayerCreator"
 type SoftLayerCreator struct {
 	uuidGen boshuuid.Generator
 
-	softLayerClient        wrdn.Client
+	softLayerClient        bslcpi.Client
 	agentEnvServiceFactory AgentEnvServiceFactory
 
 	hostBindMounts  HostBindMounts
@@ -26,7 +26,7 @@ type SoftLayerCreator struct {
 
 func NewSoftLayerCreator(
 	uuidGen boshuuid.Generator,
-	softLayerClient wrdn.Client,
+	softLayerClient bslcpi.Client,
 	agentEnvServiceFactory AgentEnvServiceFactory,
 	hostBindMounts HostBindMounts,
 	guestBindMounts GuestBindMounts,
@@ -63,25 +63,25 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, net
 		return SoftLayerVM{}, err
 	}
 
-	containerSpec := wrdn.ContainerSpec{
+	containerSpec := bslcpi.ContainerSpec{
 		Handle:     id,
 		RootFSPath: stemcell.DirPath(),
 		Network:    networkIP,
-		BindMounts: []wrdn.BindMount{
-			wrdn.BindMount{
+		BindMounts: []bslcpi.BindMount{
+			bslcpi.BindMount{
 				SrcPath: hostEphemeralBindMountPath,
 				DstPath: c.guestBindMounts.MakeEphemeral(),
-				Mode:    wrdn.BindMountModeRW,
-				Origin:  wrdn.BindMountOriginHost,
+				Mode:    bslcpi.BindMountModeRW,
+				Origin:  bslcpi.BindMountOriginHost,
 			},
-			wrdn.BindMount{
+			bslcpi.BindMount{
 				SrcPath: hostPersistentBindMountsDir,
 				DstPath: c.guestBindMounts.MakePersistent(),
-				Mode:    wrdn.BindMountModeRW,
-				Origin:  wrdn.BindMountOriginHost,
+				Mode:    bslcpi.BindMountModeRW,
+				Origin:  bslcpi.BindMountOriginHost,
 			},
 		},
-		Properties: wrdn.Properties{},
+		Properties: bslcpi.Properties{},
 	}
 
 	c.logger.Debug(softLayerCreatorLogTag, "Creating container with spec %#v", containerSpec)
@@ -152,14 +152,14 @@ func (c SoftLayerCreator) makeHostBindMounts(id string) (string, string, error) 
 	return ephemeralBindMountPath, persistentBindMountsDir, nil
 }
 
-func (c SoftLayerCreator) startAgentInContainer(container wrdn.Container) error {
-	processSpec := wrdn.ProcessSpec{
+func (c SoftLayerCreator) startAgentInContainer(container bslcpi.Container) error {
+	processSpec := bslcpi.ProcessSpec{
 		Path:       "/usr/sbin/runsvdir-start",
 		Privileged: true,
 	}
 
 	// Do not Wait() for the process to finish
-	_, err := container.Run(processSpec, wrdn.ProcessIO{})
+	_, err := container.Run(processSpec, bslcpi.ProcessIO{})
 	if err != nil {
 		return bosherr.WrapError(err, "Running BOSH Agent in container")
 	}
@@ -167,7 +167,7 @@ func (c SoftLayerCreator) startAgentInContainer(container wrdn.Container) error 
 	return nil
 }
 
-func (c SoftLayerCreator) cleanUpContainer(container wrdn.Container) {
+func (c SoftLayerCreator) cleanUpContainer(container bslcpi.Container) {
 	// false is to kill immediately
 	err := container.Stop(false)
 	if err != nil {

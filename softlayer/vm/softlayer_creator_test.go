@@ -3,22 +3,25 @@ package vm_test
 import (
 	"errors"
 
-	boshlog "bosh/logger"
-	fakeuuid "bosh/uuid/fakes"
-	fakewrdnclient "github.com/cloudfoundry-incubator/garden/client/fake_warden_client"
-	wrdn "github.com/cloudfoundry-incubator/garden/warden"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	fakestem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell/fakes"
+	boshlog "bosh/logger"
+	fakeuuid "bosh/uuid/fakes"
+
 	. "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
+
+	fakebslcpi "github.com/maximilien/bosh-softlayer-cpi/softlayer/cpi/fakes"
+	fakestem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell/fakes"
 	fakevm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm/fakes"
+
+	wrdn "github.com/cloudfoundry-incubator/garden/warden"
 )
 
 var _ = Describe("SoftLayerCreator", func() {
 	var (
 		uuidGen                *fakeuuid.FakeGenerator
-		softLayerClient        *fakewrdnclient.FakeClient
+		softLayerClient        *fakebslcpi.FakeClient
 		agentEnvServiceFactory *fakevm.FakeAgentEnvServiceFactory
 		hostBindMounts         *fakevm.FakeHostBindMounts
 		guestBindMounts        *fakevm.FakeGuestBindMounts
@@ -29,7 +32,7 @@ var _ = Describe("SoftLayerCreator", func() {
 
 	BeforeEach(func() {
 		uuidGen = &fakeuuid.FakeGenerator{}
-		softLayerClient = fakewrdnclient.New()
+		softLayerClient = fakebslcpi.New()
 		agentEnvServiceFactory = &fakevm.FakeAgentEnvServiceFactory{}
 		hostBindMounts = &fakevm.FakeHostBindMounts{}
 		guestBindMounts = &fakevm.FakeGuestBindMounts{

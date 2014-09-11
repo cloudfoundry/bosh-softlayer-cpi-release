@@ -1,16 +1,16 @@
 package fakes
 
 import (
-	wrdn "github.com/cloudfoundry-incubator/garden/warden"
+	bslcpi "github.com/maximilien/bosh-softlayer-cpi/softlayer/cpi"
 	bslcvm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
 )
 
 type FakeAgentEnvServiceFactory struct {
-	NewContainer       wrdn.Container
+	NewContainer       bslcpi.Container
 	NewAgentEnvService *FakeAgentEnvService
 }
 
-func (f *FakeAgentEnvServiceFactory) New(container wrdn.Container) bslcvm.AgentEnvService {
+func (f *FakeAgentEnvServiceFactory) New(container bslcpi.Container) bslcvm.AgentEnvService {
 	f.NewContainer = container
 
 	if f.NewAgentEnvService == nil {

@@ -6,8 +6,8 @@ import (
 	boshcmd "bosh/platform/commands"
 	boshsys "bosh/system"
 	boshuuid "bosh/uuid"
-	wrdnclient "github.com/cloudfoundry-incubator/garden/client"
 
+	bslcpi "github.com/maximilien/bosh-softlayer-cpi/softlayer/cpi"
 	bslcdisk "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk"
 	bslcstem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell"
 	bslcutil "github.com/maximilien/bosh-softlayer-cpi/util"
@@ -19,7 +19,7 @@ type concreteFactory struct {
 }
 
 func NewConcreteFactory(
-	SoftLayerClient wrdnclient.Client,
+	SoftLayerClient bslcpi.Client,
 	fs boshsys.FileSystem,
 	cmdRunner boshsys.CmdRunner,
 	uuidGen boshuuid.Generator,

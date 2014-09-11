@@ -1,9 +1,9 @@
 package vm
 
 import (
-	wrdn "github.com/cloudfoundry-incubator/garden/warden"
+	bslcpi "github.com/maximilien/bosh-softlayer-cpi/softlayer/cpi"
 )
 
 type AgentEnvServiceFactory interface {
-	New(wrdn.Container) AgentEnvService
+	New(bslcpi.Container) AgentEnvService
 }

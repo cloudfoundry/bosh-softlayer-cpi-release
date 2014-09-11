@@ -3,13 +3,14 @@ package vm
 import (
 	bosherr "bosh/errors"
 	boshlog "bosh/logger"
-	wrdnclient "github.com/cloudfoundry-incubator/garden/client"
+
+	bslcpi "github.com/maximilien/bosh-softlayer-cpi/softlayer/cpi"
 )
 
 const wardenFinderLogTag = "WardenFinder"
 
 type SoftLayerFinder struct {
-	softLayerClient        wrdnclient.Client
+	softLayerClient        bslcpi.Client
 	agentEnvServiceFactory AgentEnvServiceFactory
 
 	hostBindMounts  HostBindMounts
@@ -19,7 +20,7 @@ type SoftLayerFinder struct {
 }
 
 func NewSoftLayerFinder(
-	softLayerClient wrdnclient.Client,
+	softLayerClient bslcpi.Client,
 	agentEnvServiceFactory AgentEnvServiceFactory,
 	hostBindMounts HostBindMounts,
 	guestBindMounts GuestBindMounts,
@@ -40,7 +41,7 @@ func (f SoftLayerFinder) Find(id string) (VM, bool, error) {
 	f.logger.Debug(wardenFinderLogTag, "Finding container with ID '%s'", id)
 
 	// Cannot just use Lookup(id) since we need to differentiate between error and not found
-	containers, err := f.softLayerClient.Containers(nil)
+	containers, err := f.softLayerClient.Containers()
 	if err != nil {
 		return nil, false, bosherr.WrapError(err, "Listing all containers")
 	}

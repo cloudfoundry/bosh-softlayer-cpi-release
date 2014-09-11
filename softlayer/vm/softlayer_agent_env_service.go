@@ -9,7 +9,8 @@ import (
 
 	bosherr "bosh/errors"
 	boshlog "bosh/logger"
-	wrdn "github.com/cloudfoundry-incubator/garden/warden"
+
+	sbslcpi "github.com/maximilien/bosh-softlayer-cpi/softlayer/cpi"
 )
 
 const (
@@ -21,12 +22,12 @@ const (
 )
 
 type SoftLayerAgentEnvService struct {
-	container wrdn.Container
+	container sbslcpi.Container
 	logger    boshlog.Logger
 }
 
 func NewSoftLayerAgentEnvService(
-	container wrdn.Container,
+	container sbslcpi.Container,
 	logger boshlog.Logger,
 ) SoftLayerAgentEnvService {
 	return SoftLayerAgentEnvService{
@@ -146,14 +147,14 @@ func (s SoftLayerAgentEnvService) marshalAgentEnv(agentEnv AgentEnv, fileName st
 }
 
 func (s SoftLayerAgentEnvService) runPrivilegedScript(script string) error {
-	processSpec := wrdn.ProcessSpec{
+	processSpec := sbslcpi.ProcessSpec{
 		Path: "bash",
 		Args: []string{"-c", script},
 
 		Privileged: true,
 	}
 
-	process, err := s.container.Run(processSpec, wrdn.ProcessIO{})
+	process, err := s.container.Run(processSpec, sbslcpi.ProcessIO{})
 	if err != nil {
 		return bosherr.WrapError(err, "Running script")
 	}

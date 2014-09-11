@@ -3,15 +3,15 @@ package vm
 import (
 	bosherr "bosh/errors"
 	boshlog "bosh/logger"
-	wrdnclient "github.com/cloudfoundry-incubator/garden/client"
 
+	bslcpi "github.com/maximilien/bosh-softlayer-cpi/softlayer/cpi"
 	bslcdisk "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk"
 )
 
 type SoftLayerVM struct {
 	id string
 
-	softLayerClient wrdnclient.Client
+	softLayerClient bslcpi.Client
 	agentEnvService AgentEnvService
 
 	hostBindMounts  HostBindMounts
@@ -22,7 +22,7 @@ type SoftLayerVM struct {
 
 func NewSoftLayerVM(
 	id string,
-	softLayerClient wrdnclient.Client,
+	softLayerClient bslcpi.Client,
 	agentEnvService AgentEnvService,
 	hostBindMounts HostBindMounts,
 	guestBindMounts GuestBindMounts,

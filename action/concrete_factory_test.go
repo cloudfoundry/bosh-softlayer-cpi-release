@@ -11,7 +11,8 @@ import (
 	fakecmd "bosh/platform/commands/fakes"
 	fakesys "bosh/system/fakes"
 	fakeuuid "bosh/uuid/fakes"
-	fakewrdnclient "github.com/cloudfoundry-incubator/garden/client/fake_warden_client"
+	
+	fakeslcpi "github.com/maximilien/bosh-softlayer-cpi/softlayer/cpi/fakes"
 
 	bslcdisk "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk"
 	bslcstem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell"
@@ -21,7 +22,7 @@ import (
 
 var _ = Describe("concreteFactory", func() {
 	var (
-		SoftLayerClient *fakewrdnclient.FakeClient
+		SoftLayerClient *fakeslcpi.FakeClient
 		fs           *fakesys.FakeFileSystem
 		cmdRunner    *fakesys.FakeCmdRunner
 		uuidGen      *fakeuuid.FakeGenerator
@@ -55,7 +56,7 @@ var _ = Describe("concreteFactory", func() {
 	)
 
 	BeforeEach(func() {
-		SoftLayerClient = fakewrdnclient.New()
+		SoftLayerClient = fakeslcpi.New()
 		fs = fakesys.NewFakeFileSystem()
 		cmdRunner = fakesys.NewFakeCmdRunner()
 		uuidGen = &fakeuuid.FakeGenerator{}

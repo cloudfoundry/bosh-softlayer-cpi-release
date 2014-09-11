@@ -8,8 +8,8 @@ import (
 	boshcmd "bosh/platform/commands"
 	boshsys "bosh/system"
 	boshuuid "bosh/uuid"
-	wrdnclient "github.com/cloudfoundry-incubator/garden/client"
-	wrdnconn "github.com/cloudfoundry-incubator/garden/client/connection"
+	
+	bslcpi "github.com/maximilien/bosh-softlayer-cpi/softlayer/cpi"
 
 	bslcaction "github.com/maximilien/bosh-softlayer-cpi/action"
 	bslcdisp "github.com/maximilien/bosh-softlayer-cpi/api/dispatcher"
@@ -66,19 +66,19 @@ func buildDispatcher(
 	cmdRunner boshsys.CmdRunner,
 	uuidGen boshuuid.Generator,
 ) bslcdisp.Dispatcher {
-	wardenConn := wrdnconn.New(
+	slConn := bslcpi.NewConnection(
 		config.SoftLayer.ConnectNetwork,
 		config.SoftLayer.ConnectAddress,
 	)
 
-	wardenClient := wrdnclient.New(wardenConn)
+	softLayerClient := bslcpi.NewClient(slConn)
 
 	compressor := boshcmd.NewTarballCompressor(cmdRunner, fs)
 
 	sleeper := bslcutil.RealSleeper{}
 
 	actionFactory := bslcaction.NewConcreteFactory(
-		wardenClient,
+		softLayerClient,
 		fs,
 		cmdRunner,
 		uuidGen,

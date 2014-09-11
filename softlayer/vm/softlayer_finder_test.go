@@ -3,18 +3,20 @@ package vm_test
 import (
 	"errors"
 
-	boshlog "bosh/logger"
-	fakewrdnclient "github.com/cloudfoundry-incubator/garden/client/fake_warden_client"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
 	. "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
+
+	boshlog "bosh/logger"
+
+	fakebslcpi "github.com/maximilien/bosh-softlayer-cpi/softlayer/cpi/fakes"
 	fakevm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm/fakes"
 )
 
 var _ = Describe("SoftLayerFinder", func() {
 	var (
-		softLayerClient        *fakewrdnclient.FakeClient
+		softLayerClient        *fakebslcpi.FakeClient
 		agentEnvServiceFactory *fakevm.FakeAgentEnvServiceFactory
 		hostBindMounts         *fakevm.FakeHostBindMounts
 		guestBindMounts        *fakevm.FakeGuestBindMounts
@@ -23,7 +25,7 @@ var _ = Describe("SoftLayerFinder", func() {
 	)
 
 	BeforeEach(func() {
-		softLayerClient = fakewrdnclient.New()
+		softLayerClient = fakebslcpi.New()
 		agentEnvServiceFactory = &fakevm.FakeAgentEnvServiceFactory{}
 		hostBindMounts = &fakevm.FakeHostBindMounts{}
 		guestBindMounts = &fakevm.FakeGuestBindMounts{}
