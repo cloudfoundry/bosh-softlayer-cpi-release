@@ -10,7 +10,6 @@ type Finder interface {
 
 type Stemcell interface {
 	ID() string
-	DirPath() string
 
 	Delete() error
 }

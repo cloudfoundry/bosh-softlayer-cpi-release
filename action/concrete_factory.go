@@ -3,8 +3,6 @@ package action
 import (
 	bosherr "github.com/cloudfoundry/bosh-agent/errors"
 	boshlog "github.com/cloudfoundry/bosh-agent/logger"
-	boshsys "github.com/cloudfoundry/bosh-agent/system"
-	boshcmd "github.com/cloudfoundry/bosh-agent/platform/commands"
 
 	sl "github.com/maximilien/softlayer-go/softlayer"
 
@@ -18,20 +16,14 @@ type concreteFactory struct {
 
 func NewConcreteFactory(
 	softLayerClient sl.Client,
-	fs boshsys.FileSystem,
-	cmdRunner boshsys.CmdRunner,
-	compressor boshcmd.Compressor,
 	options ConcreteFactoryOptions,
 	logger boshlog.Logger,
 ) concreteFactory {
 	stemcellImporter := bslcstem.NewFSImporter(
-		options.StemcellsDir,
-		fs,
-		compressor,
 		logger,
 	)
 
-	stemcellFinder := bslcstem.NewFSFinder(options.StemcellsDir, fs, logger)
+	stemcellFinder := bslcstem.NewFSFinder(softLayerClient, logger)
 
 	agentEnvServiceFactory := bslcvm.NewSoftLayerAgentEnvServiceFactory(logger)
 

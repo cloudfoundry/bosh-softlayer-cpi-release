@@ -39,7 +39,17 @@ func NewSoftLayerCreator(
 
 func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, networks Networks, env Environment) (VM, error) {
 	virtualGuestTemplate := sldatatypes.SoftLayer_Virtual_Guest_Template{
-		//Fill in necessary info from CloudProperties here
+		Hostname: agentID,
+    Domain: "softlayer.com",
+    StartCpus: 1,
+    MaxMemory: 2048,
+    Datacenter: sldatatypes.Datacenter{
+      Name: "ams01",
+    },
+    SshKeys: []sldatatypes.SshKey{{Id: 74826}},
+    HourlyBillingFlag: true,
+    LocalDiskFlag: true,
+    OperatingSystemReferenceCode: "UBUNTU_LATEST",
 	}
 
 	virtualGuestService, err := c.softLayerClient.GetSoftLayer_Virtual_Guest_Service()

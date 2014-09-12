@@ -5,7 +5,6 @@ import (
 	"os"
 
 	boshlog "github.com/cloudfoundry/bosh-agent/logger"
-	boshcmd "github.com/cloudfoundry/bosh-agent/platform/commands"
 	boshsys "github.com/cloudfoundry/bosh-agent/system"
 	
 	slclient "github.com/maximilien/softlayer-go/client"
@@ -64,13 +63,8 @@ func buildDispatcher(
 
 	softLayerClient := slclient.NewSoftLayerClient(config.SoftLayer.Username, config.SoftLayer.ApiKey)
 
-	compressor := boshcmd.NewTarballCompressor(cmdRunner, fs)
-
 	actionFactory := bslcaction.NewConcreteFactory(
 		softLayerClient,
-		fs,
-		cmdRunner,
-		compressor,
 		config.Actions,
 		logger,
 	)
