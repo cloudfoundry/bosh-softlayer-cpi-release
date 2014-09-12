@@ -1,7 +1,7 @@
 package vm
 
 import (
-	boshlog "bosh/logger"
+	boshlog "github.com/cloudfoundry/bosh-agent/logger"
 
 	sl "github.com/maximilien/softlayer-go/softlayer"
 )

@@ -3,8 +3,8 @@ package main
 import (
 	"encoding/json"
 
-	bosherr "bosh/errors"
-	boshsys "bosh/system"
+	bosherr "github.com/cloudfoundry/bosh-agent/errors"
+	boshsys "github.com/cloudfoundry/bosh-agent/system"
 
 	bslcaction "github.com/maximilien/bosh-softlayer-cpi/action"
 )
@@ -16,8 +16,8 @@ type Config struct {
 }
 
 type SoftLayerConfig struct {
-	Username string
-	ApiKey string
+	Username string `json:"username"`
+	ApiKey string `json:"api_key"`
 }
 
 func NewConfigFromPath(path string, fs boshsys.FileSystem) (Config, error) {
@@ -45,11 +45,6 @@ func (c Config) Validate() error {
 	err := c.SoftLayer.Validate()
 	if err != nil {
 		return bosherr.WrapError(err, "Validating SoftLayer configuration")
-	}
-
-	err = c.Actions.Validate()
-	if err != nil {
-		return bosherr.WrapError(err, "Validating Actions configuration")
 	}
 
 	return nil

@@ -3,7 +3,7 @@ package vm
 import (
 	"errors"
 	
-	boshlog "bosh/logger"
+	boshlog "github.com/cloudfoundry/bosh-agent/logger"
 )
 
 const (

@@ -1,10 +1,10 @@
 package action
 
 import (
-	bosherr "bosh/errors"
-	boshlog "bosh/logger"
-	boshsys "bosh/system"
-	boshcmd "bosh/platform/commands"
+	bosherr "github.com/cloudfoundry/bosh-agent/errors"
+	boshlog "github.com/cloudfoundry/bosh-agent/logger"
+	boshsys "github.com/cloudfoundry/bosh-agent/system"
+	boshcmd "github.com/cloudfoundry/bosh-agent/platform/commands"
 
 	sl "github.com/maximilien/softlayer-go/softlayer"
 

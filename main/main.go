@@ -4,9 +4,9 @@ import (
 	"flag"
 	"os"
 
-	boshlog "bosh/logger"
-	boshcmd "bosh/platform/commands"
-	boshsys "bosh/system"
+	boshlog "github.com/cloudfoundry/bosh-agent/logger"
+	boshcmd "github.com/cloudfoundry/bosh-agent/platform/commands"
+	boshsys "github.com/cloudfoundry/bosh-agent/system"
 	
 	slclient "github.com/maximilien/softlayer-go/client"
 

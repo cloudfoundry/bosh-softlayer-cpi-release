@@ -4,11 +4,11 @@ import (
 	"os"
 	"path/filepath"
 
-	bosherr "bosh/errors"
-	boshlog "bosh/logger"
-	boshcmd "bosh/platform/commands"
-	boshsys "bosh/system"
-	boshuuid "bosh/uuid"
+	bosherr "github.com/cloudfoundry/bosh-agent/errors"
+	boshlog "github.com/cloudfoundry/bosh-agent/logger"
+	boshcmd "github.com/cloudfoundry/bosh-agent/platform/commands"
+	boshsys "github.com/cloudfoundry/bosh-agent/system"
+	boshuuid "github.com/cloudfoundry/bosh-agent/uuid"
 )
 
 const fsImporterLogTag = "FSImporter"

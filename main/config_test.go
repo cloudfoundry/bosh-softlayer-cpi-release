@@ -6,7 +6,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	fakesys "bosh/system/fakes"
+	fakesys "github.com/cloudfoundry/bosh-agent/system/fakes"
 
 	. "github.com/maximilien/bosh-softlayer-cpi/main"
 

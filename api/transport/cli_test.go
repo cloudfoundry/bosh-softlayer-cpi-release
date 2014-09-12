@@ -9,7 +9,7 @@ import (
 
 	. "github.com/maximilien/bosh-softlayer-cpi/api/transport"
 
-	boshlog "bosh/logger"
+	boshlog "github.com/cloudfoundry/bosh-agent/logger"
 
 	fakedisp "github.com/maximilien/bosh-softlayer-cpi/api/dispatcher/fakes"
 )

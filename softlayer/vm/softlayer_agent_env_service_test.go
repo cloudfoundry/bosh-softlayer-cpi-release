@@ -13,7 +13,7 @@ import (
 
 	. "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
 
-	boshlog "bosh/logger"
+	boshlog "github.com/cloudfoundry/bosh-agent/logger"
 )
 
 var _ = Describe("SoftLayerAgentEnvService", func() {

@@ -6,23 +6,23 @@
 	],
 	"Deps": [
 		{
-			"ImportPath": "bosh/errors",
+			"ImportPath": "github.com/cloudfoundry/bosh-agent/errors",
 			"Rev": "90291ecec5e8d462fb36fe40a44e629b3a423a4a"
 		},
 		{
-			"ImportPath": "bosh/logger",
+			"ImportPath": "github.com/cloudfoundry/bosh-agent/logger",
 			"Rev": "90291ecec5e8d462fb36fe40a44e629b3a423a4a"
 		},
 		{
-			"ImportPath": "bosh/platform/commands",
+			"ImportPath": "github.com/cloudfoundry/bosh-agent/platform/commands",
 			"Rev": "90291ecec5e8d462fb36fe40a44e629b3a423a4a"
 		},
 		{
-			"ImportPath": "bosh/system",
+			"ImportPath": "github.com/cloudfoundry/bosh-agent/system",
 			"Rev": "90291ecec5e8d462fb36fe40a44e629b3a423a4a"
 		},
 		{
-			"ImportPath": "bosh/uuid",
+			"ImportPath": "github.com/cloudfoundry/bosh-agent/uuid",
 			"Rev": "90291ecec5e8d462fb36fe40a44e629b3a423a4a"
 		},
 		{

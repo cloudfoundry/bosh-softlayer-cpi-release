@@ -1,7 +1,7 @@
 package vm
 
 import (
-	bosherr "bosh/errors"
+	bosherr "github.com/cloudfoundry/bosh-agent/errors"
 )
 
 type AgentOptions struct {

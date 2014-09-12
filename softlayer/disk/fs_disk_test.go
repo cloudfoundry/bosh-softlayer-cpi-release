@@ -3,8 +3,8 @@ package disk_test
 import (
 	"errors"
 
-	boshlog "bosh/logger"
-	fakesys "bosh/system/fakes"
+	boshlog "github.com/cloudfoundry/bosh-agent/logger"
+	fakesys "github.com/cloudfoundry/bosh-agent/system/fakes"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 

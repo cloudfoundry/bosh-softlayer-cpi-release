@@ -3,8 +3,8 @@ package vm
 import (
 	"strconv"
 
-	bosherr "bosh/errors"
-	boshlog "bosh/logger"
+	bosherr "github.com/cloudfoundry/bosh-agent/errors"
+	boshlog "github.com/cloudfoundry/bosh-agent/logger"
 
 	sl "github.com/maximilien/softlayer-go/softlayer"
 	sldatatypes "github.com/maximilien/softlayer-go/data_types"

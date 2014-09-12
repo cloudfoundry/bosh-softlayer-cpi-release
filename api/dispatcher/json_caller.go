@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"reflect"
 
-	bosherr "bosh/errors"
+	bosherr "github.com/cloudfoundry/bosh-agent/errors"
 
 	bslcaction "github.com/maximilien/bosh-softlayer-cpi/action"
 )
