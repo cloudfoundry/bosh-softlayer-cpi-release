@@ -1,46 +1,36 @@
 package vm
 
 import (
+	"strconv"
+
 	bosherr "bosh/errors"
 	boshlog "bosh/logger"
-	boshuuid "bosh/uuid"
 
-	bslcpi "github.com/maximilien/bosh-softlayer-cpi/softlayer/cpi"
+	sl "github.com/maximilien/softlayer-go/softlayer"
+	sldatatypes "github.com/maximilien/softlayer-go/data_types"
+
 	bslcstem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell"
 )
 
 const softLayerCreatorLogTag = "SoftLayerCreator"
 
 type SoftLayerCreator struct {
-	uuidGen boshuuid.Generator
-
-	softLayerClient        bslcpi.Client
+	softLayerClient        sl.Client
 	agentEnvServiceFactory AgentEnvServiceFactory
-
-	hostBindMounts  HostBindMounts
-	guestBindMounts GuestBindMounts
 
 	agentOptions AgentOptions
 	logger       boshlog.Logger
 }
 
 func NewSoftLayerCreator(
-	uuidGen boshuuid.Generator,
-	softLayerClient bslcpi.Client,
+	softLayerClient sl.Client,
 	agentEnvServiceFactory AgentEnvServiceFactory,
-	hostBindMounts HostBindMounts,
-	guestBindMounts GuestBindMounts,
 	agentOptions AgentOptions,
 	logger boshlog.Logger,
 ) SoftLayerCreator {
 	return SoftLayerCreator{
-		uuidGen: uuidGen,
-
 		softLayerClient:        softLayerClient,
 		agentEnvServiceFactory: agentEnvServiceFactory,
-
-		hostBindMounts:  hostBindMounts,
-		guestBindMounts: guestBindMounts,
 
 		agentOptions: agentOptions,
 		logger:       logger,
@@ -48,71 +38,33 @@ func NewSoftLayerCreator(
 }
 
 func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, networks Networks, env Environment) (VM, error) {
-	id, err := c.uuidGen.Generate()
+	virtualGuestTemplate := sldatatypes.SoftLayer_Virtual_Guest_Template{
+		//Fill in necessary info from CloudProperties here
+	}
+
+	virtualGuestService, err := c.softLayerClient.GetSoftLayer_Virtual_Guest_Service()
 	if err != nil {
-		return SoftLayerVM{}, bosherr.WrapError(err, "Generating VM id")
+		return SoftLayerVM{}, bosherr.WrapError(err, "Creating VirtualGuestService from SoftLayer client")
 	}
 
-	networkIP, err := c.resolveNetworkIP(networks)
+	virtualGuest, err := virtualGuestService.CreateObject(virtualGuestTemplate)
 	if err != nil {
-		return SoftLayerVM{}, err
+		return SoftLayerVM{}, bosherr.WrapError(err, "Creating VirtualGuest from SoftLayer client")
 	}
 
-	hostEphemeralBindMountPath, hostPersistentBindMountsDir, err := c.makeHostBindMounts(id)
-	if err != nil {
-		return SoftLayerVM{}, err
-	}
+	agentEnv := NewAgentEnvForVM(agentID, strconv.Itoa(virtualGuest.Id), networks, env, c.agentOptions)
 
-	containerSpec := bslcpi.ContainerSpec{
-		Handle:     id,
-		RootFSPath: stemcell.DirPath(),
-		Network:    networkIP,
-		BindMounts: []bslcpi.BindMount{
-			bslcpi.BindMount{
-				SrcPath: hostEphemeralBindMountPath,
-				DstPath: c.guestBindMounts.MakeEphemeral(),
-				Mode:    bslcpi.BindMountModeRW,
-				Origin:  bslcpi.BindMountOriginHost,
-			},
-			bslcpi.BindMount{
-				SrcPath: hostPersistentBindMountsDir,
-				DstPath: c.guestBindMounts.MakePersistent(),
-				Mode:    bslcpi.BindMountModeRW,
-				Origin:  bslcpi.BindMountOriginHost,
-			},
-		},
-		Properties: bslcpi.Properties{},
-	}
-
-	c.logger.Debug(softLayerCreatorLogTag, "Creating container with spec %#v", containerSpec)
-
-	container, err := c.softLayerClient.Create(containerSpec)
-	if err != nil {
-		return SoftLayerVM{}, bosherr.WrapError(err, "Creating container")
-	}
-
-	agentEnv := NewAgentEnvForVM(agentID, id, networks, env, c.agentOptions)
-
-	agentEnvService := c.agentEnvServiceFactory.New(container)
+	agentEnvService := c.agentEnvServiceFactory.New()
 
 	err = agentEnvService.Update(agentEnv)
 	if err != nil {
-		c.cleanUpContainer(container)
-		return SoftLayerVM{}, bosherr.WrapError(err, "Updating container's agent env")
-	}
-
-	err = c.startAgentInContainer(container)
-	if err != nil {
-		c.cleanUpContainer(container)
-		return SoftLayerVM{}, err
+		return SoftLayerVM{}, bosherr.WrapError(err, "Updating VM agent env")
 	}
 
 	vm := NewSoftLayerVM(
-		id,
+		virtualGuest.Id,
 		c.softLayerClient,
 		agentEnvService,
-		c.hostBindMounts,
-		c.guestBindMounts,
 		c.logger,
 	)
 
@@ -136,41 +88,4 @@ func (c SoftLayerCreator) resolveNetworkIP(networks Networks) (string, error) {
 	}
 
 	return network.IP, nil
-}
-
-func (c SoftLayerCreator) makeHostBindMounts(id string) (string, string, error) {
-	ephemeralBindMountPath, err := c.hostBindMounts.MakeEphemeral(id)
-	if err != nil {
-		return "", "", bosherr.WrapError(err, "Making host ephemeral bind mount path")
-	}
-
-	persistentBindMountsDir, err := c.hostBindMounts.MakePersistent(id)
-	if err != nil {
-		return "", "", bosherr.WrapError(err, "Making host persistent bind mounts dir")
-	}
-
-	return ephemeralBindMountPath, persistentBindMountsDir, nil
-}
-
-func (c SoftLayerCreator) startAgentInContainer(container bslcpi.Container) error {
-	processSpec := bslcpi.ProcessSpec{
-		Path:       "/usr/sbin/runsvdir-start",
-		Privileged: true,
-	}
-
-	// Do not Wait() for the process to finish
-	_, err := container.Run(processSpec, bslcpi.ProcessIO{})
-	if err != nil {
-		return bosherr.WrapError(err, "Running BOSH Agent in container")
-	}
-
-	return nil
-}
-
-func (c SoftLayerCreator) cleanUpContainer(container bslcpi.Container) {
-	// false is to kill immediately
-	err := container.Stop(false)
-	if err != nil {
-		c.logger.Error(softLayerCreatorLogTag, "Failed destroying container '%s': %s", container.Handle, err.Error())
-	}
 }

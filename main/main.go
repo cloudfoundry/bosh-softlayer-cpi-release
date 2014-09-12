@@ -7,14 +7,12 @@ import (
 	boshlog "bosh/logger"
 	boshcmd "bosh/platform/commands"
 	boshsys "bosh/system"
-	boshuuid "bosh/uuid"
 	
-	bslcpi "github.com/maximilien/bosh-softlayer-cpi/softlayer/cpi"
+	slclient "github.com/maximilien/softlayer-go/client"
 
 	bslcaction "github.com/maximilien/bosh-softlayer-cpi/action"
 	bslcdisp "github.com/maximilien/bosh-softlayer-cpi/api/dispatcher"
 	bslctrans "github.com/maximilien/bosh-softlayer-cpi/api/transport"
-	bslcutil "github.com/maximilien/bosh-softlayer-cpi/util"
 )
 
 const mainLogTag = "main"
@@ -24,7 +22,7 @@ var (
 )
 
 func main() {
-	logger, fs, cmdRunner, uuidGen := basicDeps()
+	logger, fs, cmdRunner := basicDeps()
 
 	defer logger.HandlePanic("Main")
 
@@ -36,7 +34,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	dispatcher := buildDispatcher(config, logger, fs, cmdRunner, uuidGen)
+	dispatcher := buildDispatcher(config, logger, fs, cmdRunner)
 
 	cli := bslctrans.NewCLI(os.Stdin, os.Stdout, dispatcher, logger)
 
@@ -47,16 +45,14 @@ func main() {
 	}
 }
 
-func basicDeps() (boshlog.Logger, boshsys.FileSystem, boshsys.CmdRunner, boshuuid.Generator) {
+func basicDeps() (boshlog.Logger, boshsys.FileSystem, boshsys.CmdRunner) {
 	logger := boshlog.NewWriterLogger(boshlog.LevelDebug, os.Stderr, os.Stderr)
 
 	fs := boshsys.NewOsFileSystem(logger)
 
 	cmdRunner := boshsys.NewExecCmdRunner(logger)
 
-	uuidGen := boshuuid.NewGenerator()
-
-	return logger, fs, cmdRunner, uuidGen
+	return logger, fs, cmdRunner
 }
 
 func buildDispatcher(
@@ -64,26 +60,17 @@ func buildDispatcher(
 	logger boshlog.Logger,
 	fs boshsys.FileSystem,
 	cmdRunner boshsys.CmdRunner,
-	uuidGen boshuuid.Generator,
 ) bslcdisp.Dispatcher {
-	slConn := bslcpi.NewConnection(
-		config.SoftLayer.ConnectNetwork,
-		config.SoftLayer.ConnectAddress,
-	)
 
-	softLayerClient := bslcpi.NewClient(slConn)
+	softLayerClient := slclient.NewSoftLayerClient(config.SoftLayer.Username, config.SoftLayer.ApiKey)
 
 	compressor := boshcmd.NewTarballCompressor(cmdRunner, fs)
-
-	sleeper := bslcutil.RealSleeper{}
 
 	actionFactory := bslcaction.NewConcreteFactory(
 		softLayerClient,
 		fs,
 		cmdRunner,
-		uuidGen,
 		compressor,
-		sleeper,
 		config.Actions,
 		logger,
 	)

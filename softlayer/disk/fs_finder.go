@@ -2,6 +2,7 @@ package disk
 
 import (
 	"path/filepath"
+	"strconv"
 
 	boshlog "bosh/logger"
 	boshsys "bosh/system"
@@ -18,8 +19,8 @@ func NewFSFinder(dirPath string, fs boshsys.FileSystem, logger boshlog.Logger) F
 	return FSFinder{dirPath: dirPath, fs: fs, logger: logger}
 }
 
-func (f FSFinder) Find(id string) (Disk, bool, error) {
-	dirPath := filepath.Join(f.dirPath, id)
+func (f FSFinder) Find(id int) (Disk, bool, error) {
+	dirPath := filepath.Join(f.dirPath, strconv.Itoa(id))
 
 	if f.fs.FileExists(dirPath) {
 		return NewFSDisk(id, dirPath, f.fs, f.logger), true, nil

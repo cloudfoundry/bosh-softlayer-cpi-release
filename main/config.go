@@ -16,11 +16,8 @@ type Config struct {
 }
 
 type SoftLayerConfig struct {
-	// e.g. tcp, udp, unix
-	ConnectNetwork string
-
-	// Could be file path to sock file or an IP address
-	ConnectAddress string
+	Username string
+	ApiKey string
 }
 
 func NewConfigFromPath(path string, fs boshsys.FileSystem) (Config, error) {
@@ -59,12 +56,12 @@ func (c Config) Validate() error {
 }
 
 func (c SoftLayerConfig) Validate() error {
-	if c.ConnectNetwork == "" {
-		return bosherr.New("Must provide non-empty ConnectNetwork")
+	if c.Username == "" {
+		return bosherr.New("Must provide non-empty Username")
 	}
 
-	if c.ConnectAddress == "" {
-		return bosherr.New("Must provide non-empty ConnectAddress")
+	if c.ApiKey == "" {
+		return bosherr.New("Must provide non-empty ApiKey")
 	}
 
 	return nil

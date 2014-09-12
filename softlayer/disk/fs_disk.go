@@ -9,7 +9,7 @@ import (
 const fsDiskLogTag = "FSDisk"
 
 type FSDisk struct {
-	id   string
+	id   int
 	path string
 
 	fs     boshsys.FileSystem
@@ -17,7 +17,7 @@ type FSDisk struct {
 }
 
 func NewFSDisk(
-	id string,
+	id int,
 	path string,
 	fs boshsys.FileSystem,
 	logger boshlog.Logger,
@@ -25,7 +25,7 @@ func NewFSDisk(
 	return FSDisk{id: id, path: path, fs: fs, logger: logger}
 }
 
-func (s FSDisk) ID() string { return s.id }
+func (s FSDisk) ID() int { return s.id }
 
 func (s FSDisk) Path() string { return s.path }
 

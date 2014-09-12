@@ -1,22 +1,22 @@
 package fakes
 
 type FakeDisk struct {
-	id   string
+	id   int
 	path string
 
 	DeleteCalled bool
 	DeleteErr    error
 }
 
-func NewFakeDisk(id string) *FakeDisk {
+func NewFakeDisk(id int) *FakeDisk {
 	return &FakeDisk{id: id}
 }
 
-func NewFakeDiskWithPath(id, path string) *FakeDisk {
+func NewFakeDiskWithPath(id int, path string) *FakeDisk {
 	return &FakeDisk{id: id, path: path}
 }
 
-func (s FakeDisk) ID() string { return s.id }
+func (s FakeDisk) ID() int { return s.id }
 
 func (s FakeDisk) Path() string { return s.path }
 

@@ -26,7 +26,6 @@ type FSImporter struct {
 func NewFSImporter(
 	dirPath string,
 	fs boshsys.FileSystem,
-	uuidGen boshuuid.Generator,
 	compressor boshcmd.Compressor,
 	logger boshlog.Logger,
 ) FSImporter {
@@ -34,7 +33,6 @@ func NewFSImporter(
 		dirPath: dirPath,
 
 		fs:         fs,
-		uuidGen:    uuidGen,
 		compressor: compressor,
 
 		logger: logger,
@@ -44,14 +42,11 @@ func NewFSImporter(
 func (i FSImporter) ImportFromPath(imagePath string) (Stemcell, error) {
 	i.logger.Debug(fsImporterLogTag, "Importing stemcell from path '%s'", imagePath)
 
-	id, err := i.uuidGen.Generate()
-	if err != nil {
-		return nil, bosherr.WrapError(err, "Generating stemcell id")
-	}
+	stemcellId := "stemcell-id" //TODO: need to find this from CloudProperties
 
-	stemcellPath := filepath.Join(i.dirPath, id)
+	stemcellPath := filepath.Join(i.dirPath, stemcellId) 
 
-	err = i.fs.MkdirAll(stemcellPath, os.FileMode(0755))
+	err := i.fs.MkdirAll(stemcellPath, os.FileMode(0755))
 	if err != nil {
 		return nil, bosherr.WrapError(err, "Creating stemcell directory '%s'", stemcellPath)
 	}
@@ -63,5 +58,5 @@ func (i FSImporter) ImportFromPath(imagePath string) (Stemcell, error) {
 
 	i.logger.Debug(fsImporterLogTag, "Imported stemcell from path '%s'", imagePath)
 
-	return NewFSStemcell(id, stemcellPath, i.fs, i.logger), nil
+	return NewFSStemcell(stemcellId, stemcellPath, i.fs, i.logger), nil
 }

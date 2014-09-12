@@ -14,10 +14,6 @@ import (
 	. "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
 
 	boshlog "bosh/logger"
-
-	fakeslcpi "github.com/maximilien/bosh-softlayer-cpi/softlayer/cpi/fakes"
-
-	bslcpi "github.com/maximilien/bosh-softlayer-cpi/softlayer/cpi"
 )
 
 var _ = Describe("SoftLayerAgentEnvService", func() {
@@ -28,25 +24,12 @@ var _ = Describe("SoftLayerAgentEnvService", func() {
 	)
 
 	BeforeEach(func() {
-		softLayerClient = fakeslcpi.New()
-
-		softLayerClient.Connection.CreateReturns("fake-vm-id", nil)
-
-		containerSpec := bslcpi.ContainerSpec{
-			Handle:     "fake-vm-id",
-			RootFSPath: "fake-root-fs-path",
-		}
-
-		container, err := softLayerClient.Create(containerSpec)
-		Expect(err).ToNot(HaveOccurred())
-
 		logger = boshlog.NewLogger(boshlog.LevelNone)
-		agentEnvService = NewSoftLayerAgentEnvService(container, logger)
+		agentEnvService = NewSoftLayerAgentEnvService(logger)
 	})
 
 	Describe("Fetch", func() {
 		var (
-			runProcess  *fakeslcpi.FakeProcess
 			outAgentEnv AgentEnv
 		)
 

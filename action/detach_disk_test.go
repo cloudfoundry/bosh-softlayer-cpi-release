@@ -28,15 +28,15 @@ var _ = Describe("DetachDisk", func() {
 	Describe("Run", func() {
 		It("tries to find VM with given VM cid", func() {
 			vmFinder.FindFound = true
-			vmFinder.FindVM = fakevm.NewFakeVM("fake-vm-id")
+			vmFinder.FindVM = fakevm.NewFakeVM(1234)
 
 			diskFinder.FindFound = true
-			diskFinder.FindDisk = fakedisk.NewFakeDisk("fake-disk-id")
+			diskFinder.FindDisk = fakedisk.NewFakeDisk(1234)
 
-			_, err := action.Run("fake-vm-id", "fake-disk-id")
+			_, err := action.Run(1234, 1234)
 			Expect(err).ToNot(HaveOccurred())
 
-			Expect(vmFinder.FindID).To(Equal("fake-vm-id"))
+			Expect(vmFinder.FindID).To(Equal(1234))
 		})
 
 		Context("when VM is found with given VM cid", func() {
@@ -45,7 +45,7 @@ var _ = Describe("DetachDisk", func() {
 			)
 
 			BeforeEach(func() {
-				vm = fakevm.NewFakeVM("fake-vm-id")
+				vm = fakevm.NewFakeVM(1234)
 				vmFinder.FindVM = vm
 				vmFinder.FindFound = true
 			})
@@ -53,10 +53,10 @@ var _ = Describe("DetachDisk", func() {
 			It("tries to find disk with given disk cid", func() {
 				diskFinder.FindFound = true
 
-				_, err := action.Run("fake-vm-id", "fake-disk-id")
+				_, err := action.Run(1234, 1234)
 				Expect(err).ToNot(HaveOccurred())
 
-				Expect(diskFinder.FindID).To(Equal("fake-disk-id"))
+				Expect(diskFinder.FindID).To(Equal(1234))
 			})
 
 			Context("when disk is found with given disk cid", func() {
@@ -65,13 +65,13 @@ var _ = Describe("DetachDisk", func() {
 				)
 
 				BeforeEach(func() {
-					disk = fakedisk.NewFakeDisk("fake-disk-id")
+					disk = fakedisk.NewFakeDisk(1234)
 					diskFinder.FindDisk = disk
 					diskFinder.FindFound = true
 				})
 
 				It("does not return error when detaching found disk from found VM succeeds", func() {
-					_, err := action.Run("fake-vm-id", "fake-disk-id")
+					_, err := action.Run(1234, 1234)
 					Expect(err).ToNot(HaveOccurred())
 
 					Expect(vm.DetachDiskDisk).To(Equal(disk))
@@ -80,7 +80,7 @@ var _ = Describe("DetachDisk", func() {
 				It("returns error if detaching disk fails", func() {
 					vm.DetachDiskErr = errors.New("fake-detach-disk-err")
 
-					_, err := action.Run("fake-vm-id", "fake-disk-id")
+					_, err := action.Run(1234, 1234)
 					Expect(err).To(HaveOccurred())
 					Expect(err.Error()).To(ContainSubstring("fake-detach-disk-err"))
 				})
@@ -90,7 +90,7 @@ var _ = Describe("DetachDisk", func() {
 				It("returns error", func() {
 					diskFinder.FindFound = false
 
-					_, err := action.Run("fake-vm-id", "fake-disk-id")
+					_, err := action.Run(1234, 1234)
 					Expect(err).To(HaveOccurred())
 					Expect(err.Error()).To(ContainSubstring("Expected to find disk"))
 				})
@@ -100,7 +100,7 @@ var _ = Describe("DetachDisk", func() {
 				It("returns error", func() {
 					diskFinder.FindErr = errors.New("fake-find-err")
 
-					_, err := action.Run("fake-vm-id", "fake-disk-id")
+					_, err := action.Run(1234, 1234)
 					Expect(err).To(HaveOccurred())
 					Expect(err.Error()).To(ContainSubstring("fake-find-err"))
 				})
@@ -111,7 +111,7 @@ var _ = Describe("DetachDisk", func() {
 			It("returns error because disk can only be detached from an existing VM", func() {
 				vmFinder.FindFound = false
 
-				_, err := action.Run("fake-vm-id", "fake-disk-id")
+				_, err := action.Run(1234, 1234)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("Expected to find VM"))
 			})
@@ -121,7 +121,7 @@ var _ = Describe("DetachDisk", func() {
 			It("returns error because disk can only be detached from an existing VM", func() {
 				vmFinder.FindErr = errors.New("fake-find-err")
 
-				_, err := action.Run("fake-vm-id", "fake-disk-id")
+				_, err := action.Run(1234, 1234)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("fake-find-err"))
 			})

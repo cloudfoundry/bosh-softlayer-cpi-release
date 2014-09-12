@@ -10,35 +10,24 @@ import (
 
 	fakecmd "bosh/platform/commands/fakes"
 	fakesys "bosh/system/fakes"
-	fakeuuid "bosh/uuid/fakes"
-	
-	fakeslcpi "github.com/maximilien/bosh-softlayer-cpi/softlayer/cpi/fakes"
 
+	fakeslclient "github.com/maximilien/softLayer-go/client/fakes"
+	
 	bslcdisk "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk"
 	bslcstem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell"
-	bslcutil "github.com/maximilien/bosh-softlayer-cpi/util"
 	bslcvm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
 )
 
 var _ = Describe("concreteFactory", func() {
 	var (
-		SoftLayerClient *fakeslcpi.FakeClient
+		softLayerClient *fakeslclient.FakeSoftLayerClient
 		fs           *fakesys.FakeFileSystem
 		cmdRunner    *fakesys.FakeCmdRunner
-		uuidGen      *fakeuuid.FakeGenerator
 		compressor   *fakecmd.FakeCompressor
-		sleeper      bslcutil.Sleeper
 		logger       boshlog.Logger
 
 		options = ConcreteFactoryOptions{
 			StemcellsDir: "/tmp/stemcells",
-			DisksDir:     "/tmp/disks",
-
-			HostEphemeralBindMountsDir:  "/tmp/host-ephemeral-bind-mounts-dir",
-			HostPersistentBindMountsDir: "/tmp/host-persistent-bind-mounts-dir",
-
-			GuestEphemeralBindMountPath:  "/tmp/guest-ephemeral-bind-mount-path",
-			GuestPersistentBindMountsDir: "/tmp/guest-persistent-bind-mounts-dir",
 		}
 
 		factory Factory
@@ -47,60 +36,36 @@ var _ = Describe("concreteFactory", func() {
 	var (
 		agentEnvServiceFactory bslcvm.AgentEnvServiceFactory
 
-		hostBindMounts  bslcvm.FSHostBindMounts
-		guestBindMounts bslcvm.FSGuestBindMounts
-
 		stemcellFinder bslcstem.Finder
 		vmFinder       bslcvm.Finder
 		diskFinder     bslcdisk.Finder
 	)
 
 	BeforeEach(func() {
-		SoftLayerClient = fakeslcpi.New()
+		softLayerClient = fakeslclient.NewFakeSoftLayerClient("fake-username", "fake-api-key")
 		fs = fakesys.NewFakeFileSystem()
 		cmdRunner = fakesys.NewFakeCmdRunner()
-		uuidGen = &fakeuuid.FakeGenerator{}
 		compressor = fakecmd.NewFakeCompressor()
-		sleeper = bslcutil.RealSleeper{}
 		logger = boshlog.NewLogger(boshlog.LevelNone)
 
 		factory = NewConcreteFactory(
-			SoftLayerClient,
+			softLayerClient,
 			fs,
 			cmdRunner,
-			uuidGen,
 			compressor,
-			sleeper,
 			options,
 			logger,
 		)
 	})
 
 	BeforeEach(func() {
-		hostBindMounts = bslcvm.NewFSHostBindMounts(
-			"/tmp/host-ephemeral-bind-mounts-dir",
-			"/tmp/host-persistent-bind-mounts-dir",
-			sleeper,
-			fs,
-			cmdRunner,
-			logger,
-		)
-
-		guestBindMounts = bslcvm.NewFSGuestBindMounts(
-			"/tmp/guest-ephemeral-bind-mount-path",
-			"/tmp/guest-persistent-bind-mounts-dir",
-			logger,
-		)
-
 		agentEnvServiceFactory = bslcvm.NewSoftLayerAgentEnvServiceFactory(logger)
 
 		stemcellFinder = bslcstem.NewFSFinder("/tmp/stemcells", fs, logger)
 
 		vmFinder = bslcvm.NewSoftLayerFinder(
-			SoftLayerClient,
+			softLayerClient,
 			agentEnvServiceFactory,
-			hostBindMounts,
-			guestBindMounts,
 			logger,
 		)
 
@@ -117,7 +82,6 @@ var _ = Describe("concreteFactory", func() {
 		stemcellImporter := bslcstem.NewFSImporter(
 			"/tmp/stemcells",
 			fs,
-			uuidGen,
 			compressor,
 			logger,
 		)
@@ -135,11 +99,8 @@ var _ = Describe("concreteFactory", func() {
 
 	It("create_vm", func() {
 		vmCreator := bslcvm.NewSoftLayerCreator(
-			uuidGen,
-			SoftLayerClient,
+			softLayerClient,
 			agentEnvServiceFactory,
-			hostBindMounts,
-			guestBindMounts,
 			options.Agent,
 			logger,
 		)
@@ -183,7 +144,6 @@ var _ = Describe("concreteFactory", func() {
 		diskCreator := bslcdisk.NewFSCreator(
 			"/tmp/disks",
 			fs,
-			uuidGen,
 			cmdRunner,
 			logger,
 		)

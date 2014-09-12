@@ -17,7 +17,7 @@ func NewCreateDisk(diskCreator bslcdisk.Creator) CreateDisk {
 func (a CreateDisk) Run(size int, _ VMCID) (DiskCID, error) {
 	disk, err := a.diskCreator.Create(size)
 	if err != nil {
-		return "", bosherr.WrapError(err, "Creating disk of size '%d'", size)
+		return 0, bosherr.WrapError(err, "Creating disk of size '%d'", size)
 	}
 
 	return DiskCID(disk.ID()), nil

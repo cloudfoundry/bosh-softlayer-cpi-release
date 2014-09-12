@@ -2,8 +2,6 @@ package vm
 
 import (
 	boshlog "bosh/logger"
-
-	bslcpi "github.com/maximilien/bosh-softlayer-cpi/softlayer/cpi"
 )
 
 type SoftLayerAgentEnvServiceFactory struct {
@@ -14,6 +12,6 @@ func NewSoftLayerAgentEnvServiceFactory(logger boshlog.Logger) SoftLayerAgentEnv
 	return SoftLayerAgentEnvServiceFactory{logger: logger}
 }
 
-func (f SoftLayerAgentEnvServiceFactory) New(container bslcpi.Container) AgentEnvService {
-	return NewSoftLayerAgentEnvService(container, f.logger)
+func (f SoftLayerAgentEnvServiceFactory) New() AgentEnvService {
+	return NewSoftLayerAgentEnvService(f.logger)
 }

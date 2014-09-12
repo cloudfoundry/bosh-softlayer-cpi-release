@@ -24,17 +24,17 @@ var _ = Describe("HasVM", func() {
 
 	Describe("Run", func() {
 		It("tries to find VM with given VM CID", func() {
-			_, err := action.Run("fake-vm-id")
+			_, err := action.Run(1234)
 			Expect(err).ToNot(HaveOccurred())
 
-			Expect(vmFinder.FindID).To(Equal("fake-vm-id"))
+			Expect(vmFinder.FindID).To(Equal(1234))
 		})
 
 		Context("when VM is found with given CID", func() {
 			It("returns true without error", func() {
 				vmFinder.FindFound = true
 
-				found, err := action.Run("fake-vm-id")
+				found, err := action.Run(1234)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(found).To(BeTrue())
 			})
@@ -42,7 +42,7 @@ var _ = Describe("HasVM", func() {
 
 		Context("when VM is not found with given CID", func() {
 			It("returns false without error", func() {
-				found, err := action.Run("fake-vm-id")
+				found, err := action.Run(1234)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(found).To(BeFalse())
 			})
@@ -52,7 +52,7 @@ var _ = Describe("HasVM", func() {
 			It("returns error", func() {
 				vmFinder.FindErr = errors.New("fake-find-err")
 
-				found, err := action.Run("fake-vm-id")
+				found, err := action.Run(1234)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("fake-find-err"))
 				Expect(found).To(BeFalse())

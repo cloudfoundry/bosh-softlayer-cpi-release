@@ -5,7 +5,7 @@ import (
 )
 
 type FakeVM struct {
-	id string
+	id int
 
 	DeleteCalled bool
 	DeleteErr    error
@@ -17,11 +17,11 @@ type FakeVM struct {
 	DetachDiskErr  error
 }
 
-func NewFakeVM(id string) *FakeVM {
+func NewFakeVM(id int) *FakeVM {
 	return &FakeVM{id: id}
 }
 
-func (vm FakeVM) ID() string { return vm.id }
+func (vm FakeVM) ID() int { return vm.id }
 
 func (vm *FakeVM) Delete() error {
 	vm.DeleteCalled = true

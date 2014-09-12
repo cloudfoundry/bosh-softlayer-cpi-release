@@ -24,11 +24,11 @@ var _ = Describe("CreateDisk", func() {
 
 	Describe("Run", func() {
 		It("returns id for created disk for specific size", func() {
-			diskCreator.CreateDisk = fakedisk.NewFakeDisk("fake-disk-id")
+			diskCreator.CreateDisk = fakedisk.NewFakeDisk(1234)
 
-			id, err := action.Run(20, VMCID("fake-vm-id"))
+			id, err := action.Run(20, VMCID(1234))
 			Expect(err).ToNot(HaveOccurred())
-			Expect(id).To(Equal(DiskCID("fake-disk-id")))
+			Expect(id).To(Equal(DiskCID(1234)))
 
 			Expect(diskCreator.CreateSize).To(Equal(20))
 		})
@@ -36,10 +36,10 @@ var _ = Describe("CreateDisk", func() {
 		It("returns error if creating disk fails", func() {
 			diskCreator.CreateErr = errors.New("fake-create-err")
 
-			id, err := action.Run(20, VMCID("fake-vm-id"))
+			id, err := action.Run(20, VMCID(1234))
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("fake-create-err"))
-			Expect(id).To(Equal(DiskCID("")))
+			Expect(id).To(Equal(DiskCID(1234)))
 		})
 	})
 })

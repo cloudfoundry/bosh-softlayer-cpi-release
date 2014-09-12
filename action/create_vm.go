@@ -26,11 +26,11 @@ func NewCreateVM(stemcellFinder bslcstem.Finder, vmCreator bslcvm.Creator) Creat
 func (a CreateVM) Run(agentID string, stemcellCID StemcellCID, _ ResourcePool, networks Networks, _ []DiskCID, env Environment) (VMCID, error) {
 	stemcell, found, err := a.stemcellFinder.Find(string(stemcellCID))
 	if err != nil {
-		return "", bosherr.WrapError(err, "Finding stemcell '%s'", stemcellCID)
+		return 0, bosherr.WrapError(err, "Finding stemcell '%s'", stemcellCID)
 	}
 
 	if !found {
-		return "", bosherr.New("Expected to find stemcell '%s'", stemcellCID)
+		return 0, bosherr.New("Expected to find stemcell '%s'", stemcellCID)
 	}
 
 	vmNetworks := networks.AsVMNetworks()
@@ -39,7 +39,7 @@ func (a CreateVM) Run(agentID string, stemcellCID StemcellCID, _ ResourcePool, n
 
 	vm, err := a.vmCreator.Create(agentID, stemcell, vmNetworks, vmEnv)
 	if err != nil {
-		return "", bosherr.WrapError(err, "Creating VM with agent ID '%s'", agentID)
+		return 0, bosherr.WrapError(err, "Creating VM with agent ID '%s'", agentID)
 	}
 
 	return VMCID(vm.ID()), nil

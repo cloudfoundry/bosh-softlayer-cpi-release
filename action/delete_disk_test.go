@@ -24,10 +24,10 @@ var _ = Describe("DeleteDisk", func() {
 
 	Describe("Run", func() {
 		It("tries to find disk with given disk cid", func() {
-			_, err := action.Run("fake-disk-id")
+			_, err := action.Run(1234)
 			Expect(err).ToNot(HaveOccurred())
 
-			Expect(diskFinder.FindID).To(Equal("fake-disk-id"))
+			Expect(diskFinder.FindID).To(Equal(1234))
 		})
 
 		Context("when disk is found with given disk cid", func() {
@@ -36,13 +36,13 @@ var _ = Describe("DeleteDisk", func() {
 			)
 
 			BeforeEach(func() {
-				disk = fakedisk.NewFakeDisk("fake-disk-id")
+				disk = fakedisk.NewFakeDisk(1234)
 				diskFinder.FindDisk = disk
 				diskFinder.FindFound = true
 			})
 
 			It("deletes disk", func() {
-				_, err := action.Run("fake-disk-id")
+				_, err := action.Run(1234)
 				Expect(err).ToNot(HaveOccurred())
 
 				Expect(disk.DeleteCalled).To(BeTrue())
@@ -51,7 +51,7 @@ var _ = Describe("DeleteDisk", func() {
 			It("returns error if deleting disk fails", func() {
 				disk.DeleteErr = errors.New("fake-delete-err")
 
-				_, err := action.Run("fake-disk-id")
+				_, err := action.Run(1234)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("fake-delete-err"))
 			})
@@ -61,7 +61,7 @@ var _ = Describe("DeleteDisk", func() {
 			It("does not return error", func() {
 				diskFinder.FindFound = false
 
-				_, err := action.Run("fake-disk-id")
+				_, err := action.Run(1234)
 				Expect(err).ToNot(HaveOccurred())
 			})
 		})
@@ -70,7 +70,7 @@ var _ = Describe("DeleteDisk", func() {
 			It("does not return error", func() {
 				diskFinder.FindErr = errors.New("fake-find-err")
 
-				_, err := action.Run("fake-disk-id")
+				_, err := action.Run(1234)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("fake-find-err"))
 			})

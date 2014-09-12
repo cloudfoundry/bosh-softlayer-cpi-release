@@ -7,7 +7,6 @@ import (
 	bosherr "bosh/errors"
 	boshlog "bosh/logger"
 	boshsys "bosh/system"
-	boshuuid "bosh/uuid"
 )
 
 const fsCreatorLogTag = "FSCreator"
@@ -16,7 +15,6 @@ type FSCreator struct {
 	dirPath string
 
 	fs        boshsys.FileSystem
-	uuidGen   boshuuid.Generator
 	cmdRunner boshsys.CmdRunner
 	logger    boshlog.Logger
 }
@@ -24,14 +22,12 @@ type FSCreator struct {
 func NewFSCreator(
 	dirPath string,
 	fs boshsys.FileSystem,
-	uuidGen boshuuid.Generator,
 	cmdRunner boshsys.CmdRunner,
 	logger boshlog.Logger,
 ) FSCreator {
 	return FSCreator{
 		dirPath:   dirPath,
 		fs:        fs,
-		uuidGen:   uuidGen,
 		cmdRunner: cmdRunner,
 		logger:    logger,
 	}
@@ -40,14 +36,11 @@ func NewFSCreator(
 func (c FSCreator) Create(size int) (Disk, error) {
 	c.logger.Debug(fsCreatorLogTag, "Creating disk of size '%d'", size)
 
-	id, err := c.uuidGen.Generate()
-	if err != nil {
-		return nil, bosherr.WrapError(err, "Generating disk id")
-	}
+	id := 1234 //TODO: get disk ID from SL API
 
-	diskPath := filepath.Join(c.dirPath, id)
+	diskPath := filepath.Join(c.dirPath, strconv.Itoa(id))
 
-	err = c.fs.WriteFile(diskPath, []byte{})
+	err := c.fs.WriteFile(diskPath, []byte{})
 	if err != nil {
 		return nil, bosherr.WrapError(err, "Creating empty disk")
 	}

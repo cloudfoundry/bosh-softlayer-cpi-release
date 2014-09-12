@@ -20,7 +20,7 @@ func NewDetachDisk(vmFinder bslcvm.Finder, diskFinder bslcdisk.Finder) DetachDis
 }
 
 func (a DetachDisk) Run(vmCID VMCID, diskCID DiskCID) (interface{}, error) {
-	vm, found, err := a.vmFinder.Find(string(vmCID))
+	vm, found, err := a.vmFinder.Find(int(vmCID))
 	if err != nil {
 		return nil, bosherr.WrapError(err, "Finding VM '%s'", vmCID)
 	}
@@ -29,7 +29,7 @@ func (a DetachDisk) Run(vmCID VMCID, diskCID DiskCID) (interface{}, error) {
 		return nil, bosherr.New("Expected to find VM '%s'", vmCID)
 	}
 
-	disk, found, err := a.diskFinder.Find(string(diskCID))
+	disk, found, err := a.diskFinder.Find(int(diskCID))
 	if err != nil {
 		return nil, bosherr.WrapError(err, "Finding disk '%s'", diskCID)
 	}

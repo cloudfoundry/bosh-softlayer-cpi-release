@@ -11,37 +11,20 @@ import (
 	. "github.com/maximilien/bosh-softlayer-cpi/main"
 
 	bslcaction "github.com/maximilien/bosh-softlayer-cpi/action"
-	bslcvm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
 )
+
+var validSoftLayerConfig = SoftLayerConfig{
+	Username: "fake-username",
+	ApiKey: "fake-api-key",
+}
+
+var validActionsOptions = bslcaction.ConcreteFactoryOptions{
+		StemcellsDir: "/tmp/stemcells",
+}
 
 var validConfig = Config{
 	SoftLayer: validSoftLayerConfig,
 	Actions:   validActionsOptions,
-}
-
-var validSoftLayerConfig = SoftLayerConfig{
-	ConnectNetwork: "fake-tcp",
-	ConnectAddress: "fake-address",
-}
-
-var validActionsOptions = bslcaction.ConcreteFactoryOptions{
-	StemcellsDir: "/tmp/stemcells",
-	DisksDir:     "/tmp/disks",
-
-	HostEphemeralBindMountsDir:  "/tmp/host-ephemeral-bind-mounts-dir",
-	HostPersistentBindMountsDir: "/tmp/host-persistent-bind-mounts-dir",
-
-	GuestEphemeralBindMountPath:  "/tmp/guest-ephemeral-bind-mount-path",
-	GuestPersistentBindMountsDir: "/tmp/guest-persistent-bind-mounts-dir",
-
-	Agent: bslcvm.AgentOptions{
-		Mbus: "fake-mbus",
-		NTP:  []string{},
-
-		Blobstore: bslcvm.BlobstoreOptions{
-			Type: "fake-blobstore-type",
-		},
-	},
 }
 
 var _ = Describe("NewConfigFromPath", func() {
@@ -99,19 +82,11 @@ var _ = Describe("Config", func() {
 		})
 
 		It("returns error if softlayer section is not valid", func() {
-			config.SoftLayer.ConnectNetwork = ""
+			config.SoftLayer.Username = ""
 
 			err := config.Validate()
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("Validating SoftLayer configuration"))
-		})
-
-		It("returns error if actions section is not valid", func() {
-			config.Actions.DisksDir = ""
-
-			err := config.Validate()
-			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring("Validating Actions configuration"))
 		})
 	})
 })
@@ -131,20 +106,20 @@ var _ = Describe("SoftLayerConfig", func() {
 			Expect(err).ToNot(HaveOccurred())
 		})
 
-		It("returns error if ConnectNetwork is empty", func() {
-			config.ConnectNetwork = ""
+		It("returns error if Username is empty", func() {
+			config.Username = ""
 
 			err := config.Validate()
 			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring("Must provide non-empty ConnectNetwork"))
+			Expect(err.Error()).To(ContainSubstring("Must provide non-empty Username"))
 		})
 
-		It("returns error if ConnectAddress is empty", func() {
-			config.ConnectAddress = ""
+		It("returns error if ApiKey is empty", func() {
+			config.ApiKey = ""
 
 			err := config.Validate()
 			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring("Must provide non-empty ConnectAddress"))
+			Expect(err.Error()).To(ContainSubstring("Must provide non-empty ApiKey"))
 		})
 	})
 })

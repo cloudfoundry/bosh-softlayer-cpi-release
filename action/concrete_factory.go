@@ -3,14 +3,12 @@ package action
 import (
 	bosherr "bosh/errors"
 	boshlog "bosh/logger"
-	boshcmd "bosh/platform/commands"
 	boshsys "bosh/system"
-	boshuuid "bosh/uuid"
+	boshcmd "bosh/platform/commands"
 
-	bslcpi "github.com/maximilien/bosh-softlayer-cpi/softlayer/cpi"
-	bslcdisk "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk"
+	sl "github.com/maximilien/softlayer-go/softlayer"
+
 	bslcstem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell"
-	bslcutil "github.com/maximilien/bosh-softlayer-cpi/util"
 	bslcvm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
 )
 
@@ -19,70 +17,36 @@ type concreteFactory struct {
 }
 
 func NewConcreteFactory(
-	SoftLayerClient bslcpi.Client,
+	softLayerClient sl.Client,
 	fs boshsys.FileSystem,
 	cmdRunner boshsys.CmdRunner,
-	uuidGen boshuuid.Generator,
 	compressor boshcmd.Compressor,
-	sleeper bslcutil.Sleeper,
 	options ConcreteFactoryOptions,
 	logger boshlog.Logger,
 ) concreteFactory {
 	stemcellImporter := bslcstem.NewFSImporter(
 		options.StemcellsDir,
 		fs,
-		uuidGen,
 		compressor,
 		logger,
 	)
 
 	stemcellFinder := bslcstem.NewFSFinder(options.StemcellsDir, fs, logger)
 
-	hostBindMounts := bslcvm.NewFSHostBindMounts(
-		options.HostEphemeralBindMountsDir,
-		options.HostPersistentBindMountsDir,
-		sleeper,
-		fs,
-		cmdRunner,
-		logger,
-	)
-
-	guestBindMounts := bslcvm.NewFSGuestBindMounts(
-		options.GuestEphemeralBindMountPath,
-		options.GuestPersistentBindMountsDir,
-		logger,
-	)
-
 	agentEnvServiceFactory := bslcvm.NewSoftLayerAgentEnvServiceFactory(logger)
 
 	vmCreator := bslcvm.NewSoftLayerCreator(
-		uuidGen,
-		SoftLayerClient,
+		softLayerClient,
 		agentEnvServiceFactory,
-		hostBindMounts,
-		guestBindMounts,
 		options.Agent,
 		logger,
 	)
 
 	vmFinder := bslcvm.NewSoftLayerFinder(
-		SoftLayerClient,
+		softLayerClient,
 		agentEnvServiceFactory,
-		hostBindMounts,
-		guestBindMounts,
 		logger,
 	)
-
-	diskCreator := bslcdisk.NewFSCreator(
-		options.DisksDir,
-		fs,
-		uuidGen,
-		cmdRunner,
-		logger,
-	)
-
-	diskFinder := bslcdisk.NewFSFinder(options.DisksDir, fs, logger)
-
 	return concreteFactory{
 		availableActions: map[string]Action{
 			// Stemcell management
@@ -98,10 +62,10 @@ func NewConcreteFactory(
 			"configure_networks": NewConfigureNetworks(),
 
 			// Disk management
-			"create_disk": NewCreateDisk(diskCreator),
-			"delete_disk": NewDeleteDisk(diskFinder),
-			"attach_disk": NewAttachDisk(vmFinder, diskFinder),
-			"detach_disk": NewDetachDisk(vmFinder, diskFinder),
+			"create_disk": NewCreateDisk(nil),
+			"delete_disk": NewDeleteDisk(nil),
+			"attach_disk": NewAttachDisk(vmFinder, nil),
+			"detach_disk": NewDetachDisk(vmFinder, nil),
 
 			// Not implemented:
 			//   current_vm_id

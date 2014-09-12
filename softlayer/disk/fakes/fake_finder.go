@@ -5,13 +5,13 @@ import (
 )
 
 type FakeFinder struct {
-	FindID    string
+	FindID    int
 	FindDisk  bslcdisk.Disk
 	FindFound bool
 	FindErr   error
 }
 
-func (f *FakeFinder) Find(id string) (bslcdisk.Disk, bool, error) {
+func (f *FakeFinder) Find(id int) (bslcdisk.Disk, bool, error) {
 	f.FindID = id
 	return f.FindDisk, f.FindFound, f.FindErr
 }

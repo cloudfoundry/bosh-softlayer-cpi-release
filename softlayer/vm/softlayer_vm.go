@@ -4,28 +4,26 @@ import (
 	bosherr "bosh/errors"
 	boshlog "bosh/logger"
 
-	bslcpi "github.com/maximilien/bosh-softlayer-cpi/softlayer/cpi"
+	sl "github.com/maximilien/softlayer-go/softlayer"
+
 	bslcdisk "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk"
 )
 
+const softLayerVMtag = "SoftLayerVM"
+
 type SoftLayerVM struct {
-	id string
+	id int
 
-	softLayerClient bslcpi.Client
+	softLayerClient sl.Client
 	agentEnvService AgentEnvService
-
-	hostBindMounts  HostBindMounts
-	guestBindMounts GuestBindMounts
 
 	logger boshlog.Logger
 }
 
 func NewSoftLayerVM(
-	id string,
-	softLayerClient bslcpi.Client,
+	id int,
+	softLayerClient sl.Client,
 	agentEnvService AgentEnvService,
-	hostBindMounts HostBindMounts,
-	guestBindMounts GuestBindMounts,
 	logger boshlog.Logger,
 ) SoftLayerVM {
 	return SoftLayerVM{
@@ -34,69 +32,38 @@ func NewSoftLayerVM(
 		softLayerClient: softLayerClient,
 		agentEnvService: agentEnvService,
 
-		hostBindMounts:  hostBindMounts,
-		guestBindMounts: guestBindMounts,
-
 		logger: logger,
 	}
 }
 
-func (vm SoftLayerVM) ID() string { return vm.id }
+func (vm SoftLayerVM) ID() int { return vm.id }
 
 func (vm SoftLayerVM) Delete() error {
-	err := vm.hostBindMounts.DeleteEphemeral(vm.id)
+	virtualGuestService, err := vm.softLayerClient.GetSoftLayer_Virtual_Guest_Service()
 	if err != nil {
-		return err
+		return bosherr.WrapError(err, "Creating SoftLayer VirtualGuestService from client")
 	}
 
-	err = vm.hostBindMounts.DeletePersistent(vm.id)
+	deleted, err := virtualGuestService.DeleteObject(vm.ID())
 	if err != nil {
-		return err
+		return bosherr.WrapError(err, "Deleting SoftLayer VirtualGuest from client")
 	}
 
-	return vm.softLayerClient.Destroy(vm.id)
-}
-
-func (vm SoftLayerVM) AttachDisk(disk bslcdisk.Disk) error {
-	agentEnv, err := vm.agentEnvService.Fetch()
-	if err != nil {
-		return bosherr.WrapError(err, "Fetching agent env")
-	}
-
-	err = vm.hostBindMounts.MountPersistent(vm.id, disk.ID(), disk.Path())
-	if err != nil {
-		return bosherr.WrapError(err, "Mounting persistent bind mounts dir")
-	}
-
-	diskHintPath := vm.guestBindMounts.MountPersistent(disk.ID())
-
-	agentEnv = agentEnv.AttachPersistentDisk(disk.ID(), diskHintPath)
-
-	err = vm.agentEnvService.Update(agentEnv)
-	if err != nil {
-		return bosherr.WrapError(err, "Updating agent env")
+	if !deleted {
+		return bosherr.WrapError(nil, "Did not delete SoftLayer VirtualGuest from client")
 	}
 
 	return nil
 }
 
+func (vm SoftLayerVM) AttachDisk(disk bslcdisk.Disk) error {
+	vm.logger.Info(softLayerVMtag, "Not yet implemented!")
+
+	return nil
+}
+
 func (vm SoftLayerVM) DetachDisk(disk bslcdisk.Disk) error {
-	agentEnv, err := vm.agentEnvService.Fetch()
-	if err != nil {
-		return bosherr.WrapError(err, "Fetching agent env")
-	}
-
-	err = vm.hostBindMounts.UnmountPersistent(vm.id, disk.ID())
-	if err != nil {
-		return bosherr.WrapError(err, "Unmounting persistent bind mounts dir")
-	}
-
-	agentEnv = agentEnv.DetachPersistentDisk(disk.ID())
-
-	err = vm.agentEnvService.Update(agentEnv)
-	if err != nil {
-		return bosherr.WrapError(err, "Updating agent env")
-	}
-
+	vm.logger.Info(softLayerVMtag, "Not yet implemented!")
+	
 	return nil
 }

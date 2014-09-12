@@ -11,11 +11,11 @@ type Creator interface {
 }
 
 type Finder interface {
-	Find(string) (VM, bool, error)
+	Find(int) (VM, bool, error)
 }
 
 type VM interface {
-	ID() string
+	ID() int
 
 	Delete() error
 

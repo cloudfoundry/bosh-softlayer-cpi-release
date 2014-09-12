@@ -2,6 +2,6 @@ package action
 
 type StemcellCID string
 
-type VMCID string
+type VMCID int
 
-type DiskCID string
+type DiskCID int
