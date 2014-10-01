@@ -93,7 +93,7 @@ var _ = Describe("CreateVM", func() {
 				id, err := action.Run("fake-agent-id", stemcellCID, resourcePool, networks, diskLocality, env)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("fake-create-err"))
-				Expect(id).To(Equal(VMCID(1234)))
+				Expect(id).To(Equal(VMCID(0)))
 			})
 		})
 
@@ -104,7 +104,7 @@ var _ = Describe("CreateVM", func() {
 				id, err := action.Run("fake-agent-id", stemcellCID, resourcePool, networks, diskLocality, env)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("Expected to find stemcell"))
-				Expect(id).To(Equal(VMCID(1234)))
+				Expect(id).To(Equal(VMCID(0)))
 			})
 		})
 
@@ -115,7 +115,7 @@ var _ = Describe("CreateVM", func() {
 				id, err := action.Run("fake-agent-id", stemcellCID, resourcePool, networks, diskLocality, env)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("fake-find-err"))
-				Expect(id).To(Equal(VMCID(1234)))
+				Expect(id).To(Equal(VMCID(0)))
 			})
 		})
 	})
