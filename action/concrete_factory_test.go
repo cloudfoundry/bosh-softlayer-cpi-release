@@ -12,7 +12,7 @@ import (
 	fakesys "github.com/cloudfoundry/bosh-agent/system/fakes"
 
 	fakeslclient "github.com/maximilien/softLayer-go/client/fakes"
-	
+
 	bslcdisk "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk"
 	bslcstem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell"
 	bslcvm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
@@ -21,10 +21,10 @@ import (
 var _ = Describe("concreteFactory", func() {
 	var (
 		softLayerClient *fakeslclient.FakeSoftLayerClient
-		fs           *fakesys.FakeFileSystem
-		cmdRunner    *fakesys.FakeCmdRunner
-		compressor   *fakecmd.FakeCompressor
-		logger       boshlog.Logger
+		fs              *fakesys.FakeFileSystem
+		cmdRunner       *fakesys.FakeCmdRunner
+		compressor      *fakecmd.FakeCompressor
+		logger          boshlog.Logger
 
 		options = ConcreteFactoryOptions{
 			StemcellsDir: "/tmp/stemcells",
@@ -38,7 +38,6 @@ var _ = Describe("concreteFactory", func() {
 
 		stemcellFinder bslcstem.Finder
 		vmFinder       bslcvm.Finder
-		diskFinder     bslcdisk.Finder
 	)
 
 	BeforeEach(func() {
@@ -50,9 +49,6 @@ var _ = Describe("concreteFactory", func() {
 
 		factory = NewConcreteFactory(
 			softLayerClient,
-			fs,
-			cmdRunner,
-			compressor,
 			options,
 			logger,
 		)
@@ -61,15 +57,13 @@ var _ = Describe("concreteFactory", func() {
 	BeforeEach(func() {
 		agentEnvServiceFactory = bslcvm.NewSoftLayerAgentEnvServiceFactory(logger)
 
-		stemcellFinder = bslcstem.NewFSFinder("/tmp/stemcells", fs, logger)
+		stemcellFinder = bslcstem.NewFSFinder(softLayerClient, logger)
 
 		vmFinder = bslcvm.NewSoftLayerFinder(
 			softLayerClient,
 			agentEnvServiceFactory,
 			logger,
 		)
-
-		diskFinder = bslcdisk.NewFSFinder("/tmp/disks", fs, logger)
 	})
 
 	It("returns error if action cannot be created", func() {
@@ -79,12 +73,7 @@ var _ = Describe("concreteFactory", func() {
 	})
 
 	It("create_stemcell", func() {
-		stemcellImporter := bslcstem.NewFSImporter(
-			"/tmp/stemcells",
-			fs,
-			compressor,
-			logger,
-		)
+		stemcellImporter := bslcstem.NewFSImporter(logger)
 
 		action, err := factory.Create("create_stemcell")
 		Expect(err).ToNot(HaveOccurred())
@@ -156,19 +145,19 @@ var _ = Describe("concreteFactory", func() {
 	It("delete_disk", func() {
 		action, err := factory.Create("delete_disk")
 		Expect(err).ToNot(HaveOccurred())
-		Expect(action).To(Equal(NewDeleteDisk(diskFinder)))
+		Expect(action).To(BeNil())
 	})
 
 	It("attach_disk", func() {
 		action, err := factory.Create("attach_disk")
 		Expect(err).ToNot(HaveOccurred())
-		Expect(action).To(Equal(NewAttachDisk(vmFinder, diskFinder)))
+		Expect(action).To(BeNil())
 	})
 
 	It("detach_disk", func() {
 		action, err := factory.Create("detach_disk")
 		Expect(err).ToNot(HaveOccurred())
-		Expect(action).To(Equal(NewDetachDisk(vmFinder, diskFinder)))
+		Expect(action).To(BeNil())
 	})
 
 	It("returns error because CPI machine is not self-aware if action is current_vm_id", func() {

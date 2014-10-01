@@ -6,8 +6,8 @@ import (
 	bosherr "github.com/cloudfoundry/bosh-agent/errors"
 	boshlog "github.com/cloudfoundry/bosh-agent/logger"
 
-	sl "github.com/maximilien/softlayer-go/softlayer"
 	sldatatypes "github.com/maximilien/softlayer-go/data_types"
+	sl "github.com/maximilien/softlayer-go/softlayer"
 
 	bslcstem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell"
 )
@@ -39,17 +39,17 @@ func NewSoftLayerCreator(
 
 func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, networks Networks, env Environment) (VM, error) {
 	virtualGuestTemplate := sldatatypes.SoftLayer_Virtual_Guest_Template{
-		Hostname: agentID,
-    Domain: "softlayer.com",
-    StartCpus: 1,
-    MaxMemory: 2048,
-    Datacenter: sldatatypes.Datacenter{
-      Name: "ams01",
-    },
-    SshKeys: []sldatatypes.SshKey{{Id: 74826}},
-    HourlyBillingFlag: true,
-    LocalDiskFlag: true,
-    OperatingSystemReferenceCode: "UBUNTU_LATEST",
+		Hostname:  agentID,
+		Domain:    "softlayer.com",
+		StartCpus: 1,
+		MaxMemory: 2048,
+		Datacenter: sldatatypes.Datacenter{
+			Name: "ams01",
+		},
+		SshKeys:                      []sldatatypes.SshKey{{Id: 74826}},
+		HourlyBillingFlag:            true,
+		LocalDiskFlag:                true,
+		OperatingSystemReferenceCode: "UBUNTU_LATEST",
 	}
 
 	virtualGuestService, err := c.softLayerClient.GetSoftLayer_Virtual_Guest_Service()
