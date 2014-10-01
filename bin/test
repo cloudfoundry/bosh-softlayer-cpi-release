@@ -5,7 +5,7 @@ result=0
 bin=$(dirname $0)
 
 echo -e "\n Formatting packages..."
-$bin/go fmt bosh-softlayer-cpi/...
+$bin/go fmt ./...
 let "result+=$?"
 
 echo -e "\n Installing ginkgo..."
@@ -17,7 +17,7 @@ $bin/env ginkgo -r $bin/..
 let "result+=$?"
 
 echo -e "\n Vetting packages for potential issues..."
-$bin/go vet bosh-softlayer-cpi/...
+$bin/go vet ./...
 let "result+=$?"
 
 echo -e "\n Running build script to confirm everything compiles..."
