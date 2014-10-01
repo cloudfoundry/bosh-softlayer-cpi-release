@@ -32,5 +32,5 @@ func (i FSImporter) ImportFromPath(imagePath string) (Stemcell, error) {
 
 	stemcellId := "stemcell-id" //TODO: need to find this from CloudProperties
 
-	return NewFSStemcell(stemcellId,  i.logger), nil
+	return NewFSStemcell(stemcellId, i.logger), nil
 }

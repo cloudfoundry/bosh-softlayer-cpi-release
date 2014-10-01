@@ -15,11 +15,11 @@ import (
 
 var validSoftLayerConfig = SoftLayerConfig{
 	Username: "fake-username",
-	ApiKey: "fake-api-key",
+	ApiKey:   "fake-api-key",
 }
 
 var validActionsOptions = bslcaction.ConcreteFactoryOptions{
-		StemcellsDir: "/tmp/stemcells",
+	StemcellsDir: "/tmp/stemcells",
 }
 
 var validConfig = Config{
