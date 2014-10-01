@@ -11,7 +11,7 @@ import (
 	. "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk"
 )
 
-var _ = Describe("FSDisk", func() {
+var _ = XDescribe("FSDisk", func() {
 	var (
 		fs   *fakesys.FakeFileSystem
 		disk FSDisk
@@ -20,7 +20,7 @@ var _ = Describe("FSDisk", func() {
 	BeforeEach(func() {
 		fs = fakesys.NewFakeFileSystem()
 		logger := boshlog.NewLogger(boshlog.LevelNone)
-		disk = NewFSDisk("fake-disk-id", "/fake-disk-path", fs, logger)
+		disk = NewFSDisk(1234, "/fake-disk-path", fs, logger)
 	})
 
 	Describe("Delete", func() {
