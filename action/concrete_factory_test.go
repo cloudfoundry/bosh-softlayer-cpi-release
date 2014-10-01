@@ -129,7 +129,7 @@ var _ = Describe("concreteFactory", func() {
 		Expect(action).To(Equal(NewConfigureNetworks()))
 	})
 
-	It("create_disk", func() {
+	XIt("create_disk", func() {
 		diskCreator := bslcdisk.NewFSCreator(
 			"/tmp/disks",
 			fs,
@@ -142,19 +142,19 @@ var _ = Describe("concreteFactory", func() {
 		Expect(action).To(Equal(NewCreateDisk(diskCreator)))
 	})
 
-	It("delete_disk", func() {
+	XIt("delete_disk", func() {
 		action, err := factory.Create("delete_disk")
 		Expect(err).ToNot(HaveOccurred())
 		Expect(action).To(BeNil())
 	})
 
-	It("attach_disk", func() {
+	XIt("attach_disk", func() {
 		action, err := factory.Create("attach_disk")
 		Expect(err).ToNot(HaveOccurred())
 		Expect(action).To(BeNil())
 	})
 
-	It("detach_disk", func() {
+	XIt("detach_disk", func() {
 		action, err := factory.Create("detach_disk")
 		Expect(err).ToNot(HaveOccurred())
 		Expect(action).To(BeNil())
