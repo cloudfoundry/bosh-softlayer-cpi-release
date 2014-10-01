@@ -7,7 +7,7 @@ import (
 const fsStemcellLogTag = "FSStemcell"
 
 type FSStemcell struct {
-	id      string
+	id     string
 	logger boshlog.Logger
 }
 

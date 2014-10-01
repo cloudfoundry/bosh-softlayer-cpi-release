@@ -2,7 +2,7 @@ package vm
 
 import (
 	"errors"
-	
+
 	boshlog "github.com/cloudfoundry/bosh-agent/logger"
 )
 
@@ -15,14 +15,14 @@ const (
 )
 
 type SoftLayerAgentEnvService struct {
-	logger    boshlog.Logger
+	logger boshlog.Logger
 }
 
 func NewSoftLayerAgentEnvService(
 	logger boshlog.Logger,
 ) SoftLayerAgentEnvService {
 	return SoftLayerAgentEnvService{
-		logger:    logger,
+		logger: logger,
 	}
 }
 

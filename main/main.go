@@ -6,7 +6,7 @@ import (
 
 	boshlog "github.com/cloudfoundry/bosh-agent/logger"
 	boshsys "github.com/cloudfoundry/bosh-agent/system"
-	
+
 	slclient "github.com/maximilien/softlayer-go/client"
 
 	bslcaction "github.com/maximilien/bosh-softlayer-cpi/action"

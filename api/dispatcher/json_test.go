@@ -6,7 +6,6 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-
 	. "github.com/maximilien/bosh-softlayer-cpi/api/dispatcher"
 
 	boshlog "github.com/cloudfoundry/bosh-agent/logger"

@@ -64,6 +64,6 @@ func (vm SoftLayerVM) AttachDisk(disk bslcdisk.Disk) error {
 
 func (vm SoftLayerVM) DetachDisk(disk bslcdisk.Disk) error {
 	vm.logger.Info(softLayerVMtag, "Not yet implemented!")
-	
+
 	return nil
 }

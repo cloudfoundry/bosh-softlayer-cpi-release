@@ -10,9 +10,9 @@ import (
 
 	boshlog "github.com/cloudfoundry/bosh-agent/logger"
 
-	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
 	fakestem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell/fakes"
 	fakevm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm/fakes"
+	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
 
 	slcpi "github.com/maximilien/bosh-softlayer-cpi/softlayer/cpi"
 )
