@@ -39,7 +39,7 @@ var _ = Describe("CreateDisk", func() {
 			id, err := action.Run(20, VMCID(1234))
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("fake-create-err"))
-			Expect(id).To(Equal(DiskCID(1234)))
+			Expect(id).To(Equal(DiskCID(0)))
 		})
 	})
 })
