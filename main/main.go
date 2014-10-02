@@ -54,13 +54,7 @@ func basicDeps() (boshlog.Logger, boshsys.FileSystem, boshsys.CmdRunner) {
 	return logger, fs, cmdRunner
 }
 
-func buildDispatcher(
-	config Config,
-	logger boshlog.Logger,
-	fs boshsys.FileSystem,
-	cmdRunner boshsys.CmdRunner,
-) bslcdisp.Dispatcher {
-
+func buildDispatcher(config Config, logger boshlog.Logger, fs boshsys.FileSystem, cmdRunner boshsys.CmdRunner) bslcdisp.Dispatcher {
 	softLayerClient := slclient.NewSoftLayerClient(config.SoftLayer.Username, config.SoftLayer.ApiKey)
 
 	actionFactory := bslcaction.NewConcreteFactory(
