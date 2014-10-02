@@ -2,19 +2,12 @@ package stemcell
 
 import (
 	boshlog "github.com/cloudfoundry/bosh-agent/logger"
-	boshcmd "github.com/cloudfoundry/bosh-agent/platform/commands"
-	boshsys "github.com/cloudfoundry/bosh-agent/system"
-	boshuuid "github.com/cloudfoundry/bosh-agent/uuid"
 )
 
 const fsImporterLogTag = "FSImporter"
 
 type FSImporter struct {
 	dirPath string
-
-	fs         boshsys.FileSystem
-	uuidGen    boshuuid.Generator
-	compressor boshcmd.Compressor
 
 	logger boshlog.Logger
 }

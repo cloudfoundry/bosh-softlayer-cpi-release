@@ -1,39 +1,36 @@
 package stemcell_test
 
 import (
-	"os"
-
-	boshlog "github.com/cloudfoundry/bosh-agent/logger"
-	fakesys "github.com/cloudfoundry/bosh-agent/system/fakes"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
 	. "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell"
+
+	boshlog "github.com/cloudfoundry/bosh-agent/logger"
+	slfakes "github.com/maximilien/softlayer-go/client/fakes"
+	softlayer "github.com/maximilien/softlayer-go/softlayer"
 )
 
 var _ = Describe("FSFinder", func() {
 	var (
-		fs     *fakesys.FakeFileSystem
-		logger boshlog.Logger
-		finder FSFinder
+		softLayerClient softlayer.Client
+		logger          boshlog.Logger
+		finder          FSFinder
 	)
 
 	BeforeEach(func() {
-		fs = fakesys.NewFakeFileSystem()
+		softLayerClient = slfakes.NewFakeSoftLayerClient("fake-username", "fake-api-key")
 		logger = boshlog.NewLogger(boshlog.LevelNone)
-		finder = NewFSFinder("/fake-collection-dir", fs, logger)
+		finder = NewFSFinder(softLayerClient, logger)
 	})
 
 	Describe("Find", func() {
 		It("returns stemcell and found as true if stemcell directory exists", func() {
-			err := fs.MkdirAll("/fake-collection-dir/fake-stemcell-id", os.ModeDir)
-			Expect(err).ToNot(HaveOccurred())
-
 			stemcell, found, err := finder.Find("fake-stemcell-id")
 			Expect(err).ToNot(HaveOccurred())
 			Expect(found).To(BeTrue())
 
-			expectedStemcell := NewFSStemcell("fake-stemcell-id", "/fake-collection-dir/fake-stemcell-id", fs, logger)
+			expectedStemcell := NewFSStemcell("fake-stemcell-id", logger)
 			Expect(stemcell).To(Equal(expectedStemcell))
 		})
 
