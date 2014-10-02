@@ -11,7 +11,7 @@ import (
 	fakecmd "github.com/cloudfoundry/bosh-agent/platform/commands/fakes"
 	fakesys "github.com/cloudfoundry/bosh-agent/system/fakes"
 
-	fakeslclient "github.com/maximilien/softLayer-go/client/fakes"
+	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
 
 	bslcdisk "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk"
 	bslcstem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell"
