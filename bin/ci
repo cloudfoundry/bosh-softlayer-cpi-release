@@ -14,6 +14,11 @@
   trap printStatus EXIT
   export GOPATH=$(godep path):$GOPATH
 
+  bin=$(dirname $0)
+
+  echo -e "\n Getting bosh-agent dependencies..."  
+  $bin/go get github.com/cloundfoundry/bosh-agent/...
+
   echo -e "\n Cleaning build artifacts..."
   go clean
 
