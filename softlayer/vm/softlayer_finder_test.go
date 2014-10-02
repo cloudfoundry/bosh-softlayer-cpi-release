@@ -1,30 +1,25 @@
 package vm_test
 
 import (
-	"errors"
-
 	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
 
 	. "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
 
 	boshlog "github.com/cloudfoundry/bosh-agent/logger"
-
-	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
-
 	fakevm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm/fakes"
+	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
 )
 
 var _ = Describe("SoftLayerFinder", func() {
 	var (
-		softLayerClient        *fakebslcpi.FakeClient
+		softLayerClient        *fakeslclient.FakeSoftLayerClient
 		agentEnvServiceFactory *fakevm.FakeAgentEnvServiceFactory
 		logger                 boshlog.Logger
 		finder                 SoftLayerFinder
 	)
 
 	BeforeEach(func() {
-		softLayerClient = fakebslcpi.New()
+		softLayerClient = fakeslclient.NewFakeSoftLayerClient("fake-username", "fake-api-key")
 		agentEnvServiceFactory = &fakevm.FakeAgentEnvServiceFactory{}
 		logger = boshlog.NewLogger(boshlog.LevelNone)
 

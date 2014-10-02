@@ -1,40 +1,30 @@
 package vm_test
 
 import (
-	"errors"
-
 	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
 
 	. "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
 
 	boshlog "github.com/cloudfoundry/bosh-agent/logger"
 
-	fakebslclient "github.com/maximilien/softlayer-go/client/fakes"
-
-	fakedisk "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk/fakes"
 	fakevm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm/fakes"
+	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
 )
 
 var _ = Describe("SoftLayerVM", func() {
 	var (
-		softLayerClient *fakebslclient.FakeClient
+		softLayerClient *fakeslclient.FakeSoftLayerClient
 		agentEnvService *fakevm.FakeAgentEnvService
 		logger          boshlog.Logger
 		vm              SoftLayerVM
 	)
 
 	BeforeEach(func() {
-		softLayerClient = fakebslcpi.New()
+		softLayerClient = fakeslclient.NewFakeSoftLayerClient("fake-username", "fake-api-key")
 		agentEnvService = &fakevm.FakeAgentEnvService{}
 		logger = boshlog.NewLogger(boshlog.LevelNone)
 
-		vm = NewSoftLayerVM(
-			"fake-vm-id",
-			softLayerClient,
-			agentEnvService,
-			logger,
-		)
+		vm = NewSoftLayerVM(1234, softLayerClient, agentEnvService, logger)
 	})
 
 	Describe("Delete", func() {
