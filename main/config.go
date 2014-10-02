@@ -17,7 +17,7 @@ type Config struct {
 
 type SoftLayerConfig struct {
 	Username string `json:"username"`
-	ApiKey   string `json:"api_key"`
+	ApiKey   string `json:"apiKey"`
 }
 
 func NewConfigFromPath(path string, fs boshsys.FileSystem) (Config, error) {

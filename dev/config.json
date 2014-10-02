@@ -15,7 +15,7 @@
     "StemcellsDir": "/var/vcap/store/cpi/stemcells"
   },
   "SoftLayer": {
-    "username": "XXXXXXXX",
-    "api_key": "XXXXXXXX"
+    "username": "fake-username",
+    "apiKey": "fake-api-key"
   }
 }
