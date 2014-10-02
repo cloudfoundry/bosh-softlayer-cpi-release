@@ -11,7 +11,7 @@ import (
 	softlayer "github.com/maximilien/softlayer-go/softlayer"
 )
 
-var _ = Describe("FSFinder", func() {
+var _ = XDescribe("FSFinder", func() {
 	var (
 		softLayerClient softlayer.Client
 		logger          boshlog.Logger

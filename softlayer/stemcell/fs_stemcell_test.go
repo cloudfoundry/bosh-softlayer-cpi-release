@@ -9,7 +9,7 @@ import (
 	boshlog "github.com/cloudfoundry/bosh-agent/logger"
 )
 
-var _ = Describe("FSImporter", func() {
+var _ = XDescribe("FSImporter", func() {
 	var (
 		stemcell FSStemcell
 		logger   boshlog.Logger
