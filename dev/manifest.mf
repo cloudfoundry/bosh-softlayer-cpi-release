@@ -1,0 +1,17 @@
+resource_pools:
+- name: deas
+  stemcell:
+    name: blah
+    version: 123
+  cloud_properties:
+    startCpus: 1
+    maxMemory: 1024
+    datacenter: {name: "ams01"}
+
+  cloud_properties:
+    startCpus:
+    memory: 1024
+
+jobs:
+- name: deas
+  resource_pool: deas
