@@ -1,6 +1,8 @@
 package action
 
 import (
+	"fmt"
+
 	bosherr "github.com/cloudfoundry/bosh-agent/errors"
 
 	bslcvm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
@@ -15,6 +17,12 @@ func NewDeleteVM(vmFinder bslcvm.Finder) DeleteVM {
 }
 
 func (a DeleteVM) Run(vmCID VMCID) (interface{}, error) {
+	//DEBUG
+	fmt.Println("DeleteVM.Run")
+	fmt.Printf("----> vmCID: %#v\n", vmCID)
+	fmt.Println()
+	//DEBUG
+
 	vm, found, err := a.vmFinder.Find(int(vmCID))
 	if err != nil {
 		return nil, bosherr.WrapError(err, "Finding vm '%s'", vmCID)

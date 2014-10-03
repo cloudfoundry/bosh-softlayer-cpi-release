@@ -1,10 +1,14 @@
 package action
 
 import (
+	"fmt"
+
 	bosherr "github.com/cloudfoundry/bosh-agent/errors"
 
 	bslcstem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell"
 	bslcvm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
+
+	sldatatypes "github.com/maximilien/softlayer-go/data_types"
 )
 
 type CreateVM struct {
@@ -12,7 +16,12 @@ type CreateVM struct {
 	vmCreator      bslcvm.Creator
 }
 
-type ResourcePool struct{}
+type VMCloudProperties struct {
+	StartCpus  int `json:"startCpus,omitempty"`
+	MaxMemory  int `json:"maxMemory,omitempty"`
+	Datacenter sldatatypes.Datacenter
+	SshKeys    []sldatatypes.SshKey `json:"sshKeys"`
+}
 
 type Environment map[string]interface{}
 
@@ -23,7 +32,18 @@ func NewCreateVM(stemcellFinder bslcstem.Finder, vmCreator bslcvm.Creator) Creat
 	}
 }
 
-func (a CreateVM) Run(agentID string, stemcellCID StemcellCID, _ ResourcePool, networks Networks, _ []DiskCID, env Environment) (VMCID, error) {
+func (a CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMCloudProperties, networks Networks, diskIDs []DiskCID, env Environment) (VMCID, error) {
+	//DEBUG
+	fmt.Println("CreateVM.Run")
+	fmt.Printf("----> agentID: %#v\n", agentID)
+	fmt.Printf("----> stemcellID: %#v\n", stemcellCID)
+	fmt.Printf("----> cloudProps: %#v\n", cloudProps)
+	fmt.Printf("----> networks: %#v\n", networks)
+	fmt.Printf("----> diskIDs: %#v\n", diskIDs)
+	fmt.Printf("----> env: %#v\n", env)
+	fmt.Println()
+	//DEBUG
+
 	stemcell, found, err := a.stemcellFinder.Find(string(stemcellCID))
 	if err != nil {
 		return 0, bosherr.WrapError(err, "Finding stemcell '%s'", stemcellCID)
