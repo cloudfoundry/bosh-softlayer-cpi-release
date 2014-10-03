@@ -30,7 +30,7 @@ var _ = Describe("CreateVM", func() {
 	Describe("Run", func() {
 		var (
 			stemcellCID  StemcellCID
-			resourcePool ResourcePool
+			vmCloudProp  VMCloudProperties
 			networks     Networks
 			diskLocality []DiskCID
 			env          Environment
@@ -38,7 +38,7 @@ var _ = Describe("CreateVM", func() {
 
 		BeforeEach(func() {
 			stemcellCID = StemcellCID("fake-stemcell-id")
-			resourcePool = ResourcePool{}
+			vmCloudProp = VMCloudProperties{}
 			networks = Networks{"fake-net-name": Network{IP: "fake-ip"}}
 			diskLocality = []DiskCID{1234}
 			env = Environment{"fake-env-key": "fake-env-value"}
@@ -48,7 +48,7 @@ var _ = Describe("CreateVM", func() {
 			stemcellFinder.FindFound = true
 			vmCreator.CreateVM = fakevm.NewFakeVM(1234)
 
-			_, err := action.Run("fake-agent-id", stemcellCID, resourcePool, networks, diskLocality, env)
+			_, err := action.Run("fake-agent-id", stemcellCID, vmCloudProp, networks, diskLocality, env)
 			Expect(err).ToNot(HaveOccurred())
 
 			Expect(stemcellFinder.FindID).To(Equal("fake-stemcell-id"))
@@ -68,7 +68,7 @@ var _ = Describe("CreateVM", func() {
 			It("returns id for created VM", func() {
 				vmCreator.CreateVM = fakevm.NewFakeVM(1234)
 
-				id, err := action.Run("fake-agent-id", stemcellCID, resourcePool, networks, diskLocality, env)
+				id, err := action.Run("fake-agent-id", stemcellCID, vmCloudProp, networks, diskLocality, env)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(id).To(Equal(VMCID(1234)))
 			})
@@ -76,7 +76,7 @@ var _ = Describe("CreateVM", func() {
 			It("creates VM with requested agent ID, stemcell, and networks", func() {
 				vmCreator.CreateVM = fakevm.NewFakeVM(1234)
 
-				_, err := action.Run("fake-agent-id", stemcellCID, resourcePool, networks, diskLocality, env)
+				_, err := action.Run("fake-agent-id", stemcellCID, vmCloudProp, networks, diskLocality, env)
 				Expect(err).ToNot(HaveOccurred())
 
 				Expect(vmCreator.CreateAgentID).To(Equal("fake-agent-id"))
@@ -90,7 +90,7 @@ var _ = Describe("CreateVM", func() {
 			It("returns error if creating VM fails", func() {
 				vmCreator.CreateErr = errors.New("fake-create-err")
 
-				id, err := action.Run("fake-agent-id", stemcellCID, resourcePool, networks, diskLocality, env)
+				id, err := action.Run("fake-agent-id", stemcellCID, vmCloudProp, networks, diskLocality, env)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("fake-create-err"))
 				Expect(id).To(Equal(VMCID(0)))
@@ -101,7 +101,7 @@ var _ = Describe("CreateVM", func() {
 			It("returns error because VM cannot be created without a stemcell", func() {
 				stemcellFinder.FindFound = false
 
-				id, err := action.Run("fake-agent-id", stemcellCID, resourcePool, networks, diskLocality, env)
+				id, err := action.Run("fake-agent-id", stemcellCID, vmCloudProp, networks, diskLocality, env)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("Expected to find stemcell"))
 				Expect(id).To(Equal(VMCID(0)))
@@ -112,7 +112,7 @@ var _ = Describe("CreateVM", func() {
 			It("returns error because VM cannot be created without a stemcell", func() {
 				stemcellFinder.FindErr = errors.New("fake-find-err")
 
-				id, err := action.Run("fake-agent-id", stemcellCID, resourcePool, networks, diskLocality, env)
+				id, err := action.Run("fake-agent-id", stemcellCID, vmCloudProp, networks, diskLocality, env)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("fake-find-err"))
 				Expect(id).To(Equal(VMCID(0)))
