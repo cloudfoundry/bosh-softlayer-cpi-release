@@ -28,11 +28,7 @@ func (vmCID *VMCID) UnmarshalJSON(data []byte) error {
 }
 
 func (vmCID VMCID) MarshalJSON() ([]byte, error) {
-	return json.Marshal(struct {
-		VMCID int `json:"vmCID"`
-	}{
-		VMCID: int(vmCID),
-	})
+	return json.Marshal(int(vmCID))
 }
 
 func (diskCID *DiskCID) UnmarshalJSON(data []byte) error {
@@ -52,9 +48,5 @@ func (diskCID *DiskCID) UnmarshalJSON(data []byte) error {
 }
 
 func (diskCID DiskCID) MarshalJSON() ([]byte, error) {
-	return json.Marshal(struct {
-		DiskCID int `json:"diskCID"`
-	}{
-		DiskCID: int(diskCID),
-	})
+	return json.Marshal(int(diskCID))
 }
