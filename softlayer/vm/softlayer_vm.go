@@ -1,6 +1,9 @@
 package vm
 
 import (
+	"fmt"
+	"os"
+
 	bosherr "github.com/cloudfoundry/bosh-agent/errors"
 	boshlog "github.com/cloudfoundry/bosh-agent/logger"
 
@@ -20,12 +23,7 @@ type SoftLayerVM struct {
 	logger boshlog.Logger
 }
 
-func NewSoftLayerVM(
-	id int,
-	softLayerClient sl.Client,
-	agentEnvService AgentEnvService,
-	logger boshlog.Logger,
-) SoftLayerVM {
+func NewSoftLayerVM(id int, softLayerClient sl.Client, agentEnvService AgentEnvService, logger boshlog.Logger) SoftLayerVM {
 	return SoftLayerVM{
 		id: id,
 
@@ -39,6 +37,13 @@ func NewSoftLayerVM(
 func (vm SoftLayerVM) ID() int { return vm.id }
 
 func (vm SoftLayerVM) Delete() error {
+	//DEBUG
+	fmt.Println("SoftLayerVM.Delete")
+	fmt.Printf("----> ID: %#v\n", vm.ID())
+	fmt.Println()
+	os.Exit(0)
+	//DEBUG
+
 	virtualGuestService, err := vm.softLayerClient.GetSoftLayer_Virtual_Guest_Service()
 	if err != nil {
 		return bosherr.WrapError(err, "Creating SoftLayer VirtualGuestService from client")
