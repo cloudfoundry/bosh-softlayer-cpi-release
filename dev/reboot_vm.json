@@ -1,0 +1,9 @@
+{
+	"method": "reboot_vm",
+	"arguments": [
+		"1234"
+	],
+	"context": {
+		"director_uuid": "3f695519-5a17-480f-879a-582dbe31131e"
+	}
+}
