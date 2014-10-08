@@ -9,15 +9,15 @@ import (
 	boshlog "github.com/cloudfoundry/bosh-agent/logger"
 )
 
-var _ = XDescribe("FSImporter", func() {
+var _ = XDescribe("SoftLayerImporter", func() {
 	var (
 		logger   boshlog.Logger
-		importer FSImporter
+		importer SoftLayerImporter
 	)
 
 	BeforeEach(func() {
 		logger = boshlog.NewLogger(boshlog.LevelNone)
-		importer = NewFSImporter(logger)
+		importer = NewSoftLayerImporter(logger)
 	})
 
 	Describe("ImportFromPath", func() {
@@ -25,7 +25,7 @@ var _ = XDescribe("FSImporter", func() {
 			stemcell, err := importer.ImportFromPath("/fake/path")
 			Expect(err).ToNot(HaveOccurred())
 
-			expectedStemcell := NewFSStemcell("/fake-collection-dir/fake-uuid", logger)
+			expectedStemcell := NewSoftLayerStemcell("/fake-collection-dir/fake-uuid", logger)
 			Expect(stemcell).To(Equal(expectedStemcell))
 		})
 

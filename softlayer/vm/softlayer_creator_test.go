@@ -44,7 +44,7 @@ var _ = Describe("SoftLayerCreator", func() {
 	Describe("Create", func() {
 		var (
 			agentID    string
-			stemcell   bslcstem.FSStemcell
+			stemcell   bslcstem.SoftLayerStemcell
 			cloudProps VMCloudProperties
 			networks   Networks
 			env        Environment
@@ -53,7 +53,7 @@ var _ = Describe("SoftLayerCreator", func() {
 		Context("valid arguments", func() {
 			BeforeEach(func() {
 				agentID = "fake-agent-id"
-				stemcell = bslcstem.NewFSStemcell("fake-stemcell-id", logger)
+				stemcell = bslcstem.NewSoftLayerStemcell("fake-stemcell-id", logger)
 				cloudProps = VMCloudProperties{
 					StartCpus:  4,
 					MaxMemory:  2048,
@@ -74,7 +74,7 @@ var _ = Describe("SoftLayerCreator", func() {
 			Context("missing correct VMProperties", func() {
 				BeforeEach(func() {
 					agentID = "fake-agent-id"
-					stemcell = bslcstem.NewFSStemcell("fake-stemcell-id", logger)
+					stemcell = bslcstem.NewSoftLayerStemcell("fake-stemcell-id", logger)
 					networks = Networks{}
 					env = Environment{}
 				})

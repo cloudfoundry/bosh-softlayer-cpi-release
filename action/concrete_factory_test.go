@@ -57,7 +57,7 @@ var _ = Describe("concreteFactory", func() {
 	BeforeEach(func() {
 		agentEnvServiceFactory = bslcvm.NewSoftLayerAgentEnvServiceFactory(logger)
 
-		stemcellFinder = bslcstem.NewFSFinder(softLayerClient, logger)
+		stemcellFinder = bslcstem.NewSoftLayerFinder(softLayerClient, logger)
 
 		vmFinder = bslcvm.NewSoftLayerFinder(
 			softLayerClient,
@@ -73,7 +73,7 @@ var _ = Describe("concreteFactory", func() {
 	})
 
 	It("create_stemcell", func() {
-		stemcellImporter := bslcstem.NewFSImporter(logger)
+		stemcellImporter := bslcstem.NewSoftLayerImporter(logger)
 
 		action, err := factory.Create("create_stemcell")
 		Expect(err).ToNot(HaveOccurred())

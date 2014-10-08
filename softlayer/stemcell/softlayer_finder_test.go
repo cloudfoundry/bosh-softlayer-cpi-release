@@ -11,17 +11,17 @@ import (
 	softlayer "github.com/maximilien/softlayer-go/softlayer"
 )
 
-var _ = XDescribe("FSFinder", func() {
+var _ = XDescribe("SoftLayerFinder", func() {
 	var (
 		softLayerClient softlayer.Client
 		logger          boshlog.Logger
-		finder          FSFinder
+		finder          SoftLayerFinder
 	)
 
 	BeforeEach(func() {
 		softLayerClient = slfakes.NewFakeSoftLayerClient("fake-username", "fake-api-key")
 		logger = boshlog.NewLogger(boshlog.LevelNone)
-		finder = NewFSFinder(softLayerClient, logger)
+		finder = NewSoftLayerFinder(softLayerClient, logger)
 	})
 
 	Describe("Find", func() {
@@ -30,7 +30,7 @@ var _ = XDescribe("FSFinder", func() {
 			Expect(err).ToNot(HaveOccurred())
 			Expect(found).To(BeTrue())
 
-			expectedStemcell := NewFSStemcell("fake-stemcell-id", logger)
+			expectedStemcell := NewSoftLayerStemcell("fake-stemcell-id", logger)
 			Expect(stemcell).To(Equal(expectedStemcell))
 		})
 

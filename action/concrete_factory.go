@@ -14,16 +14,9 @@ type concreteFactory struct {
 	availableActions map[string]Action
 }
 
-func NewConcreteFactory(
-	softLayerClient sl.Client,
-	options ConcreteFactoryOptions,
-	logger boshlog.Logger,
-) concreteFactory {
-	stemcellImporter := bslcstem.NewFSImporter(
-		logger,
-	)
-
-	stemcellFinder := bslcstem.NewFSFinder(softLayerClient, logger)
+func NewConcreteFactory(softLayerClient sl.Client, options ConcreteFactoryOptions, logger boshlog.Logger) concreteFactory {
+	stemcellImporter := bslcstem.NewSoftLayerImporter(logger)
+	stemcellFinder := bslcstem.NewSoftLayerFinder(softLayerClient, logger)
 
 	agentEnvServiceFactory := bslcvm.NewSoftLayerAgentEnvServiceFactory(logger)
 
