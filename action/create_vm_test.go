@@ -41,8 +41,8 @@ var _ = Describe("CreateVM", func() {
 		BeforeEach(func() {
 			stemcellCID = StemcellCID("fake-stemcell-id")
 			vmCloudProp = bslcvm.VMCloudProperties{
-				StartCpus: 2, 
-				MaxMemory: 2048, 
+				StartCpus:  2,
+				MaxMemory:  2048,
 				Datacenter: sldatatypes.Datacenter{Name: "fake-datacenter"},
 				SshKeys: []sldatatypes.SshKey{
 					sldatatypes.SshKey{Id: 1234},

@@ -8,8 +8,8 @@ import (
 )
 
 type CreateVM struct {
-	stemcellFinder bslcstem.Finder
-	vmCreator      bslcvm.Creator
+	stemcellFinder    bslcstem.Finder
+	vmCreator         bslcvm.Creator
 	vmCloudProperties bslcvm.VMCloudProperties
 }
 
@@ -17,8 +17,8 @@ type Environment map[string]interface{}
 
 func NewCreateVM(stemcellFinder bslcstem.Finder, vmCreator bslcvm.Creator) CreateVM {
 	return CreateVM{
-		stemcellFinder: stemcellFinder,
-		vmCreator:      vmCreator,
+		stemcellFinder:    stemcellFinder,
+		vmCreator:         vmCreator,
 		vmCloudProperties: bslcvm.VMCloudProperties{},
 	}
 }

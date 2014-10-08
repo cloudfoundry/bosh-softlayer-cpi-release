@@ -6,13 +6,13 @@ import (
 )
 
 type FakeCreator struct {
-	CreateAgentID     string
-	CreateStemcell    bslcstem.Stemcell
-	CreateNetworks    bslcvm.Networks
+	CreateAgentID           string
+	CreateStemcell          bslcstem.Stemcell
+	CreateNetworks          bslcvm.Networks
 	CreateVMCloudProperties bslcvm.VMCloudProperties
-	CreateEnvironment bslcvm.Environment
-	CreateVM          bslcvm.VM
-	CreateErr         error
+	CreateEnvironment       bslcvm.Environment
+	CreateVM                bslcvm.VM
+	CreateErr               error
 }
 
 func (c *FakeCreator) Create(agentID string, stemcell bslcstem.Stemcell, vmCloudProperties bslcvm.VMCloudProperties, networks bslcvm.Networks, env bslcvm.Environment) (bslcvm.VM, error) {
