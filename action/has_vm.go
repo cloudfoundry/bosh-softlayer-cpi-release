@@ -1,8 +1,6 @@
 package action
 
 import (
-	"fmt"
-
 	bosherr "github.com/cloudfoundry/bosh-agent/errors"
 
 	bslcvm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
@@ -17,12 +15,6 @@ func NewHasVM(vmFinder bslcvm.Finder) HasVM {
 }
 
 func (a HasVM) Run(vmCID VMCID) (bool, error) {
-	//DEBUG
-	fmt.Println("HasVM.Run")
-	fmt.Printf("----> vmCID: %#v\n", vmCID)
-	fmt.Println()
-	//DEBUG
-
 	_, found, err := a.vmFinder.Find(int(vmCID))
 	if err != nil {
 		return false, bosherr.WrapError(err, "Finding VM '%s'", vmCID)
