@@ -1,9 +1,9 @@
 package vm_test
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
-	"errors"
 	"testing"
 
 	. "github.com/onsi/ginkgo"
