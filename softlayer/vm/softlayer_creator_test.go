@@ -6,6 +6,8 @@ import (
 
 	. "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
 
+	common "github.com/maximilien/bosh-softlayer-cpi/common"
+
 	fakevm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm/fakes"
 	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
 
@@ -27,7 +29,7 @@ var _ = Describe("SoftLayerCreator", func() {
 
 	BeforeEach(func() {
 		softLayerClient = fakeslclient.NewFakeSoftLayerClient("fake-username", "fake-api-key")
-		SetTestFixturesForFakeSoftLayerClient(softLayerClient, "SoftLayer_Virtual_Guest_Service_createObject.json")
+		common.SetTestFixturesForFakeSoftLayerClient(softLayerClient, "SoftLayer_Virtual_Guest_Service_createObject.json")
 
 		agentEnvServiceFactory = &fakevm.FakeAgentEnvServiceFactory{}
 		agentOptions = AgentOptions{Mbus: "fake-mbus"}

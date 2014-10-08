@@ -6,7 +6,10 @@ import (
 
 	. "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
 
+	common "github.com/maximilien/bosh-softlayer-cpi/common"
+
 	boshlog "github.com/cloudfoundry/bosh-agent/logger"
+
 	fakevm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm/fakes"
 	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
 )
