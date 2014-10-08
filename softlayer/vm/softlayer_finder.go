@@ -1,9 +1,7 @@
 package vm
 
 import (
-	"fmt"
-	"os"
-
+	bosherr "github.com/cloudfoundry/bosh-agent/errors"
 	boshlog "github.com/cloudfoundry/bosh-agent/logger"
 
 	sl "github.com/maximilien/softlayer-go/softlayer"
@@ -28,18 +26,24 @@ func NewSoftLayerFinder(softLayerClient sl.Client, agentEnvServiceFactory AgentE
 }
 
 func (f SoftLayerFinder) Find(vmID int) (VM, bool, error) {
-	//DEBUG
-	fmt.Println("SoftLayerFinder.Find")
-	fmt.Printf("----> vmID: %#v\n", vmID)
-	fmt.Println()
-	os.Exit(0)
-	//DEBUG
+	accountService, err := f.softLayerClient.GetSoftLayer_Account_Service()
+	if err != nil {
+		return SoftLayerVM{}, false, bosherr.WrapError(err, "Creating SoftLayer AcccountService from client")
+	}
 
-	f.logger.Debug(softLayerFinderLogTag, "Finding container with ID '%s'", vmID)
+	virtualGuests, err := accountService.GetVirtualGuests()
+	if err != nil {
+		return SoftLayerVM{}, false, bosherr.WrapError(err, "Getting a list of SoftLayer VirtualGuests from client")
+	}
 
-	//Find VM here using SL client
+	found, vm := false, SoftLayerVM{}
+	for _, virtualGuest := range virtualGuests {
+		if virtualGuest.Id == vmID {
+			vm = NewSoftLayerVM(vmID, f.softLayerClient, f.agentEnvServiceFactory.New(), f.logger)
+			found = true
+			break
+		}
+	}
 
-	f.logger.Debug(softLayerFinderLogTag, "Did not find container with ID '%s'", vmID)
-
-	return nil, false, nil
+	return vm, found, nil
 }
