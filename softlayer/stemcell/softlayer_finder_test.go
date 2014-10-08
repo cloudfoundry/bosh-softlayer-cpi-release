@@ -6,39 +6,47 @@ import (
 
 	. "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell"
 
+	common "github.com/maximilien/bosh-softlayer-cpi/common"
+
 	boshlog "github.com/cloudfoundry/bosh-agent/logger"
-	slfakes "github.com/maximilien/softlayer-go/client/fakes"
-	softlayer "github.com/maximilien/softlayer-go/softlayer"
+
+	fakesslclient "github.com/maximilien/softlayer-go/client/fakes"
 )
 
-var _ = XDescribe("SoftLayerFinder", func() {
+var _ = Describe("SoftLayerFinder", func() {
 	var (
-		softLayerClient softlayer.Client
+		softLayerClient *fakesslclient.FakeSoftLayerClient
 		logger          boshlog.Logger
 		finder          SoftLayerFinder
 	)
 
 	BeforeEach(func() {
-		softLayerClient = slfakes.NewFakeSoftLayerClient("fake-username", "fake-api-key")
+		softLayerClient = fakesslclient.NewFakeSoftLayerClient("fake-username", "fake-api-key")
+		common.SetTestFixturesForFakeSoftLayerClient(softLayerClient, "SoftLayer_Account_Service_getVirtualDiskImages.json")
+
 		logger = boshlog.NewLogger(boshlog.LevelNone)
 		finder = NewSoftLayerFinder(softLayerClient, logger)
 	})
 
 	Describe("Find", func() {
-		It("returns stemcell and found as true if stemcell directory exists", func() {
-			stemcell, found, err := finder.Find("fake-stemcell-id")
-			Expect(err).ToNot(HaveOccurred())
-			Expect(found).To(BeTrue())
+		Context("valid stemcell ID pointing to a SL virtual disk image", func() {
+			It("returns stemcell and found as true if stemcell ", func() {
+				stemcell, found, err := finder.Find("8c7a8358-d9a9-4e4d-9345-6f637e10ccb7")
+				Expect(err).ToNot(HaveOccurred())
+				Expect(found).To(BeTrue())
 
-			expectedStemcell := NewSoftLayerStemcell("fake-stemcell-id", logger)
-			Expect(stemcell).To(Equal(expectedStemcell))
+				expectedStemcell := NewSoftLayerStemcell("8c7a8358-d9a9-4e4d-9345-6f637e10ccb7", logger)
+				Expect(stemcell).To(Equal(expectedStemcell))
+			})
 		})
 
-		It("returns found as false if stemcell directory does not exist", func() {
-			stemcell, found, err := finder.Find("fake-stemcell-id")
-			Expect(err).ToNot(HaveOccurred())
-			Expect(found).To(BeFalse())
-			Expect(stemcell).To(BeNil())
+		Context("valid stemcell ID pointing to a SL virtual disk image", func() {
+			It("returns found as false if stemcell directory does not exist", func() {
+				stemcell, found, err := finder.Find("fake-stemcell-id")
+				Expect(err).ToNot(HaveOccurred())
+				Expect(found).To(BeFalse())
+				Expect(stemcell).To(BeNil())
+			})
 		})
 	})
 })
