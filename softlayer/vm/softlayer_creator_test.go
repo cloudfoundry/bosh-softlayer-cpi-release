@@ -1,9 +1,6 @@
 package vm_test
 
 import (
-	"os"
-	"path/filepath"
-
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -12,7 +9,6 @@ import (
 	fakevm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm/fakes"
 	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
 
-	common "github.com/maximilien/bosh-softlayer-cpi/common"
 	bslcstem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell"
 
 	boshlog "github.com/cloudfoundry/bosh-agent/logger"
@@ -30,12 +26,8 @@ var _ = Describe("SoftLayerCreator", func() {
 	)
 
 	BeforeEach(func() {
-		workingDir, err := os.Getwd()
-		Expect(err).ToNot(HaveOccurred())
-
 		softLayerClient = fakeslclient.NewFakeSoftLayerClient("fake-username", "fake-api-key")
-		softLayerClient.DoRawHttpRequestResponse, err = common.ReadJsonTestFixtures(filepath.Join(workingDir, "..", ".."), "softlayer", "SoftLayer_Virtual_Guest_Service_createObject.json")
-		Expect(err).ToNot(HaveOccurred())
+		SetTestFixturesForFakeSoftLayerClient(softLayerClient, "SoftLayer_Virtual_Guest_Service_createObject.json")
 
 		agentEnvServiceFactory = &fakevm.FakeAgentEnvServiceFactory{}
 		agentOptions = AgentOptions{Mbus: "fake-mbus"}
