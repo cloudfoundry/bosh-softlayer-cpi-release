@@ -1,26 +1,16 @@
 package action
 
 import (
-	"fmt"
-
 	bosherr "github.com/cloudfoundry/bosh-agent/errors"
 
 	bslcstem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell"
 	bslcvm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
-
-	sldatatypes "github.com/maximilien/softlayer-go/data_types"
 )
 
 type CreateVM struct {
 	stemcellFinder bslcstem.Finder
 	vmCreator      bslcvm.Creator
-}
-
-type VMCloudProperties struct {
-	StartCpus  int `json:"startCpus,omitempty"`
-	MaxMemory  int `json:"maxMemory,omitempty"`
-	Datacenter sldatatypes.Datacenter
-	SshKeys    []sldatatypes.SshKey `json:"sshKeys"`
+	vmCloudProperties bslcvm.VMCloudProperties
 }
 
 type Environment map[string]interface{}
@@ -29,20 +19,12 @@ func NewCreateVM(stemcellFinder bslcstem.Finder, vmCreator bslcvm.Creator) Creat
 	return CreateVM{
 		stemcellFinder: stemcellFinder,
 		vmCreator:      vmCreator,
+		vmCloudProperties: bslcvm.VMCloudProperties{},
 	}
 }
 
-func (a CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMCloudProperties, networks Networks, diskIDs []DiskCID, env Environment) (VMCID, error) {
-	//DEBUG
-	fmt.Println("CreateVM.Run")
-	fmt.Printf("----> agentID: %#v\n", agentID)
-	fmt.Printf("----> stemcellID: %#v\n", stemcellCID)
-	fmt.Printf("----> cloudProps: %#v\n", cloudProps)
-	fmt.Printf("----> networks: %#v\n", networks)
-	fmt.Printf("----> diskIDs: %#v\n", diskIDs)
-	fmt.Printf("----> env: %#v\n", env)
-	fmt.Println()
-	//DEBUG
+func (a CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps bslcvm.VMCloudProperties, networks Networks, diskIDs []DiskCID, env Environment) (VMCID, error) {
+	a.updateCloudProperties(cloudProps)
 
 	stemcell, found, err := a.stemcellFinder.Find(string(stemcellCID))
 	if err != nil {
@@ -57,10 +39,28 @@ func (a CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClou
 
 	vmEnv := bslcvm.Environment(env)
 
-	vm, err := a.vmCreator.Create(agentID, stemcell, vmNetworks, vmEnv)
+	vm, err := a.vmCreator.Create(agentID, stemcell, cloudProps, vmNetworks, vmEnv)
 	if err != nil {
 		return 0, bosherr.WrapError(err, "Creating VM with agent ID '%s'", agentID)
 	}
 
 	return VMCID(vm.ID()), nil
+}
+
+func (a CreateVM) updateCloudProperties(cloudProps bslcvm.VMCloudProperties) {
+	if cloudProps.StartCpus > 1 {
+		a.vmCloudProperties.StartCpus = cloudProps.StartCpus
+	}
+
+	if cloudProps.MaxMemory > 1024 {
+		a.vmCloudProperties.MaxMemory = cloudProps.MaxMemory
+	}
+
+	if cloudProps.Datacenter.Name != a.vmCloudProperties.Datacenter.Name {
+		a.vmCloudProperties.Datacenter.Name = cloudProps.Datacenter.Name
+	}
+
+	if len(cloudProps.SshKeys) > 0 {
+		a.vmCloudProperties.SshKeys = cloudProps.SshKeys
+	}
 }

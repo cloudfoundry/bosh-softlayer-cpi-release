@@ -12,6 +12,8 @@ import (
 	fakevm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm/fakes"
 
 	bslcvm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
+
+	sldatatypes "github.com/maximilien/softlayer-go/data_types"
 )
 
 var _ = Describe("CreateVM", func() {
@@ -30,7 +32,7 @@ var _ = Describe("CreateVM", func() {
 	Describe("Run", func() {
 		var (
 			stemcellCID  StemcellCID
-			vmCloudProp  VMCloudProperties
+			vmCloudProp  bslcvm.VMCloudProperties
 			networks     Networks
 			diskLocality []DiskCID
 			env          Environment
@@ -38,7 +40,14 @@ var _ = Describe("CreateVM", func() {
 
 		BeforeEach(func() {
 			stemcellCID = StemcellCID("fake-stemcell-id")
-			vmCloudProp = VMCloudProperties{}
+			vmCloudProp = bslcvm.VMCloudProperties{
+				StartCpus: 2, 
+				MaxMemory: 2048, 
+				Datacenter: sldatatypes.Datacenter{Name: "fake-datacenter"},
+				SshKeys: []sldatatypes.SshKey{
+					sldatatypes.SshKey{Id: 1234},
+				},
+			}
 			networks = Networks{"fake-net-name": Network{IP: "fake-ip"}}
 			diskLocality = []DiskCID{1234}
 			env = Environment{"fake-env-key": "fake-env-value"}
@@ -73,7 +82,7 @@ var _ = Describe("CreateVM", func() {
 				Expect(id).To(Equal(VMCID(1234)))
 			})
 
-			It("creates VM with requested agent ID, stemcell, and networks", func() {
+			It("creates VM with requested agent ID, stemcell, cloud properties, and networks", func() {
 				vmCreator.CreateVM = fakevm.NewFakeVM(1234)
 
 				_, err := action.Run("fake-agent-id", stemcellCID, vmCloudProp, networks, diskLocality, env)
@@ -81,6 +90,7 @@ var _ = Describe("CreateVM", func() {
 
 				Expect(vmCreator.CreateAgentID).To(Equal("fake-agent-id"))
 				Expect(vmCreator.CreateStemcell).To(Equal(stemcell))
+				Expect(vmCreator.CreateVMCloudProperties).To(Equal(vmCloudProp))
 				Expect(vmCreator.CreateNetworks).To(Equal(networks.AsVMNetworks()))
 				Expect(vmCreator.CreateEnvironment).To(Equal(
 					bslcvm.Environment{"fake-env-key": "fake-env-value"},

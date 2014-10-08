@@ -1,8 +1,6 @@
 package vm
 
 import (
-	"fmt"
-	"os"
 	"strconv"
 
 	bosherr "github.com/cloudfoundry/bosh-agent/errors"
@@ -24,8 +22,7 @@ type SoftLayerCreator struct {
 	logger       boshlog.Logger
 }
 
-func NewSoftLayerCreator(softLayerClient sl.Client, agentEnvServiceFactory AgentEnvServiceFactory,
-	agentOptions AgentOptions, logger boshlog.Logger) SoftLayerCreator {
+func NewSoftLayerCreator(softLayerClient sl.Client, agentEnvServiceFactory AgentEnvServiceFactory, agentOptions AgentOptions, logger boshlog.Logger) SoftLayerCreator {
 	return SoftLayerCreator{
 		softLayerClient:        softLayerClient,
 		agentEnvServiceFactory: agentEnvServiceFactory,
@@ -34,26 +31,16 @@ func NewSoftLayerCreator(softLayerClient sl.Client, agentEnvServiceFactory Agent
 	}
 }
 
-func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, networks Networks, env Environment) (VM, error) {
-	//DEBUG
-	fmt.Println("SoftLayerCreator.Creator")
-	fmt.Printf("----> agentID: %#v\n", agentID)
-	fmt.Printf("----> stemcell: %#v\n", stemcell)
-	fmt.Printf("----> networks: %#v\n", networks)
-	fmt.Printf("----> env: %#v\n", env)
-	fmt.Println()
-	os.Exit(0)
-	//DEBUG
-
+func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
 	virtualGuestTemplate := sldatatypes.SoftLayer_Virtual_Guest_Template{
 		Hostname:  agentID,
 		Domain:    "softlayer.com",
-		StartCpus: 1,
-		MaxMemory: 2048,
+		StartCpus: cloudProps.StartCpus,
+		MaxMemory: cloudProps.MaxMemory,
 		Datacenter: sldatatypes.Datacenter{
-			Name: "ams01",
+			Name: cloudProps.Datacenter.Name,
 		},
-		SshKeys:                      []sldatatypes.SshKey{{Id: 74826}},
+		SshKeys:                      cloudProps.SshKeys,
 		HourlyBillingFlag:            true,
 		LocalDiskFlag:                true,
 		OperatingSystemReferenceCode: "UBUNTU_LATEST",
