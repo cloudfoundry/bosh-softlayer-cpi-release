@@ -10,7 +10,7 @@ import (
 
 func TestVM(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Vm Suite")
+	RunSpecs(t, "VM Suite")
 }
 
 type NonJSONMarshable struct{}
