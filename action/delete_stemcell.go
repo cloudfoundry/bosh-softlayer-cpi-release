@@ -15,7 +15,7 @@ func NewDeleteStemcell(stemcellFinder bslcstem.Finder) DeleteStemcell {
 }
 
 func (a DeleteStemcell) Run(stemcellCID StemcellCID) (interface{}, error) {
-	stemcell, found, err := a.stemcellFinder.Find(string(stemcellCID))
+	stemcell, found, err := a.stemcellFinder.FindById(int(stemcellCID))
 	if err != nil {
 		return nil, bosherr.WrapError(err, "Finding stemcell '%s'", stemcellCID)
 	}

@@ -7,15 +7,18 @@ import (
 const softLayerStemcellLogTag = "SoftLayerStemcell"
 
 type SoftLayerStemcell struct {
-	id     string
+	id     int
+	uuid   string
 	logger boshlog.Logger
 }
 
-func NewSoftLayerStemcell(id string, logger boshlog.Logger) SoftLayerStemcell {
+func NewSoftLayerStemcell(id int, uuid string, logger boshlog.Logger) SoftLayerStemcell {
 	return SoftLayerStemcell{id: id, logger: logger}
 }
 
-func (s SoftLayerStemcell) ID() string { return s.id }
+func (s SoftLayerStemcell) ID() int { return s.id }
+
+func (s SoftLayerStemcell) Uuid() string { return s.uuid }
 
 func (s SoftLayerStemcell) Delete() error {
 	//TODO: implement me

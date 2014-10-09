@@ -7,9 +7,29 @@ import (
 	"strings"
 )
 
-type StemcellCID string
+type StemcellCID int
 type VMCID int
 type DiskCID int
+
+func (stemcellCID *StemcellCID) UnmarshalJSON(data []byte) error {
+	if stemcellCID == nil {
+		return errors.New("StemcellCID: UnmarshalJSON on nil pointer")
+	}
+
+	dataString := strings.Trim(string(data), "\"")
+	intValue, err := strconv.Atoi(dataString)
+	if err != nil {
+		return err
+	}
+
+	*stemcellCID = StemcellCID(intValue)
+
+	return nil
+}
+
+func (stemcellCID StemcellCID) MarshalJSON() ([]byte, error) {
+	return json.Marshal(int(stemcellCID))
+}
 
 func (vmCID *VMCID) UnmarshalJSON(data []byte) error {
 	if vmCID == nil {

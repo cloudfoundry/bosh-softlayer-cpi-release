@@ -5,13 +5,19 @@ import (
 )
 
 type FakeFinder struct {
-	FindID       string
+	FindID       int
+	FindUuid     string
 	FindStemcell bslcstem.Stemcell
 	FindFound    bool
 	FindErr      error
 }
 
-func (f *FakeFinder) Find(id string) (bslcstem.Stemcell, bool, error) {
+func (f *FakeFinder) Find(uuid string) (bslcstem.Stemcell, bool, error) {
+	f.FindUuid = uuid
+	return f.FindStemcell, f.FindFound, f.FindErr
+}
+
+func (f *FakeFinder) FindById(id int) (bslcstem.Stemcell, bool, error) {
 	f.FindID = id
 	return f.FindStemcell, f.FindFound, f.FindErr
 }

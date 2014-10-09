@@ -39,7 +39,7 @@ var _ = Describe("CreateVM", func() {
 		)
 
 		BeforeEach(func() {
-			stemcellCID = StemcellCID("fake-stemcell-id")
+			stemcellCID = StemcellCID(1234)
 			vmCloudProp = bslcvm.VMCloudProperties{
 				StartCpus:  2,
 				MaxMemory:  2048,
@@ -59,8 +59,6 @@ var _ = Describe("CreateVM", func() {
 
 			_, err := action.Run("fake-agent-id", stemcellCID, vmCloudProp, networks, diskLocality, env)
 			Expect(err).ToNot(HaveOccurred())
-
-			Expect(stemcellFinder.FindID).To(Equal("fake-stemcell-id"))
 		})
 
 		Context("when stemcell is found with given stemcell cid", func() {
@@ -69,7 +67,7 @@ var _ = Describe("CreateVM", func() {
 			)
 
 			BeforeEach(func() {
-				stemcell = fakestem.NewFakeStemcell("fake-stemcell-id")
+				stemcell = fakestem.NewFakeStemcell(1234, "fake-stemcell-id")
 				stemcellFinder.FindStemcell = stemcell
 				stemcellFinder.FindFound = true
 			})

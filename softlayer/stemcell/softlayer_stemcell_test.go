@@ -17,7 +17,7 @@ var _ = XDescribe("SoftLayerImporter", func() {
 
 	BeforeEach(func() {
 		logger = boshlog.NewLogger(boshlog.LevelNone)
-		stemcell = NewSoftLayerStemcell("/fake-stemcell-dir", logger)
+		stemcell = NewSoftLayerStemcell(1234, "/fake-stemcell-dir", logger)
 	})
 
 	Describe("Delete", func() {

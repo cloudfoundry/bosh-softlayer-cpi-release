@@ -35,7 +35,7 @@ var _ = Describe("SoftLayerFinder", func() {
 				Expect(err).ToNot(HaveOccurred())
 				Expect(found).To(BeTrue())
 
-				expectedStemcell := NewSoftLayerStemcell("8c7a8358-d9a9-4e4d-9345-6f637e10ccb7", logger)
+				expectedStemcell := NewSoftLayerStemcell(4868344, "8c7a8358-d9a9-4e4d-9345-6f637e10ccb7", logger)
 				Expect(stemcell).To(Equal(expectedStemcell))
 			})
 		})

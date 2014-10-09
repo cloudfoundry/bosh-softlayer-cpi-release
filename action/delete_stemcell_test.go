@@ -24,10 +24,10 @@ var _ = Describe("DeleteStemcell", func() {
 
 	Describe("Run", func() {
 		It("tries to find stemcell with given stemcell cid", func() {
-			_, err := action.Run("fake-stemcell-id")
+			_, err := action.Run(1234)
 			Expect(err).ToNot(HaveOccurred())
 
-			Expect(stemcellFinder.FindID).To(Equal("fake-stemcell-id"))
+			Expect(stemcellFinder.FindID).To(Equal(1234))
 		})
 
 		Context("when stemcell is found with given stemcell cid", func() {
@@ -36,13 +36,13 @@ var _ = Describe("DeleteStemcell", func() {
 			)
 
 			BeforeEach(func() {
-				stemcell = fakestem.NewFakeStemcell("fake-stemcell-id")
+				stemcell = fakestem.NewFakeStemcell(1234, "fake-stemcell-id")
 				stemcellFinder.FindStemcell = stemcell
 				stemcellFinder.FindFound = true
 			})
 
 			It("deletes stemcell", func() {
-				_, err := action.Run("fake-stemcell-id")
+				_, err := action.Run(1234)
 				Expect(err).ToNot(HaveOccurred())
 
 				Expect(stemcell.DeleteCalled).To(BeTrue())
@@ -51,7 +51,7 @@ var _ = Describe("DeleteStemcell", func() {
 			It("returns error if deleting stemcell fails", func() {
 				stemcell.DeleteErr = errors.New("fake-delete-err")
 
-				_, err := action.Run("fake-stemcell-id")
+				_, err := action.Run(1234)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("fake-delete-err"))
 			})
@@ -61,7 +61,7 @@ var _ = Describe("DeleteStemcell", func() {
 			It("does not return error", func() {
 				stemcellFinder.FindFound = false
 
-				_, err := action.Run("fake-stemcell-id")
+				_, err := action.Run(1234)
 				Expect(err).ToNot(HaveOccurred())
 			})
 		})
@@ -70,7 +70,7 @@ var _ = Describe("DeleteStemcell", func() {
 			It("does not return error", func() {
 				stemcellFinder.FindErr = errors.New("fake-find-err")
 
-				_, err := action.Run("fake-stemcell-id")
+				_, err := action.Run(1234)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("fake-find-err"))
 			})

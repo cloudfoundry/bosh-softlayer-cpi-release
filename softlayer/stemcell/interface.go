@@ -1,11 +1,13 @@
 package stemcell
 
 type Finder interface {
-	Find(id string) (Stemcell, bool, error)
+	Find(uuid string) (Stemcell, bool, error)
+	FindById(id int) (Stemcell, bool, error)
 }
 
 type Stemcell interface {
-	ID() string
+	ID() int
+	Uuid() string
 
 	Delete() error
 }

@@ -25,11 +25,11 @@ var _ = Describe("CreateStemcell", func() {
 	Describe("Run", func() {
 		It("returns id for created stemcell from image path", func() {
 			stemcellFinder.FindFound, stemcellFinder.FindErr = true, nil
-			stemcellFinder.FindStemcell = fakestem.NewFakeStemcell("fake-stemcell-id")
+			stemcellFinder.FindStemcell = fakestem.NewFakeStemcell(1234, "fake-stemcell-id")
 
 			id, err := action.Run(CreateStemcellCloudProps{Uuid: "fake-stemcell-id"})
 			Expect(err).ToNot(HaveOccurred())
-			Expect(id).To(Equal(StemcellCID("fake-stemcell-id")))
+			Expect(id).To(Equal(StemcellCID(1234)))
 		})
 
 		It("returns error if creating stemcell fails", func() {
@@ -38,7 +38,7 @@ var _ = Describe("CreateStemcell", func() {
 			id, err := action.Run(CreateStemcellCloudProps{Uuid: "fake-stemcell-id"})
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("fake-add-err"))
-			Expect(id).To(Equal(StemcellCID("")))
+			Expect(id).To(Equal(StemcellCID(0)))
 		})
 	})
 })
