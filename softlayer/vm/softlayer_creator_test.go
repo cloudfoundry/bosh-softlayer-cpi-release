@@ -8,6 +8,7 @@ import (
 
 	common "github.com/maximilien/bosh-softlayer-cpi/common"
 
+	fakestem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell/fakes"
 	fakevm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm/fakes"
 	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
 
@@ -55,7 +56,7 @@ var _ = Describe("SoftLayerCreator", func() {
 		Context("valid arguments", func() {
 			BeforeEach(func() {
 				agentID = "fake-agent-id"
-				stemcell = bslcstem.NewSoftLayerStemcell(1234, "fake-stemcell-id", logger)
+				stemcell = bslcstem.NewSoftLayerStemcell(1234, "fake-stemcell-uuid", fakestem.FakeStemcellKind, softLayerClient, logger)
 				cloudProps = VMCloudProperties{
 					StartCpus:  4,
 					MaxMemory:  2048,
@@ -76,7 +77,7 @@ var _ = Describe("SoftLayerCreator", func() {
 			Context("missing correct VMProperties", func() {
 				BeforeEach(func() {
 					agentID = "fake-agent-id"
-					stemcell = bslcstem.NewSoftLayerStemcell(1234, "fake-stemcell-id", logger)
+					stemcell = bslcstem.NewSoftLayerStemcell(1234, "fake-stemcell-uuid", fakestem.FakeStemcellKind, softLayerClient, logger)
 					networks = Networks{}
 					env = Environment{}
 				})

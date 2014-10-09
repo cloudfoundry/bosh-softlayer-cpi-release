@@ -25,7 +25,7 @@ var _ = Describe("CreateStemcell", func() {
 	Describe("Run", func() {
 		It("returns id for created stemcell from image path", func() {
 			stemcellFinder.FindFound, stemcellFinder.FindErr = true, nil
-			stemcellFinder.FindStemcell = fakestem.NewFakeStemcell(1234, "fake-stemcell-id")
+			stemcellFinder.FindStemcell = fakestem.NewFakeStemcell(1234, "fake-stemcell-id", fakestem.FakeStemcellKind)
 
 			id, err := action.Run(CreateStemcellCloudProps{Uuid: "fake-stemcell-id"})
 			Expect(err).ToNot(HaveOccurred())

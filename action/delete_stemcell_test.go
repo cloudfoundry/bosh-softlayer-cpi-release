@@ -36,7 +36,7 @@ var _ = Describe("DeleteStemcell", func() {
 			)
 
 			BeforeEach(func() {
-				stemcell = fakestem.NewFakeStemcell(1234, "fake-stemcell-id")
+				stemcell = fakestem.NewFakeStemcell(1234, "fake-stemcell-id", fakestem.FakeStemcellKind)
 				stemcellFinder.FindStemcell = stemcell
 				stemcellFinder.FindFound = true
 			})

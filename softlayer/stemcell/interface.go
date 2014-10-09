@@ -8,6 +8,7 @@ type Finder interface {
 type Stemcell interface {
 	ID() int
 	Uuid() string
+	Kind() string
 
 	Delete() error
 }

@@ -70,7 +70,7 @@ func (f SoftLayerFinder) findInVirtualDiskImages(uuid string, accountService sl.
 
 	for _, vdImage := range virtualDiskImages {
 		if vdImage.Uuid == uuid {
-			return NewSoftLayerStemcell(vdImage.Id, vdImage.Uuid, f.logger), true, nil
+			return NewSoftLayerStemcell(vdImage.Id, vdImage.Uuid, VirtualDiskImageKind, f.client, f.logger), true, nil
 		}
 	}
 
@@ -85,7 +85,7 @@ func (f SoftLayerFinder) findByIdInVirtualDiskImages(id int, accountService sl.S
 
 	for _, vdImage := range virtualDiskImages {
 		if vdImage.Id == id {
-			return NewSoftLayerStemcell(vdImage.Id, vdImage.Uuid, f.logger), true, nil
+			return NewSoftLayerStemcell(vdImage.Id, vdImage.Uuid, VirtualDiskImageKind, f.client, f.logger), true, nil
 		}
 	}
 
@@ -100,7 +100,7 @@ func (f SoftLayerFinder) findInVirtualGuestDeviceTemplateGroups(uuid string, acc
 
 	for _, vgdtgGroup := range vgdtgGroups {
 		if vgdtgGroup.GlobalIdentifier == uuid {
-			return NewSoftLayerStemcell(vgdtgGroup.Id, vgdtgGroup.GlobalIdentifier, f.logger), true, nil
+			return NewSoftLayerStemcell(vgdtgGroup.Id, vgdtgGroup.GlobalIdentifier, VirtualGuestDeviceTemplateGroupKind, f.client, f.logger), true, nil
 		}
 	}
 
@@ -115,7 +115,7 @@ func (f SoftLayerFinder) findByIdInVirtualGuestDeviceTemplateGroups(id int, acco
 
 	for _, vgdtgGroup := range vgdtgGroups {
 		if vgdtgGroup.Id == id {
-			return NewSoftLayerStemcell(vgdtgGroup.Id, vgdtgGroup.GlobalIdentifier, f.logger), true, nil
+			return NewSoftLayerStemcell(vgdtgGroup.Id, vgdtgGroup.GlobalIdentifier, VirtualGuestDeviceTemplateGroupKind, f.client, f.logger), true, nil
 		}
 	}
 
