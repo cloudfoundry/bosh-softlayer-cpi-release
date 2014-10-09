@@ -4,7 +4,7 @@ import (
 	boshlog "github.com/cloudfoundry/bosh-agent/logger"
 )
 
-const softLayerStemcellLogTag = "FSStemcell"
+const softLayerStemcellLogTag = "SoftLayerStemcell"
 
 type SoftLayerStemcell struct {
 	id     string
