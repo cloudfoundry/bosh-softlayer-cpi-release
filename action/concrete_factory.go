@@ -15,7 +15,6 @@ type concreteFactory struct {
 }
 
 func NewConcreteFactory(softLayerClient sl.Client, options ConcreteFactoryOptions, logger boshlog.Logger) concreteFactory {
-	stemcellImporter := bslcstem.NewSoftLayerImporter(logger)
 	stemcellFinder := bslcstem.NewSoftLayerFinder(softLayerClient, logger)
 
 	agentEnvServiceFactory := bslcvm.NewSoftLayerAgentEnvServiceFactory(logger)
@@ -32,10 +31,11 @@ func NewConcreteFactory(softLayerClient sl.Client, options ConcreteFactoryOption
 		agentEnvServiceFactory,
 		logger,
 	)
+
 	return concreteFactory{
 		availableActions: map[string]Action{
 			// Stemcell management
-			"create_stemcell": NewCreateStemcell(stemcellImporter),
+			"create_stemcell": NewCreateStemcell(stemcellFinder),
 			"delete_stemcell": NewDeleteStemcell(stemcellFinder),
 
 			// VM management

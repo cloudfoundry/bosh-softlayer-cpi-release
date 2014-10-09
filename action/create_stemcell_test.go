@@ -13,30 +13,29 @@ import (
 
 var _ = Describe("CreateStemcell", func() {
 	var (
-		stemcellImporter *fakestem.FakeImporter
-		action           CreateStemcell
+		stemcellFinder *fakestem.FakeFinder
+		action         CreateStemcell
 	)
 
 	BeforeEach(func() {
-		stemcellImporter = &fakestem.FakeImporter{}
-		action = NewCreateStemcell(stemcellImporter)
+		stemcellFinder = &fakestem.FakeFinder{}
+		action = NewCreateStemcell(stemcellFinder)
 	})
 
 	Describe("Run", func() {
 		It("returns id for created stemcell from image path", func() {
-			stemcellImporter.ImportFromPathStemcell = fakestem.NewFakeStemcell("fake-stemcell-id")
+			stemcellFinder.FindFound, stemcellFinder.FindErr = true, nil
+			stemcellFinder.FindStemcell = fakestem.NewFakeStemcell("fake-stemcell-id")
 
-			id, err := action.Run("/fake-image-path", CreateStemcellCloudProps{})
+			id, err := action.Run(CreateStemcellCloudProps{Uuid: "fake-stemcell-id"})
 			Expect(err).ToNot(HaveOccurred())
 			Expect(id).To(Equal(StemcellCID("fake-stemcell-id")))
-
-			Expect(stemcellImporter.ImportFromPathImagePath).To(Equal("/fake-image-path"))
 		})
 
 		It("returns error if creating stemcell fails", func() {
-			stemcellImporter.ImportFromPathErr = errors.New("fake-add-err")
+			stemcellFinder.FindFound, stemcellFinder.FindErr = false, errors.New("fake-add-err")
 
-			id, err := action.Run("/fake-image-path", CreateStemcellCloudProps{})
+			id, err := action.Run(CreateStemcellCloudProps{Uuid: "fake-stemcell-id"})
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("fake-add-err"))
 			Expect(id).To(Equal(StemcellCID("")))

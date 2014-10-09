@@ -7,19 +7,25 @@ import (
 )
 
 type CreateStemcell struct {
-	stemcellImporter bslcstem.Importer
+	stemcellFinder bslcstem.Finder
 }
 
-type CreateStemcellCloudProps struct{}
-
-func NewCreateStemcell(stemcellImporter bslcstem.Importer) CreateStemcell {
-	return CreateStemcell{stemcellImporter: stemcellImporter}
+type CreateStemcellCloudProps struct {
+	Uuid string `json:"uuid"`
 }
 
-func (a CreateStemcell) Run(imagePath string, _ CreateStemcellCloudProps) (StemcellCID, error) {
-	stemcell, err := a.stemcellImporter.ImportFromPath(imagePath)
+func NewCreateStemcell(stemcellFinder bslcstem.Finder) CreateStemcell {
+	return CreateStemcell{stemcellFinder: stemcellFinder}
+}
+
+func (a CreateStemcell) Run(stemcellCloudProps CreateStemcellCloudProps) (StemcellCID, error) {
+	stemcell, found, err := a.stemcellFinder.Find(stemcellCloudProps.Uuid)
 	if err != nil {
-		return "", bosherr.WrapError(err, "Importing stemcell from '%s'", imagePath)
+		return "", bosherr.WrapError(err, "Finding stemcell with UUID '%s'", stemcellCloudProps.Uuid)
+	}
+
+	if !found {
+		return "", bosherr.WrapError(err, "Did not find stemcell with UUID '%s'", stemcellCloudProps.Uuid)
 	}
 
 	return StemcellCID(stemcell.ID()), nil
