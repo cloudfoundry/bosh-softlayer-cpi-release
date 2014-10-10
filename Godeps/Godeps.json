@@ -7,43 +7,47 @@
 	"Deps": [
 		{
 			"ImportPath": "github.com/cloudfoundry/bosh-agent/errors",
-			"Rev": "91a7d3491fa6eb4917a8c3e594cf297dc89255c8"
+			"Rev": "fd02f91290c1732e1f7f429756b6770602069f4d"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/bosh-agent/logger",
-			"Rev": "91a7d3491fa6eb4917a8c3e594cf297dc89255c8"
+			"Rev": "fd02f91290c1732e1f7f429756b6770602069f4d"
 		},
 		{
-			"ImportPath": "github.com/cloudfoundry/bosh-agent/platform/commands/fakes",
-			"Rev": "91a7d3491fa6eb4917a8c3e594cf297dc89255c8"
+			"ImportPath": "github.com/cloudfoundry/bosh-agent/platform/commands",
+			"Rev": "fd02f91290c1732e1f7f429756b6770602069f4d"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/bosh-agent/system",
-			"Rev": "91a7d3491fa6eb4917a8c3e594cf297dc89255c8"
+			"Rev": "fd02f91290c1732e1f7f429756b6770602069f4d"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/bosh-agent/uuid/fakes",
-			"Rev": "91a7d3491fa6eb4917a8c3e594cf297dc89255c8"
+			"Rev": "fd02f91290c1732e1f7f429756b6770602069f4d"
+		},
+		{
+			"ImportPath": "github.com/cloudfoundry/gofileutils/glob",
+			"Rev": "a4a0cae5ff8a342ba01fce700b9e41c6942c0e5e"
 		},
 		{
 			"ImportPath": "github.com/maximilien/softlayer-go/client",
-			"Comment": "v0.0.2-10-gfd6a71b",
-			"Rev": "fd6a71ba0cfda4e93ad4750da286278cbced9604"
+			"Comment": "v0.0.2-25-g6c0b56d",
+			"Rev": "6c0b56d26ab1d63d53ec8d73f285d936149b4483"
 		},
 		{
 			"ImportPath": "github.com/maximilien/softlayer-go/data_types",
-			"Comment": "v0.0.2-10-gfd6a71b",
-			"Rev": "fd6a71ba0cfda4e93ad4750da286278cbced9604"
+			"Comment": "v0.0.2-25-g6c0b56d",
+			"Rev": "6c0b56d26ab1d63d53ec8d73f285d936149b4483"
 		},
 		{
 			"ImportPath": "github.com/maximilien/softlayer-go/services",
-			"Comment": "v0.0.2-10-gfd6a71b",
-			"Rev": "fd6a71ba0cfda4e93ad4750da286278cbced9604"
+			"Comment": "v0.0.2-25-g6c0b56d",
+			"Rev": "6c0b56d26ab1d63d53ec8d73f285d936149b4483"
 		},
 		{
 			"ImportPath": "github.com/maximilien/softlayer-go/softlayer",
-			"Comment": "v0.0.2-10-gfd6a71b",
-			"Rev": "fd6a71ba0cfda4e93ad4750da286278cbced9604"
+			"Comment": "v0.0.2-25-g6c0b56d",
+			"Rev": "6c0b56d26ab1d63d53ec8d73f285d936149b4483"
 		},
 		{
 			"ImportPath": "github.com/nu7hatch/gouuid",
