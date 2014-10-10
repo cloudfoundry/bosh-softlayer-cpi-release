@@ -30,7 +30,6 @@ var _ = Describe("SoftLayerCreator", func() {
 
 	BeforeEach(func() {
 		softLayerClient = fakeslclient.NewFakeSoftLayerClient("fake-username", "fake-api-key")
-		common.SetTestFixturesForFakeSoftLayerClient(softLayerClient, "SoftLayer_Virtual_Guest_Service_createObject.json")
 
 		agentEnvServiceFactory = &fakevm.FakeAgentEnvServiceFactory{}
 		agentOptions = AgentOptions{Mbus: "fake-mbus"}
@@ -64,6 +63,8 @@ var _ = Describe("SoftLayerCreator", func() {
 				}
 				networks = Networks{}
 				env = Environment{}
+
+				setFakeSoftLayerClientCreateObjectTestFixtures(softLayerClient)
 			})
 
 			It("returns a new SoftLayerVM with correct virtual guest ID and SoftLayerClient", func() {
@@ -80,6 +81,8 @@ var _ = Describe("SoftLayerCreator", func() {
 					stemcell = bslcstem.NewSoftLayerStemcell(1234, "fake-stemcell-uuid", fakestem.FakeStemcellKind, softLayerClient, logger)
 					networks = Networks{}
 					env = Environment{}
+
+					setFakeSoftLayerClientCreateObjectTestFixtures(softLayerClient)
 				})
 
 				It("fails when VMProperties is missing StartCpus", func() {
@@ -115,3 +118,18 @@ var _ = Describe("SoftLayerCreator", func() {
 		})
 	})
 })
+
+func setFakeSoftLayerClientCreateObjectTestFixtures(fakeSoftLayerClient *fakeslclient.FakeSoftLayerClient) {
+	fileNames := []string{
+		"SoftLayer_Virtual_Guest_Service_createObject.json",
+		"SoftLayer_Virtual_Guest_Service_getPowerState.json",
+
+		"SoftLayer_Virtual_Guest_Service_getActiveTransactions.json",
+
+		"SoftLayer_Virtual_Guest_Service_setMetadata.json",
+		"SoftLayer_Virtual_Guest_Service_configureMetadataDisk.json",
+
+		"SoftLayer_Virtual_Guest_Service_getPowerState.json",
+	}
+	common.SetTestFixturesForFakeSoftLayerClient(fakeSoftLayerClient, fileNames)
+}
