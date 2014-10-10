@@ -31,23 +31,23 @@
 		},
 		{
 			"ImportPath": "github.com/maximilien/softlayer-go/client",
-			"Comment": "v0.0.2-25-g6c0b56d",
-			"Rev": "6c0b56d26ab1d63d53ec8d73f285d936149b4483"
+			"Comment": "v0.0.2-27-g0538585",
+			"Rev": "0538585e1ef8dc702c762f7b2ae206706c99b18f"
 		},
 		{
 			"ImportPath": "github.com/maximilien/softlayer-go/data_types",
-			"Comment": "v0.0.2-25-g6c0b56d",
-			"Rev": "6c0b56d26ab1d63d53ec8d73f285d936149b4483"
+			"Comment": "v0.0.2-27-g0538585",
+			"Rev": "0538585e1ef8dc702c762f7b2ae206706c99b18f"
 		},
 		{
 			"ImportPath": "github.com/maximilien/softlayer-go/services",
-			"Comment": "v0.0.2-25-g6c0b56d",
-			"Rev": "6c0b56d26ab1d63d53ec8d73f285d936149b4483"
+			"Comment": "v0.0.2-27-g0538585",
+			"Rev": "0538585e1ef8dc702c762f7b2ae206706c99b18f"
 		},
 		{
 			"ImportPath": "github.com/maximilien/softlayer-go/softlayer",
-			"Comment": "v0.0.2-25-g6c0b56d",
-			"Rev": "6c0b56d26ab1d63d53ec8d73f285d936149b4483"
+			"Comment": "v0.0.2-27-g0538585",
+			"Rev": "0538585e1ef8dc702c762f7b2ae206706c99b18f"
 		},
 		{
 			"ImportPath": "github.com/nu7hatch/gouuid",
