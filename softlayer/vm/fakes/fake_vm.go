@@ -10,6 +10,9 @@ type FakeVM struct {
 	DeleteCalled bool
 	DeleteErr    error
 
+	RebootCalled bool
+	RebootErr    error
+
 	AttachDiskDisk bslcdisk.Disk
 	AttachDiskErr  error
 
@@ -26,6 +29,11 @@ func (vm FakeVM) ID() int { return vm.id }
 func (vm *FakeVM) Delete() error {
 	vm.DeleteCalled = true
 	return vm.DeleteErr
+}
+
+func (vm *FakeVM) Reboot() error {
+	vm.RebootCalled = true
+	return vm.RebootErr
 }
 
 func (vm *FakeVM) AttachDisk(disk bslcdisk.Disk) error {

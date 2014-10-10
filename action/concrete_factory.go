@@ -42,7 +42,7 @@ func NewConcreteFactory(softLayerClient sl.Client, options ConcreteFactoryOption
 			"create_vm":          NewCreateVM(stemcellFinder, vmCreator),
 			"delete_vm":          NewDeleteVM(vmFinder),
 			"has_vm":             NewHasVM(vmFinder),
-			"reboot_vm":          NewRebootVM(),
+			"reboot_vm":          NewRebootVM(vmFinder),
 			"set_vm_metadata":    NewSetVMMetadata(),
 			"configure_networks": NewConfigureNetworks(),
 

@@ -109,7 +109,7 @@ var _ = Describe("concreteFactory", func() {
 		It("reboot_vm", func() {
 			action, err := factory.Create("reboot_vm")
 			Expect(err).ToNot(HaveOccurred())
-			Expect(action).To(Equal(NewRebootVM()))
+			Expect(action).To(Equal(NewRebootVM(vmFinder)))
 		})
 
 		It("set_vm_metadata", func() {

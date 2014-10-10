@@ -51,6 +51,24 @@ func (vm SoftLayerVM) Delete() error {
 	return nil
 }
 
+func (vm SoftLayerVM) Reboot() error {
+	virtualGuestService, err := vm.softLayerClient.GetSoftLayer_Virtual_Guest_Service()
+	if err != nil {
+		return bosherr.WrapError(err, "Creating SoftLayer VirtualGuestService from client")
+	}
+
+	rebooted, err := virtualGuestService.RebootSoft(vm.ID())
+	if err != nil {
+		return bosherr.WrapError(err, "Rebooting (soft) SoftLayer VirtualGuest from client")
+	}
+
+	if !rebooted {
+		return bosherr.WrapError(nil, "Did not reboot (soft) SoftLayer VirtualGuest from client")
+	}
+
+	return nil
+}
+
 func (vm SoftLayerVM) AttachDisk(disk bslcdisk.Disk) error {
 	vm.logger.Info(softLayerVMtag, "Not yet implemented!")
 

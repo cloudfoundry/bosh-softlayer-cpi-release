@@ -1,21 +1,31 @@
 package action
 
 import (
-	"fmt"
+	bosherr "github.com/cloudfoundry/bosh-agent/errors"
+
+	bslcvm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
 )
 
-type RebootVM struct{}
+type RebootVM struct {
+	vmFinder bslcvm.Finder
+}
 
-func NewRebootVM() RebootVM {
-	return RebootVM{}
+func NewRebootVM(vmFinder bslcvm.Finder) RebootVM {
+	return RebootVM{vmFinder: vmFinder}
 }
 
 func (a RebootVM) Run(vmCID VMCID) (interface{}, error) {
-	//DEBUG
-	fmt.Println("RebootVM.Run")
-	fmt.Printf("----> vmCID: %#v\n", vmCID)
-	fmt.Println()
-	//DEBUG
+	vm, found, err := a.vmFinder.Find(int(vmCID))
+	if err != nil {
+		return nil, bosherr.WrapError(err, "Finding vm '%s'", vmCID)
+	}
+
+	if found {
+		err := vm.Reboot()
+		if err != nil {
+			return nil, bosherr.WrapError(err, "Rebooting vm '%s'", vmCID)
+		}
+	}
 
 	return nil, nil
 }

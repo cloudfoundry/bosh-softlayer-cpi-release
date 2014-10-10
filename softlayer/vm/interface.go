@@ -27,6 +27,7 @@ type VM interface {
 	ID() int
 
 	Delete() error
+	Reboot() error
 
 	AttachDisk(bslcdisk.Disk) error
 	DetachDisk(bslcdisk.Disk) error

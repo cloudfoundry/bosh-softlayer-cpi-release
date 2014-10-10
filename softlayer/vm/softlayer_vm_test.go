@@ -55,6 +55,32 @@ var _ = Describe("SoftLayerVM", func() {
 		})
 	})
 
+	Describe("Reboot", func() {
+		Context("valid VM ID is used", func() {
+			BeforeEach(func() {
+				softLayerClient.DoRawHttpRequestResponse = []byte("true")
+				vm = NewSoftLayerVM(1234567, softLayerClient, agentEnvService, logger)
+			})
+
+			It("reboots the VM successfully", func() {
+				err := vm.Reboot()
+				Expect(err).ToNot(HaveOccurred())
+			})
+		})
+
+		Context("invalid VM ID is used", func() {
+			BeforeEach(func() {
+				softLayerClient.DoRawHttpRequestResponse = []byte("false")
+				vm = NewSoftLayerVM(00000, softLayerClient, agentEnvService, logger)
+			})
+
+			It("fails rebooting the VM", func() {
+				err := vm.Reboot()
+				Expect(err).To(HaveOccurred())
+			})
+		})
+	})
+
 	Describe("AttachDisk", func() {
 		//TODO: when disk support added to softlayer-go and to CPI
 	})
