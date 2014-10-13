@@ -48,12 +48,12 @@ var _ = Describe("RebootVM", func() {
 				Expect(vm.RebootCalled).To(BeTrue())
 			})
 
-			It("returns error if deleting vm fails", func() {
-				vm.RebootErr = errors.New("fake-delete-err")
+			It("returns error if rebooting vm fails", func() {
+				vm.RebootErr = errors.New("fake-reboot-err")
 
 				_, err := action.Run(1234)
 				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("fake-delete-err"))
+				Expect(err.Error()).To(ContainSubstring("fake-reboot-err"))
 			})
 		})
 
