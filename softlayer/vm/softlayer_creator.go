@@ -6,23 +6,17 @@ import (
 	"strconv"
 	"time"
 
-	gomega "github.com/onsi/gomega"
-
 	bosherr "github.com/cloudfoundry/bosh-agent/errors"
 	boshlog "github.com/cloudfoundry/bosh-agent/logger"
 
 	sldatatypes "github.com/maximilien/softlayer-go/data_types"
 	sl "github.com/maximilien/softlayer-go/softlayer"
 
+	bslcommon "github.com/maximilien/bosh-softlayer-cpi/softlayer/common"
 	bslcstem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell"
 )
 
 const softLayerCreatorLogTag = "SoftLayerCreator"
-
-var (
-	TIMEOUT          time.Duration
-	POLLING_INTERVAL time.Duration
-)
 
 type SoftLayerCreator struct {
 	softLayerClient        sl.Client
@@ -33,8 +27,8 @@ type SoftLayerCreator struct {
 }
 
 func NewSoftLayerCreator(softLayerClient sl.Client, agentEnvServiceFactory AgentEnvServiceFactory, agentOptions AgentOptions, logger boshlog.Logger) SoftLayerCreator {
-	TIMEOUT = 10 * time.Minute
-	POLLING_INTERVAL = 10 * time.Second
+	bslcommon.TIMEOUT = 10 * time.Minute
+	bslcommon.POLLING_INTERVAL = 10 * time.Second
 
 	return SoftLayerCreator{
 		softLayerClient:        softLayerClient,
@@ -71,7 +65,12 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 
 	agentEnv := NewAgentEnvForVM(agentID, strconv.Itoa(virtualGuest.Id), networks, env, c.agentOptions)
 
-	err = c.configureMetadataOnVirtualGuest(virtualGuest.Id, agentEnv)
+	metadata, err := json.Marshal(agentEnv)
+	if err != nil {
+		return SoftLayerVM{}, bosherr.WrapError(err, "Marshalling agent environment metadata")
+	}
+
+	err = bslcommon.ConfigureMetadataOnVirtualGuest(c.softLayerClient, virtualGuest.Id, string(metadata), bslcommon.TIMEOUT, bslcommon.POLLING_INTERVAL)
 	if err != nil {
 		return SoftLayerVM{}, bosherr.WrapError(err, fmt.Sprintf("Configuring metadata on VirtualGuest `%d`", virtualGuest.Id))
 	}
@@ -86,102 +85,6 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 	vm := NewSoftLayerVM(virtualGuest.Id, c.softLayerClient, agentEnvService, c.logger)
 
 	return vm, nil
-}
-
-func (c SoftLayerCreator) configureMetadataOnVirtualGuest(virtualGuestId int, agentEnv AgentEnv) error {
-	err := c.waitForVirtualGuest(virtualGuestId, "RUNNING", TIMEOUT, POLLING_INTERVAL)
-	if err != nil {
-		return bosherr.WrapError(err, fmt.Sprintf("Waiting for VirtualGuest `%d`", virtualGuestId))
-	}
-
-	err = c.waitForVirtualGuestToHaveNoRunningTransactions(virtualGuestId, TIMEOUT, POLLING_INTERVAL)
-	if err != nil {
-		return bosherr.WrapError(err, fmt.Sprintf("Waiting for VirtualGuest `%d` to have no pending transactions", virtualGuestId))
-	}
-
-	err = c.setMetadataOnVirtualGuest(virtualGuestId, agentEnv)
-	if err != nil {
-		return bosherr.WrapError(err, fmt.Sprintf("Setting metadata on VirtualGuest `%d`", virtualGuestId))
-	}
-
-	err = c.configureMetadataDiskOnVirtualGuest(virtualGuestId)
-	if err != nil {
-		return bosherr.WrapError(err, fmt.Sprintf("Configuring metadata disk on VirtualGuest `%d`", virtualGuestId))
-	}
-
-	err = c.waitForVirtualGuest(virtualGuestId, "RUNNING", TIMEOUT, POLLING_INTERVAL)
-	if err != nil {
-		return bosherr.WrapError(err, fmt.Sprintf("Waiting for VirtualGuest `%d`", virtualGuestId))
-	}
-
-	return nil
-}
-
-func (c SoftLayerCreator) waitForVirtualGuestToHaveNoRunningTransactions(virtualGuestId int, timeout, pollingInterval time.Duration) error {
-	virtualGuestService, err := c.softLayerClient.GetSoftLayer_Virtual_Guest_Service()
-	if err != nil {
-		return bosherr.WrapError(err, "Creating VirtualGuestService from SoftLayer client")
-	}
-
-	gomega.Eventually(func() int {
-		activeTransactions, err := virtualGuestService.GetActiveTransactions(virtualGuestId)
-		gomega.Expect(err).ToNot(gomega.HaveOccurred())
-		return len(activeTransactions)
-	}, timeout, pollingInterval).Should(gomega.Equal(0), "failed waiting for virtual guest to have no active transactions")
-
-	return nil
-}
-
-func (c SoftLayerCreator) waitForVirtualGuest(virtualGuestId int, targetState string, timeout, pollingInterval time.Duration) error {
-	virtualGuestService, err := c.softLayerClient.GetSoftLayer_Virtual_Guest_Service()
-	if err != nil {
-		return bosherr.WrapError(err, "Creating VirtualGuestService from SoftLayer client")
-	}
-
-	gomega.Eventually(func() string {
-		vgPowerState, err := virtualGuestService.GetPowerState(virtualGuestId)
-		gomega.Expect(err).ToNot(gomega.HaveOccurred())
-		return vgPowerState.KeyName
-	}, timeout, pollingInterval).Should(gomega.Equal(targetState), fmt.Sprintf("failed waiting for virtual guest to be %s", targetState))
-
-	return nil
-}
-
-func (c SoftLayerCreator) setMetadataOnVirtualGuest(virtualGuestId int, agentEnv AgentEnv) error {
-	metadata, err := json.Marshal(agentEnv)
-	if err != nil {
-		return bosherr.WrapError(err, "Marshalling agent environment metadata")
-	}
-
-	virtualGuestService, err := c.softLayerClient.GetSoftLayer_Virtual_Guest_Service()
-	if err != nil {
-		return bosherr.WrapError(err, "Creating VirtualGuestService from SoftLayer client")
-	}
-
-	success, err := virtualGuestService.SetMetadata(virtualGuestId, string(metadata))
-	if err != nil {
-		return bosherr.WrapError(err, fmt.Sprintf("Setting metadata on VirtualGuest `%d`", virtualGuestId))
-	}
-
-	if !success {
-		return bosherr.WrapError(err, fmt.Sprintf("Failed to set metadata on VirtualGuest `%d`", virtualGuestId))
-	}
-
-	return nil
-}
-
-func (c SoftLayerCreator) configureMetadataDiskOnVirtualGuest(virtualGuestId int) error {
-	virtualGuestService, err := c.softLayerClient.GetSoftLayer_Virtual_Guest_Service()
-	if err != nil {
-		return bosherr.WrapError(err, "Creating VirtualGuestService from SoftLayer client")
-	}
-
-	_, err = virtualGuestService.ConfigureMetadataDisk(virtualGuestId)
-	if err != nil {
-		return bosherr.WrapError(err, fmt.Sprintf("Configuring metadata on VirtualGuest `%d`", virtualGuestId))
-	}
-
-	return nil
 }
 
 func (c SoftLayerCreator) resolveNetworkIP(networks Networks) (string, error) {

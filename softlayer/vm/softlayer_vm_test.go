@@ -6,6 +6,8 @@ import (
 
 	. "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
 
+	common "github.com/maximilien/bosh-softlayer-cpi/common"
+
 	boshlog "github.com/cloudfoundry/bosh-agent/logger"
 
 	fakevm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm/fakes"
@@ -76,6 +78,54 @@ var _ = Describe("SoftLayerVM", func() {
 
 			It("fails rebooting the VM", func() {
 				err := vm.Reboot()
+				Expect(err).To(HaveOccurred())
+			})
+		})
+	})
+
+	XDescribe("SetMetadata", func() {
+		var (
+			metadata VMMetadata
+		)
+
+		Context("valid VM ID is used", func() {
+			BeforeEach(func() {
+				fileNames := []string{
+					"SoftLayer_Virtual_Guest_Service_setMetadata.json",
+					"SoftLayer_Virtual_Guest_Service_configureMetadataDisk.json",
+
+					"SoftLayer_Virtual_Guest_Service_getActiveTransactions.json",
+					"SoftLayer_Virtual_Guest_Service_getPowerState.json",
+				}
+				common.SetTestFixturesForFakeSoftLayerClient(softLayerClient, fileNames)
+
+				metadata = VMMetadata{}
+				vm = NewSoftLayerVM(1234567, softLayerClient, agentEnvService, logger)
+			})
+
+			It("sets the vm metadata successfully", func() {
+				err := vm.SetMetadata(metadata)
+				Expect(err).ToNot(HaveOccurred())
+			})
+		})
+
+		Context("invalid VM ID is used", func() {
+			BeforeEach(func() {
+				fileNames := []string{
+					"SoftLayer_Virtual_Guest_Service_setMetadata.json",
+					"SoftLayer_Virtual_Guest_Service_configureMetadataDisk.json",
+
+					"SoftLayer_Virtual_Guest_Service_getActiveTransactions.json",
+					"SoftLayer_Virtual_Guest_Service_getPowerState.json",
+				}
+				common.SetTestFixturesForFakeSoftLayerClient(softLayerClient, fileNames)
+
+				metadata = VMMetadata{}
+				vm = NewSoftLayerVM(00000, softLayerClient, agentEnvService, logger)
+			})
+
+			It("fails setting the vm metadata", func() {
+				err := vm.SetMetadata(metadata)
 				Expect(err).To(HaveOccurred())
 			})
 		})

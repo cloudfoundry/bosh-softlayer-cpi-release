@@ -1,11 +1,14 @@
 package vm
 
 import (
+	"time"
+
 	bosherr "github.com/cloudfoundry/bosh-agent/errors"
 	boshlog "github.com/cloudfoundry/bosh-agent/logger"
 
 	sl "github.com/maximilien/softlayer-go/softlayer"
 
+	bslcommon "github.com/maximilien/bosh-softlayer-cpi/softlayer/common"
 	bslcdisk "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk"
 )
 
@@ -21,6 +24,9 @@ type SoftLayerVM struct {
 }
 
 func NewSoftLayerVM(id int, softLayerClient sl.Client, agentEnvService AgentEnvService, logger boshlog.Logger) SoftLayerVM {
+	bslcommon.TIMEOUT = 10 * time.Minute
+	bslcommon.POLLING_INTERVAL = 10 * time.Second
+
 	return SoftLayerVM{
 		id: id,
 
