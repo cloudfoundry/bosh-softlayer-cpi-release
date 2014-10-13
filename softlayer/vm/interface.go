@@ -15,7 +15,7 @@ type VMCloudProperties struct {
 }
 
 type VMMetadata struct {
-	vmCloudProperties VMCloudProperties `json:"cloud_properties,omitempty"`
+	VMCloudProperties VMCloudProperties `json:"cloud_properties,omitempty"`
 }
 
 type Creator interface {
