@@ -2,6 +2,8 @@ package fakes
 
 import (
 	bslcdisk "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk"
+
+	bslcvm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
 )
 
 type FakeVM struct {
@@ -12,6 +14,14 @@ type FakeVM struct {
 
 	RebootCalled bool
 	RebootErr    error
+
+	SetMetadataCalled bool
+	SetMetadataErr    error
+	VMMetadata        bslcvm.VMMetadata
+
+	ConfigureNetworksCalled bool
+	ConfigureNetworksErr    error
+	Networks                bslcvm.Networks
 
 	AttachDiskDisk bslcdisk.Disk
 	AttachDiskErr  error
@@ -34,6 +44,18 @@ func (vm *FakeVM) Delete() error {
 func (vm *FakeVM) Reboot() error {
 	vm.RebootCalled = true
 	return vm.RebootErr
+}
+
+func (vm *FakeVM) SetMetadata(metadata bslcvm.VMMetadata) error {
+	vm.SetMetadataCalled = true
+	vm.VMMetadata = metadata
+	return vm.SetMetadataErr
+}
+
+func (vm *FakeVM) ConfigureNetworks(networks bslcvm.Networks) error {
+	vm.ConfigureNetworksCalled = true
+	vm.Networks = networks
+	return vm.ConfigureNetworksErr
 }
 
 func (vm *FakeVM) AttachDisk(disk bslcdisk.Disk) error {

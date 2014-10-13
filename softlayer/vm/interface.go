@@ -14,6 +14,10 @@ type VMCloudProperties struct {
 	SshKeys    []sldatatypes.SshKey `json:"sshKeys"`
 }
 
+type VMMetadata struct {
+	vmCloudProperties VMCloudProperties `json:"cloud_properties,omitempty"`
+}
+
 type Creator interface {
 	// Create takes an agent id and creates a VM with provided configuration
 	Create(string, bslcstem.Stemcell, VMCloudProperties, Networks, Environment) (VM, error)
@@ -28,6 +32,9 @@ type VM interface {
 
 	Delete() error
 	Reboot() error
+
+	SetMetadata(VMMetadata) error
+	ConfigureNetworks(Networks) error
 
 	AttachDisk(bslcdisk.Disk) error
 	DetachDisk(bslcdisk.Disk) error
