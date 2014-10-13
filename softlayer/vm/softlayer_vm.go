@@ -69,6 +69,18 @@ func (vm SoftLayerVM) Reboot() error {
 	return nil
 }
 
+func (vm SoftLayerVM) SetMetadata(metadata VMMetadata) error {
+	vm.logger.Info(softLayerVMtag, "Not yet implemented!")
+
+	return nil
+}
+
+func (vm SoftLayerVM) ConfigureNetworks(networks Networks) error {
+	vm.logger.Info(softLayerVMtag, "Not yet implemented!")
+
+	return nil
+}
+
 func (vm SoftLayerVM) AttachDisk(disk bslcdisk.Disk) error {
 	vm.logger.Info(softLayerVMtag, "Not yet implemented!")
 
