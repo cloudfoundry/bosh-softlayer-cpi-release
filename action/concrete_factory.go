@@ -43,7 +43,7 @@ func NewConcreteFactory(softLayerClient sl.Client, options ConcreteFactoryOption
 			"delete_vm":          NewDeleteVM(vmFinder),
 			"has_vm":             NewHasVM(vmFinder),
 			"reboot_vm":          NewRebootVM(vmFinder),
-			"set_vm_metadata":    NewSetVMMetadata(),
+			"set_vm_metadata":    NewSetVMMetadata(vmFinder),
 			"configure_networks": NewConfigureNetworks(),
 
 			// Disk management

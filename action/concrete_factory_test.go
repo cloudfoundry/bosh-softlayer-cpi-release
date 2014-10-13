@@ -115,7 +115,7 @@ var _ = Describe("concreteFactory", func() {
 		It("set_vm_metadata", func() {
 			action, err := factory.Create("set_vm_metadata")
 			Expect(err).ToNot(HaveOccurred())
-			Expect(action).To(Equal(NewSetVMMetadata()))
+			Expect(action).To(Equal(NewSetVMMetadata(vmFinder)))
 		})
 
 		It("configure_networks", func() {
