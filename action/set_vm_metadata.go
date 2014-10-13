@@ -1,29 +1,35 @@
 package action
 
-import "fmt"
+import (
+	bosherr "github.com/cloudfoundry/bosh-agent/errors"
 
-type SetVMMetadata struct{}
+	bslcvm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
+)
 
-type Bar struct {
-	Test int `json:"test"`
+type SetVMMetadata struct {
+	vmFinder   bslcvm.Finder
+	vmMetadata bslcvm.VMMetadata
 }
 
-type VMMetadata struct {
-	Foo string `json:"foo,omitempty"`
-	Bar Bar    `json:"bar,omitempty"`
+func NewSetVMMetadata(vmFinder bslcvm.Finder) SetVMMetadata {
+	return SetVMMetadata{
+		vmFinder:   vmFinder,
+		vmMetadata: bslcvm.VMMetadata{},
+	}
 }
 
-func NewSetVMMetadata() SetVMMetadata {
-	return SetVMMetadata{}
-}
+func (a SetVMMetadata) Run(vmCID VMCID, metadata bslcvm.VMMetadata) (interface{}, error) {
+	vm, found, err := a.vmFinder.Find(int(vmCID))
+	if err != nil {
+		return nil, bosherr.WrapError(err, "Finding vm '%s'", vmCID)
+	}
 
-func (a SetVMMetadata) Run(vmCID VMCID, metadata VMMetadata) (interface{}, error) {
-	//DEBUG
-	fmt.Println("SetVMMetadata.Run")
-	fmt.Printf("----> vmCID: %#v\n", vmCID)
-	fmt.Printf("----> metadata: %#v\n", metadata)
-	fmt.Println()
-	//DEBUG
+	if found {
+		err := vm.SetMetadata(metadata)
+		if err != nil {
+			return nil, bosherr.WrapError(err, "Setting metadata on vm '%s'", vmCID)
+		}
+	}
 
 	return nil, nil
 }

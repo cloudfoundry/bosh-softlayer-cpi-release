@@ -121,7 +121,7 @@ var _ = Describe("concreteFactory", func() {
 		It("configure_networks", func() {
 			action, err := factory.Create("configure_networks")
 			Expect(err).ToNot(HaveOccurred())
-			Expect(action).To(Equal(NewConfigureNetworks()))
+			Expect(action).To(Equal(NewConfigureNetworks(vmFinder)))
 		})
 	})
 

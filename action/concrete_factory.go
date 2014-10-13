@@ -44,7 +44,7 @@ func NewConcreteFactory(softLayerClient sl.Client, options ConcreteFactoryOption
 			"has_vm":             NewHasVM(vmFinder),
 			"reboot_vm":          NewRebootVM(vmFinder),
 			"set_vm_metadata":    NewSetVMMetadata(vmFinder),
-			"configure_networks": NewConfigureNetworks(),
+			"configure_networks": NewConfigureNetworks(vmFinder),
 
 			// Disk management
 			"create_disk": NewCreateDisk(nil),
