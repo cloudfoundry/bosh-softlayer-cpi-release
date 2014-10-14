@@ -83,7 +83,7 @@ var _ = Describe("SoftLayerVM", func() {
 		})
 	})
 
-	XDescribe("SetMetadata", func() {
+	Describe("SetMetadata", func() {
 		var (
 			metadata VMMetadata
 		)
@@ -91,10 +91,12 @@ var _ = Describe("SoftLayerVM", func() {
 		Context("valid VM ID is used", func() {
 			BeforeEach(func() {
 				fileNames := []string{
+					"SoftLayer_Virtual_Guest_Service_getPowerState.json",
+					"SoftLayer_Virtual_Guest_Service_getActiveTransactions.json",
+
 					"SoftLayer_Virtual_Guest_Service_setMetadata.json",
 					"SoftLayer_Virtual_Guest_Service_configureMetadataDisk.json",
 
-					"SoftLayer_Virtual_Guest_Service_getActiveTransactions.json",
 					"SoftLayer_Virtual_Guest_Service_getPowerState.json",
 				}
 				common.SetTestFixturesForFakeSoftLayerClient(softLayerClient, fileNames)
@@ -112,10 +114,12 @@ var _ = Describe("SoftLayerVM", func() {
 		Context("invalid VM ID is used", func() {
 			BeforeEach(func() {
 				fileNames := []string{
-					"SoftLayer_Virtual_Guest_Service_setMetadata.json",
+					"SoftLayer_Virtual_Guest_Service_getPowerState.json",
+					"SoftLayer_Virtual_Guest_Service_getActiveTransactions.json",
+
+					"SoftLayer_Virtual_Guest_Service_setMetadata_false.json",
 					"SoftLayer_Virtual_Guest_Service_configureMetadataDisk.json",
 
-					"SoftLayer_Virtual_Guest_Service_getActiveTransactions.json",
 					"SoftLayer_Virtual_Guest_Service_getPowerState.json",
 				}
 				common.SetTestFixturesForFakeSoftLayerClient(softLayerClient, fileNames)

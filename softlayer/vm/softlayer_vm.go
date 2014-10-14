@@ -1,6 +1,8 @@
 package vm
 
 import (
+	"encoding/json"
+	"fmt"
 	"time"
 
 	bosherr "github.com/cloudfoundry/bosh-agent/errors"
@@ -75,8 +77,17 @@ func (vm SoftLayerVM) Reboot() error {
 	return nil
 }
 
-func (vm SoftLayerVM) SetMetadata(metadata VMMetadata) error {
-	vm.logger.Info(softLayerVMtag, "Not yet implemented!")
+func (vm SoftLayerVM) SetMetadata(vmMetadata VMMetadata) error {
+	//TODO: reconcile this metadata (from VMMetadata) abd SoftLayerCreator.Run metadata
+	metadata, err := json.Marshal(vmMetadata)
+	if err != nil {
+		return bosherr.WrapError(err, "Marshalling VM metadata")
+	}
+
+	err = bslcommon.ConfigureMetadataOnVirtualGuest(vm.softLayerClient, vm.id, string(metadata), bslcommon.TIMEOUT, bslcommon.POLLING_INTERVAL)
+	if err != nil {
+		return bosherr.WrapError(err, fmt.Sprintf("Configuring metadata on VirtualGuest `%d`", vm.id))
+	}
 
 	return nil
 }
