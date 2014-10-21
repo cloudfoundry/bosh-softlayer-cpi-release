@@ -6,6 +6,7 @@ import (
 
 	. "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
 
+	api "github.com/maximilien/bosh-softlayer-cpi/api"
 	common "github.com/maximilien/bosh-softlayer-cpi/common"
 
 	boshlog "github.com/cloudfoundry/bosh-agent/logger"
@@ -132,6 +133,24 @@ var _ = Describe("SoftLayerVM", func() {
 				err := vm.SetMetadata(metadata)
 				Expect(err).To(HaveOccurred())
 			})
+		})
+	})
+
+	Describe("ConfigureNetworks", func() {
+		var (
+			networks Networks
+		)
+
+		BeforeEach(func() {
+			networks = Networks{}
+			vm = NewSoftLayerVM(1234567, softLayerClient, agentEnvService, logger)
+		})
+
+		It("returns NotSupportedError", func() {
+			err := vm.ConfigureNetworks(networks)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(Equal("Not supported"))
+			Expect(err.(api.NotSupportedError).Type()).To(Equal("Bosh::Clouds::NotSupported"))
 		})
 	})
 
