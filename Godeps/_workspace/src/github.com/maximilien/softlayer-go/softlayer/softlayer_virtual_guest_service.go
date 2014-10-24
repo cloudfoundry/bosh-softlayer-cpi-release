@@ -12,12 +12,18 @@ type SoftLayer_Virtual_Guest_Service interface {
 	EditObject(instanceId int, template datatypes.SoftLayer_Virtual_Guest) (bool, error)
 	DeleteObject(instanceId int) (bool, error)
 
+	IsPingable(instanceId int) (bool, error)
+
 	GetPowerState(instanceId int) (datatypes.SoftLayer_Virtual_Guest_Power_State, error)
+
+	GetUserData(instanceId int) ([]datatypes.SoftLayer_Virtual_Guest_Attribute, error)
 
 	GetSshKeys(instanceId int) ([]datatypes.SoftLayer_Security_Ssh_Key, error)
 
 	GetActiveTransaction(instanceId int) (datatypes.SoftLayer_Provisioning_Version1_Transaction, error)
 	GetActiveTransactions(instanceId int) ([]datatypes.SoftLayer_Provisioning_Version1_Transaction, error)
+
+	GetPrimaryIpAddress(instanceId int) (string, error)
 
 	RebootSoft(instanceId int) (bool, error)
 	RebootHard(instanceId int) (bool, error)
@@ -25,4 +31,7 @@ type SoftLayer_Virtual_Guest_Service interface {
 	SetMetadata(instanceId int, metadata string) (bool, error)
 
 	ConfigureMetadataDisk(instanceId int) (datatypes.SoftLayer_Provisioning_Version1_Transaction, error)
+
+	AttachIscsiVolume(instanceId int, volumeId int) (string, error)
+	DetachIscsiVolume(instanceId int, volumeId int) error
 }

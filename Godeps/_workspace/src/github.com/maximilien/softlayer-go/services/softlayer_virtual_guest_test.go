@@ -1,6 +1,7 @@
 package services_test
 
 import (
+	"errors"
 	"os"
 
 	. "github.com/onsi/ginkgo"
@@ -121,6 +122,10 @@ var _ = Describe("SoftLayer_Virtual_Guest_Service", func() {
 			Expect(vg.GlobalIdentifier).To(Equal("52145e01-97b6-4312-9c15-dac7f24b6c2a"))
 			Expect(vg.PrimaryBackendIpAddress).To(Equal("10.106.192.42"))
 			Expect(vg.PrimaryIpAddress).To(Equal("23.246.234.32"))
+			Expect(vg.Location.Id).To(Equal(1234567))
+			Expect(len(vg.OperatingSystem.Passwords)).To(BeNumerically(">=", 1))
+			Expect(vg.OperatingSystem.Passwords[0].Password).To(Equal("test_password"))
+			Expect(vg.OperatingSystem.Passwords[0].Username).To(Equal("test_username"))
 		})
 	})
 
@@ -172,6 +177,20 @@ var _ = Describe("SoftLayer_Virtual_Guest_Service", func() {
 			vgPowerState, err := virtualGuestService.GetPowerState(virtualGuest.Id)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(vgPowerState.KeyName).To(Equal("RUNNING"))
+		})
+	})
+
+	Context("#GetPrimaryIpAddress", func() {
+		BeforeEach(func() {
+			virtualGuest.Id = 1234567
+			fakeClient.DoRawHttpRequestResponse = []byte("159.99.99.99")
+			Expect(err).ToNot(HaveOccurred())
+		})
+
+		It("sucessfully retrieves SoftLayer virtual guest's primary IP address instance", func() {
+			vgPrimaryIpAddress, err := virtualGuestService.GetPrimaryIpAddress(virtualGuest.Id)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(vgPrimaryIpAddress).To(Equal("159.99.99.99"))
 		})
 	})
 
@@ -293,6 +312,74 @@ var _ = Describe("SoftLayer_Virtual_Guest_Service", func() {
 			Expect(err).ToNot(HaveOccurred())
 
 			Expect(retBool).To(BeTrue())
+		})
+	})
+
+	Context("#GetUserData", func() {
+		BeforeEach(func() {
+			virtualGuest.Id = 1234567
+			fakeClient.DoRawHttpRequestResponse, err = common.ReadJsonTestFixtures("services", "SoftLayer_Virtual_Guest_Service_getUserData.json")
+			Expect(err).ToNot(HaveOccurred())
+		})
+
+		It("sucessfully returns user data for the virtual guest", func() {
+			attributes, err := virtualGuestService.GetUserData(virtualGuest.Id)
+			Expect(err).ToNot(HaveOccurred())
+
+			Expect(len(attributes)).To(BeNumerically("==", 2))
+
+			Expect(attributes[0].Value).To(Equal("V2hvJ3Mgc21hcnRlcj8gRG1pdHJ5aSBvciBkci5tYXguLi4gIHRoZSBkb2MsIGFueSBkYXkgOik="))
+			Expect(attributes[0].Type.Name).To(Equal("User Data"))
+			Expect(attributes[0].Type.Keyname).To(Equal("USER_DATA"))
+
+			Expect(attributes[1].Value).To(Equal("ZmFrZS1iYXNlNjQtZGF0YQo="))
+			Expect(attributes[1].Type.Name).To(Equal("Fake Data"))
+			Expect(attributes[1].Type.Keyname).To(Equal("FAKE_DATA"))
+		})
+	})
+
+	Context("#IsPingable", func() {
+		BeforeEach(func() {
+			virtualGuest.Id = 1234567
+		})
+
+		Context("when there are no API errors", func() {
+			It("checks that the virtual guest instance is pigable", func() {
+				fakeClient.DoRawHttpRequestResponse = []byte("true")
+
+				pingable, err := virtualGuestService.IsPingable(virtualGuest.Id)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(pingable).To(BeTrue())
+			})
+
+			It("checks that the virtual guest instance is NOT pigable", func() {
+				fakeClient.DoRawHttpRequestResponse = []byte("false")
+
+				pingable, err := virtualGuestService.IsPingable(virtualGuest.Id)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(pingable).To(BeFalse())
+			})
+		})
+
+		Context("when there are API errors", func() {
+			It("returns false and error", func() {
+				fakeClient.DoRawHttpRequestError = errors.New("fake-error")
+
+				pingable, err := virtualGuestService.IsPingable(virtualGuest.Id)
+				Expect(err).To(HaveOccurred())
+				Expect(pingable).To(BeFalse())
+			})
+		})
+
+		Context("when the API returns invalid or empty result", func() {
+			It("returns false and error", func() {
+				fakeClient.DoRawHttpRequestResponse = []byte("fake")
+
+				pingable, err := virtualGuestService.IsPingable(virtualGuest.Id)
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("Failed to checking that virtual guest is pingable"))
+				Expect(pingable).To(BeFalse())
+			})
 		})
 	})
 
