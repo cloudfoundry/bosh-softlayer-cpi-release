@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	api "github.com/maximilien/bosh-softlayer-cpi/api"
-
 	bosherr "github.com/cloudfoundry/bosh-agent/errors"
 	boshlog "github.com/cloudfoundry/bosh-agent/logger"
 
@@ -95,7 +93,7 @@ func (vm SoftLayerVM) SetMetadata(vmMetadata VMMetadata) error {
 }
 
 func (vm SoftLayerVM) ConfigureNetworks(networks Networks) error {
-	return api.NotSupportedError{}
+	return NotSupportedError{}
 }
 
 func (vm SoftLayerVM) AttachDisk(disk bslcdisk.Disk) error {
