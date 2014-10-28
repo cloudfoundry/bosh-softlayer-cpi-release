@@ -8,10 +8,12 @@ import (
 )
 
 type VMCloudProperties struct {
-	StartCpus  int `json:"startCpus,omitempty"`
-	MaxMemory  int `json:"maxMemory,omitempty"`
-	Datacenter sldatatypes.Datacenter
-	SshKeys    []sldatatypes.SshKey `json:"sshKeys"`
+	Domain                   string `json:"domain,omitempty"`
+	StartCpus                int    `json:"startCpus,omitempty"`
+	MaxMemory                int    `json:"maxMemory,omitempty"`
+	Datacenter               sldatatypes.Datacenter
+	BlockDeviceTemplateGroup sldatatypes.BlockDeviceTemplateGroup
+	SshKeys                  []sldatatypes.SshKey `json:"sshKeys"`
 }
 
 type VMMetadata struct {

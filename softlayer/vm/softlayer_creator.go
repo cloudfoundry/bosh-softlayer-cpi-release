@@ -41,11 +41,14 @@ func NewSoftLayerCreator(softLayerClient sl.Client, agentEnvServiceFactory Agent
 func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
 	virtualGuestTemplate := sldatatypes.SoftLayer_Virtual_Guest_Template{
 		Hostname:  agentID,
-		Domain:    "softlayer.com",
+		Domain:    cloudProps.Domain,
 		StartCpus: cloudProps.StartCpus,
 		MaxMemory: cloudProps.MaxMemory,
 		Datacenter: sldatatypes.Datacenter{
 			Name: cloudProps.Datacenter.Name,
+		},
+		BlockDeviceTemplateGroup: &sldatatypes.BlockDeviceTemplateGroup{
+			GlobalIdentifier: stemcell.Uuid(),
 		},
 		SshKeys:                      cloudProps.SshKeys,
 		HourlyBillingFlag:            true,

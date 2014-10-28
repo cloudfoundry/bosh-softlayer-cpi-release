@@ -57,8 +57,12 @@ var _ = Describe("SoftLayerCreator", func() {
 				agentID = "fake-agent-id"
 				stemcell = bslcstem.NewSoftLayerStemcell(1234, "fake-stemcell-uuid", fakestem.FakeStemcellKind, softLayerClient, logger)
 				cloudProps = VMCloudProperties{
-					StartCpus:  4,
-					MaxMemory:  2048,
+					StartCpus: 4,
+					MaxMemory: 2048,
+					Domain:    "fake-domain.com",
+					BlockDeviceTemplateGroup: sldatatypes.BlockDeviceTemplateGroup{
+						GlobalIdentifier: "fake-uuid",
+					},
 					Datacenter: sldatatypes.Datacenter{Name: "fake-datacenter"},
 				}
 				networks = Networks{}
