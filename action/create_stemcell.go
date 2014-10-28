@@ -11,7 +11,7 @@ type CreateStemcell struct {
 }
 
 type CreateStemcellCloudProps struct {
-	Id   string `json:"virtual-disk-image-id"`
+	Id   int    `json:"virtual-disk-image-id"`
 	Uuid string `json:"virtual-disk-image-uuid"`
 }
 
