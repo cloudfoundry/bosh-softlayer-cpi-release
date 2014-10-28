@@ -50,10 +50,9 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 		BlockDeviceTemplateGroup: &sldatatypes.BlockDeviceTemplateGroup{
 			GlobalIdentifier: stemcell.Uuid(),
 		},
-		SshKeys:                      cloudProps.SshKeys,
-		HourlyBillingFlag:            true,
-		LocalDiskFlag:                true,
-		OperatingSystemReferenceCode: "UBUNTU_LATEST",
+		SshKeys:           cloudProps.SshKeys,
+		HourlyBillingFlag: true,
+		LocalDiskFlag:     true,
 	}
 
 	virtualGuestService, err := c.softLayerClient.GetSoftLayer_Virtual_Guest_Service()
