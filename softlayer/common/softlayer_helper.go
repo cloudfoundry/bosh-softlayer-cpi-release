@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"time"
 
-	gomega "github.com/onsi/gomega"
-
 	bosherr "github.com/cloudfoundry/bosh-agent/errors"
 
 	sl "github.com/maximilien/softlayer-go/softlayer"
@@ -51,13 +49,21 @@ func WaitForVirtualGuestToHaveNoRunningTransactions(softLayerClient sl.Client, v
 		return bosherr.WrapError(err, "Creating VirtualGuestService from SoftLayer client")
 	}
 
-	gomega.Eventually(func() int {
+	totalTime := time.Duration(0)
+	for totalTime < timeout {
 		activeTransactions, err := virtualGuestService.GetActiveTransactions(virtualGuestId)
-		gomega.Expect(err).ToNot(gomega.HaveOccurred())
-		return len(activeTransactions)
-	}, timeout, pollingInterval).Should(gomega.Equal(0), "failed waiting for virtual guest to have no active transactions")
+		if err != nil {
+			return bosherr.WrapError(err, "Getting active transactions from SoftLayer client")
+		}
 
-	return nil
+		if len(activeTransactions) == 0 {
+			return nil
+		}
+		totalTime += pollingInterval
+		time.Sleep(pollingInterval)
+	}
+
+	return bosherr.New(fmt.Sprintf("Waiting for virtual guest with ID '%d' to have no active transactions", virtualGuestId))
 }
 
 func WaitForVirtualGuest(softLayerClient sl.Client, virtualGuestId int, targetState string, timeout, pollingInterval time.Duration) error {
@@ -66,13 +72,22 @@ func WaitForVirtualGuest(softLayerClient sl.Client, virtualGuestId int, targetSt
 		return bosherr.WrapError(err, "Creating VirtualGuestService from SoftLayer client")
 	}
 
-	gomega.Eventually(func() string {
+	totalTime := time.Duration(0)
+	for totalTime < timeout {
 		vgPowerState, err := virtualGuestService.GetPowerState(virtualGuestId)
-		gomega.Expect(err).ToNot(gomega.HaveOccurred())
-		return vgPowerState.KeyName
-	}, timeout, pollingInterval).Should(gomega.Equal(targetState), fmt.Sprintf("failed waiting for virtual guest to be %s", targetState))
+		if err != nil {
+			return bosherr.WrapError(err, fmt.Sprintf("Getting power state for virtual guest with ID: '%d' from SoftLayer client", virtualGuestId))
+		}
 
-	return nil
+		if vgPowerState.KeyName == targetState {
+			return nil
+		}
+
+		totalTime += pollingInterval
+		time.Sleep(pollingInterval)
+	}
+
+	return bosherr.New(fmt.Sprintf("Waiting for virtual guest with ID '%d' to have be in state '%s'", virtualGuestId, targetState))
 }
 
 func SetMetadataOnVirtualGuest(softLayerClient sl.Client, virtualGuestId int, metadata string) error {
