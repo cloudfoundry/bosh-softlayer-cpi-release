@@ -12,6 +12,7 @@ import (
 var (
 	TIMEOUT          time.Duration
 	POLLING_INTERVAL time.Duration
+	MAX_RETRY_COUNT  int
 )
 
 func ConfigureMetadataOnVirtualGuest(softLayerClient sl.Client, virtualGuestId int, metadata string, timeout, pollingInterval time.Duration) error {
@@ -49,16 +50,23 @@ func WaitForVirtualGuestToHaveNoRunningTransactions(softLayerClient sl.Client, v
 		return bosherr.WrapError(err, "Creating VirtualGuestService from SoftLayer client")
 	}
 
+	retryCount := 0
 	totalTime := time.Duration(0)
 	for totalTime < timeout {
 		activeTransactions, err := virtualGuestService.GetActiveTransactions(virtualGuestId)
 		if err != nil {
-			return bosherr.WrapError(err, "Getting active transactions from SoftLayer client")
+			if retryCount > MAX_RETRY_COUNT {
+				return bosherr.WrapError(err, "Getting active transactions from SoftLayer client")
+			} else {
+				retryCount += 1
+				continue
+			}
 		}
 
 		if len(activeTransactions) == 0 {
 			return nil
 		}
+
 		totalTime += pollingInterval
 		time.Sleep(pollingInterval)
 	}
@@ -72,11 +80,17 @@ func WaitForVirtualGuest(softLayerClient sl.Client, virtualGuestId int, targetSt
 		return bosherr.WrapError(err, "Creating VirtualGuestService from SoftLayer client")
 	}
 
+	retryCount := 0
 	totalTime := time.Duration(0)
 	for totalTime < timeout {
 		vgPowerState, err := virtualGuestService.GetPowerState(virtualGuestId)
 		if err != nil {
-			return bosherr.WrapError(err, fmt.Sprintf("Getting power state for virtual guest with ID: '%d' from SoftLayer client", virtualGuestId))
+			if retryCount > MAX_RETRY_COUNT {
+				return bosherr.WrapError(err, "Getting active transactions from SoftLayer client")
+			} else {
+				retryCount += 1
+				continue
+			}
 		}
 
 		if vgPowerState.KeyName == targetState {

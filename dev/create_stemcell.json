@@ -1,0 +1,19 @@
+{
+	"method": "create_stemcell",
+	"arguments": [
+	"/var/vcap/data/tmp/director/stemcell20141028-12749-tl7q6p/image", 
+	{
+		"name": "bosh-softlayer-xen-ubuntu-trusty-go_agent",
+		"version": "2710",
+		"infrastructure": "softlayer",
+		"architecture": "x86_64",
+		"root_device_name": "/dev/sda1",
+		"virtual-disk-image-id": 243222,
+		"virtual-disk-image-uuid": "bd48fc16-ab5c-4b9c-8341-47901b19b255",
+		"datacenter-name": "ams0"
+	}
+	],
+	"context": {
+		"director_uuid": "8c7900dd-0ed4-4cd5-937a-58169be6ba2f"
+	}
+}
