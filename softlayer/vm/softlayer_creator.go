@@ -80,11 +80,6 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 
 	agentEnvService := c.agentEnvServiceFactory.New()
 
-	err = agentEnvService.Update(agentEnv)
-	if err != nil {
-		return SoftLayerVM{}, bosherr.WrapError(err, "Updating VM agent env")
-	}
-
 	vm := NewSoftLayerVM(virtualGuest.Id, c.softLayerClient, agentEnvService, c.logger)
 
 	return vm, nil
