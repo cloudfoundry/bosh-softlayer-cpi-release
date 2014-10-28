@@ -11,8 +11,9 @@ type CreateStemcell struct {
 }
 
 type CreateStemcellCloudProps struct {
-	Id   int    `json:"virtual-disk-image-id"`
-	Uuid string `json:"virtual-disk-image-uuid"`
+	Id             int    `json:"virtual-disk-image-id"`
+	Uuid           string `json:"virtual-disk-image-uuid"`
+	DatacenterName string `json:"datacenter-name"`
 }
 
 func NewCreateStemcell(stemcellFinder bslcstem.Finder) CreateStemcell {
