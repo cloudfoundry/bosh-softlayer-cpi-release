@@ -21,13 +21,13 @@ func NewCreateStemcell(stemcellFinder bslcstem.Finder) CreateStemcell {
 }
 
 func (a CreateStemcell) Run(imagePath string, stemcellCloudProps CreateStemcellCloudProps) (StemcellCID, error) {
-	stemcell, found, err := a.stemcellFinder.Find(stemcellCloudProps.Uuid)
+	stemcell, found, err := a.stemcellFinder.FindById(stemcellCloudProps.Id)
 	if err != nil {
-		return 0, bosherr.WrapError(err, "Finding stemcell with UUID '%s'", stemcellCloudProps.Uuid)
+		return 0, bosherr.WrapError(err, "Finding stemcell with ID '%s'", stemcellCloudProps.Id)
 	}
 
 	if !found {
-		return 0, bosherr.WrapError(err, "Did not find stemcell with UUID '%s'", stemcellCloudProps.Uuid)
+		return 0, bosherr.New("Did not find stemcell with ID '%s'", stemcellCloudProps.Id)
 	}
 
 	return StemcellCID(stemcell.ID()), nil

@@ -26,7 +26,7 @@ func NewCreateVM(stemcellFinder bslcstem.Finder, vmCreator bslcvm.Creator) Creat
 func (a CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps bslcvm.VMCloudProperties, networks Networks, diskIDs []DiskCID, env Environment) (VMCID, error) {
 	a.updateCloudProperties(cloudProps)
 
-	stemcell, found, err := a.stemcellFinder.Find(string(stemcellCID))
+	stemcell, found, err := a.stemcellFinder.FindById(int(stemcellCID))
 	if err != nil {
 		return 0, bosherr.WrapError(err, "Finding stemcell '%s'", stemcellCID)
 	}
