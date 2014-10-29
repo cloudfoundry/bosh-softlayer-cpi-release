@@ -42,6 +42,6 @@ Assuming that you are in the CPI project and have built it successfully with `bi
 out/cpi -configPath dev/config.json < dev/<cpi_method>.json
 ```
 
-The [dev/<cpi_method>.json](http://github.com/maximilien/bosh-softlayer-cpi/dev) files ready for you to modify and reuse.
+The [dev/<cpi_method>.json](https://github.com/maximilien/bosh-softlayer-cpi/tree/master/dev) files are ready for you to modify and reuse.
 
-Please note that the [dev/config.json](http://github.com/maximilien/bosh-softlayer-cpi/dev/config.json) needs to be modified once to include your SoftLayer `username` and `apiKey` instead of the fake ones listed.
+Please note that the [dev/config.json](https://github.com/maximilien/bosh-softlayer-cpi/tree/master/dev/config.json) needs to be modified once to include your SoftLayer `username` and `apiKey` instead of the fake ones listed.
