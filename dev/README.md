@@ -1,5 +1,4 @@
 # Testing the CPI
------------------
 
 There are two general strategies for testing a CPI.
 
