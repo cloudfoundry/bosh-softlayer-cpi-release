@@ -1,0 +1,47 @@
+---
+name: dummy
+
+director_uuid: 8c7900dd-0ed4-4cd5-937a-58169be6ba2f
+
+releases:
+- name: dummy
+  version: latest
+
+networks:
+- name: default
+  type: dynamic
+  cloud_properties: {}
+
+resource_pools:
+- name: default
+  stemcell:
+    name: bosh-softlayer-xen-ubuntu-trusty-go_agent
+    version: latest
+  cloud_properties:
+    startCpus: 1
+    maxMemory: 1024
+    domain: softlayer.com
+    datacenter:
+      name: ams01
+  network: default
+
+update:
+  canaries: 1
+  max_in_flight: 10
+  canary_watch_time: 5000 - 90000
+  update_watch_time: 5000 - 15000
+
+compilation:
+  workers: 1
+  network: default
+  cloud_properties: {}
+
+jobs:
+- name: dummy
+  instances: 1
+  networks:
+  - name: default
+  resource_pool: default
+  templates:
+  - name: dummy
+    release: dummy
