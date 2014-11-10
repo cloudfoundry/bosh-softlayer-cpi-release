@@ -39,7 +39,7 @@ func (f SoftLayerFinder) Find(vmID int) (VM, bool, error) {
 	found, vm := false, SoftLayerVM{}
 	for _, virtualGuest := range virtualGuests {
 		if virtualGuest.Id == vmID {
-			vm = NewSoftLayerVM(vmID, f.softLayerClient, f.agentEnvServiceFactory.New(), f.logger)
+			vm = NewSoftLayerVM(vmID, f.softLayerClient, f.agentEnvServiceFactory.New(vmID), f.logger)
 			found = true
 			break
 		}

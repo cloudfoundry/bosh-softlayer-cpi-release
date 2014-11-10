@@ -11,6 +11,8 @@ type FakeAgentEnvService struct {
 
 	UpdateAgentEnv bslcvm.AgentEnv
 	UpdateErr      error
+
+	vmId int
 }
 
 func (s *FakeAgentEnvService) Fetch() (bslcvm.AgentEnv, error) {

@@ -18,6 +18,6 @@ func NewSoftLayerAgentEnvServiceFactory(client sl.Client, logger boshlog.Logger)
 	}
 }
 
-func (f SoftLayerAgentEnvServiceFactory) New() AgentEnvService {
-	return NewSoftLayerAgentEnvService(f.client, f.logger)
+func (f SoftLayerAgentEnvServiceFactory) New(vmId int) AgentEnvService {
+	return NewSoftLayerAgentEnvService(vmId, f.client, f.logger)
 }

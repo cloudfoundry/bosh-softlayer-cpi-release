@@ -17,12 +17,14 @@ const (
 )
 
 type SoftLayerAgentEnvService struct {
+	vmId            int
 	softLayerClient sl.Client
 	logger          boshlog.Logger
 }
 
-func NewSoftLayerAgentEnvService(softLayerClient sl.Client, logger boshlog.Logger) SoftLayerAgentEnvService {
+func NewSoftLayerAgentEnvService(vmId int, softLayerClient sl.Client, logger boshlog.Logger) SoftLayerAgentEnvService {
 	return SoftLayerAgentEnvService{
+		vmId:            vmId,
 		softLayerClient: softLayerClient,
 		logger:          logger,
 	}

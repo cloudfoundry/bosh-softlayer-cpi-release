@@ -8,10 +8,10 @@ type FakeAgentEnvServiceFactory struct {
 	NewAgentEnvService *FakeAgentEnvService
 }
 
-func (f *FakeAgentEnvServiceFactory) New() bslcvm.AgentEnvService {
+func (f *FakeAgentEnvServiceFactory) New(vmId int) bslcvm.AgentEnvService {
 	if f.NewAgentEnvService == nil {
 		// Always return non-nil service for convenience
-		return &FakeAgentEnvService{}
+		return &FakeAgentEnvService{vmId: vmId}
 	}
 
 	return f.NewAgentEnvService
