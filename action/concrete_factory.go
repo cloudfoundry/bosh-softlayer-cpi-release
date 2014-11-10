@@ -52,11 +52,13 @@ func NewConcreteFactory(softLayerClient sl.Client, options ConcreteFactoryOption
 			"attach_disk": NewAttachDisk(vmFinder, nil),
 			"detach_disk": NewDetachDisk(vmFinder, nil),
 
-			// Not implemented:
-			//   current_vm_id
+			// Not implemented (disk related):
 			//   snapshot_disk
 			//   delete_snapshot
 			//   get_disks
+
+			// Not implemented (others):
+			//   current_vm_id
 			//   ping
 		},
 	}
