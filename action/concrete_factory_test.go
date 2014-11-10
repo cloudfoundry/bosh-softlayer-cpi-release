@@ -55,7 +55,7 @@ var _ = Describe("concreteFactory", func() {
 	})
 
 	BeforeEach(func() {
-		agentEnvServiceFactory = bslcvm.NewSoftLayerAgentEnvServiceFactory(logger)
+		agentEnvServiceFactory = bslcvm.NewSoftLayerAgentEnvServiceFactory(softLayerClient, logger)
 
 		stemcellFinder = bslcstem.NewSoftLayerFinder(softLayerClient, logger)
 

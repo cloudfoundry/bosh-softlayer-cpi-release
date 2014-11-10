@@ -3,6 +3,8 @@ package vm
 import (
 	"errors"
 
+	sl "github.com/maximilien/softlayer-go/softlayer"
+
 	boshlog "github.com/cloudfoundry/bosh-agent/logger"
 )
 
@@ -15,14 +17,14 @@ const (
 )
 
 type SoftLayerAgentEnvService struct {
-	logger boshlog.Logger
+	softLayerClient sl.Client
+	logger          boshlog.Logger
 }
 
-func NewSoftLayerAgentEnvService(
-	logger boshlog.Logger,
-) SoftLayerAgentEnvService {
+func NewSoftLayerAgentEnvService(softLayerClient sl.Client, logger boshlog.Logger) SoftLayerAgentEnvService {
 	return SoftLayerAgentEnvService{
-		logger: logger,
+		softLayerClient: softLayerClient,
+		logger:          logger,
 	}
 }
 
