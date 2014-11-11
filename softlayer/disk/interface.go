@@ -1,7 +1,7 @@
 package disk
 
 type Creator interface {
-	Create(size int) (Disk, error)
+	Create(size int, virtualGuestId int) (Disk, error)
 }
 
 type Finder interface {
@@ -10,7 +10,5 @@ type Finder interface {
 
 type Disk interface {
 	ID() int
-	Path() string
-
 	Delete() error
 }
