@@ -6,6 +6,7 @@ import (
 
 	sl "github.com/maximilien/softlayer-go/softlayer"
 
+	bslcbm "github.com/maximilien/bosh-softlayer-cpi/softlayer/baremetal"
 	bslcstem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell"
 	bslcvm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
 )
@@ -32,6 +33,9 @@ func NewConcreteFactory(softLayerClient sl.Client, options ConcreteFactoryOption
 		logger,
 	)
 
+	bmCreator := bslcbm.NewBaremetalCreator(softLayerClient, logger)
+	bmFinder := bslcbm.NewBaremetalFinder(softLayerClient, logger)
+
 	return concreteFactory{
 		availableActions: map[string]Action{
 			// Stemcell management
@@ -51,6 +55,8 @@ func NewConcreteFactory(softLayerClient sl.Client, options ConcreteFactoryOption
 			"delete_disk": NewDeleteDisk(nil),
 			"attach_disk": NewAttachDisk(vmFinder, nil),
 			"detach_disk": NewDetachDisk(vmFinder, nil),
+
+			"establish_bare_metal_env": NewEstablishBareMetalEnv(bmCreator, bmFinder),
 
 			// Not implemented (disk related):
 			//   snapshot_disk
