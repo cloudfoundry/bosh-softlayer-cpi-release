@@ -1,0 +1,14 @@
+#! /bin/bash
+
+set -e
+
+export SL_BARE_METAL_FLAG=true
+export SL_BARE_METAL_MEMORY=2
+export SL_BARE_METAL_PROCESSOR=2
+export SL_BARE_METAL_DISK=20
+export SL_BARE_METAL_HOST=testing
+export SL_BARE_METAL_DOMAIN=softlayer.com
+export SL_BARE_METAL_OS=UBUNTU_LATEST
+export SL_DATA_CENTER=ams01
+
+./out/cpi -configPath dev/config.json < dev/establish_bare_metal_env.json

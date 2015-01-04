@@ -1,0 +1,7 @@
+{
+	"method": "establish_bare_metal_env",
+	"arguments": [],
+	"context": {
+		"director_uuid": "fake-director-uuid"
+	}
+}
