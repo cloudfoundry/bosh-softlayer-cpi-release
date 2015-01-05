@@ -1,0 +1,7 @@
+{
+	"method": "establish_bare_metal_env",
+	"arguments": [],
+	"context": {
+		"director_uuid": "3f695519-5a17-480f-879a-582dbe31131e"
+	}
+}
