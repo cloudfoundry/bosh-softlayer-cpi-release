@@ -128,10 +128,8 @@ var _ = Describe("concreteFactory", func() {
 	//TODO: implement when disk methods and actions are added
 	XContext("Disk methods", func() {
 		It("create_disk", func() {
-			diskCreator := bslcdisk.NewFSCreator(
-				"/tmp/disks",
-				fs,
-				cmdRunner,
+			diskCreator := bslcdisk.NewSoftLayerCreator(
+				softLayerClient,
 				logger,
 			)
 
