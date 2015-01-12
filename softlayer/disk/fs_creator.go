@@ -50,13 +50,13 @@ func (c FSCreator) Create(size int) (Disk, error) {
 	_, _, _, err = c.cmdRunner.RunCommand("truncate", "-s", sizeStr, diskPath)
 	if err != nil {
 		c.cleanUpFile(diskPath)
-		return nil, bosherr.WrapError(err, "Resizing disk to '%s'", sizeStr)
+		return nil, bosherr.WrapErrorf(err, "Resizing disk to '%s'", sizeStr)
 	}
 
 	_, _, _, err = c.cmdRunner.RunCommand("/sbin/mkfs", "-t", "ext4", "-F", diskPath)
 	if err != nil {
 		c.cleanUpFile(diskPath)
-		return nil, bosherr.WrapError(err, "Building disk filesystem '%s'", diskPath)
+		return nil, bosherr.WrapErrorf(err, "Building disk filesystem '%s'", diskPath)
 	}
 
 	return NewFSDisk(id, diskPath, c.fs, c.logger), nil

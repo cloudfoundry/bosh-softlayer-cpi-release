@@ -34,7 +34,7 @@ func (s FSDisk) Delete() error {
 
 	err := s.fs.RemoveAll(s.path)
 	if err != nil {
-		return bosherr.WrapError(err, "Deleting disk '%s'", s.path)
+		return bosherr.WrapErrorf(err, "Deleting disk '%s'", s.path)
 	}
 
 	return nil

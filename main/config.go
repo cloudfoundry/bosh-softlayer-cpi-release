@@ -25,7 +25,7 @@ func NewConfigFromPath(path string, fs boshsys.FileSystem) (Config, error) {
 
 	bytes, err := fs.ReadFile(path)
 	if err != nil {
-		return config, bosherr.WrapError(err, "Reading config %s", path)
+		return config, bosherr.WrapErrorf(err, "Reading config %s", path)
 	}
 
 	err = json.Unmarshal(bytes, &config)
@@ -52,11 +52,11 @@ func (c Config) Validate() error {
 
 func (c SoftLayerConfig) Validate() error {
 	if c.Username == "" {
-		return bosherr.New("Must provide non-empty Username")
+		return bosherr.Error("Must provide non-empty Username")
 	}
 
 	if c.ApiKey == "" {
-		return bosherr.New("Must provide non-empty ApiKey")
+		return bosherr.Error("Must provide non-empty ApiKey")
 	}
 
 	return nil

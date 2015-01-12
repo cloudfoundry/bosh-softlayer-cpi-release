@@ -90,11 +90,11 @@ func (c SoftLayerCreator) resolveNetworkIP(networks Networks) (string, error) {
 
 	switch len(networks) {
 	case 0:
-		return "", bosherr.New("Expected exactly one network; received zero")
+		return "", bosherr.Error("Expected exactly one network; received zero")
 	case 1:
 		network = networks.First()
 	default:
-		return "", bosherr.New("Expected exactly one network; received multiple")
+		return "", bosherr.Error("Expected exactly one network; received multiple")
 	}
 
 	if network.IsDynamic() {

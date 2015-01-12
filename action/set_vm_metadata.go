@@ -21,13 +21,13 @@ func NewSetVMMetadata(vmFinder bslcvm.Finder) SetVMMetadata {
 func (a SetVMMetadata) Run(vmCID VMCID, metadata bslcvm.VMMetadata) (interface{}, error) {
 	vm, found, err := a.vmFinder.Find(int(vmCID))
 	if err != nil {
-		return nil, bosherr.WrapError(err, "Finding vm '%s'", vmCID)
+		return nil, bosherr.WrapErrorf(err, "Finding vm '%s'", vmCID)
 	}
 
 	if found {
 		err := vm.SetMetadata(metadata)
 		if err != nil {
-			return nil, bosherr.WrapError(err, "Setting metadata on vm '%s'", vmCID)
+			return nil, bosherr.WrapErrorf(err, "Setting metadata on vm '%s'", vmCID)
 		}
 	}
 

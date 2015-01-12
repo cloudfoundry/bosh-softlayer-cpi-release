@@ -17,13 +17,13 @@ func NewDeleteDisk(diskFinder bslcdisk.Finder) DeleteDisk {
 func (a DeleteDisk) Run(diskCID DiskCID) (interface{}, error) {
 	disk, found, err := a.diskFinder.Find(int(diskCID))
 	if err != nil {
-		return nil, bosherr.WrapError(err, "Finding disk '%s'", diskCID)
+		return nil, bosherr.WrapErrorf(err, "Finding disk '%s'", diskCID)
 	}
 
 	if found {
 		err := disk.Delete()
 		if err != nil {
-			return nil, bosherr.WrapError(err, "Deleting disk '%s'", diskCID)
+			return nil, bosherr.WrapErrorf(err, "Deleting disk '%s'", diskCID)
 		}
 	}
 

@@ -11,6 +11,10 @@ type StemcellCID int
 type VMCID int
 type DiskCID int
 
+func (stemcellCID StemcellCID) String() string {
+	return strconv.Itoa(int(stemcellCID))
+}
+
 func (stemcellCID *StemcellCID) UnmarshalJSON(data []byte) error {
 	if stemcellCID == nil {
 		return errors.New("StemcellCID: UnmarshalJSON on nil pointer")
@@ -29,6 +33,10 @@ func (stemcellCID *StemcellCID) UnmarshalJSON(data []byte) error {
 
 func (stemcellCID StemcellCID) MarshalJSON() ([]byte, error) {
 	return json.Marshal(int(stemcellCID))
+}
+
+func (vmCID VMCID) String() string {
+	return strconv.Itoa(int(vmCID))
 }
 
 func (vmCID *VMCID) UnmarshalJSON(data []byte) error {
@@ -69,4 +77,8 @@ func (diskCID *DiskCID) UnmarshalJSON(data []byte) error {
 
 func (diskCID DiskCID) MarshalJSON() ([]byte, error) {
 	return json.Marshal(int(diskCID))
+}
+
+func (diskCID DiskCID) String() string {
+	return strconv.Itoa(int(diskCID))
 }
