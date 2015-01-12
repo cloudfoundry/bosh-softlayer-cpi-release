@@ -27,7 +27,7 @@ func (fs osFileSystem) HomeDir(username string) (homeDir string, err error) {
 
 	user, err := osuser.Lookup(username)
 	if err != nil {
-		err = bosherr.WrapError(err, "Looking up user %s", username)
+		err = bosherr.WrapErrorf(err, "Looking up user %s", username)
 		return
 	}
 	homeDir = user.HomeDir
@@ -46,7 +46,7 @@ func (fs osFileSystem) Chown(path, username string) (err error) {
 
 	user, err := osuser.Lookup(username)
 	if err != nil {
-		err = bosherr.WrapError(err, "Looking up user %s", username)
+		err = bosherr.WrapErrorf(err, "Looking up user %s", username)
 		return
 	}
 
@@ -75,7 +75,7 @@ func (fs osFileSystem) Chmod(path string, perm os.FileMode) (err error) {
 	return os.Chmod(path, perm)
 }
 
-func (fs osFileSystem) OpenFile(path string, flag int, perm os.FileMode) (ReadWriteCloseStater, error) {
+func (fs osFileSystem) OpenFile(path string, flag int, perm os.FileMode) (File, error) {
 	return os.OpenFile(path, flag, perm)
 }
 
@@ -93,7 +93,7 @@ func (fs osFileSystem) WriteFile(path string, content []byte) error {
 
 	file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
 	if err != nil {
-		return bosherr.WrapError(err, "Creating file %s", path)
+		return bosherr.WrapErrorf(err, "Creating file %s", path)
 	}
 
 	defer file.Close()
@@ -102,7 +102,7 @@ func (fs osFileSystem) WriteFile(path string, content []byte) error {
 
 	_, err = file.Write(content)
 	if err != nil {
-		return bosherr.WrapError(err, "Writing content to file %s", path)
+		return bosherr.WrapErrorf(err, "Writing content to file %s", path)
 	}
 
 	return nil
@@ -118,19 +118,19 @@ func (fs osFileSystem) ConvergeFileContents(path string, content []byte) (bool, 
 
 	err := fs.MkdirAll(filepath.Dir(path), os.ModePerm)
 	if err != nil {
-		return true, bosherr.WrapError(err, "Making dir for file %s", path)
+		return true, bosherr.WrapErrorf(err, "Making dir for file %s", path)
 	}
 
 	file, err := os.Create(path)
 	if err != nil {
-		return true, bosherr.WrapError(err, "Creating file %s", path)
+		return true, bosherr.WrapErrorf(err, "Creating file %s", path)
 	}
 
 	defer file.Close()
 
 	_, err = file.Write(content)
 	if err != nil {
-		return true, bosherr.WrapError(err, "Writing content to file %s", path)
+		return true, bosherr.WrapErrorf(err, "Writing content to file %s", path)
 	}
 
 	return true, nil
@@ -151,7 +151,7 @@ func (fs osFileSystem) ReadFile(path string) (content []byte, err error) {
 
 	file, err := os.Open(path)
 	if err != nil {
-		err = bosherr.WrapError(err, "Opening file %s", path)
+		err = bosherr.WrapErrorf(err, "Opening file %s", path)
 		return
 	}
 
@@ -159,7 +159,7 @@ func (fs osFileSystem) ReadFile(path string) (content []byte, err error) {
 
 	bytes, err := ioutil.ReadAll(file)
 	if err != nil {
-		err = bosherr.WrapError(err, "Reading file content %s", path)
+		err = bosherr.WrapErrorf(err, "Reading file content %s", path)
 		return
 	}
 
@@ -191,7 +191,7 @@ func (fs osFileSystem) Symlink(oldPath, newPath string) error {
 
 	actualOldPath, err := filepath.EvalSymlinks(oldPath)
 	if err != nil {
-		return bosherr.WrapError(err, "Evaluating symlinks for %s", oldPath)
+		return bosherr.WrapErrorf(err, "Evaluating symlinks for %s", oldPath)
 	}
 
 	existingTargetedPath, err := filepath.EvalSymlinks(newPath)
@@ -202,7 +202,7 @@ func (fs osFileSystem) Symlink(oldPath, newPath string) error {
 
 		err = os.Remove(newPath)
 		if err != nil {
-			return bosherr.WrapError(err, "Failed to delete symlimk at %s", newPath)
+			return bosherr.WrapErrorf(err, "Failed to delete symlimk at %s", newPath)
 		}
 	}
 
@@ -215,7 +215,7 @@ func (fs osFileSystem) Symlink(oldPath, newPath string) error {
 }
 
 func (fs osFileSystem) ReadLink(symlinkPath string) (targetPath string, err error) {
-	targetPath, err = os.Readlink(symlinkPath)
+	targetPath, err = filepath.EvalSymlinks(symlinkPath)
 	return
 }
 
@@ -243,7 +243,7 @@ func (fs osFileSystem) CopyFile(srcPath, dstPath string) error {
 	return nil
 }
 
-func (fs osFileSystem) TempFile(prefix string) (file *os.File, err error) {
+func (fs osFileSystem) TempFile(prefix string) (file File, err error) {
 	fs.logger.Debug(fs.logTag, "Creating temp file with prefix %s", prefix)
 	return ioutil.TempFile("", prefix)
 }
@@ -262,6 +262,10 @@ func (fs osFileSystem) RemoveAll(fileOrDir string) (err error) {
 func (fs osFileSystem) Glob(pattern string) (matches []string, err error) {
 	fs.logger.Debug(fs.logTag, "Glob '%s'", pattern)
 	return filepath.Glob(pattern)
+}
+
+func (fs osFileSystem) Walk(root string, walkFunc filepath.WalkFunc) error {
+	return filepath.Walk(root, walkFunc)
 }
 
 func (fs osFileSystem) filesAreIdentical(newContent []byte, filePath string) bool {

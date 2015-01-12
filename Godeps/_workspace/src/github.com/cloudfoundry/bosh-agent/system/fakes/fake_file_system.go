@@ -4,8 +4,10 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"sync"
 
@@ -57,13 +59,16 @@ type FakeFileSystem struct {
 	ReadLinkError error
 
 	TempFileError  error
-	ReturnTempFile *os.File
+	ReturnTempFile boshsys.File
 
 	TempDirDir   string
+	TempDirDirs  []string
 	TempDirError error
 
 	GlobErr  error
 	globsMap map[string][][]string
+
+	WalkErr error
 }
 
 type FakeFileStats struct {
@@ -90,15 +95,22 @@ func (fi FakeFileInfo) Size() int64 {
 	return int64(len(fi.file.Contents))
 }
 
+func (fi FakeFileInfo) IsDir() bool {
+	return fi.file.Stats.FileType == FakeFileTypeDir
+}
+
 type FakeFile struct {
 	path string
 	fs   *FakeFileSystem
+
+	Stats *FakeFileStats
 
 	WriteErr error
 	Contents []byte
 
 	ReadErr   error
 	ReadAtErr error
+	readIndex int64
 
 	CloseErr error
 
@@ -107,6 +119,10 @@ type FakeFile struct {
 
 func NewFakeFile(fs *FakeFileSystem) *FakeFile {
 	return &FakeFile{fs: fs}
+}
+
+func (f *FakeFile) Name() string {
+	return f.path
 }
 
 func (f *FakeFile) Write(contents []byte) (int, error) {
@@ -124,8 +140,12 @@ func (f *FakeFile) Write(contents []byte) (int, error) {
 	return len(contents), nil
 }
 
-func (f *FakeFile) Read(p []byte) (int, error) {
-	copy(p, f.Contents)
+func (f *FakeFile) Read(b []byte) (int, error) {
+	if f.readIndex >= int64(len(f.Contents)) {
+		return 0, io.EOF
+	}
+	copy(b, f.Contents)
+	f.readIndex = int64(len(f.Contents))
 	return len(f.Contents), f.ReadErr
 }
 
@@ -194,7 +214,7 @@ func (fs *FakeFileSystem) RegisterOpenFile(path string, file *FakeFile) {
 	fs.openFiles[path] = file
 }
 
-func (fs *FakeFileSystem) OpenFile(path string, flag int, perm os.FileMode) (boshsys.ReadWriteCloseStater, error) {
+func (fs *FakeFileSystem) OpenFile(path string, flag int, perm os.FileMode) (boshsys.File, error) {
 	fs.filesLock.Lock()
 	defer fs.filesLock.Unlock()
 
@@ -399,7 +419,7 @@ func (fs *FakeFileSystem) CopyFile(srcPath, dstPath string) error {
 	return nil
 }
 
-func (fs *FakeFileSystem) TempFile(prefix string) (file *os.File, err error) {
+func (fs *FakeFileSystem) TempFile(prefix string) (file boshsys.File, err error) {
 	fs.filesLock.Lock()
 	defer fs.filesLock.Unlock()
 
@@ -434,6 +454,12 @@ func (fs *FakeFileSystem) TempDir(prefix string) (string, error) {
 	var path string
 	if len(fs.TempDirDir) > 0 {
 		path = fs.TempDirDir
+	} else if fs.TempDirDirs != nil {
+		if len(fs.TempDirDirs) == 0 {
+			return "", errors.New("Failed to create new temp dir: TempDirDirs is empty")
+		}
+		path = fs.TempDirDirs[0]
+		fs.TempDirDirs = fs.TempDirDirs[1:]
 	} else {
 		uuid, err := gouuid.NewV4()
 		if err != nil {
@@ -484,7 +510,6 @@ func (fs *FakeFileSystem) removeAll(path string) error {
 			filesToRemove = append(filesToRemove, name)
 		}
 	}
-
 	for _, name := range filesToRemove {
 		delete(fs.files, name)
 	}
@@ -502,6 +527,29 @@ func (fs *FakeFileSystem) Glob(pattern string) (matches []string, err error) {
 		matches = []string{}
 	}
 	return matches, fs.GlobErr
+}
+
+func (fs *FakeFileSystem) Walk(root string, walkFunc filepath.WalkFunc) error {
+	var paths []string
+	for path := range fs.files {
+		paths = append(paths, path)
+	}
+	sort.Strings(paths)
+
+	for _, path := range paths {
+		fileStats := fs.files[path]
+		if strings.HasPrefix(path, root) {
+			fakeFile := NewFakeFile(fs)
+			fakeFile.Stats = fileStats
+			fileInfo, _ := fakeFile.Stat()
+			err := walkFunc(path, fileInfo, nil)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return fs.WalkErr
 }
 
 func (fs *FakeFileSystem) SetGlob(pattern string, matches ...[]string) {

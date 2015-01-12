@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"runtime/debug"
+	"strings"
 )
 
 type LogLevel int
@@ -17,6 +18,25 @@ const (
 	LevelError
 	LevelNone LogLevel = 99
 )
+
+var levels = map[string]LogLevel{
+	"DEBUG": LevelDebug,
+	"INFO":  LevelInfo,
+	"WARN":  LevelWarn,
+	"ERROR": LevelError,
+	"NONE":  LevelNone,
+}
+var levelKeys = []string{"DEBUG", "INFO", "WARN", "ERROR", "NONE"}
+
+func Levelify(levelString string) (LogLevel, error) {
+	upperLevelString := strings.ToUpper(levelString)
+	level, ok := levels[upperLevelString]
+	if !ok {
+		expected := strings.Join(levelKeys, ", ")
+		return level, fmt.Errorf("Unknown LogLevel string '%s', expected one of [%s]", levelString, expected)
+	}
+	return level, nil
+}
 
 type Logger struct {
 	level LogLevel
@@ -42,7 +62,6 @@ func (l Logger) Debug(tag, msg string, args ...interface{}) {
 	}
 
 	msg = fmt.Sprintf("DEBUG - %s", msg)
-	msg, args = l.formatError(msg, args)
 	l.getOutLogger(tag).Printf(msg, args...)
 }
 
@@ -59,7 +78,6 @@ func (l Logger) Info(tag, msg string, args ...interface{}) {
 	}
 
 	msg = fmt.Sprintf("INFO - %s", msg)
-	msg, args = l.formatError(msg, args)
 	l.getOutLogger(tag).Printf(msg, args...)
 }
 
@@ -69,7 +87,6 @@ func (l Logger) Warn(tag, msg string, args ...interface{}) {
 	}
 
 	msg = fmt.Sprintf("WARN - %s", msg)
-	msg, args = l.formatError(msg, args)
 	l.getErrLogger(tag).Printf(msg, args...)
 }
 
@@ -79,7 +96,6 @@ func (l Logger) Error(tag, msg string, args ...interface{}) {
 	}
 
 	msg = fmt.Sprintf("ERROR - %s", msg)
-	msg, args = l.formatError(msg, args)
 	l.getErrLogger(tag).Printf(msg, args...)
 }
 
@@ -124,17 +140,4 @@ func (l Logger) updateLogger(logger *log.Logger, tag string) *log.Logger {
 	prefix := fmt.Sprintf("[%s] ", tag)
 	logger.SetPrefix(prefix)
 	return logger
-}
-
-func (l Logger) formatError(msg string, args []interface{}) (string, []interface{}) {
-	numArgs := len(args)
-	if numArgs > 0 {
-		lastArg := args[numArgs-1]
-		argErr, ok := lastArg.(error)
-		if ok {
-			msg = msg + " - %s"
-			args[numArgs-1] = argErr.Error()
-		}
-	}
-	return msg, args
 }
