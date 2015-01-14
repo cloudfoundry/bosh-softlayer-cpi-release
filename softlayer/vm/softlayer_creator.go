@@ -51,6 +51,20 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 		BlockDeviceTemplateGroup: &sldatatypes.BlockDeviceTemplateGroup{
 			GlobalIdentifier: stemcell.Uuid(),
 		},
+		BlockDevices: []sldatatypes.BlockDevice{
+			sldatatypes.BlockDevice{
+				Device: "0",
+				DiskImage: sldatatypes.DiskImage{
+					Capacity: cloudProps.RootDiskSize,
+				},
+			},
+			sldatatypes.BlockDevice{
+				Device: "2",
+				DiskImage: sldatatypes.DiskImage{
+					Capacity: cloudProps.EphemeralDiskSize,
+				},
+			},
+		},
 		SshKeys:           cloudProps.SshKeys,
 		HourlyBillingFlag: true,
 		LocalDiskFlag:     true,

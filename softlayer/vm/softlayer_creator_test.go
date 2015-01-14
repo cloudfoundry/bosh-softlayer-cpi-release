@@ -63,7 +63,9 @@ var _ = Describe("SoftLayerCreator", func() {
 					BlockDeviceTemplateGroup: sldatatypes.BlockDeviceTemplateGroup{
 						GlobalIdentifier: "fake-uuid",
 					},
-					Datacenter: sldatatypes.Datacenter{Name: "fake-datacenter"},
+					RootDiskSize:      25,
+					EphemeralDiskSize: 25,
+					Datacenter:        sldatatypes.Datacenter{Name: "fake-datacenter"},
 				}
 				networks = Networks{}
 				env = Environment{}
@@ -109,10 +111,37 @@ var _ = Describe("SoftLayerCreator", func() {
 					Expect(err).To(HaveOccurred())
 				})
 
-				It("fails when VMProperties is missing MaxMemory", func() {
+				It("fails when VMProperties is missing Domain", func() {
 					cloudProps = VMCloudProperties{
 						StartCpus: 4,
 						MaxMemory: 1024,
+					}
+
+					_, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
+					Expect(err).To(HaveOccurred())
+				})
+
+				It("fails when RootDiskSize is negative", func() {
+					cloudProps = VMCloudProperties{
+						StartCpus:    4,
+						MaxMemory:    1024,
+						Domain:       "fake-domain",
+						Datacenter:   sldatatypes.Datacenter{Name: "fake-datacenter"},
+						RootDiskSize: -100,
+					}
+
+					_, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
+					Expect(err).To(HaveOccurred())
+				})
+
+				It("fails when Ephemeral DiskSize is negative", func() {
+					cloudProps = VMCloudProperties{
+						StartCpus:         4,
+						MaxMemory:         1024,
+						Domain:            "fake-domain",
+						Datacenter:        sldatatypes.Datacenter{Name: "fake-datacenter"},
+						RootDiskSize:      100,
+						EphemeralDiskSize: -100,
 					}
 
 					_, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
