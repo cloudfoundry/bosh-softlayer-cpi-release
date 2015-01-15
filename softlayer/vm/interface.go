@@ -14,6 +14,8 @@ type VMCloudProperties struct {
 	Datacenter               sldatatypes.Datacenter
 	BlockDeviceTemplateGroup sldatatypes.BlockDeviceTemplateGroup
 	SshKeys                  []sldatatypes.SshKey `json:"sshKeys"`
+	RootDiskSize             int                  `json:"rootDiskSize,omitempty"`
+	EphemeralDiskSize        int                  `json:"ephemeralDiskSize,omitempty"`
 }
 
 type VMMetadata struct {
