@@ -45,19 +45,25 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 		Domain:    cloudProps.Domain,
 		StartCpus: cloudProps.StartCpus,
 		MaxMemory: cloudProps.MaxMemory,
+
 		Datacenter: sldatatypes.Datacenter{
 			Name: cloudProps.Datacenter.Name,
 		},
+
 		BlockDeviceTemplateGroup: &sldatatypes.BlockDeviceTemplateGroup{
 			GlobalIdentifier: stemcell.Uuid(),
 		},
+
 		BlockDevices: []sldatatypes.BlockDevice{
+			// Device: 0 is root disk
 			sldatatypes.BlockDevice{
 				Device: "0",
 				DiskImage: sldatatypes.DiskImage{
 					Capacity: cloudProps.RootDiskSize,
 				},
 			},
+			// Device: 1 is pre-configured to swap
+			// Device: 2 is ephemeral disk
 			sldatatypes.BlockDevice{
 				Device: "2",
 				DiskImage: sldatatypes.DiskImage{
@@ -65,9 +71,12 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 				},
 			},
 		},
+
 		SshKeys:           cloudProps.SshKeys,
 		HourlyBillingFlag: true,
-		LocalDiskFlag:     true,
+
+		// Needed for ephemeral disk
+		LocalDiskFlag: true,
 	}
 
 	virtualGuestService, err := c.softLayerClient.GetSoftLayer_Virtual_Guest_Service()
