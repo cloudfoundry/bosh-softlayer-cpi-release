@@ -12,7 +12,7 @@ import (
 	"crypto/rand"
 	"fmt"
 
-	"golang.org/x/crypto/ssh/testdata"
+	"code.google.com/p/go.crypto/ssh/testdata"
 )
 
 var (

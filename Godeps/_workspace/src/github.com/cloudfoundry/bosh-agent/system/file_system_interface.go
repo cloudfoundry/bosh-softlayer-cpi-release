@@ -6,12 +6,10 @@ import (
 	"path/filepath"
 )
 
-//File is a subset of os.File
-type File interface {
+type ReadWriteCloseStater interface {
 	io.ReadWriteCloser
 	ReadAt([]byte, int64) (int, error)
 	Stat() (os.FileInfo, error)
-	Name() string
 }
 
 type FileSystem interface {
@@ -25,7 +23,7 @@ type FileSystem interface {
 	Chown(path, username string) (err error)
 	Chmod(path string, perm os.FileMode) (err error)
 
-	OpenFile(path string, flag int, perm os.FileMode) (File, error)
+	OpenFile(path string, flag int, perm os.FileMode) (ReadWriteCloseStater, error)
 
 	WriteFileString(path, content string) (err error)
 	WriteFile(path string, content []byte) (err error)
@@ -47,7 +45,7 @@ type FileSystem interface {
 	CopyFile(srcPath, dstPath string) (err error)
 
 	// Returns *unique* temporary file/dir with a custom prefix
-	TempFile(prefix string) (file File, err error)
+	TempFile(prefix string) (file *os.File, err error)
 	TempDir(prefix string) (path string, err error)
 
 	Glob(pattern string) (matches []string, err error)

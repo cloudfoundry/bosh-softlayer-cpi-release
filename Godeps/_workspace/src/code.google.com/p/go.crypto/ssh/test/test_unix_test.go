@@ -21,8 +21,8 @@ import (
 	"testing"
 	"text/template"
 
-	"golang.org/x/crypto/ssh"
-	"golang.org/x/crypto/ssh/testdata"
+	"code.google.com/p/go.crypto/ssh"
+	"code.google.com/p/go.crypto/ssh/testdata"
 )
 
 const sshd_config = `
@@ -224,9 +224,6 @@ func writeFile(path string, contents []byte) {
 
 // newServer returns a new mock ssh server.
 func newServer(t *testing.T) *server {
-	if testing.Short() {
-		t.Skip("skipping test due to -short")
-	}
 	dir, err := ioutil.TempDir("", "sshtest")
 	if err != nil {
 		t.Fatal(err)
