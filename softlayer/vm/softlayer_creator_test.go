@@ -163,6 +163,11 @@ func setFakeSoftLayerClientCreateObjectTestFixtures(fakeSoftLayerClient *fakeslc
 		"SoftLayer_Virtual_Guest_Service_configureMetadataDisk.json",
 
 		"SoftLayer_Virtual_Guest_Service_getPowerState.json",
+
+		"SoftLayer_Virtual_Guest_Service_getPowerState.json",
+		"SoftLayer_Virtual_Guest_Service_getActiveTransactions.json",
+		"SoftLayer_Virtual_Guest_Service_getUpgradeItemPrices.json",
+		"SoftLayer_Product_Order_Service_placeOrder.json",
 	}
 	common.SetTestFixturesForFakeSoftLayerClient(fakeSoftLayerClient, fileNames)
 }
