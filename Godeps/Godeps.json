@@ -7,28 +7,28 @@
 	"Deps": [
 		{
 			"ImportPath": "code.google.com/p/go.crypto/ssh",
-			"Comment": "null-213",
-			"Rev": "aa2644fe4aa50e3b38d75187b4799b1f0c9ddcef"
+			"Comment": "null-236",
+			"Rev": "69e2a90ed92d03812364aeb947b7068dc42e561e"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/bosh-agent/errors",
-			"Rev": "eca5c2172d70bd6c222d86b44bdf0955159d577c"
+			"Rev": "25cd42acbb16f5c4ba7a37089b6c1d921fd9320e"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/bosh-agent/logger",
-			"Rev": "eca5c2172d70bd6c222d86b44bdf0955159d577c"
+			"Rev": "25cd42acbb16f5c4ba7a37089b6c1d921fd9320e"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/bosh-agent/platform/commands",
-			"Rev": "eca5c2172d70bd6c222d86b44bdf0955159d577c"
+			"Rev": "25cd42acbb16f5c4ba7a37089b6c1d921fd9320e"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/bosh-agent/system",
-			"Rev": "eca5c2172d70bd6c222d86b44bdf0955159d577c"
+			"Rev": "25cd42acbb16f5c4ba7a37089b6c1d921fd9320e"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/bosh-agent/uuid/fakes",
-			"Rev": "eca5c2172d70bd6c222d86b44bdf0955159d577c"
+			"Rev": "25cd42acbb16f5c4ba7a37089b6c1d921fd9320e"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/gofileutils/glob",
@@ -70,7 +70,8 @@
 		},
 		{
 			"ImportPath": "github.com/onsi/gomega",
-			"Rev": "d53f20ed6065e75dd459ceb4904b3e0a5cadbf0d"
+			"Comment": "v1.0-28-g8adf9e1",
+			"Rev": "8adf9e1730c55cdc590de7d49766cb2acc88d8f2"
 		}
 	]
 }

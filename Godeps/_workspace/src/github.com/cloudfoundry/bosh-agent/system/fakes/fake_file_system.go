@@ -59,9 +59,10 @@ type FakeFileSystem struct {
 	ReadLinkError error
 
 	TempFileError  error
-	ReturnTempFile *os.File
+	ReturnTempFile boshsys.File
 
 	TempDirDir   string
+	TempDirDirs  []string
 	TempDirError error
 
 	GlobErr  error
@@ -118,6 +119,10 @@ type FakeFile struct {
 
 func NewFakeFile(fs *FakeFileSystem) *FakeFile {
 	return &FakeFile{fs: fs}
+}
+
+func (f *FakeFile) Name() string {
+	return f.path
 }
 
 func (f *FakeFile) Write(contents []byte) (int, error) {
@@ -209,7 +214,7 @@ func (fs *FakeFileSystem) RegisterOpenFile(path string, file *FakeFile) {
 	fs.openFiles[path] = file
 }
 
-func (fs *FakeFileSystem) OpenFile(path string, flag int, perm os.FileMode) (boshsys.ReadWriteCloseStater, error) {
+func (fs *FakeFileSystem) OpenFile(path string, flag int, perm os.FileMode) (boshsys.File, error) {
 	fs.filesLock.Lock()
 	defer fs.filesLock.Unlock()
 
@@ -414,7 +419,7 @@ func (fs *FakeFileSystem) CopyFile(srcPath, dstPath string) error {
 	return nil
 }
 
-func (fs *FakeFileSystem) TempFile(prefix string) (file *os.File, err error) {
+func (fs *FakeFileSystem) TempFile(prefix string) (file boshsys.File, err error) {
 	fs.filesLock.Lock()
 	defer fs.filesLock.Unlock()
 
@@ -449,6 +454,12 @@ func (fs *FakeFileSystem) TempDir(prefix string) (string, error) {
 	var path string
 	if len(fs.TempDirDir) > 0 {
 		path = fs.TempDirDir
+	} else if fs.TempDirDirs != nil {
+		if len(fs.TempDirDirs) == 0 {
+			return "", errors.New("Failed to create new temp dir: TempDirDirs is empty")
+		}
+		path = fs.TempDirDirs[0]
+		fs.TempDirDirs = fs.TempDirDirs[1:]
 	} else {
 		uuid, err := gouuid.NewV4()
 		if err != nil {
