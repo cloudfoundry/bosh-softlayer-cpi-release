@@ -46,6 +46,7 @@ type NetworkSpec struct {
 }
 
 type DisksSpec struct {
+	Ephemeral  string         `json:"ephemeral"`
 	Persistent PersistentSpec `json:"persistent"`
 }
 
@@ -103,6 +104,10 @@ func NewAgentEnvForVM(agentID, vmCID string, networks Networks, env Environment,
 		Blobstore: BlobstoreSpec{
 			Provider: agentOptions.Blobstore.Type,
 			Options:  agentOptions.Blobstore.Options,
+		},
+
+		Disks: DisksSpec{
+			Ephemeral: "/dev/xvdc",
 		},
 
 		Networks: networksSpec,
