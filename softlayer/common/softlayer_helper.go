@@ -15,6 +15,30 @@ var (
 	MAX_RETRY_COUNT  int
 )
 
+func AttachEphemeralDiskToVirtualGuest(softLayerClient sl.Client, virtualGuestId int, diskSize int, timeout, pollingInterval time.Duration) error {
+	err := WaitForVirtualGuest(softLayerClient, virtualGuestId, "RUNNING", timeout, pollingInterval)
+	if err != nil {
+		return bosherr.WrapError(err, fmt.Sprintf("Waiting for VirtualGuest `%d`", virtualGuestId))
+	}
+
+	err = WaitForVirtualGuestToHaveNoRunningTransactions(softLayerClient, virtualGuestId, timeout, pollingInterval)
+	if err != nil {
+		return bosherr.WrapError(err, fmt.Sprintf("Waiting for VirtualGuest `%d` to have no pending transactions", virtualGuestId))
+	}
+
+	service, err := softLayerClient.GetSoftLayer_Virtual_Guest_Service()
+	if err != nil {
+		return bosherr.WrapError(err, fmt.Sprintf("Attaching ephemeral disk to VirtualGuest `%d`", virtualGuestId))
+	}
+
+	err = service.AttachEphemeralDisk(virtualGuestId, diskSize)
+	if err != nil {
+		return bosherr.WrapError(err, fmt.Sprintf("Attaching ephemeral disk to VirtualGuest `%d`", virtualGuestId))
+	}
+
+	return nil
+}
+
 func ConfigureMetadataOnVirtualGuest(softLayerClient sl.Client, virtualGuestId int, metadata string, timeout, pollingInterval time.Duration) error {
 	err := WaitForVirtualGuest(softLayerClient, virtualGuestId, "RUNNING", timeout, pollingInterval)
 	if err != nil {
