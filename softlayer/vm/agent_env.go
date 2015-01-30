@@ -70,7 +70,7 @@ func NewAgentEnvFromJSON(bytes []byte) (AgentEnv, error) {
 	return agentEnv, nil
 }
 
-func NewAgentEnvForVM(agentID, vmCID string, networks Networks, env Environment, agentOptions AgentOptions) AgentEnv {
+func NewAgentEnvForVM(agentID, vmCID string, networks Networks, disksSpec DisksSpec, env Environment, agentOptions AgentOptions) AgentEnv {
 	networksSpec := NetworksSpec{}
 
 	for netName, network := range networks {
@@ -106,9 +106,7 @@ func NewAgentEnvForVM(agentID, vmCID string, networks Networks, env Environment,
 			Options:  agentOptions.Blobstore.Options,
 		},
 
-		Disks: DisksSpec{
-			Ephemeral: "/dev/xvdc",
-		},
+		Disks: disksSpec,
 
 		Networks: networksSpec,
 

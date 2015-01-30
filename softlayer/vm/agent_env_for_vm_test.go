@@ -26,6 +26,8 @@ var _ = Describe("NewAgentEnvForVM", func() {
 			},
 		}
 
+		disks := DisksSpec{Ephemeral: "/dev/xvdc"}
+
 		env := Environment{"fake-env-key": "fake-env-value"}
 
 		agentOptions := AgentOptions{
@@ -44,6 +46,7 @@ var _ = Describe("NewAgentEnvForVM", func() {
 			"fake-agent-id",
 			"fake-vm-id",
 			networks,
+			disks,
 			env,
 			agentOptions,
 		)
@@ -84,6 +87,10 @@ var _ = Describe("NewAgentEnvForVM", func() {
 						"fake-cp-key": "fake-cp-value",
 					},
 				},
+			},
+
+			Disks: DisksSpec{
+				Ephemeral: "/dev/xvdc",
 			},
 
 			Env: map[string]interface{}{

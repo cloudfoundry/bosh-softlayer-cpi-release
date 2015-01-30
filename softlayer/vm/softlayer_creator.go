@@ -71,7 +71,10 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 		return SoftLayerVM{}, bosherr.WrapError(err, "Creating VirtualGuest from SoftLayer client")
 	}
 
-	agentEnv := NewAgentEnvForVM(agentID, strconv.Itoa(virtualGuest.Id), networks, env, c.agentOptions)
+	//TODO: need to find or ensure the name for the ephemeral disk for SoftLayer VG
+	disks := DisksSpec{Ephemeral: "/dev/xvdc"}
+
+	agentEnv := NewAgentEnvForVM(agentID, strconv.Itoa(virtualGuest.Id), networks, disks, env, c.agentOptions)
 
 	metadata, err := json.Marshal(agentEnv)
 	if err != nil {
