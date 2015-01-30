@@ -46,6 +46,7 @@ type NetworkSpec struct {
 }
 
 type DisksSpec struct {
+	Ephemeral  string         `json:"ephemeral"`
 	Persistent PersistentSpec `json:"persistent"`
 }
 
@@ -69,7 +70,7 @@ func NewAgentEnvFromJSON(bytes []byte) (AgentEnv, error) {
 	return agentEnv, nil
 }
 
-func NewAgentEnvForVM(agentID, vmCID string, networks Networks, env Environment, agentOptions AgentOptions) AgentEnv {
+func NewAgentEnvForVM(agentID, vmCID string, networks Networks, disksSpec DisksSpec, env Environment, agentOptions AgentOptions) AgentEnv {
 	networksSpec := NetworksSpec{}
 
 	for netName, network := range networks {
@@ -104,6 +105,8 @@ func NewAgentEnvForVM(agentID, vmCID string, networks Networks, env Environment,
 			Provider: agentOptions.Blobstore.Type,
 			Options:  agentOptions.Blobstore.Options,
 		},
+
+		Disks: disksSpec,
 
 		Networks: networksSpec,
 

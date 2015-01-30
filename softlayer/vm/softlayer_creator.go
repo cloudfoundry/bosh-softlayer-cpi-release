@@ -54,24 +54,6 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 			GlobalIdentifier: stemcell.Uuid(),
 		},
 
-		BlockDevices: []sldatatypes.BlockDevice{
-			// Device: 0 is root disk
-			sldatatypes.BlockDevice{
-				Device: "0",
-				DiskImage: sldatatypes.DiskImage{
-					Capacity: cloudProps.RootDiskSize,
-				},
-			},
-			// Device: 1 is pre-configured to swap
-			// Device: 2 is ephemeral disk
-			sldatatypes.BlockDevice{
-				Device: "2",
-				DiskImage: sldatatypes.DiskImage{
-					Capacity: cloudProps.EphemeralDiskSize,
-				},
-			},
-		},
-
 		SshKeys:           cloudProps.SshKeys,
 		HourlyBillingFlag: true,
 
@@ -89,7 +71,10 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 		return SoftLayerVM{}, bosherr.WrapError(err, "Creating VirtualGuest from SoftLayer client")
 	}
 
-	agentEnv := NewAgentEnvForVM(agentID, strconv.Itoa(virtualGuest.Id), networks, env, c.agentOptions)
+	//TODO: need to find or ensure the name for the ephemeral disk for SoftLayer VG
+	disks := DisksSpec{Ephemeral: "/dev/xvdc"}
+
+	agentEnv := NewAgentEnvForVM(agentID, strconv.Itoa(virtualGuest.Id), networks, disks, env, c.agentOptions)
 
 	metadata, err := json.Marshal(agentEnv)
 	if err != nil {

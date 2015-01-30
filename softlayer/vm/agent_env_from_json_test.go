@@ -34,9 +34,7 @@ var _ = Describe("NewAgentEnvFromJSON", func() {
         },
 
         "disks": {
-          "persistent": {
-            "fake-persistent-id": "fake-persistent-path"
-          }
+          "ephemeral": "/dev/xvdc"
         },
 
         "env": {"fake-env-key": "fake-env-value"}
@@ -68,9 +66,7 @@ var _ = Describe("NewAgentEnvFromJSON", func() {
 				},
 
 				Disks: DisksSpec{
-					Persistent: PersistentSpec{
-						"fake-persistent-id": "fake-persistent-path",
-					},
+					Ephemeral: "/dev/xvdc",
 				},
 
 				Env: map[string]interface{}{
