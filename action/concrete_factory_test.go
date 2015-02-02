@@ -125,13 +125,10 @@ var _ = Describe("concreteFactory", func() {
 		})
 	})
 
-	//TODO: implement when disk methods and actions are added
-	XContext("Disk methods", func() {
+	Context("Disk methods", func() {
 		It("create_disk", func() {
-			diskCreator := bslcdisk.NewFSCreator(
-				"/tmp/disks",
-				fs,
-				cmdRunner,
+			diskCreator := bslcdisk.NewSoftLayerDiskCreator(
+				softLayerClient,
 				logger,
 			)
 
@@ -140,19 +137,19 @@ var _ = Describe("concreteFactory", func() {
 			Expect(action).To(Equal(NewCreateDisk(diskCreator)))
 		})
 
-		It("delete_disk", func() {
+		XIt("delete_disk", func() {
 			action, err := factory.Create("delete_disk")
 			Expect(err).ToNot(HaveOccurred())
 			Expect(action).To(BeNil())
 		})
 
-		It("attach_disk", func() {
+		XIt("attach_disk", func() {
 			action, err := factory.Create("attach_disk")
 			Expect(err).ToNot(HaveOccurred())
 			Expect(action).To(BeNil())
 		})
 
-		It("detach_disk", func() {
+		XIt("detach_disk", func() {
 			action, err := factory.Create("detach_disk")
 			Expect(err).ToNot(HaveOccurred())
 			Expect(action).To(BeNil())

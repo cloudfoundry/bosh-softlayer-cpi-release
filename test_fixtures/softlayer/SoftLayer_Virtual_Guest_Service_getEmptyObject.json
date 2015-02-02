@@ -1,0 +1,14 @@
+{
+	"id": 0,
+	"location": {
+		"id": 0
+	},
+	"operatingSystem": {
+		"passwords": [
+			{
+				"username": "",
+				"password": ""
+			}
+		]
+	}
+}

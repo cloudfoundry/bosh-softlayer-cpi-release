@@ -1,0 +1,17 @@
+[
+	{
+		"id": 1234,
+		"username": "fake-user",
+		"password": "fake-password",
+		"capacityGb": 20,
+		"serviceResourceBackendIpAddress": "fake-ip",
+		"billingItem": {
+			"id": 123,
+			"orderItem": {
+				"order": {
+					"id": 123
+				}
+			}
+		}
+	}
+]
