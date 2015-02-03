@@ -31,7 +31,7 @@ var _ = Describe("FSFinder", func() {
 			Expect(err).ToNot(HaveOccurred())
 			Expect(found).To(BeTrue())
 
-			expectedDisk := NewFSDisk(1234, "/fake-disks-dir/fake-disk-id", fs, logger)
+			expectedDisk := NewSoftLayerDisk(1234, logger)
 			Expect(disk).To(Equal(expectedDisk))
 		})
 

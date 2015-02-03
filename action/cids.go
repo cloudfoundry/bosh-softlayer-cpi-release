@@ -39,6 +39,10 @@ func (vmCID VMCID) String() string {
 	return strconv.Itoa(int(vmCID))
 }
 
+func (vmCID VMCID) Int() int {
+	return int(vmCID)
+}
+
 func (vmCID *VMCID) UnmarshalJSON(data []byte) error {
 	if vmCID == nil {
 		return errors.New("VMCID: UnmarshalJSON on nil pointer")
