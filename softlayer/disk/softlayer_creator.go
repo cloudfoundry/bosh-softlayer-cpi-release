@@ -46,5 +46,5 @@ func (c SoftLayerCreator) Create(size int, virtualGuestId int) (Disk, error) {
 		return SoftLayerDisk{}, bosherr.WrapError(err, "Create SoftLayer iSCSI disk error.")
 	}
 
-	return NewSoftLayerDisk(disk.Id, c.logger), nil
+	return NewSoftLayerDisk(disk.Id, c.softLayerClient, c.logger), nil
 }
