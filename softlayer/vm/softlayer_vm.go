@@ -97,7 +97,15 @@ func (vm SoftLayerVM) ConfigureNetworks(networks Networks) error {
 }
 
 func (vm SoftLayerVM) AttachDisk(disk bslcdisk.Disk) error {
-	vm.logger.Info(softLayerVMtag, "Not yet implemented!")
+	service, err := vm.softLayerClient.GetSoftLayer_Virtual_Guest_Service()
+	if err != nil {
+		return bosherr.WrapError(err, "Can not get virtual guest service.")
+	}
+
+	_, err = service.AttachIscsiVolume(vm.ID(), disk.ID())
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Failed to attach iSCSI volume with id %d to the virtual guest with id %d", vm.ID(), disk.ID())
+	}
 
 	return nil
 }
