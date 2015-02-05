@@ -12,10 +12,6 @@ func NewFakeDisk(id int) *FakeDisk {
 	return &FakeDisk{id: id}
 }
 
-func NewFakeDiskWithPath(id int, path string) *FakeDisk {
-	return &FakeDisk{id: id, path: path}
-}
-
 func (s FakeDisk) ID() int { return s.id }
 
 func (s FakeDisk) Path() string { return s.path }

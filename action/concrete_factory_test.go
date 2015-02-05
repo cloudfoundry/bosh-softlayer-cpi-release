@@ -126,38 +126,50 @@ var _ = Describe("concreteFactory", func() {
 	})
 
 	Context("Disk methods", func() {
-		It("create_disk", func() {
-			diskCreator := bslcdisk.NewSoftLayerDiskCreator(
+		var (
+			vmFinder    bslcvm.Finder
+			diskFinder  bslcdisk.Finder
+			diskCreator bslcdisk.Creator
+		)
+
+		BeforeEach(func() {
+			vmFinder = bslcvm.NewSoftLayerFinder(
+				softLayerClient,
+				agentEnvServiceFactory,
+				logger,
+			)
+			diskFinder = bslcdisk.NewSoftLayerDiskFinder(
 				softLayerClient,
 				logger,
 			)
+			diskCreator = bslcdisk.NewSoftLayerDiskCreator(
+				softLayerClient,
+				logger,
+			)
+		})
 
+		It("creates an iSCSI disk", func() {
 			action, err := factory.Create("create_disk")
 			Expect(err).ToNot(HaveOccurred())
 			Expect(action).To(Equal(NewCreateDisk(diskCreator)))
 		})
 
-		It("delete_disk", func() {
-			diskFinder := bslcdisk.NewSoftLayerDiskFinder(
-				softLayerClient,
-				logger,
-			)
-
+		It("deletes the detached iSCSI disk", func() {
 			action, err := factory.Create("delete_disk")
 			Expect(err).ToNot(HaveOccurred())
 			Expect(action).To(Equal(NewDeleteDisk(diskFinder)))
 		})
 
-		XIt("attach_disk", func() {
+		It("attaches an iSCSI disk to a virtual guest", func() {
 			action, err := factory.Create("attach_disk")
 			Expect(err).ToNot(HaveOccurred())
-			Expect(action).To(BeNil())
+			Expect(action).To(Equal(NewAttachDisk(vmFinder, diskFinder)))
 		})
 
-		XIt("detach_disk", func() {
+		It("detaches the iSCSI disk from virtual guest", func() {
 			action, err := factory.Create("detach_disk")
 			Expect(err).ToNot(HaveOccurred())
-			Expect(action).To(BeNil())
+			Expect(action).To(Equal(NewDetachDisk(vmFinder, diskFinder)))
 		})
 	})
 

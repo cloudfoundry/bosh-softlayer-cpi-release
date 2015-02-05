@@ -22,7 +22,7 @@ var _ = Describe("SoftLayerDisk", func() {
 		disk = NewSoftLayerDisk(1234, fc, logger)
 	})
 
-	Describe("Delete", func() {
+	Describe("#Delete", func() {
 		It("deletes an iSCSI disk successfully", func() {
 			fileNames := []string{
 				"SoftLayer_Account_Service_getIscsiVolume.json",

@@ -1,15 +1,18 @@
 package vm_test
 
 import (
+	"errors"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
 	. "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
 
-	common "github.com/maximilien/bosh-softlayer-cpi/common"
-
 	boshlog "github.com/cloudfoundry/bosh-agent/logger"
+	common "github.com/maximilien/bosh-softlayer-cpi/common"
+	disk "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk"
 
+	fakedisk "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk/fakes"
 	fakevm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm/fakes"
 	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
 )
@@ -153,11 +156,63 @@ var _ = Describe("SoftLayerVM", func() {
 		})
 	})
 
-	Describe("AttachDisk", func() {
-		//TODO: when disk support added to softlayer-go and to CPI
+	Describe("#AttachDisk", func() {
+		var (
+			disk disk.Disk
+		)
+
+		BeforeEach(func() {
+			disk = fakedisk.NewFakeDisk(1234)
+			vm = NewSoftLayerVM(1234567, softLayerClient, agentEnvService, logger)
+			fileNames := []string{
+				"SoftLayer_Virtual_Guest_Service_getObject.json",
+				"SoftLayer_Network_Storage_Service_getIscsiVolume.json",
+			}
+			common.SetTestFixturesForFakeSoftLayerClient(softLayerClient, fileNames)
+		})
+
+		It("attaches the iSCSI volume successfully", func() {
+			softLayerClient.ExecShellCommandResult = "fake-user\nfake-devicename"
+
+			err := vm.AttachDisk(disk)
+			Expect(err).ToNot(HaveOccurred())
+		})
+
+		It("reports error when failed to attach the iSCSI volume", func() {
+			softLayerClient.ExecShellCommandError = errors.New("fake-error")
+
+			err := vm.AttachDisk(disk)
+			Expect(err).To(HaveOccurred())
+		})
 	})
 
-	Describe("DetachDisk", func() {
-		//TODO: when disk support added to softlayer-go and to CPI
+	Describe("#DetachDisk", func() {
+		var (
+			disk disk.Disk
+		)
+
+		BeforeEach(func() {
+			disk = fakedisk.NewFakeDisk(1234)
+			vm = NewSoftLayerVM(1234567, softLayerClient, agentEnvService, logger)
+			fileNames := []string{
+				"SoftLayer_Virtual_Guest_Service_getObject.json",
+				"SoftLayer_Network_Storage_Service_getIscsiVolume.json",
+			}
+			common.SetTestFixturesForFakeSoftLayerClient(softLayerClient, fileNames)
+		})
+
+		It("detaches the iSCSI volume successfully", func() {
+			softLayerClient.ExecShellCommandResult = "fake-user\nfake-devicename"
+
+			err := vm.DetachDisk(disk)
+			Expect(err).ToNot(HaveOccurred())
+		})
+
+		It("reports error when failed to detach the iSCSI volume", func() {
+			softLayerClient.ExecShellCommandError = errors.New("fake-error")
+
+			err := vm.DetachDisk(disk)
+			Expect(err).To(HaveOccurred())
+		})
 	})
 })
