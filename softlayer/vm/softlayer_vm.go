@@ -111,7 +111,15 @@ func (vm SoftLayerVM) AttachDisk(disk bslcdisk.Disk) error {
 }
 
 func (vm SoftLayerVM) DetachDisk(disk bslcdisk.Disk) error {
-	vm.logger.Info(softLayerVMtag, "Not yet implemented!")
+	service, err := vm.softLayerClient.GetSoftLayer_Virtual_Guest_Service()
+	if err != nil {
+		return bosherr.WrapError(err, "Can not get virtual guest service.")
+	}
+
+	err = service.DetachIscsiVolume(vm.ID(), disk.ID())
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Failed to detach iSCSI volume with id %d to the virtual guest with id %d", vm.ID(), disk.ID())
+	}
 
 	return nil
 }

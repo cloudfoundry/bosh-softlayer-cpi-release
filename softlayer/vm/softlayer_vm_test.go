@@ -186,7 +186,33 @@ var _ = Describe("SoftLayerVM", func() {
 		})
 	})
 
-	XDescribe("#DetachDisk", func() {
+	Describe("#DetachDisk", func() {
+		var (
+			disk disk.Disk
+		)
 
+		BeforeEach(func() {
+			disk = fakedisk.NewFakeDisk(1234)
+			vm = NewSoftLayerVM(1234567, softLayerClient, agentEnvService, logger)
+			fileNames := []string{
+				"SoftLayer_Virtual_Guest_Service_getObject.json",
+				"SoftLayer_Network_Storage_Service_getIscsiVolume.json",
+			}
+			common.SetTestFixturesForFakeSoftLayerClient(softLayerClient, fileNames)
+		})
+
+		It("detaches the iSCSI volume successfully", func() {
+			softLayerClient.ExecShellCommandResult = "fake-user\nfake-devicename"
+
+			err := vm.DetachDisk(disk)
+			Expect(err).ToNot(HaveOccurred())
+		})
+
+		It("reports error when failed to detach the iSCSI volume", func() {
+			softLayerClient.ExecShellCommandError = errors.New("fake-error")
+
+			err := vm.DetachDisk(disk)
+			Expect(err).To(HaveOccurred())
+		})
 	})
 })

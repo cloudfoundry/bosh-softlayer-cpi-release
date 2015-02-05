@@ -166,10 +166,10 @@ var _ = Describe("concreteFactory", func() {
 			Expect(action).To(Equal(NewAttachDisk(vmFinder, diskFinder)))
 		})
 
-		XIt("detaches the iSCSI disk from virtual guest", func() {
+		It("detaches the iSCSI disk from virtual guest", func() {
 			action, err := factory.Create("detach_disk")
 			Expect(err).ToNot(HaveOccurred())
-			Expect(action).To(BeNil())
+			Expect(action).To(Equal(NewDetachDisk(vmFinder, diskFinder)))
 		})
 	})
 
