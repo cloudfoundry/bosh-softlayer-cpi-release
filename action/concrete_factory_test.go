@@ -137,10 +137,15 @@ var _ = Describe("concreteFactory", func() {
 			Expect(action).To(Equal(NewCreateDisk(diskCreator)))
 		})
 
-		XIt("delete_disk", func() {
+		It("delete_disk", func() {
+			diskFinder := bslcdisk.NewSoftLayerDiskFinder(
+				softLayerClient,
+				logger,
+			)
+
 			action, err := factory.Create("delete_disk")
 			Expect(err).ToNot(HaveOccurred())
-			Expect(action).To(BeNil())
+			Expect(action).To(Equal(NewDeleteDisk(diskFinder)))
 		})
 
 		XIt("attach_disk", func() {

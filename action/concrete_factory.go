@@ -42,6 +42,11 @@ func NewConcreteFactory(softLayerClient sl.Client, options ConcreteFactoryOption
 		logger,
 	)
 
+	diskFinder := bslcdisk.NewSoftLayerDiskFinder(
+		softLayerClient,
+		logger,
+	)
+
 	return concreteFactory{
 		availableActions: map[string]Action{
 			// Stemcell management
@@ -58,7 +63,7 @@ func NewConcreteFactory(softLayerClient sl.Client, options ConcreteFactoryOption
 
 			// Disk management
 			"create_disk": NewCreateDisk(diskCreator),
-			"delete_disk": NewDeleteDisk(nil),
+			"delete_disk": NewDeleteDisk(diskFinder),
 			"attach_disk": NewAttachDisk(vmFinder, nil),
 			"detach_disk": NewDetachDisk(vmFinder, nil),
 

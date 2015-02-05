@@ -86,3 +86,7 @@ func (diskCID DiskCID) MarshalJSON() ([]byte, error) {
 func (diskCID DiskCID) String() string {
 	return strconv.Itoa(int(diskCID))
 }
+
+func (diskCID DiskCID) Int() int {
+	return int(diskCID)
+}

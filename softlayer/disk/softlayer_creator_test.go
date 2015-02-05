@@ -40,7 +40,7 @@ var _ = Describe("SoftLayerCreator", func() {
 				disk, err := creator.Create(20, 123)
 				Expect(err).ToNot(HaveOccurred())
 
-				expectedDisk := NewSoftLayerDisk(1234, logger)
+				expectedDisk := NewSoftLayerDisk(1234, fc, logger)
 				Expect(disk).To(Equal(expectedDisk))
 			})
 		})
