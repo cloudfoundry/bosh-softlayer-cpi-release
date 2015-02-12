@@ -1,22 +1,27 @@
 package vm_test
 
 import (
+	"errors"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
 	. "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
 
-	common "github.com/maximilien/bosh-softlayer-cpi/common"
-
 	boshlog "github.com/cloudfoundry/bosh-agent/logger"
+	common "github.com/maximilien/bosh-softlayer-cpi/common"
+	disk "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk"
 
+	fakedisk "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk/fakes"
 	fakevm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm/fakes"
+	fakesutil "github.com/maximilien/bosh-softlayer-cpi/util/fakes"
 	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
 )
 
 var _ = Describe("SoftLayerVM", func() {
 	var (
 		softLayerClient *fakeslclient.FakeSoftLayerClient
+		sshClient       *fakesutil.FakeSshClient
 		agentEnvService *fakevm.FakeAgentEnvService
 		logger          boshlog.Logger
 		vm              SoftLayerVM
@@ -28,14 +33,14 @@ var _ = Describe("SoftLayerVM", func() {
 		agentEnvService = &fakevm.FakeAgentEnvService{}
 		logger = boshlog.NewLogger(boshlog.LevelNone)
 
-		vm = NewSoftLayerVM(1234, softLayerClient, agentEnvService, logger)
+		vm = NewSoftLayerVM(1234, softLayerClient, sshClient, agentEnvService, logger)
 	})
 
 	Describe("Delete", func() {
 		Context("valid VM ID is used", func() {
 			BeforeEach(func() {
 				softLayerClient.DoRawHttpRequestResponse = []byte("true")
-				vm = NewSoftLayerVM(1234567, softLayerClient, agentEnvService, logger)
+				vm = NewSoftLayerVM(1234567, softLayerClient, sshClient, agentEnvService, logger)
 			})
 
 			It("deletes the VM successfully", func() {
@@ -47,7 +52,7 @@ var _ = Describe("SoftLayerVM", func() {
 		Context("invalid VM ID is used", func() {
 			BeforeEach(func() {
 				softLayerClient.DoRawHttpRequestResponse = []byte("false")
-				vm = NewSoftLayerVM(00000, softLayerClient, agentEnvService, logger)
+				vm = NewSoftLayerVM(00000, softLayerClient, sshClient, agentEnvService, logger)
 			})
 
 			It("fails deleting the VM", func() {
@@ -61,7 +66,7 @@ var _ = Describe("SoftLayerVM", func() {
 		Context("valid VM ID is used", func() {
 			BeforeEach(func() {
 				softLayerClient.DoRawHttpRequestResponse = []byte("true")
-				vm = NewSoftLayerVM(1234567, softLayerClient, agentEnvService, logger)
+				vm = NewSoftLayerVM(1234567, softLayerClient, sshClient, agentEnvService, logger)
 			})
 
 			It("reboots the VM successfully", func() {
@@ -73,7 +78,7 @@ var _ = Describe("SoftLayerVM", func() {
 		Context("invalid VM ID is used", func() {
 			BeforeEach(func() {
 				softLayerClient.DoRawHttpRequestResponse = []byte("false")
-				vm = NewSoftLayerVM(00000, softLayerClient, agentEnvService, logger)
+				vm = NewSoftLayerVM(00000, softLayerClient, sshClient, agentEnvService, logger)
 			})
 
 			It("fails rebooting the VM", func() {
@@ -102,7 +107,7 @@ var _ = Describe("SoftLayerVM", func() {
 				common.SetTestFixturesForFakeSoftLayerClient(softLayerClient, fileNames)
 
 				metadata = VMMetadata{}
-				vm = NewSoftLayerVM(1234567, softLayerClient, agentEnvService, logger)
+				vm = NewSoftLayerVM(1234567, softLayerClient, sshClient, agentEnvService, logger)
 			})
 
 			It("sets the vm metadata successfully", func() {
@@ -125,7 +130,7 @@ var _ = Describe("SoftLayerVM", func() {
 				common.SetTestFixturesForFakeSoftLayerClient(softLayerClient, fileNames)
 
 				metadata = VMMetadata{}
-				vm = NewSoftLayerVM(00000, softLayerClient, agentEnvService, logger)
+				vm = NewSoftLayerVM(00000, softLayerClient, sshClient, agentEnvService, logger)
 			})
 
 			It("fails setting the vm metadata", func() {
@@ -142,7 +147,7 @@ var _ = Describe("SoftLayerVM", func() {
 
 		BeforeEach(func() {
 			networks = Networks{}
-			vm = NewSoftLayerVM(1234567, softLayerClient, agentEnvService, logger)
+			vm = NewSoftLayerVM(1234567, softLayerClient, sshClient, agentEnvService, logger)
 		})
 
 		It("returns NotSupportedError", func() {
@@ -153,11 +158,63 @@ var _ = Describe("SoftLayerVM", func() {
 		})
 	})
 
-	Describe("AttachDisk", func() {
-		//TODO: when disk support added to softlayer-go and to CPI
+	Describe("#AttachDisk", func() {
+		var (
+			disk disk.Disk
+		)
+		BeforeEach(func() {
+			disk = fakedisk.NewFakeDisk(1234)
+			fileNames := []string{
+				"SoftLayer_Virtual_Guest_Service_getObject.json",
+				"SoftLayer_Network_Storage_Service_getIscsiVolume.json",
+			}
+			common.SetTestFixturesForFakeSoftLayerClient(softLayerClient, fileNames)
+		})
+
+		It("attaches the iSCSI volume successfully", func() {
+			sshClient = fakesutil.GetFakeSshClient("fake-user\nfake-devicename", nil)
+			vm = NewSoftLayerVM(1234567, softLayerClient, sshClient, agentEnvService, logger)
+
+			err := vm.AttachDisk(disk)
+			Expect(err).ToNot(HaveOccurred())
+		})
+
+		It("reports error when failed to attach the iSCSI volume", func() {
+			sshClient = fakesutil.GetFakeSshClient("fake-user\nfake-devicename", errors.New("fake-error"))
+			vm = NewSoftLayerVM(1234567, softLayerClient, sshClient, agentEnvService, logger)
+
+			err := vm.AttachDisk(disk)
+			Expect(err).To(HaveOccurred())
+		})
 	})
 
-	Describe("DetachDisk", func() {
-		//TODO: when disk support added to softlayer-go and to CPI
+	Describe("#DetachDisk", func() {
+		var (
+			disk disk.Disk
+		)
+		BeforeEach(func() {
+			disk = fakedisk.NewFakeDisk(1234)
+			fileNames := []string{
+				"SoftLayer_Virtual_Guest_Service_getObject.json",
+				"SoftLayer_Network_Storage_Service_getIscsiVolume.json",
+			}
+			common.SetTestFixturesForFakeSoftLayerClient(softLayerClient, fileNames)
+		})
+
+		It("detaches the iSCSI volume successfully", func() {
+			sshClient = fakesutil.GetFakeSshClient("fake-user\nfake-devicename", nil)
+			vm = NewSoftLayerVM(1234567, softLayerClient, sshClient, agentEnvService, logger)
+
+			err := vm.DetachDisk(disk)
+			Expect(err).ToNot(HaveOccurred())
+		})
+
+		It("reports error when failed to detach the iSCSI volume", func() {
+			sshClient = fakesutil.GetFakeSshClient("fake-user\nfake-devicename", errors.New("fake-error"))
+			vm = NewSoftLayerVM(1234567, softLayerClient, sshClient, agentEnvService, logger)
+
+			err := vm.DetachDisk(disk)
+			Expect(err).To(HaveOccurred())
+		})
 	})
 })
