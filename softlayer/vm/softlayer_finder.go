@@ -4,6 +4,7 @@ import (
 	bosherr "github.com/cloudfoundry/bosh-agent/errors"
 	boshlog "github.com/cloudfoundry/bosh-agent/logger"
 
+	util "github.com/maximilien/bosh-softlayer-cpi/util"
 	sl "github.com/maximilien/softlayer-go/softlayer"
 )
 
@@ -39,7 +40,7 @@ func (f SoftLayerFinder) Find(vmID int) (VM, bool, error) {
 	found, vm := false, SoftLayerVM{}
 	for _, virtualGuest := range virtualGuests {
 		if virtualGuest.Id == vmID {
-			vm = NewSoftLayerVM(vmID, f.softLayerClient, f.agentEnvServiceFactory.New(vmID), f.logger)
+			vm = NewSoftLayerVM(vmID, f.softLayerClient, util.GetSshClient(), f.agentEnvServiceFactory.New(vmID), f.logger)
 			found = true
 			break
 		}

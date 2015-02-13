@@ -14,6 +14,8 @@ import (
 
 	bslcommon "github.com/maximilien/bosh-softlayer-cpi/softlayer/common"
 	bslcstem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell"
+
+	util "github.com/maximilien/bosh-softlayer-cpi/util"
 )
 
 const softLayerCreatorLogTag = "SoftLayerCreator"
@@ -93,7 +95,7 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 
 	agentEnvService := c.agentEnvServiceFactory.New(virtualGuest.Id)
 
-	vm := NewSoftLayerVM(virtualGuest.Id, c.softLayerClient, agentEnvService, c.logger)
+	vm := NewSoftLayerVM(virtualGuest.Id, c.softLayerClient, util.GetSshClient(), agentEnvService, c.logger)
 
 	return vm, nil
 }

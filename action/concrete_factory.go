@@ -64,8 +64,8 @@ func NewConcreteFactory(softLayerClient sl.Client, options ConcreteFactoryOption
 			// Disk management
 			"create_disk": NewCreateDisk(diskCreator),
 			"delete_disk": NewDeleteDisk(diskFinder),
-			"attach_disk": NewAttachDisk(vmFinder, nil),
-			"detach_disk": NewDetachDisk(vmFinder, nil),
+			"attach_disk": NewAttachDisk(vmFinder, diskFinder),
+			"detach_disk": NewDetachDisk(vmFinder, diskFinder),
 
 			"establish_bare_metal_env": NewEstablishBareMetalEnv(bmCreator, bmFinder),
 
