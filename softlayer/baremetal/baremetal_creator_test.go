@@ -4,9 +4,11 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	boshlog "github.com/cloudfoundry/bosh-agent/logger"
-	common "github.com/maximilien/bosh-softlayer-cpi/common"
 	bm "github.com/maximilien/bosh-softlayer-cpi/softlayer/baremetal"
+	testhelpers "github.com/maximilien/bosh-softlayer-cpi/test_helpers"
+
+	boshlog "github.com/cloudfoundry/bosh-agent/logger"
+
 	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
 )
 
@@ -25,7 +27,7 @@ var _ = Describe("BaremetalCreator", func() {
 			softLayerClient,
 			logger,
 		)
-		common.SetTestFixtureForFakeSoftLayerClient(softLayerClient, "SoftLayer_Hardware_Service_createObject.json")
+		testhelpers.SetTestFixtureForFakeSoftLayerClient(softLayerClient, "SoftLayer_Hardware_Service_createObject.json")
 	})
 
 	Describe("Create", func() {

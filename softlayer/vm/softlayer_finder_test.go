@@ -6,7 +6,7 @@ import (
 
 	. "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
 
-	common "github.com/maximilien/bosh-softlayer-cpi/common"
+	testhelpers "github.com/maximilien/bosh-softlayer-cpi/test_helpers"
 
 	boshlog "github.com/cloudfoundry/bosh-agent/logger"
 
@@ -33,7 +33,7 @@ var _ = Describe("SoftLayerFinder", func() {
 			logger,
 		)
 
-		common.SetTestFixtureForFakeSoftLayerClient(softLayerClient, "SoftLayer_Account_Service_getVirtualGuests.json")
+		testhelpers.SetTestFixtureForFakeSoftLayerClient(softLayerClient, "SoftLayer_Account_Service_getVirtualGuests.json")
 	})
 
 	Describe("Find", func() {

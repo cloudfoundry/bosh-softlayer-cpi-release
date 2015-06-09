@@ -4,9 +4,11 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	boshlog "github.com/cloudfoundry/bosh-agent/logger"
-	common "github.com/maximilien/bosh-softlayer-cpi/common"
 	bm "github.com/maximilien/bosh-softlayer-cpi/softlayer/baremetal"
+	testhelpers "github.com/maximilien/bosh-softlayer-cpi/test_helpers"
+
+	boshlog "github.com/cloudfoundry/bosh-agent/logger"
+
 	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
 )
 
@@ -30,7 +32,7 @@ var _ = Describe("BaremetalFinder", func() {
 	Describe("Find", func() {
 		Context("succeeded", func() {
 			BeforeEach(func() {
-				common.SetTestFixtureForFakeSoftLayerClient(softLayerClient, "SoftLayer_Hardware_Service_getObject.json")
+				testhelpers.SetTestFixtureForFakeSoftLayerClient(softLayerClient, "SoftLayer_Hardware_Service_getObject.json")
 			})
 
 			It("returns a new Softlayer Hardware without an error", func() {
@@ -45,7 +47,7 @@ var _ = Describe("BaremetalFinder", func() {
 
 		Context("failed", func() {
 			BeforeEach(func() {
-				common.SetTestFixtureForFakeSoftLayerClient(softLayerClient, "SoftLayer_Hardware_Service_getObject_None_Exist.json")
+				testhelpers.SetTestFixtureForFakeSoftLayerClient(softLayerClient, "SoftLayer_Hardware_Service_getObject_None_Exist.json")
 			})
 
 			It("return an error when the specified hardward id can not be found", func() {

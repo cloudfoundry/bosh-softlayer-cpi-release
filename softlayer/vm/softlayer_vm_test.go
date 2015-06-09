@@ -9,7 +9,9 @@ import (
 	. "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
 
 	boshlog "github.com/cloudfoundry/bosh-agent/logger"
-	common "github.com/maximilien/bosh-softlayer-cpi/common"
+
+	testhelpers "github.com/maximilien/bosh-softlayer-cpi/test_helpers"
+
 	disk "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk"
 
 	fakedisk "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk/fakes"
@@ -104,7 +106,7 @@ var _ = Describe("SoftLayerVM", func() {
 
 					"SoftLayer_Virtual_Guest_Service_getPowerState.json",
 				}
-				common.SetTestFixturesForFakeSoftLayerClient(softLayerClient, fileNames)
+				testhelpers.SetTestFixturesForFakeSoftLayerClient(softLayerClient, fileNames)
 
 				metadata = VMMetadata{}
 				vm = NewSoftLayerVM(1234567, softLayerClient, sshClient, agentEnvService, logger)
@@ -127,7 +129,7 @@ var _ = Describe("SoftLayerVM", func() {
 
 					"SoftLayer_Virtual_Guest_Service_getPowerState.json",
 				}
-				common.SetTestFixturesForFakeSoftLayerClient(softLayerClient, fileNames)
+				testhelpers.SetTestFixturesForFakeSoftLayerClient(softLayerClient, fileNames)
 
 				metadata = VMMetadata{}
 				vm = NewSoftLayerVM(00000, softLayerClient, sshClient, agentEnvService, logger)
@@ -168,7 +170,7 @@ var _ = Describe("SoftLayerVM", func() {
 				"SoftLayer_Virtual_Guest_Service_getObject.json",
 				"SoftLayer_Network_Storage_Service_getIscsiVolume.json",
 			}
-			common.SetTestFixturesForFakeSoftLayerClient(softLayerClient, fileNames)
+			testhelpers.SetTestFixturesForFakeSoftLayerClient(softLayerClient, fileNames)
 		})
 
 		It("attaches the iSCSI volume successfully", func() {
@@ -198,7 +200,7 @@ var _ = Describe("SoftLayerVM", func() {
 				"SoftLayer_Virtual_Guest_Service_getObject.json",
 				"SoftLayer_Network_Storage_Service_getIscsiVolume.json",
 			}
-			common.SetTestFixturesForFakeSoftLayerClient(softLayerClient, fileNames)
+			testhelpers.SetTestFixturesForFakeSoftLayerClient(softLayerClient, fileNames)
 		})
 
 		It("detaches the iSCSI volume successfully", func() {

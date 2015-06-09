@@ -2,7 +2,9 @@ package disk_test
 
 import (
 	boshlog "github.com/cloudfoundry/bosh-agent/logger"
-	common "github.com/maximilien/bosh-softlayer-cpi/common"
+
+	testhelpers "github.com/maximilien/bosh-softlayer-cpi/test_helpers"
+
 	fakeclient "github.com/maximilien/softlayer-go/client/fakes"
 
 	. "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk"
@@ -28,7 +30,7 @@ var _ = Describe("SoftLayerDisk", func() {
 				"SoftLayer_Account_Service_getIscsiVolume.json",
 				"SoftLayer_Billing_Item_Cancellation_Request_Service_createObject.json",
 			}
-			common.SetTestFixturesForFakeSoftLayerClient(fc, fileNames)
+			testhelpers.SetTestFixturesForFakeSoftLayerClient(fc, fileNames)
 
 			err := disk.Delete()
 			Expect(err).ToNot(HaveOccurred())

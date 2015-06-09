@@ -2,7 +2,9 @@ package disk_test
 
 import (
 	boshlog "github.com/cloudfoundry/bosh-agent/logger"
-	common "github.com/maximilien/bosh-softlayer-cpi/common"
+
+	testhelpers "github.com/maximilien/bosh-softlayer-cpi/test_helpers"
+
 	fakeclient "github.com/maximilien/softlayer-go/client/fakes"
 
 	. "github.com/onsi/ginkgo"
@@ -26,7 +28,7 @@ var _ = Describe("SoftLayerFinder", func() {
 
 	Describe("Find", func() {
 		It("returns disk and found as true when found the disk successfully", func() {
-			common.SetTestFixtureForFakeSoftLayerClient(fc, "SoftLayer_Network_Storage_Service_getIscsiVolume.json")
+			testhelpers.SetTestFixtureForFakeSoftLayerClient(fc, "SoftLayer_Network_Storage_Service_getIscsiVolume.json")
 
 			disk, found, err := finder.Find(1234)
 			Expect(err).ToNot(HaveOccurred())
@@ -37,7 +39,7 @@ var _ = Describe("SoftLayerFinder", func() {
 		})
 
 		It("returns found as false when failed to find the disk", func() {
-			common.SetTestFixtureForFakeSoftLayerClient(fc, "SoftLayer_Network_Storage_Service_getEmptyIscsiVolume.json")
+			testhelpers.SetTestFixtureForFakeSoftLayerClient(fc, "SoftLayer_Network_Storage_Service_getEmptyIscsiVolume.json")
 			disk, found, err := finder.Find(1234)
 
 			Expect(err).ToNot(HaveOccurred())

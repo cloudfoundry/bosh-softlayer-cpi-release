@@ -6,7 +6,7 @@ import (
 
 	. "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
 
-	common "github.com/maximilien/bosh-softlayer-cpi/common"
+	testhelpers "github.com/maximilien/bosh-softlayer-cpi/test_helpers"
 
 	fakestem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell/fakes"
 	fakevm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm/fakes"
@@ -169,5 +169,5 @@ func setFakeSoftLayerClientCreateObjectTestFixtures(fakeSoftLayerClient *fakeslc
 		"SoftLayer_Virtual_Guest_Service_getUpgradeItemPrices.json",
 		"SoftLayer_Product_Order_Service_placeOrder.json",
 	}
-	common.SetTestFixturesForFakeSoftLayerClient(fakeSoftLayerClient, fileNames)
+	testhelpers.SetTestFixturesForFakeSoftLayerClient(fakeSoftLayerClient, fileNames)
 }

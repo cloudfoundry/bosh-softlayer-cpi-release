@@ -2,7 +2,9 @@ package disk_test
 
 import (
 	boshlog "github.com/cloudfoundry/bosh-agent/logger"
-	common "github.com/maximilien/bosh-softlayer-cpi/common"
+
+	testhelpers "github.com/maximilien/bosh-softlayer-cpi/test_helpers"
+
 	fakeclient "github.com/maximilien/softlayer-go/client/fakes"
 
 	. "github.com/onsi/ginkgo"
@@ -33,7 +35,7 @@ var _ = Describe("SoftLayerCreator", func() {
 					"SoftLayer_Product_Order_Service_placeOrder.json",
 					"SoftLayer_Account_Service_getIscsiVolume.json",
 				}
-				common.SetTestFixturesForFakeSoftLayerClient(fc, fileNames)
+				testhelpers.SetTestFixturesForFakeSoftLayerClient(fc, fileNames)
 			})
 
 			It("creates disk successfully and returns unique disk id", func() {
@@ -51,7 +53,7 @@ var _ = Describe("SoftLayerCreator", func() {
 					"SoftLayer_Virtual_Guest_Service_getObject.json",
 					"SoftLayer_Product_Order_Service_getItemPrices.json",
 				}
-				common.SetTestFixturesForFakeSoftLayerClient(fc, fileNames)
+				testhelpers.SetTestFixturesForFakeSoftLayerClient(fc, fileNames)
 
 				_, err := creator.Create(25, 123)
 				Expect(err).To(HaveOccurred())
@@ -62,7 +64,7 @@ var _ = Describe("SoftLayerCreator", func() {
 					"SoftLayer_Virtual_Guest_Service_getEmptyObject.json",
 					"SoftLayer_Product_Order_Service_getItemPrices.json",
 				}
-				common.SetTestFixturesForFakeSoftLayerClient(fc, fileNames)
+				testhelpers.SetTestFixturesForFakeSoftLayerClient(fc, fileNames)
 
 				_, err := creator.Create(20, 0)
 				Expect(err).To(HaveOccurred())
