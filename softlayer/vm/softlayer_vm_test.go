@@ -90,7 +90,7 @@ var _ = Describe("SoftLayerVM", func() {
 		})
 	})
 
-	Describe("SetMetadata", func() {
+	FDescribe("SetMetadata", func() {
 		var (
 			metadata VMMetadata
 		)

@@ -1,7 +1,6 @@
 package vm
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -90,17 +89,6 @@ func (vm SoftLayerVM) Reboot() error {
 }
 
 func (vm SoftLayerVM) SetMetadata(vmMetadata VMMetadata) error {
-	//TODO: reconcile this metadata (from VMMetadata) abd SoftLayerCreator.Run metadata
-	metadata, err := json.Marshal(vmMetadata)
-	if err != nil {
-		return bosherr.WrapError(err, "Marshalling VM metadata")
-	}
-
-	err = bslcommon.ConfigureMetadataOnVirtualGuest(vm.softLayerClient, vm.id, string(metadata), bslcommon.TIMEOUT, bslcommon.POLLING_INTERVAL)
-	if err != nil {
-		return bosherr.WrapError(err, fmt.Sprintf("Configuring metadata on VirtualGuest `%d`", vm.id))
-	}
-
 	return nil
 }
 
