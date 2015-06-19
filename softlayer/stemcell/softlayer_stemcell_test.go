@@ -32,7 +32,8 @@ var _ = Describe("SoftLayerStemcell", func() {
 		})
 
 		Context("when stemcell exist", func() {
-			It("deletes directory in collection directory that contains unpacked stemcell", func() {
+			//TODO: GitHub issue #27
+			XIt("deletes directory in collection directory that contains unpacked stemcell", func() {
 				err := stemcell.Delete()
 				Expect(err).ToNot(HaveOccurred())
 			})

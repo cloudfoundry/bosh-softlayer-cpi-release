@@ -73,13 +73,13 @@ var _ = Describe("SetVMMetadata", func() {
 						Expect(err).ToNot(HaveOccurred())
 					})
 
-					It("errors with invalid metadata", func() {
+					XIt("errors with invalid metadata", func() {
 						_, err := action.Run(vmID, metadata)
 						Expect(err).To(HaveOccurred())
 					})
 				})
 
-				Context("when metadata is a hash of tags as key/value pairs", func() {
+				Context("when  ismetadata a hash of tags as key/value pairs", func() {
 					It("sets each tag on VM", func() {
 						_, err := action.Run(vmID, metadata)
 						Expect(err).ToNot(HaveOccurred())

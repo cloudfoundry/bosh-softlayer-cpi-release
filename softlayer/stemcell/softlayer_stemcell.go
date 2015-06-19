@@ -1,8 +1,6 @@
 package stemcell
 
 import (
-	"fmt"
-
 	bosherr "github.com/cloudfoundry/bosh-agent/errors"
 	boshlog "github.com/cloudfoundry/bosh-agent/logger"
 
@@ -57,14 +55,15 @@ func (s SoftLayerStemcell) deleteVirtualGuestDiskTemplateGroup(id int) error {
 		return bosherr.WrapError(err, "Getting SoftLayer_Virtual_Guest_Block_Device_Template_Group_Service from SoftLayer client")
 	}
 
-	deleted, err := vgdtgService.DeleteObject(id)
+	_, err = vgdtgService.DeleteObject(id)
 	if err != nil {
 		return bosherr.WrapError(err, "Deleting VirtualGuestBlockDeviceTemplateGroup from service")
 	}
 
-	if !deleted {
-		return bosherr.WrapError(nil, fmt.Sprintf("Could not delete VirtualGuestBlockDeviceTemplateGroup with id `%d`", id))
-	}
+	//TODO: fix to check that transaction completed since vgdtgService.DeleteObject(id) does not return bool but a transaction
+	// if !deleted {
+	// 	return bosherr.WrapError(nil, fmt.Sprintf("Could not delete VirtualGuestBlockDeviceTemplateGroup with id `%d`", id))
+	// }
 
 	return err
 }
