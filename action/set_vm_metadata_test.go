@@ -54,13 +54,15 @@ var _ = Describe("SetVMMetadata", func() {
 				vmFinder.FindVM = fakevm.NewFakeVM(int(vmID))
 			})
 
-			Context("when metadata is empty", func() {
-				It("does not do anything and returns no error", func() {
-					_, err := action.Run(vmID, bslcvm.VMMetadata{})
-					Expect(err).ToNot(HaveOccurred())
+			Context("when metadata is not valid", func() {
+				Context("when metadata is empty", func() {
+					It("does not do anything and returns no error", func() {
+						_, err := action.Run(vmID, bslcvm.VMMetadata{})
+						Expect(err).ToNot(HaveOccurred())
+					})
 				})
 
-				Context("when metadata is not a hash of string tags", func() {
+				Context("when metadata is not a hash of string/string", func() {
 					BeforeEach(func() {
 						metadataBytes := []byte(`{
   							"tag1": 0,
@@ -73,13 +75,13 @@ var _ = Describe("SetVMMetadata", func() {
 						Expect(err).ToNot(HaveOccurred())
 					})
 
-					XIt("errors with invalid metadata", func() {
+					It("does not do anything and returns no error", func() {
 						_, err := action.Run(vmID, metadata)
-						Expect(err).To(HaveOccurred())
+						Expect(err).ToNot(HaveOccurred())
 					})
 				})
 
-				Context("when  ismetadata a hash of tags as key/value pairs", func() {
+				Context("when metadata is a hash of tags as key/value pairs", func() {
 					It("sets each tag on VM", func() {
 						_, err := action.Run(vmID, metadata)
 						Expect(err).ToNot(HaveOccurred())

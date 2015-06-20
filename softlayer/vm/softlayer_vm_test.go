@@ -92,7 +92,7 @@ var _ = Describe("SoftLayerVM", func() {
 		})
 	})
 
-	FDescribe("SetMetadata", func() {
+	Describe("SetMetadata", func() {
 		var (
 			metadata VMMetadata
 		)
@@ -128,6 +128,8 @@ var _ = Describe("SoftLayerVM", func() {
 				metadata = bslcvm.VMMetadata{}
 				err := json.Unmarshal(metadataBytes, &metadata)
 				Expect(err).ToNot(HaveOccurred())
+
+				softLayerClient.DoRawHttpRequestResponse = []byte("true")
 			})
 
 			It("the tags value is empty", func() {
@@ -145,9 +147,9 @@ var _ = Describe("SoftLayerVM", func() {
 				Expect(softLayerClient.DoRawHttpRequestResponseCount).To(Equal(1))
 			})
 
-			Context("when SLVG.SetTags fails", func() {
+			Context("when SLVG.SetTags call fails", func() {
 				BeforeEach(func() {
-					softLayerClient.DoRawHttpRequestResponseError = error.New("fake-error")
+					softLayerClient.DoRawHttpRequestError = errors.New("fake-error")
 				})
 
 				It("fails with error", func() {
