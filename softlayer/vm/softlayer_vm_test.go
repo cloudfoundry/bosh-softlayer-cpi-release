@@ -1,6 +1,7 @@
 package vm_test
 
 import (
+	"encoding/json"
 	"errors"
 
 	. "github.com/onsi/ginkgo"
@@ -12,7 +13,8 @@ import (
 
 	testhelpers "github.com/maximilien/bosh-softlayer-cpi/test_helpers"
 
-	disk "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk"
+	bslcdisk "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk"
+	bslcvm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
 
 	fakedisk "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk/fakes"
 	fakevm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm/fakes"
@@ -95,49 +97,66 @@ var _ = Describe("SoftLayerVM", func() {
 			metadata VMMetadata
 		)
 
-		Context("valid VM ID is used", func() {
+		Context("no tags found in metadata", func() {
 			BeforeEach(func() {
-				fileNames := []string{
-					"SoftLayer_Virtual_Guest_Service_getPowerState.json",
-					"SoftLayer_Virtual_Guest_Service_getActiveTransactions.json",
+				metadataBytes := []byte(`{
+				  "director": "fake-director-uuid",
+				  "name": "fake-director"
+				}`)
 
-					"SoftLayer_Virtual_Guest_Service_setMetadata.json",
-					"SoftLayer_Virtual_Guest_Service_configureMetadataDisk.json",
-
-					"SoftLayer_Virtual_Guest_Service_getPowerState.json",
-				}
-				testhelpers.SetTestFixturesForFakeSoftLayerClient(softLayerClient, fileNames)
-
-				metadata = VMMetadata{}
-				vm = NewSoftLayerVM(1234567, softLayerClient, sshClient, agentEnvService, logger)
+				metadata = bslcvm.VMMetadata{}
+				err := json.Unmarshal(metadataBytes, &metadata)
+				Expect(err).ToNot(HaveOccurred())
 			})
 
-			It("sets the vm metadata successfully", func() {
+			It("does not set any tag values on the VM", func() {
 				err := vm.SetMetadata(metadata)
+
 				Expect(err).ToNot(HaveOccurred())
+				Expect(softLayerClient.DoRawHttpRequestResponseCount).To(Equal(0))
 			})
 		})
 
-		Context("invalid VM ID is used", func() {
+		Context("found tags in metadata", func() {
 			BeforeEach(func() {
-				fileNames := []string{
-					"SoftLayer_Virtual_Guest_Service_getPowerState.json",
-					"SoftLayer_Virtual_Guest_Service_getActiveTransactions.json",
+				metadataBytes := []byte(`{
+				  "director": "fake-director-uuid",
+				  "name": "fake-director",
+				  "tags": "test, tag, director"
+				}`)
 
-					"SoftLayer_Virtual_Guest_Service_setMetadata_false.json",
-					"SoftLayer_Virtual_Guest_Service_configureMetadataDisk.json",
+				metadata = bslcvm.VMMetadata{}
+				err := json.Unmarshal(metadataBytes, &metadata)
+				Expect(err).ToNot(HaveOccurred())
 
-					"SoftLayer_Virtual_Guest_Service_getPowerState.json",
-				}
-				testhelpers.SetTestFixturesForFakeSoftLayerClient(softLayerClient, fileNames)
-
-				metadata = VMMetadata{}
-				vm = NewSoftLayerVM(00000, softLayerClient, sshClient, agentEnvService, logger)
+				softLayerClient.DoRawHttpRequestResponse = []byte("true")
 			})
 
-			It("fails setting the vm metadata", func() {
+			It("the tags value is empty", func() {
+				metadata["tags"] = ""
 				err := vm.SetMetadata(metadata)
-				Expect(err).To(HaveOccurred())
+
+				Expect(err).ToNot(HaveOccurred())
+				Expect(softLayerClient.DoRawHttpRequestResponseCount).To(Equal(0))
+			})
+
+			It("at least one tag found", func() {
+				err := vm.SetMetadata(metadata)
+
+				Expect(err).ToNot(HaveOccurred())
+				Expect(softLayerClient.DoRawHttpRequestResponseCount).To(Equal(1))
+			})
+
+			Context("when SLVG.SetTags call fails", func() {
+				BeforeEach(func() {
+					softLayerClient.DoRawHttpRequestError = errors.New("fake-error")
+				})
+
+				It("fails with error", func() {
+					err := vm.SetMetadata(metadata)
+
+					Expect(err).To(HaveOccurred())
+				})
 			})
 		})
 	})
@@ -162,7 +181,7 @@ var _ = Describe("SoftLayerVM", func() {
 
 	Describe("#AttachDisk", func() {
 		var (
-			disk disk.Disk
+			disk bslcdisk.Disk
 		)
 		BeforeEach(func() {
 			disk = fakedisk.NewFakeDisk(1234)
@@ -192,7 +211,7 @@ var _ = Describe("SoftLayerVM", func() {
 
 	Describe("#DetachDisk", func() {
 		var (
-			disk disk.Disk
+			disk bslcdisk.Disk
 		)
 		BeforeEach(func() {
 			disk = fakedisk.NewFakeDisk(1234)

@@ -18,7 +18,7 @@ type VMCloudProperties struct {
 	EphemeralDiskSize        int                  `json:"ephemeralDiskSize,omitempty"`
 }
 
-type VMMetadata struct{}
+type VMMetadata map[string]interface{}
 
 type Creator interface {
 	// Create takes an agent id and creates a VM with provided configuration

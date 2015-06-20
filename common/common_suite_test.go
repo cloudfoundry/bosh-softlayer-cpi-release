@@ -1,4 +1,4 @@
-package services_test
+package common_test
 
 import (
 	. "github.com/onsi/ginkgo"
@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestServices(t *testing.T) {
+func TestCommon(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Services Suite")
+	RunSpecs(t, "Common Suite")
 }

@@ -1,7 +1,6 @@
 package vm
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -90,15 +89,32 @@ func (vm SoftLayerVM) Reboot() error {
 }
 
 func (vm SoftLayerVM) SetMetadata(vmMetadata VMMetadata) error {
-	//TODO: reconcile this metadata (from VMMetadata) abd SoftLayerCreator.Run metadata
-	metadata, err := json.Marshal(vmMetadata)
+	tags, err := vm.extractTagsFromVMMetadata(vmMetadata)
 	if err != nil {
-		return bosherr.WrapError(err, "Marshalling VM metadata")
+		return err
 	}
 
-	err = bslcommon.ConfigureMetadataOnVirtualGuest(vm.softLayerClient, vm.id, string(metadata), bslcommon.TIMEOUT, bslcommon.POLLING_INTERVAL)
+	//Check below needed since Golang strings.Split return [""] on strings.Split("", ",")
+	if len(tags) == 1 && tags[0] == "" {
+		return nil
+	}
+
+	if len(tags) == 0 {
+		return nil
+	}
+
+	virtualGuestService, err := vm.softLayerClient.GetSoftLayer_Virtual_Guest_Service()
 	if err != nil {
-		return bosherr.WrapError(err, fmt.Sprintf("Configuring metadata on VirtualGuest `%d`", vm.id))
+		return bosherr.WrapError(err, "Creating SoftLayer VirtualGuestService from client")
+	}
+
+	success, err := virtualGuestService.SetTags(vm.ID(), tags)
+	if !success {
+		return bosherr.WrapErrorf(err, "Settings tags on SoftLayer VirtualGuest `%d`", vm.ID())
+	}
+
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Settings tags on SoftLayer VirtualGuest `%d`", vm.ID())
 	}
 
 	return nil
@@ -137,6 +153,26 @@ func (vm SoftLayerVM) DetachDisk(disk bslcdisk.Disk) error {
 }
 
 // Private methods
+func (vm SoftLayerVM) extractTagsFromVMMetadata(vmMetadata VMMetadata) ([]string, error) {
+	tags := []string{}
+	for key, value := range vmMetadata {
+		if key == "tags" {
+			stringValue, ok := value.(string)
+			if !ok {
+				return []string{}, bosherr.Errorf("Could not convert tags metadata value `%v` to string", value)
+			}
+
+			tags = vm.parseTags(stringValue)
+		}
+	}
+
+	return tags, nil
+}
+
+func (vm SoftLayerVM) parseTags(value string) []string {
+	return strings.Split(value, ",")
+}
+
 func (vm SoftLayerVM) fetchVMandIscsiVolume(vmId int, volumeId int) (datatypes.SoftLayer_Virtual_Guest, datatypes.SoftLayer_Network_Storage, error) {
 	virtualGuestService, err := vm.softLayerClient.GetSoftLayer_Virtual_Guest_Service()
 	if err != nil {
