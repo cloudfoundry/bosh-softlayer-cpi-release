@@ -33,7 +33,7 @@ var _ = Describe("SoftLayerFinder", func() {
 			logger,
 		)
 
-		testhelpers.SetTestFixtureForFakeSoftLayerClient(softLayerClient, "SoftLayer_Account_Service_getVirtualGuests.json")
+		testhelpers.SetTestFixtureForFakeSoftLayerClient(softLayerClient, "SoftLayer_Virtual_Guest_Service_getObject.json")
 	})
 
 	Describe("Find", func() {
@@ -43,7 +43,7 @@ var _ = Describe("SoftLayerFinder", func() {
 
 		Context("when the VM ID is valid and existing", func() {
 			BeforeEach(func() {
-				vmID = 5816394
+				vmID = 1234
 			})
 
 			It("finds and returns a new SoftLayerVM object with correct ID", func() {

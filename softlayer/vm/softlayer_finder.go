@@ -27,23 +27,21 @@ func NewSoftLayerFinder(softLayerClient sl.Client, agentEnvServiceFactory AgentE
 }
 
 func (f SoftLayerFinder) Find(vmID int) (VM, bool, error) {
-	accountService, err := f.softLayerClient.GetSoftLayer_Account_Service()
+	virtualGuestService, err := f.softLayerClient.GetSoftLayer_Virtual_Guest_Service()
 	if err != nil {
-		return SoftLayerVM{}, false, bosherr.WrapError(err, "Creating SoftLayer AcccountService from client")
+		return SoftLayerVM{}, false, bosherr.WrapError(err, "Creating SoftLayer Virtual Guest Service from client")
 	}
 
-	virtualGuests, err := accountService.GetVirtualGuests()
+	virtualGuest, err := virtualGuestService.GetObject(vmID)
 	if err != nil {
-		return SoftLayerVM{}, false, bosherr.WrapError(err, "Getting a list of SoftLayer VirtualGuests from client")
+		return SoftLayerVM{}, false, bosherr.WrapErrorf(err, "Finding SoftLayer Virtual Guest with id `%d`", vmID)
 	}
 
-	found, vm := false, SoftLayerVM{}
-	for _, virtualGuest := range virtualGuests {
-		if virtualGuest.Id == vmID {
-			vm = NewSoftLayerVM(vmID, f.softLayerClient, util.GetSshClient(), f.agentEnvServiceFactory.New(vmID), f.logger)
-			found = true
-			break
-		}
+	vm, found := SoftLayerVM{}, true
+	if virtualGuest.Id == vmID {
+		vm = NewSoftLayerVM(vmID, f.softLayerClient, util.GetSshClient(), f.agentEnvServiceFactory.New(vmID), f.logger)
+	} else {
+		found = false
 	}
 
 	return vm, found, nil
