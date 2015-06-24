@@ -2,6 +2,7 @@ package dispatcher
 
 import (
 	"encoding/json"
+	"fmt"
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 

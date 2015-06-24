@@ -94,12 +94,12 @@ func (vm SoftLayerVM) SetMetadata(vmMetadata VMMetadata) error {
 		return err
 	}
 
-	//Check below needed since Golang strings.Split return [""] on strings.Split("", ",")
-	if len(tags) == 1 && tags[0] == "" {
+	if len(tags) == 0 {
 		return nil
 	}
 
-	if len(tags) == 0 {
+	//Check below needed since Golang strings.Split return [""] on strings.Split("", ",")
+	if len(tags) == 1 && tags[0] == "" {
 		return nil
 	}
 
