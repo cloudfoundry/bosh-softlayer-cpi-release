@@ -1,10 +1,11 @@
 {
   "method": "set_vm_metadata",
   "arguments": [
-    "b7cfe5cf-53ce-4d4b-713e-4354ad0817fc",
+    "4310eade-7084-4167-a326-3fa0aed81ed1.softlayer.com",
     {
       "director": "Bosh Lite Director",
-      "deployment": "cf-warden"
+      "deployment": "cf-warden",
+      "tags": "test_worked"
     }
   ],
   "context": {
