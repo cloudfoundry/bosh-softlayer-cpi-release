@@ -6,7 +6,7 @@ import (
 
 	. "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell"
 
-	boshlog "github.com/cloudfoundry/bosh-agent/logger"
+	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
 	fakesslclient "github.com/maximilien/softlayer-go/client/fakes"
 )

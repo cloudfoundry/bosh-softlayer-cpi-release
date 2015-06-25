@@ -1,6 +1,6 @@
 {
 	"ImportPath": "github.com/maximilien/bosh-softlayer-cpi",
-	"GoVersion": "go1.3.3",
+	"GoVersion": "go1.4.2",
 	"Packages": [
 		"./..."
 	],
@@ -11,67 +11,70 @@
 			"Rev": "69e2a90ed92d03812364aeb947b7068dc42e561e"
 		},
 		{
-			"ImportPath": "github.com/cloudfoundry/bosh-agent/errors",
-			"Rev": "25cd42acbb16f5c4ba7a37089b6c1d921fd9320e"
+			"ImportPath": "github.com/cloudfoundry/bosh-agent/internal/github.com/cloudfoundry/bosh-utils/errors",
+			"Rev": "a301b3197d7d5c729e7d8fec7260eaafbd9a24d0"
 		},
 		{
-			"ImportPath": "github.com/cloudfoundry/bosh-agent/logger",
-			"Rev": "25cd42acbb16f5c4ba7a37089b6c1d921fd9320e"
+			"ImportPath": "github.com/cloudfoundry/bosh-agent/internal/github.com/cloudfoundry/bosh-utils/fileutil",
+			"Rev": "a301b3197d7d5c729e7d8fec7260eaafbd9a24d0"
 		},
 		{
-			"ImportPath": "github.com/cloudfoundry/bosh-agent/platform/commands",
-			"Rev": "25cd42acbb16f5c4ba7a37089b6c1d921fd9320e"
+			"ImportPath": "github.com/cloudfoundry/bosh-agent/internal/github.com/cloudfoundry/bosh-utils/logger",
+			"Rev": "a301b3197d7d5c729e7d8fec7260eaafbd9a24d0"
 		},
 		{
-			"ImportPath": "github.com/cloudfoundry/bosh-agent/system",
-			"Rev": "25cd42acbb16f5c4ba7a37089b6c1d921fd9320e"
+			"ImportPath": "github.com/cloudfoundry/bosh-agent/internal/github.com/cloudfoundry/bosh-utils/system",
+			"Rev": "a301b3197d7d5c729e7d8fec7260eaafbd9a24d0"
 		},
 		{
-			"ImportPath": "github.com/cloudfoundry/bosh-agent/uuid/fakes",
-			"Rev": "25cd42acbb16f5c4ba7a37089b6c1d921fd9320e"
+			"ImportPath": "github.com/cloudfoundry/bosh-agent/internal/github.com/cloudfoundry/gofileutils/glob",
+			"Rev": "a301b3197d7d5c729e7d8fec7260eaafbd9a24d0"
 		},
 		{
-			"ImportPath": "github.com/cloudfoundry/gofileutils/glob",
-			"Rev": "a4a0cae5ff8a342ba01fce700b9e41c6942c0e5e"
+			"ImportPath": "github.com/cloudfoundry/bosh-utils/errors",
+			"Rev": "6c266c2d546fc0dfec0f3c2b0728f87b06fcd25e"
+		},
+		{
+			"ImportPath": "github.com/cloudfoundry/bosh-utils/internal/github.com/nu7hatch/gouuid",
+			"Rev": "6c266c2d546fc0dfec0f3c2b0728f87b06fcd25e"
+		},
+		{
+			"ImportPath": "github.com/cloudfoundry/bosh-utils/logger",
+			"Rev": "6c266c2d546fc0dfec0f3c2b0728f87b06fcd25e"
+		},
+		{
+			"ImportPath": "github.com/cloudfoundry/bosh-utils/system",
+			"Rev": "6c266c2d546fc0dfec0f3c2b0728f87b06fcd25e"
 		},
 		{
 			"ImportPath": "github.com/maximilien/softlayer-go/client",
-			"Comment": "v0.2.0-2-gcc98225",
-			"Rev": "cc982252edbbe036e3b476b4c0e472a4d1596cc3"
+			"Comment": "v0.2.0-42-gb9d7822",
+			"Rev": "b9d7822abdc2bea12514915e4eb5cdcac2b6a3dd"
 		},
 		{
 			"ImportPath": "github.com/maximilien/softlayer-go/data_types",
-			"Comment": "v0.2.0-2-gcc98225",
-			"Rev": "cc982252edbbe036e3b476b4c0e472a4d1596cc3"
+			"Comment": "v0.2.0-42-gb9d7822",
+			"Rev": "b9d7822abdc2bea12514915e4eb5cdcac2b6a3dd"
 		},
 		{
 			"ImportPath": "github.com/maximilien/softlayer-go/services",
-			"Comment": "v0.2.0-2-gcc98225",
-			"Rev": "cc982252edbbe036e3b476b4c0e472a4d1596cc3"
+			"Comment": "v0.2.0-42-gb9d7822",
+			"Rev": "b9d7822abdc2bea12514915e4eb5cdcac2b6a3dd"
 		},
 		{
 			"ImportPath": "github.com/maximilien/softlayer-go/softlayer",
-			"Comment": "v0.2.0-2-gcc98225",
-			"Rev": "cc982252edbbe036e3b476b4c0e472a4d1596cc3"
-		},
-		{
-			"ImportPath": "github.com/maximilien/softlayer-go/utils",
-			"Comment": "v0.2.0-2-gcc98225",
-			"Rev": "cc982252edbbe036e3b476b4c0e472a4d1596cc3"
-		},
-		{
-			"ImportPath": "github.com/nu7hatch/gouuid",
-			"Rev": "179d4d0c4d8d407a32af483c2354df1d2c91e6c3"
+			"Comment": "v0.2.0-42-gb9d7822",
+			"Rev": "b9d7822abdc2bea12514915e4eb5cdcac2b6a3dd"
 		},
 		{
 			"ImportPath": "github.com/onsi/ginkgo",
-			"Comment": "v1.1.0-33-g17ea479",
-			"Rev": "17ea479729ee427265ac1e913443018350946ddf"
+			"Comment": "v1.2.0-6-gd981d36",
+			"Rev": "d981d36e9884231afa909627b9c275e4ba678f90"
 		},
 		{
 			"ImportPath": "github.com/onsi/gomega",
-			"Comment": "v1.0-28-g8adf9e1",
-			"Rev": "8adf9e1730c55cdc590de7d49766cb2acc88d8f2"
+			"Comment": "v1.0-50-gd6c945f",
+			"Rev": "d6c945f9fdbf6cad99e85b0feff591caa268e0db"
 		}
 	]
 }

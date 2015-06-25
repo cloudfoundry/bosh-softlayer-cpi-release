@@ -8,7 +8,7 @@ import (
 
 	testhelpers "github.com/maximilien/bosh-softlayer-cpi/test_helpers"
 
-	boshlog "github.com/cloudfoundry/bosh-agent/logger"
+	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
 	fakevm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm/fakes"
 	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"

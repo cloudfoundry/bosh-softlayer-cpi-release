@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strconv"
 
-	bosherr "github.com/cloudfoundry/bosh-agent/errors"
-	boshlog "github.com/cloudfoundry/bosh-agent/logger"
+	bosherr "github.com/cloudfoundry/bosh-utils/errors"
+	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	sl "github.com/maximilien/softlayer-go/softlayer"
 )
 

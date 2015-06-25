@@ -3,7 +3,7 @@ package dispatcher
 import (
 	"encoding/json"
 
-	boshlog "github.com/cloudfoundry/bosh-agent/logger"
+	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
 	bslcaction "github.com/maximilien/bosh-softlayer-cpi/action"
 	bslcapi "github.com/maximilien/bosh-softlayer-cpi/api"

@@ -1,7 +1,7 @@
 package disk_test
 
 import (
-	boshlog "github.com/cloudfoundry/bosh-agent/logger"
+	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
 	testhelpers "github.com/maximilien/bosh-softlayer-cpi/test_helpers"
 

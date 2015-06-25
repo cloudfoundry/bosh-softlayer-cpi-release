@@ -3,7 +3,7 @@ package vm
 import (
 	sl "github.com/maximilien/softlayer-go/softlayer"
 
-	boshlog "github.com/cloudfoundry/bosh-agent/logger"
+	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 )
 
 type SoftLayerAgentEnvServiceFactory struct {

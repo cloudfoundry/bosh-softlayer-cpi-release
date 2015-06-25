@@ -3,7 +3,7 @@ package vm
 import (
 	"encoding/json"
 
-	bosherr "github.com/cloudfoundry/bosh-agent/errors"
+	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 )
 
 type AgentEnv struct {
