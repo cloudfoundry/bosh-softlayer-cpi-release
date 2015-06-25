@@ -6,10 +6,10 @@ import (
 
 	. "github.com/maximilien/bosh-softlayer-cpi/action"
 
-	boshlog "github.com/cloudfoundry/bosh-agent/logger"
+	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
 	fakecmd "github.com/cloudfoundry/bosh-agent/platform/commands/fakes"
-	fakesys "github.com/cloudfoundry/bosh-agent/system/fakes"
+	fakesys "github.com/cloudfoundry/bosh-utils/system/fakes"
 
 	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
 

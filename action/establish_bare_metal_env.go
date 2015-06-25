@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"time"
 
-	bosherr "github.com/cloudfoundry/bosh-agent/errors"
+	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	bm "github.com/maximilien/bosh-softlayer-cpi/softlayer/baremetal"
 )
 

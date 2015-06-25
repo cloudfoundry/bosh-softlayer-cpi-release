@@ -3,8 +3,8 @@ package main
 import (
 	"encoding/json"
 
-	bosherr "github.com/cloudfoundry/bosh-agent/errors"
-	boshsys "github.com/cloudfoundry/bosh-agent/system"
+	bosherr "github.com/cloudfoundry/bosh-utils/errors"
+	boshsys "github.com/cloudfoundry/bosh-utils/system"
 
 	bslcaction "github.com/maximilien/bosh-softlayer-cpi/action"
 )

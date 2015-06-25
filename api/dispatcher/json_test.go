@@ -8,7 +8,7 @@ import (
 
 	. "github.com/maximilien/bosh-softlayer-cpi/api/dispatcher"
 
-	boshlog "github.com/cloudfoundry/bosh-agent/logger"
+	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
 	fakeaction "github.com/maximilien/bosh-softlayer-cpi/action/fakes"
 	fakedisp "github.com/maximilien/bosh-softlayer-cpi/api/dispatcher/fakes"

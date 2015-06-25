@@ -1,7 +1,7 @@
 package action
 
 import (
-	bosherr "github.com/cloudfoundry/bosh-agent/errors"
+	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 
 	bslcdisk "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk"
 	bslcvm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"

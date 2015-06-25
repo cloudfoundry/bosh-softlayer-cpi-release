@@ -14,7 +14,7 @@ import (
 
 	bslcstem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell"
 
-	boshlog "github.com/cloudfoundry/bosh-agent/logger"
+	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
 	sldatatypes "github.com/maximilien/softlayer-go/data_types"
 )

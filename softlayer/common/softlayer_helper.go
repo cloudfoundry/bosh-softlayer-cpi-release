@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	bosherr "github.com/cloudfoundry/bosh-agent/errors"
+	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 
 	sl "github.com/maximilien/softlayer-go/softlayer"
 )
