@@ -11,11 +11,16 @@ import (
 	"time"
 )
 
-const softLayerStemcellLogTag = "SoftLayerStemcell"
+const (
+	softLayerStemcellLogTag = "SoftLayerStemcell"
 
-const VirtualDiskImageKind = "VirtualDiskImage"
-const VirtualGuestDeviceTemplateGroupKind = "VirtualGuestDeviceTemplateGroup"
-const DefaultKind = VirtualGuestDeviceTemplateGroupKind
+	VirtualDiskImageKind                = "VirtualDiskImage"
+	VirtualGuestDeviceTemplateGroupKind = "VirtualGuestDeviceTemplateGroup"
+	DefaultKind                         = VirtualGuestDeviceTemplateGroupKind
+
+	Timeout         = 10 * time.Minute
+	PollingInterval = 10 * time.Second
+)
 
 type SoftLayerStemcell struct {
 	id   int
@@ -64,7 +69,7 @@ func (s SoftLayerStemcell) deleteVirtualGuestDiskTemplateGroup(id int) error {
 		return bosherr.WrapError(err, "Deleting VirtualGuestBlockDeviceTemplateGroup from service")
 	}
 
-	err = slh.WaitForVirtualGuestToHaveNoRunningTransactions(s.softLayerClient, id, 10*time.Minute, 10*time.Second)
+	err = slh.WaitForVirtualGuestToHaveNoRunningTransactions(s.softLayerClient, id, Timeout, PollingInterval)
 	if err != nil {
 		return bosherr.WrapError(err, fmt.Sprintf("Waiting for VirtualGuest `%d` to have no pending transactions", id))
 	}
