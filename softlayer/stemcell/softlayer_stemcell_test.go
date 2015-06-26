@@ -27,7 +27,7 @@ var _ = Describe("SoftLayerStemcell", func() {
 		stemcell = NewSoftLayerStemcell(1234, "fake-stemcell-uuid", DefaultKind, softLayerClient, logger)
 	})
 
-	Describe("delete after active transaction finishes", func() {
+	Describe("#Delete", func() {
 		BeforeEach(func() {
 			fixturesFileNames := []string{"SoftLayer_Virtual_Guest_Block_Device_Template_Group_Service_Delete.json",
 				"SoftLayer_Virtual_Guest_Service_getActiveTransaction.json",
@@ -37,8 +37,8 @@ var _ = Describe("SoftLayerStemcell", func() {
 			testhelpers.SetTestFixturesForFakeSoftLayerClient(softLayerClient, fixturesFileNames)
 		})
 
-		Context("when stemcell exist", func() {
-			It("deletes directory in collection directory that contains unpacked stemcell", func() {
+		Context("when stemcell exists", func() {
+			It("deletes the stemcell in collection directory that contains unpacked stemcell", func() {
 				err := stemcell.Delete()
 				Expect(err).ToNot(HaveOccurred())
 			})
