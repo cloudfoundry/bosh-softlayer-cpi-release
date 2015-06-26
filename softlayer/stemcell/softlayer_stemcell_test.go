@@ -8,6 +8,7 @@ import (
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
+	testhelpers "github.com/maximilien/bosh-softlayer-cpi/test_helpers"
 	fakesslclient "github.com/maximilien/softlayer-go/client/fakes"
 )
 
@@ -26,14 +27,18 @@ var _ = Describe("SoftLayerStemcell", func() {
 		stemcell = NewSoftLayerStemcell(1234, "fake-stemcell-uuid", DefaultKind, softLayerClient, logger)
 	})
 
-	Describe("Delete", func() {
+	Describe("#Delete", func() {
 		BeforeEach(func() {
-			softLayerClient.DoRawHttpRequestResponse = []byte("true")
+			fixturesFileNames := []string{"SoftLayer_Virtual_Guest_Block_Device_Template_Group_Service_Delete.json",
+				"SoftLayer_Virtual_Guest_Service_getActiveTransaction.json",
+				"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
+				"SoftLayer_Virtual_Guest_Block_Device_Template_Group_Service_GetObject_None.json"}
+
+			testhelpers.SetTestFixturesForFakeSoftLayerClient(softLayerClient, fixturesFileNames)
 		})
 
-		Context("when stemcell exist", func() {
-			//TODO: GitHub issue #27
-			XIt("deletes directory in collection directory that contains unpacked stemcell", func() {
+		Context("when stemcell exists", func() {
+			It("deletes the stemcell in collection directory that contains unpacked stemcell", func() {
 				err := stemcell.Delete()
 				Expect(err).ToNot(HaveOccurred())
 			})
