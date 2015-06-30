@@ -1,4 +1,4 @@
-package virtual_guest_tags_test
+package set_vm_metadata_test
 
 import (
 	"testing"
