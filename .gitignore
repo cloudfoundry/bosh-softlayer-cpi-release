@@ -26,4 +26,5 @@ _testmain.go
 
 *.exe
 *.test
-*.DS_STORE
+.DS_STORE
+.DS_Store
