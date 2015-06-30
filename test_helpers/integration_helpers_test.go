@@ -51,7 +51,6 @@ var _ = Describe("helper functions for integration tests", func() {
 			err := testhelpers.RunCpi(rootTemplatePath, configPath, payload)
 			Expect(err).ToNot(HaveOccurred())
 		})
-
 	})
 
 	Context("#CreateTmpConfigPath", func() {
@@ -69,8 +68,6 @@ var _ = Describe("helper functions for integration tests", func() {
 	})
 
 	Context("#GenerateCpiJsonPayload", func() {
-		//TODO: Context("error cases", ...)
-		//TODO: Context("has_vm CPI method", ...)
 		Context("set_vm_metadata CPI method", func() {
 			BeforeEach(func() {
 				cpiTemplate = testhelpers.CpiTemplate{
