@@ -1,7 +1,7 @@
 package fakes
 
 import (
-	boshcmd "github.com/cloudfoundry/bosh-agent/internal/github.com/cloudfoundry/bosh-utils/fileutil"
+	boshcmd "github.com/cloudfoundry/bosh-utils/fileutil"
 )
 
 type FakeCompressor struct {

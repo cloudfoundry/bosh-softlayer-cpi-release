@@ -31,7 +31,7 @@ var _ = Describe("helper functions for integration tests", func() {
 		rootTemplatePath = filepath.Join(pwd, "..")
 	})
 
-	Context("#RunCpi", func() {		
+	Context("#RunCpi", func() {
 		It("/out/cpi to exist and run", func() {
 			configPath := filepath.Join(rootTemplatePath, "dev", "config.json")
 			payload := `{

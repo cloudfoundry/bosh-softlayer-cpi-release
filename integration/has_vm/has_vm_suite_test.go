@@ -11,4 +11,3 @@ func TestServices(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Integration: has_vm Suite")
 }
-
