@@ -37,7 +37,7 @@ var _ = Describe("BOSH Director Level Integration for has_vm", func() {
 
 		replacementMap map[string]string
 
-		o map[string]interface{}
+		output map[string]interface{}
 	)
 
 	BeforeEach(func() {
@@ -102,11 +102,12 @@ var _ = Describe("BOSH Director Level Integration for has_vm", func() {
 			jsonPayload, err := testhelperscpi.GenerateCpiJsonPayload("has_vm", rootTemplatePath, replacementMap)
 			Expect(err).ToNot(HaveOccurred())
 
-			output, err := testhelperscpi.RunCpi(rootTemplatePath, tmpConfigPath, jsonPayload)
+			outputBytes, err := testhelperscpi.RunCpi(rootTemplatePath, tmpConfigPath, jsonPayload)
 			Expect(err).ToNot(HaveOccurred())
-
-			json.Unmarshal(output, &o)
-			Expect(o["result"]).To(BeTrue())
+			
+			err = json.Unmarshal(outputBytes, &output)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(output["result"]).To(BeTrue())
 		})
 	})
 
@@ -122,11 +123,12 @@ var _ = Describe("BOSH Director Level Integration for has_vm", func() {
 			jsonPayload, err := testhelperscpi.GenerateCpiJsonPayload("has_vm", rootTemplatePath, replacementMap)
 			Expect(err).ToNot(HaveOccurred())
 
-			output, err := testhelperscpi.RunCpi(rootTemplatePath, tmpConfigPath, jsonPayload)
+			outputBytes, err := testhelperscpi.RunCpi(rootTemplatePath, tmpConfigPath, jsonPayload)
 			Expect(err).ToNot(HaveOccurred())
-
-			json.Unmarshal(output, &o)
-			Expect(o["result"]).To(BeFalse())
+			
+			err = json.Unmarshal(outputBytes, &output)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(output["result"]).To(BeFalse())
 		})
 	})
 })
