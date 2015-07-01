@@ -104,6 +104,11 @@ var _ = Describe("BOSH Director Level Integration for set_vm_metadata", func() {
 
 			err = os.RemoveAll(tmpConfigPath)
 			Expect(err).ToNot(HaveOccurred())
+
+			tagReferences, err := virtualGuestService.GetTagReferences(virtualGuest.Id)
+			Expect(err).ToNot(HaveOccurred())
+			Ω(tagReferences).Should(ContainElement(ContainSubstring("cpi-test")))
+			Ω(tagReferences).Should(ContainElement(ContainSubstring("softlayer")))
 		})
 	})
 })
