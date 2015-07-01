@@ -27,7 +27,7 @@ $ cd bosh-softlayer-cpi
 $ ./bin/build
 $ ./bin/test-unit
 $ export SL_USERNAME=your-username@your-org.com
-$export SL_API_KEY=your-softlayer-api-key
+$ export SL_API_KEY=your-softlayer-api-key
 $ .bin/test-integration
 ```
 
