@@ -1,4 +1,4 @@
-package set_vm_metadata_test
+package has_vm_test
 
 import (
 	"testing"
@@ -9,5 +9,6 @@ import (
 
 func TestServices(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Integration: set_vm_metadata Suite")
+	RunSpecs(t, "Integration: has_vm Suite")
 }
+

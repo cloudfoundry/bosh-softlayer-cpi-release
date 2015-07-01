@@ -31,7 +31,7 @@ var _ = Describe("helper functions for integration tests", func() {
 		rootTemplatePath = filepath.Join(pwd, "..")
 	})
 
-	Context("#RunCpi", func() {
+	Context("#RunCpi", func() {		
 		It("/out/cpi to exist and run", func() {
 			configPath := filepath.Join(rootTemplatePath, "dev", "config.json")
 			payload := `{
@@ -48,7 +48,7 @@ var _ = Describe("helper functions for integration tests", func() {
 								"director_uuid": "some director UUID"
 							}
 						}`
-			err := testhelpers.RunCpi(rootTemplatePath, configPath, payload)
+			_, err := testhelpers.RunCpi(rootTemplatePath, configPath, payload)
 			Expect(err).ToNot(HaveOccurred())
 		})
 	})

@@ -22,37 +22,32 @@ type ConfigTemplate struct {
 
 const templatePath = "../test_fixtures/cpi_methods"
 
-func RunCpi(rootCpiPath string, configPath string, jsonPayload string) error {
+func RunCpi(rootCpiPath string, configPath string, jsonPayload string) ([]byte, error) {
 	cpiPath := filepath.Join(rootCpiPath, "out/cpi")
 
 	cmd := exec.Command(cpiPath, "-configPath", configPath)
 
-	stdinPipe, err := cmd.StdinPipe()
+	stdin, err := cmd.StdinPipe()
 	if err != nil {
-		return err
+		return []byte{}, err
 	}
 
-	err = cmd.Start()
+	_, err = stdin.Write([]byte(jsonPayload))
 	if err != nil {
-		return err
+		return []byte{}, err
 	}
 
-	_, err = stdinPipe.Write([]byte(jsonPayload))
+	err = stdin.Close()
 	if err != nil {
-		return err
+		return []byte{}, err
 	}
 
-	err = stdinPipe.Close()
+	output, err := cmd.Output()
 	if err != nil {
-		return err
+		return []byte{}, err
 	}
 
-	err = cmd.Wait()
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return output, nil
 }
 
 func GenerateCpiJsonPayload(methodName string, rootTemplatePath string, replacementMap map[string]string) (string, error) {

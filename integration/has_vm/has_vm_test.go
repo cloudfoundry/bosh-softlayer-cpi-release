@@ -1,6 +1,7 @@
-package set_vm_metadata_test
+package has_vm_test
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -18,7 +19,7 @@ import (
 
 const configPath = "test_fixtures/cpi_methods/config.json"
 
-var _ = Describe("BOSH Director Level Integration for set_vm_metadata", func() {
+var _ = Describe("BOSH Director Level Integration for has_vm", func() {
 	var (
 		err error
 
@@ -32,7 +33,7 @@ var _ = Describe("BOSH Director Level Integration for set_vm_metadata", func() {
 		virtualGuest  datatypes.SoftLayer_Virtual_Guest
 		createdSshKey datatypes.SoftLayer_Security_Ssh_Key
 
-		rootTemplatePath, strVGID string
+		rootTemplatePath, tmpConfigPath, strVGID string
 
 		replacementMap map[string]string
 	)
@@ -55,9 +56,21 @@ var _ = Describe("BOSH Director Level Integration for set_vm_metadata", func() {
 
 		testhelpers.TIMEOUT = 35 * time.Minute
 		testhelpers.POLLING_INTERVAL = 10 * time.Second
+
+		pwd, err := os.Getwd()
+		Expect(err).ToNot(HaveOccurred())
+		rootTemplatePath = filepath.Join(pwd, "..", "..")
+
+		tmpConfigPath, err = testhelperscpi.CreateTmpConfigPath(rootTemplatePath, configPath, username, apiKey)
+		Expect(err).ToNot(HaveOccurred())
 	})
 
-	Context("set_vm_metadata", func() {
+	AfterEach(func() {
+		err = os.RemoveAll(tmpConfigPath)
+		Expect(err).ToNot(HaveOccurred())
+	})
+
+	Context("has_vm with actual vm", func() {
 		BeforeEach(func() {
 			err = testhelpers.FindAndDeleteTestSshKeys()
 			Expect(err).ToNot(HaveOccurred())
@@ -70,16 +83,11 @@ var _ = Describe("BOSH Director Level Integration for set_vm_metadata", func() {
 			testhelpers.WaitForVirtualGuestToBeRunning(virtualGuest.Id)
 			testhelpers.WaitForVirtualGuestToHaveNoActiveTransactions(virtualGuest.Id)
 
-			pwd, err := os.Getwd()
-			Expect(err).ToNot(HaveOccurred())
-			rootTemplatePath = filepath.Join(pwd, "..", "..")
-
 			strVGID = strconv.Itoa(virtualGuest.Id)
 
 			replacementMap = map[string]string{
 				"ID":           strVGID,
 				"DirectorUuid": "fake-director-uuid",
-				"Tags":         "cpi-test, softlayer",
 			}
 		})
 
@@ -88,22 +96,37 @@ var _ = Describe("BOSH Director Level Integration for set_vm_metadata", func() {
 			testhelpers.DeleteSshKey(createdSshKey.Id)
 		})
 
-		It("issues set_vm_metadata to cpi", func() {
-			pwd, err := os.Getwd()
-			Expect(err).ToNot(HaveOccurred())
-			rootTemplatePath := filepath.Join(pwd, "..", "..")
-
-			jsonPayload, err := testhelperscpi.GenerateCpiJsonPayload("set_vm_metadata", rootTemplatePath, replacementMap)
+		It("returns true because vm exists", func() {
+			jsonPayload, err := testhelperscpi.GenerateCpiJsonPayload("has_vm", rootTemplatePath, replacementMap)
 			Expect(err).ToNot(HaveOccurred())
 
-			tmpConfigPath, err := testhelperscpi.CreateTmpConfigPath(rootTemplatePath, configPath, username, apiKey)
+			output, err := testhelperscpi.RunCpi(rootTemplatePath, tmpConfigPath, jsonPayload)
+			Expect(err).ToNot(HaveOccurred())
+			
+			var o map[string]interface{}
+			json.Unmarshal(output, &o)
+			Expect(o["result"]).To(BeTrue())
+		})
+	})
+
+	Context("has_vm without valid vm id", func() {
+		BeforeEach(func() {
+			replacementMap = map[string]string{
+				"ID":           "123456",
+				"DirectorUuid": "fake-director-uuid",
+			}
+		})
+
+		It("returns false because vm doesn't exist", func() {
+			jsonPayload, err := testhelperscpi.GenerateCpiJsonPayload("has_vm", rootTemplatePath, replacementMap)
 			Expect(err).ToNot(HaveOccurred())
 
-			_, err = testhelperscpi.RunCpi(rootTemplatePath, tmpConfigPath, jsonPayload)
+			output, err := testhelperscpi.RunCpi(rootTemplatePath, tmpConfigPath, jsonPayload)
 			Expect(err).ToNot(HaveOccurred())
-
-			err = os.RemoveAll(tmpConfigPath)
-			Expect(err).ToNot(HaveOccurred())
+			
+			var o map[string]interface{}
+			json.Unmarshal(output, &o)
+			Expect(o["result"]).To(BeFalse())
 		})
 	})
 })
