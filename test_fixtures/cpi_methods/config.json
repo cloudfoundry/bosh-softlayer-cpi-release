@@ -1,0 +1,21 @@
+{
+  "Actions": {
+    "Agent": {
+      "Blobstore": {
+        "Options": {
+          "user": "agent",
+          "password": "agent-password",
+          "endpoint": "http://10.254.50.4:25251"
+        },
+        "Type": "dav"
+      },
+      "NTP": [],
+      "Mbus": "nats://nats:nats-password@10.254.50.4:4222"
+    },
+    "StemcellsDir": "/var/vcap/store/cpi/stemcells"
+  },
+  "SoftLayer": {
+    "username": "{{.Username}}",
+    "apiKey": "{{.ApiKey}}"
+  }
+}

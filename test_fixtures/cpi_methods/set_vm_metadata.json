@@ -1,13 +1,14 @@
 {
   "method": "set_vm_metadata",
   "arguments": [
-    "b7cfe5cf-53ce-4d4b-713e-4354ad0817fc",
+    "{{.ID}}",
     {
-      "director": "Bosh Lite Director",
-      "deployment": "cf-warden"
+      "director": "BOSH Director",
+      "deployment": "softlayer",
+      "tags": "{{.Tags}}"
     }
   ],
   "context": {
-    "director_uuid": "c37383cd-d5a8-43d7-b595-2ede9513c858"
+    "director_uuid": "{{.DirectorUuid}}"
   }
 }

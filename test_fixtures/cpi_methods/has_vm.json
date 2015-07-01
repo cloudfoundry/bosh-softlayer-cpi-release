@@ -1,0 +1,9 @@
+{
+  "method": "has_vm",
+  "arguments": [
+    "{{.ID}}"
+  ],
+  "context": {
+    "director_uuid": "{{.DirectorUuid}}"
+  }
+}
