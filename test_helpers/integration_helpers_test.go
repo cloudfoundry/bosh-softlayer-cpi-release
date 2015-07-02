@@ -48,6 +48,7 @@ var _ = Describe("helper functions for integration tests", func() {
 								"director_uuid": "some director UUID"
 							}
 						}`
+			
 			_, err := testhelpers.RunCpi(rootTemplatePath, configPath, payload)
 			Expect(err).ToNot(HaveOccurred())
 		})
