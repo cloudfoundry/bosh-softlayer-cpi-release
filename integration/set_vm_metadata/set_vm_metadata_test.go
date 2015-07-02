@@ -1,6 +1,7 @@
 package set_vm_metadata_test
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -107,8 +108,12 @@ var _ = Describe("BOSH Director Level Integration for set_vm_metadata", func() {
 
 			tagReferences, err := virtualGuestService.GetTagReferences(virtualGuest.Id)
 			Expect(err).ToNot(HaveOccurred())
-			Ω(tagReferences).Should(ContainElement(ContainSubstring("cpi-test")))
-			Ω(tagReferences).Should(ContainElement(ContainSubstring("softlayer")))
+
+			tagReferencesJSON, err := json.Marshal(tagReferences)
+			Expect(err).ToNot(HaveOccurred())
+
+			Ω(tagReferencesJSON).Should(ContainSubstring("cpi-test"))
+			Ω(tagReferencesJSON).Should(ContainSubstring("softlayer"))
 		})
 	})
 })
