@@ -81,8 +81,8 @@ Test Suite Passed
 SWEET SUITE SUCCESS
 ```
 
-## Developing *
----------------
+## Developing
+-------------
 
 1. Run `go get golang.org/x/tools/cmd/vet`
 2. Run `go get github.com/xxx ...` to install test dependencies (as you see errors)
@@ -119,11 +119,11 @@ SWEET SUITE SUCCESS
 * Strict TDD for any code added or changed
 * Go fakes when needing to mock objects
 
-(*) these items are in the works, we will remove the * once they are available
-
 ## Credit
 ---------
 
 The base code was inpired by [cppforlife](https://github.com/cppforlife)'s [BOSH Warden CPI](https://github.com/cppforlife/bosh-warden-cpi)'s example external Go-language CPI.
 
 **NOTE**: This is still _work in progress_. No guarantees are implied that this will be usable nor finish. Consider this code as prototype code.
+
+(*) these items are in the works, we will remove the * once they are available
