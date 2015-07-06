@@ -104,7 +104,7 @@ var _ = Describe("BOSH Director Level Integration for has_vm", func() {
 
 			outputBytes, err := testhelperscpi.RunCpi(rootTemplatePath, tmpConfigPath, jsonPayload)
 			Expect(err).ToNot(HaveOccurred())
-			
+
 			err = json.Unmarshal(outputBytes, &output)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(output["result"]).To(BeTrue())
@@ -125,7 +125,7 @@ var _ = Describe("BOSH Director Level Integration for has_vm", func() {
 
 			outputBytes, err := testhelperscpi.RunCpi(rootTemplatePath, tmpConfigPath, jsonPayload)
 			Expect(err).ToNot(HaveOccurred())
-			
+
 			err = json.Unmarshal(outputBytes, &output)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(output["result"]).To(BeFalse())

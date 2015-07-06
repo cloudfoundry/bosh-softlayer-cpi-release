@@ -8,14 +8,27 @@ import (
 )
 
 type VMCloudProperties struct {
-	Domain                   string `json:"domain,omitempty"`
-	StartCpus                int    `json:"startCpus,omitempty"`
-	MaxMemory                int    `json:"maxMemory,omitempty"`
-	Datacenter               sldatatypes.Datacenter
-	BlockDeviceTemplateGroup sldatatypes.BlockDeviceTemplateGroup
-	SshKeys                  []sldatatypes.SshKey `json:"sshKeys"`
-	RootDiskSize             int                  `json:"rootDiskSize,omitempty"`
-	EphemeralDiskSize        int                  `json:"ephemeralDiskSize,omitempty"`
+	Domain                   string 													`json:"domain,omitempty"`
+	StartCpus                int    													`json:"startCpus,omitempty"`
+	MaxMemory                int    													`json:"maxMemory,omitempty"`
+	Datacenter               sldatatypes.Datacenter										`json:"datacenter"`
+	BlockDeviceTemplateGroup sldatatypes.BlockDeviceTemplateGroup						`json:"blockDeviceTemplateGroup,omitempty"`
+	SshKeys                  []sldatatypes.SshKey 										`json:"sshKeys"`
+	RootDiskSize             int                  										`json:"rootDiskSize,omitempty"`
+	EphemeralDiskSize        int                  										`json:"ephemeralDiskSize,omitempty"`
+
+	//added by wenquan@cn.ibm.com
+	VMNamePrefix             			string               										`json:"vmNamePrefix,omitempty"`
+	HourlyBillingFlag        			bool                 										`json:"hourlyBillingFlag,omitempty"`
+	LocalDiskFlag            			bool                 										`json:"localDiskFlag,omitempty"`
+	DedicatedAccountHostOnlyFlag   		bool                            				`json:"dedicatedAccountHostOnlyFlag,omitempty"`
+	NetworkComponents              		[]sldatatypes.NetworkComponents             	`json:"networkComponents,omitempty"`
+	PrivateNetworkOnlyFlag         		bool                            				`json:"privateNetworkOnlyFlag,omitempty"`
+	PrimaryNetworkComponent        		sldatatypes.PrimaryNetworkComponent        		`json:"primaryNetworkComponent,omitempty"`
+	PrimaryBackendNetworkComponent 		sldatatypes.PrimaryBackendNetworkComponent 		`json:"primaryBackendNetworkComponent,omitempty"`
+	BlockDevices 						[]sldatatypes.BlockDevice 						`json:"blockDevices,omitempty"`
+	UserData     						[]sldatatypes.UserData   						`json:"userData,omitempty"`
+	PostInstallScriptUri 				string 											`json:"postInstallScriptUri,omitempty"`
 }
 
 type VMMetadata map[string]interface{}
