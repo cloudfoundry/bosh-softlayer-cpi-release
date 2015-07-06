@@ -48,12 +48,12 @@ func (a CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps bslcvm
 }
 
 func (a CreateVM) updateCloudProperties(cloudProps bslcvm.VMCloudProperties) {
-	if cloudProps.StartCpus > 1 {
-		a.vmCloudProperties.StartCpus = cloudProps.StartCpus
+	if cloudProps.StartCpus < 2  {
+		a.vmCloudProperties.StartCpus = 2
 	}
 
-	if cloudProps.MaxMemory > 1024 {
-		a.vmCloudProperties.MaxMemory = cloudProps.MaxMemory
+	if cloudProps.MaxMemory < 2048 {
+		a.vmCloudProperties.MaxMemory = 2048
 	}
 
 	if cloudProps.Datacenter.Name != a.vmCloudProperties.Datacenter.Name {

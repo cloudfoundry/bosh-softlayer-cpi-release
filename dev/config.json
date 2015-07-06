@@ -4,18 +4,18 @@
       "Blobstore": {
         "Options": {
           "user": "agent",
-          "password": "agent-password",
-          "endpoint": "http://10.254.50.4:25251"
+          "password": "agent",
+          "endpoint": " http://10.112.116.127:25250 "
         },
         "Type": "dav"
       },
       "NTP": [],
-      "Mbus": "nats://nats:nats-password@10.254.50.4:4222"
+      "Mbus": "nats://nats:nats@10.112.116.127:4222"
     },
     "StemcellsDir": "/var/vcap/store/cpi/stemcells"
   },
   "SoftLayer": {
-    "username": "fake-username",
-    "apiKey": "fake-api-key"
+    "username": "cuixuex@cn.ibm.com",
+    "apiKey": "88c500aed826ddb9f93b3d248fbb9104b84b0c6cc2c936127a01502f85499d15"
   }
 }

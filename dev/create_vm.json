@@ -1,27 +1,75 @@
 {
-	"method": "create_vm",
-	"arguments": [
-		"45632666-9fb1-422a-af35-2ab6102c5c1b",
-		"200150", {
-			"startCpus": 1,
-			"maxMemory": 1024,
-			"datacenter": {
-				"name": "ams01"
-			},
-			"sshKeys": [{
-				"id": 74826
-			}]
-		}, {
-			"diego-net": {
-				"ip": "10.244.16.18",
-				"netmask": "255.255.255.252",
-				"cloud_properties": {},
-				"default": ["dns", "gateway"]
-			}
-		},
-		null, {}
-	],
-	"context": {
-		"director_uuid": "3f695519-5a17-480f-879a-582dbe31131e"
-	}
+  "method": "create_vm",
+  "arguments": [
+    "45632666-9fb1-422a-af35-2ab6102c5c1b",
+    "200150",
+    {
+      "datacenter": {
+        "name": "lon02"
+      },
+      "domain": "softlayer.com",
+      "hostname": "ecpi_test",
+      "maxMemory": 1024,
+      "operatingSystemReferenceCode": "UBUNTU_LATEST",
+      "startCpus": 1,
+      "hourlyBillingFlag": true,
+      "localDiskFlag": true,
+      "vmNamePrefix": "bosh-",
+      "postInstallScriptUri": "",
+      "dedicatedAccountHostOnlyFlag": true,
+      "privateNetworkOnlyFlag":false,
+      "sshKeys": [
+        {
+          "id": 74826
+        }
+      ],
+      "blockDevices": [
+        {
+          "device": "0",
+          "diskImage": {
+            "capacity": 100
+          }
+        }
+      ],
+      "blockDeviceTemplateGroup": {
+        "globalIdentifier": "07beadaa-1e11-476e-a188-3f7795feb9fb"
+      },
+      "networkComponents": [
+        {
+          "maxSpeed": 1000
+        }
+      ],
+      "primaryNetworkComponent": {
+        "networkVlan": {
+          "id": 524956
+        }
+      },
+      "primaryBackendNetworkComponent": {
+        "networkVlan": {
+          "id": 524954
+        }
+      },
+      "userData": [
+        {
+          "value": "someValue"
+        }
+      ]
+    },
+    {
+      "diego-net": {
+        "cloud_properties": {},
+        "default": [
+          "dns",
+          "gateway"
+        ],
+        "ip": "10.244.16.18",
+        "netmask": "255.255.255.252"
+      }
+    },
+    null,
+    {}
+  ],
+  "context": {
+    "director_uuid": "3f695519-5a17-480f-879a-582dbe31131e"
+  }
 }

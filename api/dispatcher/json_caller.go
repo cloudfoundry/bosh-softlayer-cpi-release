@@ -7,6 +7,7 @@ import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 
 	bslcaction "github.com/maximilien/bosh-softlayer-cpi/action"
+	//"fmt"
 )
 
 type Caller interface {
@@ -88,6 +89,7 @@ func (r JSONCaller) extractMethodArgs(runMethodType reflect.Type, args []interfa
 		if !typeFound {
 			continue
 		}
+
 
 		argValuePtr := reflect.New(argType)
 
