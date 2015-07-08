@@ -1,7 +1,11 @@
 package disk
 
+type DiskCloudProperties struct {
+	ConsistentPerformanceIscsi bool `json:"consistent_performance_iscsi,omitempty"`
+}
+
 type Creator interface {
-	Create(size int, virtualGuestId int) (Disk, error)
+	Create(size int, cloudProp DiskCloudProperties, virtualGuestId int) (Disk, error)
 }
 
 type Finder interface {

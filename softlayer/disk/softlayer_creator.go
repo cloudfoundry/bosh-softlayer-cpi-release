@@ -23,7 +23,7 @@ func NewSoftLayerDiskCreator(client sl.Client, logger boshlog.Logger) SoftLayerC
 	}
 }
 
-func (c SoftLayerCreator) Create(size int, virtualGuestId int) (Disk, error) {
+func (c SoftLayerCreator) Create(size int, cloudProps DiskCloudProperties, virtualGuestId int) (Disk, error) {
 	c.logger.Debug(softLayerCreatorLogTag, "Creating disk of size '%d'", size)
 
 	vmService, err := c.softLayerClient.GetSoftLayer_Virtual_Guest_Service()
@@ -41,10 +41,21 @@ func (c SoftLayerCreator) Create(size int, virtualGuestId int) (Disk, error) {
 		return SoftLayerDisk{}, bosherr.WrapError(err, "Create SoftLayer Network Storage Service error.")
 	}
 
-	disk, err := storageService.CreateIscsiVolume(size, strconv.Itoa(vm.Datacenter.Id))
+	disk, err := storageService.CreateIscsiVolume(c.getSoftLayerDiskSize(size), strconv.Itoa(vm.Datacenter.Id))
 	if err != nil {
 		return SoftLayerDisk{}, bosherr.WrapError(err, "Create SoftLayer iSCSI disk error.")
 	}
 
 	return NewSoftLayerDisk(disk.Id, c.softLayerClient, c.logger), nil
+}
+
+func (c SoftLayerCreator) getSoftLayerDiskSize (size int) int {
+	sizeArray := []int{20, 40, 80, 100, 250, 500, 1000, 2000, 4000, 8000, 12000}
+
+	for i := range sizeArray {
+		if ret := size / 1024; ret <= sizeArray[i] {
+			return sizeArray[i]
+		}
+	}
+	return 12000
 }
