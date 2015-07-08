@@ -3,5 +3,14 @@
 set -e
 
 bin=$(dirname $0)
+base=$( cd "$( dirname "$( dirname "$0" )")" && pwd )
+
+echo "DEBUG"
+
+echo "pwd: " $PWD
+echo "bin: " $bin
+echo "base: " $base
+
+echo "====="
 
 $bin/go build -o $bin/../out/cpi github.com/maximilien/bosh-softlayer-cpi/main
