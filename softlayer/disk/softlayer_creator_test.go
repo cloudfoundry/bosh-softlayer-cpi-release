@@ -55,17 +55,6 @@ var _ = Describe("SoftLayerCreator", func() {
 		})
 
 		Context("Failed to create disk", func() {
-			It("Reports error due to wrong disk size", func() {
-				fileNames := []string{
-					"SoftLayer_Virtual_Guest_Service_getObject.json",
-					"SoftLayer_Product_Order_Service_getItemPrices.json",
-				}
-				testhelpers.SetTestFixturesForFakeSoftLayerClient(fc, fileNames)
-
-				_, err := creator.Create(25, cloudProps, 123)
-				Expect(err).To(HaveOccurred())
-			})
-
 			It("Reports error due to wrong virtual guest id", func() {
 				fileNames := []string{
 					"SoftLayer_Virtual_Guest_Service_getEmptyObject.json",

@@ -1,10 +1,13 @@
 [
-	{
+  	{
 		"id": 123,
+		"locationGroupId": null,
 		"item": {
-			"id": 456,
-			"capacity": "20",
-			"description": "20GB iSCSI SAN Storage"
+	  		"capacity": "20",
+	  		"description": "20 GB Storage Space",
+	  		"id": 456,
+	  		"keyName": "20_GB_PERFORMANCE_STORAGE_SPACE",
+	  		"units": "GB"
 		}
-	}
+  	}
 ]
