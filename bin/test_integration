@@ -28,6 +28,11 @@
   # echo -e "\n Get ginkgo..."
   # go install -installsuffix $base/concourse github.com/onsi/ginkgo/ginkgo
 
+  #DEBUG
+  echo -e "\n out/cpi?"
+  ls -la ./bosh-softlayer-cpi/out
+
+
   echo -e "\n Integration Testing packages:"
   go test ./bosh-softlayer-cpi/integration/...
 
