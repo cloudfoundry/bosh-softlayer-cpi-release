@@ -30,8 +30,10 @@
 
   #DEBUG
   echo -e "\n out/cpi?"
-  ls -la ./bosh-softlayer-cpi/out
+  ls -la $base/out
 
+  echo -e "\n Creating cpi binary..."
+  go build -o $base/out/cpi github.com/maximilien/bosh-softlayer-cpi/main
 
   echo -e "\n Integration Testing packages:"
   go test ./bosh-softlayer-cpi/integration/...
