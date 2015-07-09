@@ -28,10 +28,6 @@
   # echo -e "\n Get ginkgo..."
   # go install -installsuffix $base/concourse github.com/onsi/ginkgo/ginkgo
 
-  #DEBUG
-  echo -e "\n out/cpi?"
-  ls -la $base/out
-
   echo -e "\n Creating cpi binary..."
   go build -o $base/out/cpi github.com/maximilien/bosh-softlayer-cpi/main
 
