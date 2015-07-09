@@ -41,9 +41,29 @@ func NewSoftLayerCreator(softLayerClient sl.Client, agentEnvServiceFactory Agent
 	}
 }
 
+// get the time stample of action occurs to name the vm hostname
+func (c SoftLayerCreator) getTimeStample(now time.Time) string {
+	return now.Format("20060102-030405-") + strconv.Itoa(int(now.UnixNano()/1e6-now.Unix()*1e3))
+}
+
+func (c SoftLayerCreator) checkValid(t *sldatatypes.SoftLayer_Virtual_Guest_Template) *sldatatypes.SoftLayer_Virtual_Guest_Template {
+	//check domain name configure or not
+	if t.Domain == "" {
+		t.Domain = "softlayer.com"
+	}
+	//check conditional require
+	if t.BlockDeviceTemplateGroup.GlobalIdentifier != "" {
+		t.OperatingSystemReferenceCode = ""
+		t.BlockDevices = nil
+	}
+
+	return t
+}
+
 func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
 	virtualGuestTemplate := sldatatypes.SoftLayer_Virtual_Guest_Template{
-		Hostname:  agentID,
+		//Hostname:  agentID,
+		Hostname:  cloudProps.VmNamePrefix + c.getTimeStample(time.Now().UTC()),
 		Domain:    cloudProps.Domain,
 		StartCpus: cloudProps.StartCpus,
 		MaxMemory: cloudProps.MaxMemory,
@@ -56,11 +76,20 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 			GlobalIdentifier: stemcell.Uuid(),
 		},
 
-		SshKeys:           cloudProps.SshKeys,
-		HourlyBillingFlag: true,
+		SshKeys: cloudProps.SshKeys,
 
-		// Needed for ephemeral disk
-		LocalDiskFlag: true,
+		//HourlyBillingFlag: true,
+		HourlyBillingFlag: cloudProps.HourlyBillingFlag,
+		//Needed for ephemeral disk
+		//LocalDiskFlag: true,
+		LocalDiskFlag:                  cloudProps.LocalDiskFlag,
+		DedicatedAccountHostOnlyFlag:   cloudProps.DedicatedAccountHostOnlyFlag,
+		BlockDevices:                   cloudProps.BlockDevices,
+		NetworkComponents:              cloudProps.NetworkComponents,
+		PrivateNetworkOnlyFlag:         cloudProps.PrivateNetworkOnlyFlag,
+		PrimaryNetworkComponent:        &cloudProps.PrimaryNetworkComponent,
+		PrimaryBackendNetworkComponent: &cloudProps.PrimaryBackendNetworkComponent,
+		UserData:                       cloudProps.UserData,
 	}
 
 	virtualGuestService, err := c.softLayerClient.GetSoftLayer_Virtual_Guest_Service()
@@ -68,7 +97,7 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 		return SoftLayerVM{}, bosherr.WrapError(err, "Creating VirtualGuestService from SoftLayer client")
 	}
 
-	virtualGuest, err := virtualGuestService.CreateObject(virtualGuestTemplate)
+	virtualGuest, err := virtualGuestService.CreateObject(*c.checkValid(&virtualGuestTemplate))
 	if err != nil {
 		return SoftLayerVM{}, bosherr.WrapError(err, "Creating VirtualGuest from SoftLayer client")
 	}
