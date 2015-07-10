@@ -3,9 +3,9 @@ package vm
 import (
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
-	"strconv"
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
