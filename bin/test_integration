@@ -6,6 +6,9 @@
   base=$( cd "$( dirname "$( dirname "$0" )")" && pwd )
   base_gopath=$( cd $base/../../../.. && pwd )
  
+  echo $base
+  echo $base_gopath
+  
   export GOPATH=$base:$base/Godeps/_workspace:$base_gopath GOBIN=$base_gopath/gobin
   export PATH=$PATH:$GOBIN
 
