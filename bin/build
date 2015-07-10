@@ -6,5 +6,5 @@
 	base=$( cd "$( dirname "$( dirname "$0" )")" && pwd )
 	export GOPATH=$PWD/gopath:$base:$base/Godeps/_workspace:$base_gopath GOBIN=$base_gopath/gobin
 
-	go build -o $base/out/cpi github.com/maximilien/main
+	go build -o $base/out/cpi $base/main
 )
