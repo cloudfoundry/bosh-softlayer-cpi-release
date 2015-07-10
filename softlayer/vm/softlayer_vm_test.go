@@ -41,9 +41,20 @@ var _ = Describe("SoftLayerVM", func() {
 	})
 
 	Describe("Delete", func() {
+		BeforeEach(func() {
+		})
 		Context("valid VM ID is used", func() {
 			BeforeEach(func() {
-				softLayerClient.DoRawHttpRequestResponse = []byte("true")
+				fileNames := []string{
+					"SoftLayer_Virtual_Guest_Service_getActiveTransactions.json",
+					"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
+					"SoftLayer_Virtual_Guest_Service_deleteObject_true.json",
+					"SoftLayer_Virtual_Guest_Service_getActiveTransactions.json",
+					"SoftLayer_Virtual_Guest_Service_getObject.json",
+					"SoftLayer_Virtual_Guest_Service_getActiveTransaction.json",
+					"SoftLayer_Virtual_Guest_Service_getEmptyObject.json",
+				}
+				testhelpers.SetTestFixturesForFakeSoftLayerClient(softLayerClient, fileNames)
 				vm = NewSoftLayerVM(1234567, softLayerClient, sshClient, agentEnvService, logger)
 			})
 
@@ -55,7 +66,16 @@ var _ = Describe("SoftLayerVM", func() {
 
 		Context("invalid VM ID is used", func() {
 			BeforeEach(func() {
-				softLayerClient.DoRawHttpRequestResponse = []byte("false")
+				fileNames := []string{
+					"SoftLayer_Virtual_Guest_Service_getActiveTransactions.json",
+					"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
+					"SoftLayer_Virtual_Guest_Service_deleteObject_false.json",
+					"SoftLayer_Virtual_Guest_Service_getActiveTransactions.json",
+					"SoftLayer_Virtual_Guest_Service_getObject.json",
+					"SoftLayer_Virtual_Guest_Service_getActiveTransaction.json",
+					"SoftLayer_Virtual_Guest_Service_getEmptyObject.json",
+				}
+				testhelpers.SetTestFixturesForFakeSoftLayerClient(softLayerClient, fileNames)
 				vm = NewSoftLayerVM(00000, softLayerClient, sshClient, agentEnvService, logger)
 			})
 

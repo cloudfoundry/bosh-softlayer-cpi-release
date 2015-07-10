@@ -60,7 +60,7 @@ func (vm SoftLayerVM) Delete() error {
 	if err != nil {
 		return bosherr.WrapError(err, "Creating SoftLayer VirtualGuestService from client")
 	}
-	
+
 	vmCID := vm.ID()
 	err = bslcommon.WaitForVirtualGuestToHaveNoRunningTransactions(vm.softLayerClient, vmCID, bslcommon.TIMEOUT, bslcommon.POLLING_INTERVAL)
 	if err != nil {
@@ -75,7 +75,7 @@ func (vm SoftLayerVM) Delete() error {
 	if !deleted {
 		return bosherr.WrapError(nil, "Did not delete SoftLayer VirtualGuest from client")
 	}
-	
+
 	totalTime := time.Duration(0)
 	for totalTime < bslcommon.TIMEOUT {
 		activeTransactions, err := virtualGuestService.GetActiveTransactions(vmCID)
@@ -99,13 +99,13 @@ func (vm SoftLayerVM) Delete() error {
 	totalTime = time.Duration(0)
 	for totalTime < bslcommon.TIMEOUT {
 		vm1, err := virtualGuestService.GetObject(vmCID)
-		if err != nil || vm1.Id == 0 { 
+		if err != nil || vm1.Id == 0 {
 			vm.logger.Info(deleteVMLogTag, "VM doesn't exist. Delete done", nil)
 			break
 		}
-		
+
 		activeTransaction, err := virtualGuestService.GetActiveTransaction(vmCID)
-		if err != nil { 
+		if err != nil {
 			return bosherr.WrapError(err, "Getting active transactions from SoftLayer client")
 		}
 
@@ -124,7 +124,6 @@ func (vm SoftLayerVM) Delete() error {
 	if totalTime >= bslcommon.TIMEOUT {
 		return bosherr.WrapError(err, "After deleting a vm, waiting for active transactions to complete TIME OUT!")
 	}
-
 
 	return nil
 }
