@@ -4,7 +4,9 @@
 	set -e
 
 	base=$( cd "$( dirname "$( dirname "$0" )")" && pwd )
-	export GOPATH=$base:$base/Godeps/_workspace:$base_gopath GOBIN=$base_gopath/gobin
+	export GOPATH=$PWD:$base:$base/Godeps/_workspace:$base_gopath GOBIN=$base_gopath/gobin
 
-	go build -o $base/out/cpi main
+	echo $GOPATH
+	
+	go build -o $base/out/cpi github.com/maximilien/main
 )
