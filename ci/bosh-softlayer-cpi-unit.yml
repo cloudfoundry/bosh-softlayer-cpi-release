@@ -1,0 +1,9 @@
+---
+platform: linux
+image: docker:///golang
+
+inputs:
+  - name: bosh-softlayer-cpi
+
+run:
+  path: bosh-softlayer-cpi/bin/ci
