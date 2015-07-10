@@ -52,9 +52,9 @@ func (c SoftLayerCreator) Create(size int, cloudProps DiskCloudProperties, virtu
 func (c SoftLayerCreator) getSoftLayerDiskSize(size int) int {
 	sizeArray := []int{20, 40, 80, 100, 250, 500, 1000, 2000, 4000, 8000, 12000}
 
-	for i := range sizeArray {
-		if ret := size / 1024; ret <= sizeArray[i] {
-			return sizeArray[i]
+	for _, value := range sizeArray {
+		if ret := size / 1024; ret <= value {
+			return value
 		}
 	}
 	return 12000

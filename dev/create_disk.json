@@ -1,7 +1,7 @@
 {
   "method": "create_disk",
   "arguments": [
-    40,
+    512000,
     {
       "consistent_performance_iscsi": true
     },
