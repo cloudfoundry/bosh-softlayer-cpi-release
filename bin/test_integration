@@ -3,6 +3,12 @@
 (
   set -e
 
+  base=$( cd "$( dirname "$( dirname "$0" )")" && pwd )
+  base_gopath=$( cd $base/../../../.. && pwd )
+
+  export GOPATH=$PWD/gopath:$base/Godeps/_workspace:$base_gopath GOBIN=$base_gopath/gobin
+  export PATH=$PATH:$GOBIN
+
   function printStatus {
       if [ $? -eq 0 ]; then
           echo -e "\nSWEET SUITE SUCCESS"
@@ -12,7 +18,6 @@
   }
 
   trap printStatus EXIT
-  export GOPATH=$(godep path):$GOPATH
 
   echo -e "\n Cleaning build artifacts..."
   go clean
@@ -20,10 +25,19 @@
   echo -e "\n Formatting packages..."
   go fmt ./...
 
+  echo -e "\n Get ginkgo..."
+  go get github.com/onsi/ginkgo
+  # go install -installsuffix $base/concourse github.com/onsi/ginkgo/ginkgo
+
+  echo $PWD 
+
+  echo -e "\n Creating cpi binary..."
+  go build -o $base/out/cpi github.com/maximilien/bosh-softlayer-cpi/main
+
   echo -e "\n Integration Testing packages:"
+  # go test ./integration/...
   ginkgo -r -p -v --noisyPendings integration
 
-  echo -e "\n Vetting packages for potential issues..."
-  go tool vet services data_types main client common test_helpers integration
+  # echo -e "\n Vetting packages for potential issues..."
+  # go tool vet services data_types main client common test_helpers integration
 )
-
