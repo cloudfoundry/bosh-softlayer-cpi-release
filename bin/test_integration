@@ -29,6 +29,8 @@
   go get github.com/onsi/ginkgo
   # go install -installsuffix $base/concourse github.com/onsi/ginkgo/ginkgo
 
+  echo $PWD 
+  
   echo -e "\n Creating cpi binary..."
   go build -o $base/out/cpi github.com/maximilien/bosh-softlayer-cpi/main
 
