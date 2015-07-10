@@ -32,7 +32,7 @@
   echo $PWD 
 
   echo -e "\n Creating cpi binary..."
-  go build -o $base/out/cpi $base/main
+  go build -o $base/out/cpi github.com/maximilien/bosh-softlayer-cpi/main
 
   echo -e "\n Integration Testing packages:"
   go test $base/integration/...
