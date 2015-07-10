@@ -4,7 +4,9 @@ image: docker:///golang
 
 inputs:
   - name: bosh-softlayer-cpi
+    path: gopath/src/github.com/maximilien/bosh-softlayer-cpi
   - name: build
 
 run:
-  path: bosh-softlayer-cpi/bin/test-integration
+  path: gopath/src/github.com/maximilien/bosh-softlayer-cpi/bin/test-integration
+

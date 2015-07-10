@@ -25,7 +25,8 @@
   echo -e "\n Formatting packages..."
   go fmt ./...
 
-  # echo -e "\n Get ginkgo..."
+  echo -e "\n Get ginkgo..."
+  go get github.com/onsi/ginkgo
   # go install -installsuffix $base/concourse github.com/onsi/ginkgo/ginkgo
 
   echo -e "\n Creating cpi binary..."
