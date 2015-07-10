@@ -6,7 +6,5 @@
 	base=$( cd "$( dirname "$( dirname "$0" )")" && pwd )
 	export GOPATH=$base:$base/Godeps/_workspace:$base_gopath GOBIN=$base_gopath/gobin
 
-	echo $PWD
-	echo $base
-	go build -o $base/out/cpi github.com/maximilien/bosh-softlayer-cpi/main
+	go build -o $base/out/cpi main
 )
