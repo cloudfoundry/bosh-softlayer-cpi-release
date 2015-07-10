@@ -6,7 +6,7 @@
   base=$( cd "$( dirname "$( dirname "$0" )")" && pwd )
   base_gopath=$( cd $base/../../../.. && pwd )
 
-  export GOPATH=$PWD:$base/Godeps/_workspace:$base_gopath GOBIN=$base_gopath/gobin
+  export GOPATH=$PWD/gopath:$base/Godeps/_workspace:$base_gopath GOBIN=$base_gopath/gobin
   export PATH=$PATH:$GOBIN
 
   function printStatus {
@@ -32,10 +32,10 @@
   echo $PWD 
 
   echo -e "\n Creating cpi binary..."
-  go build -o $base/out/cpi main
+  go build -o $base/out/cpi github.com/maximilien/main
 
   echo -e "\n Integration Testing packages:"
-  go test ./bosh-softlayer-cpi/integration/...
+  go test $base/integration/...
 
   # echo -e "\n Vetting packages for potential issues..."
   # go tool vet services data_types main client common test_helpers integration
