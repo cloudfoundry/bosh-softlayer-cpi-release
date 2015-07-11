@@ -7,6 +7,7 @@ import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 
 	sl "github.com/maximilien/softlayer-go/softlayer"
+	"github.com/maximilien/softlayer-go/data_types"
 )
 
 var (
@@ -158,4 +159,22 @@ func ConfigureMetadataDiskOnVirtualGuest(softLayerClient sl.Client, virtualGuest
 	}
 
 	return nil
+}
+
+func GetImageTemplateId(softLayerClient sl.Client, globalIdentifier string) (int, error) {
+	accountService, err := softLayerClient.GetSoftLayer_Account_Service()
+	if err != nil {
+		return bosherr.WrapError(err, "Creating AccountService from SoftLayer client")
+	}
+
+	filter := globalIdentifier
+	var result data_types.SoftLayer_Virtual_Guest_Block_Device_Template_Group
+	result, err = accountService.GetPrivateBlockDeviceTemplateGroupsWithFilter(filter)
+	if err != nil {
+		return bosherr.WrapError(err, fmt.Sprintf("Failed to get image info by given globalIdentifier %s", globalIdentifier))
+	}
+
+	image_id := result[0]["Id"]
+
+	return image_id, err
 }

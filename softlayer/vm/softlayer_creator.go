@@ -42,6 +42,13 @@ func NewSoftLayerCreator(softLayerClient sl.Client, agentEnvServiceFactory Agent
 }
 
 func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
+
+	fmt.Sprintln("OS reload with stemcell %s", stemcell)
+	agentEnvService := c.agentEnvServiceFactory.New(10595179)
+	vm := NewSoftLayerVM(10595179, c.softLayerClient, util.GetSshClient(), agentEnvService, c.logger)
+	vm.ReloadOS(stemcell)
+	return vm, nil
+
 	virtualGuestTemplate := sldatatypes.SoftLayer_Virtual_Guest_Template{
 		Hostname:  agentID,
 		Domain:    cloudProps.Domain,
@@ -93,11 +100,13 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 		return SoftLayerVM{}, bosherr.WrapError(err, fmt.Sprintf("Attaching ephemeral disk to VirtualGuest `%d`", virtualGuest.Id))
 	}
 
-	agentEnvService := c.agentEnvServiceFactory.New(virtualGuest.Id)
+	agentEnvService = c.agentEnvServiceFactory.New(virtualGuest.Id)
 
-	vm := NewSoftLayerVM(virtualGuest.Id, c.softLayerClient, util.GetSshClient(), agentEnvService, c.logger)
+	vm = NewSoftLayerVM(virtualGuest.Id, c.softLayerClient, util.GetSshClient(), agentEnvService, c.logger)
 
 	return vm, nil
+
+
 }
 
 func (c SoftLayerCreator) resolveNetworkIP(networks Networks) (string, error) {
