@@ -27,6 +27,10 @@ var _ = Describe("SoftLayerCreator", func() {
 	})
 
 	Describe("Create", func() {
+		var (
+			cloudProps DiskCloudProperties
+		)
+
 		Context("Creates disk successfully", func() {
 			BeforeEach(func() {
 				fileNames := []string{
@@ -35,11 +39,14 @@ var _ = Describe("SoftLayerCreator", func() {
 					"SoftLayer_Product_Order_Service_placeOrder.json",
 					"SoftLayer_Account_Service_getIscsiVolume.json",
 				}
+				cloudProps = DiskCloudProperties{
+					ConsistentPerformanceIscsi: true,
+				}
 				testhelpers.SetTestFixturesForFakeSoftLayerClient(fc, fileNames)
 			})
 
 			It("creates disk successfully and returns unique disk id", func() {
-				disk, err := creator.Create(20, 123)
+				disk, err := creator.Create(20, cloudProps, 123)
 				Expect(err).ToNot(HaveOccurred())
 
 				expectedDisk := NewSoftLayerDisk(1234, fc, logger)
@@ -48,17 +55,6 @@ var _ = Describe("SoftLayerCreator", func() {
 		})
 
 		Context("Failed to create disk", func() {
-			It("Reports error due to wrong disk size", func() {
-				fileNames := []string{
-					"SoftLayer_Virtual_Guest_Service_getObject.json",
-					"SoftLayer_Product_Order_Service_getItemPrices.json",
-				}
-				testhelpers.SetTestFixturesForFakeSoftLayerClient(fc, fileNames)
-
-				_, err := creator.Create(25, 123)
-				Expect(err).To(HaveOccurred())
-			})
-
 			It("Reports error due to wrong virtual guest id", func() {
 				fileNames := []string{
 					"SoftLayer_Virtual_Guest_Service_getEmptyObject.json",
@@ -66,7 +62,7 @@ var _ = Describe("SoftLayerCreator", func() {
 				}
 				testhelpers.SetTestFixturesForFakeSoftLayerClient(fc, fileNames)
 
-				_, err := creator.Create(20, 0)
+				_, err := creator.Create(20, cloudProps, 0)
 				Expect(err).To(HaveOccurred())
 			})
 		})
