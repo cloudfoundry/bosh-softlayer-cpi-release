@@ -35,7 +35,7 @@
 
   echo -e "\n Integration Testing packages:"
   # go test ./integration/...
-  ginkgo -r -p -v --noisyPendings integration
+  ginkgo -r -p -v --noisyPendings $base/integration
 
   echo -e "\n Vetting packages for potential issues..."
   go tool vet $base/services $base/data_types $base/main $base/client $base/common $base/test_helpers $base/integration
