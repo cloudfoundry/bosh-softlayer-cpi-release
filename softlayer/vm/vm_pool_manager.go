@@ -27,7 +27,7 @@ type VMInfo struct {
 	agent_id string
 }
 
-func OpenDB() (*sql.DB, error) {
+func openDB() (*sql.DB, error) {
 
 	db, err := sql.Open("sqlite3", SQLITE_DB_FILE_PATH)
 
@@ -38,7 +38,7 @@ func OpenDB() (*sql.DB, error) {
 	return db, nil
 }
 
-func InitVMDB(db *sql.DB) error {
+func initVMPoolDB(db *sql.DB) error {
 
 	// Create vms table if it does not exist
 	sqlStmt := `create table if not exists vms (id int not null primary key, name varchar(32), in_use varchar(32),
@@ -59,7 +59,6 @@ func exec(db *sql.DB, sqlStmt string) error {
 	if err != nil {
 		return bosherr.WrapError(err, "Failed to begin DB transcation")
 	}
-	defer db.Close()
 
 	_, err = tx.Exec(sqlStmt)
 	if err != nil {
@@ -70,31 +69,38 @@ func exec(db *sql.DB, sqlStmt string) error {
 	return nil
 }
 
-func (vmInfo *VMInfo) QueryVMInfobyAgentID(db *sql.DB) error {
+func QueryVMInfobyAgentID(agent_id string) (*VMInfo, error) {
 
-	tx, err := db.Begin()
+	vmInfo := new(VMInfo)
+
+	db, err := openDB()
 	if err != nil {
-		return bosherr.WrapError(err, "Failed to begin DB transcation")
+		return vmInfo, bosherr.WrapError(err, "Failed to Open DB")
 	}
 	defer db.Close()
 
-	sqlStmt, err := tx.Prepare("select id, image_id from vms where agent_id=? and in_use='f'")
+	tx, err := db.Begin()
 	if err != nil {
-		return bosherr.WrapError(err, "Failed to prepare sql statement")
+		return vmInfo, bosherr.WrapError(err, "Failed to begin DB transcation")
+	}
+
+	sqlStmt, err := tx.Prepare("select id, image_id, agent_id from vms where agent_id=? and in_use='f'")
+	if err != nil {
+		return vmInfo, bosherr.WrapError(err, "Failed to prepare sql statement")
 	}
 	defer sqlStmt.Close()
 
-	err = sqlStmt.QueryRow(vmInfo.agent_id).Scan(&vmInfo.id, &vmInfo.image_id)
+	err = sqlStmt.QueryRow(agent_id).Scan(&vmInfo.id, &vmInfo.image_id, &vmInfo.agent_id)
 	if err != nil {
-		return bosherr.WrapError(err, "Failed to query VM info from vms table")
+		return vmInfo, bosherr.WrapError(err, "Failed to query VM info from vms table")
 	}
 	tx.Commit()
 
-	return nil
+	return vmInfo, nil
 
 }
 
-func (vmInfo *VMInfo) QueryVMInfobyNamePrefix(db *sql.DB) error {
+func (vmInfo *VMInfo) queryVMInfobyNamePrefix(db *sql.DB) error {
 
 	tx, err := db.Begin()
 	if err != nil {
@@ -117,10 +123,16 @@ func (vmInfo *VMInfo) QueryVMInfobyNamePrefix(db *sql.DB) error {
 	return nil
 }
 
-func (vmInfo *VMInfo) DeleteVMFromDB(db *sql.DB) error {
+func DeleteVMFromDB(id int) error {
 
-	sqlStmt := fmt.Sprintf("delete from vms where id=%d", vmInfo.id)
-	err := exec(db, sqlStmt)
+	db, err := openDB()
+	if err != nil {
+		return bosherr.WrapError(err, "Failed to Open DB")
+	}
+	defer db.Close()
+
+	sqlStmt := fmt.Sprintf("delete from vms where id=%d", id)
+	err = exec(db, sqlStmt)
 	if err != nil {
 		return bosherr.WrapError(nil, "Failed to delete VM info from vms table")
 	}
@@ -139,13 +151,18 @@ func (vmInfo *VMInfo) InsertVMInfo(db *sql.DB) error {
 	return nil
 }
 
-func (vmInfo *VMInfo) UpdateVMInfo(db *sql.DB) error {
+func (vmInfo *VMInfo) updateVMInfo() error {
+
+	db, err := openDB()
+	if err != nil {
+		return  bosherr.WrapError(err, "Failed to Open DB")
+	}
+	defer db.Close()
 
 	tx, err := db.Begin()
 	if err != nil {
 		return bosherr.WrapError(err, "Failed to begin DB transcation")
 	}
-	defer db.Close()
 
 	if vmInfo.in_use == "f" || vmInfo.in_use == "t" {
 		sqlStmt := fmt.Sprintf("update vms set in_use='%s', timestamp=CURRENT_TIMESTAMP) where id = %s", vmInfo.in_use, vmInfo.id)
@@ -172,3 +189,16 @@ func (vmInfo *VMInfo) UpdateVMInfo(db *sql.DB) error {
 
 	return nil
 }
+
+func ReleaseVMToPool(id int, agent_id string) error {
+
+	vmInfo := &VMInfo{id, "", "f", "", agent_id}
+	err := vmInfo.updateVMInfo()
+	if err != nil {
+		return bosherr.WrapError(err, "Failed to release VM to the pool")
+	} else {
+		return nil
+	}
+}
+
+

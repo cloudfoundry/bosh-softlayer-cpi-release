@@ -16,6 +16,7 @@ import (
 	bslcstem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell"
 
 	util "github.com/maximilien/bosh-softlayer-cpi/util"
+	"strings"
 )
 
 const softLayerCreatorLogTag = "SoftLayerCreator"
@@ -41,13 +42,7 @@ func NewSoftLayerCreator(softLayerClient sl.Client, agentEnvServiceFactory Agent
 	}
 }
 
-func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
-
-	fmt.Sprintln("OS reload with stemcell %s", stemcell)
-	agentEnvService := c.agentEnvServiceFactory.New(10595179)
-	vm := NewSoftLayerVM(10595179, c.softLayerClient, util.GetSshClient(), agentEnvService, c.logger)
-	vm.ReloadOS(stemcell)
-	return vm, nil
+func (c SoftLayerCreator) Create_CCI(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
 
 	virtualGuestTemplate := sldatatypes.SoftLayer_Virtual_Guest_Template{
 		Hostname:  agentID,
@@ -100,12 +95,36 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 		return SoftLayerVM{}, bosherr.WrapError(err, fmt.Sprintf("Attaching ephemeral disk to VirtualGuest `%d`", virtualGuest.Id))
 	}
 
-	agentEnvService = c.agentEnvServiceFactory.New(virtualGuest.Id)
+	agentEnvService := c.agentEnvServiceFactory.New(virtualGuest.Id)
 
-	vm = NewSoftLayerVM(virtualGuest.Id, c.softLayerClient, util.GetSshClient(), agentEnvService, c.logger)
+	vm := NewSoftLayerVM(virtualGuest.Id, c.softLayerClient, util.GetSshClient(), agentEnvService, c.logger)
 
 	return vm, nil
 
+}
+
+func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
+
+	if strings.Contains(cloudProps.VmNamePrefix, "-worker") {
+		vm, err := c.Create_CCI(agentID, stemcell, cloudProps, networks, env)
+		return vm, err
+	}
+
+	vmInfo, err := QueryVMInfobyAgentID(agentID)
+	if err != nil {
+		return SoftLayerVM{}, bosherr.WrapError(err, "")
+	}
+
+	if vmInfo.id != 0 {
+		// Perform OS Reload
+		fmt.Sprintln("OS reload with stemcell %s", stemcell)
+		agentEnvService := c.agentEnvServiceFactory.New(vmInfo.id)
+		vm := NewSoftLayerVM(vmInfo.id, c.softLayerClient, util.GetSshClient(), agentEnvService, c.logger)
+		vm.ReloadOS(stemcell)
+		return vm, nil
+	}
+
+	return c.Create(agentID, stemcell, cloudProps, networks, env)
 
 }
 

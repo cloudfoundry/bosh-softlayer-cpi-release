@@ -94,10 +94,14 @@ func (vm SoftLayerVM) Reboot() error {
 
 func (vm *SoftLayerVM) ReloadOS(stemcell bslcstem.Stemcell) (error) {
 
-	os_Reload_Config := sldatatypes.OS_Reload_Config{
+/*	os_Reload_Config := sldatatypes.OS_Reload_Config{
 		sldatatypes.Image_Template_Config{
 			ImageTemplateId: strconv.Itoa(stemcell.ID()),
 		},
+	}*/
+
+	reload_OS_Reload_Config := sldatatypes.Image_Template_Config{
+		ImageTemplateId: strconv.Itoa(stemcell.ID()),
 	}
 
 	fmt.Sprintln("stemcell ID: %s", stemcell.ID())
@@ -106,7 +110,7 @@ func (vm *SoftLayerVM) ReloadOS(stemcell bslcstem.Stemcell) (error) {
 	if err != nil {
 		return bosherr.WrapError(err, "Creating VirtualGuestService from SoftLayer client")
 	}
-	err = virtualGuestService.ReloadOperatingSystem(vm.ID(), os_Reload_Config)
+	err = virtualGuestService.ReloadOperatingSystem(vm.ID(), reload_OS_Reload_Config)
 	if err != nil {
 		return bosherr.WrapError(err, "Reloading OS on the specified VirtualGuest from SoftLayer client")
 	}

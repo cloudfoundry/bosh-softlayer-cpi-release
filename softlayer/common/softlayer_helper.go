@@ -166,15 +166,20 @@ func GetImageTemplateId(softLayerClient sl.Client, globalIdentifier string) (int
 	if err != nil {
 		return bosherr.WrapError(err, "Creating AccountService from SoftLayer client")
 	}
-
-	filter := globalIdentifier
-	var result data_types.SoftLayer_Virtual_Guest_Block_Device_Template_Group
-	result, err = accountService.GetPrivateBlockDeviceTemplateGroupsWithFilter(filter)
+	masks := []string {"id", "globalIdentifier"}
+	filters := fmt.Sprintf(`{"globalIdentifier":{"name":{"operation":"%s"}}}`, globalIdentifier)
+	var results []data_types.SoftLayer_Virtual_Guest_Block_Device_Template_Group
+	results, err = accountService.GetPrivateBlockDeviceTemplateGroupsWithMaskAndFilter(masks, filters)
 	if err != nil {
 		return bosherr.WrapError(err, fmt.Sprintf("Failed to get image info by given globalIdentifier %s", globalIdentifier))
 	}
 
-	image_id := result[0]["Id"]
+	for i := 0; i < len(results); i++ {
+		if results[i].GlobalIdentifier == globalIdentifier {
+			return results[i].Id
+			break
+		}
+	}
 
-	return image_id, err
+	return nil, err
 }
