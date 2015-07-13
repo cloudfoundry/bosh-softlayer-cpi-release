@@ -76,54 +76,7 @@ func (vm SoftLayerVM) Delete() error {
 		return bosherr.WrapError(nil, "Did not delete SoftLayer VirtualGuest from client")
 	}
 
-	totalTime := time.Duration(0)
-	for totalTime < bslcommon.TIMEOUT {
-		activeTransactions, err := virtualGuestService.GetActiveTransactions(vmCID)
-		if err != nil {
-			return bosherr.WrapError(err, "Getting active transactions from SoftLayer client")
-		}
-
-		if len(activeTransactions) > 0 {
-			vm.logger.Info(deleteVMLogTag, "Delete VM transaction started", nil)
-			break
-		}
-
-		totalTime += bslcommon.POLLING_INTERVAL
-		time.Sleep(bslcommon.POLLING_INTERVAL)
-	}
-
-	if totalTime >= bslcommon.TIMEOUT {
-		return bosherr.WrapError(err, "Waiting for DeleteVM transaction to start TIME OUT!")
-	}
-
-	totalTime = time.Duration(0)
-	for totalTime < bslcommon.TIMEOUT {
-		vm1, err := virtualGuestService.GetObject(vmCID)
-		if err != nil || vm1.Id == 0 {
-			vm.logger.Info(deleteVMLogTag, "VM doesn't exist. Delete done", nil)
-			break
-		}
-
-		activeTransaction, err := virtualGuestService.GetActiveTransaction(vmCID)
-		if err != nil {
-			return bosherr.WrapError(err, "Getting active transactions from SoftLayer client")
-		}
-
-		averageTransactionDuration, _ := strconv.ParseFloat(activeTransaction.TransactionStatus.AverageDuration, 32)
-
-		if averageTransactionDuration > 30 { // long transaction (for monthly charged)
-			vm.logger.Info(deleteVMLogTag, "Deleting VM instance had been launched and it is a long transaction. Please check Softlayer Portal", nil)
-			break
-		}
-
-		vm.logger.Info(deleteVMLogTag, "This is a short transaction, waiting for all active transactions to complete", nil)
-		totalTime += bslcommon.POLLING_INTERVAL
-		time.Sleep(bslcommon.POLLING_INTERVAL)
-	}
-
-	if totalTime >= bslcommon.TIMEOUT {
-		return bosherr.WrapError(err, "After deleting a vm, waiting for active transactions to complete TIME OUT!")
-	}
+	vm.postCheckActiveTransactionsForDeleteVM(vm.softLayerClient, vmCID, bslcommon.TIMEOUT, bslcommon.POLLING_INTERVAL)
 
 	return nil
 }
@@ -336,4 +289,62 @@ func (vm SoftLayerVM) getRootPassword(virtualGuest datatypes.SoftLayer_Virtual_G
 	}
 
 	return ""
+}
+
+func (vm SoftLayerVM) postCheckActiveTransactionsForDeleteVM(softLayerClient sl.Client, virtualGuestId int, timeout, pollingInterval time.Duration) error {
+	virtualGuestService, err := softLayerClient.GetSoftLayer_Virtual_Guest_Service()
+	if err != nil {
+		return bosherr.WrapError(err, "Creating VirtualGuestService from SoftLayer client")
+	}
+
+	totalTime := time.Duration(0)
+	for totalTime < timeout {
+		activeTransactions, err := virtualGuestService.GetActiveTransactions(virtualGuestId)
+		if err != nil {
+			return bosherr.WrapError(err, "Getting active transactions from SoftLayer client")
+		}
+
+		if len(activeTransactions) > 0 {
+			vm.logger.Info(deleteVMLogTag, "Delete VM transaction started", nil)
+			break
+		}
+
+		totalTime += pollingInterval
+		time.Sleep(pollingInterval)
+	}
+
+	if totalTime >= timeout {
+		return bosherr.WrapError(err, "Waiting for DeleteVM transaction to start TIME OUT!")
+	}
+
+	totalTime = time.Duration(0)
+	for totalTime < timeout {
+		vm1, err := virtualGuestService.GetObject(virtualGuestId)
+		if err != nil || vm1.Id == 0 {
+			vm.logger.Info(deleteVMLogTag, "VM doesn't exist. Delete done", nil)
+			break
+		}
+
+		activeTransaction, err := virtualGuestService.GetActiveTransaction(virtualGuestId)
+		if err != nil {
+			return bosherr.WrapError(err, "Getting active transactions from SoftLayer client")
+		}
+
+		averageTransactionDuration, _ := strconv.ParseFloat(activeTransaction.TransactionStatus.AverageDuration, 32)
+
+		if averageTransactionDuration > 30 {
+			vm.logger.Info(deleteVMLogTag, "Deleting VM instance had been launched and it is a long transaction. Please check Softlayer Portal", nil)
+			break
+		}
+
+		vm.logger.Info(deleteVMLogTag, "This is a short transaction, waiting for all active transactions to complete", nil)
+		totalTime += pollingInterval
+		time.Sleep(pollingInterval)
+	}
+
+	if totalTime >= timeout {
+		return bosherr.WrapError(err, "After deleting a vm, waiting for active transactions to complete TIME OUT!")
+	}
+
+	return nil
 }
