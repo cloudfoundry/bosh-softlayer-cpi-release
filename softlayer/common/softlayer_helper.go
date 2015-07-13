@@ -177,7 +177,10 @@ func GetUserMetadataOnVirtualGuest(softLayerClient sl.Client, virtualGuestId int
 	}
 
 	sEnc := attributes[0].Value
-	sDec, _ := base64.StdEncoding.DecodeString(sEnc)
+	sDec, err := base64.StdEncoding.DecodeString(sEnc)
+	if err != nil {
+		return []byte{}, bosherr.WrapError(err, fmt.Sprintf("Failed to decode metadata returned from virtualGuest `%d`", virtualGuestId))
+	}
 
 	return sDec, nil
 }
