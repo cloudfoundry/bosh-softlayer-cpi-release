@@ -41,9 +41,14 @@ func NewSoftLayerCreator(softLayerClient sl.Client, agentEnvServiceFactory Agent
 	}
 }
 
+func (c SoftLayerCreator) getTimeStample(now time.Time) string {
+	//utilize the constants list in the http://golang.org/src/time/format.go file to get the expect time formats
+	return now.Format("20060102-030405-") + strconv.Itoa(int(now.UnixNano()/1e6-now.Unix()*1e3))
+}
+
 func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
 	virtualGuestTemplate := sldatatypes.SoftLayer_Virtual_Guest_Template{
-		Hostname:  agentID,
+		Hostname:  cloudProps.VmNamePrefix + c.getTimeStample(time.Now().UTC()),
 		Domain:    cloudProps.Domain,
 		StartCpus: cloudProps.StartCpus,
 		MaxMemory: cloudProps.MaxMemory,
@@ -56,11 +61,19 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 			GlobalIdentifier: stemcell.Uuid(),
 		},
 
-		SshKeys:           cloudProps.SshKeys,
-		HourlyBillingFlag: true,
+		SshKeys: cloudProps.SshKeys,
 
-		// Needed for ephemeral disk
-		LocalDiskFlag: true,
+		HourlyBillingFlag: cloudProps.HourlyBillingFlag,
+		//Needed for ephemeral disk
+		LocalDiskFlag: cloudProps.LocalDiskFlag,
+
+		DedicatedAccountHostOnlyFlag:   cloudProps.DedicatedAccountHostOnlyFlag,
+		BlockDevices:                   cloudProps.BlockDevices,
+		NetworkComponents:              cloudProps.NetworkComponents,
+		PrivateNetworkOnlyFlag:         cloudProps.PrivateNetworkOnlyFlag,
+		PrimaryNetworkComponent:        &cloudProps.PrimaryNetworkComponent,
+		PrimaryBackendNetworkComponent: &cloudProps.PrimaryBackendNetworkComponent,
+		UserData:                       cloudProps.UserData,
 	}
 
 	virtualGuestService, err := c.softLayerClient.GetSoftLayer_Virtual_Guest_Service()
