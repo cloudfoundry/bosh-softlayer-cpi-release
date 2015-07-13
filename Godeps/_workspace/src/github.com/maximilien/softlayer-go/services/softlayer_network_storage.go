@@ -39,11 +39,11 @@ func (slns *softLayer_Network_Storage_Service) CreateIscsiVolume(size int, locat
 	}
 
 	sizeItemPriceId, err := slns.getIscsiVolumeItemIdBasedOnSize(size)
-	iopsItemPriceId, err := slns.getPerformanceStorageItemPriceIdByIops(size)
-
-	/*if err != nil {
+	if err != nil {
 		return datatypes.SoftLayer_Network_Storage{}, err
-	}*/
+	}
+
+	iopsItemPriceId := slns.getPerformanceStorageItemPriceIdByIops(size)
 
 	order := datatypes.SoftLayer_Product_Order{
 		Location:    location,
@@ -67,7 +67,11 @@ func (slns *softLayer_Network_Storage_Service) CreateIscsiVolume(size int, locat
 		Quantity:  1,
 	}
 
-	productOrderService, _ := slns.client.GetSoftLayer_Product_Order_Service()
+	productOrderService, err := slns.client.GetSoftLayer_Product_Order_Service()
+	if err != nil {
+		return datatypes.SoftLayer_Network_Storage{}, err
+	}
+
 	receipt, err := productOrderService.PlaceOrder(order)
 	if err != nil {
 		return datatypes.SoftLayer_Network_Storage{}, err
@@ -91,8 +95,16 @@ func (slns *softLayer_Network_Storage_Service) CreateIscsiVolume(size int, locat
 
 func (slns *softLayer_Network_Storage_Service) DeleteIscsiVolume(volumeId int, immediateCancellationFlag bool) error {
 	ObjectFilter := string(`{"iscsiNetworkStorage":{"id":{"operation":` + strconv.Itoa(volumeId) + `}}}`)
-	accountService, _ := slns.client.GetSoftLayer_Account_Service()
-	iscsiStorages, _ := accountService.GetIscsiNetworkStorageWithFilter(ObjectFilter)
+
+	accountService, err := slns.client.GetSoftLayer_Account_Service()
+	if err != nil {
+		return err
+	}
+
+	iscsiStorages, err := accountService.GetIscsiNetworkStorageWithFilter(ObjectFilter)
+	if err != nil {
+		return err
+	}
 
 	var accountId, billingItemId int
 
@@ -115,8 +127,12 @@ func (slns *softLayer_Network_Storage_Service) DeleteIscsiVolume(volumeId int, i
 		},
 	}
 
-	billingItemCancellationRequestService, _ := slns.client.GetSoftLayer_Billing_Item_Cancellation_Request_Service()
-	_, err := billingItemCancellationRequestService.CreateObject(billingItemCancellationRequest)
+	billingItemCancellationRequestService, err := slns.client.GetSoftLayer_Billing_Item_Cancellation_Request_Service()
+	if err != nil {
+		return err
+	}
+
+	_, err = billingItemCancellationRequestService.CreateObject(billingItemCancellationRequest)
 	if err != nil {
 		return err
 	}
@@ -139,13 +155,76 @@ func (slns *softLayer_Network_Storage_Service) GetIscsiVolume(volumeId int) (dat
 	return volume, nil
 }
 
+func (slns *softLayer_Network_Storage_Service) HasAllowedVirtualGuest(volumeId int, vmId int) (bool, error) {
+	filter := string(`{"allowedVirtualGuests":{"id":{"operation":"` + strconv.Itoa(vmId) + `"}}}`)
+	response, err := slns.client.DoRawHttpRequestWithObjectFilterAndObjectMask(fmt.Sprintf("%s/%d/getAllowedVirtualGuests.json", slns.GetName(), volumeId), []string{"id"}, fmt.Sprintf(string(filter)), "GET", new(bytes.Buffer))
+
+	if err != nil {
+		return false, errors.New(fmt.Sprintf("Can not check authentication for volume %d in vm %d", volumeId, vmId))
+	}
+
+	virtualGuest := []datatypes.SoftLayer_Virtual_Guest{}
+	err = json.Unmarshal(response, &virtualGuest)
+
+	if len(virtualGuest) > 0 {
+		return true, nil
+	}
+
+	return false, nil
+}
+
+func (slns *softLayer_Network_Storage_Service) AttachIscsiVolume(virtualGuest datatypes.SoftLayer_Virtual_Guest, volumeId int) error {
+	parameters := datatypes.SoftLayer_Virtual_Guest_Parameters{
+		Parameters: []datatypes.SoftLayer_Virtual_Guest{
+			virtualGuest,
+		},
+	}
+	requestBody, err := json.Marshal(parameters)
+	if err != nil {
+		return err
+	}
+
+	_, err = slns.client.DoRawHttpRequest(fmt.Sprintf("%s/%d/allowAccessFromVirtualGuest.json", slns.GetName(), volumeId), "PUT", bytes.NewBuffer(requestBody))
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (slns *softLayer_Network_Storage_Service) DetachIscsiVolume(virtualGuest datatypes.SoftLayer_Virtual_Guest, volumeId int) error {
+	parameters := datatypes.SoftLayer_Virtual_Guest_Parameters{
+		Parameters: []datatypes.SoftLayer_Virtual_Guest{
+			virtualGuest,
+		},
+	}
+	requestBody, err := json.Marshal(parameters)
+	if err != nil {
+		return err
+	}
+
+	_, err = slns.client.DoRawHttpRequest(fmt.Sprintf("%s/%d/removeAccessFromVirtualGuest.json", slns.GetName(), volumeId), "PUT", bytes.NewBuffer(requestBody))
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // Private methods
 
 func (slns *softLayer_Network_Storage_Service) findIscsiVolumeId(orderId int) (datatypes.SoftLayer_Network_Storage, error) {
 	ObjectFilter := string(`{"iscsiNetworkStorage":{"billingItem":{"orderItem":{"order":{"id":{"operation":` + strconv.Itoa(orderId) + `}}}}}}`)
-	accountService, _ := slns.client.GetSoftLayer_Account_Service()
 
-	iscsiStorages, _ := accountService.GetIscsiNetworkStorageWithFilter(ObjectFilter)
+	accountService, err := slns.client.GetSoftLayer_Account_Service()
+	if err != nil {
+		return datatypes.SoftLayer_Network_Storage{}, err
+	}
+
+	iscsiStorages, err := accountService.GetIscsiNetworkStorageWithFilter(ObjectFilter)
+	if err != nil {
+		return datatypes.SoftLayer_Network_Storage{}, err
+	}
 
 	if len(iscsiStorages) == 1 {
 		return iscsiStorages[0], nil
@@ -182,15 +261,15 @@ func (slns *softLayer_Network_Storage_Service) getIscsiVolumeItemIdBasedOnSize(s
 	return currentItemId, nil
 }
 
-func (slns *softLayer_Network_Storage_Service) getPerformanceStorageItemPriceIdByIops(size int) (int, error) {
+func (slns *softLayer_Network_Storage_Service) getPerformanceStorageItemPriceIdByIops(size int) int {
 	switch size {
 	case 20:
-		return 40838, nil // 500 IOPS
+		return 40838 // 500 IOPS
 	case 40:
-		return 40988, nil // 1000 IOPS
+		return 40988 // 1000 IOPS
 	case 80:
-		return 41288, nil // 2000 IOPS
+		return 41288 // 2000 IOPS
 	default:
-		return 41788, nil // 3000 IOPS
+		return 41788 // 3000 IOPS
 	}
 }

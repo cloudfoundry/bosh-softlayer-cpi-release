@@ -1,0 +1,10 @@
+{
+  "method": "attach_disk",
+  "arguments": [
+    "10498259",
+    "5636345"
+  ],
+  "context": {
+    "director_uuid": "5276b588-1016-4023-acae-9a0d797168be"
+  }
+}
