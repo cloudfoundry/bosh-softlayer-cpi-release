@@ -8,11 +8,7 @@
  
   # export GOPATH=$base:$base/Godeps/_workspace:$base_gopath GOBIN=$base_gopath/gobin
   # export PATH=$PATH:$GOBIN
-
-  echo $GODEP
-  export GOPATH=$($GODEP path):$GOPATH
-  export PATH=$($GODEP path)/bin:$PATH
-
+  
   function printStatus {
       if [ $? -eq 0 ]; then
           echo -e "\nSWEET SUITE SUCCESS"
@@ -22,6 +18,12 @@
   }
 
   trap printStatus EXIT
+
+  echo -e "\n Get godep and append path"
+  go get github.com/tools/godep
+  GODEP=$(which godep)
+  export GOPATH=$($GODEP path):$GOPATH
+  export PATH=$($GODEP path)/bin:$PATH
 
   echo -e "\n Cleaning build artifacts..."
   go clean
