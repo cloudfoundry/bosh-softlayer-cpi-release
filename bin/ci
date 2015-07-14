@@ -8,8 +8,10 @@
  
   # export GOPATH=$base:$base/Godeps/_workspace:$base_gopath GOBIN=$base_gopath/gobin
   # export PATH=$PATH:$GOBIN
+  echo $GOPATH
   export GOPATH=$base:$base/Godeps/_workspace:$base_gopath
-
+  echo $GOPATH
+  
   function printStatus {
       if [ $? -eq 0 ]; then
           echo -e "\nSWEET SUITE SUCCESS"
