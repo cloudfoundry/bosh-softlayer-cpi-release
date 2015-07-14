@@ -28,7 +28,7 @@
   cd $base
 
   echo -e "\n Creating cpi binary..."
-  go build -o out/cpi main
+  go build -o out/cpi github.com/maximilien/bosh-softlayer-cpi/main
 
   echo -e "\n Integration Testing packages:"
   ginkgo -r -p -v --noisyPendings integration
