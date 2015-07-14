@@ -8,7 +8,6 @@
  
   # export GOPATH=$base:$base/Godeps/_workspace:$base_gopath GOBIN=$base_gopath/gobin
   # export PATH=$PATH:$GOBIN
-  export GOPATH=$base
   
   function printStatus {
       if [ $? -eq 0 ]; then
@@ -20,20 +19,14 @@
 
   trap printStatus EXIT
 
-  echo -e "\n Get godep and append path"
-  go get github.com/tools/godep
-  GODEP=$(which godep)
-  export GOPATH=$GODEP:$GOPATH
-  export PATH=$GODEP/bin:$PATH
-
   echo -e "\n Cleaning build artifacts..."
   go clean
 
   echo -e "\n Formatting packages..."
   go fmt ./...
 
-  echo -e "\n Install ginkgo..."
-  go install github.com/onsi/ginkgo/ginkgo
+  # echo -e "\n Install ginkgo..."
+  # go install github.com/onsi/ginkgo/ginkgo
 
   echo -e "\n Unit Testing packages:"
   ginkgo -r -p -v $base/action $base/api/... $base/softlayer $base/util
