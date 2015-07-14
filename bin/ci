@@ -23,8 +23,8 @@
   echo -e "\n Get godep and append path"
   go get github.com/tools/godep
   GODEP=$(which godep)
-  export GOPATH=$($GODEP path):$GOPATH
-  export PATH=$($GODEP path)/bin:$PATH
+  export GOPATH=$GODEP:$GOPATH
+  export PATH=$GODEP/bin:$PATH
 
   echo -e "\n Cleaning build artifacts..."
   go clean
