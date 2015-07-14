@@ -5,9 +5,6 @@
 
   base=$( cd "$( dirname "$( dirname "$0" )")" && pwd )
   base_gopath=$( cd $base/../../../.. && pwd )
- 
-  # export GOPATH=$base:$base/Godeps/_workspace:$base_gopath GOBIN=$base_gopath/gobin
-  # export PATH=$PATH:$GOBIN
   
   export GOPATH=$base/Godeps/_workspace:$base_gopath:$GOPATH
 
@@ -28,7 +25,7 @@
   go fmt ./...
 
   echo -e "\n Unit Testing packages:"
-  ginkgo -r -p -v $base/action $base/api/... softlayer $base/util
+  ginkgo -r -p -v action $base/api $base/softlayer $base/util
 
   echo -e "\n Vetting packages for potential issues..."
   go tool vet $base/action $base/api $base/main $base/softlayer $base/util
