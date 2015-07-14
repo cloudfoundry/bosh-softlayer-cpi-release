@@ -10,7 +10,7 @@ type FakeCreator struct {
 	CreateErr  error
 }
 
-func (c *FakeCreator) Create(size int, virtualGuestId int) (bslcdisk.Disk, error) {
+func (c *FakeCreator) Create(size int, diskCloudProperties bslcdisk.DiskCloudProperties, virtualGuestId int) (bslcdisk.Disk, error) {
 	c.CreateSize = size
 	return c.CreateDisk, c.CreateErr
 }
