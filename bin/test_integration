@@ -25,18 +25,15 @@
   echo -e "\n Formatting packages..."
   go fmt ./...
 
-  echo -e "\n Get ginkgo..."
-  # go get github.com/onsi/ginkgo
-  # go install -installsuffix $base/concourse github.com/onsi/ginkgo/ginkgo
-  go install github.com/onsi/ginkgo/ginkgo
+  # echo -e "\n Install ginkgo..."
+  # go install github.com/onsi/ginkgo/ginkgo
 
   echo -e "\n Creating cpi binary..."
   go build -o $base/out/cpi github.com/maximilien/bosh-softlayer-cpi/main
 
   echo -e "\n Integration Testing packages:"
-  # go test ./integration/...
   ginkgo -r -p -v --noisyPendings $base/integration
 
   echo -e "\n Vetting packages for potential issues..."
-  go tool vet $base/services $base/data_types $base/main $base/client $base/common $base/test_helpers $base/integration
+  go tool vet $base/action $base/api $base/common $base/integration $base/main $base/test_helpers
 )
