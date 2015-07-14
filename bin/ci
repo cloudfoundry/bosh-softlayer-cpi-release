@@ -8,7 +8,7 @@
  
   # export GOPATH=$base:$base/Godeps/_workspace:$base_gopath GOBIN=$base_gopath/gobin
   # export PATH=$PATH:$GOBIN
-  export GOPATH=$base/gopath:$base/Godeps/_workspace:$base_gopath
+  export GOPATH=$base:$base/Godeps/_workspace:$base_gopath
 
   function printStatus {
       if [ $? -eq 0 ]; then
@@ -30,7 +30,7 @@
   go install github.com/onsi/ginkgo/ginkgo
 
   echo -e "\n Unit Testing packages:"
-  ginkgo -r -p -v --noisyPendings $base/action $base/api/... $base/softlayer $base/util
+  ginkgo -r -p -v $base/action $base/api/... $base/softlayer $base/util
 
   echo -e "\n Vetting packages for potential issues..."
   go tool vet $base/action $base/api $base/main $base/softlayer $base/util
