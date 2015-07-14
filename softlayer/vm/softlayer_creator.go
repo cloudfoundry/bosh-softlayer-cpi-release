@@ -41,14 +41,14 @@ func NewSoftLayerCreator(softLayerClient sl.Client, agentEnvServiceFactory Agent
 	}
 }
 
-func (c SoftLayerCreator) getTimeStample(now time.Time) string {
+func (c SoftLayerCreator) getTimeStamp(now time.Time) string {
 	//utilize the constants list in the http://golang.org/src/time/format.go file to get the expect time formats
 	return now.Format("20060102-030405-") + strconv.Itoa(int(now.UnixNano()/1e6-now.Unix()*1e3))
 }
 
 func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
 	virtualGuestTemplate := sldatatypes.SoftLayer_Virtual_Guest_Template{
-		Hostname:  cloudProps.VmNamePrefix + c.getTimeStample(time.Now().UTC()),
+		Hostname:  cloudProps.VmNamePrefix + c.getTimeStamp(time.Now().UTC()),
 		Domain:    cloudProps.Domain,
 		StartCpus: cloudProps.StartCpus,
 		MaxMemory: cloudProps.MaxMemory,
