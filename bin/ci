@@ -6,8 +6,9 @@
   base=$( cd "$( dirname "$( dirname "$0" )")" && pwd )
   base_gopath=$( cd $base/../../../.. && pwd )
  
-  export GOPATH=$base:$base/Godeps/_workspace:$base_gopath GOBIN=$base_gopath/gobin
-  export PATH=$PATH:$GOBIN
+  # export GOPATH=$base:$base/Godeps/_workspace:$base_gopath GOBIN=$base_gopath/gobin
+  # export PATH=$PATH:$GOBIN
+  export GOPATH=$base:$base_gopath:$PWD
 
   function printStatus {
       if [ $? -eq 0 ]; then
@@ -25,8 +26,11 @@
   echo -e "\n Formatting packages..."
   go fmt ./...
 
+  echo -e "\n Install ginkgo..."
+  go install github.com/onsi/ginkgo/ginkgo
+  
   echo -e "\n Unit Testing packages:"
-  go test ./gopath/src/github.com/maximilien/bosh-softlayer-cpi/action/... ./gopath/src/github.com/maximilien/bosh-softlayer-cpi/api/... ./gopath/src/github.com/maximilien/bosh-softlayer-cpi/softlayer/... ./gopath/src/github.com/maximilien/bosh-softlayer-cpi/util/...
+  ginkgo $GOPATH/action $GOPATH/api/... $GOPATH/softlayer $GOPATH/util
 
   echo -e "\n Vetting packages for potential issues..."
   go tool vet $base/action $base/api $base/main $base/softlayer $base/util
