@@ -42,10 +42,15 @@ func NewSoftLayerCreator(softLayerClient sl.Client, agentEnvServiceFactory Agent
 	}
 }
 
-func (c SoftLayerCreator) Create_CCI(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
+func (c SoftLayerCreator) getTimeStample(now time.Time) string {
+	//utilize the constants list in the http://golang.org/src/time/format.go file to get the expect time formats
+	return now.Format("20060102-030405-") + strconv.Itoa(int(now.UnixNano()/1e6-now.Unix()*1e3))
+}
+
+func (c SoftLayerCreator) CreateCCI(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
 
 	virtualGuestTemplate := sldatatypes.SoftLayer_Virtual_Guest_Template{
-		Hostname:  agentID,
+		Hostname:  cloudProps.VmNamePrefix + c.getTimeStample(time.Now().UTC()),
 		Domain:    cloudProps.Domain,
 		StartCpus: cloudProps.StartCpus,
 		MaxMemory: cloudProps.MaxMemory,
@@ -58,11 +63,19 @@ func (c SoftLayerCreator) Create_CCI(agentID string, stemcell bslcstem.Stemcell,
 			GlobalIdentifier: stemcell.Uuid(),
 		},
 
-		SshKeys:           cloudProps.SshKeys,
-		HourlyBillingFlag: true,
+		SshKeys: cloudProps.SshKeys,
 
-		// Needed for ephemeral disk
-		LocalDiskFlag: true,
+		HourlyBillingFlag: cloudProps.HourlyBillingFlag,
+		//Needed for ephemeral disk
+		LocalDiskFlag: cloudProps.LocalDiskFlag,
+
+		DedicatedAccountHostOnlyFlag:   cloudProps.DedicatedAccountHostOnlyFlag,
+		BlockDevices:                   cloudProps.BlockDevices,
+		NetworkComponents:              cloudProps.NetworkComponents,
+		PrivateNetworkOnlyFlag:         cloudProps.PrivateNetworkOnlyFlag,
+		PrimaryNetworkComponent:        &cloudProps.PrimaryNetworkComponent,
+		PrimaryBackendNetworkComponent: &cloudProps.PrimaryBackendNetworkComponent,
+		UserData:                       cloudProps.UserData,
 	}
 
 	virtualGuestService, err := c.softLayerClient.GetSoftLayer_Virtual_Guest_Service()
@@ -99,6 +112,19 @@ func (c SoftLayerCreator) Create_CCI(agentID string, stemcell bslcstem.Stemcell,
 
 	vm := NewSoftLayerVM(virtualGuest.Id, c.softLayerClient, util.GetSshClient(), agentEnvService, c.logger)
 
+	//Insert a record into vms table (VM pool) of sqlite DB when creating a new VM
+	vmInfo := VMInfo{
+		id:vm.id,
+		name:virtualGuestTemplate.Hostname+virtualGuestTemplate.Domain,
+		in_use:"t",
+		image_id:stemcell.Uuid(),
+		agent_id:agentID,
+	}
+	err = InsertVMInfo(&vmInfo)
+	if err != nil {
+		return SoftLayerVM{}, bosherr.WrapError(err, "Failed to insert the record into vms table")
+	}
+
 	return vm, nil
 
 }
@@ -106,7 +132,7 @@ func (c SoftLayerCreator) Create_CCI(agentID string, stemcell bslcstem.Stemcell,
 func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
 
 	if strings.Contains(cloudProps.VmNamePrefix, "-worker") {
-		vm, err := c.Create_CCI(agentID, stemcell, cloudProps, networks, env)
+		vm, err := c.CreateCCI(agentID, stemcell, cloudProps, networks, env)
 		return vm, err
 	}
 
@@ -124,7 +150,7 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 		return vm, nil
 	}
 
-	return c.Create(agentID, stemcell, cloudProps, networks, env)
+	return c.CreateCCI(agentID, stemcell, cloudProps, networks, env)
 
 }
 

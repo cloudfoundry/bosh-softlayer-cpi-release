@@ -140,10 +140,16 @@ func DeleteVMFromDB(id int) error {
 	return nil
 }
 
-func (vmInfo *VMInfo) InsertVMInfo(db *sql.DB) error {
+func InsertVMInfo(*VMInfo) error {
+
+	db, err := openDB()
+	if err != nil {
+		return  bosherr.WrapError(err, "Failed to Open DB")
+	}
+	defer db.Close()
 
 	sqlStmt := fmt.Sprintf("insert into vms (id, name, in_use, image_id, agent_id, timestamp) values (%d, %s, %s, %s, CURRENT_TIMESTAMP)", vmInfo.id, vmInfo.name, vmInfo.in_use, vmInfo.image_id, vmInfo.agent_id)
-	err := exec(db, sqlStmt)
+	err = exec(db, sqlStmt)
 	if err != nil {
 		return bosherr.WrapError(nil, "Failed to insert VM info into vms table")
 	}
