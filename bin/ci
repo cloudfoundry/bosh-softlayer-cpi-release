@@ -8,6 +8,7 @@
  
   # export GOPATH=$base:$base/Godeps/_workspace:$base_gopath GOBIN=$base_gopath/gobin
   # export PATH=$PATH:$GOBIN
+  export GOPATH=$base
   
   function printStatus {
       if [ $? -eq 0 ]; then
