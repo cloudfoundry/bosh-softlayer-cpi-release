@@ -6,12 +6,7 @@
   base=$( cd "$( dirname "$( dirname "$0" )")" && pwd )
   base_gopath=$( cd $base/../../../.. && pwd )
 
-  # export GOPATH=$PWD/gopath:$base/Godeps/_workspace:$base_gopath GOBIN=$base_gopath/gobin
-  
-  # export PATH=$PATH:$GOBIN
-
-  # export GOPATH=$PWD/gopath:$base/Godeps/_workspace:$base_gopath
-  export GOPATH=$PWD/gopath
+  export GOPATH=$base/Godeps/_workspace:$base_gopath:$GOPATH
 
   function printStatus {
       if [ $? -eq 0 ]; then
@@ -28,9 +23,6 @@
 
   echo -e "\n Formatting packages..."
   go fmt ./...
-
-  echo -e "\n Install ginkgo..."
-  go install github.com/onsi/ginkgo/ginkgo
 
   echo -e "\n Creating cpi binary..."
   go build -o $base/out/cpi github.com/maximilien/bosh-softlayer-cpi/main
