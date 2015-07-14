@@ -6,8 +6,12 @@
   base=$( cd "$( dirname "$( dirname "$0" )")" && pwd )
   base_gopath=$( cd $base/../../../.. && pwd )
 
-  export GOPATH=$PWD/gopath:$base/Godeps/_workspace:$base_gopath GOBIN=$base_gopath/gobin
-  export PATH=$PATH:$GOBIN
+  # export GOPATH=$PWD/gopath:$base/Godeps/_workspace:$base_gopath GOBIN=$base_gopath/gobin
+  
+  # export PATH=$PATH:$GOBIN
+
+  # export GOPATH=$PWD/gopath:$base/Godeps/_workspace:$base_gopath
+  export GOPATH=$PWD/gopath
 
   function printStatus {
       if [ $? -eq 0 ]; then
