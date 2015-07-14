@@ -193,6 +193,9 @@ func (vm SoftLayerVM) DetachDisk(disk bslcdisk.Disk) error {
 	}
 
 	metadata, err := bslcommon.GetUserMetadataOnVirtualGuest(vm.softLayerClient, virtualGuest.Id)
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Failed to get metadata from virtual guest with id: %d.", virtualGuest.Id)
+	}
 
 	old_agentEnv, err := NewAgentEnvFromJSON(metadata)
 	new_agentEnv := old_agentEnv.DetachPersistentDisk(strconv.Itoa(disk.ID()))
