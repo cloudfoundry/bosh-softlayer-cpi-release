@@ -14,7 +14,7 @@ var _ = Describe("Sleeper", func() {
 		sleeper bscutil.Sleeper
 	)
 
-	Context("#RealSleeper", func() {
+	Context("RealSleeper", func() {
 		BeforeEach(func() {
 			sleeper = bscutil.RealSleeper{}
 		})
@@ -29,7 +29,7 @@ var _ = Describe("Sleeper", func() {
 		})
 	})
 
-	Context("#RecordingNoopSleeper", func() {
+	Context("RecordingNoopSleeper", func() {
 		var recordingNoopSleeper *bscutil.RecordingNoopSleeper
 
 		BeforeEach(func() {
