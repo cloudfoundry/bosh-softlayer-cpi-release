@@ -63,9 +63,25 @@ var _ = Describe("SoftLayerCreator", func() {
 					BlockDeviceTemplateGroup: sldatatypes.BlockDeviceTemplateGroup{
 						GlobalIdentifier: "fake-uuid",
 					},
-					RootDiskSize:      25,
-					EphemeralDiskSize: 25,
-					Datacenter:        sldatatypes.Datacenter{Name: "fake-datacenter"},
+					RootDiskSize:                 25,
+					EphemeralDiskSize:            25,
+					Datacenter:                   sldatatypes.Datacenter{Name: "fake-datacenter"},
+					HourlyBillingFlag:            true,
+					LocalDiskFlag:                true,
+					VmNamePrefix:                 "bosh-",
+					PostInstallScriptUri:         "",
+					DedicatedAccountHostOnlyFlag: true,
+					PrivateNetworkOnlyFlag:       false,
+					SshKeys:                      []sldatatypes.SshKey{{Id: 74826}},
+					BlockDevices: []sldatatypes.BlockDevice{{
+						Device:    "0",
+						DiskImage: sldatatypes.DiskImage{Capacity: 100}}},
+					NetworkComponents: []sldatatypes.NetworkComponents{{MaxSpeed: 1000}},
+					PrimaryNetworkComponent: sldatatypes.PrimaryNetworkComponent{
+						NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
+					PrimaryBackendNetworkComponent: sldatatypes.PrimaryBackendNetworkComponent{
+						NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
+					UserData: []sldatatypes.UserData{{Value: "someValue"}},
 				}
 				networks = Networks{}
 				env = Environment{}
