@@ -330,7 +330,10 @@ func (vm SoftLayerVM) postCheckActiveTransactionsForDeleteVM(softLayerClient sl.
 			return bosherr.WrapError(err, "Getting active transactions from SoftLayer client")
 		}
 
-		averageTransactionDuration, _ := strconv.ParseFloat(activeTransaction.TransactionStatus.AverageDuration, 32)
+		averageTransactionDuration, err := strconv.ParseFloat(activeTransaction.TransactionStatus.AverageDuration, 32)
+		if err != nil {
+			return bosherr.WrapError(err, "Parsing float for average transaction duration")
+		}
 
 		if averageTransactionDuration > 30 {
 			vm.logger.Info(deleteVMLogTag, "Deleting VM instance had been launched and it is a long transaction. Please check Softlayer Portal", nil)
