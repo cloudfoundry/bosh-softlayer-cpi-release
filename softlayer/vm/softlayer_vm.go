@@ -22,9 +22,8 @@ import (
 const (
 	softLayerVMtag = "SoftLayerVM"
 	ROOT_USER_NAME = "root"
+	deleteVMLogTag = "DeleteVM"
 )
-
-const deleteVMLogTag = "Delete VM"
 
 type SoftLayerVM struct {
 	id int
