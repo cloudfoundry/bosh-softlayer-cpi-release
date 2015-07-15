@@ -62,6 +62,12 @@ var _ = Describe("SoftLayerVM", func() {
 				err := vm.Delete()
 				Expect(err).ToNot(HaveOccurred())
 			})
+
+			It("postCheckActiveTransactionsForDeleteVM time out", func() {
+				vm.SetTimeOutTestTag(true)
+				err := vm.Delete()
+				Expect(err).To(HaveOccurred())
+			})
 		})
 
 		Context("invalid VM ID is used", func() {
