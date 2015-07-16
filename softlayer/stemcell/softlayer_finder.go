@@ -4,8 +4,8 @@ import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
-	"fmt"
 	sl "github.com/maximilien/softlayer-go/softlayer"
+	"fmt"
 )
 
 type SoftLayerFinder struct {

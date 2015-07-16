@@ -64,7 +64,7 @@ var _ = Describe("SoftLayerFinder", func() {
 
 		Context("valid stemcell ID pointing to a SL virtual disk image", func() {
 			It("returns found as false if stemcell directory does not exist", func() {
-				stemcell, found, err := finder.FindById(1111111)
+				stemcell, found, err := finder.FindById("fake-stemcell-id")
 				Expect(err).ToNot(HaveOccurred())
 				Expect(found).To(BeFalse())
 				Expect(stemcell).To(BeNil())

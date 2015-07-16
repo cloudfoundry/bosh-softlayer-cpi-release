@@ -13,9 +13,12 @@ import (
 
 	bslcommon "github.com/maximilien/bosh-softlayer-cpi/softlayer/common"
 	bslcdisk "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk"
+	bslcstem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell"
 
 	util "github.com/maximilien/bosh-softlayer-cpi/util"
 	datatypes "github.com/maximilien/softlayer-go/data_types"
+	sldatatypes "github.com/maximilien/softlayer-go/data_types"
+    "strconv"
 )
 
 const (
@@ -88,18 +91,44 @@ func (vm SoftLayerVM) Reboot() error {
 	return nil
 }
 
+
+func (vm *SoftLayerVM) ReloadOS(stemcell bslcstem.Stemcell) (error) {
+
+/*	os_Reload_Config := sldatatypes.OS_Reload_Config{
+		sldatatypes.Image_Template_Config{
+			ImageTemplateId: strconv.Itoa(stemcell.ID()),
+		},
+	}*/
+
+	reload_OS_Reload_Config := sldatatypes.Image_Template_Config{
+		ImageTemplateId: strconv.Itoa(stemcell.ID()),
+	}
+
+	fmt.Sprintln("stemcell ID: %s", stemcell.ID())
+
+	virtualGuestService, err := vm.softLayerClient.GetSoftLayer_Virtual_Guest_Service()
+	if err != nil {
+		return bosherr.WrapError(err, "Creating VirtualGuestService from SoftLayer client")
+	}
+	err = virtualGuestService.ReloadOperatingSystem(vm.ID(), reload_OS_Reload_Config)
+	if err != nil {
+		return bosherr.WrapError(err, "Reloading OS on the specified VirtualGuest from SoftLayer client")
+	}
+	return nil
+}
+
 func (vm SoftLayerVM) SetMetadata(vmMetadata VMMetadata) error {
 	tags, err := vm.extractTagsFromVMMetadata(vmMetadata)
 	if err != nil {
 		return err
 	}
 
-	if len(tags) == 0 {
+	//Check below needed since Golang strings.Split return [""] on strings.Split("", ",")
+	if len(tags) == 1 && tags[0] == "" {
 		return nil
 	}
 
-	//Check below needed since Golang strings.Split return [""] on strings.Split("", ",")
-	if len(tags) == 1 && tags[0] == "" {
+	if len(tags) == 0 {
 		return nil
 	}
 

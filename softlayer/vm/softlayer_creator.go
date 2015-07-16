@@ -16,6 +16,7 @@ import (
 	bslcstem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell"
 
 	util "github.com/maximilien/bosh-softlayer-cpi/util"
+	"strings"
 )
 
 const softLayerCreatorLogTag = "SoftLayerCreator"
@@ -46,7 +47,8 @@ func (c SoftLayerCreator) getTimeStamp(now time.Time) string {
 	return now.Format("20060102-030405-") + strconv.Itoa(int(now.UnixNano()/1e6-now.Unix()*1e3))
 }
 
-func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
+func (c SoftLayerCreator) CreateNewVM(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
+
 	virtualGuestTemplate := sldatatypes.SoftLayer_Virtual_Guest_Template{
 		Hostname:  cloudProps.VmNamePrefix + c.getTimeStamp(time.Now().UTC()),
 		Domain:    cloudProps.Domain,
@@ -110,7 +112,46 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 
 	vm := NewSoftLayerVM(virtualGuest.Id, c.softLayerClient, util.GetSshClient(), agentEnvService, c.logger)
 
+	//Insert a record into vms table (VM pool) of sqlite DB when creating a new VM
+	vmInfo := VMInfo{
+		id:vm.id,
+		name:virtualGuestTemplate.Hostname+virtualGuestTemplate.Domain,
+		in_use:"t",
+		image_id:stemcell.Uuid(),
+		agent_id:agentID,
+	}
+	err = InsertVMInfo(&vmInfo)
+	if err != nil {
+		return SoftLayerVM{}, bosherr.WrapError(err, "Failed to insert the record into vms table")
+	}
+
 	return vm, nil
+
+}
+
+func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
+
+	if strings.Contains(cloudProps.VmNamePrefix, "-worker") {
+		vm, err := c.CreateNewVM(agentID, stemcell, cloudProps, networks, env)
+		return vm, err
+	}
+
+	vmInfo, err := QueryVMInfobyAgentID(agentID)
+	if err != nil {
+		return SoftLayerVM{}, bosherr.WrapError(err, "")
+	}
+
+	if vmInfo.id != 0 {
+		// Perform OS Reload
+		fmt.Sprintln("OS reload with stemcell %s", stemcell)
+		agentEnvService := c.agentEnvServiceFactory.New(vmInfo.id)
+		vm := NewSoftLayerVM(vmInfo.id, c.softLayerClient, util.GetSshClient(), agentEnvService, c.logger)
+		vm.ReloadOS(stemcell)
+		return vm, nil
+	}
+
+	return c.CreateNewVM(agentID, stemcell, cloudProps, networks, env)
+
 }
 
 func (c SoftLayerCreator) resolveNetworkIP(networks Networks) (string, error) {
