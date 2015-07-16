@@ -1,10 +1,13 @@
 #!/bin/bash
 
 (
-	set -e
+  set -e
 
-	base=$( cd "$( dirname "$( dirname "$0" )")" && pwd )
-	export GOPATH=$PWD/gopath:$base:$base/Godeps/_workspace:$base_gopath GOBIN=$base_gopath/gobin
+  base=$( cd "$( dirname "$( dirname "$0" )")" && pwd )
+  base_gopath=$( cd $base/../../../.. && pwd )
 
-	go build -o ./out/cpi github.com/maximilien/bosh-softlayer-cpi/main
+  export GOPATH=$base/Godeps/_workspace:$base_gopath:$GOPATH
+
+  cd $base
+  go build -o out/cpi github.com/maximilien/bosh-softlayer-cpi/main
 )
