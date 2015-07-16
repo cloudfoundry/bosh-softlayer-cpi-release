@@ -56,6 +56,12 @@ func NewSoftLayerVM(id int, softLayerClient sl.Client, sshClient util.SshClient,
 func (vm SoftLayerVM) ID() int { return vm.id }
 
 func (vm SoftLayerVM) Delete() error {
+
+	err := InitVMPoolDB()
+	if err != nil {
+		return bosherr.WrapError(err, "Failed to initialize VM pool DB")
+	}
+
 	virtualGuestService, err := vm.softLayerClient.GetSoftLayer_Virtual_Guest_Service()
 	if err != nil {
 		return bosherr.WrapError(err, "Creating SoftLayer VirtualGuestService from client")

@@ -38,7 +38,9 @@ func openDB() (*sql.DB, error) {
 	return db, nil
 }
 
-func initVMPoolDB(db *sql.DB) error {
+func InitVMPoolDB() error {
+
+	db, err := openDB()
 
 	// Create vms table if it does not exist
 	sqlStmt := `create table if not exists vms (id int not null primary key, name varchar(32), in_use varchar(32),
@@ -46,11 +48,11 @@ func initVMPoolDB(db *sql.DB) error {
 										  image_id varchar(64),
 										  agent_id varchar(32),
 										  timestamp timestamp)`
-	err := exec(db, sqlStmt)
+	err = exec(db, sqlStmt)
 	if err != nil {
 		return bosherr.WrapError(err, "Failed to execute sql statement: " + sqlStmt)
 	}
-	return err
+	return nil
 }
 
 func exec(db *sql.DB, sqlStmt string) error {
@@ -140,7 +142,7 @@ func DeleteVMFromDB(id int) error {
 	return nil
 }
 
-func InsertVMInfo(*VMInfo) error {
+func InsertVMInfo(vmInfo *VMInfo) error {
 
 	db, err := openDB()
 	if err != nil {

@@ -112,7 +112,7 @@ func (c SoftLayerCreator) CreateNewVM(agentID string, stemcell bslcstem.Stemcell
 
 	vm := NewSoftLayerVM(virtualGuest.Id, c.softLayerClient, util.GetSshClient(), agentEnvService, c.logger)
 
-	//Insert a record into vms table (VM pool) of sqlite DB when creating a new VM
+	//Insert a record into VM pool table (sqlite DB) when creating a new VM
 	vmInfo := VMInfo{
 		id:vm.id,
 		name:virtualGuestTemplate.Hostname+virtualGuestTemplate.Domain,
@@ -122,7 +122,7 @@ func (c SoftLayerCreator) CreateNewVM(agentID string, stemcell bslcstem.Stemcell
 	}
 	err = InsertVMInfo(&vmInfo)
 	if err != nil {
-		return SoftLayerVM{}, bosherr.WrapError(err, "Failed to insert the record into vms table")
+		return SoftLayerVM{}, bosherr.WrapError(err, "Failed to insert the record into VM pool DB")
 	}
 
 	return vm, nil
@@ -134,6 +134,11 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 	if strings.Contains(cloudProps.VmNamePrefix, "-worker") {
 		vm, err := c.CreateNewVM(agentID, stemcell, cloudProps, networks, env)
 		return vm, err
+	}
+
+	err := InitVMPoolDB()
+	if err != nil {
+		return bosherr.WrapError(err, "Failed to initialize VM pool DB")
 	}
 
 	vmInfo, err := QueryVMInfobyAgentID(agentID)
