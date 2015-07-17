@@ -50,7 +50,6 @@ func (c SoftLayerCreator) getTimeStamp(now time.Time) string {
 func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
 	disks := DisksSpec{}
 	if cloudProps.EphemeralDiskSize > 0 {
-		//TODO: need to find or ensure the name for the ephemeral disk for SoftLayer VG
 		disks = DisksSpec{Ephemeral: "/dev/xvdc"}
 	}
 	// To keep consistent with legacy softlayer CPI, making agent name with prefix "vm-"

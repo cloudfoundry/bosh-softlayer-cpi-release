@@ -159,7 +159,6 @@ func (vm SoftLayerVM) AttachDisk(disk bslcdisk.Disk) error {
 	if err != nil {
 		return bosherr.WrapErrorf(err, "Failed to unmarshal metadata from virutal guest with id: %d.", virtualGuest.Id)
 	}
-	//TODO: need to create a new private method to retrieve the exact device name from vm
 	new_agentEnv := old_agentEnv.AttachPersistentDisk(strconv.Itoa(disk.ID()), "/dev/sda") // Naming convention for iscsi driver in Softlayer.
 
 	metadata, err = json.Marshal(new_agentEnv)
