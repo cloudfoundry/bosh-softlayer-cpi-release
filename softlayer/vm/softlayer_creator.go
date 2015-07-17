@@ -49,6 +49,8 @@ func (c SoftLayerCreator) getTimeStamp(now time.Time) string {
 
 func (c SoftLayerCreator) CreateNewVM(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
 
+	c.logger.Info(softLayerCreatorLogTag, fmt.Sprintln("Creating a new server with stemcell %s",  stemcell.ID()))
+
 	virtualGuestTemplate := sldatatypes.SoftLayer_Virtual_Guest_Template{
 		Hostname:  cloudProps.VmNamePrefix + c.getTimeStamp(time.Now().UTC()),
 		Domain:    cloudProps.Domain,
@@ -138,7 +140,7 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 
 	err := InitVMPoolDB()
 	if err != nil {
-		return bosherr.WrapError(err, "Failed to initialize VM pool DB")
+		return SoftLayerVM{}, bosherr.WrapError(err, "Failed to initialize VM pool DB")
 	}
 
 	vmInfo, err := QueryVMInfobyAgentID(agentID)
@@ -147,8 +149,7 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 	}
 
 	if vmInfo.id != 0 {
-		// Perform OS Reload
-		fmt.Sprintln("OS reload with stemcell %s", stemcell)
+		c.logger.Info(softLayerCreatorLogTag, fmt.Sprintln("OS reload on the server id %d with stemcell %s", vmInfo.id,  stemcell))
 		agentEnvService := c.agentEnvServiceFactory.New(vmInfo.id)
 		vm := NewSoftLayerVM(vmInfo.id, c.softLayerClient, util.GetSshClient(), agentEnvService, c.logger)
 		vm.ReloadOS(stemcell)

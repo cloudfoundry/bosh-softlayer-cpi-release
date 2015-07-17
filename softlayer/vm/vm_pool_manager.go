@@ -20,9 +20,9 @@ var (
 )
 
 type VMInfo struct {
-	id int64
+	id int
 	name string
-	in_use bool
+	in_use string
 	image_id string
 	agent_id string
 }
@@ -32,7 +32,7 @@ func openDB() (*sql.DB, error) {
 	db, err := sql.Open("sqlite3", SQLITE_DB_FILE_PATH)
 
 	if err != nil {
-		return nil, bosherr.WrapError(err, "Failed to open VM DB")
+		return nil, bosherr.WrapError(err, "Failed to open VM Pool DB")
 	}
 
 	return db, nil
