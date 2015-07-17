@@ -188,6 +188,14 @@ var _ = Describe("SoftLayerVM", func() {
 			fileNames := []string{
 				"SoftLayer_Virtual_Guest_Service_getObject.json",
 				"SoftLayer_Network_Storage_Service_getIscsiVolume.json",
+				"SoftLayer_Network_Storage_Service_getAllowedVirtualGuests_None.json",
+				"SoftLayer_Network_Storage_Service_allowAccessFromVirtualGuest.json",
+				"SoftLayer_Virtual_Guest_Service_getUserData_Without_PersistentDisk.json",
+				"SoftLayer_Virtual_Guest_Service_getPowerState.json",
+				"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
+				"SoftLayer_Virtual_Guest_Service_setMetadata.json",
+				"SoftLayer_Virtual_Guest_Service_configureMetadataDisk.json",
+				"SoftLayer_Virtual_Guest_Service_getPowerState.json",
 			}
 			testhelpers.SetTestFixturesForFakeSoftLayerClient(softLayerClient, fileNames)
 		})
@@ -218,6 +226,14 @@ var _ = Describe("SoftLayerVM", func() {
 			fileNames := []string{
 				"SoftLayer_Virtual_Guest_Service_getObject.json",
 				"SoftLayer_Network_Storage_Service_getIscsiVolume.json",
+				"SoftLayer_Network_Storage_Service_getAllowedVirtualGuests.json",
+				"SoftLayer_Network_Storage_Service_removeAccessFromVirtualGuest.json",
+				"SoftLayer_Virtual_Guest_Service_getUserData_With_PersistentDisk.json",
+				"SoftLayer_Virtual_Guest_Service_getPowerState.json",
+				"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
+				"SoftLayer_Virtual_Guest_Service_setMetadata.json",
+				"SoftLayer_Virtual_Guest_Service_configureMetadataDisk.json",
+				"SoftLayer_Virtual_Guest_Service_getPowerState.json",
 			}
 			testhelpers.SetTestFixturesForFakeSoftLayerClient(softLayerClient, fileNames)
 		})
