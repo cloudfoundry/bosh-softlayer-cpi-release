@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"net/url"
 
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/types"
@@ -37,10 +36,7 @@ func VerifyRequest(method string, path interface{}, rawQuery ...string) http.Han
 			Ω(req.URL.Path).Should(Equal(path), "Path mismatch")
 		}
 		if len(rawQuery) > 0 {
-			values, err := url.ParseQuery(rawQuery[0])
-			Ω(err).ShouldNot(HaveOccurred(), "Expected RawQuery is malformed")
-
-			Ω(req.URL.Query()).Should(Equal(values), "RawQuery mismatch")
+			Ω(req.URL.RawQuery).Should(Equal(rawQuery[0]), "RawQuery mismatch")
 		}
 	}
 }
@@ -183,17 +179,7 @@ Also, RespondWithJSONEncoded can be given an optional http.Header.  The headers 
 func RespondWithJSONEncoded(statusCode int, object interface{}, optionalHeader ...http.Header) http.HandlerFunc {
 	data, err := json.Marshal(object)
 	Ω(err).ShouldNot(HaveOccurred())
-
-	var headers http.Header
-	if len(optionalHeader) == 1 {
-		headers = optionalHeader[0]
-	} else {
-		headers = make(http.Header)
-	}
-	if _, found := headers["Content-Type"]; !found {
-		headers["Content-Type"] = []string{"application/json"}
-	}
-	return RespondWith(statusCode, string(data), headers)
+	return RespondWith(statusCode, string(data), optionalHeader...)
 }
 
 /*
@@ -206,20 +192,13 @@ objects.
 Also, RespondWithJSONEncodedPtr can be given an optional http.Header.  The headers defined therein will be added to the response headers.
 Since the http.Header can be mutated after the fact you don't need to pass in a pointer.
 */
-func RespondWithJSONEncodedPtr(statusCode *int, object interface{}, optionalHeader ...http.Header) http.HandlerFunc {
+func RespondWithJSONEncodedPtr(statusCode *int, object *interface{}, optionalHeader ...http.Header) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		data, err := json.Marshal(object)
+		data, err := json.Marshal(*object)
 		Ω(err).ShouldNot(HaveOccurred())
-		var headers http.Header
 		if len(optionalHeader) == 1 {
-			headers = optionalHeader[0]
-		} else {
-			headers = make(http.Header)
+			copyHeader(optionalHeader[0], w.Header())
 		}
-		if _, found := headers["Content-Type"]; !found {
-			headers["Content-Type"] = []string{"application/json"}
-		}
-		copyHeader(headers, w.Header())
 		w.WriteHeader(*statusCode)
 		w.Write(data)
 	}

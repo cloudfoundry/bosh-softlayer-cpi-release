@@ -20,6 +20,8 @@ var _ = Describe("SshClient", func() {
 			fakeSshClient = &bscutilfakes.FakeSshClient{
 				ExecCommandResult: "fake-result",
 				ExecCommandError:  nil,
+				UploadFileError:   nil,
+				DownloadFileError: nil,
 			}
 			sshClient = fakeSshClient
 		})
@@ -35,5 +37,21 @@ var _ = Describe("SshClient", func() {
 
 			Expect(output).To(Equal(fakeSshClient.ExecCommandResult))
 		})
+
+		It("upload file using the SSH client", func() {
+			err := sshClient.UploadFile("fake-username", "fake-password", "localhost", "/fake-file", "/fake-file")
+			Expect(err).ToNot(HaveOccurred())
+			Expect(fakeSshClient.Username).To(Equal("fake-username"))
+			Expect(fakeSshClient.Password).To(Equal("fake-password"))
+			Expect(fakeSshClient.Ip).To(Equal("localhost"))
+		})
+		It("download file using the SSH client", func() {
+			err := sshClient.DownloadFile("fake-username", "fake-password", "localhost", "/fake-file", "/fake-file")
+			Expect(err).ToNot(HaveOccurred())
+			Expect(fakeSshClient.Username).To(Equal("fake-username"))
+			Expect(fakeSshClient.Password).To(Equal("fake-password"))
+			Expect(fakeSshClient.Ip).To(Equal("localhost"))
+		})
+
 	})
 })
