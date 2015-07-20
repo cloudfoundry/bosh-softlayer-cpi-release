@@ -9,7 +9,7 @@ type HaveOccurredMatcher struct {
 }
 
 func (matcher *HaveOccurredMatcher) Match(actual interface{}) (success bool, err error) {
-	if isNil(actual) {
+	if actual == nil {
 		return false, nil
 	}
 
