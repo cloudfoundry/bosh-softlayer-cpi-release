@@ -120,7 +120,6 @@ var _ = Describe("Suite", func() {
 			Ω(description.FileName).Should(ContainSubstring("suite_test.go"))
 			Ω(description.LineNumber).Should(BeNumerically(">", 50))
 			Ω(description.LineNumber).Should(BeNumerically("<", 150))
-			Ω(description.Failed).Should(BeFalse())
 		})
 
 		Measure("should run measurements", func(b Benchmarker) {
