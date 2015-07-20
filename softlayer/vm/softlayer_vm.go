@@ -20,9 +20,10 @@ import (
 )
 
 const (
-	softLayerVMtag = "SoftLayerVM"
-	ROOT_USER_NAME = "root"
-	deleteVMLogTag = "DeleteVM"
+	softLayerVMtag                 = "SoftLayerVM"
+	ROOT_USER_NAME                 = "root"
+	deleteVMLogTag                 = "DeleteVM"
+	TIMEOUT_TRANSACTIONS_DELETE_VM = 10 * time.Minute
 )
 
 type SoftLayerVM struct {
@@ -35,10 +36,10 @@ type SoftLayerVM struct {
 
 	logger boshlog.Logger
 
-	timeOutTestTag bool
+	timeoutForActiveTransactions time.Duration
 }
 
-func NewSoftLayerVM(id int, softLayerClient sl.Client, sshClient util.SshClient, agentEnvService AgentEnvService, logger boshlog.Logger) SoftLayerVM {
+func NewSoftLayerVM(id int, softLayerClient sl.Client, sshClient util.SshClient, agentEnvService AgentEnvService, logger boshlog.Logger, timeoutForActiveTransactions time.Duration) SoftLayerVM {
 	bslcommon.TIMEOUT = 10 * time.Minute
 	bslcommon.POLLING_INTERVAL = 10 * time.Second
 
@@ -52,12 +53,8 @@ func NewSoftLayerVM(id int, softLayerClient sl.Client, sshClient util.SshClient,
 
 		logger: logger,
 
-		timeOutTestTag: false,
+		timeoutForActiveTransactions: timeoutForActiveTransactions,
 	}
-}
-
-func (vm *SoftLayerVM) SetTimeOutTestTag(tag bool) {
-	vm.timeOutTestTag = tag
 }
 
 func (vm SoftLayerVM) ID() int { return vm.id }
@@ -69,7 +66,7 @@ func (vm SoftLayerVM) Delete() error {
 	}
 
 	vmCID := vm.ID()
-	err = bslcommon.WaitForVirtualGuestToHaveNoRunningTransactions(vm.softLayerClient, vmCID, bslcommon.TIMEOUT, bslcommon.POLLING_INTERVAL)
+	err = bslcommon.WaitForVirtualGuestToHaveNoRunningTransactions(vm.softLayerClient, vmCID, vm.timeoutForActiveTransactions, bslcommon.POLLING_INTERVAL)
 	if err != nil {
 		return bosherr.WrapError(err, fmt.Sprintf("Waiting for VirtualGuest `%d` to have no pending transactions before deleting vm", vmCID))
 	}
@@ -83,7 +80,7 @@ func (vm SoftLayerVM) Delete() error {
 		return bosherr.WrapError(nil, "Did not delete SoftLayer VirtualGuest from client")
 	}
 
-	err = vm.postCheckActiveTransactionsForDeleteVM(vm.softLayerClient, vmCID, bslcommon.TIMEOUT, bslcommon.POLLING_INTERVAL)
+	err = vm.postCheckActiveTransactionsForDeleteVM(vm.softLayerClient, vmCID, vm.timeoutForActiveTransactions, bslcommon.POLLING_INTERVAL)
 	if err != nil {
 		return bosherr.WrapError(err, fmt.Sprintf("Waiting for VirtualGuest `%d` to have no pending transactions after deleting vm", vmCID))
 	}
@@ -302,21 +299,13 @@ func (vm SoftLayerVM) getRootPassword(virtualGuest datatypes.SoftLayer_Virtual_G
 }
 
 func (vm SoftLayerVM) postCheckActiveTransactionsForDeleteVM(softLayerClient sl.Client, virtualGuestId int, timeout, pollingInterval time.Duration) error {
-	var thisTimeOut time.Duration
-
-	if vm.timeOutTestTag {
-		thisTimeOut = 5 * time.Second
-	} else {
-		thisTimeOut = timeout
-	}
-
 	virtualGuestService, err := softLayerClient.GetSoftLayer_Virtual_Guest_Service()
 	if err != nil {
 		return bosherr.WrapError(err, "Creating VirtualGuestService from SoftLayer client")
 	}
 
 	totalTime := time.Duration(0)
-	for totalTime < thisTimeOut {
+	for totalTime < timeout {
 		activeTransactions, err := virtualGuestService.GetActiveTransactions(virtualGuestId)
 		if err != nil {
 			return bosherr.WrapError(err, "Getting active transactions from SoftLayer client")
@@ -331,13 +320,13 @@ func (vm SoftLayerVM) postCheckActiveTransactionsForDeleteVM(softLayerClient sl.
 		time.Sleep(pollingInterval)
 	}
 
-	if totalTime >= thisTimeOut {
+	if totalTime >= timeout {
 		err := errors.New(fmt.Sprintf("Waiting for DeleteVM transaction to start TIME OUT!"))
 		return err
 	}
 
 	totalTime = time.Duration(0)
-	for totalTime < thisTimeOut {
+	for totalTime < timeout {
 		vm1, err := virtualGuestService.GetObject(virtualGuestId)
 		if err != nil || vm1.Id == 0 {
 			vm.logger.Info(deleteVMLogTag, "VM doesn't exist. Delete done", nil)
@@ -364,7 +353,7 @@ func (vm SoftLayerVM) postCheckActiveTransactionsForDeleteVM(softLayerClient sl.
 		time.Sleep(pollingInterval)
 	}
 
-	if totalTime >= thisTimeOut {
+	if totalTime >= timeout {
 		err := errors.New(fmt.Sprintf("After deleting a vm, waiting for active transactions to complete TIME OUT!"))
 		return err
 	}
