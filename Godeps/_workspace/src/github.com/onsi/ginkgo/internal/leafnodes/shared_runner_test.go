@@ -96,24 +96,6 @@ func SynchronousSharedRunnerBehaviors(build func(body interface{}, timeout time.
 				Ω(failure.ForwardedPanic).Should(Equal("ack!"))
 			})
 		})
-
-		Context("when a panic occurs with a nil value", func() {
-			BeforeEach(func() {
-				outcome, failure = build(func() {
-					didRun = true
-					innerCodeLocation = codelocation.New(0)
-					panic(nil)
-				}, 0, failer, componentCodeLocation).Run()
-			})
-
-			It("should return the nil-valued panic", func() {
-				Ω(didRun).Should(BeTrue())
-
-				Ω(outcome).Should(Equal(types.SpecStatePanicked))
-				Ω(failure.ForwardedPanic).Should(Equal("<nil>"))
-			})
-		})
-
 	})
 }
 
@@ -246,23 +228,6 @@ func AsynchronousSharedRunnerBehaviors(build func(body interface{}, timeout time
 
 				Ω(outcome).Should(Equal(types.SpecStatePanicked))
 				Ω(failure.ForwardedPanic).Should(Equal("ack!"))
-			})
-		})
-
-		Context("when the function panics with a nil value", func() {
-			BeforeEach(func() {
-				outcome, failure = build(func(done Done) {
-					didRun = true
-					innerCodeLocation = codelocation.New(0)
-					panic(nil)
-				}, 100*time.Millisecond, failer, componentCodeLocation).Run()
-			})
-
-			It("should return the nil-valued panic", func() {
-				Ω(didRun).Should(BeTrue())
-
-				Ω(outcome).Should(Equal(types.SpecStatePanicked))
-				Ω(failure.ForwardedPanic).Should(Equal("<nil>"))
 			})
 		})
 	})

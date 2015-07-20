@@ -130,7 +130,6 @@ type Done chan<- interface{}
 //	IsMeasurement: true if the current test is a measurement
 //	FileName: the name of the file containing the current test
 //	LineNumber: the line number for the current test
-//	Failed: if the current test has failed, this will be true (useful in an AfterEach)
 type GinkgoTestDescription struct {
 	FullTestText   string
 	ComponentTexts []string
@@ -140,8 +139,6 @@ type GinkgoTestDescription struct {
 
 	FileName   string
 	LineNumber int
-
-	Failed bool
 }
 
 //CurrentGinkgoTestDescripton returns information about the current running test.
@@ -160,7 +157,6 @@ func CurrentGinkgoTestDescription() GinkgoTestDescription {
 		IsMeasurement:  summary.IsMeasurement,
 		FileName:       subjectCodeLocation.FileName,
 		LineNumber:     subjectCodeLocation.LineNumber,
-		Failed:         summary.HasFailureState(),
 	}
 }
 
@@ -220,17 +216,6 @@ func buildDefaultReporter() Reporter {
 	} else {
 		return remote.NewForwardingReporter(remoteReportingServer, &http.Client{}, remote.NewOutputInterceptor())
 	}
-}
-
-//Skip notifies Ginkgo that the current spec should be skipped.
-func Skip(message string, callerSkip ...int) {
-	skip := 0
-	if len(callerSkip) > 0 {
-		skip = callerSkip[0]
-	}
-
-	globalFailer.Skip(message, codelocation.New(skip+1))
-	panic(GINKGO_PANIC)
 }
 
 //Fail notifies Ginkgo that the current spec has failed. (Gomega will call Fail for you automatically when an assertion fails.)
