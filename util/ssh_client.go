@@ -33,7 +33,6 @@ func IsDir(d string) (b bool) {
 	return true
 }
 
-
 func (c *sshClientImpl) ExecCommand(username string, password string, ip string, command string) (string, error) {
 	config := &ssh.ClientConfig{
 		User: username,
@@ -92,12 +91,14 @@ func (c *sshClientImpl) UploadFile(username string, password string, ip string, 
 		log.Fatal(err)
 		return err
 	}
-	if _, err := f.Write([]byte(data)); err != nil {
+	_, err = f.Write([]byte(data));
+	if err != nil {
 		log.Fatal(err)
 		return err
 	}
 
-	if _, err = sftp.Lstat(destFile); err != nil {
+	_, err = sftp.Lstat(destFile);
+	if err != nil {
 		log.Fatal(err)
 		return err
 	}
@@ -151,7 +152,6 @@ func (c *sshClientImpl) DownloadFile(username string, password string, ip string
 
 	return nil
 }
-
 
 func GetSshClient() SshClient {
 	return &sshClientImpl{}
