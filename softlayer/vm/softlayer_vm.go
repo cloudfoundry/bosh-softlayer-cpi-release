@@ -69,6 +69,27 @@ func (vm SoftLayerVM) Delete() error {
 		return bosherr.WrapError(err, "Failed to initialize VM pool DB")
 	}
 
+	vmInfoDB := NewVMInfoDB(vm.id, "", "", "", "", vm.logger)
+
+	err = (&vmInfoDB).QueryVMInfobyID()
+	if err != nil {
+		return bosherr.WrapError(err, "Failed to query VM info by given ID " + strconv.Itoa(vm.id))
+	}
+	vm.logger.Info(softLayerCreatorLogTag, fmt.Sprintf("vmInfoDB.vmProperties.id is %d", (&vmInfoDB).vmProperties.id))
+
+	if vmInfoDB.vmProperties.id != 0 {
+		vm.logger.Info(softLayerCreatorLogTag, fmt.Sprintf("Release the VM with id %d back to the VM pool", vmInfoDB.vmProperties.id))
+		(&vmInfoDB).vmProperties.in_use = "f"
+		err = vmInfoDB.UpdateVMInfoByID()
+		if err != nil {
+			return bosherr.WrapError(err, "Failed to query VM info by given ID " + strconv.Itoa(vm.id))
+		} else {
+			return nil
+		}
+	}
+
+	return nil
+
 	virtualGuestService, err := vm.softLayerClient.GetSoftLayer_Virtual_Guest_Service()
 	if err != nil {
 		return bosherr.WrapError(err, "Creating SoftLayer VirtualGuestService from client")

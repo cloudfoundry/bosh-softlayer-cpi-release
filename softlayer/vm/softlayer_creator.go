@@ -50,7 +50,7 @@ func (c SoftLayerCreator) getTimeStamp(now time.Time) string {
 
 func (c SoftLayerCreator) CreateNewVM(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
 
-	c.logger.Info(softLayerCreatorLogTag, fmt.Sprintln("Creating a new server with stemcell %s",  stemcell.ID()))
+	c.logger.Info(softLayerCreatorLogTag, fmt.Sprintln("Creating a new server with stemcell %d",  stemcell.ID()))
 
 	disks := DisksSpec{}
 	if cloudProps.EphemeralDiskSize > 0 {
@@ -151,9 +151,10 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 	if err != nil {
 		return SoftLayerVM{}, bosherr.WrapError(err, "Failed to query VM info by given agent ID " + agentID)
 	}
+	c.logger.Info(softLayerCreatorLogTag, fmt.Sprintln("vmInfoDB.vmProperties.id is ", (&vmInfoDB).vmProperties.id))
 
 	if vmInfoDB.vmProperties.id != 0 {
-		c.logger.Info(softLayerCreatorLogTag, fmt.Sprintln("OS reload on the server id %d with stemcell %s", vmInfoDB.vmProperties.id,  stemcell))
+		c.logger.Info(softLayerCreatorLogTag, fmt.Sprintf("OS reload on the server id %d with stemcell %d", vmInfoDB.vmProperties.id,  stemcell.ID()))
 		agentEnvService := c.agentEnvServiceFactory.New(vmInfoDB.vmProperties.id)
 		vm := NewSoftLayerVM (vmInfoDB.vmProperties.id, c.softLayerClient, util.GetSshClient(), agentEnvService, c.logger, TIMEOUT_TRANSACTIONS_DELETE_VM)
 		(&vm).ReloadOS(stemcell)
@@ -162,7 +163,7 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 		}
 		return vm, nil
 	}
-
+	return SoftLayerVM{}, nil
 	return c.CreateNewVM(agentID, stemcell, cloudProps, networks, env)
 
 }

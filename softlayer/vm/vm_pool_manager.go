@@ -57,9 +57,18 @@ func openDB() (*sql.DB, error) {
 	return db, nil
 }
 
+func (vmInfoDB *VMInfoDB) CloseDB() (error) {
+	err := vmInfoDB.dbConn.Close()
+	if err != nil {
+		return bosherr.WrapError(err, "Failed to close VM Pool DB connection")
+	}
+	return nil
+}
+
 func InitVMPoolDB() error {
 
 	db, err := openDB()
+	defer db.Close()
 
 	// Create vms table if it does not exist
 	sqlStmt := `create table if not exists vms (id int not null primary key, name varchar(32), in_use varchar(32),
@@ -92,7 +101,7 @@ func exec(db *sql.DB, sqlStmt string) error {
 
 func (vmInfoDB *VMInfoDB) QueryVMInfobyAgentID() (error) {
 
-	defer vmInfoDB.dbConn.Close()
+	//defer vmInfoDB.dbConn.Close()
 
 	tx, err := vmInfoDB.dbConn.Begin()
 	if err != nil {
@@ -112,7 +121,30 @@ func (vmInfoDB *VMInfoDB) QueryVMInfobyAgentID() (error) {
 	tx.Commit()
 
 	return nil
+}
 
+func (vmInfoDB *VMInfoDB) QueryVMInfobyID() (error) {
+
+	//defer vmInfoDB.dbConn.Close()
+
+	tx, err := vmInfoDB.dbConn.Begin()
+	if err != nil {
+		return bosherr.WrapError(err, "Failed to begin DB transcation")
+	}
+
+	sqlStmt, err := tx.Prepare("select id, in_use, image_id, agent_id from vms where id=?")
+	if err != nil {
+		return bosherr.WrapError(err, "Failed to prepare sql statement")
+	}
+	defer sqlStmt.Close()
+
+	err = sqlStmt.QueryRow(vmInfoDB.vmProperties.id).Scan(&vmInfoDB.vmProperties.id, &vmInfoDB.vmProperties.in_use, &vmInfoDB.vmProperties.image_id, &vmInfoDB.vmProperties.agent_id)
+	if err != nil && !strings.Contains(err.Error(), "no rows") {
+		return bosherr.WrapError(err, "Failed to query VM info from vms table")
+	}
+	tx.Commit()
+
+	return nil
 }
 
 /*func (vmInfo *VMInfo) queryVMInfobyNamePrefix(db *sql.DB) error {
@@ -140,7 +172,7 @@ func (vmInfoDB *VMInfoDB) QueryVMInfobyAgentID() (error) {
 
 func (vmInfoDB *VMInfoDB) DeleteVMFromVMDB() error {
 
-	defer vmInfoDB.dbConn.Close()
+	//defer vmInfoDB.dbConn.Close()
 
 	sqlStmt := fmt.Sprintf("delete from vms where id=%d", vmInfoDB.vmProperties.id)
 	err := exec(vmInfoDB.dbConn, sqlStmt)
@@ -153,7 +185,7 @@ func (vmInfoDB *VMInfoDB) DeleteVMFromVMDB() error {
 
 func (vmInfoDB *VMInfoDB) InsertVMInfo() error {
 
-	defer vmInfoDB.dbConn.Close()
+	//defer vmInfoDB.dbConn.Close()
 
 	sqlStmt := fmt.Sprintf("insert into vms (id, name, in_use, image_id, agent_id, timestamp) values (%d, '%s', '%s', '%s', '%s', CURRENT_TIMESTAMP)", vmInfoDB.vmProperties.id, vmInfoDB.vmProperties.name, vmInfoDB.vmProperties.in_use, vmInfoDB.vmProperties.image_id, vmInfoDB.vmProperties.agent_id)
 	err := exec(vmInfoDB.dbConn, sqlStmt)
@@ -164,9 +196,9 @@ func (vmInfoDB *VMInfoDB) InsertVMInfo() error {
 	return nil
 }
 
-func (vmInfoDB *VMInfoDB) UpdateVMInfo() error {
+func (vmInfoDB *VMInfoDB) UpdateVMInfoByID() error {
 
-	defer vmInfoDB.dbConn.Close()
+	//defer vmInfoDB.dbConn.Close()
 
 	tx, err := vmInfoDB.dbConn.Begin()
 	if err != nil {
@@ -174,24 +206,24 @@ func (vmInfoDB *VMInfoDB) UpdateVMInfo() error {
 	}
 
 	if vmInfoDB.vmProperties.in_use == "f" || vmInfoDB.vmProperties.in_use == "t" {
-		sqlStmt := fmt.Sprintf("update vms set in_use='%s', timestamp=CURRENT_TIMESTAMP) where id = %s", vmInfoDB.vmProperties.in_use, vmInfoDB.vmProperties.id)
+		sqlStmt := fmt.Sprintf("update vms set in_use='%s', timestamp=CURRENT_TIMESTAMP where id = %d", vmInfoDB.vmProperties.in_use, vmInfoDB.vmProperties.id)
 		_, err = tx.Exec(sqlStmt)
 		if err != nil {
-			return bosherr.WrapError(err, "Failed to begin DB transcation")
+			return bosherr.WrapError(err, "Failed to update in_use column in vms")
 		}
 	}
 	if vmInfoDB.vmProperties.image_id != "" {
-		sqlStmt := fmt.Sprintf("update vms set image_id where id = %s", vmInfoDB.vmProperties.image_id, vmInfoDB.vmProperties.id)
+		sqlStmt := fmt.Sprintf("update vms set image_id='%s' where id = %d", vmInfoDB.vmProperties.image_id, vmInfoDB.vmProperties.id)
 		_, err = tx.Exec(sqlStmt)
 		if err != nil {
-			return bosherr.WrapError(err, "Failed to begin DB transcation")
+			return bosherr.WrapError(err, "Failed to update image_id column in vms")
 		}
 	}
 	if vmInfoDB.vmProperties.agent_id != "" {
-		sqlStmt := fmt.Sprintf("update vms set agent_id where id = %s", vmInfoDB.vmProperties.agent_id, vmInfoDB.vmProperties.id)
+		sqlStmt := fmt.Sprintf("update vms set agent_id='%s' where id = %d", vmInfoDB.vmProperties.agent_id, vmInfoDB.vmProperties.id)
 		_, err = tx.Exec(sqlStmt)
 		if err != nil {
-			return bosherr.WrapError(err, "Failed to begin DB transcation")
+			return bosherr.WrapError(err, "Failed to update agent_id column in vms")
 		}
 	}
 	tx.Commit()
