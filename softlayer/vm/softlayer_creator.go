@@ -121,7 +121,7 @@ func (c SoftLayerCreator) CreateNewVM(agentID string, stemcell bslcstem.Stemcell
 
 	agentEnvService := c.agentEnvServiceFactory.New(virtualGuest.Id)
 
-	vm := NewSoftLayerVM(virtualGuest.Id, c.softLayerClient, util.GetSshClient(), agentEnvService, c.logger)
+	vm := NewSoftLayerVM(virtualGuest.Id, c.softLayerClient, util.GetSshClient(), agentEnvService, c.logger, TIMEOUT_TRANSACTIONS_DELETE_VM)
 
 	//Insert a record into VM pool table (sqlite DB) when creating a new VM
 	vmInfo := VMInfo{
