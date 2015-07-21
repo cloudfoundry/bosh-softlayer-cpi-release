@@ -81,7 +81,7 @@ var _ = Describe("SoftLayerCreator", func() {
 						NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
 					PrimaryBackendNetworkComponent: sldatatypes.PrimaryBackendNetworkComponent{
 						NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
-					UserData: []sldatatypes.UserData{{Value: "someValue"}},
+					UserData: []sldatatypes.UserData{{Value: "fake-userdata"}},
 				}
 				networks = Networks{}
 				env = Environment{}
@@ -131,19 +131,6 @@ var _ = Describe("SoftLayerCreator", func() {
 					cloudProps = VMCloudProperties{
 						StartCpus: 4,
 						MaxMemory: 1024,
-					}
-
-					_, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
-					Expect(err).To(HaveOccurred())
-				})
-
-				It("fails when RootDiskSize is negative", func() {
-					cloudProps = VMCloudProperties{
-						StartCpus:    4,
-						MaxMemory:    1024,
-						Domain:       "fake-domain",
-						Datacenter:   sldatatypes.Datacenter{Name: "fake-datacenter"},
-						RootDiskSize: -100,
 					}
 
 					_, err := creator.Create(agentID, stemcell, cloudProps, networks, env)

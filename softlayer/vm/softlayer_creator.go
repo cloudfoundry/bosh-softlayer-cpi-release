@@ -1,6 +1,7 @@
 package vm
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"strconv"
@@ -51,6 +52,19 @@ func (c SoftLayerCreator) CreateNewVM(agentID string, stemcell bslcstem.Stemcell
 
 	c.logger.Info(softLayerCreatorLogTag, fmt.Sprintln("Creating a new server with stemcell %s",  stemcell.ID()))
 
+	disks := DisksSpec{}
+	if cloudProps.EphemeralDiskSize > 0 {
+		disks = DisksSpec{Ephemeral: "/dev/xvdc"}
+	}
+	// To keep consistent with legacy softlayer CPI, making agent name with prefix "vm-"
+	agentEnv := NewAgentEnvForVM(agentID, fmt.Sprintf("vm-%s", agentID), networks, disks, env, c.agentOptions)
+	metadata, err := json.Marshal(agentEnv)
+	if err != nil {
+		return SoftLayerVM{}, bosherr.WrapError(err, "Marshalling agent environment metadata")
+	}
+	dataBytes := []byte(metadata)
+	base64EncodedMetadata := base64.StdEncoding.EncodeToString(dataBytes)
+
 	virtualGuestTemplate := sldatatypes.SoftLayer_Virtual_Guest_Template{
 		Hostname:  cloudProps.VmNamePrefix + c.getTimeStamp(time.Now().UTC()),
 		Domain:    cloudProps.Domain,
@@ -68,8 +82,7 @@ func (c SoftLayerCreator) CreateNewVM(agentID string, stemcell bslcstem.Stemcell
 		SshKeys: cloudProps.SshKeys,
 
 		HourlyBillingFlag: cloudProps.HourlyBillingFlag,
-		//Needed for ephemeral disk
-		LocalDiskFlag: cloudProps.LocalDiskFlag,
+		LocalDiskFlag:     cloudProps.LocalDiskFlag,
 
 		DedicatedAccountHostOnlyFlag:   cloudProps.DedicatedAccountHostOnlyFlag,
 		BlockDevices:                   cloudProps.BlockDevices,
@@ -77,7 +90,11 @@ func (c SoftLayerCreator) CreateNewVM(agentID string, stemcell bslcstem.Stemcell
 		PrivateNetworkOnlyFlag:         cloudProps.PrivateNetworkOnlyFlag,
 		PrimaryNetworkComponent:        &cloudProps.PrimaryNetworkComponent,
 		PrimaryBackendNetworkComponent: &cloudProps.PrimaryBackendNetworkComponent,
-		UserData:                       cloudProps.UserData,
+		UserData: []sldatatypes.UserData{
+			sldatatypes.UserData{
+				Value: base64EncodedMetadata,
+			},
+		},
 	}
 
 	virtualGuestService, err := c.softLayerClient.GetSoftLayer_Virtual_Guest_Service()
@@ -90,24 +107,16 @@ func (c SoftLayerCreator) CreateNewVM(agentID string, stemcell bslcstem.Stemcell
 		return SoftLayerVM{}, bosherr.WrapError(err, "Creating VirtualGuest from SoftLayer client")
 	}
 
-	//TODO: need to find or ensure the name for the ephemeral disk for SoftLayer VG
-	disks := DisksSpec{Ephemeral: "/dev/xvdc"}
-
-	agentEnv := NewAgentEnvForVM(agentID, strconv.Itoa(virtualGuest.Id), networks, disks, env, c.agentOptions)
-
-	metadata, err := json.Marshal(agentEnv)
-	if err != nil {
-		return SoftLayerVM{}, bosherr.WrapError(err, "Marshalling agent environment metadata")
-	}
-
-	err = bslcommon.ConfigureMetadataOnVirtualGuest(c.softLayerClient, virtualGuest.Id, string(metadata), bslcommon.TIMEOUT, bslcommon.POLLING_INTERVAL)
-	if err != nil {
-		return SoftLayerVM{}, bosherr.WrapError(err, fmt.Sprintf("Configuring metadata on VirtualGuest `%d`", virtualGuest.Id))
-	}
-
-	err = bslcommon.AttachEphemeralDiskToVirtualGuest(c.softLayerClient, virtualGuest.Id, cloudProps.EphemeralDiskSize, bslcommon.TIMEOUT, bslcommon.POLLING_INTERVAL)
-	if err != nil {
-		return SoftLayerVM{}, bosherr.WrapError(err, fmt.Sprintf("Attaching ephemeral disk to VirtualGuest `%d`", virtualGuest.Id))
+	if cloudProps.EphemeralDiskSize == 0 {
+		err = bslcommon.WaitForVirtualGuest(c.softLayerClient, virtualGuest.Id, "RUNNING", bslcommon.TIMEOUT, bslcommon.POLLING_INTERVAL)
+		if err != nil {
+			return SoftLayerVM{}, bosherr.WrapError(err, fmt.Sprintf("PowerOn failed with VirtualGuest id `%d`", virtualGuest.Id))
+		}
+	} else {
+		err = bslcommon.AttachEphemeralDiskToVirtualGuest(c.softLayerClient, virtualGuest.Id, cloudProps.EphemeralDiskSize, bslcommon.TIMEOUT, bslcommon.POLLING_INTERVAL)
+		if err != nil {
+			return SoftLayerVM{}, bosherr.WrapError(err, fmt.Sprintf("Attaching ephemeral disk to VirtualGuest `%d`", virtualGuest.Id))
+		}
 	}
 
 	agentEnvService := c.agentEnvServiceFactory.New(virtualGuest.Id)

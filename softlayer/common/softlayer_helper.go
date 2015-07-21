@@ -1,6 +1,7 @@
 package common
 
 import (
+	"encoding/base64"
 	"fmt"
 	"time"
 
@@ -159,4 +160,28 @@ func ConfigureMetadataDiskOnVirtualGuest(softLayerClient sl.Client, virtualGuest
 	}
 
 	return nil
+}
+
+func GetUserMetadataOnVirtualGuest(softLayerClient sl.Client, virtualGuestId int) ([]byte, error) {
+	virtualGuestService, err := softLayerClient.GetSoftLayer_Virtual_Guest_Service()
+	if err != nil {
+		return []byte{}, bosherr.WrapError(err, "Creating VirtualGuestService from SoftLayer client")
+	}
+
+	attributes, err := virtualGuestService.GetUserData(virtualGuestId)
+	if err != nil {
+		return []byte{}, bosherr.WrapError(err, fmt.Sprintf("Getting metadata on VirtualGuest `%d`", virtualGuestId))
+	}
+
+	if len(attributes) == 0 {
+		return []byte{}, bosherr.WrapError(err, fmt.Sprintf("Failed to get metadata on VirtualGuest `%d`", virtualGuestId))
+	}
+
+	sEnc := attributes[0].Value
+	sDec, err := base64.StdEncoding.DecodeString(sEnc)
+	if err != nil {
+		return []byte{}, bosherr.WrapError(err, fmt.Sprintf("Failed to decode metadata returned from virtualGuest `%d`", virtualGuestId))
+	}
+
+	return sDec, nil
 }
