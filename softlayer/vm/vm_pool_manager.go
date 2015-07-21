@@ -7,10 +7,12 @@ import (
 	"path/filepath"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
+	"strings"
 )
 
 const (
-	SQLITE_DB_FOLDER = "/var/vcap/store/director/"
+	//SQLITE_DB_FOLDER = "/var/vcap/store/director/"
+	SQLITE_DB_FOLDER = "/tmp/director/"
 	SQLITE_DB_FOLDER_CLI = "/usr/local/"
 	SQLITE_DB_FILE = "vm_pool.sqlite"
 )
@@ -34,11 +36,8 @@ type VMInfoDB struct {
 }
 
 
-func NewVMInfoDB(id, name, in_use, image_id, agent_id, dbConn sql.DB, logger boshlog.Logger) VMInfoDB {
-	dbConn, err := openDB()
-	if err != nil {
-		return nil, bosherr.WrapError(err, "Failed to new VMInfoDB object")
-	}
+func NewVMInfoDB(id int, name string, in_use string, image_id string, agent_id string, logger boshlog.Logger) VMInfoDB {
+	dbConn, _:= openDB()
 
 	vmProperties := VMProperties{id, name, in_use, image_id, agent_id}
 	return VMInfoDB{
@@ -107,7 +106,7 @@ func (vmInfoDB *VMInfoDB) QueryVMInfobyAgentID() (error) {
 	defer sqlStmt.Close()
 
 	err = sqlStmt.QueryRow(vmInfoDB.vmProperties.agent_id).Scan(&vmInfoDB.vmProperties.id, &vmInfoDB.vmProperties.image_id, &vmInfoDB.vmProperties.agent_id)
-	if err != nil {
+	if err != nil && !strings.Contains(err.Error(), "no rows") {
 		return bosherr.WrapError(err, "Failed to query VM info from vms table")
 	}
 	tx.Commit()
@@ -156,10 +155,10 @@ func (vmInfoDB *VMInfoDB) InsertVMInfo() error {
 
 	defer vmInfoDB.dbConn.Close()
 
-	sqlStmt := fmt.Sprintf("insert into vms (id, name, in_use, image_id, agent_id, timestamp) values (%d, %s, %s, %s, CURRENT_TIMESTAMP)", vmInfoDB.vmProperties.id, vmInfoDB.vmProperties.name, vmInfoDB.vmProperties.in_use, vmInfoDB.vmProperties.image_id, vmInfoDB.vmProperties.agent_id)
+	sqlStmt := fmt.Sprintf("insert into vms (id, name, in_use, image_id, agent_id, timestamp) values (%d, '%s', '%s', '%s', '%s', CURRENT_TIMESTAMP)", vmInfoDB.vmProperties.id, vmInfoDB.vmProperties.name, vmInfoDB.vmProperties.in_use, vmInfoDB.vmProperties.image_id, vmInfoDB.vmProperties.agent_id)
 	err := exec(vmInfoDB.dbConn, sqlStmt)
 	if err != nil {
-		return bosherr.WrapError(nil, "Failed to insert VM info into vms table")
+		return bosherr.WrapError(err, "Failed to insert VM info into vms table")
 	}
 
 	return nil

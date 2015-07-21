@@ -68,6 +68,39 @@ func (slvgs *softLayer_Virtual_Guest_Service) CreateObject(template datatypes.So
 	return softLayer_Virtual_Guest, nil
 }
 
+
+func (slvgs *softLayer_Virtual_Guest_Service) ReloadOperatingSystem(instanceId int, template datatypes.Image_Template_Config) (error) {
+
+	parameter := make([]interface{}, 2)
+	parameter[0]="Force"
+	parameter[1]=template
+
+	parameters := map[string]interface{}{
+		"Parameters": parameter,
+	}
+
+	requestBody, err := json.Marshal(parameters)
+	if err != nil {
+		return err
+	}
+
+	response, err := slvgs.client.DoRawHttpRequest(fmt.Sprintf("%s/%d/reloadOperatingSystem.json", slvgs.GetName(), instanceId), "POST", bytes.NewBuffer(requestBody))
+
+	if res := string(response[:]); res != "true" {
+		return errors.New(fmt.Sprintf("Failed to reload OS on instance with id '%d', got '%s' as response from the API.", instanceId, res))
+	}
+
+	fmt.Println("Response of OS Reload is: %s", response)
+
+	err = slvgs.client.CheckForHttpResponseErrors(response)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+
 func (slvgs *softLayer_Virtual_Guest_Service) GetObject(instanceId int) (datatypes.SoftLayer_Virtual_Guest, error) {
 
 	objectMask := []string{
@@ -91,6 +124,7 @@ func (slvgs *softLayer_Virtual_Guest_Service) GetObject(instanceId int) (datatyp
 		"startCpus",
 		"statusId",
 		"uuid",
+		"userData.value",
 
 		"globalIdentifier",
 		"managedResourceFlag",
@@ -103,6 +137,7 @@ func (slvgs *softLayer_Virtual_Guest_Service) GetObject(instanceId int) (datatyp
 		"datacenter.name",
 		"datacenter.longName",
 		"datacenter.id",
+		"networkComponents.maxSpeed",
 		"operatingSystem.passwords.password",
 		"operatingSystem.passwords.username",
 	}
@@ -632,6 +667,21 @@ func (slvgs *softLayer_Virtual_Guest_Service) CheckHostDiskAvailability(instance
 	}
 
 	return false, errors.New(fmt.Sprintf("Failed to check host disk availability for instance '%d', got '%s' as response from the API.", instanceId, res))
+}
+
+func (slvgs *softLayer_Virtual_Guest_Service) CaptureImage(instanceId int) (datatypes.SoftLayer_Container_Disk_Image_Capture_Template, error) {
+	response, err := slvgs.client.DoRawHttpRequest(fmt.Sprintf("%s/%d/captureImage.json", slvgs.GetName(), instanceId), "GET", new(bytes.Buffer))
+	if err != nil {
+		return datatypes.SoftLayer_Container_Disk_Image_Capture_Template{}, err
+	}
+
+	diskImageTemplate := datatypes.SoftLayer_Container_Disk_Image_Capture_Template{}
+	err = json.Unmarshal(response, &diskImageTemplate)
+	if err != nil {
+		return datatypes.SoftLayer_Container_Disk_Image_Capture_Template{}, err
+	}
+
+	return diskImageTemplate, nil
 }
 
 //Private methods

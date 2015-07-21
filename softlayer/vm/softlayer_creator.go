@@ -124,20 +124,13 @@ func (c SoftLayerCreator) CreateNewVM(agentID string, stemcell bslcstem.Stemcell
 	vm := NewSoftLayerVM(virtualGuest.Id, c.softLayerClient, util.GetSshClient(), agentEnvService, c.logger, TIMEOUT_TRANSACTIONS_DELETE_VM)
 
 	//Insert a record into VM pool table (sqlite DB) when creating a new VM
-	vmInfo := VMInfo{
-		id:vm.id,
-		name:virtualGuestTemplate.Hostname+virtualGuestTemplate.Domain,
-		in_use:"t",
-		image_id:stemcell.Uuid(),
-		agent_id:agentID,
-	}
-	err = InsertVMInfo(&vmInfo)
+	vmInfoDB := NewVMInfoDB(vm.id, virtualGuestTemplate.Hostname+"."+virtualGuestTemplate.Domain, "t", stemcell.Uuid(), agentID, c.logger)
+	err = (&vmInfoDB).InsertVMInfo()
 	if err != nil {
 		return SoftLayerVM{}, bosherr.WrapError(err, "Failed to insert the record into VM pool DB")
 	}
 
 	return vm, nil
-
 }
 
 func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
@@ -152,16 +145,21 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 		return SoftLayerVM{}, bosherr.WrapError(err, "Failed to initialize VM pool DB")
 	}
 
-	vmInfo, err := QueryVMInfobyAgentID(agentID)
+	vmInfoDB := NewVMInfoDB(0, "", "", "", agentID, c.logger)
+
+	err = (&vmInfoDB).QueryVMInfobyAgentID()
 	if err != nil {
-		return SoftLayerVM{}, bosherr.WrapError(err, "")
+		return SoftLayerVM{}, bosherr.WrapError(err, "Failed to query VM info by given agent ID " + agentID)
 	}
 
-	if vmInfo.id != 0 {
-		c.logger.Info(softLayerCreatorLogTag, fmt.Sprintln("OS reload on the server id %d with stemcell %s", vmInfo.id,  stemcell))
-		agentEnvService := c.agentEnvServiceFactory.New(vmInfo.id)
-		vm := NewSoftLayerVM(vmInfo.id, c.softLayerClient, util.GetSshClient(), agentEnvService, c.logger)
-		vm.ReloadOS(stemcell)
+	if vmInfoDB.vmProperties.id != 0 {
+		c.logger.Info(softLayerCreatorLogTag, fmt.Sprintln("OS reload on the server id %d with stemcell %s", vmInfoDB.vmProperties.id,  stemcell))
+		agentEnvService := c.agentEnvServiceFactory.New(vmInfoDB.vmProperties.id)
+		vm := NewSoftLayerVM (vmInfoDB.vmProperties.id, c.softLayerClient, util.GetSshClient(), agentEnvService, c.logger, TIMEOUT_TRANSACTIONS_DELETE_VM)
+		(&vm).ReloadOS(stemcell)
+		if err != nil {
+			return SoftLayerVM{}, bosherr.WrapError(err, "Failed to reload OS")
+		}
 		return vm, nil
 	}
 
