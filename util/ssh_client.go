@@ -66,7 +66,6 @@ func (c *sshClientImpl) UploadFile(username string, password string, ip string, 
 	if IsDir(srcFile) || IsDir(destFile) {
 		return errors.New("Is a directory")
 	}
-
 	client, err := ssh.Dial("tcp", ip+":22", config)
 	if err != nil {
 		log.Fatal(err)
