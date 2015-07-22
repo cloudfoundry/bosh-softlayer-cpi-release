@@ -387,8 +387,7 @@ func (vm SoftLayerVM) postCheckActiveTransactionsForDeleteVM(softLayerClient sl.
 	}
 
 	if totalTime >= timeout {
-		err := errors.New(fmt.Sprintf("Waiting for DeleteVM transaction to start TIME OUT!"))
-		return err
+		return errors.New(fmt.Sprintf("Waiting for DeleteVM transaction to start TIME OUT!"))
 	}
 
 	totalTime = time.Duration(0)
@@ -420,8 +419,7 @@ func (vm SoftLayerVM) postCheckActiveTransactionsForDeleteVM(softLayerClient sl.
 	}
 
 	if totalTime >= timeout {
-		err := errors.New(fmt.Sprintf("After deleting a vm, waiting for active transactions to complete TIME OUT!"))
-		return err
+		return errors.New(fmt.Sprintf("After deleting a vm, waiting for active transactions to complete TIME OUT!"))
 	}
 
 	return nil
