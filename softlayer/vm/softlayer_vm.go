@@ -70,6 +70,7 @@ func (vm SoftLayerVM) Delete() error {
 	}
 
 	vmInfoDB := NewVMInfoDB(vm.id, "", "", "", "", vm.logger)
+	defer vmInfoDB.CloseDB()
 
 	err = (&vmInfoDB).QueryVMInfobyID()
 	if err != nil {

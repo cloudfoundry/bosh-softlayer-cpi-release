@@ -146,6 +146,7 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 	}
 
 	vmInfoDB := NewVMInfoDB(0, "", "", "", agentID, c.logger)
+	defer vmInfoDB.CloseDB()
 
 	err = (&vmInfoDB).QueryVMInfobyAgentID()
 	if err != nil {
