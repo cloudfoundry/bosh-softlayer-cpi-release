@@ -8,7 +8,6 @@ import (
 	"io/ioutil"
 	"log"
 	"regexp"
-	"unsafe"
 )
 
 type SshClient interface {
@@ -53,10 +52,10 @@ func (c *sshClientImpl) ExecCommand(username string, password string, ip string,
 }
 
 func (c *sshClientImpl) UploadFile(username string, password string, ip string, srcFile string, destFile string) error {
-	config := &ssh.ClientConfig{
+	config := &myssh.ClientConfig{
 		User: username,
-		Auth: []ssh.AuthMethod{
-			ssh.Password(password),
+		Auth: []myssh.AuthMethod{
+			myssh.Password(password),
 		},
 	}
 	if !IsIP(ip) {
@@ -66,14 +65,14 @@ func (c *sshClientImpl) UploadFile(username string, password string, ip string, 
 	if IsDir(srcFile) || IsDir(destFile) {
 		return errors.New("Is a directory")
 	}
-	client, err := ssh.Dial("tcp", ip+":22", config)
+
+	client, err := myssh.Dial("tcp", ip+":22", config)
 	if err != nil {
 		log.Fatal(err)
 		return err
 	}
 
-	conn := (*myssh.Client)(unsafe.Pointer(client))
-	sftp, err := sftp.NewClient(conn)
+	sftp, err := sftp.NewClient(client)
 	if err != nil {
 		log.Fatal(err)
 		return err
@@ -91,13 +90,13 @@ func (c *sshClientImpl) UploadFile(username string, password string, ip string, 
 		log.Fatal(err)
 		return err
 	}
-	_, err = f.Write([]byte(data));
+	_, err = f.Write([]byte(data))
 	if err != nil {
 		log.Fatal(err)
 		return err
 	}
 
-	_, err = sftp.Lstat(destFile);
+	_, err = sftp.Lstat(destFile)
 	if err != nil {
 		log.Fatal(err)
 		return err
@@ -106,12 +105,13 @@ func (c *sshClientImpl) UploadFile(username string, password string, ip string, 
 }
 
 func (c *sshClientImpl) DownloadFile(username string, password string, ip string, srcFile string, destFile string) error {
-	config := &ssh.ClientConfig{
+	config := &myssh.ClientConfig{
 		User: username,
-		Auth: []ssh.AuthMethod{
-			ssh.Password(password),
+		Auth: []myssh.AuthMethod{
+			myssh.Password(password),
 		},
 	}
+
 	if !IsIP(ip) {
 		return errors.New("invalid IP address")
 	}
@@ -119,13 +119,14 @@ func (c *sshClientImpl) DownloadFile(username string, password string, ip string
 	if IsDir(srcFile) || IsDir(destFile) {
 		return errors.New("Is a directory")
 	}
-	client, err := ssh.Dial("tcp", ip+":22", config)
+
+	client, err := myssh.Dial("tcp", ip+":22", config)
 	if err != nil {
 		log.Fatal(err)
 		return err
 	}
-	conn := (*myssh.Client)(unsafe.Pointer(client))
-	sftp, err := sftp.NewClient(conn)
+
+	sftp, err := sftp.NewClient(client)
 	if err != nil {
 		log.Fatal(err)
 		return err
