@@ -1,6 +1,7 @@
 package vm
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strconv"
@@ -145,12 +146,46 @@ func (vm SoftLayerVM) ConfigureNetworks(networks Networks) error {
 func (vm SoftLayerVM) AttachDisk(disk bslcdisk.Disk) error {
 	virtualGuest, volume, err := vm.fetchVMandIscsiVolume(vm.ID(), disk.ID())
 	if err != nil {
-		return err
+		return bosherr.WrapError(err, fmt.Sprintf("Failed to fetch disk `%d` and virtual gusest `%d`", disk.ID(), virtualGuest.Id))
+	}
+
+	networkStorageService, err := vm.softLayerClient.GetSoftLayer_Network_Storage_Service()
+	if err != nil {
+		return bosherr.WrapError(err, "Can not get network storage service.")
+	}
+
+	allowed, err := networkStorageService.HasAllowedVirtualGuest(disk.ID(), vm.ID())
+	if err == nil && allowed == false {
+		err = networkStorageService.AttachIscsiVolume(virtualGuest, disk.ID())
+	}
+	if err != nil {
+		return bosherr.WrapError(err, fmt.Sprintf("Failed to grant access of disk `%d` from virtual gusest `%d`", disk.ID(), virtualGuest.Id))
 	}
 
 	_, err = vm.attachVolumeBasedOnShellScript(virtualGuest, volume)
 	if err != nil {
 		return bosherr.WrapErrorf(err, "Failed to attach volume with id %d to virtual guest with id: %d.", volume.Id, virtualGuest.Id)
+	}
+
+	metadata, err := bslcommon.GetUserMetadataOnVirtualGuest(vm.softLayerClient, virtualGuest.Id)
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Failed to get metadata from virtual guest with id: %d.", virtualGuest.Id)
+	}
+
+	old_agentEnv, err := NewAgentEnvFromJSON(metadata)
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Failed to unmarshal metadata from virutal guest with id: %d.", virtualGuest.Id)
+	}
+	new_agentEnv := old_agentEnv.AttachPersistentDisk(strconv.Itoa(disk.ID()), "/dev/sda") // Naming convention for iscsi driver in Softlayer.
+
+	metadata, err = json.Marshal(new_agentEnv)
+	if err != nil {
+		return bosherr.WrapError(err, "Marshalling agent environment metadata")
+	}
+
+	err = bslcommon.ConfigureMetadataOnVirtualGuest(vm.softLayerClient, virtualGuest.Id, string(metadata), bslcommon.TIMEOUT, bslcommon.POLLING_INTERVAL)
+	if err != nil {
+		return bosherr.WrapError(err, fmt.Sprintf("Configuring metadata on VirtualGuest `%d`", virtualGuest.Id))
 	}
 
 	return nil
@@ -162,9 +197,40 @@ func (vm SoftLayerVM) DetachDisk(disk bslcdisk.Disk) error {
 		return err
 	}
 
+	networkStorageService, err := vm.softLayerClient.GetSoftLayer_Network_Storage_Service()
+	if err != nil {
+		return bosherr.WrapError(err, "Can not get network storage service.")
+	}
+
+	allowed, err := networkStorageService.HasAllowedVirtualGuest(disk.ID(), vm.ID())
+	if err == nil && allowed == true {
+		err = networkStorageService.DetachIscsiVolume(virtualGuest, disk.ID())
+	}
+	if err != nil {
+		return bosherr.WrapError(err, fmt.Sprintf("Failed to revoke access of disk `%d` from virtual gusest `%d`", disk.ID(), virtualGuest.Id))
+	}
+
 	err = vm.detachVolumeBasedOnShellScript(virtualGuest, volume)
 	if err != nil {
 		return bosherr.WrapErrorf(err, "Failed to detach volume with id %d from virtual guest with id: %d.", volume.Id, virtualGuest.Id)
+	}
+
+	metadata, err := bslcommon.GetUserMetadataOnVirtualGuest(vm.softLayerClient, virtualGuest.Id)
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Failed to get metadata from virtual guest with id: %d.", virtualGuest.Id)
+	}
+
+	old_agentEnv, err := NewAgentEnvFromJSON(metadata)
+	new_agentEnv := old_agentEnv.DetachPersistentDisk(strconv.Itoa(disk.ID()))
+
+	metadata, err = json.Marshal(new_agentEnv)
+	if err != nil {
+		return bosherr.WrapError(err, "Marshalling agent environment metadata")
+	}
+
+	err = bslcommon.ConfigureMetadataOnVirtualGuest(vm.softLayerClient, virtualGuest.Id, string(metadata), bslcommon.TIMEOUT, bslcommon.POLLING_INTERVAL)
+	if err != nil {
+		return bosherr.WrapError(err, fmt.Sprintf("Configuring metadata on VirtualGuest `%d`", virtualGuest.Id))
 	}
 
 	return nil

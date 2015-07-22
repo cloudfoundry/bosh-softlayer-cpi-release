@@ -11,7 +11,7 @@ TBD
 ### Overview Presentations (*)
 --------------------------
 
-TBD
+1. CF Summit 05/12/2015: [bosh-init](https://github.com/maximilien/presentations/blob/master/2015/cf-summit-bosh/releases/bosh-init-v1.0.0.pdf) - which also includes some details around BOSH external CPIs (motivation and goals)
 
 ### Cloning and Building
 ------------------------

@@ -1,15 +1,14 @@
 {
-	"method": "set_vm_metadata",
-	"arguments": [
-		1234,
-		{
-			"foo": "foo1",
-			"bar": {
-				"test": 1
-			}
-		}
-	],
-	"context": {
-		"director_uuid": "3f695519-5a17-480f-879a-582dbe31131e"
-	}
+  "method": "set_vm_metadata",
+  "arguments": [
+	"10498259",
+    {
+      "director": "5276b588-1016-4023-acae-9a0d797168be",
+      "name": "fake-director",
+      "tags": "test, tag, director"
+    }
+  ],
+  "context": {
+	"director_uuid": "5276b588-1016-4023-acae-9a0d797168be"
+  }
 }
