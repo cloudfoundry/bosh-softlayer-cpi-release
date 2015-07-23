@@ -96,7 +96,7 @@ func (f SoftLayerFinder) findByIdInVirtualDiskImages(id int, accountService sl.S
 }
 
 func (f SoftLayerFinder) findInVirtualGuestDeviceTemplateGroups(uuid string, accountService sl.SoftLayer_Account_Service) (Stemcell, bool, error) {
-	filters := fmt.Sprintf(`"blockDeviceTemplateGroups":{"globalIdentifier":{"operation":"%s"}}}`, uuid)
+	filters := fmt.Sprintf(`{"blockDeviceTemplateGroups":{"globalIdentifier":{"operation":"%s"}}}`, uuid)
 	vgdtgGroups, err := accountService.GetBlockDeviceTemplateGroupsWithFilter(filters)
 	if err != nil {
 		return nil, false, bosherr.WrapError(err, "Getting virtual guest device template groups")
@@ -112,7 +112,7 @@ func (f SoftLayerFinder) findInVirtualGuestDeviceTemplateGroups(uuid string, acc
 }
 
 func (f SoftLayerFinder) findByIdInVirtualGuestDeviceTemplateGroups(id int, accountService sl.SoftLayer_Account_Service) (Stemcell, bool, error) {
-	filters := fmt.Sprintf(`"blockDeviceTemplateGroups":{"accountId":{"operation":"%d"}}}`, id)
+	filters := fmt.Sprintf(`{"blockDeviceTemplateGroups":{"id":{"operation":"%d"}}}`, id)
 	vgdtgGroups, err := accountService.GetBlockDeviceTemplateGroupsWithFilter(filters)
 	if err != nil {
 		return nil, false, bosherr.WrapError(err, "Getting virtual guest device template groups")
