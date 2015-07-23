@@ -52,6 +52,10 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 	if cloudProps.EphemeralDiskSize > 0 {
 		disks = DisksSpec{Ephemeral: "/dev/xvdc"}
 	}
+	// Append powerdns ip as DNS resovler
+	for _, network := range networks {
+		network.AppendDNS(cloudProps.BoshIp)
+	}
 	// To keep consistent with legacy softlayer CPI, making agent name with prefix "vm-"
 	agentEnv := NewAgentEnvForVM(agentID, fmt.Sprintf("vm-%s", agentID), networks, disks, env, c.agentOptions)
 	metadata, err := json.Marshal(agentEnv)
