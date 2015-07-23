@@ -71,6 +71,7 @@ func (c *sshClientImpl) UploadFile(username string, password string, ip string, 
 		log.Fatal(err)
 		return err
 	}
+	defer client.Close()
 
 	sftp, err := sftp.NewClient(client)
 	if err != nil {
@@ -125,6 +126,7 @@ func (c *sshClientImpl) DownloadFile(username string, password string, ip string
 		log.Fatal(err)
 		return err
 	}
+	defer client.Close()
 
 	sftp, err := sftp.NewClient(client)
 	if err != nil {
@@ -138,6 +140,7 @@ func (c *sshClientImpl) DownloadFile(username string, password string, ip string
 		log.Fatal(err)
 		return err
 	}
+	defer pFile.Close()
 
 	data, err := ioutil.ReadAll(pFile)
 	if err != nil {
