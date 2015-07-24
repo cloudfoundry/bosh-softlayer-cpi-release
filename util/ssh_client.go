@@ -91,6 +91,8 @@ func (c *sshClientImpl) UploadFile(username string, password string, ip string, 
 		log.Fatal(err)
 		return err
 	}
+	defer f.Close()
+
 	_, err = f.Write([]byte(data))
 	if err != nil {
 		log.Fatal(err)
