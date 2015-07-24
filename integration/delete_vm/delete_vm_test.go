@@ -88,7 +88,7 @@ var _ = Describe("BOSH Director Level Integration for delete_vm", func() {
 			strVGID = strconv.Itoa(virtualGuest.Id)
 
 			replacementMap = map[string]string{
-				"ID": strVGID,
+				"ID":           strVGID,
 				"DirectorUuid": "fake-director-uuid",
 			}
 		})
