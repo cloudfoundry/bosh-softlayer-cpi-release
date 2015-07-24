@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
-	//	"strconv"
+	"strconv"
 	"time"
 
 	. "github.com/onsi/ginkgo"
@@ -77,26 +77,23 @@ var _ = Describe("BOSH Director Level Integration for delete_vm", func() {
 			err = testhelpers.FindAndDeleteTestSshKeys()
 			Expect(err).ToNot(HaveOccurred())
 
-			//createdSshKey, _ = testhelpers.CreateTestSshKey()
-			//testhelpers.WaitForCreatedSshKeyToBePresent(createdSshKey.Id)
+			createdSshKey, _ = testhelpers.CreateTestSshKey()
+			testhelpers.WaitForCreatedSshKeyToBePresent(createdSshKey.Id)
 
-			//virtualGuest = testhelpers.CreateVirtualGuestAndMarkItTest([]datatypes.SoftLayer_Security_Ssh_Key{createdSshKey})
+			virtualGuest = testhelpers.CreateVirtualGuestAndMarkItTest([]datatypes.SoftLayer_Security_Ssh_Key{createdSshKey})
 
-			//testhelpers.WaitForVirtualGuestToBeRunning(virtualGuest.Id)
-			//testhelpers.WaitForVirtualGuestToHaveNoActiveTransactions(virtualGuest.Id)
+			testhelpers.WaitForVirtualGuestToBeRunning(virtualGuest.Id)
+			testhelpers.WaitForVirtualGuestToHaveNoActiveTransactions(virtualGuest.Id)
 
-			//strVGID = strconv.Itoa(virtualGuest.Id)
-			strVGID = "11006647"
+			strVGID = strconv.Itoa(virtualGuest.Id)
 
 			replacementMap = map[string]string{
 				"ID": strVGID,
-				//"DirectorUuid": "fake-director-uuid",
-				"DirectorUuid": "3f695519-5a17-480f-879a-582dbe31131e",
+				"DirectorUuid": "fake-director-uuid",
 			}
 		})
 
 		AfterEach(func() {
-			testhelpers.DeleteVirtualGuest(virtualGuest.Id)
 			testhelpers.DeleteSshKey(createdSshKey.Id)
 		})
 
@@ -119,12 +116,11 @@ var _ = Describe("BOSH Director Level Integration for delete_vm", func() {
 		BeforeEach(func() {
 			replacementMap = map[string]string{
 				"ID":           "123456",
-				"DirectorUuid": "3f695519-5a17-480f-879a-582dbe31131e",
+				"DirectorUuid": "fake-director-uuid",
 			}
 		})
 
 		It("fails to delete the VM", func() {
-			//TODO
 			jsonPayload, err := testhelperscpi.GenerateCpiJsonPayload("delete_vm", rootTemplatePath, replacementMap)
 			Expect(err).ToNot(HaveOccurred())
 

@@ -24,7 +24,7 @@ const (
 	softLayerVMtag                 = "SoftLayerVM"
 	ROOT_USER_NAME                 = "root"
 	deleteVMLogTag                 = "DeleteVM"
-	TIMEOUT_TRANSACTIONS_DELETE_VM = 10 * time.Minute
+	TIMEOUT_TRANSACTIONS_DELETE_VM = 60 * time.Minute
 )
 
 type SoftLayerVM struct {
@@ -83,7 +83,7 @@ func (vm SoftLayerVM) Delete() error {
 
 	err = vm.postCheckActiveTransactionsForDeleteVM(vm.softLayerClient, vmCID, vm.timeoutForActiveTransactions, bslcommon.POLLING_INTERVAL)
 	if err != nil {
-		return bosherr.WrapError(err, fmt.Sprintf("Waiting for VirtualGuest `%d` to have no pending transactions after deleting vm", vmCID))
+		return err
 	}
 
 	return nil
