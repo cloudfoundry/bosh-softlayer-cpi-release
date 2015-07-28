@@ -52,17 +52,22 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 	if cloudProps.EphemeralDiskSize > 0 {
 		disks = DisksSpec{Ephemeral: "/dev/xvdc"}
 	}
+
 	// Append powerdns ip as DNS resovler
-	for _, network := range networks {
-		network.AppendDNS(cloudProps.BoshIp)
+	nNetworks := make(map[string]Network)
+	for name, network := range networks {
+		network = network.AppendDNS(cloudProps.BoshIp)
+		nNetworks[name] = network
 	}
+
 	// To keep consistent with legacy softlayer CPI, making agent name with prefix "vm-"
-	agentEnv := NewAgentEnvForVM(agentID, fmt.Sprintf("vm-%s", agentID), networks, disks, env, c.agentOptions)
+	agentEnv := NewAgentEnvForVM(agentID, fmt.Sprintf("vm-%s", agentID), nNetworks, disks, env, c.agentOptions)
 	metadata, err := json.Marshal(agentEnv)
 	if err != nil {
 		return SoftLayerVM{}, bosherr.WrapError(err, "Marshalling agent environment metadata")
 	}
 	dataBytes := []byte(metadata)
+	fmt.Println(string(dataBytes))
 	base64EncodedMetadata := base64.StdEncoding.EncodeToString(dataBytes)
 
 	virtualGuestTemplate := sldatatypes.SoftLayer_Virtual_Guest_Template{
