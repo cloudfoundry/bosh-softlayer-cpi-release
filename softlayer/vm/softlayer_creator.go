@@ -67,7 +67,6 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 		return SoftLayerVM{}, bosherr.WrapError(err, "Marshalling agent environment metadata")
 	}
 	dataBytes := []byte(metadata)
-	fmt.Println(string(dataBytes))
 	base64EncodedMetadata := base64.StdEncoding.EncodeToString(dataBytes)
 
 	virtualGuestTemplate := sldatatypes.SoftLayer_Virtual_Guest_Template{
