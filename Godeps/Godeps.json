@@ -35,6 +35,10 @@
 			"Rev": "6c266c2d546fc0dfec0f3c2b0728f87b06fcd25e"
 		},
 		{
+			"ImportPath": "github.com/kr/fs",
+			"Rev": "2788f0dbd16903de03cb8186e5c7d97b69ad387b"
+		},
+		{
 			"ImportPath": "github.com/maximilien/softlayer-go/client",
 			"Comment": "v0.2.0-133-gbd2ab4c",
 			"Rev": "bd2ab4c9ef75902c06a52edaf647d4cbba1efd48"
@@ -68,6 +72,14 @@
 			"ImportPath": "github.com/onsi/gomega",
 			"Comment": "v1.0-50-gd6c945f",
 			"Rev": "d6c945f9fdbf6cad99e85b0feff591caa268e0db"
+		},
+		{
+			"ImportPath": "github.com/pkg/sftp",
+			"Rev": "d2d0a435b798a9af27f5fc597cacc19d275df702"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/ssh",
+			"Rev": "60052bd85f2d91293457e8811b0cf26b773de469"
 		}
 	]
 }
