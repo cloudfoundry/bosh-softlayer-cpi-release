@@ -29,7 +29,7 @@ type VMCloudProperties struct {
 	UserData                       []sldatatypes.UserData                     `json:"userData,omitempty"`
 	PostInstallScriptUri           string                                     `json:"postInstallScriptUri,omitempty"`
 
-	BoshIp						   string									  `json:"bosh_ip"`
+	BoshIp string `json:"bosh_ip"`
 }
 
 type VMMetadata map[string]interface{}
