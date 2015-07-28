@@ -90,7 +90,7 @@ var _ = Describe("SoftLayerCreator", func() {
 			})
 
 			It("returns a new SoftLayerVM with correct virtual guest ID and SoftLayerClient", func() {
-				vm, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
+				vm, err := creator.CreateNewVM(agentID, stemcell, cloudProps, networks, env)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(vm.ID()).To(Equal(1234567))
 			})
@@ -113,7 +113,7 @@ var _ = Describe("SoftLayerCreator", func() {
 						Datacenter: sldatatypes.Datacenter{Name: "fake-datacenter"},
 					}
 
-					_, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
+					_, err := creator.CreateNewVM(agentID, stemcell, cloudProps, networks, env)
 					Expect(err).To(HaveOccurred())
 				})
 
@@ -123,7 +123,7 @@ var _ = Describe("SoftLayerCreator", func() {
 						Datacenter: sldatatypes.Datacenter{Name: "fake-datacenter"},
 					}
 
-					_, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
+					_, err := creator.CreateNewVM(agentID, stemcell, cloudProps, networks, env)
 					Expect(err).To(HaveOccurred())
 				})
 
@@ -133,7 +133,7 @@ var _ = Describe("SoftLayerCreator", func() {
 						MaxMemory: 1024,
 					}
 
-					_, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
+					_, err := creator.CreateNewVM(agentID, stemcell, cloudProps, networks, env)
 					Expect(err).To(HaveOccurred())
 				})
 
@@ -147,7 +147,7 @@ var _ = Describe("SoftLayerCreator", func() {
 						EphemeralDiskSize: -100,
 					}
 
-					_, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
+					_, err := creator.CreateNewVM(agentID, stemcell, cloudProps, networks, env)
 					Expect(err).To(HaveOccurred())
 				})
 			})

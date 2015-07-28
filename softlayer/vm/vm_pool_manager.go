@@ -1,19 +1,19 @@
 package vm
 
 import (
-	"fmt"
 	sql "database/sql"
-	_ "github.com/mattn/go-sqlite3"
-	"path/filepath"
+	"fmt"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
+	_ "github.com/mattn/go-sqlite3"
+	"path/filepath"
 	"strings"
 )
 
 const (
 	//SQLITE_DB_FOLDER = "/var/vcap/store/director/"
-	SQLITE_DB_FOLDER = "/tmp/director/"
-	SQLITE_DB_FOLDER_CLI = "/usr/local/"
+	SQLITE_DB_FOLDER = "/Users/mattcui/Developer/go_workspace/src/github.com/maximilien/bosh-softlayer-cpi/out"
+	//SQLITE_DB_FOLDER_CLI = "/usr/local/"
 	SQLITE_DB_FILE = "vm_pool.sqlite"
 )
 
@@ -22,28 +22,27 @@ var (
 )
 
 type VMProperties struct {
-	id int
-	name string
-	in_use string
+	id       int
+	name     string
+	in_use   string
 	image_id string
 	agent_id string
 }
 
 type VMInfoDB struct {
 	vmProperties VMProperties
-	dbConn *sql.DB
-	logger boshlog.Logger
+	dbConn       *sql.DB
+	logger       boshlog.Logger
 }
 
-
 func NewVMInfoDB(id int, name string, in_use string, image_id string, agent_id string, logger boshlog.Logger) VMInfoDB {
-	dbConn, _:= openDB()
+	dbConn, _ := openDB()
 
 	vmProperties := VMProperties{id, name, in_use, image_id, agent_id}
 	return VMInfoDB{
 		vmProperties: vmProperties,
-	    dbConn: dbConn,
-		logger: logger,
+		dbConn:       dbConn,
+		logger:       logger,
 	}
 }
 
@@ -57,7 +56,7 @@ func openDB() (*sql.DB, error) {
 	return db, nil
 }
 
-func (vmInfoDB *VMInfoDB) CloseDB() (error) {
+func (vmInfoDB *VMInfoDB) CloseDB() error {
 	err := vmInfoDB.dbConn.Close()
 	if err != nil {
 		return bosherr.WrapError(err, "Failed to close VM Pool DB connection")
@@ -78,7 +77,7 @@ func InitVMPoolDB() error {
 										  timestamp timestamp)`
 	err = exec(db, sqlStmt)
 	if err != nil {
-		return bosherr.WrapError(err, "Failed to execute sql statement: " + sqlStmt)
+		return bosherr.WrapError(err, "Failed to execute sql statement: "+sqlStmt)
 	}
 	return nil
 }
@@ -92,14 +91,14 @@ func exec(db *sql.DB, sqlStmt string) error {
 
 	_, err = tx.Exec(sqlStmt)
 	if err != nil {
-		return bosherr.WrapError(err, "Failed to execute sql statement: " + sqlStmt)
+		return bosherr.WrapError(err, "Failed to execute sql statement: "+sqlStmt)
 	}
 
 	tx.Commit()
 	return nil
 }
 
-func (vmInfoDB *VMInfoDB) QueryVMInfobyAgentID() (error) {
+func (vmInfoDB *VMInfoDB) QueryVMInfobyAgentID() error {
 
 	//defer vmInfoDB.dbConn.Close()
 
@@ -123,7 +122,7 @@ func (vmInfoDB *VMInfoDB) QueryVMInfobyAgentID() (error) {
 	return nil
 }
 
-func (vmInfoDB *VMInfoDB) QueryVMInfobyID() (error) {
+func (vmInfoDB *VMInfoDB) QueryVMInfobyID() error {
 
 	//defer vmInfoDB.dbConn.Close()
 
@@ -241,5 +240,3 @@ func (vmInfoDB *VMInfoDB) UpdateVMInfoByID() error {
 		return nil
 	}
 }*/
-
-

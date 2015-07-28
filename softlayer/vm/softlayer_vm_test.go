@@ -59,13 +59,13 @@ var _ = Describe("SoftLayerVM", func() {
 
 			It("deletes the VM successfully", func() {
 				vm = NewSoftLayerVM(1234567, softLayerClient, sshClient, agentEnvService, logger, TIMEOUT_TRANSACTIONS_DELETE_VM)
-				err := vm.Delete()
+				err := vm.DeleteVM()
 				Expect(err).ToNot(HaveOccurred())
 			})
 
 			It("postCheckActiveTransactionsForDeleteVM time out", func() {
 				vm = NewSoftLayerVM(1234567, softLayerClient, sshClient, agentEnvService, logger, 5*time.Second)
-				err := vm.Delete()
+				err := vm.DeleteVM()
 				Expect(err).To(HaveOccurred())
 			})
 		})
@@ -86,7 +86,7 @@ var _ = Describe("SoftLayerVM", func() {
 			})
 
 			It("fails deleting the VM", func() {
-				err := vm.Delete()
+				err := vm.DeleteVM()
 				Expect(err).To(HaveOccurred())
 			})
 		})

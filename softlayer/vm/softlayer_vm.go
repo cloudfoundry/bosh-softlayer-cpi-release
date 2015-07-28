@@ -27,6 +27,8 @@ const (
 	ROOT_USER_NAME                 = "root"
 	deleteVMLogTag                 = "DeleteVM"
 	TIMEOUT_TRANSACTIONS_DELETE_VM = 10 * time.Minute
+	TIMEOUT_TRANSACTIONS_CREATE_VM = 10 * time.Minute
+	TIMEOUT_TRANSACTIONS_OSRELOAD_VM = 24 * time.Hour
 )
 
 type SoftLayerVM struct {
@@ -74,7 +76,7 @@ func (vm SoftLayerVM) Delete() error {
 
 	err = (&vmInfoDB).QueryVMInfobyID()
 	if err != nil {
-		return bosherr.WrapError(err, "Failed to query VM info by given ID " + strconv.Itoa(vm.id))
+		return bosherr.WrapError(err, fmt.Sprintf("Failed to query VM info by given ID %d", vm.id))
 	}
 	vm.logger.Info(softLayerCreatorLogTag, fmt.Sprintf("vmInfoDB.vmProperties.id is %d", (&vmInfoDB).vmProperties.id))
 
@@ -83,14 +85,17 @@ func (vm SoftLayerVM) Delete() error {
 		(&vmInfoDB).vmProperties.in_use = "f"
 		err = vmInfoDB.UpdateVMInfoByID()
 		if err != nil {
-			return bosherr.WrapError(err, "Failed to query VM info by given ID " + strconv.Itoa(vm.id))
+			return bosherr.WrapError(err, fmt.Sprintf("Failed to query VM info by given ID %d", vm.id))
 		} else {
 			return nil
 		}
 	}
-
+	vm.logger.Info(softLayerCreatorLogTag, "Start deleting the real VM")
 	return nil
+	return vm.DeleteVM()
+}
 
+func (vm SoftLayerVM) DeleteVM() error {
 	virtualGuestService, err := vm.softLayerClient.GetSoftLayer_Virtual_Guest_Service()
 	if err != nil {
 		return bosherr.WrapError(err, "Creating SoftLayer VirtualGuestService from client")
@@ -137,14 +142,7 @@ func (vm SoftLayerVM) Reboot() error {
 	return nil
 }
 
-
-func (vm *SoftLayerVM) ReloadOS(stemcell bslcstem.Stemcell) (error) {
-
-/*	os_Reload_Config := sldatatypes.OS_Reload_Config{
-		sldatatypes.Image_Template_Config{
-			ImageTemplateId: strconv.Itoa(stemcell.ID()),
-		},
-	}*/
+func (vm *SoftLayerVM) ReloadOS(stemcell bslcstem.Stemcell) error {
 
 	reload_OS_Reload_Config := sldatatypes.Image_Template_Config{
 		ImageTemplateId: strconv.Itoa(stemcell.ID()),
@@ -160,6 +158,12 @@ func (vm *SoftLayerVM) ReloadOS(stemcell bslcstem.Stemcell) (error) {
 	if err != nil {
 		return bosherr.WrapError(err, "Reloading OS on the specified VirtualGuest from SoftLayer client")
 	}
+
+	err = bslcommon.WaitForVirtualGuest(vm.softLayerClient, vm.ID(), "RUNNING", vm.timeoutForActiveTransactions, bslcommon.POLLING_INTERVAL)
+	if err != nil {
+		return bosherr.WrapError(err, fmt.Sprintf("PowerOn failed with VirtualGuest id `%d`", vm.ID()))
+	}
+
 	return nil
 }
 
