@@ -106,7 +106,6 @@ var _ = Describe("BOSH Director Level Integration for delete_vm", func() {
 
 			err = json.Unmarshal(outputBytes, &output)
 			Expect(err).ToNot(HaveOccurred())
-			println("")
 			Expect(output["error"]).To(BeNil())
 		})
 
