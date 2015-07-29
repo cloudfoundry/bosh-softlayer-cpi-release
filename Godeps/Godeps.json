@@ -35,29 +35,33 @@
 			"Rev": "6c266c2d546fc0dfec0f3c2b0728f87b06fcd25e"
 		},
 		{
+			"ImportPath": "github.com/kr/fs",
+			"Rev": "2788f0dbd16903de03cb8186e5c7d97b69ad387b"
+		},
+		{
 			"ImportPath": "github.com/maximilien/softlayer-go/client",
-			"Comment": "v0.2.0-128-g5c4d425",
-			"Rev": "5c4d425f9811b18e180cc3e2e5bc121e27f395bb"
+			"Comment": "v0.2.0-125-g409a67a",
+			"Rev": "409a67ace35b811aba42b34ae9d2a8f82916d760"
 		},
 		{
 			"ImportPath": "github.com/maximilien/softlayer-go/data_types",
-			"Comment": "v0.2.0-128-g5c4d425",
-			"Rev": "5c4d425f9811b18e180cc3e2e5bc121e27f395bb"
+			"Comment": "v0.2.0-125-g409a67a",
+			"Rev": "409a67ace35b811aba42b34ae9d2a8f82916d760"
 		},
 		{
 			"ImportPath": "github.com/maximilien/softlayer-go/services",
-			"Comment": "v0.2.0-128-g5c4d425",
-			"Rev": "5c4d425f9811b18e180cc3e2e5bc121e27f395bb"
+			"Comment": "v0.2.0-125-g409a67a",
+			"Rev": "409a67ace35b811aba42b34ae9d2a8f82916d760"
 		},
 		{
 			"ImportPath": "github.com/maximilien/softlayer-go/softlayer",
-			"Comment": "v0.2.0-128-g5c4d425",
-			"Rev": "5c4d425f9811b18e180cc3e2e5bc121e27f395bb"
+			"Comment": "v0.2.0-125-g409a67a",
+			"Rev": "409a67ace35b811aba42b34ae9d2a8f82916d760"
 		},
 		{
 			"ImportPath": "github.com/maximilien/softlayer-go/test_helpers",
-			"Comment": "v0.2.0-128-g5c4d425",
-			"Rev": "5c4d425f9811b18e180cc3e2e5bc121e27f395bb"
+			"Comment": "v0.2.0-125-g409a67a",
+			"Rev": "409a67ace35b811aba42b34ae9d2a8f82916d760"
 		},
 		{
 			"ImportPath": "github.com/onsi/ginkgo",
@@ -68,6 +72,14 @@
 			"ImportPath": "github.com/onsi/gomega",
 			"Comment": "v1.0-50-gd6c945f",
 			"Rev": "d6c945f9fdbf6cad99e85b0feff591caa268e0db"
+		},
+		{
+			"ImportPath": "github.com/pkg/sftp",
+			"Rev": "d2d0a435b798a9af27f5fc597cacc19d275df702"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/ssh",
+			"Rev": "56474dfd625f18739b46f075b138fd0133717491"
 		}
 	]
 }
