@@ -80,10 +80,6 @@ var _ = Describe("BOSH Director Level Integration for create_vm", func() {
 			jsonPayload, err := testhelperscpi.GenerateCpiJsonPayload("create_vm", rootTemplatePath, replacementMap)
 			Expect(err).ToNot(HaveOccurred())
 
-			//The outputBytes always be a JSON string.
-			//if success, should be similar {"result":vmId,"error":null,"log":""}
-			//if fail, should be similar {"result":null,"error":"error message","log":""}
-
 			outputBytes, err := testhelperscpi.RunCpi(rootTemplatePath, tmpConfigPath, jsonPayload)
 			log.Println("outputBytes=" + string(outputBytes))
 			Expect(err).ToNot(HaveOccurred())
