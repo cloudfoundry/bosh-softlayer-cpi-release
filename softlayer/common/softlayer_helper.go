@@ -99,7 +99,7 @@ func WaitForVirtualGuestToHaveNoRunningTransactions(softLayerClient sl.Client, v
 	return bosherr.Errorf("Waiting for virtual guest with ID '%d' to have no active transactions", virtualGuestId)
 }
 
-func WaitForVirtualGuest(softLayerClient sl.Client, virtualGuestId int, targetState string, timeout, pollingInterval time.Duration) error {
+func  WaitForVirtualGuest(softLayerClient sl.Client, virtualGuestId int, targetState string, timeout, pollingInterval time.Duration) error {
 	virtualGuestService, err := softLayerClient.GetSoftLayer_Virtual_Guest_Service()
 	if err != nil {
 		return bosherr.WrapError(err, "Creating VirtualGuestService from SoftLayer client")

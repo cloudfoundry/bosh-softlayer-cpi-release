@@ -17,17 +17,20 @@ import (
 	bslcdisk "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk"
 	bslcstem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell"
 
+	common "github.com/maximilien/bosh-softlayer-cpi/common"
 	util "github.com/maximilien/bosh-softlayer-cpi/util"
 	datatypes "github.com/maximilien/softlayer-go/data_types"
 	sldatatypes "github.com/maximilien/softlayer-go/data_types"
 )
 
 const (
-	softLayerVMtag                 = "SoftLayerVM"
-	ROOT_USER_NAME                 = "root"
-	deleteVMLogTag                 = "DeleteVM"
-	TIMEOUT_TRANSACTIONS_DELETE_VM = 10 * time.Minute
-	TIMEOUT_TRANSACTIONS_CREATE_VM = 10 * time.Minute
+	softLayerVMtag   = "SoftLayerVM"
+	ROOT_USER_NAME   = "root"
+	deleteVMLogTag   = "DeleteVM"
+	osReloadVMLogTag = "OSReload"
+
+	TIMEOUT_TRANSACTIONS_DELETE_VM   = 60 * time.Minute
+	TIMEOUT_TRANSACTIONS_CREATE_VM   = 100 * time.Minute
 	TIMEOUT_TRANSACTIONS_OSRELOAD_VM = 24 * time.Hour
 )
 
@@ -65,6 +68,10 @@ func NewSoftLayerVM(id int, softLayerClient sl.Client, sshClient util.SshClient,
 func (vm SoftLayerVM) ID() int { return vm.id }
 
 func (vm SoftLayerVM) Delete() error {
+
+	if strings.ToUpper(common.GetOSEnvVariable("OS_RELOAD_ENABLED", "TRUE")) == "FALSE" {
+		return vm.DeleteVM()
+	}
 
 	err := InitVMPoolDB()
 	if err != nil {
@@ -118,7 +125,7 @@ func (vm SoftLayerVM) DeleteVM() error {
 
 	err = vm.postCheckActiveTransactionsForDeleteVM(vm.softLayerClient, vmCID, vm.timeoutForActiveTransactions, bslcommon.POLLING_INTERVAL)
 	if err != nil {
-		return bosherr.WrapError(err, fmt.Sprintf("Waiting for VirtualGuest `%d` to have no pending transactions after deleting vm", vmCID))
+		return err
 	}
 
 	return nil
@@ -142,26 +149,27 @@ func (vm SoftLayerVM) Reboot() error {
 	return nil
 }
 
-func (vm *SoftLayerVM) ReloadOS(stemcell bslcstem.Stemcell) error {
+func (vm SoftLayerVM) ReloadOS(stemcell bslcstem.Stemcell) error {
 
 	reload_OS_Reload_Config := sldatatypes.Image_Template_Config{
 		ImageTemplateId: strconv.Itoa(stemcell.ID()),
 	}
-
-	fmt.Sprintln("stemcell ID: %s", stemcell.ID())
 
 	virtualGuestService, err := vm.softLayerClient.GetSoftLayer_Virtual_Guest_Service()
 	if err != nil {
 		return bosherr.WrapError(err, "Creating VirtualGuestService from SoftLayer client")
 	}
 	err = virtualGuestService.ReloadOperatingSystem(vm.ID(), reload_OS_Reload_Config)
+
 	if err != nil {
 		return bosherr.WrapError(err, "Reloading OS on the specified VirtualGuest from SoftLayer client")
 	}
 
-	err = bslcommon.WaitForVirtualGuest(vm.softLayerClient, vm.ID(), "RUNNING", vm.timeoutForActiveTransactions, bslcommon.POLLING_INTERVAL)
+	time.Sleep(time.Minute * 1)
+
+	err = vm.postCheckActiveTransactionsForOSReload(vm.softLayerClient, vm.timeoutForActiveTransactions, bslcommon.POLLING_INTERVAL)
 	if err != nil {
-		return bosherr.WrapError(err, fmt.Sprintf("PowerOn failed with VirtualGuest id `%d`", vm.ID()))
+		return err
 	}
 
 	return nil
@@ -424,6 +432,45 @@ func (vm SoftLayerVM) getRootPassword(virtualGuest datatypes.SoftLayer_Virtual_G
 	return ""
 }
 
+func (vm SoftLayerVM) postCheckActiveTransactionsForOSReload(softLayerClient sl.Client, timeout, pollingInterval time.Duration) error {
+
+	vm.logger.Info(osReloadVMLogTag, ">> Enter postCheckActiveTransactionsForOSReload")
+
+	virtualGuestService, err := softLayerClient.GetSoftLayer_Virtual_Guest_Service()
+	if err != nil {
+		return bosherr.WrapError(err, "Creating VirtualGuestService from SoftLayer client")
+	}
+
+	totalTime := time.Duration(0)
+	for totalTime < timeout {
+		activeTransactions, err := virtualGuestService.GetActiveTransactions(vm.ID())
+		if err != nil {
+			return bosherr.WrapError(err, "Getting active transactions from SoftLayer client")
+		}
+
+		if len(activeTransactions) > 0 {
+			vm.logger.Info(osReloadVMLogTag, "OS Reload transaction started")
+			break
+		}
+
+		totalTime += pollingInterval
+		time.Sleep(pollingInterval)
+	}
+
+	if totalTime >= timeout {
+		return errors.New(fmt.Sprintf("Waiting for OS Reload transaction to start TIME OUT!"))
+	}
+
+	err = bslcommon.WaitForVirtualGuest(vm.softLayerClient, vm.ID(), "RUNNING", bslcommon.TIMEOUT, bslcommon.POLLING_INTERVAL)
+	if err != nil {
+		return bosherr.WrapError(err, fmt.Sprintf("PowerOn failed with VirtualGuest id %d", vm.ID()))
+	}
+
+	vm.logger.Info(osReloadVMLogTag, fmt.Sprintf("The virtual guest %d is powered on", vm.ID()))
+
+	return nil
+}
+
 func (vm SoftLayerVM) postCheckActiveTransactionsForDeleteVM(softLayerClient sl.Client, virtualGuestId int, timeout, pollingInterval time.Duration) error {
 	virtualGuestService, err := softLayerClient.GetSoftLayer_Virtual_Guest_Service()
 	if err != nil {
@@ -447,8 +494,7 @@ func (vm SoftLayerVM) postCheckActiveTransactionsForDeleteVM(softLayerClient sl.
 	}
 
 	if totalTime >= timeout {
-		err := errors.New(fmt.Sprintf("Waiting for DeleteVM transaction to start TIME OUT!"))
-		return err
+		return errors.New(fmt.Sprintf("Waiting for DeleteVM transaction to start TIME OUT!"))
 	}
 
 	totalTime = time.Duration(0)
@@ -480,9 +526,23 @@ func (vm SoftLayerVM) postCheckActiveTransactionsForDeleteVM(softLayerClient sl.
 	}
 
 	if totalTime >= timeout {
-		err := errors.New(fmt.Sprintf("After deleting a vm, waiting for active transactions to complete TIME OUT!"))
-		return err
+		return errors.New(fmt.Sprintf("After deleting a vm, waiting for active transactions to complete TIME OUT!"))
 	}
 
 	return nil
+}
+
+func (vm SoftLayerVM) execCommand(virtualGuest datatypes.SoftLayer_Virtual_Guest, command string) (string, error) {
+	result, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryIpAddress, command)
+	return result, err
+}
+
+func (vm SoftLayerVM) uploadFile(virtualGuest datatypes.SoftLayer_Virtual_Guest, srcFile string, destFile string) error {
+	err := vm.sshClient.UploadFile(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryIpAddress, srcFile, destFile)
+	return err
+}
+
+func (vm SoftLayerVM) downloadFile(virtualGuest datatypes.SoftLayer_Virtual_Guest, srcFile string, destFile string) error {
+	err := vm.sshClient.DownloadFile(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryIpAddress, srcFile, destFile)
+	return err
 }

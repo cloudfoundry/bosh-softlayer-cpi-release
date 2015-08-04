@@ -3,14 +3,13 @@ package common
 import (
 	"os"
 	"strconv"
-	"strings"
 	"time"
 )
 
-func GetOSEnvVariableToUpper(varName string, defaultValue string) string {
-	result := strings.ToUpper(os.Getenv("PATH"))
+func GetOSEnvVariable(varName string, defaultValue string) string {
+	result := os.Getenv(varName)
 	if result == "" {
-		result = strings.ToUpper(defaultValue)
+		result = defaultValue
 	}
 	return result
 }

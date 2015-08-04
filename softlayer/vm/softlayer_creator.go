@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
@@ -17,7 +18,6 @@ import (
 	bslcstem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell"
 
 	util "github.com/maximilien/bosh-softlayer-cpi/util"
-	"strings"
 )
 
 const softLayerCreatorLogTag = "SoftLayerCreator"
@@ -130,7 +130,7 @@ func (c SoftLayerCreator) CreateNewVM(agentID string, stemcell bslcstem.Stemcell
 
 func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
 
-	if common.GetOSEnvVariableToUpper("OS_RELOAD_ENABLED", "TRUE") == "FALSE" {
+	if strings.ToUpper(common.GetOSEnvVariable("OS_RELOAD_ENABLED", "TRUE")) == "FALSE" {
 		return c.CreateNewVM(agentID, stemcell, cloudProps, networks, env)
 	}
 
@@ -154,18 +154,27 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 
 	if vmInfoDB.vmProperties.id != 0 {
 		c.logger.Info(softLayerCreatorLogTag, fmt.Sprintf("OS reload on the server id %d with stemcell %d", vmInfoDB.vmProperties.id, stemcell.ID()))
+
 		agentEnvService := c.agentEnvServiceFactory.New(vmInfoDB.vmProperties.id)
 		vm := NewSoftLayerVM(vmInfoDB.vmProperties.id, c.softLayerClient, util.GetSshClient(), agentEnvService, c.logger, TIMEOUT_TRANSACTIONS_OSRELOAD_VM)
-		(&vm).ReloadOS(stemcell)
+
+		err = bslcommon.WaitForVirtualGuestToHaveNoRunningTransactions(vm.softLayerClient, vm.ID(), vm.timeoutForActiveTransactions, bslcommon.POLLING_INTERVAL)
+		if err != nil {
+			return SoftLayerVM{}, bosherr.WrapError(err, fmt.Sprintf("Waiting for VirtualGuest %d to have no pending transactions before OS reload", vm.ID()))
+		}
+
+		vm.logger.Info(softLayerCreatorLogTag, fmt.Sprintf("No transaction is running on this VM %d", vmInfoDB.vmProperties.id))
+
+		vm.ReloadOS(stemcell)
 		if err != nil {
 			return SoftLayerVM{}, bosherr.WrapError(err, "Failed to reload OS")
 		}
 
-		c.logger.Info(softLayerCreatorLogTag, fmt.Sprintf("Change to in use for the VM with id %d in VM pool", vmInfoDB.vmProperties.id))
+		c.logger.Info(softLayerCreatorLogTag, fmt.Sprintf("Updated in_use flag to 't' for the VM %d in VM pool", vmInfoDB.vmProperties.id))
 		(&vmInfoDB).vmProperties.in_use = "t"
 		err = vmInfoDB.UpdateVMInfoByID()
 		if err != nil {
-			return vm, bosherr.WrapError(err, fmt.Sprintf("Failed to query VM info by given ID %d", vm.id))
+			return vm, bosherr.WrapError(err, fmt.Sprintf("Failed to query VM info by given ID %d", vm.ID()))
 		} else {
 			return vm, nil
 		}
