@@ -13,9 +13,8 @@ import (
 )
 
 var (
-	//SQLITE_DB_FOLDER = common.GetOSEnvVariable("SQLITE_DB_FOLDER", "/var/vcap/store/director/")
+	SQLITE_DB_FOLDER = common.GetOSEnvVariable("SQLITE_DB_FOLDER", "/var/vcap/store/director/")
 	SQLITE_DB_FILE      = common.GetOSEnvVariable("SQLITE_DB_FILE", "vm_pool.sqlite")
-	SQLITE_DB_FOLDER    = "/Users/mattcui/Developer/go_workspace/src/github.com/maximilien/bosh-softlayer-cpi/out"
 	SQLITE_DB_FILE_PATH = filepath.Join(SQLITE_DB_FOLDER, SQLITE_DB_FILE)
 )
 
@@ -134,27 +133,6 @@ func (vmInfoDB *VMInfoDB) QueryVMInfobyID() error {
 	return nil
 }
 
-/*func (vmInfoDB *VMInfo) queryVMInfobyNamePrefix(db *sql.DB) error {
-	tx, err := vmInfoDB.dbConn.Begin()
-	if err != nil {
-		return bosherr.WrapError(err, "Failed to begin DB transcation")
-	}
-
-	sqlStmt, err := tx.Prepare("select id, image_id from vms where agent_id=? and in_use='f'")
-	if err != nil {
-		return bosherr.WrapError(err, "Failed to prepare sql statement")
-	}
-	defer sqlStmt.Close()
-
-	err = sqlStmt.QueryRow(vmInfoDB.name).Scan(&vmInfoDB.id, &vmInfoDB.image_id)
-	if err != nil {
-		return bosherr.WrapError(err, "Failed to query VM info from vms table")
-	}
-	tx.Commit()
-
-	return nil
-}*/
-
 func (vmInfoDB *VMInfoDB) DeleteVMFromVMDB() error {
 	sqlStmt := fmt.Sprintf("delete from vms where id=%d", vmInfoDB.vmProperties.id)
 	err := exec(vmInfoDB.dbConn, sqlStmt)
@@ -207,13 +185,3 @@ func (vmInfoDB *VMInfoDB) UpdateVMInfoByID() error {
 	return nil
 }
 
-/*func (vmInfoDB *VMInfoDB) ReleaseVMToPool(id int, agent_id string) error {
-
-	vmInfo := &VMInfo{id, "", "f", "", agent_id}
-	err := vmInfoDB.updateVMInfo()
-	if err != nil {
-		return bosherr.WrapError(err, "Failed to release VM to the pool")
-	} else {
-		return nil
-	}
-}*/
