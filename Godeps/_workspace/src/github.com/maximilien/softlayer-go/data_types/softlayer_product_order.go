@@ -20,8 +20,8 @@ type SoftLayer_Product_Order struct {
 }
 
 type OsFormatType struct {
-	Id      int    `json:"id"`
-	KeyName string `json:"keyName"`
+	Id      int    `json:"id,omitempty"`
+	KeyName string `json:"keyName,omitempty"`
 }
 
 type Property struct {
