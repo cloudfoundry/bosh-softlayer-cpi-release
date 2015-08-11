@@ -23,13 +23,6 @@ var _ = Describe("DeleteVM", func() {
 	})
 
 	Describe("Run", func() {
-		It("tries to find vm with given vm cid", func() {
-			_, err := action.Run(1234)
-			Expect(err).ToNot(HaveOccurred())
-
-			Expect(vmFinder.FindID).To(Equal(1234))
-		})
-
 		Context("when vm is found with given vm cid", func() {
 			var (
 				vm *fakevm.FakeVM
@@ -62,7 +55,7 @@ var _ = Describe("DeleteVM", func() {
 				vmFinder.FindFound = false
 
 				_, err := action.Run(1234)
-				Expect(err).ToNot(HaveOccurred())
+				Expect(err).To(HaveOccurred())
 			})
 		})
 
