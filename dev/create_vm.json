@@ -1,11 +1,11 @@
 {
-  	"method": "create_vm",
-  	"arguments": [
+	"method": "create_vm",
+	"arguments": [
 		"45632666-9fb1-422a-af35-2ab6102c5c1b",
-    	"200150", {
-  			"startCpus": 1,
+		"200150", {
+			"startCpus": 1,
 			"maxMemory": 1024,
-  			"datacenter": {
+			"datacenter": {
 				"name": "ams01"
 			},
 			"sshKeys": [{
