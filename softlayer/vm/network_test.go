@@ -53,7 +53,7 @@ var _ = Describe("Network", func() {
 			Expect(fakeNetwork).To(Equal(expectedNetwork))
 		})
 
-		It("return nil in empty networks", func() {
+		It("return empty network in empty networks", func() {
 			fakeNetwork := emptyNetworks.First()
 			Expect(fakeNetwork).To(Equal(Network{}))
 		})
