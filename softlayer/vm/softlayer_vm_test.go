@@ -18,6 +18,7 @@ import (
 	bslcvm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
 
 	fakedisk "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk/fakes"
+	fakestemcell "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell/fakes"
 	fakevm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm/fakes"
 	fakesutil "github.com/maximilien/bosh-softlayer-cpi/util/fakes"
 	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
@@ -30,6 +31,7 @@ var _ = Describe("SoftLayerVM", func() {
 		agentEnvService *fakevm.FakeAgentEnvService
 		logger          boshlog.Logger
 		vm              SoftLayerVM
+		stemcell        *fakestemcell.FakeStemcell
 	)
 
 	BeforeEach(func() {
@@ -114,6 +116,27 @@ var _ = Describe("SoftLayerVM", func() {
 			It("fails rebooting the VM", func() {
 				err := vm.Reboot()
 				Expect(err).To(HaveOccurred())
+			})
+		})
+	})
+
+	Describe("ReloadOS", func() {
+		Context("valid VM ID is used", func() {
+			BeforeEach(func() {
+				fileNames := []string{
+					"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
+					"SoftLayer_Virtual_Guest_Service_reloadOS.json",
+					"SoftLayer_Virtual_Guest_Service_getActiveTransactions_NotNone.json",
+					"SoftLayer_Virtual_Guest_Service_getPowerState.json",
+				}
+				testhelpers.SetTestFixturesForFakeSoftLayerClient(softLayerClient, fileNames)
+				vm = NewSoftLayerVM(1234567, softLayerClient, sshClient, agentEnvService, logger, TIMEOUT_TRANSACTIONS_CREATE_VM)
+				stemcell = fakestemcell.NewFakeStemcell(123456, "5b7bc66a-72c6-447a-94a1-967803fcd76b", "non-dea")
+			})
+
+			It("os reload on the VM successfully", func() {
+				err := vm.ReloadOS(stemcell)
+				Expect(err).ToNot(HaveOccurred())
 			})
 		})
 	})

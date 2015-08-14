@@ -1,55 +1,52 @@
-package vm
+package vm_pool
 
 import (
-	sql "database/sql"
 	"fmt"
-	_ "github.com/mattn/go-sqlite3"
+	"os"
 	"path/filepath"
 	"strings"
 
+	sql "database/sql"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
+	_ "github.com/mattn/go-sqlite3"
 	common "github.com/maximilien/bosh-softlayer-cpi/common"
 )
 
 var (
-	SQLITE_DB_FOLDER = common.GetOSEnvVariable("SQLITE_DB_FOLDER", "/var/vcap/store/director/")
+	SQLITE_DB_FOLDER    = common.GetOSEnvVariable("SQLITE_DB_FOLDER", "/var/vcap/store/director/")
 	SQLITE_DB_FILE      = common.GetOSEnvVariable("SQLITE_DB_FILE", "vm_pool.sqlite")
 	SQLITE_DB_FILE_PATH = filepath.Join(SQLITE_DB_FOLDER, SQLITE_DB_FILE)
 )
 
-type VMProperties struct {
-	id       int
-	name     string
-	in_use   string
-	image_id string
-	agent_id string
+type vmProperties struct {
+	Id      int
+	Name    string
+	InUse   string
+	ImageId string
+	AgentId string
 }
 
 type VMInfoDB struct {
-	vmProperties VMProperties
-	dbConn       *sql.DB
-	logger       boshlog.Logger
+	dbConn *sql.DB
+	logger boshlog.Logger
+
+	VmProperties vmProperties
 }
 
 func NewVMInfoDB(id int, name string, in_use string, image_id string, agent_id string, logger boshlog.Logger) VMInfoDB {
 	dbConn, _ := openDB()
 
-	vmProperties := VMProperties{id, name, in_use, image_id, agent_id}
 	return VMInfoDB{
-		vmProperties: vmProperties,
-		dbConn:       dbConn,
-		logger:       logger,
+		VmProperties: vmProperties{
+			Id:      id,
+			Name:    name,
+			InUse:   in_use,
+			ImageId: image_id,
+			AgentId: agent_id},
+		dbConn: dbConn,
+		logger: logger,
 	}
-}
-
-func openDB() (*sql.DB, error) {
-	db, err := sql.Open("sqlite3", SQLITE_DB_FILE_PATH)
-	if err != nil {
-		return nil, bosherr.WrapError(err, "Failed to open VM Pool DB")
-	}
-
-	return db, nil
 }
 
 func (vmInfoDB *VMInfoDB) CloseDB() error {
@@ -61,6 +58,11 @@ func (vmInfoDB *VMInfoDB) CloseDB() error {
 }
 
 func InitVMPoolDB() error {
+	err := os.MkdirAll(SQLITE_DB_FOLDER, 0777)
+	if err != nil {
+		return bosherr.WrapError(err, "Failed to make director: "+SQLITE_DB_FOLDER)
+	}
+
 	db, err := openDB()
 	defer db.Close()
 
@@ -103,7 +105,7 @@ func (vmInfoDB *VMInfoDB) QueryVMInfobyAgentID() error {
 	}
 	defer sqlStmt.Close()
 
-	err = sqlStmt.QueryRow(vmInfoDB.vmProperties.agent_id).Scan(&vmInfoDB.vmProperties.id, &vmInfoDB.vmProperties.image_id, &vmInfoDB.vmProperties.agent_id)
+	err = sqlStmt.QueryRow(vmInfoDB.VmProperties.AgentId).Scan(vmInfoDB.VmProperties.Id, vmInfoDB.VmProperties.ImageId, vmInfoDB.VmProperties.AgentId)
 	if err != nil && !strings.Contains(err.Error(), "no rows") {
 		return bosherr.WrapError(err, "Failed to query VM info from vms table")
 	}
@@ -124,7 +126,7 @@ func (vmInfoDB *VMInfoDB) QueryVMInfobyID() error {
 	}
 	defer sqlStmt.Close()
 
-	err = sqlStmt.QueryRow(vmInfoDB.vmProperties.id).Scan(&vmInfoDB.vmProperties.id, &vmInfoDB.vmProperties.in_use, &vmInfoDB.vmProperties.image_id, &vmInfoDB.vmProperties.agent_id)
+	err = sqlStmt.QueryRow(vmInfoDB.VmProperties.Id).Scan(vmInfoDB.VmProperties.Id, vmInfoDB.VmProperties.InUse, vmInfoDB.VmProperties.ImageId, vmInfoDB.VmProperties.AgentId)
 	if err != nil && !strings.Contains(err.Error(), "no rows") {
 		return bosherr.WrapError(err, "Failed to query VM info from vms table")
 	}
@@ -134,7 +136,7 @@ func (vmInfoDB *VMInfoDB) QueryVMInfobyID() error {
 }
 
 func (vmInfoDB *VMInfoDB) DeleteVMFromVMDB() error {
-	sqlStmt := fmt.Sprintf("delete from vms where id=%d", vmInfoDB.vmProperties.id)
+	sqlStmt := fmt.Sprintf("delete from vms where id=%d", vmInfoDB.VmProperties.Id)
 	err := exec(vmInfoDB.dbConn, sqlStmt)
 	if err != nil {
 		return bosherr.WrapError(nil, "Failed to delete VM info from vms table")
@@ -144,7 +146,7 @@ func (vmInfoDB *VMInfoDB) DeleteVMFromVMDB() error {
 }
 
 func (vmInfoDB *VMInfoDB) InsertVMInfo() error {
-	sqlStmt := fmt.Sprintf("insert into vms (id, name, in_use, image_id, agent_id, timestamp) values (%d, '%s', '%s', '%s', '%s', CURRENT_TIMESTAMP)", vmInfoDB.vmProperties.id, vmInfoDB.vmProperties.name, vmInfoDB.vmProperties.in_use, vmInfoDB.vmProperties.image_id, vmInfoDB.vmProperties.agent_id)
+	sqlStmt := fmt.Sprintf("insert into vms (id, name, in_use, image_id, agent_id, timestamp) values (%d, '%s', '%s', '%s', '%s', CURRENT_TIMESTAMP)", vmInfoDB.VmProperties.Id, vmInfoDB.VmProperties.Name, vmInfoDB.VmProperties.InUse, vmInfoDB.VmProperties.ImageId, vmInfoDB.VmProperties.AgentId)
 	err := exec(vmInfoDB.dbConn, sqlStmt)
 	if err != nil {
 		return bosherr.WrapError(err, "Failed to insert VM info into vms table")
@@ -159,22 +161,22 @@ func (vmInfoDB *VMInfoDB) UpdateVMInfoByID() error {
 		return bosherr.WrapError(err, "Failed to begin DB transcation")
 	}
 
-	if vmInfoDB.vmProperties.in_use == "f" || vmInfoDB.vmProperties.in_use == "t" {
-		sqlStmt := fmt.Sprintf("update vms set in_use='%s', timestamp=CURRENT_TIMESTAMP where id = %d", vmInfoDB.vmProperties.in_use, vmInfoDB.vmProperties.id)
+	if vmInfoDB.VmProperties.InUse == "f" || vmInfoDB.VmProperties.InUse == "t" {
+		sqlStmt := fmt.Sprintf("update vms set in_use='%s', timestamp=CURRENT_TIMESTAMP where id = %d", vmInfoDB.VmProperties.InUse, vmInfoDB.VmProperties.Id)
 		_, err = tx.Exec(sqlStmt)
 		if err != nil {
 			return bosherr.WrapError(err, "Failed to update in_use column in vms")
 		}
 	}
-	if vmInfoDB.vmProperties.image_id != "" {
-		sqlStmt := fmt.Sprintf("update vms set image_id='%s' where id = %d", vmInfoDB.vmProperties.image_id, vmInfoDB.vmProperties.id)
+	if vmInfoDB.VmProperties.ImageId != "" {
+		sqlStmt := fmt.Sprintf("update vms set image_id='%s' where id = %d", vmInfoDB.VmProperties.ImageId, vmInfoDB.VmProperties.Id)
 		_, err = tx.Exec(sqlStmt)
 		if err != nil {
 			return bosherr.WrapError(err, "Failed to update image_id column in vms")
 		}
 	}
-	if vmInfoDB.vmProperties.agent_id != "" {
-		sqlStmt := fmt.Sprintf("update vms set agent_id='%s' where id = %d", vmInfoDB.vmProperties.agent_id, vmInfoDB.vmProperties.id)
+	if vmInfoDB.VmProperties.AgentId != "" {
+		sqlStmt := fmt.Sprintf("update vms set agent_id='%s' where id = %d", vmInfoDB.VmProperties.AgentId, vmInfoDB.VmProperties.Id)
 		_, err = tx.Exec(sqlStmt)
 		if err != nil {
 			return bosherr.WrapError(err, "Failed to update agent_id column in vms")
@@ -185,3 +187,13 @@ func (vmInfoDB *VMInfoDB) UpdateVMInfoByID() error {
 	return nil
 }
 
+// Private methods
+
+func openDB() (*sql.DB, error) {
+	db, err := sql.Open("sqlite3", SQLITE_DB_FILE_PATH)
+	if err != nil {
+		return nil, bosherr.WrapError(err, "Failed to open VM Pool DB")
+	}
+
+	return db, nil
+}

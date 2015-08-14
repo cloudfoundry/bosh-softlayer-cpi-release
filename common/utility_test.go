@@ -9,7 +9,7 @@ import (
 
 var _ = Describe("Utility", func() {
 	var (
-		result bool
+		result string
 	)
 
 	Context("#GetOSEnvVariable", func() {

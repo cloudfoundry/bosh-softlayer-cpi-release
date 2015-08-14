@@ -3,6 +3,7 @@ package vm_test
 import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"os"
 
 	. "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
 
@@ -90,6 +91,14 @@ var _ = Describe("SoftLayerCreator", func() {
 			})
 
 			It("returns a new SoftLayerVM with correct virtual guest ID and SoftLayerClient", func() {
+				os.Setenv("OS_RELOAD_ENABLED", "FALSE")
+				vm, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(vm.ID()).To(Equal(1234567))
+			})
+
+			It("returns a new SoftLayerVM with correct virtual guest ID and SoftLayerClient", func() {
+				os.Setenv("OS_RELOAD_ENABLED", "FALSE")
 				vm, err := creator.CreateNewVM(agentID, stemcell, cloudProps, networks, env)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(vm.ID()).To(Equal(1234567))

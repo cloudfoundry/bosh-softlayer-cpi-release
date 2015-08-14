@@ -16,6 +16,7 @@ import (
 	common "github.com/maximilien/bosh-softlayer-cpi/common"
 	bslcommon "github.com/maximilien/bosh-softlayer-cpi/softlayer/common"
 	bslcstem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell"
+	bslcvmpool "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm/pool"
 
 	util "github.com/maximilien/bosh-softlayer-cpi/util"
 )
@@ -45,12 +46,13 @@ func NewSoftLayerCreator(softLayerClient sl.Client, agentEnvServiceFactory Agent
 
 func (c SoftLayerCreator) CreateNewVM(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
 
-	c.logger.Info(softLayerCreatorLogTag, fmt.Sprintln("Creating a new server with stemcell %d", stemcell.ID()))
+	c.logger.Info(softLayerCreatorLogTag, fmt.Sprintf("Creating a new server with stemcell %d", stemcell.ID()))
 
 	disks := DisksSpec{}
 	if cloudProps.EphemeralDiskSize > 0 {
 		disks = DisksSpec{Ephemeral: "/dev/xvdc"}
 	}
+
 	// To keep consistent with legacy softlayer CPI, making agent name with prefix "vm-"
 	agentEnv := NewAgentEnvForVM(agentID, fmt.Sprintf("vm-%s", agentID), networks, disks, env, c.agentOptions)
 	metadata, err := json.Marshal(agentEnv)
@@ -115,21 +117,20 @@ func (c SoftLayerCreator) CreateNewVM(agentID string, stemcell bslcstem.Stemcell
 	}
 
 	agentEnvService := c.agentEnvServiceFactory.New(virtualGuest.Id)
-
 	vm := NewSoftLayerVM(virtualGuest.Id, c.softLayerClient, util.GetSshClient(), agentEnvService, c.logger, TIMEOUT_TRANSACTIONS_CREATE_VM)
 
-	//Insert a record into VM pool table (sqlite DB) when creating a new VM
-	vmInfoDB := NewVMInfoDB(vm.id, virtualGuestTemplate.Hostname+"."+virtualGuestTemplate.Domain, "t", stemcell.Uuid(), agentID, c.logger)
-	err = (&vmInfoDB).InsertVMInfo()
-	if err != nil {
-		return SoftLayerVM{}, bosherr.WrapError(err, "Failed to insert the record into VM pool DB")
+	if strings.ToUpper(common.GetOSEnvVariable("OS_RELOAD_ENABLED", "TRUE")) == "TRUE" {
+		vmInfoDB := bslcvmpool.NewVMInfoDB(vm.id, virtualGuestTemplate.Hostname+"."+virtualGuestTemplate.Domain, "t", stemcell.Uuid(), agentID, c.logger)
+		err = vmInfoDB.InsertVMInfo()
+		if err != nil {
+			return SoftLayerVM{}, bosherr.WrapError(err, "Failed to insert the record into VM pool DB")
+		}
 	}
 
 	return vm, nil
 }
 
 func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
-
 	if strings.ToUpper(common.GetOSEnvVariable("OS_RELOAD_ENABLED", "TRUE")) == "FALSE" {
 		return c.CreateNewVM(agentID, stemcell, cloudProps, networks, env)
 	}
@@ -139,52 +140,41 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 		return vm, err
 	}
 
-	err := InitVMPoolDB()
+	err := bslcvmpool.InitVMPoolDB()
 	if err != nil {
 		return SoftLayerVM{}, bosherr.WrapError(err, "Failed to initialize VM pool DB")
 	}
 
-	vmInfoDB := NewVMInfoDB(0, "", "", "", agentID, c.logger)
+	vmInfoDB := bslcvmpool.NewVMInfoDB(0, "", "", "", agentID, c.logger)
 	defer vmInfoDB.CloseDB()
 
-	err = (&vmInfoDB).QueryVMInfobyAgentID()
+	err = vmInfoDB.QueryVMInfobyAgentID()
 	if err != nil {
 		return SoftLayerVM{}, bosherr.WrapError(err, "Failed to query VM info by given agent ID "+agentID)
 	}
 
-	if vmInfoDB.vmProperties.id != 0 {
-		c.logger.Info(softLayerCreatorLogTag, fmt.Sprintf("OS reload on the server id %d with stemcell %d", vmInfoDB.vmProperties.id, stemcell.ID()))
+	if vmInfoDB.VmProperties.Id != 0 {
+		c.logger.Info(softLayerCreatorLogTag, fmt.Sprintf("OS reload on the server id %d with stemcell %d", vmInfoDB.VmProperties.Id, stemcell.ID()))
 
-		agentEnvService := c.agentEnvServiceFactory.New(vmInfoDB.vmProperties.id)
-		vm := NewSoftLayerVM(vmInfoDB.vmProperties.id, c.softLayerClient, util.GetSshClient(), agentEnvService, c.logger, TIMEOUT_TRANSACTIONS_OSRELOAD_VM)
-
-		err = bslcommon.WaitForVirtualGuestToHaveNoRunningTransactions(vm.softLayerClient, vm.ID(), vm.timeoutForActiveTransactions, bslcommon.POLLING_INTERVAL)
-		if err != nil {
-			return SoftLayerVM{}, bosherr.WrapError(err, fmt.Sprintf("Waiting for VirtualGuest %d to have no pending transactions before OS reload", vm.ID()))
-		}
-
-		vm.logger.Info(softLayerCreatorLogTag, fmt.Sprintf("No transaction is running on this VM %d", vmInfoDB.vmProperties.id))
+		agentEnvService := c.agentEnvServiceFactory.New(vmInfoDB.VmProperties.Id)
+		vm := NewSoftLayerVM(vmInfoDB.VmProperties.Id, c.softLayerClient, util.GetSshClient(), agentEnvService, c.logger, TIMEOUT_TRANSACTIONS_OSRELOAD_VM)
 
 		vm.ReloadOS(stemcell)
 		if err != nil {
 			return SoftLayerVM{}, bosherr.WrapError(err, "Failed to reload OS")
 		}
 
-		c.logger.Info(softLayerCreatorLogTag, fmt.Sprintf("Updated in_use flag to 't' for the VM %d in VM pool", vmInfoDB.vmProperties.id))
-		(&vmInfoDB).vmProperties.in_use = "t"
+		c.logger.Info(softLayerCreatorLogTag, fmt.Sprintf("Updated in_use flag to 't' for the VM %d in VM pool", vmInfoDB.VmProperties.Id))
+		vmInfoDB.VmProperties.InUse = "t"
 		err = vmInfoDB.UpdateVMInfoByID()
 		if err != nil {
 			return vm, bosherr.WrapError(err, fmt.Sprintf("Failed to query VM info by given ID %d", vm.ID()))
 		} else {
 			return vm, nil
 		}
-		return vm, nil
 	}
 
-	c.logger.Info(softLayerCreatorLogTag, "Start creating a new VM")
-	return SoftLayerVM{}, nil
 	return c.CreateNewVM(agentID, stemcell, cloudProps, networks, env)
-
 }
 
 func (c SoftLayerCreator) resolveNetworkIP(networks Networks) (string, error) {

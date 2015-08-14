@@ -9,6 +9,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	common "github.com/maximilien/bosh-softlayer-cpi/common"
 	testhelperscpi "github.com/maximilien/bosh-softlayer-cpi/test_helpers"
 	slclient "github.com/maximilien/softlayer-go/client"
 	softlayer "github.com/maximilien/softlayer-go/softlayer"
@@ -80,6 +81,8 @@ var _ = Describe("BOSH Director Level Integration for create_vm", func() {
 			jsonPayload, err := testhelperscpi.GenerateCpiJsonPayload("create_vm", rootTemplatePath, replacementMap)
 			Expect(err).ToNot(HaveOccurred())
 
+			log.Println(common.GetOSEnvVariable("OS_RELOAD_ENABLED", "Matt"))
+
 			outputBytes, err := testhelperscpi.RunCpi(rootTemplatePath, tmpConfigPath, jsonPayload)
 			log.Println("outputBytes=" + string(outputBytes))
 			Expect(err).ToNot(HaveOccurred())
@@ -92,9 +95,29 @@ var _ = Describe("BOSH Director Level Integration for create_vm", func() {
 			vmId = output["result"].(float64)
 			Expect(vmId).ToNot(BeZero())
 		})
+
+		It("returns true with valid parameters for OS reload", func() {
+			jsonPayload, err := testhelperscpi.GenerateCpiJsonPayload("create_vm", rootTemplatePath, replacementMap)
+			Expect(err).ToNot(HaveOccurred())
+
+			log.Println(common.GetOSEnvVariable("OS_RELOAD_ENABLED", "Matt"))
+
+			outputBytes, err := testhelperscpi.RunCpi(rootTemplatePath, tmpConfigPath, jsonPayload)
+			log.Println("outputBytes=" + string(outputBytes))
+			Expect(err).ToNot(HaveOccurred())
+
+			err = json.Unmarshal(outputBytes, &output)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(output["result"]).ToNot(BeNil())
+			Expect(output["error"]).To(BeNil())
+
+			vmId = output["result"].(float64)
+			Expect(vmId).ToNot(BeZero())
+
+		})
 	})
 
-	Context("create_vm in SoftLayer", func() {
+	/*	Context("create_vm in SoftLayer", func() {
 
 		It("returns false because empty parameters", func() {
 			jsonPayload := `{"method": "create_vm", "arguments": [],"context": {}}`
@@ -108,5 +131,16 @@ var _ = Describe("BOSH Director Level Integration for create_vm", func() {
 			Expect(output["result"]).To(BeNil())
 			Expect(output["error"]).ToNot(BeNil())
 		})
-	})
+
+		It("returns false if VM does not exist for OS reload", func() {
+			jsonPayload, err := testhelperscpi.GenerateCpiJsonPayload("create_vm", rootTemplatePath, replacementMap)
+			Expect(err).ToNot(HaveOccurred())
+
+			outputBytes, err := testhelperscpi.RunCpi(rootTemplatePath, tmpConfigPath, jsonPayload)
+			log.Println("outputBytes=" + string(outputBytes))
+
+			Expect(err).To(HaveOccurred())
+		})
+
+	})*/
 })
