@@ -149,7 +149,7 @@ func (vm SoftLayerVM) Reboot() error {
 	return nil
 }
 
-func (vm SoftLayerVM) ReloadOS(stemcell bslcstem.Stemcell) error {
+func (vm SoftLayerVM) ReloadOS(stemcell bslcstem.Stemcell, timeout time.Duration) error {
 	reload_OS_Config := sldatatypes.Image_Template_Config{
 		ImageTemplateId: strconv.Itoa(stemcell.ID()),
 	}
@@ -170,7 +170,7 @@ func (vm SoftLayerVM) ReloadOS(stemcell bslcstem.Stemcell) error {
 		return bosherr.WrapError(err, "Failed to reload OS on the specified VirtualGuest from SoftLayer client")
 	}
 
-	time.Sleep(time.Second * 30)
+	time.Sleep(timeout)
 
 	err = vm.postCheckActiveTransactionsForOSReload(vm.softLayerClient, vm.timeoutForActiveTransactions, bslcommon.POLLING_INTERVAL)
 	if err != nil {

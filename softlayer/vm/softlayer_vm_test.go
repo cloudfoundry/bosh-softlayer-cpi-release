@@ -14,6 +14,7 @@ import (
 
 	testhelpers "github.com/maximilien/bosh-softlayer-cpi/test_helpers"
 
+	bslcommon "github.com/maximilien/bosh-softlayer-cpi/softlayer/common"
 	bslcdisk "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk"
 	bslcvm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
 
@@ -130,12 +131,12 @@ var _ = Describe("SoftLayerVM", func() {
 					"SoftLayer_Virtual_Guest_Service_getPowerState.json",
 				}
 				testhelpers.SetTestFixturesForFakeSoftLayerClient(softLayerClient, fileNames)
-				vm = NewSoftLayerVM(1234567, softLayerClient, sshClient, agentEnvService, logger, TIMEOUT_TRANSACTIONS_CREATE_VM)
+				vm = NewSoftLayerVM(1234567, softLayerClient, sshClient, agentEnvService, logger, 2*time.Millisecond)
 				stemcell = fakestemcell.NewFakeStemcell(123456, "5b7bc66a-72c6-447a-94a1-967803fcd76b", "non-dea")
 			})
 
 			It("os reload on the VM successfully", func() {
-				err := vm.ReloadOS(stemcell)
+				err := vm.ReloadOS(stemcell, 1*time.Millisecond)
 				Expect(err).ToNot(HaveOccurred())
 			})
 		})

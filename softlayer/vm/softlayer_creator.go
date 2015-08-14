@@ -29,6 +29,8 @@ type SoftLayerCreator struct {
 
 	agentOptions AgentOptions
 	logger       boshlog.Logger
+
+	OsReloadTimeout time.Duration
 }
 
 func NewSoftLayerCreator(softLayerClient sl.Client, agentEnvServiceFactory AgentEnvServiceFactory, agentOptions AgentOptions, logger boshlog.Logger) SoftLayerCreator {
@@ -41,6 +43,7 @@ func NewSoftLayerCreator(softLayerClient sl.Client, agentEnvServiceFactory Agent
 		agentEnvServiceFactory: agentEnvServiceFactory,
 		agentOptions:           agentOptions,
 		logger:                 logger,
+		OsReloadTimeout:        30 * time.Second,
 	}
 }
 
@@ -159,7 +162,7 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 		agentEnvService := c.agentEnvServiceFactory.New(vmInfoDB.VmProperties.Id)
 		vm := NewSoftLayerVM(vmInfoDB.VmProperties.Id, c.softLayerClient, util.GetSshClient(), agentEnvService, c.logger, TIMEOUT_TRANSACTIONS_OSRELOAD_VM)
 
-		vm.ReloadOS(stemcell)
+		vm.ReloadOS(stemcell, c.OsReloadTimeout)
 		if err != nil {
 			return SoftLayerVM{}, bosherr.WrapError(err, "Failed to reload OS")
 		}
