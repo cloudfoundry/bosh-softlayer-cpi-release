@@ -48,10 +48,12 @@ type SoftLayerVM struct {
 	timeoutForActiveTransactions time.Duration
 }
 
-func NewSoftLayerVM(id int, softLayerClient sl.Client, sshClient util.SshClient, agentEnvService AgentEnvService, logger boshlog.Logger, timeoutForActiveTransactions time.Duration) SoftLayerVM {
+func init() {
 	bslcommon.TIMEOUT = 10 * time.Minute
 	bslcommon.POLLING_INTERVAL = 10 * time.Second
+}
 
+func NewSoftLayerVM(id int, softLayerClient sl.Client, sshClient util.SshClient, agentEnvService AgentEnvService, logger boshlog.Logger, timeoutForActiveTransactions time.Duration) SoftLayerVM {
 	return SoftLayerVM{
 		id: id,
 
@@ -69,7 +71,6 @@ func NewSoftLayerVM(id int, softLayerClient sl.Client, sshClient util.SshClient,
 func (vm SoftLayerVM) ID() int { return vm.id }
 
 func (vm SoftLayerVM) Delete() error {
-
 	if strings.ToUpper(common.GetOSEnvVariable("OS_RELOAD_ENABLED", "TRUE")) == "FALSE" {
 		return vm.DeleteVM()
 	}
