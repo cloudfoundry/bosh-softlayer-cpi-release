@@ -2,21 +2,13 @@ package vm_pool
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
 	"strings"
 
 	sql "database/sql"
+	_ "github.com/mattn/go-sqlite3"
+
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
-	_ "github.com/mattn/go-sqlite3"
-	common "github.com/maximilien/bosh-softlayer-cpi/common"
-)
-
-var (
-	SQLITE_DB_FOLDER    = common.GetOSEnvVariable("SQLITE_DB_FOLDER", "/var/vcap/store/director/")
-	SQLITE_DB_FILE      = common.GetOSEnvVariable("SQLITE_DB_FILE", "vm_pool.sqlite")
-	SQLITE_DB_FILE_PATH = filepath.Join(SQLITE_DB_FOLDER, SQLITE_DB_FILE)
 )
 
 type vmProperties struct {
@@ -34,9 +26,7 @@ type VMInfoDB struct {
 	VmProperties vmProperties
 }
 
-func NewVMInfoDB(id int, name string, in_use string, image_id string, agent_id string, logger boshlog.Logger) VMInfoDB {
-	dbConn, _ := openDB()
-
+func NewVMInfoDB(id int, name string, in_use string, image_id string, agent_id string, logger boshlog.Logger, dbConn *sql.DB) VMInfoDB {
 	return VMInfoDB{
 		VmProperties: vmProperties{
 			Id:      id,
@@ -54,42 +44,6 @@ func (vmInfoDB *VMInfoDB) CloseDB() error {
 	if err != nil {
 		return bosherr.WrapError(err, "Failed to close VM Pool DB connection")
 	}
-	return nil
-}
-
-func InitVMPoolDB() error {
-	err := os.MkdirAll(SQLITE_DB_FOLDER, 0777)
-	if err != nil {
-		return bosherr.WrapError(err, "Failed to make director: "+SQLITE_DB_FOLDER)
-	}
-
-	db, err := openDB()
-	defer db.Close()
-
-	sqlStmt := `create table if not exists vms (id int not null primary key, name varchar(32), in_use varchar(32),
-										  public_ip varchar(32), private_ip varchar(32), root_pwd varchar(32),
-										  image_id varchar(64),
-										  agent_id varchar(32),
-										  timestamp timestamp)`
-	err = exec(db, sqlStmt)
-	if err != nil {
-		return bosherr.WrapError(err, "Failed to execute sql statement: "+sqlStmt)
-	}
-	return nil
-}
-
-func exec(db *sql.DB, sqlStmt string) error {
-	tx, err := db.Begin()
-	if err != nil {
-		return bosherr.WrapError(err, "Failed to begin DB transcation")
-	}
-
-	_, err = tx.Exec(sqlStmt)
-	if err != nil {
-		return bosherr.WrapError(err, "Failed to execute sql statement: "+sqlStmt)
-	}
-
-	tx.Commit()
 	return nil
 }
 
@@ -189,11 +143,17 @@ func (vmInfoDB *VMInfoDB) UpdateVMInfoByID() error {
 
 // Private methods
 
-func openDB() (*sql.DB, error) {
-	db, err := sql.Open("sqlite3", SQLITE_DB_FILE_PATH)
+func exec(db *sql.DB, sqlStmt string) error {
+	tx, err := db.Begin()
 	if err != nil {
-		return nil, bosherr.WrapError(err, "Failed to open VM Pool DB")
+		return bosherr.WrapError(err, "Failed to begin DB transcation")
 	}
 
-	return db, nil
+	_, err = tx.Exec(sqlStmt)
+	if err != nil {
+		return bosherr.WrapError(err, "Failed to execute sql statement: "+sqlStmt)
+	}
+
+	tx.Commit()
+	return nil
 }

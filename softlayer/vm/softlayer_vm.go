@@ -80,7 +80,12 @@ func (vm SoftLayerVM) Delete() error {
 		return bosherr.WrapError(err, "Failed to initialize VM pool DB")
 	}
 
-	vmInfoDB := bslcvmpool.NewVMInfoDB(vm.id, "", "", "", "", vm.logger)
+	db, err := bslcvmpool.OpenDB()
+	if err != nil {
+		return bosherr.WrapError(err, "Opening DB")
+	}
+
+	vmInfoDB := bslcvmpool.NewVMInfoDB(vm.id, "", "", "", "", vm.logger, db)
 	defer vmInfoDB.CloseDB()
 
 	err = vmInfoDB.QueryVMInfobyID()

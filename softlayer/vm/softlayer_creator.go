@@ -123,7 +123,12 @@ func (c SoftLayerCreator) CreateNewVM(agentID string, stemcell bslcstem.Stemcell
 	vm := NewSoftLayerVM(virtualGuest.Id, c.softLayerClient, util.GetSshClient(), agentEnvService, c.logger, TIMEOUT_TRANSACTIONS_CREATE_VM)
 
 	if strings.ToUpper(common.GetOSEnvVariable("OS_RELOAD_ENABLED", "TRUE")) == "TRUE" {
-		vmInfoDB := bslcvmpool.NewVMInfoDB(vm.id, virtualGuestTemplate.Hostname+"."+virtualGuestTemplate.Domain, "t", stemcell.Uuid(), agentID, c.logger)
+		db, err := bslcvmpool.OpenDB()
+		if err != nil {
+			return SoftLayerVM{}, bosherr.WrapError(err, "Opening DB")
+		}
+
+		vmInfoDB := bslcvmpool.NewVMInfoDB(vm.id, virtualGuestTemplate.Hostname+"."+virtualGuestTemplate.Domain, "t", stemcell.Uuid(), agentID, c.logger, db)
 		err = vmInfoDB.InsertVMInfo()
 		if err != nil {
 			return SoftLayerVM{}, bosherr.WrapError(err, "Failed to insert the record into VM pool DB")
@@ -148,7 +153,12 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 		return SoftLayerVM{}, bosherr.WrapError(err, "Failed to initialize VM pool DB")
 	}
 
-	vmInfoDB := bslcvmpool.NewVMInfoDB(0, "", "", "", agentID, c.logger)
+	db, err := bslcvmpool.OpenDB()
+	if err != nil {
+		return SoftLayerVM{}, bosherr.WrapError(err, "Opening DB")
+	}
+
+	vmInfoDB := bslcvmpool.NewVMInfoDB(0, "", "", "", agentID, c.logger, db)
 	defer vmInfoDB.CloseDB()
 
 	err = vmInfoDB.QueryVMInfobyAgentID()
