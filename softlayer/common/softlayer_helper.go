@@ -8,6 +8,7 @@ import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 
 	sl "github.com/maximilien/softlayer-go/softlayer"
+
 )
 
 var (

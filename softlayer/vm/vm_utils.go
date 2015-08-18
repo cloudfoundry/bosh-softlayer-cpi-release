@@ -40,7 +40,7 @@ func CreateVirtualGuestTemplate(agentID string, stemcell bslcstem.Stemcell, clou
 	if err != nil {
 		return sldatatypes.SoftLayer_Virtual_Guest_Template{}, bosherr.WrapError(err, "Creating agent metadata")
 	}
-
+    println(string(metadataBytes))
 	base64EncodedMetadata := Base64EncodeData(string(metadataBytes))
 
 	virtualGuestTemplate := sldatatypes.SoftLayer_Virtual_Guest_Template{
