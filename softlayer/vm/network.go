@@ -24,3 +24,11 @@ func (ns Networks) First() Network {
 }
 
 func (n Network) IsDynamic() bool { return n.Type == "dynamic" }
+
+func (n Network) AppendDNS(dns string) Network {
+	if len(dns) > 0 {
+		n.DNS = append(n.DNS, dns)
+		return n
+	}
+	return n
+}

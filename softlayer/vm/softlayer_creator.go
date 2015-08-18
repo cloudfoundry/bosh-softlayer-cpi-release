@@ -190,6 +190,8 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 	return c.CreateNewVM(agentID, stemcell, cloudProps, networks, env)
 }
 
+// Private methods
+
 func (c SoftLayerCreator) resolveNetworkIP(networks Networks) (string, error) {
 	var network Network
 
