@@ -32,10 +32,10 @@ type VMCloudProperties struct {
 	BoshIp string `json:"bosh_ip,omitempty"`
 }
 
-type AllowedHostCredential  struct {
-	Iqn			string 		`json:"iqn"`
-	UserName 	string 		`json:"username"`
-	Password  	string    	`json:"password"`
+type AllowedHostCredential struct {
+	Iqn      string `json:"iqn"`
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
 
 type VMMetadata map[string]interface{}
@@ -63,4 +63,3 @@ type VM interface {
 }
 
 type Environment map[string]interface{}
-
