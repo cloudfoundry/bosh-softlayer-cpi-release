@@ -22,7 +22,7 @@ func InitVMPoolDB() error {
 		return bosherr.WrapError(err, "Failed to make director: "+SQLITE_DB_FOLDER)
 	}
 
-	db, err := OpenDB()
+	db, err := OpenDB(SQLITE_DB_FOLDER)
 	defer db.Close()
 	if err != nil {
 		return bosherr.WrapError(err, "Opening DB")
@@ -41,11 +41,25 @@ func InitVMPoolDB() error {
 	return nil
 }
 
-func OpenDB() (*sql.DB, error) {
-	db, err := sql.Open("sqlite3", SQLITE_DB_FILE_PATH)
+func OpenDB(dbPath string) (*sql.DB, error) {
+	_, err := IsDirectory(dbPath)
+	if err != nil {
+		return nil, bosherr.WrapError(err, "Failed to open VM Pool DB, invalid DB path")
+	}
+
+	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
 		return nil, bosherr.WrapError(err, "Failed to open VM Pool DB")
 	}
 
 	return db, nil
+}
+
+func IsDirectory(path string) (bool, error) {
+	fileInfo, err := os.Stat(path)
+	if err != nil {
+		return false, err
+	}
+
+	return fileInfo.IsDir(), err
 }

@@ -1,6 +1,6 @@
 {
 	"ImportPath": "github.com/maximilien/bosh-softlayer-cpi",
-	"GoVersion": "go1.4.2",
+	"GoVersion": "go1.3.3",
 	"Packages": [
 		"./..."
 	],
@@ -39,34 +39,39 @@
 			"Rev": "2788f0dbd16903de03cb8186e5c7d97b69ad387b"
 		},
 		{
+			"ImportPath": "github.com/mattn/go-sqlite3",
+			"Comment": "v1.0.0-4-g3dc190a",
+			"Rev": "3dc190a01779c7f35c9748dd14aba234fcf48a33"
+		},
+		{
 			"ImportPath": "github.com/maximilien/softlayer-go/client",
-			"Comment": "v0.2.0-164-g65ef354",
-			"Rev": "65ef35469cd8fb5a73ebf7061f20923f77823519"
+			"Comment": "v0.2.0-150-g1a1751c",
+			"Rev": "1a1751c075935aef1b87936dd86f82393e0f4139"
 		},
 		{
 			"ImportPath": "github.com/maximilien/softlayer-go/common",
-			"Comment": "v0.2.0-164-g65ef354",
-			"Rev": "65ef35469cd8fb5a73ebf7061f20923f77823519"
+			"Comment": "v0.2.0-150-g1a1751c",
+			"Rev": "1a1751c075935aef1b87936dd86f82393e0f4139"
 		},
 		{
 			"ImportPath": "github.com/maximilien/softlayer-go/data_types",
-			"Comment": "v0.2.0-164-g65ef354",
-			"Rev": "65ef35469cd8fb5a73ebf7061f20923f77823519"
+			"Comment": "v0.2.0-150-g1a1751c",
+			"Rev": "1a1751c075935aef1b87936dd86f82393e0f4139"
 		},
 		{
 			"ImportPath": "github.com/maximilien/softlayer-go/services",
-			"Comment": "v0.2.0-164-g65ef354",
-			"Rev": "65ef35469cd8fb5a73ebf7061f20923f77823519"
+			"Comment": "v0.2.0-150-g1a1751c",
+			"Rev": "1a1751c075935aef1b87936dd86f82393e0f4139"
 		},
 		{
 			"ImportPath": "github.com/maximilien/softlayer-go/softlayer",
-			"Comment": "v0.2.0-164-g65ef354",
-			"Rev": "65ef35469cd8fb5a73ebf7061f20923f77823519"
+			"Comment": "v0.2.0-150-g1a1751c",
+			"Rev": "1a1751c075935aef1b87936dd86f82393e0f4139"
 		},
 		{
 			"ImportPath": "github.com/maximilien/softlayer-go/test_helpers",
-			"Comment": "v0.2.0-164-g65ef354",
-			"Rev": "65ef35469cd8fb5a73ebf7061f20923f77823519"
+			"Comment": "v0.2.0-150-g1a1751c",
+			"Rev": "1a1751c075935aef1b87936dd86f82393e0f4139"
 		},
 		{
 			"ImportPath": "github.com/onsi/ginkgo",
@@ -84,11 +89,11 @@
 		},
 		{
 			"ImportPath": "golang.org/x/crypto/curve25519",
-			"Rev": "81bf7719a6b7ce9b665598222362b50122dfc13b"
+			"Rev": "c16968172724c0b5e8bdc6ad33f5a79443a44cd7"
 		},
 		{
 			"ImportPath": "golang.org/x/crypto/ssh",
-			"Rev": "81bf7719a6b7ce9b665598222362b50122dfc13b"
+			"Rev": "c16968172724c0b5e8bdc6ad33f5a79443a44cd7"
 		}
 	]
 }

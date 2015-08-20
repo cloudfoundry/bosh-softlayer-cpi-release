@@ -80,7 +80,7 @@ func (vm SoftLayerVM) Delete() error {
 		return bosherr.WrapError(err, "Failed to initialize VM pool DB")
 	}
 
-	db, err := bslcvmpool.OpenDB()
+	db, err := bslcvmpool.OpenDB(bslcvmpool.SQLITE_DB_FILE_PATH)
 	if err != nil {
 		return bosherr.WrapError(err, "Opening DB")
 	}

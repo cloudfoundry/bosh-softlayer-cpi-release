@@ -2,7 +2,6 @@ package vm
 
 import (
 	"fmt"
-
 	"strings"
 	"time"
 
@@ -10,7 +9,6 @@ import (
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
 	sl "github.com/maximilien/softlayer-go/softlayer"
-
 	common "github.com/maximilien/bosh-softlayer-cpi/common"
 	bslcommon "github.com/maximilien/bosh-softlayer-cpi/softlayer/common"
 	bslcstem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell"
@@ -77,7 +75,7 @@ func (c SoftLayerCreator) CreateNewVM(agentID string, stemcell bslcstem.Stemcell
 	vm := NewSoftLayerVM(virtualGuest.Id, c.softLayerClient, util.GetSshClient(), agentEnvService, c.logger, TIMEOUT_TRANSACTIONS_CREATE_VM)
 
 	if strings.ToUpper(common.GetOSEnvVariable("OS_RELOAD_ENABLED", "TRUE")) == "TRUE" {
-		db, err := bslcvmpool.OpenDB()
+		db, err := bslcvmpool.OpenDB(bslcvmpool.SQLITE_DB_FILE_PATH)
 		if err != nil {
 			return SoftLayerVM{}, bosherr.WrapError(err, "Opening DB")
 		}
@@ -91,7 +89,6 @@ func (c SoftLayerCreator) CreateNewVM(agentID string, stemcell bslcstem.Stemcell
 
 	return vm, nil
 }
-
 
 func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
 	if strings.ToUpper(common.GetOSEnvVariable("OS_RELOAD_ENABLED", "TRUE")) == "FALSE" {
@@ -108,7 +105,7 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 		return SoftLayerVM{}, bosherr.WrapError(err, "Failed to initialize VM pool DB")
 	}
 
-	db, err := bslcvmpool.OpenDB()
+	db, err := bslcvmpool.OpenDB(bslcvmpool.SQLITE_DB_FILE_PATH)
 	if err != nil {
 		return SoftLayerVM{}, bosherr.WrapError(err, "Opening DB")
 	}

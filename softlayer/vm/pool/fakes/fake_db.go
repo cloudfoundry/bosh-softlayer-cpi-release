@@ -6,7 +6,6 @@ import (
 )
 
 type FakeDB struct {
-	sql.DB
 	BeginTxReturn *sql.Tx
 	BeginError    error
 
@@ -43,12 +42,8 @@ var (
 	OpenError error
 )
 
-/*func (fakeDb *FakeDB) DB() *sql.DB {
-	return &sql.DB{}
-}*/
-
 func NewFakeDB() *FakeDB {
-	return &FakeDB{sql.DB{}}
+	return &FakeDB{}
 }
 
 func Open(driverName, dataSourceName string) (*sql.DB, error) {
