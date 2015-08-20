@@ -167,7 +167,7 @@ func (vm SoftLayerVM) AttachDisk(disk bslcdisk.Disk) error {
 		return bosherr.WrapError(err, fmt.Sprintf("Failed to grant access of disk `%d` from virtual guest `%d`", disk.ID(), virtualGuest.Id))
 	}
 
-	hasMultiPath, err := vm.hasMulitPathTool(virtualGuest)
+	hasMultiPath, err := vm.hasMulitPathToolBasedOnShellScript(virtualGuest)
 	if err != nil {
 		return bosherr.WrapError(err, fmt.Sprintf("Failed to get multipath information from virtual guest `%d`", virtualGuest.Id))
 	}
@@ -276,7 +276,7 @@ func (vm SoftLayerVM) parseTags(value string) []string {
 func (vm SoftLayerVM) waitForVolumeAttached(virtualGuest datatypes.SoftLayer_Virtual_Guest, volume datatypes.SoftLayer_Network_Storage, hasMultiPath bool, timeout, pollingInterval time.Duration) (string, error) {
 	var deviceName string
 
-	oldDisks, err := vm.getIscsiDevicesFromVM(virtualGuest, hasMultiPath)
+	oldDisks, err := vm.getIscsiDeviceNamesBasedOnShellScript(virtualGuest, hasMultiPath)
 	if err != nil {
 		return "", bosherr.WrapError(err, fmt.Sprintf("Failed to get devices names from virtual guest `%d`", virtualGuest.Id))
 	}
@@ -310,7 +310,7 @@ func (vm SoftLayerVM) waitForVolumeAttached(virtualGuest datatypes.SoftLayer_Vir
 		if _, err = vm.discoveryOpenIscsiTargetsBasedOnShellScript(virtualGuest); err != nil {
 			return "", bosherr.WrapErrorf(err, "Failed to attach volume with id %d to virtual guest with id: %d.", volume.Id, virtualGuest.Id)
 		}
-		newDisks, err := vm.getIscsiDevicesFromVM(virtualGuest, hasMultiPath)
+		newDisks, err := vm.getIscsiDeviceNamesBasedOnShellScript(virtualGuest, hasMultiPath)
 		if err != nil {
 			return "", bosherr.WrapError(err, fmt.Sprintf("Failed to get devices names from virtual guest `%d`", virtualGuest.Id))
 		}
@@ -346,7 +346,7 @@ func (vm SoftLayerVM) waitForVolumeAttached(virtualGuest datatypes.SoftLayer_Vir
 	return "", bosherr.Errorf("Failed to attach disk '%d' to virtual guest '%d'", volume.Id, virtualGuest.Id)
 }
 
-func (vm SoftLayerVM) hasMulitPathTool(virtualGuest datatypes.SoftLayer_Virtual_Guest) (bool, error) {
+func (vm SoftLayerVM) hasMulitPathToolBasedOnShellScript(virtualGuest datatypes.SoftLayer_Virtual_Guest) (bool, error) {
 	command := `command -v multipath`
 	output, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, command)
 	if err != nil {
@@ -359,7 +359,7 @@ func (vm SoftLayerVM) hasMulitPathTool(virtualGuest datatypes.SoftLayer_Virtual_
 	return false, nil
 }
 
-func (vm SoftLayerVM) getIscsiDevicesFromVM(virtualGuest datatypes.SoftLayer_Virtual_Guest, hasMultiPath bool) ([]string, error) {
+func (vm SoftLayerVM) getIscsiDeviceNamesBasedOnShellScript(virtualGuest datatypes.SoftLayer_Virtual_Guest, hasMultiPath bool) ([]string, error) {
 	devices := []string{}
 
 	command1 := `dmsetup ls`
