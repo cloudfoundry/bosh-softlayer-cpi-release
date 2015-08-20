@@ -123,7 +123,7 @@ func (c SoftLayerCreator) CreateNewVM(agentID string, stemcell bslcstem.Stemcell
 	vm := NewSoftLayerVM(virtualGuest.Id, c.softLayerClient, util.GetSshClient(), agentEnvService, c.logger, TIMEOUT_TRANSACTIONS_CREATE_VM)
 
 	if strings.ToUpper(common.GetOSEnvVariable("OS_RELOAD_ENABLED", "TRUE")) == "TRUE" {
-		db, err := bslcvmpool.OpenDB()
+		db, err := bslcvmpool.OpenDB(bslcvmpool.SQLITE_DB_FILE_PATH)
 		if err != nil {
 			return SoftLayerVM{}, bosherr.WrapError(err, "Opening DB")
 		}
@@ -153,7 +153,7 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 		return SoftLayerVM{}, bosherr.WrapError(err, "Failed to initialize VM pool DB")
 	}
 
-	db, err := bslcvmpool.OpenDB()
+	db, err := bslcvmpool.OpenDB(bslcvmpool.SQLITE_DB_FILE_PATH)
 	if err != nil {
 		return SoftLayerVM{}, bosherr.WrapError(err, "Opening DB")
 	}
@@ -200,6 +200,8 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 	}
 
 }
+
+// Private methods
 
 func (c SoftLayerCreator) resolveNetworkIP(networks Networks) (string, error) {
 	var network Network

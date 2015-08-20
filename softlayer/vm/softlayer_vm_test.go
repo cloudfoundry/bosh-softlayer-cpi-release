@@ -41,7 +41,7 @@ var _ = Describe("SoftLayerVM", func() {
 		agentEnvService = &fakevm.FakeAgentEnvService{}
 		logger = boshlog.NewLogger(boshlog.LevelNone)
 
-		vm = NewSoftLayerVM(1234, softLayerClient, sshClient, agentEnvService, logger, 2*time.Millisecond)
+		vm = NewSoftLayerVM(1234, softLayerClient, sshClient, agentEnvService, logger, 5*time.Millisecond)
 
 		bslcommon.POLLING_INTERVAL = 1 * time.Millisecond
 	})

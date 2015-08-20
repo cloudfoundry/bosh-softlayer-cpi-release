@@ -4,12 +4,27 @@ import (
 	"fmt"
 	"strings"
 
-	sql "database/sql"
+	"database/sql"
+	"database/sql/driver"
+
 	_ "github.com/mattn/go-sqlite3"
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 )
+
+type DB interface {
+	Begin() (*sql.Tx, error)
+	Close() error
+	Driver() driver.Driver
+	Exec(query string, args ...interface{}) (sql.Result, error)
+	Ping() error
+	Prepare(query string) (*sql.Stmt, error)
+	Query(query string, args ...interface{}) (*sql.Rows, error)
+	QueryRow(query string, args ...interface{}) *sql.Row
+	SetMaxIdleConns(n int)
+	SetMaxOpenConns(n int)
+}
 
 type vmProperties struct {
 	Id      int
@@ -20,13 +35,13 @@ type vmProperties struct {
 }
 
 type VMInfoDB struct {
-	dbConn *sql.DB
+	db     DB
 	logger boshlog.Logger
 
 	VmProperties vmProperties
 }
 
-func NewVMInfoDB(id int, name string, in_use string, image_id string, agent_id string, logger boshlog.Logger, dbConn *sql.DB) VMInfoDB {
+func NewVMInfoDB(id int, name string, in_use string, image_id string, agent_id string, logger boshlog.Logger, db DB) VMInfoDB {
 	return VMInfoDB{
 		VmProperties: vmProperties{
 			Id:      id,
@@ -34,13 +49,13 @@ func NewVMInfoDB(id int, name string, in_use string, image_id string, agent_id s
 			InUse:   in_use,
 			ImageId: image_id,
 			AgentId: agent_id},
-		dbConn: dbConn,
+		db:     db,
 		logger: logger,
 	}
 }
 
 func (vmInfoDB *VMInfoDB) CloseDB() error {
-	err := vmInfoDB.dbConn.Close()
+	err := vmInfoDB.db.Close()
 	if err != nil {
 		return bosherr.WrapError(err, "Failed to close VM Pool DB connection")
 	}
@@ -48,7 +63,7 @@ func (vmInfoDB *VMInfoDB) CloseDB() error {
 }
 
 func (vmInfoDB *VMInfoDB) QueryVMInfobyAgentID() error {
-	tx, err := vmInfoDB.dbConn.Begin()
+	tx, err := vmInfoDB.db.Begin()
 	if err != nil {
 		return bosherr.WrapError(err, "Failed to begin DB transcation")
 	}
@@ -78,7 +93,7 @@ func (vmInfoDB *VMInfoDB) QueryVMInfobyAgentID() error {
 }
 
 func (vmInfoDB *VMInfoDB) QueryVMInfobyID() error {
-	tx, err := vmInfoDB.dbConn.Begin()
+	tx, err := vmInfoDB.db.Begin()
 	if err != nil {
 		return bosherr.WrapError(err, "Failed to begin DB transcation")
 	}
@@ -109,7 +124,7 @@ func (vmInfoDB *VMInfoDB) QueryVMInfobyID() error {
 
 func (vmInfoDB *VMInfoDB) DeleteVMFromVMDB() error {
 	sqlStmt := fmt.Sprintf("delete from vms where id=%d", vmInfoDB.VmProperties.Id)
-	err := exec(vmInfoDB.dbConn, sqlStmt)
+	err := exec(vmInfoDB.db, sqlStmt)
 	if err != nil {
 		return bosherr.WrapError(nil, "Failed to delete VM info from vms table")
 	}
@@ -119,7 +134,7 @@ func (vmInfoDB *VMInfoDB) DeleteVMFromVMDB() error {
 
 func (vmInfoDB *VMInfoDB) InsertVMInfo() error {
 	sqlStmt := fmt.Sprintf("insert into vms (id, name, in_use, image_id, agent_id, timestamp) values (%d, '%s', '%s', '%s', '%s', CURRENT_TIMESTAMP)", vmInfoDB.VmProperties.Id, vmInfoDB.VmProperties.Name, vmInfoDB.VmProperties.InUse, vmInfoDB.VmProperties.ImageId, vmInfoDB.VmProperties.AgentId)
-	err := exec(vmInfoDB.dbConn, sqlStmt)
+	err := exec(vmInfoDB.db, sqlStmt)
 	if err != nil {
 		return bosherr.WrapError(err, "Failed to insert VM info into vms table")
 	}
@@ -128,7 +143,7 @@ func (vmInfoDB *VMInfoDB) InsertVMInfo() error {
 }
 
 func (vmInfoDB *VMInfoDB) UpdateVMInfoByID() error {
-	tx, err := vmInfoDB.dbConn.Begin()
+	tx, err := vmInfoDB.db.Begin()
 	if err != nil {
 		return bosherr.WrapError(err, "Failed to begin DB transcation")
 	}
@@ -161,7 +176,7 @@ func (vmInfoDB *VMInfoDB) UpdateVMInfoByID() error {
 
 // Private methods
 
-func exec(db *sql.DB, sqlStmt string) error {
+func exec(db DB, sqlStmt string) error {
 	tx, err := db.Begin()
 	if err != nil {
 		return bosherr.WrapError(err, "Failed to begin DB transcation")

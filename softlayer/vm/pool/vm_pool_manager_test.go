@@ -1,7 +1,6 @@
 package vm_pool_test
 
 import (
-	"database/sql"
 	"errors"
 
 	. "github.com/onsi/ginkgo"
@@ -17,7 +16,6 @@ import (
 var _ = Describe("VMInfoDB", func() {
 	var (
 		vmInfoDB VMInfoDB
-		db       *sql.DB
 		fakeDB   *fakes.FakeDB
 		logger   boshlog.Logger
 		err      error
@@ -27,8 +25,9 @@ var _ = Describe("VMInfoDB", func() {
 		logger = boshlog.NewLogger(boshlog.LevelDebug)
 
 		fakeDB = fakes.NewFakeDB()
-		//db = fakeDB.DB()
 	})
+
+	//TODO: add tests for methods: #QueryVMInfobyAgentID, #QueryVMInfobyID, #DeleteVMFromVMDB, #InsertVMInfo, #UpdateVMInfoByID
 
 	Describe("#CloseDB", func() {
 		BeforeEach(func() {
