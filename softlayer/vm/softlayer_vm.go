@@ -85,7 +85,7 @@ func (vm SoftLayerVM) Delete() error {
 		return bosherr.WrapError(err, "Opening DB")
 	}
 
-	vmInfoDB := bslcvmpool.NewVMInfoDB(vm.id, "", "", "", "", vm.logger, db)
+	vmInfoDB := bslcvmpool.NewVMInfoDB(vm.id, "", "t", "", "", vm.logger, db)
 	defer vmInfoDB.CloseDB()
 
 	err = vmInfoDB.QueryVMInfobyID()
@@ -105,7 +105,18 @@ func (vm SoftLayerVM) Delete() error {
 		}
 	}
 
-	return vm.DeleteVM()
+	vmInfoDB.VmProperties.InUse = ""
+	err = vmInfoDB.QueryVMInfobyID()
+	if err != nil {
+		return bosherr.WrapError(err, fmt.Sprintf("Failed to query VM info by given ID %d", vm.id))
+	}
+
+	if vmInfoDB.VmProperties.Id != 0 {
+		return bosherr.WrapError(err, fmt.Sprintf("Wrong in_use status in VM with ID %d, Do not delete this VM", vm.id))
+	} else {
+		return vm.DeleteVM()
+	}
+
 }
 
 func (vm SoftLayerVM) DeleteVM() error {

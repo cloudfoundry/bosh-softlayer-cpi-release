@@ -53,13 +53,22 @@ func (vmInfoDB *VMInfoDB) QueryVMInfobyAgentID() error {
 		return bosherr.WrapError(err, "Failed to begin DB transcation")
 	}
 
-	sqlStmt, err := tx.Prepare("select id, image_id, agent_id from vms where agent_id=? and in_use='f'")
+	var prepareStmt string
+	if vmInfoDB.VmProperties.InUse == "t" {
+		prepareStmt = "select id, image_id, agent_id from vms where in_use='t' and agent_id=?"
+	} else if vmInfoDB.VmProperties.InUse == "f" {
+		prepareStmt = "select id, image_id, agent_id from vms where in_use='f' and agent_id=?"
+	} else {
+		prepareStmt = "select id, image_id, agent_id from vms where agent_id==?"
+	}
+
+	sqlStmt, err := tx.Prepare(prepareStmt)
+	defer sqlStmt.Close()
 	if err != nil {
 		return bosherr.WrapError(err, "Failed to prepare sql statement")
 	}
-	defer sqlStmt.Close()
 
-	err = sqlStmt.QueryRow(vmInfoDB.VmProperties.AgentId).Scan(vmInfoDB.VmProperties.Id, vmInfoDB.VmProperties.ImageId, vmInfoDB.VmProperties.AgentId)
+	err = sqlStmt.QueryRow(vmInfoDB.VmProperties.AgentId).Scan(&vmInfoDB.VmProperties.Id, &vmInfoDB.VmProperties.ImageId, &vmInfoDB.VmProperties.AgentId)
 	if err != nil && !strings.Contains(err.Error(), "no rows") {
 		return bosherr.WrapError(err, "Failed to query VM info from vms table")
 	}
@@ -74,13 +83,22 @@ func (vmInfoDB *VMInfoDB) QueryVMInfobyID() error {
 		return bosherr.WrapError(err, "Failed to begin DB transcation")
 	}
 
-	sqlStmt, err := tx.Prepare("select id, in_use, image_id, agent_id from vms where id=?")
+	var prepareStmt string
+	if vmInfoDB.VmProperties.InUse == "t" {
+		prepareStmt = "select id, in_use, image_id, agent_id from vms where id=? and in_use='t'"
+	} else if vmInfoDB.VmProperties.InUse == "f" {
+		prepareStmt = "select id, in_use, image_id, agent_id from vms where id=? and in_use='f'"
+	} else {
+		prepareStmt = "select id, in_use, image_id, agent_id from vms where id=?"
+	}
+
+	sqlStmt, err := tx.Prepare(prepareStmt)
 	if err != nil {
 		return bosherr.WrapError(err, "Failed to prepare sql statement")
 	}
 	defer sqlStmt.Close()
 
-	err = sqlStmt.QueryRow(vmInfoDB.VmProperties.Id).Scan(vmInfoDB.VmProperties.Id, vmInfoDB.VmProperties.InUse, vmInfoDB.VmProperties.ImageId, vmInfoDB.VmProperties.AgentId)
+	err = sqlStmt.QueryRow(vmInfoDB.VmProperties.Id).Scan(&vmInfoDB.VmProperties.Id, &vmInfoDB.VmProperties.InUse, &vmInfoDB.VmProperties.ImageId, &vmInfoDB.VmProperties.AgentId)
 	if err != nil && !strings.Contains(err.Error(), "no rows") {
 		return bosherr.WrapError(err, "Failed to query VM info from vms table")
 	}

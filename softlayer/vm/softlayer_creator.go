@@ -158,7 +158,7 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 		return SoftLayerVM{}, bosherr.WrapError(err, "Opening DB")
 	}
 
-	vmInfoDB := bslcvmpool.NewVMInfoDB(0, "", "", "", agentID, c.logger, db)
+	vmInfoDB := bslcvmpool.NewVMInfoDB(0, "", "f", "", agentID, c.logger, db)
 	defer vmInfoDB.CloseDB()
 
 	err = vmInfoDB.QueryVMInfobyAgentID()
@@ -187,7 +187,18 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 		}
 	}
 
-	return c.CreateNewVM(agentID, stemcell, cloudProps, networks, env)
+	vmInfoDB.VmProperties.InUse = ""
+	err = vmInfoDB.QueryVMInfobyAgentID()
+	if err != nil {
+		return SoftLayerVM{}, bosherr.WrapError(err, "Failed to query VM info by given agent ID "+agentID)
+	}
+
+	if vmInfoDB.VmProperties.Id != 0 {
+		return SoftLayerVM{}, bosherr.WrapError(err, "Wrong in_use status in VM with agent ID "+agentID+", Do not create a new VM")
+	} else {
+		return c.CreateNewVM(agentID, stemcell, cloudProps, networks, env)
+	}
+
 }
 
 func (c SoftLayerCreator) resolveNetworkIP(networks Networks) (string, error) {
