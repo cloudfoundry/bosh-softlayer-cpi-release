@@ -222,10 +222,10 @@ func (vm SoftLayerVM) DetachDisk(disk bslcdisk.Disk) error {
 	if err != nil {
 		return bosherr.WrapErrorf(err, "Failed to get metadata from virtual guest with id: %d.", virtualGuest.Id)
 	}
-	old_agentEnv, err := NewAgentEnvFromJSON(metadata)
-	new_agentEnv := old_agentEnv.DetachPersistentDisk(strconv.Itoa(disk.ID()))
+	oldAgentEnv, err := NewAgentEnvFromJSON(metadata)
+	newAgentEnv := oldAgentEnv.DetachPersistentDisk(strconv.Itoa(disk.ID()))
 
-	metadata, err = json.Marshal(new_agentEnv)
+	metadata, err = json.Marshal(newAgentEnv)
 	if err != nil {
 		return bosherr.WrapError(err, "Marshalling agent environment metadata")
 	}
