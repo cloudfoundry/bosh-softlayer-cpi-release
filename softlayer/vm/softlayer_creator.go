@@ -1,16 +1,14 @@
 package vm
 
 import (
-	"encoding/base64"
-	"encoding/json"
 	"fmt"
+
 	"strings"
 	"time"
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
-	sldatatypes "github.com/maximilien/softlayer-go/data_types"
 	sl "github.com/maximilien/softlayer-go/softlayer"
 
 	common "github.com/maximilien/bosh-softlayer-cpi/common"
@@ -48,53 +46,9 @@ func NewSoftLayerCreator(softLayerClient sl.Client, agentEnvServiceFactory Agent
 }
 
 func (c SoftLayerCreator) CreateNewVM(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
-
-	c.logger.Info(softLayerCreatorLogTag, fmt.Sprintf("Creating a new server with stemcell %d", stemcell.ID()))
-
-	disks := DisksSpec{}
-	if cloudProps.EphemeralDiskSize > 0 {
-		disks = DisksSpec{Ephemeral: "/dev/xvdc"}
-	}
-
-	// To keep consistent with legacy softlayer CPI, making agent name with prefix "vm-"
-	agentEnv := NewAgentEnvForVM(agentID, fmt.Sprintf("vm-%s", agentID), networks, disks, env, c.agentOptions)
-	metadata, err := json.Marshal(agentEnv)
+	virtualGuestTemplate, err := CreateVirtualGuestTemplate(agentID, stemcell, cloudProps, networks, env, c.agentOptions)
 	if err != nil {
-		return SoftLayerVM{}, bosherr.WrapError(err, "Marshalling agent environment metadata")
-	}
-	dataBytes := []byte(metadata)
-	base64EncodedMetadata := base64.StdEncoding.EncodeToString(dataBytes)
-
-	virtualGuestTemplate := sldatatypes.SoftLayer_Virtual_Guest_Template{
-		Hostname:  cloudProps.VmNamePrefix + common.GetTimeStamp(time.Now().UTC()),
-		Domain:    cloudProps.Domain,
-		StartCpus: cloudProps.StartCpus,
-		MaxMemory: cloudProps.MaxMemory,
-
-		Datacenter: sldatatypes.Datacenter{
-			Name: cloudProps.Datacenter.Name,
-		},
-
-		BlockDeviceTemplateGroup: &sldatatypes.BlockDeviceTemplateGroup{
-			GlobalIdentifier: stemcell.Uuid(),
-		},
-
-		SshKeys: cloudProps.SshKeys,
-
-		HourlyBillingFlag: cloudProps.HourlyBillingFlag,
-		LocalDiskFlag:     cloudProps.LocalDiskFlag,
-
-		DedicatedAccountHostOnlyFlag:   cloudProps.DedicatedAccountHostOnlyFlag,
-		BlockDevices:                   cloudProps.BlockDevices,
-		NetworkComponents:              cloudProps.NetworkComponents,
-		PrivateNetworkOnlyFlag:         cloudProps.PrivateNetworkOnlyFlag,
-		PrimaryNetworkComponent:        &cloudProps.PrimaryNetworkComponent,
-		PrimaryBackendNetworkComponent: &cloudProps.PrimaryBackendNetworkComponent,
-		UserData: []sldatatypes.UserData{
-			sldatatypes.UserData{
-				Value: base64EncodedMetadata,
-			},
-		},
+		return SoftLayerVM{}, bosherr.WrapError(err, "Creating virtual guest template")
 	}
 
 	virtualGuestService, err := c.softLayerClient.GetSoftLayer_Virtual_Guest_Service()
@@ -137,6 +91,7 @@ func (c SoftLayerCreator) CreateNewVM(agentID string, stemcell bslcstem.Stemcell
 
 	return vm, nil
 }
+
 
 func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
 	if strings.ToUpper(common.GetOSEnvVariable("OS_RELOAD_ENABLED", "TRUE")) == "FALSE" {
@@ -200,6 +155,8 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 	}
 
 }
+
+// Private methods
 
 func (c SoftLayerCreator) resolveNetworkIP(networks Networks) (string, error) {
 	var network Network

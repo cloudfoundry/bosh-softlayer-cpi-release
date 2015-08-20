@@ -69,11 +69,7 @@ func (slvgs *softLayer_Virtual_Guest_Service) CreateObject(template datatypes.So
 }
 
 func (slvgs *softLayer_Virtual_Guest_Service) ReloadOperatingSystem(instanceId int, template datatypes.Image_Template_Config) error {
-
-	parameter := make([]interface{}, 2)
-	parameter[0] = "FORCE"
-	parameter[1] = template
-
+	parameter := [2]interface{}{"FORCE", template}
 	parameters := map[string]interface{}{
 		"parameters": parameter,
 	}
@@ -84,16 +80,12 @@ func (slvgs *softLayer_Virtual_Guest_Service) ReloadOperatingSystem(instanceId i
 	}
 
 	response, err := slvgs.client.DoRawHttpRequest(fmt.Sprintf("%s/%d/reloadOperatingSystem.json", slvgs.GetName(), instanceId), "POST", bytes.NewBuffer(requestBody))
-
-	if res := string(response[:]); res != "true" {
-		return errors.New(fmt.Sprintf("Failed to reload OS on instance with id '%d', got '%s' as response from the API.", instanceId, res))
-	}
-
-	fmt.Println("Response of OS Reload is: %s", response)
-
-	err = slvgs.client.CheckForHttpResponseErrors(response)
 	if err != nil {
 		return err
+	}
+
+	if res := string(response[:]); res != `"1"` {
+		return errors.New(fmt.Sprintf("Failed to reload OS on instance with id '%d', got '%s' as response from the API.", instanceId, res))
 	}
 
 	return nil
@@ -411,7 +403,7 @@ func (slvgs *softLayer_Virtual_Guest_Service) AttachEphemeralDisk(instanceId int
 		return err
 	}
 
-	order := datatypes.SoftLayer_Product_Order{
+	order := datatypes.SoftLayer_Container_Product_Order_Virtual_Guest_Upgrade{
 		VirtualGuests: []datatypes.VirtualGuest{
 			datatypes.VirtualGuest{
 				Id: instanceId,
@@ -440,7 +432,7 @@ func (slvgs *softLayer_Virtual_Guest_Service) AttachEphemeralDisk(instanceId int
 		},
 	}
 
-	_, err = service.PlaceOrder(order)
+	_, err = service.PlaceContainerOrderVirtualGuestUpgrade(order)
 
 	return err
 }
@@ -631,6 +623,21 @@ func (slvgs *softLayer_Virtual_Guest_Service) ShutdownPublicPort(instanceId int)
 	}
 
 	return false, errors.New(fmt.Sprintf("Failed to shutdown public port for virtual guest is pingable for instance with id '%d', got '%s' as response from the API.", instanceId, res))
+}
+
+func (slvgs *softLayer_Virtual_Guest_Service) GetAllowedHost(instanceId int) (datatypes.SoftLayer_Network_Storage_Allowed_Host, error) {
+	response, err := slvgs.client.DoRawHttpRequest(fmt.Sprintf("%s/%d/getAllowedHost.json", slvgs.GetName(), instanceId), "GET", new(bytes.Buffer))
+	if err != nil {
+		return datatypes.SoftLayer_Network_Storage_Allowed_Host{}, err
+	}
+
+	allowedHost := datatypes.SoftLayer_Network_Storage_Allowed_Host{}
+	err = json.Unmarshal(response, &allowedHost)
+	if err != nil {
+		return datatypes.SoftLayer_Network_Storage_Allowed_Host{}, err
+	}
+
+	return allowedHost, nil
 }
 
 func (slvgs *softLayer_Virtual_Guest_Service) GetNetworkVlans(instanceId int) ([]datatypes.SoftLayer_Network_Vlan, error) {

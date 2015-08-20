@@ -13,7 +13,7 @@ type VMCloudProperties struct {
 	MaxMemory                int                                  `json:"maxMemory,omitempty"`
 	Datacenter               sldatatypes.Datacenter               `json:"datacenter"`
 	BlockDeviceTemplateGroup sldatatypes.BlockDeviceTemplateGroup `json:"blockDeviceTemplateGroup,omitempty"`
-	SshKeys                  []sldatatypes.SshKey                 `json:"sshKeys"`
+	SshKeys                  []sldatatypes.SshKey                 `json:"sshKeys,omitempty"`
 	RootDiskSize             int                                  `json:"rootDiskSize,omitempty"`
 	EphemeralDiskSize        int                                  `json:"ephemeralDiskSize,omitempty"`
 
@@ -28,6 +28,8 @@ type VMCloudProperties struct {
 	BlockDevices                   []sldatatypes.BlockDevice                  `json:"blockDevices,omitempty"`
 	UserData                       []sldatatypes.UserData                     `json:"userData,omitempty"`
 	PostInstallScriptUri           string                                     `json:"postInstallScriptUri,omitempty"`
+
+	BoshIp string `json:"bosh_ip,omitempty"`
 }
 
 type VMMetadata map[string]interface{}

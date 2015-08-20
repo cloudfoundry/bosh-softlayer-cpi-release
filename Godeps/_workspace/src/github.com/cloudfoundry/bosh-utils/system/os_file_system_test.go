@@ -13,9 +13,10 @@ import (
 	. "github.com/cloudfoundry/bosh-utils/internal/github.com/onsi/gomega"
 	"github.com/cloudfoundry/bosh-utils/internal/github.com/stretchr/testify/assert"
 
+	"io/ioutil"
+
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	. "github.com/cloudfoundry/bosh-utils/system"
-	"io/ioutil"
 )
 
 func createOsFs() (fs FileSystem, runner CmdRunner) {
@@ -98,9 +99,8 @@ func init() {
 			Expect(err).ToNot(HaveOccurred())
 			defer os.RemoveAll(testPath)
 
-			err = osFs.Chown(testPath, "root")
+			err = osFs.Chown(testPath, "garbage-foo")
 			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring("not permitted"))
 		})
 
 		It("chmod", func() {
@@ -416,7 +416,7 @@ func init() {
 
 		Describe("Temporary directories and files", func() {
 			var (
-				osFs FileSystem
+				osFs        FileSystem
 				testTempDir string
 			)
 			BeforeEach(func() {
@@ -449,7 +449,7 @@ func init() {
 			})
 
 			Context("no temp root is set and was initialized as a strict temp root", func() {
-				BeforeEach(func () {
+				BeforeEach(func() {
 					osFs = NewOsFileSystemWithStrictTempRoot(boshlog.NewLogger(boshlog.LevelNone))
 				})
 

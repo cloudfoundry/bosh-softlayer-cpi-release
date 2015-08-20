@@ -44,7 +44,7 @@ var _ = Describe("SoftLayerCreator", func() {
 		)
 	})
 
-	Describe("Create", func() {
+	Describe("#Create", func() {
 		var (
 			agentID    string
 			stemcell   bslcstem.SoftLayerStemcell
