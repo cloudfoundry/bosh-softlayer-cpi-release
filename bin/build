@@ -7,7 +7,6 @@
   base_gopath=$( cd $base/../../../.. && pwd )
 
   export GOPATH=$base/Godeps/_workspace:$base_gopath:$GOPATH
-  
 
   cd $base
   go build -o out/cpi github.com/maximilien/bosh-softlayer-cpi/main
