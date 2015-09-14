@@ -23,16 +23,16 @@ func NewCreateVM(stemcellFinder bslcstem.Finder, vmCreator bslcvm.Creator) Creat
 	}
 }
 
-func (a CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps bslcvm.VMCloudProperties, networks Networks, diskIDs []DiskCID, env Environment) (VMCID, error) {
+func (a CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps bslcvm.VMCloudProperties, networks Networks, diskIDs []DiskCID, env Environment) (string, error) {
 	a.updateCloudProperties(cloudProps)
 
 	stemcell, found, err := a.stemcellFinder.FindById(int(stemcellCID))
 	if err != nil {
-		return 0, bosherr.WrapErrorf(err, "Finding stemcell '%s'", stemcellCID)
+		return "0", bosherr.WrapErrorf(err, "Finding stemcell '%s'", stemcellCID)
 	}
 
 	if !found {
-		return 0, bosherr.Errorf("Expected to find stemcell '%s'", stemcellCID)
+		return "0", bosherr.Errorf("Expected to find stemcell '%s'", stemcellCID)
 	}
 
 	vmNetworks := networks.AsVMNetworks()
@@ -41,10 +41,10 @@ func (a CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps bslcvm
 
 	vm, err := a.vmCreator.Create(agentID, stemcell, cloudProps, vmNetworks, vmEnv)
 	if err != nil {
-		return 0, bosherr.WrapErrorf(err, "Creating VM with agent ID '%s'", agentID)
+		return "0", bosherr.WrapErrorf(err, "Creating VM with agent ID '%s'", agentID)
 	}
 
-	return VMCID(vm.ID()), nil
+	return VMCID(vm.ID()).String(), nil
 }
 
 func (a CreateVM) updateCloudProperties(cloudProps bslcvm.VMCloudProperties) {

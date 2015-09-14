@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"strconv"
 	"time"
 
 	. "github.com/onsi/ginkgo"
@@ -33,8 +34,6 @@ var _ = Describe("BOSH Director Level Integration for create_vm", func() {
 		replacementMap                  map[string]string
 
 		output map[string]interface{}
-
-		vmId float64
 	)
 
 	BeforeEach(func() {
@@ -71,11 +70,6 @@ var _ = Describe("BOSH Director Level Integration for create_vm", func() {
 
 	Context("create_vm in SoftLayer", func() {
 
-		AfterEach(func() {
-			testhelpers.WaitForVirtualGuestToHaveNoActiveTransactions(int(vmId))
-			testhelpers.DeleteVirtualGuest(int(vmId))
-		})
-
 		It("returns true because valid parameters", func() {
 			jsonPayload, err := testhelperscpi.GenerateCpiJsonPayload("create_vm", rootTemplatePath, replacementMap)
 			Expect(err).ToNot(HaveOccurred())
@@ -89,9 +83,14 @@ var _ = Describe("BOSH Director Level Integration for create_vm", func() {
 			Expect(output["result"]).ToNot(BeNil())
 			Expect(output["error"]).To(BeNil())
 
-			vmId = output["result"].(float64)
-			Expect(vmId).ToNot(BeZero())
+			id := output["result"].(string)
+			vmId, err := strconv.Atoi(id)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(vmId).ToNot(BeNil())
+			testhelpers.WaitForVirtualGuestToHaveNoActiveTransactions(vmId)
+			testhelpers.DeleteVirtualGuest(vmId)
 		})
+
 	})
 
 	Context("create_vm in SoftLayer", func() {
