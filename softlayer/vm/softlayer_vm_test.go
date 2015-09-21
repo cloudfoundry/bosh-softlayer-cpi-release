@@ -37,7 +37,7 @@ var _ = Describe("SoftLayerVM", func() {
 
 	BeforeEach(func() {
 		softLayerClient = fakeslclient.NewFakeSoftLayerClient("fake-username", "fake-api-key")
-
+		sshClient = fakesutil.NewFakeSshClient()
 		agentEnvService = &fakevm.FakeAgentEnvService{}
 		logger = boshlog.NewLogger(boshlog.LevelNone)
 
@@ -235,6 +235,44 @@ var _ = Describe("SoftLayerVM", func() {
 		var (
 			disk bslcdisk.Disk
 		)
+
+		const expectedDmSetupLs1 = `
+36090a0c8600058baa8283574c302c0fc-part1	(252:1)
+36090a0c8600058baa8283574c302c0fc	(252:0)
+`
+		const expectedDmSetupLs2 = `
+36090a0c8600058baa8283574c302c0fc-part1	(252:1)
+36090a0c8600058baa8283574c302c0fc	(252:0)
+36090a0c8600058baa8283574c302c0fd-part1	(252:1)
+36090a0c8600058baa8283574c302c0fd	(252:0)
+`
+		const expectedPartitions1 = `major minor  #blocks  name
+
+   7        0     131072 loop0
+ 202       16    2097152 xvdb
+ 202       17    2096451 xvdb1
+ 202        0   26214400 xvda
+ 202        1     248832 xvda1
+ 202        2   25963520 xvda2
+ 202       32  314572800 xvdc
+ 202       33  314568733 xvdc1
+`
+		const expectedPartitions2 = `major minor  #blocks  name
+
+   7        0     131072 loop0
+ 202       16    2097152 xvdb
+ 202       17    2096451 xvdb1
+ 202        0   26214400 xvda
+ 202        1     248832 xvda1
+ 202        2   25963520 xvda2
+ 202       32  314572800 xvdc
+ 202       33  314568733 xvdc1
+ 252        0  314572800 dm-0
+ 252        1  314572799 dm-1
+   8       16  314572800 sdb
+   8       17  314572799 sdb1
+`
+
 		BeforeEach(func() {
 			disk = fakedisk.NewFakeDisk(1234)
 			fileNames := []string{
@@ -242,6 +280,8 @@ var _ = Describe("SoftLayerVM", func() {
 				"SoftLayer_Network_Storage_Service_getIscsiVolume.json",
 				"SoftLayer_Network_Storage_Service_getAllowedVirtualGuests_None.json",
 				"SoftLayer_Network_Storage_Service_allowAccessFromVirtualGuest.json",
+				"SoftLayer_Virtual_Guest_Service_getAllowedHost.json",
+				"SoftLayer_Network_Storage_Allowed_Host_Service_getCredential.json",
 				"SoftLayer_Virtual_Guest_Service_getUserData_Without_PersistentDisk.json",
 				"SoftLayer_Virtual_Guest_Service_getPowerState.json",
 				"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
@@ -250,19 +290,63 @@ var _ = Describe("SoftLayerVM", func() {
 				"SoftLayer_Virtual_Guest_Service_getPowerState.json",
 			}
 			testhelpers.SetTestFixturesForFakeSoftLayerClient(softLayerClient, fileNames)
+
 		})
 
-		It("attaches the iSCSI volume successfully", func() {
-			sshClient = fakesutil.GetFakeSshClient("fake-user\nfake-devicename", nil)
-			vm = NewSoftLayerVM(1234567, softLayerClient, sshClient, agentEnvService, logger, 2*time.Millisecond)
+		It("attaches the iSCSI volume successfully (multipath-tool installed)", func() {
+			expectedCmdResults := []string{
+				"/sbin/multipath",
+				"No devices found",
+				"",
+				"",
+				"",
+				"",
+				expectedDmSetupLs1,
+			}
+			testhelpers.SetTestFixturesForFakeSSHClient(sshClient, expectedCmdResults, nil)
+			vm = NewSoftLayerVM(1234567, softLayerClient, sshClient, agentEnvService, logger, TIMEOUT_TRANSACTIONS_DELETE_VM)
+
+			err := vm.AttachDisk(disk)
+			Expect(err).ToNot(HaveOccurred())
+		})
+
+		It("attaches the iSCSI volume successfully (multipath-tool not installed)", func() {
+			expectedCmdResults := []string{
+				"",
+				expectedPartitions1,
+				"",
+				"",
+				"",
+				"",
+				expectedPartitions2,
+			}
+			testhelpers.SetTestFixturesForFakeSSHClient(sshClient, expectedCmdResults, nil)
+			vm = NewSoftLayerVM(1234567, softLayerClient, sshClient, agentEnvService, logger, TIMEOUT_TRANSACTIONS_DELETE_VM)
+
+			err := vm.AttachDisk(disk)
+			Expect(err).ToNot(HaveOccurred())
+		})
+
+		It("attaches second iSCSI volume successfully (multipath-tool installed)", func() {
+			expectedCmdResults := []string{
+				"/sbin/multipath",
+				expectedDmSetupLs1,
+				"",
+				"",
+				"",
+				"",
+				expectedDmSetupLs2,
+			}
+			testhelpers.SetTestFixturesForFakeSSHClient(sshClient, expectedCmdResults, nil)
+			vm = NewSoftLayerVM(1234567, softLayerClient, sshClient, agentEnvService, logger, TIMEOUT_TRANSACTIONS_DELETE_VM)
 
 			err := vm.AttachDisk(disk)
 			Expect(err).ToNot(HaveOccurred())
 		})
 
 		It("reports error when failed to attach the iSCSI volume", func() {
-			sshClient = fakesutil.GetFakeSshClient("fake-user\nfake-devicename", errors.New("fake-error"))
-			vm = NewSoftLayerVM(1234567, softLayerClient, sshClient, agentEnvService, logger, 2*time.Millisecond)
+			testhelpers.SetTestFixturesForFakeSSHClient(sshClient, []string{"fake-result"}, errors.New("fake-error"))
+			vm = NewSoftLayerVM(1234567, softLayerClient, sshClient, agentEnvService, logger, TIMEOUT_TRANSACTIONS_DELETE_VM)
 
 			err := vm.AttachDisk(disk)
 			Expect(err).To(HaveOccurred())
@@ -273,34 +357,63 @@ var _ = Describe("SoftLayerVM", func() {
 		var (
 			disk bslcdisk.Disk
 		)
+
+		const expectedTarget1 = `iqn.2001-05.com.equallogic:0-8a0906-ba580060c-fcc002c3743528a8-fake-user
+`
+		const expectedTarget2 = `iqn.1992-08.com.netapp:sjc0101
+`
+		const exportedPortals1 = `10.1.107.49:3260
+`
+		const expectedPortals2 = `10.1.236.90:3260,1033
+10.1.106.75:3260,1030
+`
 		BeforeEach(func() {
 			disk = fakedisk.NewFakeDisk(1234)
 			fileNames := []string{
 				"SoftLayer_Virtual_Guest_Service_getObject.json",
 				"SoftLayer_Network_Storage_Service_getIscsiVolume.json",
-				"SoftLayer_Network_Storage_Service_getAllowedVirtualGuests.json",
-				"SoftLayer_Network_Storage_Service_removeAccessFromVirtualGuest.json",
 				"SoftLayer_Virtual_Guest_Service_getUserData_With_PersistentDisk.json",
 				"SoftLayer_Virtual_Guest_Service_getPowerState.json",
 				"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
 				"SoftLayer_Virtual_Guest_Service_setMetadata.json",
 				"SoftLayer_Virtual_Guest_Service_configureMetadataDisk.json",
 				"SoftLayer_Virtual_Guest_Service_getPowerState.json",
+				"SoftLayer_Network_Storage_Service_getAllowedVirtualGuests.json",
+				"SoftLayer_Network_Storage_Service_removeAccessFromVirtualGuest.json",
 			}
 			testhelpers.SetTestFixturesForFakeSoftLayerClient(softLayerClient, fileNames)
 		})
 
-		It("detaches the iSCSI volume successfully", func() {
-			sshClient = fakesutil.GetFakeSshClient("fake-user\nfake-devicename", nil)
-			vm = NewSoftLayerVM(1234567, softLayerClient, sshClient, agentEnvService, logger, 2*time.Millisecond)
+		It("detaches legacy iSCSI volume successfully", func() {
+			expectedCmdResults := []string{
+				expectedTarget1,
+				exportedPortals1,
+				"",
+			}
+			testhelpers.SetTestFixturesForFakeSSHClient(sshClient, expectedCmdResults, nil)
+			vm = NewSoftLayerVM(1234567, softLayerClient, sshClient, agentEnvService, logger, TIMEOUT_TRANSACTIONS_DELETE_VM)
 
 			err := vm.DetachDisk(disk)
 			Expect(err).ToNot(HaveOccurred())
 		})
 
-		It("reports error when failed to detach the iSCSI volume", func() {
-			sshClient = fakesutil.GetFakeSshClient("fake-user\nfake-devicename", errors.New("fake-error"))
-			vm = NewSoftLayerVM(1234567, softLayerClient, sshClient, agentEnvService, logger, 2*time.Millisecond)
+		It("detaches performance storage iSCSI volume successfully", func() {
+			expectedCmdResults := []string{
+				expectedTarget2,
+				expectedPortals2,
+				"",
+				"",
+			}
+			testhelpers.SetTestFixturesForFakeSSHClient(sshClient, expectedCmdResults, nil)
+			vm = NewSoftLayerVM(1234567, softLayerClient, sshClient, agentEnvService, logger, TIMEOUT_TRANSACTIONS_DELETE_VM)
+
+			err := vm.DetachDisk(disk)
+			Expect(err).ToNot(HaveOccurred())
+		})
+
+		It("reports error when failed to detach iSCSI volume", func() {
+			testhelpers.SetTestFixturesForFakeSSHClient(sshClient, []string{"fake-result"}, errors.New("fake-error"))
+			vm = NewSoftLayerVM(1234567, softLayerClient, sshClient, agentEnvService, logger, TIMEOUT_TRANSACTIONS_DELETE_VM)
 
 			err := vm.DetachDisk(disk)
 			Expect(err).To(HaveOccurred())
