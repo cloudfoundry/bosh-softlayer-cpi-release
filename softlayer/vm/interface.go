@@ -40,6 +40,8 @@ type VM interface {
 
 	AttachDisk(bslcdisk.Disk) error
 	DetachDisk(bslcdisk.Disk) error
+
+	FetchVMDetails() (sldatatypes.SoftLayer_Virtual_Guest, error)
 }
 
 type Environment map[string]interface{}

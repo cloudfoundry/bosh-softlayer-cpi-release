@@ -152,6 +152,20 @@ func (vm SoftLayerVM) DetachDisk(disk bslcdisk.Disk) error {
 	return nil
 }
 
+func (vm SoftLayerVM) FetchVMDetails() (datatypes.SoftLayer_Virtual_Guest, error) {
+	virtualGuestService, err := vm.softLayerClient.GetSoftLayer_Virtual_Guest_Service()
+	if err != nil {
+		return datatypes.SoftLayer_Virtual_Guest{}, bosherr.WrapError(err, "Can not get softlayer virtual guest service.")
+	}
+
+	virtualGuest, err := virtualGuestService.GetObject(vm.ID())
+	if err != nil {
+		return datatypes.SoftLayer_Virtual_Guest{}, bosherr.WrapErrorf(err, "Can not get virtual guest with id: %d", vm.ID())
+	}
+
+	return virtualGuest, nil
+}
+
 // Private methods
 func (vm SoftLayerVM) extractTagsFromVMMetadata(vmMetadata VMMetadata) ([]string, error) {
 	tags := []string{}
