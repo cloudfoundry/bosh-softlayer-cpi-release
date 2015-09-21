@@ -61,6 +61,9 @@ func NewConcreteFactory(softLayerClient sl.Client, options ConcreteFactoryOption
 			"set_vm_metadata":    NewSetVMMetadata(vmFinder),
 			"configure_networks": NewConfigureNetworks(vmFinder),
 
+			// Retrieve VM Information used by Softlayer bosh-init
+			"find_vm":          NewFindVM(vmFinder),
+
 			// Disk management
 			"create_disk": NewCreateDisk(diskCreator),
 			"delete_disk": NewDeleteDisk(diskFinder),
