@@ -29,7 +29,7 @@ var _ = Describe("CreateStemcell", func() {
 
 			id, err := action.Run("fake-path", CreateStemcellCloudProps{Uuid: "fake-stemcell-id"})
 			Expect(err).ToNot(HaveOccurred())
-			Expect(id).To(Equal(StemcellCID(1234)))
+			Expect(id).To(Equal(StemcellCID(1234).String()))
 		})
 
 		It("returns error if creating stemcell fails", func() {
@@ -38,7 +38,7 @@ var _ = Describe("CreateStemcell", func() {
 			id, err := action.Run("fake-path", CreateStemcellCloudProps{Uuid: "fake-stemcell-id"})
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("fake-add-err"))
-			Expect(id).To(Equal(StemcellCID(0)))
+			Expect(id).To(Equal(StemcellCID(0).String()))
 		})
 	})
 })

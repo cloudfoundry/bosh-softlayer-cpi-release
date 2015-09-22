@@ -40,7 +40,7 @@ var _ = Describe("CreateDisk", func() {
 
 			id, err := action.Run(20, diskCloudProp, VMCID(1234))
 			Expect(err).ToNot(HaveOccurred())
-			Expect(id).To(Equal(DiskCID(1234)))
+			Expect(id).To(Equal(DiskCID(1234).String()))
 
 			Expect(diskCreator.CreateSize).To(Equal(20))
 		})
@@ -51,7 +51,7 @@ var _ = Describe("CreateDisk", func() {
 			id, err := action.Run(20, diskCloudProp, VMCID(1234))
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("fake-create-err"))
-			Expect(id).To(Equal(DiskCID(0)))
+			Expect(id).To(Equal(DiskCID(0).String()))
 		})
 	})
 })

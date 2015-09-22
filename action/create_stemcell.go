@@ -20,15 +20,15 @@ func NewCreateStemcell(stemcellFinder bslcstem.Finder) CreateStemcell {
 	return CreateStemcell{stemcellFinder: stemcellFinder}
 }
 
-func (a CreateStemcell) Run(imagePath string, stemcellCloudProps CreateStemcellCloudProps) (StemcellCID, error) {
+func (a CreateStemcell) Run(imagePath string, stemcellCloudProps CreateStemcellCloudProps) (string, error) {
 	stemcell, found, err := a.stemcellFinder.FindById(stemcellCloudProps.Id)
 	if err != nil {
-		return 0, bosherr.WrapErrorf(err, "Finding stemcell with ID '%d'", stemcellCloudProps.Id)
+		return "0", bosherr.WrapErrorf(err, "Finding stemcell with ID '%d'", stemcellCloudProps.Id)
 	}
 
 	if !found {
-		return 0, bosherr.Errorf("Did not find stemcell with ID '%d'", stemcellCloudProps.Id)
+		return "0", bosherr.Errorf("Did not find stemcell with ID '%d'", stemcellCloudProps.Id)
 	}
 
-	return StemcellCID(stemcell.ID()), nil
+	return StemcellCID(stemcell.ID()).String(), nil
 }
