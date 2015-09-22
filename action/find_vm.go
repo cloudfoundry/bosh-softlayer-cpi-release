@@ -28,5 +28,5 @@ func (a FindVM) Run(vmCID VMCID) (string, string, error) {
 		return virtualGuest.FullyQualifiedDomainName, virtualGuest.PrimaryBackendIpAddress, nil
 	}
 
-	return
+	return "","", nil
 }
