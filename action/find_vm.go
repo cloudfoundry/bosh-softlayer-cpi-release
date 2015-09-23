@@ -26,7 +26,7 @@ func (a FindVM) Run(vmCID VMCID) (string, error) {
 		if err != nil {
 			return "", bosherr.WrapErrorf(err, "Fetching backend ip of vm '%s'", vmCID)
 		}
-		record := fmt.Sprintf(`%s  %s`, virtualGuest.FullyQualifiedDomainName, virtualGuest.PrimaryBackendIpAddress)
+		record := fmt.Sprintf(`%s  %s`, virtualGuest.PrimaryBackendIpAddress, virtualGuest.FullyQualifiedDomainName)
 		return record, nil
 	}
 
