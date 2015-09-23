@@ -1,6 +1,7 @@
 package action
 
 import (
+	"fmt"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	bslcvm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
 )
@@ -13,20 +14,21 @@ func NewFindVM(vmFinder bslcvm.Finder) FindVM {
 	return FindVM{vmFinder: vmFinder}
 }
 
-func (a FindVM) Run(vmCID VMCID) (string, string, error) {
+func (a FindVM) Run(vmCID VMCID) (string, error) {
 	vm, found, err := a.vmFinder.Find(int(vmCID))
 
 	if err != nil || !found {
-		return "","", bosherr.WrapErrorf(err, "Finding vm '%s'", vmCID)
+		return "", bosherr.WrapErrorf(err, "Finding vm '%s'", vmCID)
 	}
 
 	if found {
 		virtualGuest, err := vm.FetchVMDetails()
 		if err != nil {
-			return "", "", bosherr.WrapErrorf(err, "Fetching backend ip of vm '%s'", vmCID)
+			return "", bosherr.WrapErrorf(err, "Fetching backend ip of vm '%s'", vmCID)
 		}
-		return virtualGuest.FullyQualifiedDomainName, virtualGuest.PrimaryBackendIpAddress, nil
+		record := fmt.Sprintf(`%s  %s`, virtualGuest.FullyQualifiedDomainName, virtualGuest.PrimaryBackendIpAddress)
+		return record, nil
 	}
 
-	return "","", nil
+	return "", nil
 }
