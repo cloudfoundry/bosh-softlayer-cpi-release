@@ -24,14 +24,14 @@ type SoftLayer_Network_Storage struct {
 }
 
 type Billing_Item struct {
-	Id        int         `json:"id"`
-	OrderItem *Order_Item `json:"orderItem"`
+	Id        int         `json:"id,omitempty"`
+	OrderItem *Order_Item `json:"orderItem,omitempty"`
 }
 
 type Order_Item struct {
-	Order *Order `json:"order"`
+	Order *Order `json:"order,omitempty"`
 }
 
 type Order struct {
-	Id int `json:"id"`
+	Id int `json:"id,omitempty"`
 }
