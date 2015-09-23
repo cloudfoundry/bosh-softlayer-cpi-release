@@ -640,6 +640,7 @@ func (vm SoftLayerVM) getRootPassword(virtualGuest datatypes.SoftLayer_Virtual_G
 
 	for _, password := range passwords {
 		if password.Username == ROOT_USER_NAME {
+			vm.logger.Info(softLayerVMtag, "WJQ: ROOT password: %s", password.Password)
 			return password.Password
 		}
 	}
