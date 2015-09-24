@@ -361,7 +361,7 @@ func (vm SoftLayerVM) waitForVolumeAttached(virtualGuest datatypes.SoftLayer_Vir
 }
 
 func (vm SoftLayerVM) hasMulitPathToolBasedOnShellScript(virtualGuest datatypes.SoftLayer_Virtual_Guest) (bool, error) {
-	command := fmt.Sprintf(`ls`)
+	command := fmt.Sprintf("echo `command -v mulitpath`")
 	output, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, command)
 	if err != nil {
 		return false, err
@@ -376,8 +376,8 @@ func (vm SoftLayerVM) hasMulitPathToolBasedOnShellScript(virtualGuest datatypes.
 func (vm SoftLayerVM) getIscsiDeviceNamesBasedOnShellScript(virtualGuest datatypes.SoftLayer_Virtual_Guest, hasMultiPath bool) ([]string, error) {
 	devices := []string{}
 
-	command1 := "dmsetup ls"
-	command2 := "cat /proc/partitions"
+	command1 := fmt.Sprintf("dmsetup ls")
+	command2 := fmt.Sprintf("cat /proc/partitions")
 
 	if hasMultiPath {
 		result, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, command1)
