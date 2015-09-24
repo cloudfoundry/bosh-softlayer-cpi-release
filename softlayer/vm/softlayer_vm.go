@@ -361,13 +361,13 @@ func (vm SoftLayerVM) waitForVolumeAttached(virtualGuest datatypes.SoftLayer_Vir
 }
 
 func (vm SoftLayerVM) hasMulitPathToolBasedOnShellScript(virtualGuest datatypes.SoftLayer_Virtual_Guest) (bool, error) {
-	command := fmt.Sprintf(`command -v multipath`)
+	command := fmt.Sprintf(`ls`)
 	output, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, command)
 	if err != nil {
 		return false, err
 	}
 
-	if strings.Contains(output, "multipath") {
+	if len(output) > 0 && strings.Contains(output, "multipath") {
 		return true, nil
 	}
 	return false, nil
