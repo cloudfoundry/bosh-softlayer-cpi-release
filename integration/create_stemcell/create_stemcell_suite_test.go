@@ -1,4 +1,4 @@
-package create_vm_test
+package create_stemcell_test
 
 import (
 	. "github.com/onsi/ginkgo"
