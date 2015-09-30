@@ -50,33 +50,8 @@ var _ = Describe("BOSH Director Level Integration for create_stemcell", func() {
 		apiKey = os.Getenv("SL_API_KEY")
 		Expect(apiKey).ToNot(Equal(""), "apiKey cannot be empty, set SL_API_KEY")
 
-		swiftUsername := strings.Split(os.Getenv("SWIFT_USERNAME"), ":")[0]
-		Expect(swiftUsername).ToNot(Equal(""), "swiftUsername cannot be empty, set SWIFT_USERNAME")
-
-		swiftCluster := os.Getenv("SWIFT_CLUSTER")
-		Expect(swiftCluster).ToNot(Equal(""), "swiftCluster cannot be empty, set SWIFT_CLUSTER")
-
 		client = slclient.NewSoftLayerClient(username, apiKey)
 		Expect(client).ToNot(BeNil())
-
-		vgbdtgService, err = client.GetSoftLayer_Virtual_Guest_Block_Device_Template_Group_Service()
-		Expect(err).ToNot(HaveOccurred())
-		Expect(vgbdtgService).ToNot(BeNil())
-
-		configuration = datatypes.SoftLayer_Container_Virtual_Guest_Block_Device_Template_Configuration{
-			Name: "integration-test-vgbtg",
-			Note: "",
-			OperatingSystemReferenceCode: "UBUNTU_14_64",
-			Uri: "swift://" + swiftUsername + "@" + swiftCluster + "/stemcells/test-bosh-stemcell-softlayer.vhd",
-		}
-
-		vgbdtGroup, err := vgbdtgService.CreateFromExternalSource(configuration)
-		Expect(err).ToNot(HaveOccurred())
-
-		virtual_disk_image_id = vgbdtGroup.Id
-
-		// Wait for transaction to complete
-		time.Sleep(1 * time.Minute)
 
 		pwd, err := os.Getwd()
 		Expect(err).ToNot(HaveOccurred())
@@ -87,13 +62,43 @@ var _ = Describe("BOSH Director Level Integration for create_stemcell", func() {
 	})
 
 	AfterEach(func() {
-		_, err := vgbdtgService.DeleteObject(virtual_disk_image_id)
-		Expect(err).ToNot(HaveOccurred())
 		err = os.RemoveAll(tmpConfigPath)
 		Expect(err).ToNot(HaveOccurred())
 	})
 
 	Context("create_stemcell in SoftLayer", func() {
+		BeforeEach(func() {
+			swiftUsername := strings.Split(os.Getenv("SWIFT_USERNAME"), ":")[0]
+			Expect(swiftUsername).ToNot(Equal(""), "swiftUsername cannot be empty, set SWIFT_USERNAME")
+
+			swiftCluster := os.Getenv("SWIFT_CLUSTER")
+			Expect(swiftCluster).ToNot(Equal(""), "swiftCluster cannot be empty, set SWIFT_CLUSTER")
+
+			vgbdtgService, err = client.GetSoftLayer_Virtual_Guest_Block_Device_Template_Group_Service()
+			Expect(err).ToNot(HaveOccurred())
+			Expect(vgbdtgService).ToNot(BeNil())
+
+			configuration = datatypes.SoftLayer_Container_Virtual_Guest_Block_Device_Template_Configuration{
+				Name: "integration-test-vgbtg",
+				Note: "",
+				OperatingSystemReferenceCode: "UBUNTU_14_64",
+				Uri: "swift://" + swiftUsername + "@" + swiftCluster + "/stemcells/test-bosh-stemcell-softlayer.vhd",
+			}
+
+			vgbdtGroup, err := vgbdtgService.CreateFromExternalSource(configuration)
+			Expect(err).ToNot(HaveOccurred())
+
+			virtual_disk_image_id = vgbdtGroup.Id
+
+			// Wait for transaction to complete
+			time.Sleep(1 * time.Minute)
+		})
+
+		AfterEach(func() {
+			_, err := vgbdtgService.DeleteObject(virtual_disk_image_id)
+			Expect(err).ToNot(HaveOccurred())
+		})
+
 		It("returns true because valid parameters", func() {
 			jsonPayload := fmt.Sprintf(
 				`{"method": "create_stemcell", "arguments": ["%s", {"virtual-disk-image-id": %d, "virtual-disk-image-uuid": "%s", "datacenter-name": "%s"}],"context": {"director_uuid": "%s"}}`,
