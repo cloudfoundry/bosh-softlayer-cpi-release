@@ -2,8 +2,10 @@ package create_stemcell_test
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	. "github.com/onsi/ginkgo"
@@ -11,8 +13,9 @@ import (
 
 	testhelperscpi "github.com/maximilien/bosh-softlayer-cpi/test_helpers"
 	slclient "github.com/maximilien/softlayer-go/client"
+	datatypes "github.com/maximilien/softlayer-go/data_types"
 	softlayer "github.com/maximilien/softlayer-go/softlayer"
-	testhelpers "github.com/maximilien/softlayer-go/test_helpers"
+	// testhelpers "github.com/maximilien/softlayer-go/test_helpers"
 	"log"
 )
 
@@ -26,10 +29,14 @@ var _ = Describe("BOSH Director Level Integration for create_stemcell", func() {
 
 		username, apiKey string
 
-		accountService softlayer.SoftLayer_Account_Service
+		vgbdtgService softlayer.SoftLayer_Virtual_Guest_Block_Device_Template_Group_Service
 
-		rootTemplatePath, tmpConfigPath string
-		replacementMap                  map[string]string
+		configuration datatypes.SoftLayer_Container_Virtual_Guest_Block_Device_Template_Configuration
+
+		tmpConfigPath    string
+		rootTemplatePath string
+
+		virtual_disk_image_id int
 
 		output map[string]interface{}
 
@@ -43,14 +50,33 @@ var _ = Describe("BOSH Director Level Integration for create_stemcell", func() {
 		apiKey = os.Getenv("SL_API_KEY")
 		Expect(apiKey).ToNot(Equal(""), "apiKey cannot be empty, set SL_API_KEY")
 
+		swiftUsername := strings.Split(os.Getenv("SWIFT_USERNAME"), ":")[0]
+		Expect(swiftUsername).ToNot(Equal(""), "swiftUsername cannot be empty, set SWIFT_USERNAME")
+
+		swiftCluster := os.Getenv("SWIFT_CLUSTER")
+		Expect(swiftCluster).ToNot(Equal(""), "swiftCluster cannot be empty, set SWIFT_CLUSTER")
+
 		client = slclient.NewSoftLayerClient(username, apiKey)
 		Expect(client).ToNot(BeNil())
 
-		accountService, err = testhelpers.CreateAccountService()
+		vgbdtgService, err = client.GetSoftLayer_Virtual_Guest_Block_Device_Template_Group_Service()
+		Expect(err).ToNot(HaveOccurred())
+		Expect(vgbdtgService).ToNot(BeNil())
+
+		configuration = datatypes.SoftLayer_Container_Virtual_Guest_Block_Device_Template_Configuration{
+			Name: "integration-test-vgbtg",
+			Note: "",
+			OperatingSystemReferenceCode: "UBUNTU_14_64",
+			Uri: "swift://" + swiftUsername + "@" + swiftCluster + "/stemcells/test-bosh-stemcell-softlayer.vhd",
+		}
+
+		vgbdtGroup, err := vgbdtgService.CreateFromExternalSource(configuration)
 		Expect(err).ToNot(HaveOccurred())
 
-		testhelpers.TIMEOUT = 35 * time.Minute
-		testhelpers.POLLING_INTERVAL = 10 * time.Second
+		virtual_disk_image_id = vgbdtGroup.Id
+
+		// Wait for transaction to complete
+		time.Sleep(1 * time.Minute)
 
 		pwd, err := os.Getwd()
 		Expect(err).ToNot(HaveOccurred())
@@ -61,14 +87,23 @@ var _ = Describe("BOSH Director Level Integration for create_stemcell", func() {
 	})
 
 	AfterEach(func() {
+		_, err := vgbdtgService.DeleteObject(virtual_disk_image_id)
+		Expect(err).ToNot(HaveOccurred())
 		err = os.RemoveAll(tmpConfigPath)
 		Expect(err).ToNot(HaveOccurred())
 	})
 
 	Context("create_stemcell in SoftLayer", func() {
 		It("returns true because valid parameters", func() {
-			jsonPayload, err := testhelperscpi.GenerateCpiJsonPayload("create_stemcell", rootTemplatePath, replacementMap)
-			Expect(err).ToNot(HaveOccurred())
+			jsonPayload := fmt.Sprintf(
+				`{"method": "create_stemcell", "arguments": ["%s", {"virtual-disk-image-id": %d, "virtual-disk-image-uuid": "%s", "datacenter-name": "%s"}],"context": {"director_uuid": "%s"}}`,
+				"fake/root/path",
+				virtual_disk_image_id,
+				"fake-uuid",
+				"ams01",
+				"fake-director-uuid")
+			// jsonPayload, err := testhelperscpi.GenerateCpiJsonPayload("create_stemcell", rootTemplatePath, replacementMap)
+			// Expect(err).ToNot(HaveOccurred())
 
 			outputBytes, err := testhelperscpi.RunCpi(rootTemplatePath, tmpConfigPath, jsonPayload)
 			log.Println("outputBytes=" + string(outputBytes))
@@ -84,7 +119,7 @@ var _ = Describe("BOSH Director Level Integration for create_stemcell", func() {
 		})
 	})
 
-	FContext("create_stemcell in SoftLayer", func() {
+	Context("create_stemcell in SoftLayer", func() {
 		It("returns false because empty parameters", func() {
 			jsonPayload := `{"method": "create_stemcell", "arguments": [],"context": {}}`
 
