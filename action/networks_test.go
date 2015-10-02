@@ -34,6 +34,11 @@ var _ = Describe("Networks", func() {
 				Type: "fake-net2-type",
 				IP:   "fake-net2-ip",
 			},
+			"fake-net3-name": Network{
+				Type:          "fake-net3-type",
+				IP:            "fake-net3-ip",
+				Preconfigured: true,
+			},
 		}
 	})
 
@@ -57,6 +62,11 @@ var _ = Describe("Networks", func() {
 				"fake-net2-name": bslcvm.Network{
 					Type: "fake-net2-type",
 					IP:   "fake-net2-ip",
+				},
+				"fake-net3-name": bslcvm.Network{
+					Type:          "fake-net3-type",
+					IP:            "fake-net3-ip",
+					Preconfigured: true,
 				},
 			}
 

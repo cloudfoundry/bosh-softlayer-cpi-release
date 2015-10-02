@@ -179,8 +179,9 @@ var _ = Describe("AgentEnv", func() {
 						Netmask: "fake-netmask",
 						Gateway: "fake-gateway",
 
-						DNS:     []string{"fake-dns"},
-						Default: []string{"fake-default"},
+						DNS:           []string{"fake-dns"},
+						Default:       []string{"fake-default"},
+						Preconfigured: true,
 
 						MAC: "fake-mac",
 
