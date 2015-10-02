@@ -2,8 +2,10 @@ package delete_stemcell_test
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	. "github.com/onsi/ginkgo"
@@ -11,8 +13,9 @@ import (
 
 	testhelperscpi "github.com/maximilien/bosh-softlayer-cpi/test_helpers"
 	slclient "github.com/maximilien/softlayer-go/client"
+	datatypes "github.com/maximilien/softlayer-go/data_types"
 	softlayer "github.com/maximilien/softlayer-go/softlayer"
-	testhelpers "github.com/maximilien/softlayer-go/test_helpers"
+	// testhelpers "github.com/maximilien/softlayer-go/test_helpers"
 	"log"
 )
 
@@ -26,14 +29,14 @@ var _ = Describe("BOSH Director Level Integration for delete_stemcell", func() {
 
 		username, apiKey string
 
-		accountService softlayer.SoftLayer_Account_Service
+		vgbdtgService softlayer.SoftLayer_Virtual_Guest_Block_Device_Template_Group_Service
+
+		configuration datatypes.SoftLayer_Container_Virtual_Guest_Block_Device_Template_Configuration
 
 		rootTemplatePath, tmpConfigPath string
-		replacementMap                  map[string]string
 
-		output map[string]interface{}
-
-		vmId float64
+		virtual_disk_image_id int
+		output                map[string]interface{}
 	)
 
 	BeforeEach(func() {
@@ -45,12 +48,6 @@ var _ = Describe("BOSH Director Level Integration for delete_stemcell", func() {
 
 		client = slclient.NewSoftLayerClient(username, apiKey)
 		Expect(client).ToNot(BeNil())
-
-		accountService, err = testhelpers.CreateAccountService()
-		Expect(err).ToNot(HaveOccurred())
-
-		testhelpers.TIMEOUT = 35 * time.Minute
-		testhelpers.POLLING_INTERVAL = 10 * time.Second
 
 		pwd, err := os.Getwd()
 		Expect(err).ToNot(HaveOccurred())
@@ -66,8 +63,43 @@ var _ = Describe("BOSH Director Level Integration for delete_stemcell", func() {
 	})
 
 	Context("delete_stemcell in SoftLayer", func() {
-		It("returns true because valid parameters", func() {
-			jsonPayload, err := testhelperscpi.GenerateCpiJsonPayload("delete_stemcell", rootTemplatePath, replacementMap)
+		BeforeEach(func() {
+			swiftUsername := strings.Split(os.Getenv("SWIFT_USERNAME"), ":")[0]
+			Expect(swiftUsername).ToNot(Equal(""), "swiftUsername cannot be empty, set SWIFT_USERNAME")
+
+			swiftCluster := os.Getenv("SWIFT_CLUSTER")
+			Expect(swiftCluster).ToNot(Equal(""), "swiftCluster cannot be empty, set SWIFT_CLUSTER")
+
+			vgbdtgService, err = client.GetSoftLayer_Virtual_Guest_Block_Device_Template_Group_Service()
+			Expect(err).ToNot(HaveOccurred())
+			Expect(vgbdtgService).ToNot(BeNil())
+
+			configuration = datatypes.SoftLayer_Container_Virtual_Guest_Block_Device_Template_Configuration{
+				Name: "integration-test-vgbtg",
+				Note: "",
+				OperatingSystemReferenceCode: "UBUNTU_14_64",
+				Uri: "swift://" + swiftUsername + "@" + swiftCluster + "/stemcells/test-bosh-stemcell-softlayer.vhd",
+			}
+
+			vgbdtGroup, err := vgbdtgService.CreateFromExternalSource(configuration)
+			Expect(err).ToNot(HaveOccurred())
+
+			virtual_disk_image_id = vgbdtGroup.Id
+
+			// Wait for transaction to complete
+			time.Sleep(1 * time.Minute)
+		})
+
+		AfterEach(func() {
+			_, err := vgbdtgService.DeleteObject(virtual_disk_image_id)
+			Expect(err).ToNot(HaveOccurred())
+		})
+
+		It("returns nil when passed valid ID", func() {
+			jsonPayload := fmt.Sprintf(
+				`{"method": "delete_stemcell", "arguments": [%d], "context": {"director_uuid": "%s"}}`,
+				virtual_disk_image_id,
+				"fake-director-uuid")
 			Expect(err).ToNot(HaveOccurred())
 
 			outputBytes, err := testhelperscpi.RunCpi(rootTemplatePath, tmpConfigPath, jsonPayload)
@@ -76,15 +108,12 @@ var _ = Describe("BOSH Director Level Integration for delete_stemcell", func() {
 
 			err = json.Unmarshal(outputBytes, &output)
 			Expect(err).ToNot(HaveOccurred())
-			Expect(output["result"]).ToNot(BeNil())
+			Expect(output["result"]).To(BeNil())
 			Expect(output["error"]).To(BeNil())
-
-			vmId = output["result"].(float64)
-			Expect(vmId).ToNot(BeZero())
 		})
 	})
 
-	FContext("delete_stemcell in SoftLayer", func() {
+	Context("delete_stemcell in SoftLayer", func() {
 		It("returns false because empty parameters", func() {
 			jsonPayload := `{"method": "delete_stemcell", "arguments": [],"context": {}}`
 
