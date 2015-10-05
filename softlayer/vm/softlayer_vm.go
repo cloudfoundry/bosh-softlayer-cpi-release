@@ -464,9 +464,7 @@ func (vm SoftLayerVM) getAllowedHostCredential(virtualGuest datatypes.SoftLayer_
 }
 
 func (vm SoftLayerVM) backupOpenIscsiConfBasedOnShellScript(virtualGuest datatypes.SoftLayer_Virtual_Guest) (bool, error) {
-	command := fmt.Sprintf(`
-						cp /etc/iscsi/iscsid.conf{,.save}`,
-	)
+	command := fmt.Sprintf("cp /etc/iscsi/iscsid.conf{,.save}")
 	_, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, command)
 	if err != nil {
 		return false, bosherr.WrapError(err, "backuping open iscsi conf")
@@ -476,10 +474,7 @@ func (vm SoftLayerVM) backupOpenIscsiConfBasedOnShellScript(virtualGuest datatyp
 }
 
 func (vm SoftLayerVM) restartOpenIscsiBasedOnShellScript(virtualGuest datatypes.SoftLayer_Virtual_Guest) (bool, error) {
-	command := fmt.Sprintf(`
-						export PATH=/etc/init.d:$PATH
-						open-iscsi restart`,
-	)
+	command := fmt.Sprintf("/etc/init.d/open-iscsi restart")
 	_, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, command)
 	if err != nil {
 		return false, bosherr.WrapError(err, "restarting open iscsi")
@@ -489,11 +484,7 @@ func (vm SoftLayerVM) restartOpenIscsiBasedOnShellScript(virtualGuest datatypes.
 }
 
 func (vm SoftLayerVM) discoveryOpenIscsiTargetsBasedOnShellScript(virtualGuest datatypes.SoftLayer_Virtual_Guest) (bool, error) {
-	command := fmt.Sprintf(`
-						iscsiadm -m discovery -t sendtargets -p %s
-						iscsiadm -m node -l`,
-		virtualGuest.PrimaryBackendIpAddress,
-	)
+	command := fmt.Sprintf("iscsiadm -m discovery -t sendtargets -p %s ; iscsiadm -m node -l", virtualGuest.PrimaryBackendIpAddress)
 	_, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, command)
 	if err != nil {
 		return false, bosherr.WrapError(err, "discvoerying open iscsi targets")
@@ -504,10 +495,7 @@ func (vm SoftLayerVM) discoveryOpenIscsiTargetsBasedOnShellScript(virtualGuest d
 
 func (vm SoftLayerVM) writeOpenIscsiInitiatornameBasedOnShellScript(virtualGuest datatypes.SoftLayer_Virtual_Guest, credential AllowedHostCredential) (bool, error) {
 	if len(credential.Iqn) > 0 {
-		command := fmt.Sprintf(`
-						echo "InitiatorName=%s" > /etc/iscsi/initiatorname.iscsi`,
-			credential.Iqn,
-		)
+		command := fmt.Sprintf("echo 'InitiatorName=%s' > /etc/iscsi/initiatorname.iscsi" , credential.Iqn)
 		_, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, command)
 		if err != nil {
 			return false, bosherr.WrapError(err, "Writing to /etc/iscsi/initiatorname.iscsi")
@@ -583,15 +571,7 @@ func (vm SoftLayerVM) detachVolumeBasedOnShellScript(virtualGuest datatypes.Soft
 	}
 
 	for _, portal := range portals {
-		command := fmt.Sprintf(`
-		iscsiadm -m node -T %s --portal %s -u
-		iscsiadm -m node -o delete -T %s --portal %s`,
-			targetName,
-			portal,
-			targetName,
-			portal,
-		)
-
+		command := fmt.Sprintf("iscsiadm -m node -T %s --portal %s -u ; iscsiadm -m node -o delete -T %s --portal %s", targetName, portal, targetName, portal)
 		if _, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, command); err != nil {
 			return err
 		}
@@ -601,10 +581,7 @@ func (vm SoftLayerVM) detachVolumeBasedOnShellScript(virtualGuest datatypes.Soft
 }
 
 func (vm SoftLayerVM) findOpenIscsiTargetBasedOnShellScript(virtualGuest datatypes.SoftLayer_Virtual_Guest, volume datatypes.SoftLayer_Network_Storage) (targetName string, err error) {
-	command := `
-		sleep 1
-			iscsiadm -m session -P3 | awk '/Target: /{print $2}'`
-
+	command := "sleep 1 ; iscsiadm -m session -P3 | awk '/Target: /{print $2}'"
 	output, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, command)
 	if err != nil {
 		return "", err
@@ -619,9 +596,7 @@ func (vm SoftLayerVM) findOpenIscsiTargetBasedOnShellScript(virtualGuest datatyp
 }
 
 func (vm SoftLayerVM) findOpenIscsiPortalsBasedOnShellScript(virtualGuest datatypes.SoftLayer_Virtual_Guest, volume datatypes.SoftLayer_Network_Storage) ([]string, error) {
-	command := `
-		sleep 1
-			iscsiadm -m session -P3 | awk 'BEGIN{ lel=0} { if($0 ~ /Current Portal: /){ portal = $3 ; lel=NR } else { if( NR==(lel+46) && $0 ~ /Attached scsi disk /) {print portal}}}'`
+	command := "sleep 1 ; iscsiadm -m session -P3 | awk 'BEGIN{ lel=0} { if($0 ~ /Current Portal: /){ portal = $3 ; lel=NR } else { if( NR==(lel+46) && $0 ~ /Attached scsi disk /) {print portal}}}'"
 	output, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, command)
 	if err != nil {
 		return []string{}, err
@@ -640,7 +615,6 @@ func (vm SoftLayerVM) getRootPassword(virtualGuest datatypes.SoftLayer_Virtual_G
 
 	for _, password := range passwords {
 		if password.Username == ROOT_USER_NAME {
-			vm.logger.Info(softLayerVMtag, "WJQ: ROOT password: %s", password.Password)
 			return password.Password
 		}
 	}
