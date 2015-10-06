@@ -8,6 +8,7 @@ import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 
 	sl "github.com/maximilien/softlayer-go/softlayer"
+	datatypes "github.com/maximilien/softlayer-go/data_types"
 )
 
 var (
@@ -183,4 +184,29 @@ func GetUserMetadataOnVirtualGuest(softLayerClient sl.Client, virtualGuestId int
 	}
 
 	return sDec, nil
+}
+
+func GetObjectDetailsOnVirtualGuest(softLayerClient sl.Client, virtualGuestId int) (datatypes.SoftLayer_Virtual_Guest, error) {
+	virtualGuestService, err := softLayerClient.GetSoftLayer_Virtual_Guest_Service()
+	if err != nil {
+		return datatypes.SoftLayer_Virtual_Guest{}, bosherr.WrapError(err, "Can not get softlayer virtual guest service.")
+	}
+	virtualGuest, err := virtualGuestService.GetObject(virtualGuestId)
+	if err != nil {
+		return datatypes.SoftLayer_Virtual_Guest{},  bosherr.WrapErrorf(err, "Can not get virtual guest with id: %d", virtualGuestId)
+	}
+	return virtualGuest, nil
+}
+
+func GetObjectDetailsOnStorage(softLayerClient sl.Client, volumeId int) ( datatypes.SoftLayer_Network_Storage, error) {
+	networkStorageService, err := softLayerClient.GetSoftLayer_Network_Storage_Service()
+	if err != nil {
+		return datatypes.SoftLayer_Network_Storage{}, bosherr.WrapError(err, "Can not get network storage service.")
+	}
+
+	volume, err := networkStorageService.GetIscsiVolume(volumeId)
+	if err != nil {
+		return datatypes.SoftLayer_Network_Storage{}, bosherr.WrapErrorf(err, "Failed to get iSCSI volume with id: %d", volumeId)
+	}
+	return volume, nil
 }

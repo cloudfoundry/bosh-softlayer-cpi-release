@@ -71,6 +71,9 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 	vm := NewSoftLayerVM(virtualGuest.Id, c.softLayerClient, util.GetSshClient(), agentEnvService, c.logger, TIMEOUT_TRANSACTIONS_DELETE_VM)
 
     // update mbus setting
+
+
+
 	metadata, err := bslcommon.GetUserMetadataOnVirtualGuest(vm.softLayerClient, virtualGuest.Id)
 	if err != nil {
 		return SoftLayerVM{}, bosherr.WrapErrorf(err, "Failed to get metadata from virtual guest with id: %d.", virtualGuest.Id)
@@ -80,8 +83,12 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 		return SoftLayerVM{}, bosherr.WrapErrorf(err, "Failed to unmarshal metadata from virutal guest with id: %d.", virtualGuest.Id)
 	}
 
-	mbus := fmt.Sprintf("https://admin:admin@%s:6868", virtualGuest.PrimaryBackendIpAddress)
+	virtualGuest, err = bslcommon.GetObjectDetailsOnVirtualGuest(vm.softLayerClient, virtualGuest.Id)
+	if err != nil {
+		return SoftLayerVM{}, bosherr.WrapErrorf(err, "Failed to get details from virtual guest with id: %d.", virtualGuest.Id)
+	}
 
+	mbus := fmt.Sprintf(`https://admin:admin@%s:6868`, virtualGuest.PrimaryBackendIpAddress)
 	agentEnv.Mbus = mbus;
 
 	metadata, err = json.Marshal(agentEnv)
