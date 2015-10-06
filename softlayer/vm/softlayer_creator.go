@@ -3,6 +3,7 @@ package vm
 import (
 	"fmt"
 	"time"
+	"encoding/json"
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
@@ -67,8 +68,31 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 	}
 
 	agentEnvService := c.agentEnvServiceFactory.New(virtualGuest.Id)
-
 	vm := NewSoftLayerVM(virtualGuest.Id, c.softLayerClient, util.GetSshClient(), agentEnvService, c.logger, TIMEOUT_TRANSACTIONS_DELETE_VM)
+
+    // update mbus setting
+	metadata, err := bslcommon.GetUserMetadataOnVirtualGuest(vm.softLayerClient, virtualGuest.Id)
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Failed to get metadata from virtual guest with id: %d.", virtualGuest.Id)
+	}
+	agentEnv, err := NewAgentEnvFromJSON(metadata)
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Failed to unmarshal metadata from virutal guest with id: %d.", virtualGuest.Id)
+	}
+
+	mbus := fmt.Sprintf("https://admin:admin@%s:6868", virtualGuest.PrimaryBackendIpAddress)
+
+	agentEnv.Mbus = mbus;
+
+	metadata, err = json.Marshal(agentEnv)
+	if err != nil {
+		return bosherr.WrapError(err, "Marshalling agent environment metadata")
+	}
+
+	err = bslcommon.ConfigureMetadataOnVirtualGuest(vm.softLayerClient, virtualGuest.Id, string(metadata), bslcommon.TIMEOUT, bslcommon.POLLING_INTERVAL)
+	if err != nil {
+		return bosherr.WrapError(err, fmt.Sprintf("Configuring metadata on VirtualGuest `%d`", virtualGuest.Id))
+	}
 
 	return vm, nil
 }
