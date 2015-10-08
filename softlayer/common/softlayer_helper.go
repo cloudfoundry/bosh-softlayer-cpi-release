@@ -57,6 +57,8 @@ func ConfigureMetadataOnVirtualGuest(softLayerClient sl.Client, virtualGuestId i
 		return bosherr.WrapError(err, fmt.Sprintf("Setting metadata on VirtualGuest `%d`", virtualGuestId))
 	}
 
+	time.sleep(5 * time.Minute)
+
 	err = WaitForVirtualGuestToHaveNoRunningTransactions(softLayerClient, virtualGuestId, timeout, pollingInterval)
 	if err != nil {
 		return bosherr.WrapError(err, fmt.Sprintf("Waiting for VirtualGuest `%d` to have no pending transactions", virtualGuestId))
