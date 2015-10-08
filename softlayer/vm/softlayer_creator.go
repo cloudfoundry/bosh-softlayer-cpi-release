@@ -71,9 +71,6 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 	vm := NewSoftLayerVM(virtualGuest.Id, c.softLayerClient, util.GetSshClient(), agentEnvService, c.logger, TIMEOUT_TRANSACTIONS_DELETE_VM)
 
     // update mbus setting
-
-
-
 	metadata, err := bslcommon.GetUserMetadataOnVirtualGuest(vm.softLayerClient, virtualGuest.Id)
 	if err != nil {
 		return SoftLayerVM{}, bosherr.WrapErrorf(err, "Failed to get metadata from virtual guest with id: %d.", virtualGuest.Id)

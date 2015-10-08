@@ -57,6 +57,11 @@ func ConfigureMetadataOnVirtualGuest(softLayerClient sl.Client, virtualGuestId i
 		return bosherr.WrapError(err, fmt.Sprintf("Setting metadata on VirtualGuest `%d`", virtualGuestId))
 	}
 
+	err = WaitForVirtualGuestToHaveNoRunningTransactions(softLayerClient, virtualGuestId, timeout, pollingInterval)
+	if err != nil {
+		return bosherr.WrapError(err, fmt.Sprintf("Waiting for VirtualGuest `%d` to have no pending transactions", virtualGuestId))
+	}
+
 	err = ConfigureMetadataDiskOnVirtualGuest(softLayerClient, virtualGuestId)
 	if err != nil {
 		return bosherr.WrapError(err, fmt.Sprintf("Configuring metadata disk on VirtualGuest `%d`", virtualGuestId))
