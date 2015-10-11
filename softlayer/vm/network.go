@@ -12,6 +12,8 @@ type Network struct {
 	DNS     []string
 	Default []string
 
+	Preconfigured bool
+
 	CloudProperties map[string]interface{}
 }
 
