@@ -81,7 +81,7 @@ func (c SoftLayerCreator) CreateNewVM(agentID string, stemcell bslcstem.Stemcell
 		}
 
 		vmInfoDB := bslcvmpool.NewVMInfoDB(vm.id, virtualGuestTemplate.Hostname+"."+virtualGuestTemplate.Domain, "t", stemcell.Uuid(), agentID, c.logger, db)
-		err = vmInfoDB.InsertVMInfo()
+		err = vmInfoDB.InsertVMInfo(bslcvmpool.DB_RETRY_TIMES, bslcvmpool.DB_RETRY_INTERVAL)
 		if err != nil {
 			return SoftLayerVM{}, bosherr.WrapError(err, "Failed to insert the record into VM pool DB")
 		}
@@ -113,7 +113,7 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 	vmInfoDB := bslcvmpool.NewVMInfoDB(0, "", "f", "", agentID, c.logger, db)
 	defer vmInfoDB.CloseDB()
 
-	err = vmInfoDB.QueryVMInfobyAgentID()
+	err = vmInfoDB.QueryVMInfobyAgentID(bslcvmpool.DB_RETRY_TIMES, bslcvmpool.DB_RETRY_INTERVAL)
 	if err != nil {
 		return SoftLayerVM{}, bosherr.WrapError(err, "Failed to query VM info by given agent ID "+agentID)
 	}
@@ -131,7 +131,7 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 
 		c.logger.Info(softLayerCreatorLogTag, fmt.Sprintf("Updated in_use flag to 't' for the VM %d in VM pool", vmInfoDB.VmProperties.Id))
 		vmInfoDB.VmProperties.InUse = "t"
-		err = vmInfoDB.UpdateVMInfoByID()
+		err = vmInfoDB.UpdateVMInfoByID(bslcvmpool.DB_RETRY_TIMES, bslcvmpool.DB_RETRY_INTERVAL)
 		if err != nil {
 			return vm, bosherr.WrapError(err, fmt.Sprintf("Failed to query VM info by given ID %d", vm.ID()))
 		} else {
@@ -140,7 +140,7 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 	}
 
 	vmInfoDB.VmProperties.InUse = ""
-	err = vmInfoDB.QueryVMInfobyAgentID()
+	err = vmInfoDB.QueryVMInfobyAgentID(bslcvmpool.DB_RETRY_TIMES, bslcvmpool.DB_RETRY_INTERVAL)
 	if err != nil {
 		return SoftLayerVM{}, bosherr.WrapError(err, "Failed to query VM info by given agent ID "+agentID)
 	}

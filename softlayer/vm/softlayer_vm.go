@@ -93,7 +93,7 @@ func (vm SoftLayerVM) Delete() error {
 	vmInfoDB := bslcvmpool.NewVMInfoDB(vm.id, "", "t", "", "", vm.logger, db)
 	defer vmInfoDB.CloseDB()
 
-	err = vmInfoDB.QueryVMInfobyID()
+	err = vmInfoDB.QueryVMInfobyID(bslcvmpool.DB_RETRY_TIMES, bslcvmpool.DB_RETRY_INTERVAL)
 	if err != nil {
 		return bosherr.WrapError(err, fmt.Sprintf("Failed to query VM info by given ID %d", vm.id))
 	}
@@ -102,7 +102,7 @@ func (vm SoftLayerVM) Delete() error {
 	if vmInfoDB.VmProperties.Id != 0 {
 		vm.logger.Info(softLayerCreatorLogTag, fmt.Sprintf("Release the VM with id %d back to the VM pool", vmInfoDB.VmProperties.Id))
 		vmInfoDB.VmProperties.InUse = "f"
-		err = vmInfoDB.UpdateVMInfoByID()
+		err = vmInfoDB.UpdateVMInfoByID(bslcvmpool.DB_RETRY_TIMES, bslcvmpool.DB_RETRY_INTERVAL)
 		if err != nil {
 			return bosherr.WrapError(err, fmt.Sprintf("Failed to query VM info by given ID %d", vm.id))
 		} else {
@@ -111,7 +111,7 @@ func (vm SoftLayerVM) Delete() error {
 	}
 
 	vmInfoDB.VmProperties.InUse = ""
-	err = vmInfoDB.QueryVMInfobyID()
+	err = vmInfoDB.QueryVMInfobyID(bslcvmpool.DB_RETRY_TIMES, bslcvmpool.DB_RETRY_INTERVAL)
 	if err != nil {
 		return bosherr.WrapError(err, fmt.Sprintf("Failed to query VM info by given ID %d", vm.id))
 	}
