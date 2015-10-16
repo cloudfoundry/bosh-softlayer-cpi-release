@@ -76,7 +76,7 @@ func (vmInfoDB *VMInfoDB) QueryVMInfobyAgentID(retryTimes int, retryInterval tim
 				vmInfoDB.logger.Info(updateVMPoolDBLogTag, fmt.Sprintf("%s, retrying %d times...", sqliteErr.Error(), retry_counter))
 				continue
 			} else {
-				return bosherr.WrapError(sqliteErr.Error(), "Failed to begin DB transcation")
+				return bosherr.WrapError(sqliteErr, "Failed to begin DB transcation")
 			}
 		}
 
@@ -97,7 +97,7 @@ func (vmInfoDB *VMInfoDB) QueryVMInfobyAgentID(retryTimes int, retryInterval tim
 				vmInfoDB.logger.Info(updateVMPoolDBLogTag, fmt.Sprintf("%s, retrying %d times...", sqliteErr.Error(), retry_counter))
 				continue
 			} else {
-				return bosherr.WrapError(sqliteErr.Error(), "Failed to prepare sql statement")
+				return bosherr.WrapError(sqliteErr, "Failed to prepare sql statement")
 			}
 		}
 
@@ -108,7 +108,7 @@ func (vmInfoDB *VMInfoDB) QueryVMInfobyAgentID(retryTimes int, retryInterval tim
 				vmInfoDB.logger.Info(updateVMPoolDBLogTag, fmt.Sprintf("%s, retrying %d times...", sqliteErr.Error(), retry_counter))
 				continue
 			} else {
-				return bosherr.WrapError(sqliteErr.Error(), "Failed to query VM info from vms table")
+				return bosherr.WrapError(sqliteErr, "Failed to query VM info from vms table")
 			}
 
 		}
@@ -118,7 +118,7 @@ func (vmInfoDB *VMInfoDB) QueryVMInfobyAgentID(retryTimes int, retryInterval tim
 
 	if locked == true {
 		sqliteErr := err.(sqlite3.Error)
-		return bosherr.WrapError(sqliteErr.Error(), "Failed to query VM Pool DB")
+		return bosherr.WrapError(sqliteErr, "Failed to query VM Pool DB")
 	} else {
 		return nil
 	}
@@ -138,7 +138,7 @@ func (vmInfoDB *VMInfoDB) QueryVMInfobyID(retryTimes int, retryInterval time.Dur
 				vmInfoDB.logger.Info(updateVMPoolDBLogTag, fmt.Sprintf("%s, retrying %d times...", sqliteErr.Error(), retry_counter))
 				continue
 			} else {
-				return bosherr.WrapError(sqliteErr.Error(), "Failed to begin DB transcation")
+				return bosherr.WrapError(sqliteErr, "Failed to begin DB transcation")
 			}
 		}
 
@@ -158,7 +158,7 @@ func (vmInfoDB *VMInfoDB) QueryVMInfobyID(retryTimes int, retryInterval time.Dur
 				vmInfoDB.logger.Info(updateVMPoolDBLogTag, fmt.Sprintf("%s, retrying %d times...", sqliteErr.Error(), retry_counter))
 				continue
 			} else {
-				return bosherr.WrapError(sqliteErr.Error(), "Failed to prepare sql statement")
+				return bosherr.WrapError(sqliteErr, "Failed to prepare sql statement")
 			}
 		}
 		defer sqlStmt.Close()
@@ -170,7 +170,7 @@ func (vmInfoDB *VMInfoDB) QueryVMInfobyID(retryTimes int, retryInterval time.Dur
 				vmInfoDB.logger.Info(updateVMPoolDBLogTag, fmt.Sprintf("%s, retrying %d times...", sqliteErr.Error(), retry_counter))
 				continue
 			} else {
-				return bosherr.WrapError(sqliteErr.Error(), "Failed to query VM info from vms table")
+				return bosherr.WrapError(sqliteErr, "Failed to query VM info from vms table")
 			}
 
 		}
@@ -180,7 +180,7 @@ func (vmInfoDB *VMInfoDB) QueryVMInfobyID(retryTimes int, retryInterval time.Dur
 
 	if locked == true {
 		sqliteErr := err.(sqlite3.Error)
-		return bosherr.WrapError(sqliteErr.Error(), "Failed to execute Query VM info")
+		return bosherr.WrapError(sqliteErr, "Failed to execute Query VM info")
 	} else {
 		return nil
 	}
@@ -219,7 +219,7 @@ func (vmInfoDB *VMInfoDB) UpdateVMInfoByID(retryTimes int, retryInterval time.Du
 				vmInfoDB.logger.Info(updateVMPoolDBLogTag, fmt.Sprintf("%s, retrying %d times...", sqliteErr.Error(), retry_counter))
 				continue
 			} else {
-				return bosherr.WrapError(sqliteErr.Error(), "Failed to begin DB transcation")
+				return bosherr.WrapError(sqliteErr, "Failed to begin DB transcation")
 			}
 		}
 
@@ -232,7 +232,7 @@ func (vmInfoDB *VMInfoDB) UpdateVMInfoByID(retryTimes int, retryInterval time.Du
 					vmInfoDB.logger.Info(updateVMPoolDBLogTag, fmt.Sprintf("%s, retrying %d times...", sqliteErr.Error(), retry_counter))
 					continue
 				} else {
-					return bosherr.WrapError(sqliteErr.Error(), "Failed to update in_use column in vms")
+					return bosherr.WrapError(sqliteErr, "Failed to update in_use column in vms")
 				}
 			}
 		}
@@ -246,7 +246,7 @@ func (vmInfoDB *VMInfoDB) UpdateVMInfoByID(retryTimes int, retryInterval time.Du
 					vmInfoDB.logger.Info(updateVMPoolDBLogTag, fmt.Sprintf("%s, retrying %d times...", sqliteErr.Error(), retry_counter))
 					continue
 				} else {
-					return bosherr.WrapError(sqliteErr.Error(), "Failed to update in_use column in vms")
+					return bosherr.WrapError(sqliteErr, "Failed to update in_use column in vms")
 				}
 			}
 		}
@@ -260,7 +260,7 @@ func (vmInfoDB *VMInfoDB) UpdateVMInfoByID(retryTimes int, retryInterval time.Du
 					vmInfoDB.logger.Info(updateVMPoolDBLogTag, fmt.Sprintf("%s, retrying %d times...", sqliteErr.Error(), retry_counter))
 					continue
 				} else {
-					return bosherr.WrapError(sqliteErr.Error(), "Failed to update in_use column in vms")
+					return bosherr.WrapError(sqliteErr, "Failed to update in_use column in vms")
 				}
 			}
 		}
@@ -270,7 +270,7 @@ func (vmInfoDB *VMInfoDB) UpdateVMInfoByID(retryTimes int, retryInterval time.Du
 
 	if locked == true {
 		sqliteErr := err.(sqlite3.Error)
-		return bosherr.WrapError(sqliteErr.Error(), "Failed to update VM Pool DB")
+		return bosherr.WrapError(sqliteErr, "Failed to update VM Pool DB")
 	} else {
 		return nil
 	}
@@ -291,7 +291,7 @@ func exec(db DB, sqlStmt string, retryTimes int, retryInterval time.Duration) er
 				boshlog.Logger.Info(updateVMPoolDBLogTag, fmt.Sprintf("%s, retrying %d times...", sqliteErr.Error(), retry_counter))
 				continue
 			} else {
-				return bosherr.WrapError(sqliteErr.Error(), "Failed to begin DB transcation")
+				return bosherr.WrapError(sqliteErr, "Failed to begin DB transcation")
 			}
 		}
 
@@ -302,7 +302,7 @@ func exec(db DB, sqlStmt string, retryTimes int, retryInterval time.Duration) er
 				boshlog.Logger.Info(updateVMPoolDBLogTag, fmt.Sprintf("%s, retrying %d times...", sqliteErr.Error(), retry_counter))
 				continue
 			} else {
-				return bosherr.WrapError(sqliteErr.Error(), "Failed to execute sql statement: "+sqlStmt)
+				return bosherr.WrapError(sqliteErr, "Failed to execute sql statement: "+sqlStmt)
 			}
 		}
 
@@ -312,7 +312,7 @@ func exec(db DB, sqlStmt string, retryTimes int, retryInterval time.Duration) er
 
 	if locked == true {
 		sqliteErr := err.(sqlite3.Error)
-		return bosherr.WrapError(sqliteErr.Error(), "Failed to execute sql statement: "+sqlStmt)
+		return bosherr.WrapError(sqliteErr, "Failed to execute sql statement: "+sqlStmt)
 	} else {
 		return nil
 	}
