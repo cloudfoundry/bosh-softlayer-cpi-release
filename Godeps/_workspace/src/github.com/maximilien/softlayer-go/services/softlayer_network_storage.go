@@ -15,7 +15,7 @@ import (
 const (
 	NETWORK_PERFORMANCE_STORAGE_PACKAGE_ID = 222
 	BLOCK_ITEM_PRICE_ID                    = 40678 // file or block item price id
-	CREATE_ISCSI_VOLUME_MAX_RETRY_TIME     = 12
+	CREATE_ISCSI_VOLUME_MAX_RETRY_TIME     = 60
 	CREATE_ISCSI_VOLUME_CHECK_INTERVAL     = 5 // seconds
 )
 
