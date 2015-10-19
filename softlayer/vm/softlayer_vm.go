@@ -204,6 +204,11 @@ func (vm SoftLayerVM) AttachDisk(disk bslcdisk.Disk) error {
 		return bosherr.WrapError(err, fmt.Sprintf("Configuring metadata on VirtualGuest `%d`", virtualGuest.Id))
 	}
 
+	err = bslcommon.WaitForVirtualGuest(vm.softLayerClient, virtualGuest.Id, "RUNNING", bslcommon.TIMEOUT, bslcommon.POLLING_INTERVAL)
+	if err != nil {
+		return bosherr.WrapError(err, fmt.Sprintf("PowerOn failed with VirtualGuest id `%d`", virtualGuest.Id))
+	}
+
 	return nil
 }
 
@@ -233,6 +238,11 @@ func (vm SoftLayerVM) DetachDisk(disk bslcdisk.Disk) error {
 	err = bslcommon.ConfigureMetadataOnVirtualGuest(vm.softLayerClient, virtualGuest.Id, string(metadata), bslcommon.TIMEOUT, bslcommon.POLLING_INTERVAL)
 	if err != nil {
 		return bosherr.WrapError(err, fmt.Sprintf("Configuring metadata on VirtualGuest `%d`", virtualGuest.Id))
+	}
+
+	err = bslcommon.WaitForVirtualGuest(vm.softLayerClient, virtualGuest.Id, "RUNNING", bslcommon.TIMEOUT, bslcommon.POLLING_INTERVAL)
+	if err != nil {
+		return bosherr.WrapError(err, fmt.Sprintf("PowerOn failed with VirtualGuest id `%d`", virtualGuest.Id))
 	}
 
 	networkStorageService, err := vm.softLayerClient.GetSoftLayer_Network_Storage_Service()
@@ -429,7 +439,7 @@ func (vm SoftLayerVM) fetchVMandIscsiVolume(vmId int, volumeId int) (datatypes.S
 
 	volume, err := networkStorageService.GetIscsiVolume(volumeId)
 	if err != nil {
-		return datatypes.SoftLayer_Virtual_Guest{}, datatypes.SoftLayer_Network_Storage{}, bosherr.WrapErrorf(err, "Failed to get iSCSI volume with id: %d", volumeId)
+		return datatypes.SoftLayer_Virtual_Guest{}, datatypes.SoftLayer_Network_Storage{}, bosherr.WrapErrorf(err, "Can not get iSCSI volume with id: %d", volumeId)
 	}
 
 	return virtualGuest, volume, nil
@@ -484,10 +494,16 @@ func (vm SoftLayerVM) restartOpenIscsiBasedOnShellScript(virtualGuest datatypes.
 }
 
 func (vm SoftLayerVM) discoveryOpenIscsiTargetsBasedOnShellScript(virtualGuest datatypes.SoftLayer_Virtual_Guest, volume datatypes.SoftLayer_Network_Storage) (bool, error) {
-	command := fmt.Sprintf("iscsiadm -m discovery -t sendtargets -p %s ; iscsiadm -m node -l", volume.ServiceResourceBackendIpAddress)
+	command := fmt.Sprintf("iscsiadm -m discovery -t sendtargets -p %s", volume.ServiceResourceBackendIpAddress)
 	_, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, command)
 	if err != nil {
 		return false, bosherr.WrapError(err, "discvoerying open iscsi targets")
+	}
+
+	loginSessionCmd := fmt.Sprintf("iscsiadm -m node -l")
+	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, loginSessionCmd)
+	if err != nil {
+		return false, bosherr.WrapError(err, "logining iscsi sessions")
 	}
 
 	return true, nil
