@@ -77,7 +77,7 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 	vm := NewSoftLayerVM(virtualGuest.Id, c.softLayerClient, util.GetSshClient(), agentEnvService, c.logger, TIMEOUT_TRANSACTIONS_DELETE_VM)
 
 
-	if len(cloudProps.BoshIp) = 0{
+	if len(cloudProps.BoshIp) == 0{
 		virtualGuest, err = bslcommon.GetObjectDetailsOnVirtualGuest(vm.softLayerClient, virtualGuest.Id)
 		if err != nil {
 			return SoftLayerVM{}, bosherr.WrapErrorf(err, "Can not get details from virtual guest with id: %d.", virtualGuest.Id)
