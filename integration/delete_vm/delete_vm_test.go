@@ -94,6 +94,8 @@ var _ = Describe("BOSH Director Level Integration for delete_vm", func() {
 		})
 
 		AfterEach(func() {
+			// assume errors are either because service was already deleted or will be caught later anyway
+			testhelpers.WaitForVirtualGuestToHaveNoActiveTransactionsOrToErr(virtualGuest.Id)
 			testhelpers.DeleteSshKey(createdSshKey.Id)
 		})
 
