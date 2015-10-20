@@ -15,6 +15,8 @@ import (
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
+	boshretry "github.com/cloudfoundry/bosh-utils/retrystrategy"
+	"github.com/pivotal-golang/clock"
 
 	sl "github.com/maximilien/softlayer-go/softlayer"
 
@@ -159,13 +161,22 @@ func (vm SoftLayerVM) AttachDisk(disk bslcdisk.Disk) error {
 	if err != nil {
 		return bosherr.WrapError(err, "Can not get network storage service.")
 	}
-
 	allowed, err := networkStorageService.HasAllowedVirtualGuest(disk.ID(), vm.ID())
 	if err == nil && allowed == false {
-		err = networkStorageService.AttachIscsiVolume(virtualGuest, disk.ID())
-	}
-	if err != nil {
-		return bosherr.WrapError(err, fmt.Sprintf("Failed to grant access of disk `%d` from virtual guest `%d`", disk.ID(), virtualGuest.Id))
+		attachIscsiVolumeRetryable := boshretry.NewRetryable(
+			func() (bool, error) {
+				resp, err := networkStorageService.AttachIscsiVolume(virtualGuest, disk.ID())
+				if err != nil || strings.Contains(resp,"A Volume Provisioning is currently in progress") {
+					return true, bosherr.WrapError(err, fmt.Sprintf("Granting volume access to vitrual guest %s", virtualGuest.Id))
+				}
+				return false, nil
+			})
+		timeService := clock.NewClock()
+		timeoutRetryStrategy := boshretry.NewTimeoutRetryStrategy(10*time.Minute, 30*time.Second, attachIscsiVolumeRetryable, timeService, vm.logger)
+		err := timeoutRetryStrategy.Try()
+		if err != nil {
+			return bosherr.WrapError(err, fmt.Sprintf("Failed to grant access of disk `%d` from virtual guest `%d`", disk.ID(), virtualGuest.Id))
+		}
 	}
 
 	hasMultiPath, err := vm.hasMulitPathToolBasedOnShellScript(virtualGuest)
@@ -461,7 +472,7 @@ func (vm SoftLayerVM) getAllowedHostCredential(virtualGuest datatypes.SoftLayer_
 	}
 
 	allowedHost, err := virtualGuestService.GetAllowedHost(virtualGuest.Id)
-	if err != nil {
+	if err != nil || allowedHost.Id == 0 {
 		return AllowedHostCredential{}, bosherr.WrapErrorf(err, "Can not get allowed host with instance id: %d", virtualGuest.Id)
 	}
 
