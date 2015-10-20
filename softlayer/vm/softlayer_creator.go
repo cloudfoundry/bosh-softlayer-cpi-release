@@ -172,5 +172,5 @@ func (c SoftLayerCreator) updateEtcHostsOfBoshInit(record string) (err error) {
 
 const etcHostsTemplate = `127.0.0.1 localhost
 {{.}}
-
+`
 
