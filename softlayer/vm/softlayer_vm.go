@@ -29,6 +29,7 @@ const (
 	softLayerVMtag                 = "SoftLayerVM"
 	ROOT_USER_NAME                 = "root"
 	deleteVMLogTag                 = "DeleteVM"
+	attachDiskLogTag               = "AttachDiskVM"
 	TIMEOUT_TRANSACTIONS_DELETE_VM = 60 * time.Minute
 )
 
@@ -204,7 +205,13 @@ func (vm SoftLayerVM) AttachDisk(disk bslcdisk.Disk) error {
 		return bosherr.WrapError(err, fmt.Sprintf("Configuring metadata on VirtualGuest `%d`", virtualGuest.Id))
 	}
 
-	time.Sleep(2 * time.Minute)
+	t := 5*time.Minute
+
+	vm.logger.Info(attachDiskLogTag, "Before WJQ %s", time.Now().String())
+
+	time.Sleep(t)
+
+	vm.logger.Info(attachDiskLogTag, "After WJQ %s", time.Now().String())
 
 	err = bslcommon.WaitForVirtualGuest(vm.softLayerClient, virtualGuest.Id, "RUNNING", bslcommon.TIMEOUT, bslcommon.POLLING_INTERVAL)
 	if err != nil {
