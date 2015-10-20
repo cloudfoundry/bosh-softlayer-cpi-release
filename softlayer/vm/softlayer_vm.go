@@ -500,7 +500,7 @@ func (vm SoftLayerVM) discoveryOpenIscsiTargetsBasedOnShellScript(virtualGuest d
 		return false, bosherr.WrapError(err, "discvoerying open iscsi targets")
 	}
 
-	loginSessionCmd := fmt.Sprintf("iscsiadm -m node -l")
+	loginSessionCmd := fmt.Sprintf("echo `iscsiadm -m node -l`")
 	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, loginSessionCmd)
 	if err != nil {
 		return false, bosherr.WrapError(err, "logining iscsi sessions")
