@@ -207,8 +207,6 @@ func (slns *softLayer_Network_Storage_Service) AttachIscsiVolume(virtualGuest da
 		return err
 	}
 
-	time.Sleep(5 * time.Minute)
-
 	_, err = slns.client.DoRawHttpRequest(fmt.Sprintf("%s/%d/allowAccessFromVirtualGuest.json", slns.GetName(), volumeId), "PUT", bytes.NewBuffer(requestBody))
 	if err != nil {
 		return err
