@@ -11,11 +11,11 @@ import (
 )
 
 var (
-	SQLITE_DB_FOLDER    = common.GetOSEnvVariable("SQLITE_DB_FOLDER", "/var/vcap/store/director/")
-	SQLITE_DB_FILE      = common.GetOSEnvVariable("SQLITE_DB_FILE", "vm_pool.sqlite")
-	SQLITE_DB_FILE_PATH = filepath.Join(SQLITE_DB_FOLDER, SQLITE_DB_FILE)
-	DB_RETRY_INTERVAL = 3 * time.Second
-	DB_RETRY_TIMES = 10
+	SQLITE_DB_FOLDER     = common.GetOSEnvVariable("SQLITE_DB_FOLDER", "/var/vcap/store/director/")
+	SQLITE_DB_FILE       = common.GetOSEnvVariable("SQLITE_DB_FILE", "vm_pool.sqlite")
+	SQLITE_DB_FILE_PATH  = filepath.Join(SQLITE_DB_FOLDER, SQLITE_DB_FILE)
+	DB_RETRY_INTERVAL    = 3 * time.Second
+	DB_RETRY_TIMES       = 10
 	updateVMPoolDBLogTag = "updateVMPoolDBLogTag"
 )
 

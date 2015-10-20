@@ -68,7 +68,7 @@ func (vmInfoDB *VMInfoDB) QueryVMInfobyAgentID(retryTimes int, retryInterval tim
 	retry_counter := 0
 	var err error
 	for locked && retry_counter <= retryTimes {
-		retry_counter +=1
+		retry_counter += 1
 		tx, err := vmInfoDB.db.Begin()
 		if err != nil {
 			sqliteErr := err.(sqlite3.Error)
@@ -93,7 +93,7 @@ func (vmInfoDB *VMInfoDB) QueryVMInfobyAgentID(retryTimes int, retryInterval tim
 		defer sqlStmt.Close()
 		if err != nil {
 			sqliteErr := err.(sqlite3.Error)
-			if sqliteErr.Code == sqlite3.ErrBusy || sqliteErr.Code ==  sqlite3.ErrLocked {
+			if sqliteErr.Code == sqlite3.ErrBusy || sqliteErr.Code == sqlite3.ErrLocked {
 				vmInfoDB.logger.Info(updateVMPoolDBLogTag, fmt.Sprintf("%s, retrying %d times...", sqliteErr.Error(), retry_counter))
 				continue
 			} else {
@@ -130,7 +130,7 @@ func (vmInfoDB *VMInfoDB) QueryVMInfobyID(retryTimes int, retryInterval time.Dur
 	retry_counter := 0
 	var err error
 	for locked && retry_counter <= retryTimes {
-		retry_counter +=1
+		retry_counter += 1
 		tx, err := vmInfoDB.db.Begin()
 		if err != nil {
 			sqliteErr := err.(sqlite3.Error)
@@ -211,7 +211,7 @@ func (vmInfoDB *VMInfoDB) UpdateVMInfoByID(retryTimes int, retryInterval time.Du
 	retry_counter := 0
 	var err error
 	for locked && retry_counter <= retryTimes {
-		retry_counter +=1
+		retry_counter += 1
 		tx, err := vmInfoDB.db.Begin()
 		if err != nil {
 			sqliteErr := err.(sqlite3.Error)
@@ -283,12 +283,11 @@ func exec(db DB, sqlStmt string, retryTimes int, retryInterval time.Duration) er
 	retry_counter := 0
 	var err error
 	for locked && retry_counter <= retryTimes {
-		retry_counter +=1
+		retry_counter += 1
 		tx, err := db.Begin()
 		if err != nil {
 			sqliteErr := err.(sqlite3.Error)
 			if sqliteErr.Code == sqlite3.ErrBusy || sqliteErr.Code == sqlite3.ErrLocked {
-				boshlog.Logger.Info(updateVMPoolDBLogTag, fmt.Sprintf("%s, retrying %d times...", sqliteErr.Error(), retry_counter))
 				continue
 			} else {
 				return bosherr.WrapError(sqliteErr, "Failed to begin DB transcation")
@@ -299,7 +298,6 @@ func exec(db DB, sqlStmt string, retryTimes int, retryInterval time.Duration) er
 		if err != nil {
 			sqliteErr := err.(sqlite3.Error)
 			if sqliteErr.Code == sqlite3.ErrBusy || sqliteErr.Code == sqlite3.ErrLocked {
-				boshlog.Logger.Info(updateVMPoolDBLogTag, fmt.Sprintf("%s, retrying %d times...", sqliteErr.Error(), retry_counter))
 				continue
 			} else {
 				return bosherr.WrapError(sqliteErr, "Failed to execute sql statement: "+sqlStmt)

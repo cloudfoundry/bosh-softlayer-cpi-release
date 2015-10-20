@@ -169,6 +169,21 @@ func CreateVirtualGuestService() (softlayer.SoftLayer_Virtual_Guest_Service, err
 	return virtualGuestService, nil
 }
 
+func CreateVirtualGuestBlockDeviceTemplateGroupService() (softlayer.SoftLayer_Virtual_Guest_Block_Device_Template_Group_Service, error) {
+	username, apiKey, err := GetUsernameAndApiKey()
+	if err != nil {
+		return nil, err
+	}
+
+	client := slclient.NewSoftLayerClient(username, apiKey)
+	vgbdtgService, err := client.GetSoftLayer_Virtual_Guest_Block_Device_Template_Group_Service()
+	if err != nil {
+		return nil, err
+	}
+
+	return vgbdtgService, nil
+}
+
 func CreateSecuritySshKeyService() (softlayer.SoftLayer_Security_Ssh_Key_Service, error) {
 	username, apiKey, err := GetUsernameAndApiKey()
 	if err != nil {
@@ -421,6 +436,23 @@ func WaitForVirtualGuestToHaveNoActiveTransactions(virtualGuestId int) {
 	}, TIMEOUT, POLLING_INTERVAL).Should(Equal(0), "failed waiting for virtual guest to have no active transactions")
 }
 
+func WaitForVirtualGuestToHaveNoActiveTransactionsOrToErr(virtualGuestId int) {
+	virtualGuestService, err := CreateVirtualGuestService()
+    if err != nil {
+        return
+    }
+
+	fmt.Printf("----> waiting for virtual guest to have no active transactions pending\n")
+	Eventually(func() int {
+		activeTransactions, err := virtualGuestService.GetActiveTransactions(virtualGuestId)
+        if err != nil {
+            return 0
+        }
+		fmt.Printf("----> virtual guest: %d, has %d active transactions\n", virtualGuestId, len(activeTransactions))
+		return len(activeTransactions)
+	}, TIMEOUT, POLLING_INTERVAL).Should(Equal(0), "failed waiting for virtual guest to have no active transactions")
+}
+
 func WaitForDeletedSshKeyToNoLongerBePresent(sshKeyId int) {
 	accountService, err := CreateAccountService()
 	Expect(err).ToNot(HaveOccurred())
@@ -457,6 +489,25 @@ func WaitForCreatedSshKeyToBePresent(sshKeyId int) {
 		}
 		return keyPresent
 	}, TIMEOUT, POLLING_INTERVAL).Should(BeTrue(), "created ssh key but not in the list of ssh keys")
+}
+
+func WaitForVirtualGuestBlockTemplateGroupToHaveNoActiveTransactions(virtualGuestBlockTemplateGroupId int) {
+	vgbdtgService, err := CreateVirtualGuestBlockDeviceTemplateGroupService()
+	Expect(err).ToNot(HaveOccurred())
+
+	fmt.Printf("----> waiting for virtual guest block template group to have no active transactions pending\n")
+	Eventually(func() bool {
+		activeTransaction, err := vgbdtgService.GetTransaction(virtualGuestBlockTemplateGroupId)
+		Expect(err).ToNot(HaveOccurred())
+
+		transactionTrue := false
+		emptyTransaction := datatypes.SoftLayer_Provisioning_Version1_Transaction{}
+		if activeTransaction != emptyTransaction {
+			fmt.Printf("----> virtual guest template group: %d, has %#v pending\n", virtualGuestBlockTemplateGroupId, activeTransaction)
+			transactionTrue = true
+		}
+		return transactionTrue
+	}, TIMEOUT, POLLING_INTERVAL).Should(BeFalse(), "failed waiting for virtual guest block template group to have no active transactions")
 }
 
 func SetUserDataToVirtualGuest(virtualGuestId int, metadata string) {
