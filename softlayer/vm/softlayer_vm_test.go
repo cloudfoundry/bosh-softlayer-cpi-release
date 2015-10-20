@@ -18,6 +18,7 @@ import (
 	bslcdisk "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk"
 	bslcvm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
 
+	common "github.com/maximilien/bosh-softlayer-cpi/common"
 	fakedisk "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk/fakes"
 	fakestemcell "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell/fakes"
 	fakevm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm/fakes"
@@ -33,6 +34,7 @@ var _ = Describe("SoftLayerVM", func() {
 		agentEnvService             *fakevm.FakeAgentEnvService
 		logger                      boshlog.Logger
 		vm                          SoftLayerVM
+		stemcell                    *fakestemcell.FakeStemcell
 	)
 
 	BeforeEach(func() {
@@ -63,6 +65,7 @@ var _ = Describe("SoftLayerVM", func() {
 				vm = NewSoftLayerVM(1234567, softLayerClient, sshClient, agentEnvService, logger, timeoutTransactionsDeleteVM)
 				bslcommon.POLLING_INTERVAL = 1 * time.Second //Make delete faster
 
+				common.SetOSEnvVariable("OS_RELOAD_ENABLED", "FALSE")
 				err := vm.Delete()
 				Expect(err).ToNot(HaveOccurred())
 			})

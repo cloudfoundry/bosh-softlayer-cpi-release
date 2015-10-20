@@ -18,4 +18,14 @@ var _ = Describe("Utility", func() {
 			Expect(result).To(Equal("theDefaultValue"))
 		})
 	})
+
+	Context("#SetOSEnvVariable", func() {
+		It("returns the expected value set by SetOSEnvVariable", func() {
+			err := SetOSEnvVariable("TEST_VARSET", "setByUnitTest")
+			Expect(err).ToNot(HaveOccurred())
+			result = GetOSEnvVariable("TEST_VARSET", "")
+			Expect(result).To(Equal("setByUnitTest"))
+		})
+	})
+
 })
