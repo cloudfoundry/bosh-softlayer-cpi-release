@@ -29,8 +29,8 @@ const (
 	softLayerVMtag                 = "SoftLayerVM"
 	ROOT_USER_NAME                 = "root"
 	deleteVMLogTag                 = "DeleteVM"
-	attachDiskLogTag               = "AttachDiskVM"
 	TIMEOUT_TRANSACTIONS_DELETE_VM = 60 * time.Minute
+
 )
 
 type SoftLayerVM struct {
@@ -205,13 +205,9 @@ func (vm SoftLayerVM) AttachDisk(disk bslcdisk.Disk) error {
 		return bosherr.WrapError(err, fmt.Sprintf("Configuring metadata on VirtualGuest `%d`", virtualGuest.Id))
 	}
 
-	t := 5*time.Minute
-
-	vm.logger.Info(attachDiskLogTag, "Before WJQ %s", time.Now().String())
-
-	time.Sleep(t)
-
-	vm.logger.Info(attachDiskLogTag, "After WJQ %s", time.Now().String())
+	//The transaction (configureMetadataDisk) will shut down the guest while the metadata disk is configured. Pause 2 minutes for its back.
+	pauseTime := 2*time.Minute
+	time.Sleep(pauseTime)
 
 	err = bslcommon.WaitForVirtualGuest(vm.softLayerClient, virtualGuest.Id, "RUNNING", bslcommon.TIMEOUT, bslcommon.POLLING_INTERVAL)
 	if err != nil {
@@ -232,6 +228,19 @@ func (vm SoftLayerVM) DetachDisk(disk bslcdisk.Disk) error {
 		return bosherr.WrapErrorf(err, "Failed to detach volume with id %d from virtual guest with id: %d.", volume.Id, virtualGuest.Id)
 	}
 
+	networkStorageService, err := vm.softLayerClient.GetSoftLayer_Network_Storage_Service()
+	if err != nil {
+		return bosherr.WrapError(err, "Can not get network storage service.")
+	}
+
+	allowed, err := networkStorageService.HasAllowedVirtualGuest(disk.ID(), vm.ID())
+	if err == nil && allowed == true {
+		err = networkStorageService.DetachIscsiVolume(virtualGuest, disk.ID())
+	}
+	if err != nil {
+		return bosherr.WrapError(err, fmt.Sprintf("Failed to revoke access of disk `%d` from virtual gusest `%d`", disk.ID(), virtualGuest.Id))
+	}
+
 	metadata, err := bslcommon.GetUserMetadataOnVirtualGuest(vm.softLayerClient, virtualGuest.Id)
 	if err != nil {
 		return bosherr.WrapErrorf(err, "Failed to get metadata from virtual guest with id: %d.", virtualGuest.Id)
@@ -249,22 +258,13 @@ func (vm SoftLayerVM) DetachDisk(disk bslcdisk.Disk) error {
 		return bosherr.WrapError(err, fmt.Sprintf("Configuring metadata on VirtualGuest `%d`", virtualGuest.Id))
 	}
 
+	//The transaction (configureMetadataDisk) will shut down the guest while the metadata disk is configured. Pause 2 minutes for its back.
+	pauseTime := 2*time.Minute
+	time.Sleep(pauseTime)
+
 	err = bslcommon.WaitForVirtualGuest(vm.softLayerClient, virtualGuest.Id, "RUNNING", bslcommon.TIMEOUT, bslcommon.POLLING_INTERVAL)
 	if err != nil {
 		return bosherr.WrapError(err, fmt.Sprintf("PowerOn failed with VirtualGuest id `%d`", virtualGuest.Id))
-	}
-
-	networkStorageService, err := vm.softLayerClient.GetSoftLayer_Network_Storage_Service()
-	if err != nil {
-		return bosherr.WrapError(err, "Can not get network storage service.")
-	}
-
-	allowed, err := networkStorageService.HasAllowedVirtualGuest(disk.ID(), vm.ID())
-	if err == nil && allowed == true {
-		err = networkStorageService.DetachIscsiVolume(virtualGuest, disk.ID())
-	}
-	if err != nil {
-		return bosherr.WrapError(err, fmt.Sprintf("Failed to revoke access of disk `%d` from virtual gusest `%d`", disk.ID(), virtualGuest.Id))
 	}
 
 	return nil
