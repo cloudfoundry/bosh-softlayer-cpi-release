@@ -147,7 +147,7 @@ func SetMetadataOnVirtualGuest(softLayerClient sl.Client, virtualGuestId int, me
 	}
 
 	if !success {
-		return bosherr.WrapError(err, fmt.Sprintf("Failed to set metadata on VirtualGuest `%d`", virtualGuestId))
+		return bosherr.WrapError(err, fmt.Sprintf("Can not set metadata on VirtualGuest `%d`", virtualGuestId))
 	}
 
 	return nil
@@ -179,13 +179,13 @@ func GetUserMetadataOnVirtualGuest(softLayerClient sl.Client, virtualGuestId int
 	}
 
 	if len(attributes) == 0 {
-		return []byte{}, bosherr.WrapError(err, fmt.Sprintf("Failed to get metadata on VirtualGuest `%d`", virtualGuestId))
+		return []byte{}, bosherr.WrapError(err, fmt.Sprintf("Can not get metadata on VirtualGuest `%d`", virtualGuestId))
 	}
 
 	sEnc := attributes[0].Value
 	sDec, err := base64.StdEncoding.DecodeString(sEnc)
 	if err != nil {
-		return []byte{}, bosherr.WrapError(err, fmt.Sprintf("Failed to decode metadata returned from virtualGuest `%d`", virtualGuestId))
+		return []byte{}, bosherr.WrapError(err, fmt.Sprintf("Can not decode metadata returned from virtualGuest `%d`", virtualGuestId))
 	}
 
 	return sDec, nil
@@ -211,7 +211,7 @@ func GetObjectDetailsOnStorage(softLayerClient sl.Client, volumeId int) ( dataty
 
 	volume, err := networkStorageService.GetIscsiVolume(volumeId)
 	if err != nil {
-		return datatypes.SoftLayer_Network_Storage{}, bosherr.WrapErrorf(err, "Failed to get iSCSI volume with id: %d", volumeId)
+		return datatypes.SoftLayer_Network_Storage{}, bosherr.WrapErrorf(err, "Can not get iSCSI volume with id: %d", volumeId)
 	}
 	return volume, nil
 }
