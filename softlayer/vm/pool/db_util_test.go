@@ -12,8 +12,9 @@ import (
 
 var _ = Describe("DB Util", func() {
 	var (
-		err    error
-		dbPath string
+		err                 error
+		dbPath              string
+		SQLITE_DB_FILE_PATH string
 	)
 
 	//TODO: add tests for function: #InitVMPoolDB
@@ -31,7 +32,7 @@ var _ = Describe("DB Util", func() {
 		})
 
 		It("returns a new DB", func() {
-			db, err := OpenDB(SQLITE_DB_FILE_PATH)
+			db, err := OpenDB(dbPath)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(db).ToNot(BeNil())
 		})

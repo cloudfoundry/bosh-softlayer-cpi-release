@@ -8,7 +8,9 @@ import (
 	"database/sql"
 	"database/sql/driver"
 
+	boshretry "github.com/cloudfoundry/bosh-utils/retrystrategy"
 	sqlite3 "github.com/mattn/go-sqlite3"
+	clock "github.com/pivotal-golang/clock"
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
@@ -63,142 +65,136 @@ func (vmInfoDB *VMInfoDB) CloseDB() error {
 	return nil
 }
 
-func (vmInfoDB *VMInfoDB) QueryVMInfobyAgentID(retryTimes int, retryInterval time.Duration) error {
-	locked := true
-	retry_counter := 0
-	var err error
-	for locked && retry_counter <= retryTimes {
-		retry_counter += 1
-		tx, err := vmInfoDB.db.Begin()
-		if err != nil {
-			sqliteErr := err.(sqlite3.Error)
-			if sqliteErr.Code == sqlite3.ErrBusy || sqliteErr.Code == sqlite3.ErrLocked {
-				vmInfoDB.logger.Info(updateVMPoolDBLogTag, fmt.Sprintf("%s, retrying %d times...", sqliteErr.Error(), retry_counter))
-				continue
-			} else {
-				return bosherr.WrapError(sqliteErr, "Failed to begin DB transcation")
-			}
-		}
+func (vmInfoDB *VMInfoDB) QueryVMInfobyAgentID(retryTimeout time.Duration, retryInterval time.Duration) error {
 
-		var prepareStmt string
-		if vmInfoDB.VmProperties.InUse == "t" {
-			prepareStmt = "select id, image_id, agent_id from vms where in_use='t' and agent_id=?"
-		} else if vmInfoDB.VmProperties.InUse == "f" {
-			prepareStmt = "select id, image_id, agent_id from vms where in_use='f' and agent_id=?"
-		} else {
-			prepareStmt = "select id, image_id, agent_id from vms where agent_id==?"
-		}
-
-		sqlStmt, err := tx.Prepare(prepareStmt)
-		defer sqlStmt.Close()
-		if err != nil {
-			sqliteErr := err.(sqlite3.Error)
-			if sqliteErr.Code == sqlite3.ErrBusy || sqliteErr.Code == sqlite3.ErrLocked {
-				vmInfoDB.logger.Info(updateVMPoolDBLogTag, fmt.Sprintf("%s, retrying %d times...", sqliteErr.Error(), retry_counter))
-				continue
-			} else {
-				return bosherr.WrapError(sqliteErr, "Failed to prepare sql statement")
-			}
-		}
-
-		err = sqlStmt.QueryRow(vmInfoDB.VmProperties.AgentId).Scan(&vmInfoDB.VmProperties.Id, &vmInfoDB.VmProperties.ImageId, &vmInfoDB.VmProperties.AgentId)
-		if err != nil && !strings.Contains(err.Error(), "no rows") {
-			sqliteErr := err.(sqlite3.Error)
-			if sqliteErr.Code == sqlite3.ErrBusy || sqliteErr.Code == 6 {
-				vmInfoDB.logger.Info(updateVMPoolDBLogTag, fmt.Sprintf("%s, retrying %d times...", sqliteErr.Error(), retry_counter))
-				continue
-			} else {
-				return bosherr.WrapError(sqliteErr, "Failed to query VM info from vms table")
+	execStmtRetryable := boshretry.NewRetryable(
+		func() (bool, error) {
+			tx, err := vmInfoDB.db.Begin()
+			if err != nil {
+				sqliteErr := err.(sqlite3.Error)
+				if sqliteErr.Code == sqlite3.ErrBusy || sqliteErr.Code == sqlite3.ErrLocked {
+					return true, bosherr.WrapError(sqliteErr, "retrying...")
+				} else {
+					return false, bosherr.WrapError(sqliteErr, "Failed to begin DB transcation")
+				}
 			}
 
-		}
-		tx.Commit()
-		locked = false
-	}
+			var prepareStmt string
+			if vmInfoDB.VmProperties.InUse == "t" {
+				prepareStmt = "select id, image_id, agent_id from vms where in_use='t' and agent_id=?"
+			} else if vmInfoDB.VmProperties.InUse == "f" {
+				prepareStmt = "select id, image_id, agent_id from vms where in_use='f' and agent_id=?"
+			} else {
+				prepareStmt = "select id, image_id, agent_id from vms where agent_id==?"
+			}
 
-	if locked == true {
-		sqliteErr := err.(sqlite3.Error)
-		return bosherr.WrapError(sqliteErr, "Failed to query VM Pool DB")
+			sqlStmt, err := tx.Prepare(prepareStmt)
+			defer sqlStmt.Close()
+			if err != nil {
+				sqliteErr := err.(sqlite3.Error)
+				if sqliteErr.Code == sqlite3.ErrBusy || sqliteErr.Code == sqlite3.ErrLocked {
+					return true, bosherr.WrapError(sqliteErr, "retrying...")
+				} else {
+					return false, bosherr.WrapError(sqliteErr, "Failed to prepare sql statement")
+				}
+			}
+
+			err = sqlStmt.QueryRow(vmInfoDB.VmProperties.AgentId).Scan(&vmInfoDB.VmProperties.Id, &vmInfoDB.VmProperties.ImageId, &vmInfoDB.VmProperties.AgentId)
+			if err != nil && !strings.Contains(err.Error(), "no rows") {
+				sqliteErr := err.(sqlite3.Error)
+				if sqliteErr.Code == sqlite3.ErrBusy || sqliteErr.Code == 6 {
+					return true, bosherr.WrapError(sqliteErr, "retrying...")
+				} else {
+					return false, bosherr.WrapError(sqliteErr, "Failed to query VM info from vms table")
+				}
+
+			}
+			tx.Commit()
+			return false, nil
+		})
+
+	timeService := clock.NewClock()
+	timeoutRetryStrategy := boshretry.NewTimeoutRetryStrategy(retryTimeout, retryInterval, execStmtRetryable, timeService, vmInfoDB.logger)
+	err := timeoutRetryStrategy.Try()
+	if err != nil {
+		return bosherr.WrapError(err, fmt.Sprintf("Failed to run QueryVMInfobyAgentID"))
 	} else {
 		return nil
 	}
 
 }
 
-func (vmInfoDB *VMInfoDB) QueryVMInfobyID(retryTimes int, retryInterval time.Duration) error {
-	locked := true
-	retry_counter := 0
-	var err error
-	for locked && retry_counter <= retryTimes {
-		retry_counter += 1
-		tx, err := vmInfoDB.db.Begin()
-		if err != nil {
-			sqliteErr := err.(sqlite3.Error)
-			if sqliteErr.Code == sqlite3.ErrBusy || sqliteErr.Code == sqlite3.ErrLocked {
-				vmInfoDB.logger.Info(updateVMPoolDBLogTag, fmt.Sprintf("%s, retrying %d times...", sqliteErr.Error(), retry_counter))
-				continue
-			} else {
-				return bosherr.WrapError(sqliteErr, "Failed to begin DB transcation")
-			}
-		}
+func (vmInfoDB *VMInfoDB) QueryVMInfobyID(retryTimeout time.Duration, retryInterval time.Duration) error {
 
-		var prepareStmt string
-		if vmInfoDB.VmProperties.InUse == "t" {
-			prepareStmt = "select id, in_use, image_id, agent_id from vms where id=? and in_use='t'"
-		} else if vmInfoDB.VmProperties.InUse == "f" {
-			prepareStmt = "select id, in_use, image_id, agent_id from vms where id=? and in_use='f'"
-		} else {
-			prepareStmt = "select id, in_use, image_id, agent_id from vms where id=?"
-		}
-
-		sqlStmt, err := tx.Prepare(prepareStmt)
-		if err != nil {
-			sqliteErr := err.(sqlite3.Error)
-			if sqliteErr.Code == sqlite3.ErrBusy || sqliteErr.Code == sqlite3.ErrLocked {
-				vmInfoDB.logger.Info(updateVMPoolDBLogTag, fmt.Sprintf("%s, retrying %d times...", sqliteErr.Error(), retry_counter))
-				continue
-			} else {
-				return bosherr.WrapError(sqliteErr, "Failed to prepare sql statement")
-			}
-		}
-		defer sqlStmt.Close()
-
-		err = sqlStmt.QueryRow(vmInfoDB.VmProperties.Id).Scan(&vmInfoDB.VmProperties.Id, &vmInfoDB.VmProperties.InUse, &vmInfoDB.VmProperties.ImageId, &vmInfoDB.VmProperties.AgentId)
-		if err != nil && !strings.Contains(err.Error(), "no rows") {
-			sqliteErr := err.(sqlite3.Error)
-			if sqliteErr.Code == sqlite3.ErrBusy || sqliteErr.Code == sqlite3.ErrLocked {
-				vmInfoDB.logger.Info(updateVMPoolDBLogTag, fmt.Sprintf("%s, retrying %d times...", sqliteErr.Error(), retry_counter))
-				continue
-			} else {
-				return bosherr.WrapError(sqliteErr, "Failed to query VM info from vms table")
+	execStmtRetryable := boshretry.NewRetryable(
+		func() (bool, error) {
+			tx, err := vmInfoDB.db.Begin()
+			if err != nil {
+				sqliteErr := err.(sqlite3.Error)
+				if sqliteErr.Code == sqlite3.ErrBusy || sqliteErr.Code == sqlite3.ErrLocked {
+					return true, bosherr.WrapError(sqliteErr, "retrying...")
+				} else {
+					return false, bosherr.WrapError(sqliteErr, "Failed to begin DB transcation")
+				}
 			}
 
-		}
-		tx.Commit()
-		locked = false
-	}
+			var prepareStmt string
+			if vmInfoDB.VmProperties.InUse == "t" {
+				prepareStmt = "select id, in_use, image_id, agent_id from vms where id=? and in_use='t'"
+			} else if vmInfoDB.VmProperties.InUse == "f" {
+				prepareStmt = "select id, in_use, image_id, agent_id from vms where id=? and in_use='f'"
+			} else {
+				prepareStmt = "select id, in_use, image_id, agent_id from vms where id=?"
+			}
 
-	if locked == true {
-		sqliteErr := err.(sqlite3.Error)
-		return bosherr.WrapError(sqliteErr, "Failed to execute Query VM info")
+			sqlStmt, err := tx.Prepare(prepareStmt)
+			if err != nil {
+				sqliteErr := err.(sqlite3.Error)
+				if sqliteErr.Code == sqlite3.ErrBusy || sqliteErr.Code == sqlite3.ErrLocked {
+					return true, bosherr.WrapError(sqliteErr, "retrying...")
+				} else {
+					return false, bosherr.WrapError(sqliteErr, "Failed to prepare sql statement")
+				}
+			}
+			defer sqlStmt.Close()
+
+			err = sqlStmt.QueryRow(vmInfoDB.VmProperties.Id).Scan(&vmInfoDB.VmProperties.Id, &vmInfoDB.VmProperties.InUse, &vmInfoDB.VmProperties.ImageId, &vmInfoDB.VmProperties.AgentId)
+			if err != nil && !strings.Contains(err.Error(), "no rows") {
+				sqliteErr := err.(sqlite3.Error)
+				if sqliteErr.Code == sqlite3.ErrBusy || sqliteErr.Code == sqlite3.ErrLocked {
+					return true, bosherr.WrapError(sqliteErr, "retrying...")
+				} else {
+					return false, bosherr.WrapError(sqliteErr, "Failed to query VM info from vms table")
+				}
+
+			}
+			tx.Commit()
+			return false, nil
+		})
+
+	timeService := clock.NewClock()
+	timeoutRetryStrategy := boshretry.NewTimeoutRetryStrategy(retryTimeout, retryInterval, execStmtRetryable, timeService, vmInfoDB.logger)
+	err := timeoutRetryStrategy.Try()
+	if err != nil {
+		return bosherr.WrapError(err, fmt.Sprintf("Failed to run QueryVMInfobyID"))
 	} else {
 		return nil
 	}
 
 }
 
-func (vmInfoDB *VMInfoDB) DeleteVMFromVMDB(retryTimes int, retryInterval time.Duration) error {
+func (vmInfoDB *VMInfoDB) DeleteVMFromVMDB(retryTimeout time.Duration, retryInterval time.Duration) error {
 	sqlStmt := fmt.Sprintf("delete from vms where id=%d", vmInfoDB.VmProperties.Id)
-	err := exec(vmInfoDB.db, sqlStmt, DB_RETRY_TIMES, DB_RETRY_INTERVAL)
+	err := exec(vmInfoDB.db, sqlStmt, retryTimeout, retryInterval, vmInfoDB.logger)
 	if err != nil {
 		return bosherr.WrapError(err, "Failed to delete VM info from vms table")
 	}
 	return nil
 }
 
-func (vmInfoDB *VMInfoDB) InsertVMInfo(retryTimes int, retryInterval time.Duration) error {
+func (vmInfoDB *VMInfoDB) InsertVMInfo(retryTimeout time.Duration, retryInterval time.Duration) error {
 	sqlStmt := fmt.Sprintf("insert into vms (id, name, in_use, image_id, agent_id, timestamp) values (%d, '%s', '%s', '%s', '%s', CURRENT_TIMESTAMP)", vmInfoDB.VmProperties.Id, vmInfoDB.VmProperties.Name, vmInfoDB.VmProperties.InUse, vmInfoDB.VmProperties.ImageId, vmInfoDB.VmProperties.AgentId)
-	err := exec(vmInfoDB.db, sqlStmt, DB_RETRY_TIMES, DB_RETRY_INTERVAL)
+	err := exec(vmInfoDB.db, sqlStmt, retryTimeout, retryInterval, vmInfoDB.logger)
 	if err != nil {
 		return bosherr.WrapError(err, "Failed to insert VM info into vms table")
 	}
@@ -206,71 +202,67 @@ func (vmInfoDB *VMInfoDB) InsertVMInfo(retryTimes int, retryInterval time.Durati
 	return nil
 }
 
-func (vmInfoDB *VMInfoDB) UpdateVMInfoByID(retryTimes int, retryInterval time.Duration) error {
-	locked := true
-	retry_counter := 0
-	var err error
-	for locked && retry_counter <= retryTimes {
-		retry_counter += 1
-		tx, err := vmInfoDB.db.Begin()
-		if err != nil {
-			sqliteErr := err.(sqlite3.Error)
-			if sqliteErr.Code == sqlite3.ErrBusy || sqliteErr.Code == sqlite3.ErrLocked {
-				vmInfoDB.logger.Info(updateVMPoolDBLogTag, fmt.Sprintf("%s, retrying %d times...", sqliteErr.Error(), retry_counter))
-				continue
-			} else {
-				return bosherr.WrapError(sqliteErr, "Failed to begin DB transcation")
-			}
-		}
+func (vmInfoDB *VMInfoDB) UpdateVMInfoByID(retryTimeout time.Duration, retryInterval time.Duration) error {
 
-		if vmInfoDB.VmProperties.InUse == "f" || vmInfoDB.VmProperties.InUse == "t" {
-			sqlStmt := fmt.Sprintf("update vms set in_use='%s', timestamp=CURRENT_TIMESTAMP where id = %d", vmInfoDB.VmProperties.InUse, vmInfoDB.VmProperties.Id)
-			_, err = tx.Exec(sqlStmt)
+	execStmtRetryable := boshretry.NewRetryable(
+		func() (bool, error) {
+			tx, err := vmInfoDB.db.Begin()
 			if err != nil {
 				sqliteErr := err.(sqlite3.Error)
 				if sqliteErr.Code == sqlite3.ErrBusy || sqliteErr.Code == sqlite3.ErrLocked {
-					vmInfoDB.logger.Info(updateVMPoolDBLogTag, fmt.Sprintf("%s, retrying %d times...", sqliteErr.Error(), retry_counter))
-					continue
+					return true, bosherr.WrapError(sqliteErr, "retrying...")
 				} else {
-					return bosherr.WrapError(sqliteErr, "Failed to update in_use column in vms")
+					return false, bosherr.WrapError(sqliteErr, "Failed to begin DB transcation")
 				}
 			}
-		}
 
-		if vmInfoDB.VmProperties.ImageId != "" {
-			sqlStmt := fmt.Sprintf("update vms set image_id='%s' where id = %d", vmInfoDB.VmProperties.ImageId, vmInfoDB.VmProperties.Id)
-			_, err = tx.Exec(sqlStmt)
-			if err != nil {
-				sqliteErr := err.(sqlite3.Error)
-				if sqliteErr.Code == sqlite3.ErrBusy || sqliteErr.Code == sqlite3.ErrLocked {
-					vmInfoDB.logger.Info(updateVMPoolDBLogTag, fmt.Sprintf("%s, retrying %d times...", sqliteErr.Error(), retry_counter))
-					continue
-				} else {
-					return bosherr.WrapError(sqliteErr, "Failed to update in_use column in vms")
+			if vmInfoDB.VmProperties.InUse == "f" || vmInfoDB.VmProperties.InUse == "t" {
+				sqlStmt := fmt.Sprintf("update vms set in_use='%s', timestamp=CURRENT_TIMESTAMP where id = %d", vmInfoDB.VmProperties.InUse, vmInfoDB.VmProperties.Id)
+				_, err = tx.Exec(sqlStmt)
+				if err != nil {
+					sqliteErr := err.(sqlite3.Error)
+					if sqliteErr.Code == sqlite3.ErrBusy || sqliteErr.Code == sqlite3.ErrLocked {
+						return true, bosherr.WrapError(sqliteErr, "retrying...")
+					} else {
+						return false, bosherr.WrapError(sqliteErr, "Failed to update in_use column in vms")
+					}
 				}
 			}
-		}
 
-		if vmInfoDB.VmProperties.AgentId != "" {
-			sqlStmt := fmt.Sprintf("update vms set agent_id='%s' where id = %d", vmInfoDB.VmProperties.AgentId, vmInfoDB.VmProperties.Id)
-			_, err = tx.Exec(sqlStmt)
-			if err != nil {
-				sqliteErr := err.(sqlite3.Error)
-				if sqliteErr.Code == sqlite3.ErrBusy || sqliteErr.Code == sqlite3.ErrLocked {
-					vmInfoDB.logger.Info(updateVMPoolDBLogTag, fmt.Sprintf("%s, retrying %d times...", sqliteErr.Error(), retry_counter))
-					continue
-				} else {
-					return bosherr.WrapError(sqliteErr, "Failed to update in_use column in vms")
+			if vmInfoDB.VmProperties.ImageId != "" {
+				sqlStmt := fmt.Sprintf("update vms set image_id='%s' where id = %d", vmInfoDB.VmProperties.ImageId, vmInfoDB.VmProperties.Id)
+				_, err = tx.Exec(sqlStmt)
+				if err != nil {
+					sqliteErr := err.(sqlite3.Error)
+					if sqliteErr.Code == sqlite3.ErrBusy || sqliteErr.Code == sqlite3.ErrLocked {
+						return true, bosherr.WrapError(sqliteErr, "retrying...")
+					} else {
+						return false, bosherr.WrapError(sqliteErr, "Failed to update in_use column in vms")
+					}
 				}
 			}
-		}
-		tx.Commit()
-		locked = false
-	}
 
-	if locked == true {
-		sqliteErr := err.(sqlite3.Error)
-		return bosherr.WrapError(sqliteErr, "Failed to update VM Pool DB")
+			if vmInfoDB.VmProperties.AgentId != "" {
+				sqlStmt := fmt.Sprintf("update vms set agent_id='%s' where id = %d", vmInfoDB.VmProperties.AgentId, vmInfoDB.VmProperties.Id)
+				_, err = tx.Exec(sqlStmt)
+				if err != nil {
+					sqliteErr := err.(sqlite3.Error)
+					if sqliteErr.Code == sqlite3.ErrBusy || sqliteErr.Code == sqlite3.ErrLocked {
+						return true, bosherr.WrapError(sqliteErr, "retrying...")
+					} else {
+						return false, bosherr.WrapError(sqliteErr, "Failed to update in_use column in vms")
+					}
+				}
+			}
+			tx.Commit()
+			return false, nil
+		})
+
+	timeService := clock.NewClock()
+	timeoutRetryStrategy := boshretry.NewTimeoutRetryStrategy(retryTimeout, retryInterval, execStmtRetryable, timeService, vmInfoDB.logger)
+	err := timeoutRetryStrategy.Try()
+	if err != nil {
+		return bosherr.WrapError(err, fmt.Sprintf("Failed to run UpdateVMInfoByID"))
 	} else {
 		return nil
 	}
@@ -278,39 +270,39 @@ func (vmInfoDB *VMInfoDB) UpdateVMInfoByID(retryTimes int, retryInterval time.Du
 
 // Private methods
 
-func exec(db DB, sqlStmt string, retryTimes int, retryInterval time.Duration) error {
-	locked := true
-	retry_counter := 0
-	var err error
-	for locked && retry_counter <= retryTimes {
-		retry_counter += 1
-		tx, err := db.Begin()
-		if err != nil {
-			sqliteErr := err.(sqlite3.Error)
-			if sqliteErr.Code == sqlite3.ErrBusy || sqliteErr.Code == sqlite3.ErrLocked {
-				continue
-			} else {
-				return bosherr.WrapError(sqliteErr, "Failed to begin DB transcation")
+func exec(db DB, sqlStmt string, retryTimeout time.Duration, retryInterval time.Duration, logger boshlog.Logger) error {
+
+	execStmtRetryable := boshretry.NewRetryable(
+		func() (bool, error) {
+			tx, err := db.Begin()
+			if err != nil {
+				sqliteErr := err.(sqlite3.Error)
+				if sqliteErr.Code == sqlite3.ErrBusy || sqliteErr.Code == sqlite3.ErrLocked {
+					return true, bosherr.WrapError(sqliteErr, "Retrying...")
+				} else {
+					return false, bosherr.WrapError(sqliteErr, "Failed to begin DB transcation")
+				}
 			}
-		}
 
-		_, err = tx.Exec(sqlStmt)
-		if err != nil {
-			sqliteErr := err.(sqlite3.Error)
-			if sqliteErr.Code == sqlite3.ErrBusy || sqliteErr.Code == sqlite3.ErrLocked {
-				continue
-			} else {
-				return bosherr.WrapError(sqliteErr, "Failed to execute sql statement: "+sqlStmt)
+			_, err = tx.Exec(sqlStmt)
+			if err != nil {
+				sqliteErr := err.(sqlite3.Error)
+				if sqliteErr.Code == sqlite3.ErrBusy || sqliteErr.Code == sqlite3.ErrLocked {
+					return true, bosherr.WrapError(sqliteErr, "Retrying...")
+				} else {
+					return false, bosherr.WrapError(sqliteErr, "Failed to execute sql statement: "+sqlStmt)
+				}
 			}
-		}
 
-		tx.Commit()
-		locked = false
-	}
+			tx.Commit()
+			return false, nil
+		})
 
-	if locked == true {
-		sqliteErr := err.(sqlite3.Error)
-		return bosherr.WrapError(sqliteErr, "Failed to execute sql statement: "+sqlStmt)
+	timeService := clock.NewClock()
+	timeoutRetryStrategy := boshretry.NewTimeoutRetryStrategy(retryTimeout, retryInterval, execStmtRetryable, timeService, logger)
+	err := timeoutRetryStrategy.Try()
+	if err != nil {
+		return bosherr.WrapError(err, fmt.Sprintf("Failed to execute the sql statment %s", sqlStmt))
 	} else {
 		return nil
 	}
