@@ -51,7 +51,7 @@ var _ = Describe("SoftLayerStemcell", func() {
 
 			It("returns error if deleting stemcell does not exist", func() {
 				err := stemcell.Delete()
-				Expect(err).To(HaveOccurred())
+				Expect(err).ToNot(HaveOccurred())
 			})
 		})
 	})
