@@ -15,7 +15,7 @@ import (
 const (
 	NETWORK_PERFORMANCE_STORAGE_PACKAGE_ID = 222
 	BLOCK_ITEM_PRICE_ID                    = 40678 // file or block item price id
-	CREATE_ISCSI_VOLUME_MAX_RETRY_TIME     = 12
+	CREATE_ISCSI_VOLUME_MAX_RETRY_TIME     = 60
 	CREATE_ISCSI_VOLUME_CHECK_INTERVAL     = 5 // seconds
 )
 
@@ -141,7 +141,27 @@ func (slns *softLayer_Network_Storage_Service) DeleteIscsiVolume(volumeId int, i
 }
 
 func (slns *softLayer_Network_Storage_Service) GetIscsiVolume(volumeId int) (datatypes.SoftLayer_Network_Storage, error) {
-	response, err := slns.client.DoRawHttpRequestWithObjectMask(fmt.Sprintf("%s/%d/getObject.json", slns.GetName(), volumeId), []string{"serviceResourceBackendIpAddress", "lunId"}, "GET", new(bytes.Buffer))
+	objectMask := []string{
+		"accountId",
+		"capacityGb",
+		"createDate",
+		"guestId",
+		"hardwareId",
+		"hostId",
+		"id",
+		"nasType",
+		"notes",
+		"Password",
+		"serviceProviderId",
+		"upgradableFlag",
+		"username",
+		"billingItem.id",
+		"billingItem.orderItem.order.id",
+		"lunId",
+		"serviceResourceBackendIpAddress",
+	}
+
+	response, err := slns.client.DoRawHttpRequestWithObjectMask(fmt.Sprintf("%s/%d/getObject.json", slns.GetName(), volumeId), objectMask, "GET", new(bytes.Buffer))
 	if err != nil {
 		return datatypes.SoftLayer_Network_Storage{}, err
 	}
@@ -176,7 +196,7 @@ func (slns *softLayer_Network_Storage_Service) HasAllowedVirtualGuest(volumeId i
 	return false, nil
 }
 
-func (slns *softLayer_Network_Storage_Service) AttachIscsiVolume(virtualGuest datatypes.SoftLayer_Virtual_Guest, volumeId int) error {
+func (slns *softLayer_Network_Storage_Service) AttachIscsiVolume(virtualGuest datatypes.SoftLayer_Virtual_Guest, volumeId int) (string, error) {
 	parameters := datatypes.SoftLayer_Virtual_Guest_Parameters{
 		Parameters: []datatypes.SoftLayer_Virtual_Guest{
 			virtualGuest,
@@ -184,15 +204,12 @@ func (slns *softLayer_Network_Storage_Service) AttachIscsiVolume(virtualGuest da
 	}
 	requestBody, err := json.Marshal(parameters)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	_, err = slns.client.DoRawHttpRequest(fmt.Sprintf("%s/%d/allowAccessFromVirtualGuest.json", slns.GetName(), volumeId), "PUT", bytes.NewBuffer(requestBody))
-	if err != nil {
-		return err
-	}
+	resp, err := slns.client.DoRawHttpRequest(fmt.Sprintf("%s/%d/allowAccessFromVirtualGuest.json", slns.GetName(), volumeId), "PUT", bytes.NewBuffer(requestBody))
 
-	return nil
+	return string(resp[:]), err
 }
 
 func (slns *softLayer_Network_Storage_Service) DetachIscsiVolume(virtualGuest datatypes.SoftLayer_Virtual_Guest, volumeId int) error {
