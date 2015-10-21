@@ -266,11 +266,11 @@ var _ = Describe("SoftLayerVM", func() {
 				"SoftLayer_Virtual_Guest_Service_getPowerState.json",
 				"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
 				"SoftLayer_Virtual_Guest_Service_setMetadata.json",
+				"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
 				"SoftLayer_Virtual_Guest_Service_configureMetadataDisk.json",
 				"SoftLayer_Virtual_Guest_Service_getPowerState.json",
 			}
 			testhelpers.SetTestFixturesForFakeSoftLayerClient(softLayerClient, fileNames)
-
 		})
 
 		It("attaches the iSCSI volume successfully (multipath-tool installed)", func() {
@@ -281,11 +281,13 @@ var _ = Describe("SoftLayerVM", func() {
 				"",
 				"",
 				"",
+				"",
 				expectedDmSetupLs1,
 			}
 			testhelpers.SetTestFixturesForFakeSSHClient(sshClient, expectedCmdResults, nil)
 			vm = NewSoftLayerVM(1234567, softLayerClient, sshClient, agentEnvService, logger, timeoutTransactionsDeleteVM)
 
+			bslcommon.PAUSE_TIME = 1 * time.Second
 			err := vm.AttachDisk(disk)
 			Expect(err).ToNot(HaveOccurred())
 		})
@@ -298,11 +300,13 @@ var _ = Describe("SoftLayerVM", func() {
 				"",
 				"",
 				"",
+				"",
 				expectedPartitions2,
 			}
 			testhelpers.SetTestFixturesForFakeSSHClient(sshClient, expectedCmdResults, nil)
 			vm = NewSoftLayerVM(1234567, softLayerClient, sshClient, agentEnvService, logger, timeoutTransactionsDeleteVM)
 
+			bslcommon.PAUSE_TIME = 1 * time.Second
 			err := vm.AttachDisk(disk)
 			Expect(err).ToNot(HaveOccurred())
 		})
@@ -315,11 +319,13 @@ var _ = Describe("SoftLayerVM", func() {
 				"",
 				"",
 				"",
+				"",
 				expectedDmSetupLs2,
 			}
 			testhelpers.SetTestFixturesForFakeSSHClient(sshClient, expectedCmdResults, nil)
 			vm = NewSoftLayerVM(1234567, softLayerClient, sshClient, agentEnvService, logger, timeoutTransactionsDeleteVM)
 
+			bslcommon.PAUSE_TIME = 1 * time.Second
 			err := vm.AttachDisk(disk)
 			Expect(err).ToNot(HaveOccurred())
 		})
@@ -328,6 +334,7 @@ var _ = Describe("SoftLayerVM", func() {
 			testhelpers.SetTestFixturesForFakeSSHClient(sshClient, []string{"fake-result"}, errors.New("fake-error"))
 			vm = NewSoftLayerVM(1234567, softLayerClient, sshClient, agentEnvService, logger, timeoutTransactionsDeleteVM)
 
+			bslcommon.PAUSE_TIME = 1 * time.Second
 			err := vm.AttachDisk(disk)
 			Expect(err).To(HaveOccurred())
 		})
@@ -352,14 +359,15 @@ var _ = Describe("SoftLayerVM", func() {
 			fileNames := []string{
 				"SoftLayer_Virtual_Guest_Service_getObject.json",
 				"SoftLayer_Network_Storage_Service_getIscsiVolume.json",
+				"SoftLayer_Network_Storage_Service_getAllowedVirtualGuests.json",
+				"SoftLayer_Network_Storage_Service_removeAccessFromVirtualGuest.json",
 				"SoftLayer_Virtual_Guest_Service_getUserData_With_PersistentDisk.json",
 				"SoftLayer_Virtual_Guest_Service_getPowerState.json",
 				"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
 				"SoftLayer_Virtual_Guest_Service_setMetadata.json",
+				"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
 				"SoftLayer_Virtual_Guest_Service_configureMetadataDisk.json",
 				"SoftLayer_Virtual_Guest_Service_getPowerState.json",
-				"SoftLayer_Network_Storage_Service_getAllowedVirtualGuests.json",
-				"SoftLayer_Network_Storage_Service_removeAccessFromVirtualGuest.json",
 			}
 			testhelpers.SetTestFixturesForFakeSoftLayerClient(softLayerClient, fileNames)
 		})
@@ -373,6 +381,7 @@ var _ = Describe("SoftLayerVM", func() {
 			testhelpers.SetTestFixturesForFakeSSHClient(sshClient, expectedCmdResults, nil)
 			vm = NewSoftLayerVM(1234567, softLayerClient, sshClient, agentEnvService, logger, timeoutTransactionsDeleteVM)
 
+			bslcommon.PAUSE_TIME = 1 * time.Second
 			err := vm.DetachDisk(disk)
 			Expect(err).ToNot(HaveOccurred())
 		})
@@ -387,6 +396,7 @@ var _ = Describe("SoftLayerVM", func() {
 			testhelpers.SetTestFixturesForFakeSSHClient(sshClient, expectedCmdResults, nil)
 			vm = NewSoftLayerVM(1234567, softLayerClient, sshClient, agentEnvService, logger, timeoutTransactionsDeleteVM)
 
+			bslcommon.PAUSE_TIME = 1 * time.Second
 			err := vm.DetachDisk(disk)
 			Expect(err).ToNot(HaveOccurred())
 		})
@@ -395,6 +405,7 @@ var _ = Describe("SoftLayerVM", func() {
 			testhelpers.SetTestFixturesForFakeSSHClient(sshClient, []string{"fake-result"}, errors.New("fake-error"))
 			vm = NewSoftLayerVM(1234567, softLayerClient, sshClient, agentEnvService, logger, timeoutTransactionsDeleteVM)
 
+			bslcommon.PAUSE_TIME = 1 * time.Second
 			err := vm.DetachDisk(disk)
 			Expect(err).To(HaveOccurred())
 		})
