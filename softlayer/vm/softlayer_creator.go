@@ -1,8 +1,13 @@
 package vm
 
 import (
+	"bytes"
 	"fmt"
 	"time"
+	"net"
+	"net/url"
+	"encoding/json"
+	"text/template"
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
@@ -11,6 +16,8 @@ import (
 
 	bslcommon "github.com/maximilien/bosh-softlayer-cpi/softlayer/common"
 	bslcstem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell"
+
+	boshsys "github.com/cloudfoundry/bosh-utils/system"
 
 	util "github.com/maximilien/bosh-softlayer-cpi/util"
 )
@@ -26,7 +33,7 @@ type SoftLayerCreator struct {
 }
 
 func NewSoftLayerCreator(softLayerClient sl.Client, agentEnvServiceFactory AgentEnvServiceFactory, agentOptions AgentOptions, logger boshlog.Logger) SoftLayerCreator {
-	bslcommon.TIMEOUT = 20 * time.Minute
+	bslcommon.TIMEOUT = 60 * time.Minute
 	bslcommon.POLLING_INTERVAL = 20 * time.Second
 	bslcommon.MAX_RETRY_COUNT = 5
 
@@ -67,8 +74,43 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 	}
 
 	agentEnvService := c.agentEnvServiceFactory.New(virtualGuest.Id)
-
 	vm := NewSoftLayerVM(virtualGuest.Id, c.softLayerClient, util.GetSshClient(), agentEnvService, c.logger, TIMEOUT_TRANSACTIONS_DELETE_VM)
+
+
+	if len(cloudProps.BoshIp) == 0{
+		virtualGuest, err = bslcommon.GetObjectDetailsOnVirtualGuest(vm.softLayerClient, virtualGuest.Id)
+		if err != nil {
+			return SoftLayerVM{}, bosherr.WrapErrorf(err, "Can not get details from virtual guest with id: %d.", virtualGuest.Id)
+		}
+		c.updateEtcHostsOfBoshInit(fmt.Sprintf("%s  %s", virtualGuest.PrimaryBackendIpAddress, virtualGuest.FullyQualifiedDomainName))
+
+		// Update mbus url setting for bosh director
+		metadata, err := bslcommon.GetUserMetadataOnVirtualGuest(vm.softLayerClient, virtualGuest.Id)
+		if err != nil {
+			return SoftLayerVM{}, bosherr.WrapErrorf(err, "Can not get metadata from virtual guest with id: %d.", virtualGuest.Id)
+		}
+		agentEnv, err := NewAgentEnvFromJSON(metadata)
+		if err != nil {
+			return SoftLayerVM{}, bosherr.WrapErrorf(err, "Can not unmarshal metadata from virutal guest with id: %d.", virtualGuest.Id)
+		}
+
+		//Construct mbus url with new director ip
+		mbus,err := c.parseMbusURL(c.agentOptions.Mbus, virtualGuest.PrimaryBackendIpAddress)
+		if err != nil {
+			return SoftLayerVM{}, bosherr.WrapErrorf(err, "Can not construct mbus url.")
+		}
+		agentEnv.Mbus = mbus
+
+		metadata, err = json.Marshal(agentEnv)
+		if err != nil {
+			return SoftLayerVM{}, bosherr.WrapError(err, "Marshalling agent environment metadata")
+		}
+
+		err = bslcommon.ConfigureMetadataOnVirtualGuest(vm.softLayerClient, virtualGuest.Id, string(metadata), bslcommon.TIMEOUT, bslcommon.POLLING_INTERVAL)
+		if err != nil {
+			return SoftLayerVM{}, bosherr.WrapError(err, fmt.Sprintf("Configuring metadata on VirtualGuest `%d`", virtualGuest.Id))
+		}
+	}
 
 	return vm, nil
 }
@@ -93,3 +135,42 @@ func (c SoftLayerCreator) resolveNetworkIP(networks Networks) (string, error) {
 
 	return network.IP, nil
 }
+
+func (c SoftLayerCreator) parseMbusURL(mbusURL string, primaryBackendIpAddress string) (string, error) {
+	parsedURL, err := url.Parse(mbusURL)
+	if err != nil {
+		return "", bosherr.WrapError(err, "Parsing Mbus URL")
+	}
+	var username, password, port string
+	_, port, _ = net.SplitHostPort(parsedURL.Host)
+	userInfo := parsedURL.User
+	if userInfo != nil {
+		username = userInfo.Username()
+		password, _ = userInfo.Password()
+		return fmt.Sprintf("https://%s:%s@%s:%s", username, password, primaryBackendIpAddress, port), nil
+	} else {
+		return fmt.Sprintf("https://%s:%s", primaryBackendIpAddress, port), nil
+	}
+	return "", nil
+}
+
+func (c SoftLayerCreator) updateEtcHostsOfBoshInit(record string) (err error) {
+	buffer := bytes.NewBuffer([]byte{})
+	t := template.Must(template.New("etc-hosts").Parse(etcHostsTemplate))
+
+	err = t.Execute(buffer, record)
+	if err != nil {
+		return bosherr.WrapError(err, "Generating config from template")
+	}
+	fileSystem := boshsys.NewOsFileSystemWithStrictTempRoot(c.logger)
+	err = fileSystem.WriteFile("/etc/hosts", buffer.Bytes())
+	if err != nil {
+		return bosherr.WrapError(err, "Writing to /etc/hosts")
+	}
+	return nil
+}
+
+const etcHostsTemplate = `127.0.0.1 localhost
+{{.}}
+`
+

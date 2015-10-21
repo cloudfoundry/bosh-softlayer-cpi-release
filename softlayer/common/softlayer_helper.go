@@ -8,6 +8,7 @@ import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 
 	sl "github.com/maximilien/softlayer-go/softlayer"
+	datatypes "github.com/maximilien/softlayer-go/data_types"
 )
 
 var (
@@ -54,6 +55,11 @@ func ConfigureMetadataOnVirtualGuest(softLayerClient sl.Client, virtualGuestId i
 	err = SetMetadataOnVirtualGuest(softLayerClient, virtualGuestId, metadata)
 	if err != nil {
 		return bosherr.WrapError(err, fmt.Sprintf("Setting metadata on VirtualGuest `%d`", virtualGuestId))
+	}
+
+	err = WaitForVirtualGuestToHaveNoRunningTransactions(softLayerClient, virtualGuestId, timeout, pollingInterval)
+	if err != nil {
+		return bosherr.WrapError(err, fmt.Sprintf("Waiting for VirtualGuest `%d` to have no pending transactions", virtualGuestId))
 	}
 
 	err = ConfigureMetadataDiskOnVirtualGuest(softLayerClient, virtualGuestId)
@@ -141,7 +147,7 @@ func SetMetadataOnVirtualGuest(softLayerClient sl.Client, virtualGuestId int, me
 	}
 
 	if !success {
-		return bosherr.WrapError(err, fmt.Sprintf("Failed to set metadata on VirtualGuest `%d`", virtualGuestId))
+		return bosherr.WrapError(err, fmt.Sprintf("Can not set metadata on VirtualGuest `%d`", virtualGuestId))
 	}
 
 	return nil
@@ -173,14 +179,39 @@ func GetUserMetadataOnVirtualGuest(softLayerClient sl.Client, virtualGuestId int
 	}
 
 	if len(attributes) == 0 {
-		return []byte{}, bosherr.WrapError(err, fmt.Sprintf("Failed to get metadata on VirtualGuest `%d`", virtualGuestId))
+		return []byte{}, bosherr.WrapError(err, fmt.Sprintf("Can not get metadata on VirtualGuest `%d`", virtualGuestId))
 	}
 
 	sEnc := attributes[0].Value
 	sDec, err := base64.StdEncoding.DecodeString(sEnc)
 	if err != nil {
-		return []byte{}, bosherr.WrapError(err, fmt.Sprintf("Failed to decode metadata returned from virtualGuest `%d`", virtualGuestId))
+		return []byte{}, bosherr.WrapError(err, fmt.Sprintf("Can not decode metadata returned from virtualGuest `%d`", virtualGuestId))
 	}
 
 	return sDec, nil
+}
+
+func GetObjectDetailsOnVirtualGuest(softLayerClient sl.Client, virtualGuestId int) (datatypes.SoftLayer_Virtual_Guest, error) {
+	virtualGuestService, err := softLayerClient.GetSoftLayer_Virtual_Guest_Service()
+	if err != nil {
+		return datatypes.SoftLayer_Virtual_Guest{}, bosherr.WrapError(err, "Can not get softlayer virtual guest service.")
+	}
+	virtualGuest, err := virtualGuestService.GetObject(virtualGuestId)
+	if err != nil {
+		return datatypes.SoftLayer_Virtual_Guest{},  bosherr.WrapErrorf(err, "Can not get virtual guest with id: %d", virtualGuestId)
+	}
+	return virtualGuest, nil
+}
+
+func GetObjectDetailsOnStorage(softLayerClient sl.Client, volumeId int) ( datatypes.SoftLayer_Network_Storage, error) {
+	networkStorageService, err := softLayerClient.GetSoftLayer_Network_Storage_Service()
+	if err != nil {
+		return datatypes.SoftLayer_Network_Storage{}, bosherr.WrapError(err, "Can not get network storage service.")
+	}
+
+	volume, err := networkStorageService.GetIscsiVolume(volumeId)
+	if err != nil {
+		return datatypes.SoftLayer_Network_Storage{}, bosherr.WrapErrorf(err, "Can not get iSCSI volume with id: %d", volumeId)
+	}
+	return volume, nil
 }

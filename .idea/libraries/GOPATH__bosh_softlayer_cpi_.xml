@@ -1,0 +1,56 @@
+<component name="libraryTable">
+  <library name="GOPATH &lt;bosh-softlayer-cpi&gt;">
+    <CLASSES>
+      <root url="file://$USER_HOME$/Workspace/softlayer-go/src/github.com" />
+      <root url="file://$USER_HOME$/Workspace/softlayer-go/src/code.google.com" />
+      <root url="file://$USER_HOME$/Workspace/softlayer-go/src/golang.org" />
+    </CLASSES>
+    <SOURCES />
+    <excluded>
+      <root url="file://$USER_HOME$/Workspace/softlayer-go/src/github.com/maximilien/bosh-softlayer-cpi/Godeps/_workspace" />
+      <root url="file://$USER_HOME$/Workspace/softlayer-go/src/golang.org/x/tools/go/gccgoimporter/testdata" />
+      <root url="file://$USER_HOME$/Workspace/softlayer-go/src/golang.org/x/tools/.git" />
+      <root url="file://$USER_HOME$/Workspace/softlayer-go/src/golang.org/x/tools/refactor/eg/testdata" />
+      <root url="file://$USER_HOME$/Workspace/softlayer-go/src/golang.org/x/tools/go/ssa/ssautil/testdata" />
+      <root url="file://$PROJECT_DIR$" />
+      <root url="file://$USER_HOME$/Workspace/softlayer-go/src/golang.org/x/tools/go/loader/testdata" />
+      <root url="file://$USER_HOME$/Workspace/softlayer-go/src/golang.org/x/net/html/charset/testdata" />
+      <root url="file://$USER_HOME$/Workspace/softlayer-go/src/golang.org/x/tools/oracle/testdata" />
+      <root url="file://$USER_HOME$/Workspace/softlayer-go/src/github.com/pkg/sftp/.git" />
+      <root url="file://$USER_HOME$/Workspace/softlayer-go/src/github.com/onsi/gomega/gexec/_fixture" />
+      <root url="file://$USER_HOME$/Workspace/softlayer-go/src/code.google.com/p/go.crypto/.hg" />
+      <root url="file://$USER_HOME$/Workspace/softlayer-go/src/golang.org/x/tools/go/pointer/testdata" />
+      <root url="file://$USER_HOME$/Workspace/softlayer-go/src/github.com/onsi/ginkgo/.git" />
+      <root url="file://$USER_HOME$/Workspace/softlayer-go/src/golang.org/x/crypto/sha3/testdata" />
+      <root url="file://$USER_HOME$/Workspace/softlayer-go/src/github.com/maximilien/bosh-softlayer-stemcells/Godeps/_workspace" />
+      <root url="file://$USER_HOME$/Workspace/softlayer-go/src/golang.org/x/tools/go/types/testdata" />
+      <root url="file://$USER_HOME$/Workspace/softlayer-go/src/golang.org/x/tools/cmd/stringer/testdata" />
+      <root url="file://$USER_HOME$/Workspace/softlayer-go/src/golang.org/x/tools/go/ssa/testdata" />
+      <root url="file://$USER_HOME$/Workspace/softlayer-go/src/github.com/cloudfoundry/bosh-utils/.git" />
+      <root url="file://$USER_HOME$/Workspace/softlayer-go/src/github.com/maximilien/.git" />
+      <root url="file://$USER_HOME$/Workspace/softlayer-go/src/golang.org/x/tools/cmd/vet/testdata" />
+      <root url="file://$USER_HOME$/Workspace/softlayer-go/src/github.com/maximilien/.idea" />
+      <root url="file://$USER_HOME$/Workspace/softlayer-go/src/github.com/maximilien/bosh-softlayer-stemcells/.git" />
+      <root url="file://$USER_HOME$/Workspace/softlayer-go/src/github.com/kr/fs/.git" />
+      <root url="file://$USER_HOME$/Workspace/softlayer-go/src/golang.org/x/net/.git" />
+      <root url="file://$USER_HOME$/Workspace/softlayer-go/src/golang.org/x/tools/cmd/callgraph/testdata" />
+      <root url="file://$USER_HOME$/Workspace/softlayer-go/src/golang.org/x/crypto/ssh/testdata" />
+      <root url="file://$USER_HOME$/Workspace/softlayer-go/src/github.com/maximilien/softlayer-go/.git" />
+      <root url="file://$USER_HOME$/Workspace/softlayer-go/src/golang.org/x/tools/go/callgraph/cha/testdata" />
+      <root url="file://$USER_HOME$/Workspace/softlayer-go/src/github.com/onsi/gomega/.git" />
+      <root url="file://$USER_HOME$/Workspace/softlayer-go/src/github.com/onsi/ginkgo/integration/_fixtures" />
+      <root url="file://$USER_HOME$/Workspace/softlayer-go/src/golang.org/x/tools/cmd/fiximports/testdata" />
+      <root url="file://$USER_HOME$/Workspace/softlayer-go/src/code.google.com/p/go.crypto/ssh/testdata" />
+      <root url="file://$USER_HOME$/Workspace/softlayer-go/src/golang.org/x/text/.git" />
+      <root url="file://$USER_HOME$/Workspace/softlayer-go/src/golang.org/x/tools/go/callgraph/rta/testdata" />
+      <root url="file://$USER_HOME$/Workspace/softlayer-go/src/golang.org/x/text/encoding/testdata" />
+      <root url="file://$USER_HOME$/Workspace/softlayer-go/src/golang.org/x/tools/cmd/cover/testdata" />
+      <root url="file://$USER_HOME$/Workspace/softlayer-go/src/github.com/maximilien/bosh-softlayer-cpi/.git" />
+      <root url="file://$USER_HOME$/Workspace/softlayer-go/src/golang.org/x/net/html/testdata" />
+      <root url="file://$USER_HOME$/Workspace/softlayer-go/src/golang.org/x/tools/go/gcimporter/testdata" />
+      <root url="file://$USER_HOME$/Workspace/softlayer-go/src/golang.org/x/tools/go/ssa/interp/testdata" />
+      <root url="file://$USER_HOME$/Workspace/softlayer-go/src/golang.org/x/crypto/.git" />
+      <root url="file://$USER_HOME$/Workspace/softlayer-go/src/github.com/maximilien/softlayer-go/Godeps/_workspace" />
+    </excluded>
+  </library>
+</component>
