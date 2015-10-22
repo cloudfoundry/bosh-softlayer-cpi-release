@@ -7,6 +7,7 @@ import (
 
 	. "github.com/onsi/gomega"
 
+	fakesshclient "github.com/maximilien/bosh-softlayer-cpi/util/fakes"
 	fakesslclient "github.com/maximilien/softlayer-go/client/fakes"
 )
 
@@ -31,5 +32,12 @@ func SetTestFixturesForFakeSoftLayerClient(fakeSoftLayerClient *fakesslclient.Fa
 		Expect(err).ToNot(HaveOccurred())
 
 		fakeSoftLayerClient.DoRawHttpRequestResponses = append(fakeSoftLayerClient.DoRawHttpRequestResponses, fileContents)
+	}
+}
+
+func SetTestFixturesForFakeSSHClient(fakeSSHClient *fakesshclient.FakeSshClient, results []string, err error) {
+	for _, result := range results {
+		fakeSSHClient.ExecCommandResults = append(fakeSSHClient.ExecCommandResults, result)
+		fakeSSHClient.ExecCommandError = err
 	}
 }

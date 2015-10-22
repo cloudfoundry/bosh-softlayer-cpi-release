@@ -16,6 +16,8 @@ type Network struct {
 	DNS     []string `json:"dns"`
 	Default []string `json:"default"`
 
+	Preconfigured bool `json:"preconfigured"`
+
 	MAC string `json:"mac"`
 
 	CloudProperties map[string]interface{} `json:"cloud_properties"`
@@ -32,8 +34,9 @@ func (ns Networks) AsVMNetworks() bslcvm.Networks {
 			Netmask: network.Netmask,
 			Gateway: network.Gateway,
 
-			DNS:     network.DNS,
-			Default: network.Default,
+			DNS:           network.DNS,
+			Default:       network.Default,
+			Preconfigured: network.Preconfigured,
 
 			CloudProperties: network.CloudProperties,
 		}

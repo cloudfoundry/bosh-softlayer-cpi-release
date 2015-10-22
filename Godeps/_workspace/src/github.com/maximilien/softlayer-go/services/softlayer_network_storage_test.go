@@ -55,17 +55,6 @@ var _ = Describe("SoftLayer_Network_Storage", func() {
 		})
 	})
 
-	Context("#DeleteIscsiVolume", func() {
-		BeforeEach(func() {
-			fakeClient.DoRawHttpRequestResponse, err = testhelpers.ReadJsonTestFixtures("services", "SoftLayer_Network_Storage_Service_getIscsiVolume.json")
-			Expect(err).ToNot(HaveOccurred())
-		})
-		It("fails with error if the volume size is negative", func() {
-			_, err := networkStorageService.CreateIscsiVolume(-1, "fake-location")
-			Expect(err).To(HaveOccurred())
-		})
-	})
-
 	Context("#GetIscsiVolume", func() {
 		BeforeEach(func() {
 			fakeClient.DoRawHttpRequestResponse, err = testhelpers.ReadJsonTestFixtures("services", "SoftLayer_Network_Storage_Service_getIscsiVolume.json")
@@ -112,8 +101,9 @@ var _ = Describe("SoftLayer_Network_Storage", func() {
 				PrimaryIpAddress:         "fake-primary-ip",
 			}
 			fakeClient.DoRawHttpRequestResponse = []byte("true")
-			err = networkStorageService.AttachIscsiVolume(virtualGuest, 123)
+			resp, err := networkStorageService.AttachIscsiVolume(virtualGuest, 123)
 			Expect(err).ToNot(HaveOccurred())
+			Expect(resp).To(Equal("true"))
 		})
 	})
 

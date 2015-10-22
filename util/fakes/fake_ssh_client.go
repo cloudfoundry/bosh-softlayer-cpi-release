@@ -1,8 +1,9 @@
 package util_fakes
 
 type FakeSshClient struct {
-	ExecCommandResult string
-	ExecCommandError  error
+	ExecCommandResultsIndex int
+	ExecCommandResults      []string
+	ExecCommandError        error
 
 	Username string
 	Password string
@@ -13,13 +14,21 @@ type FakeSshClient struct {
 	DownloadFileError error
 }
 
+func NewFakeSshClient() *FakeSshClient {
+	fssh := &FakeSshClient{
+		ExecCommandResults: []string{},
+		ExecCommandError:   nil,
+	}
+	return fssh
+}
+
 func (f *FakeSshClient) ExecCommand(username string, password string, ip string, command string) (string, error) {
 	f.Username = username
 	f.Password = password
 	f.Ip = ip
 	f.Command = command
-
-	return f.ExecCommandResult, f.ExecCommandError
+	f.ExecCommandResultsIndex = f.ExecCommandResultsIndex + 1
+	return f.ExecCommandResults[f.ExecCommandResultsIndex-1], f.ExecCommandError
 }
 
 func (f *FakeSshClient) UploadFile(username string, password string, ip string, srcFile string, destFile string) error {
@@ -36,9 +45,9 @@ func (f *FakeSshClient) DownloadFile(username string, password string, ip string
 	return f.DownloadFileError
 }
 
-func GetFakeSshClient(fakeResult string, fakeError error) *FakeSshClient {
+func GetFakeSshClient(fakeResults []string, fakeError error) *FakeSshClient {
 	return &FakeSshClient{
-		ExecCommandResult: fakeResult,
-		ExecCommandError:  fakeError,
+		ExecCommandResults: fakeResults,
+		ExecCommandError:   fakeError,
 	}
 }

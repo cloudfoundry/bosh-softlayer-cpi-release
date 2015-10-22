@@ -18,10 +18,10 @@ var _ = Describe("SshClient", func() {
 
 		BeforeEach(func() {
 			fakeSshClient = &bscutilfakes.FakeSshClient{
-				ExecCommandResult: "fake-result",
-				ExecCommandError:  nil,
-				UploadFileError:   nil,
-				DownloadFileError: nil,
+				ExecCommandResults: []string{"fake-result"},
+				ExecCommandError:   nil,
+				UploadFileError:    nil,
+				DownloadFileError:  nil,
 			}
 			sshClient = fakeSshClient
 		})
@@ -35,7 +35,7 @@ var _ = Describe("SshClient", func() {
 			Expect(fakeSshClient.Ip).To(Equal("localhost"))
 			Expect(fakeSshClient.Command).To(Equal("fake-command"))
 
-			Expect(output).To(Equal(fakeSshClient.ExecCommandResult))
+			Expect(output).To(Equal("fake-result"))
 		})
 
 		It("upload file using the SSH client", func() {
