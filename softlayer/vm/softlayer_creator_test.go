@@ -64,6 +64,7 @@ var _ = Describe("SoftLayerCreator", func() {
 						GlobalIdentifier: "fake-uuid",
 					},
 					RootDiskSize:                 25,
+					BoshIp:                       "10.0.0.1",
 					EphemeralDiskSize:            25,
 					Datacenter:                   sldatatypes.Datacenter{Name: "fake-datacenter"},
 					HourlyBillingFlag:            true,
