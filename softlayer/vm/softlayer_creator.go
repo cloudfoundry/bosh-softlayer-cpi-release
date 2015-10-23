@@ -79,24 +79,24 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 	if len(cloudProps.BoshIp) == 0 {
 		virtualGuest, err = bslcommon.GetObjectDetailsOnVirtualGuest(vm.softLayerClient, virtualGuest.Id)
 		if err != nil {
-			return SoftLayerVM{}, bosherr.WrapErrorf(err, "Can not get details from virtual guest with id: %d.", virtualGuest.Id)
+			return SoftLayerVM{}, bosherr.WrapErrorf(err, "Cannot get details from virtual guest with id: %d.", virtualGuest.Id)
 		}
 		c.updateEtcHostsOfBoshInit(fmt.Sprintf("%s  %s", virtualGuest.PrimaryBackendIpAddress, virtualGuest.FullyQualifiedDomainName))
 
 		// Update mbus url setting for bosh director
 		metadata, err := bslcommon.GetUserMetadataOnVirtualGuest(vm.softLayerClient, virtualGuest.Id)
 		if err != nil {
-			return SoftLayerVM{}, bosherr.WrapErrorf(err, "Can not get metadata from virtual guest with id: %d.", virtualGuest.Id)
+			return SoftLayerVM{}, bosherr.WrapErrorf(err, "Cannot get metadata from virtual guest with id: %d.", virtualGuest.Id)
 		}
 		agentEnv, err := NewAgentEnvFromJSON(metadata)
 		if err != nil {
-			return SoftLayerVM{}, bosherr.WrapErrorf(err, "Can not unmarshal metadata from virutal guest with id: %d.", virtualGuest.Id)
+			return SoftLayerVM{}, bosherr.WrapErrorf(err, "Cannot unmarshal metadata from virutal guest with id: %d.", virtualGuest.Id)
 		}
 
 		//Construct mbus url with new director ip
 		mbus, err := c.parseMbusURL(c.agentOptions.Mbus, virtualGuest.PrimaryBackendIpAddress)
 		if err != nil {
-			return SoftLayerVM{}, bosherr.WrapErrorf(err, "Can not construct mbus url.")
+			return SoftLayerVM{}, bosherr.WrapErrorf(err, "Cannot construct mbus url.")
 		}
 		agentEnv.Mbus = mbus
 
@@ -105,7 +105,7 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 			return SoftLayerVM{}, bosherr.WrapError(err, "Marshalling agent environment metadata")
 		}
 
-		err = bslcommon.ConfigureMetadataOnVirtualGuest(vm.softLayerClient, virtualGuest.Id, string(metadata), bslcommon.TIMEOUT, bslcommon.POLLING_INTERVAL)
+		err = bslcommon.ConfigureMetadataOnVirtualGuest(vm.softLayerClient, virtualGuest.Id, string(metadata))
 		if err != nil {
 			return SoftLayerVM{}, bosherr.WrapError(err, fmt.Sprintf("Configuring metadata on VirtualGuest `%d`", virtualGuest.Id))
 		}
@@ -147,14 +147,14 @@ func (c SoftLayerCreator) parseMbusURL(mbusURL string, primaryBackendIpAddress s
 		username = userInfo.Username()
 		password, _ = userInfo.Password()
 		return fmt.Sprintf("https://%s:%s@%s:%s", username, password, primaryBackendIpAddress, port), nil
-	} else {
-		return fmt.Sprintf("https://%s:%s", primaryBackendIpAddress, port), nil
 	}
+
+	return fmt.Sprintf("https://%s:%s", primaryBackendIpAddress, port), nil
 }
 
 func (c SoftLayerCreator) updateEtcHostsOfBoshInit(record string) (err error) {
 	buffer := bytes.NewBuffer([]byte{})
-	t := template.Must(template.New("etc-hosts").Parse(etcHostsTemplate))
+	t := template.Must(template.New("etc-hosts").Parse(ETC_HOSTS_TEMPLATE))
 
 	err = t.Execute(buffer, record)
 	if err != nil {
@@ -165,9 +165,10 @@ func (c SoftLayerCreator) updateEtcHostsOfBoshInit(record string) (err error) {
 	if err != nil {
 		return bosherr.WrapError(err, "Writing to /etc/hosts")
 	}
+
 	return nil
 }
 
-const etcHostsTemplate = `127.0.0.1 localhost
+const ETC_HOSTS_TEMPLATE = `127.0.0.1 localhost
 {{.}}
 `

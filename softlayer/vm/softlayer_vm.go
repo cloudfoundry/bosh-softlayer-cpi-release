@@ -50,7 +50,6 @@ type SoftLayerVM struct {
 func NewSoftLayerVM(id int, softLayerClient sl.Client, sshClient util.SshClient, agentEnvService AgentEnvService, logger boshlog.Logger, timeoutForActiveTransactions time.Duration) SoftLayerVM {
 	bslcommon.TIMEOUT = 10 * time.Minute
 	bslcommon.POLLING_INTERVAL = 10 * time.Second
-	bslcommon.PAUSE_TIME = 2 * time.Minute
 
 	return SoftLayerVM{
 		id: id,
@@ -159,17 +158,21 @@ func (vm SoftLayerVM) AttachDisk(disk bslcdisk.Disk) error {
 
 	networkStorageService, err := vm.softLayerClient.GetSoftLayer_Network_Storage_Service()
 	if err != nil {
-		return bosherr.WrapError(err, "Can not get network storage service.")
+		return bosherr.WrapError(err, "Cannot get network storage service.")
 	}
 	allowed, err := networkStorageService.HasAllowedVirtualGuest(disk.ID(), vm.ID())
 	if err == nil && allowed == false {
 		attachIscsiVolumeRetryable := boshretry.NewRetryable(
 			func() (bool, error) {
 				resp, err := networkStorageService.AttachIscsiVolume(virtualGuest, disk.ID())
-				if err != nil || strings.Contains(resp, "A Volume Provisioning is currently in progress") {
-					return true, bosherr.WrapError(err, fmt.Sprintf("Granting volume access to vitrual guest %d", virtualGuest.Id))
+				if err != nil {
+					return false, bosherr.WrapError(err, fmt.Sprintf("Granting volume access to vitrual guest %d", virtualGuest.Id))
+				} else {
+					if strings.Contains(resp, "A Volume Provisioning is currently in progress") {
+						return true, nil
+					}
+					return false, nil
 				}
-				return false, nil
 			})
 		timeService := clock.NewClock()
 		timeoutRetryStrategy := boshretry.NewTimeoutRetryStrategy(bslcommon.TIMEOUT, bslcommon.POLLING_INTERVAL, attachIscsiVolumeRetryable, timeService, vm.logger)
@@ -211,7 +214,7 @@ func (vm SoftLayerVM) AttachDisk(disk bslcdisk.Disk) error {
 		return bosherr.WrapError(err, "Marshalling agent environment metadata")
 	}
 
-	err = bslcommon.ConfigureMetadataOnVirtualGuest(vm.softLayerClient, virtualGuest.Id, string(metadata), bslcommon.TIMEOUT, bslcommon.POLLING_INTERVAL)
+	err = bslcommon.ConfigureMetadataOnVirtualGuest(vm.softLayerClient, virtualGuest.Id, string(metadata))
 	if err != nil {
 		return bosherr.WrapError(err, fmt.Sprintf("Configuring metadata on VirtualGuest `%d`", virtualGuest.Id))
 	}
@@ -232,7 +235,7 @@ func (vm SoftLayerVM) DetachDisk(disk bslcdisk.Disk) error {
 
 	networkStorageService, err := vm.softLayerClient.GetSoftLayer_Network_Storage_Service()
 	if err != nil {
-		return bosherr.WrapError(err, "Can not get network storage service.")
+		return bosherr.WrapError(err, "Cannot get network storage service.")
 	}
 
 	allowed, err := networkStorageService.HasAllowedVirtualGuest(disk.ID(), vm.ID())
@@ -255,7 +258,7 @@ func (vm SoftLayerVM) DetachDisk(disk bslcdisk.Disk) error {
 		return bosherr.WrapError(err, "Marshalling agent environment metadata")
 	}
 
-	err = bslcommon.ConfigureMetadataOnVirtualGuest(vm.softLayerClient, virtualGuest.Id, string(metadata), bslcommon.TIMEOUT, bslcommon.POLLING_INTERVAL)
+	err = bslcommon.ConfigureMetadataOnVirtualGuest(vm.softLayerClient, virtualGuest.Id, string(metadata))
 	if err != nil {
 		return bosherr.WrapError(err, fmt.Sprintf("Configuring metadata on VirtualGuest `%d`", virtualGuest.Id))
 	}
@@ -271,7 +274,7 @@ func (vm SoftLayerVM) extractTagsFromVMMetadata(vmMetadata VMMetadata) ([]string
 		if key == "tags" {
 			stringValue, ok := value.(string)
 			if !ok {
-				return []string{}, bosherr.Errorf("Could not convert tags metadata value `%v` to string", value)
+				return []string{}, bosherr.Errorf("Cannot convert tags metadata value `%v` to string", value)
 			}
 
 			tags = vm.parseTags(stringValue)
@@ -412,22 +415,22 @@ func (vm SoftLayerVM) getIscsiDeviceNamesBasedOnShellScript(virtualGuest datatyp
 func (vm SoftLayerVM) fetchVMandIscsiVolume(vmId int, volumeId int) (datatypes.SoftLayer_Virtual_Guest, datatypes.SoftLayer_Network_Storage, error) {
 	virtualGuestService, err := vm.softLayerClient.GetSoftLayer_Virtual_Guest_Service()
 	if err != nil {
-		return datatypes.SoftLayer_Virtual_Guest{}, datatypes.SoftLayer_Network_Storage{}, bosherr.WrapError(err, "Can not get softlayer virtual guest service.")
+		return datatypes.SoftLayer_Virtual_Guest{}, datatypes.SoftLayer_Network_Storage{}, bosherr.WrapError(err, "Cannot get softlayer virtual guest service.")
 	}
 
 	networkStorageService, err := vm.softLayerClient.GetSoftLayer_Network_Storage_Service()
 	if err != nil {
-		return datatypes.SoftLayer_Virtual_Guest{}, datatypes.SoftLayer_Network_Storage{}, bosherr.WrapError(err, "Can not get network storage service.")
+		return datatypes.SoftLayer_Virtual_Guest{}, datatypes.SoftLayer_Network_Storage{}, bosherr.WrapError(err, "Cannot get network storage service.")
 	}
 
 	virtualGuest, err := virtualGuestService.GetObject(vmId)
 	if err != nil {
-		return datatypes.SoftLayer_Virtual_Guest{}, datatypes.SoftLayer_Network_Storage{}, bosherr.WrapErrorf(err, "Can not get virtual guest with id: %d", vmId)
+		return datatypes.SoftLayer_Virtual_Guest{}, datatypes.SoftLayer_Network_Storage{}, bosherr.WrapErrorf(err, "Cannot get virtual guest with id: %d", vmId)
 	}
 
 	volume, err := networkStorageService.GetIscsiVolume(volumeId)
 	if err != nil {
-		return datatypes.SoftLayer_Virtual_Guest{}, datatypes.SoftLayer_Network_Storage{}, bosherr.WrapErrorf(err, "Can not get iSCSI volume with id: %d", volumeId)
+		return datatypes.SoftLayer_Virtual_Guest{}, datatypes.SoftLayer_Network_Storage{}, bosherr.WrapErrorf(err, "Cannot get iSCSI volume with id: %d", volumeId)
 	}
 
 	return virtualGuest, volume, nil
@@ -436,22 +439,25 @@ func (vm SoftLayerVM) fetchVMandIscsiVolume(vmId int, volumeId int) (datatypes.S
 func (vm SoftLayerVM) getAllowedHostCredential(virtualGuest datatypes.SoftLayer_Virtual_Guest) (AllowedHostCredential, error) {
 	virtualGuestService, err := vm.softLayerClient.GetSoftLayer_Virtual_Guest_Service()
 	if err != nil {
-		return AllowedHostCredential{}, bosherr.WrapError(err, "Can not get softlayer virtual guest service.")
+		return AllowedHostCredential{}, bosherr.WrapError(err, "Cannot get softlayer virtual guest service.")
 	}
 
 	allowedHost, err := virtualGuestService.GetAllowedHost(virtualGuest.Id)
-	if err != nil || allowedHost.Id == 0 {
-		return AllowedHostCredential{}, bosherr.WrapErrorf(err, "Can not get allowed host with instance id: %d", virtualGuest.Id)
+	if err != nil {
+		return AllowedHostCredential{}, bosherr.WrapErrorf(err, "Cannot get allowed host with instance id: %d", virtualGuest.Id)
+	}
+	if allowedHost.Id == 0 {
+		return AllowedHostCredential{}, bosherr.Errorf("Cannot get allowed host with instance id: %d", virtualGuest.Id)
 	}
 
 	allowedHostService, err := vm.softLayerClient.GetSoftLayer_Network_Storage_Allowed_Host_Service()
 	if err != nil {
-		return AllowedHostCredential{}, bosherr.WrapError(err, "Can not get network storage allowed host service.")
+		return AllowedHostCredential{}, bosherr.WrapError(err, "Cannot get network storage allowed host service.")
 	}
 
 	credential, err := allowedHostService.GetCredential(allowedHost.Id)
 	if err != nil {
-		return AllowedHostCredential{}, bosherr.WrapErrorf(err, "Can not get credential with allowed host id: %d", allowedHost.Id)
+		return AllowedHostCredential{}, bosherr.WrapErrorf(err, "Cannot get credential with allowed host id: %d", allowedHost.Id)
 	}
 
 	return AllowedHostCredential{
@@ -482,16 +488,10 @@ func (vm SoftLayerVM) restartOpenIscsiBasedOnShellScript(virtualGuest datatypes.
 }
 
 func (vm SoftLayerVM) discoveryOpenIscsiTargetsBasedOnShellScript(virtualGuest datatypes.SoftLayer_Virtual_Guest, volume datatypes.SoftLayer_Network_Storage) (bool, error) {
-	command := fmt.Sprintf("iscsiadm -m discovery -t sendtargets -p %s", volume.ServiceResourceBackendIpAddress)
+	command := fmt.Sprintf("iscsiadm -m discovery -t sendtargets -p %s ; iscsiadm -m node -l", volume.ServiceResourceBackendIpAddress)
 	_, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, command)
 	if err != nil {
 		return false, bosherr.WrapError(err, "discvoerying open iscsi targets")
-	}
-
-	loginSessionCmd := fmt.Sprintf("echo `iscsiadm -m node -l`")
-	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, loginSessionCmd)
-	if err != nil {
-		return false, bosherr.WrapError(err, "logining iscsi sessions")
 	}
 
 	return true, nil
@@ -576,7 +576,8 @@ func (vm SoftLayerVM) detachVolumeBasedOnShellScript(virtualGuest datatypes.Soft
 
 	for _, portal := range portals {
 		command := fmt.Sprintf("iscsiadm -m node -T %s --portal %s -u ; iscsiadm -m node -o delete -T %s --portal %s", targetName, portal, targetName, portal)
-		if _, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, command); err != nil {
+		_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, command)
+		if err != nil {
 			return err
 		}
 	}
@@ -585,7 +586,7 @@ func (vm SoftLayerVM) detachVolumeBasedOnShellScript(virtualGuest datatypes.Soft
 }
 
 func (vm SoftLayerVM) findOpenIscsiTargetBasedOnShellScript(virtualGuest datatypes.SoftLayer_Virtual_Guest, volume datatypes.SoftLayer_Network_Storage) (targetName string, err error) {
-	command := "sleep 1 ; iscsiadm -m session -P3 | awk '/Target: /{print $2}'"
+	command := "sleep 5 ; iscsiadm -m session -P3 | awk '/Target: /{print $2}'"
 	output, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, command)
 	if err != nil {
 		return "", err
@@ -596,11 +597,11 @@ func (vm SoftLayerVM) findOpenIscsiTargetBasedOnShellScript(virtualGuest datatyp
 		return line, nil
 	}
 
-	return "", errors.New(fmt.Sprintf("Can not find matched iSCSI device for user name: %s", volume.Username))
+	return "", errors.New(fmt.Sprintf("Cannot find matched iSCSI device for user name: %s", volume.Username))
 }
 
 func (vm SoftLayerVM) findOpenIscsiPortalsBasedOnShellScript(virtualGuest datatypes.SoftLayer_Virtual_Guest, volume datatypes.SoftLayer_Network_Storage) ([]string, error) {
-	command := "sleep 1 ; iscsiadm -m session -P3 | awk 'BEGIN{ lel=0} { if($0 ~ /Current Portal: /){ portal = $3 ; lel=NR } else { if( NR==(lel+46) && $0 ~ /Attached scsi disk /) {print portal}}}'"
+	command := "sleep 5 ; iscsiadm -m session -P3 | awk 'BEGIN{ lel=0} { if($0 ~ /Current Portal: /){ portal = $3 ; lel=NR } else { if( NR==(lel+46) && $0 ~ /Attached scsi disk /) {print portal}}}'"
 	output, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, command)
 	if err != nil {
 		return []string{}, err

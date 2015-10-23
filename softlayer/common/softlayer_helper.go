@@ -6,9 +6,13 @@ import (
 	"time"
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
+	boshlog "github.com/cloudfoundry/bosh-utils/logger"
+	boshretry "github.com/cloudfoundry/bosh-utils/retrystrategy"
+	"github.com/pivotal-golang/clock"
 
 	datatypes "github.com/maximilien/softlayer-go/data_types"
 	sl "github.com/maximilien/softlayer-go/softlayer"
+	"strings"
 )
 
 var (
@@ -42,13 +46,13 @@ func AttachEphemeralDiskToVirtualGuest(softLayerClient sl.Client, virtualGuestId
 	return nil
 }
 
-func ConfigureMetadataOnVirtualGuest(softLayerClient sl.Client, virtualGuestId int, metadata string, timeout, pollingInterval time.Duration) error {
-	err := WaitForVirtualGuest(softLayerClient, virtualGuestId, "RUNNING", timeout, pollingInterval)
+func ConfigureMetadataOnVirtualGuest(softLayerClient sl.Client, virtualGuestId int, metadata string) error {
+	err := WaitForVirtualGuest(softLayerClient, virtualGuestId, "RUNNING", TIMEOUT, POLLING_INTERVAL)
 	if err != nil {
 		return bosherr.WrapError(err, fmt.Sprintf("Waiting for VirtualGuest `%d`", virtualGuestId))
 	}
 
-	err = WaitForVirtualGuestToHaveNoRunningTransactions(softLayerClient, virtualGuestId, timeout, pollingInterval)
+	err = WaitForVirtualGuestToHaveNoRunningTransactions(softLayerClient, virtualGuestId, TIMEOUT, POLLING_INTERVAL)
 	if err != nil {
 		return bosherr.WrapError(err, fmt.Sprintf("Waiting for VirtualGuest `%d` to have no pending transactions", virtualGuestId))
 	}
@@ -58,20 +62,20 @@ func ConfigureMetadataOnVirtualGuest(softLayerClient sl.Client, virtualGuestId i
 		return bosherr.WrapError(err, fmt.Sprintf("Setting metadata on VirtualGuest `%d`", virtualGuestId))
 	}
 
-	err = WaitForVirtualGuestToHaveNoRunningTransactions(softLayerClient, virtualGuestId, timeout, pollingInterval)
+	err = WaitForVirtualGuestToHaveNoRunningTransactions(softLayerClient, virtualGuestId, TIMEOUT, POLLING_INTERVAL)
 	if err != nil {
 		return bosherr.WrapError(err, fmt.Sprintf("Waiting for VirtualGuest `%d` to have no pending transactions", virtualGuestId))
 	}
 
 	err = ConfigureMetadataDiskOnVirtualGuest(softLayerClient, virtualGuestId)
 	if err != nil {
-		return bosherr.WrapError(err, fmt.Sprintf("Configuring metadata disk on VirtualGuest `%d`", virtualGuestId))
+		return bosherr.WrapError(err, fmt.Sprintf("Configuring metadata disk on VirtualGuest `%d`", POLLING_INTERVAL))
 	}
 
 	//The transaction (configureMetadataDisk) will shut down the guest while the metadata disk is configured. Pause 2 minutes for its back.
 	time.Sleep(PAUSE_TIME)
 
-	err = WaitForVirtualGuest(softLayerClient, virtualGuestId, "RUNNING", timeout, pollingInterval)
+	err = WaitForVirtualGuest(softLayerClient, virtualGuestId, "RUNNING", TIMEOUT, POLLING_INTERVAL)
 	if err != nil {
 		return bosherr.WrapError(err, fmt.Sprintf("Waiting for VirtualGuest `%d`", virtualGuestId))
 	}
@@ -109,6 +113,64 @@ func WaitForVirtualGuestToHaveNoRunningTransactions(softLayerClient sl.Client, v
 	return bosherr.Errorf("Waiting for virtual guest with ID '%d' to have no active transactions", virtualGuestId)
 }
 
+func WaitForVirtualGuestToHaveRunningTransaction(softLayerClient sl.Client, virtualGuestId int, logger boshlog.Logger) error {
+
+	virtualGuestService, err := softLayerClient.GetSoftLayer_Virtual_Guest_Service()
+	if err != nil {
+		return bosherr.WrapError(err, "Creating VirtualGuestService from SoftLayer client")
+	}
+
+	runningTransactionsRetryable := boshretry.NewRetryable(
+		func() (bool, error) {
+			activeTransactions, err := virtualGuestService.GetActiveTransactions(virtualGuestId)
+			if err != nil {
+				return false, bosherr.WrapError(err, fmt.Sprintf("Getting active transaction against vitrual guest %d", virtualGuestId))
+			} else {
+				if len(activeTransactions) == 0 {
+					return true, nil
+				}
+				return false, nil
+			}
+		})
+
+	timeService := clock.NewClock()
+	timeoutRetryStrategy := boshretry.NewTimeoutRetryStrategy(TIMEOUT, POLLING_INTERVAL, runningTransactionsRetryable, timeService, logger)
+	err = timeoutRetryStrategy.Try()
+	if err != nil {
+		return bosherr.Errorf("Waiting for virtual guest with ID '%d' to have active transactions", virtualGuestId)
+	}
+	return nil
+}
+
+func WaitForVirtualGuestToHaveNoRunningTransaction(softLayerClient sl.Client, virtualGuestId int, logger boshlog.Logger) error {
+
+	virtualGuestService, err := softLayerClient.GetSoftLayer_Virtual_Guest_Service()
+	if err != nil {
+		return bosherr.WrapError(err, "Creating VirtualGuestService from SoftLayer client")
+	}
+
+	runningTransactionsRetryable := boshretry.NewRetryable(
+		func() (bool, error) {
+			activeTransactions, err := virtualGuestService.GetActiveTransactions(virtualGuestId)
+			if err != nil {
+				return true, bosherr.WrapError(err, fmt.Sprintf("Getting active transaction against vitrual guest %d", virtualGuestId))
+			} else {
+				if len(activeTransactions) > 0 {
+					return true, nil
+				}
+				return false, nil
+			}
+		})
+
+	timeService := clock.NewClock()
+	timeoutRetryStrategy := boshretry.NewTimeoutRetryStrategy(TIMEOUT, POLLING_INTERVAL, runningTransactionsRetryable, timeService, logger)
+	err = timeoutRetryStrategy.Try()
+	if err != nil {
+		return bosherr.Errorf("Waiting for virtual guest with ID '%d' to have no active transactions", virtualGuestId)
+	}
+	return nil
+}
+
 func WaitForVirtualGuest(softLayerClient sl.Client, virtualGuestId int, targetState string, timeout, pollingInterval time.Duration) error {
 	virtualGuestService, err := softLayerClient.GetSoftLayer_Virtual_Guest_Service()
 	if err != nil {
@@ -121,7 +183,7 @@ func WaitForVirtualGuest(softLayerClient sl.Client, virtualGuestId int, targetSt
 		vgPowerState, err := virtualGuestService.GetPowerState(virtualGuestId)
 		if err != nil {
 			if retryCount > MAX_RETRY_COUNT {
-				return bosherr.WrapError(err, "Getting active transactions from SoftLayer client")
+				return bosherr.WrapError(err, "Getting active transaction from SoftLayer client")
 			} else {
 				retryCount += 1
 				continue
@@ -137,6 +199,35 @@ func WaitForVirtualGuest(softLayerClient sl.Client, virtualGuestId int, targetSt
 	}
 
 	return bosherr.Errorf("Waiting for virtual guest with ID '%d' to have be in state '%s'", virtualGuestId, targetState)
+}
+
+func WaitForVirtualGuestToTargetState(softLayerClient sl.Client, virtualGuestId int, targetState string, logger boshlog.Logger) error {
+	virtualGuestService, err := softLayerClient.GetSoftLayer_Virtual_Guest_Service()
+	if err != nil {
+		return bosherr.WrapError(err, "Creating VirtualGuestService from SoftLayer client")
+	}
+
+	getTargetStateRetryable := boshretry.NewRetryable(
+		func() (bool, error) {
+			vgPowerState, err := virtualGuestService.GetPowerState(virtualGuestId)
+			if err != nil {
+				return false, bosherr.WrapError(err, fmt.Sprintf("Getting PowerState from vitrual guest %d", virtualGuestId))
+			} else {
+				if strings.Contains(vgPowerState.KeyName, targetState) {
+					return false, nil
+				}
+				return true, nil
+			}
+		})
+
+	timeService := clock.NewClock()
+	timeoutRetryStrategy := boshretry.NewTimeoutRetryStrategy(TIMEOUT, POLLING_INTERVAL, getTargetStateRetryable, timeService, logger)
+	err = timeoutRetryStrategy.Try()
+	if err != nil {
+		return bosherr.Errorf("Waiting for virtual guest with ID '%d' to have be in state '%s'", virtualGuestId, targetState)
+	}
+
+	return nil
 }
 
 func SetMetadataOnVirtualGuest(softLayerClient sl.Client, virtualGuestId int, metadata string) error {
@@ -198,11 +289,11 @@ func GetUserMetadataOnVirtualGuest(softLayerClient sl.Client, virtualGuestId int
 func GetObjectDetailsOnVirtualGuest(softLayerClient sl.Client, virtualGuestId int) (datatypes.SoftLayer_Virtual_Guest, error) {
 	virtualGuestService, err := softLayerClient.GetSoftLayer_Virtual_Guest_Service()
 	if err != nil {
-		return datatypes.SoftLayer_Virtual_Guest{}, bosherr.WrapError(err, "Can not get softlayer virtual guest service.")
+		return datatypes.SoftLayer_Virtual_Guest{}, bosherr.WrapError(err, "Cannot get softlayer virtual guest service.")
 	}
 	virtualGuest, err := virtualGuestService.GetObject(virtualGuestId)
 	if err != nil {
-		return datatypes.SoftLayer_Virtual_Guest{}, bosherr.WrapErrorf(err, "Can not get virtual guest with id: %d", virtualGuestId)
+		return datatypes.SoftLayer_Virtual_Guest{}, bosherr.WrapErrorf(err, "Cannot get virtual guest with id: %d", virtualGuestId)
 	}
 	return virtualGuest, nil
 }
@@ -210,12 +301,12 @@ func GetObjectDetailsOnVirtualGuest(softLayerClient sl.Client, virtualGuestId in
 func GetObjectDetailsOnStorage(softLayerClient sl.Client, volumeId int) (datatypes.SoftLayer_Network_Storage, error) {
 	networkStorageService, err := softLayerClient.GetSoftLayer_Network_Storage_Service()
 	if err != nil {
-		return datatypes.SoftLayer_Network_Storage{}, bosherr.WrapError(err, "Can not get network storage service.")
+		return datatypes.SoftLayer_Network_Storage{}, bosherr.WrapError(err, "Cannot get network storage service.")
 	}
 
 	volume, err := networkStorageService.GetIscsiVolume(volumeId)
 	if err != nil {
-		return datatypes.SoftLayer_Network_Storage{}, bosherr.WrapErrorf(err, "Can not get iSCSI volume with id: %d", volumeId)
+		return datatypes.SoftLayer_Network_Storage{}, bosherr.WrapErrorf(err, "Cannot get iSCSI volume with id: %d", volumeId)
 	}
 	return volume, nil
 }

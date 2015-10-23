@@ -281,7 +281,6 @@ var _ = Describe("SoftLayerVM", func() {
 				"",
 				"",
 				"",
-				"",
 				expectedDmSetupLs1,
 			}
 			testhelpers.SetTestFixturesForFakeSSHClient(sshClient, expectedCmdResults, nil)
@@ -300,7 +299,6 @@ var _ = Describe("SoftLayerVM", func() {
 				"",
 				"",
 				"",
-				"",
 				expectedPartitions2,
 			}
 			testhelpers.SetTestFixturesForFakeSSHClient(sshClient, expectedCmdResults, nil)
@@ -315,7 +313,6 @@ var _ = Describe("SoftLayerVM", func() {
 			expectedCmdResults := []string{
 				"/sbin/multipath",
 				expectedDmSetupLs1,
-				"",
 				"",
 				"",
 				"",

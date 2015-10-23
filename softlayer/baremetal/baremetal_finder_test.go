@@ -53,7 +53,7 @@ var _ = Describe("BaremetalFinder", func() {
 			It("return an error when the specified hardward id can not be found", func() {
 				_, err := finder.Find("none-exist-id")
 				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(Equal("can not find the baremetal server with id: none-exist-id."))
+				Expect(err.Error()).To(Equal("cannot find the baremetal server with id: none-exist-id."))
 			})
 
 		})
