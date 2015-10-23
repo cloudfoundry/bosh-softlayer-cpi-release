@@ -160,6 +160,7 @@ func (c SoftLayerCreator) updateEtcHostsOfBoshInit(record string) (err error) {
 	if err != nil {
 		return bosherr.WrapError(err, "Generating config from template")
 	}
+
 	fileSystem := boshsys.NewOsFileSystemWithStrictTempRoot(c.logger)
 	err = fileSystem.WriteFile("/etc/hosts", buffer.Bytes())
 	if err != nil {
