@@ -3,6 +3,7 @@ package vm_test
 import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"time"
 
 	. "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
 
@@ -12,6 +13,7 @@ import (
 	fakevm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm/fakes"
 	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
 
+	bslcommon "github.com/maximilien/bosh-softlayer-cpi/softlayer/common"
 	bslcstem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell"
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
@@ -41,6 +43,9 @@ var _ = Describe("SoftLayerCreator", func() {
 			agentOptions,
 			logger,
 		)
+		bslcommon.TIMEOUT = 2 * time.Second
+		bslcommon.POLLING_INTERVAL = 1 * time.Second
+		bslcommon.PAUSE_TIME = 1 * time.Second
 	})
 
 	Describe("#Create", func() {

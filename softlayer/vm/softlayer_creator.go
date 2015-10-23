@@ -33,9 +33,8 @@ type SoftLayerCreator struct {
 }
 
 func NewSoftLayerCreator(softLayerClient sl.Client, agentEnvServiceFactory AgentEnvServiceFactory, agentOptions AgentOptions, logger boshlog.Logger) SoftLayerCreator {
-	bslcommon.TIMEOUT = 60 * time.Minute
-	bslcommon.POLLING_INTERVAL = 20 * time.Second
-	bslcommon.MAX_RETRY_COUNT = 5
+	bslcommon.TIMEOUT = 30 * time.Minute
+	bslcommon.POLLING_INTERVAL = 10 * time.Second
 
 	return SoftLayerCreator{
 		softLayerClient:        softLayerClient,
@@ -62,19 +61,19 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 	}
 
 	if cloudProps.EphemeralDiskSize == 0 {
-		err = bslcommon.WaitForVirtualGuest(c.softLayerClient, virtualGuest.Id, "RUNNING", bslcommon.TIMEOUT, bslcommon.POLLING_INTERVAL)
+		err = bslcommon.WaitForVirtualGuest(c.softLayerClient, virtualGuest.Id, "RUNNING")
 		if err != nil {
 			return SoftLayerVM{}, bosherr.WrapError(err, fmt.Sprintf("PowerOn failed with VirtualGuest id `%d`", virtualGuest.Id))
 		}
 	} else {
-		err = bslcommon.AttachEphemeralDiskToVirtualGuest(c.softLayerClient, virtualGuest.Id, cloudProps.EphemeralDiskSize, bslcommon.TIMEOUT, bslcommon.POLLING_INTERVAL)
+		err = bslcommon.AttachEphemeralDiskToVirtualGuest(c.softLayerClient, virtualGuest.Id, cloudProps.EphemeralDiskSize)
 		if err != nil {
 			return SoftLayerVM{}, bosherr.WrapError(err, fmt.Sprintf("Attaching ephemeral disk to VirtualGuest `%d`", virtualGuest.Id))
 		}
 	}
 
 	agentEnvService := c.agentEnvServiceFactory.New(virtualGuest.Id)
-	vm := NewSoftLayerVM(virtualGuest.Id, c.softLayerClient, util.GetSshClient(), agentEnvService, c.logger, TIMEOUT_TRANSACTIONS_DELETE_VM)
+	vm := NewSoftLayerVM(virtualGuest.Id, c.softLayerClient, util.GetSshClient(), agentEnvService, c.logger)
 
 	if len(cloudProps.BoshIp) == 0 {
 		virtualGuest, err = bslcommon.GetObjectDetailsOnVirtualGuest(vm.softLayerClient, virtualGuest.Id)

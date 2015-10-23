@@ -28,10 +28,9 @@ import (
 )
 
 const (
-	softLayerVMtag                 = "SoftLayerVM"
-	ROOT_USER_NAME                 = "root"
-	deleteVMLogTag                 = "DeleteVM"
-	TIMEOUT_TRANSACTIONS_DELETE_VM = 60 * time.Minute
+	softLayerVMtag = "SoftLayerVM"
+	ROOT_USER_NAME = "root"
+	deleteVMLogTag = "DeleteVM"
 )
 
 type SoftLayerVM struct {
@@ -43,13 +42,11 @@ type SoftLayerVM struct {
 	sshClient util.SshClient
 
 	logger boshlog.Logger
-
-	timeoutForActiveTransactions time.Duration
 }
 
-func NewSoftLayerVM(id int, softLayerClient sl.Client, sshClient util.SshClient, agentEnvService AgentEnvService, logger boshlog.Logger, timeoutForActiveTransactions time.Duration) SoftLayerVM {
+func NewSoftLayerVM(id int, softLayerClient sl.Client, sshClient util.SshClient, agentEnvService AgentEnvService, logger boshlog.Logger) SoftLayerVM {
 	bslcommon.TIMEOUT = 10 * time.Minute
-	bslcommon.POLLING_INTERVAL = 10 * time.Second
+	bslcommon.POLLING_INTERVAL = 5 * time.Second
 
 	return SoftLayerVM{
 		id: id,
@@ -60,8 +57,6 @@ func NewSoftLayerVM(id int, softLayerClient sl.Client, sshClient util.SshClient,
 		sshClient: sshClient,
 
 		logger: logger,
-
-		timeoutForActiveTransactions: timeoutForActiveTransactions,
 	}
 }
 
@@ -74,7 +69,7 @@ func (vm SoftLayerVM) Delete() error {
 	}
 
 	vmCID := vm.ID()
-	err = bslcommon.WaitForVirtualGuestToHaveNoRunningTransactions(vm.softLayerClient, vmCID, vm.timeoutForActiveTransactions, bslcommon.POLLING_INTERVAL)
+	err = bslcommon.WaitForVirtualGuestToHaveNoRunningTransactions(vm.softLayerClient, vmCID)
 	if err != nil {
 		return bosherr.WrapError(err, fmt.Sprintf("Waiting for VirtualGuest `%d` to have no pending transactions before deleting vm", vmCID))
 	}
@@ -88,7 +83,7 @@ func (vm SoftLayerVM) Delete() error {
 		return bosherr.WrapError(nil, "Did not delete SoftLayer VirtualGuest from client")
 	}
 
-	err = vm.postCheckActiveTransactionsForDeleteVM(vm.softLayerClient, vmCID, vm.timeoutForActiveTransactions, bslcommon.POLLING_INTERVAL)
+	err = vm.postCheckActiveTransactionsForDeleteVM(vm.softLayerClient, vmCID)
 	if err != nil {
 		return err
 	}
@@ -187,7 +182,7 @@ func (vm SoftLayerVM) AttachDisk(disk bslcdisk.Disk) error {
 		return bosherr.WrapError(err, fmt.Sprintf("Failed to get multipath information from virtual guest `%d`", virtualGuest.Id))
 	}
 
-	deviceName, err := vm.waitForVolumeAttached(virtualGuest, volume, hasMultiPath, bslcommon.TIMEOUT, bslcommon.POLLING_INTERVAL)
+	deviceName, err := vm.waitForVolumeAttached(virtualGuest, volume, hasMultiPath)
 	if err != nil {
 		return bosherr.WrapError(err, fmt.Sprintf("Failed to attach volume `%d` to virtual guest `%d`", disk.ID(), virtualGuest.Id))
 	}
@@ -288,7 +283,7 @@ func (vm SoftLayerVM) parseTags(value string) []string {
 	return strings.Split(value, ",")
 }
 
-func (vm SoftLayerVM) waitForVolumeAttached(virtualGuest datatypes.SoftLayer_Virtual_Guest, volume datatypes.SoftLayer_Network_Storage, hasMultiPath bool, timeout, pollingInterval time.Duration) (string, error) {
+func (vm SoftLayerVM) waitForVolumeAttached(virtualGuest datatypes.SoftLayer_Virtual_Guest, volume datatypes.SoftLayer_Network_Storage, hasMultiPath bool) (string, error) {
 	var deviceName string
 
 	oldDisks, err := vm.getIscsiDeviceNamesBasedOnShellScript(virtualGuest, hasMultiPath)
@@ -321,7 +316,7 @@ func (vm SoftLayerVM) waitForVolumeAttached(virtualGuest datatypes.SoftLayer_Vir
 	}
 
 	totalTime := time.Duration(0)
-	for totalTime < timeout {
+	for totalTime < bslcommon.TIMEOUT {
 		if _, err = vm.discoveryOpenIscsiTargetsBasedOnShellScript(virtualGuest, volume); err != nil {
 			return "", bosherr.WrapErrorf(err, "Failed to attach volume with id %d to virtual guest with id: %d.", volume.Id, virtualGuest.Id)
 		}
@@ -354,8 +349,8 @@ func (vm SoftLayerVM) waitForVolumeAttached(virtualGuest datatypes.SoftLayer_Vir
 			return deviceName, nil
 		}
 
-		totalTime += pollingInterval
-		time.Sleep(pollingInterval)
+		totalTime += bslcommon.POLLING_INTERVAL
+		time.Sleep(bslcommon.POLLING_INTERVAL)
 	}
 
 	return "", bosherr.Errorf("Failed to attach disk '%d' to virtual guest '%d'", volume.Id, virtualGuest.Id)
@@ -627,14 +622,14 @@ func (vm SoftLayerVM) getRootPassword(virtualGuest datatypes.SoftLayer_Virtual_G
 	return ""
 }
 
-func (vm SoftLayerVM) postCheckActiveTransactionsForDeleteVM(softLayerClient sl.Client, virtualGuestId int, timeout, pollingInterval time.Duration) error {
+func (vm SoftLayerVM) postCheckActiveTransactionsForDeleteVM(softLayerClient sl.Client, virtualGuestId int) error {
 	virtualGuestService, err := softLayerClient.GetSoftLayer_Virtual_Guest_Service()
 	if err != nil {
 		return bosherr.WrapError(err, "Creating VirtualGuestService from SoftLayer client")
 	}
 
 	totalTime := time.Duration(0)
-	for totalTime < timeout {
+	for totalTime < bslcommon.TIMEOUT {
 		activeTransactions, err := virtualGuestService.GetActiveTransactions(virtualGuestId)
 		if err != nil {
 			return bosherr.WrapError(err, "Getting active transactions from SoftLayer client")
@@ -645,16 +640,16 @@ func (vm SoftLayerVM) postCheckActiveTransactionsForDeleteVM(softLayerClient sl.
 			break
 		}
 
-		totalTime += pollingInterval
-		time.Sleep(pollingInterval)
+		totalTime += bslcommon.POLLING_INTERVAL
+		time.Sleep(bslcommon.POLLING_INTERVAL)
 	}
 
-	if totalTime >= timeout {
+	if totalTime >= bslcommon.TIMEOUT {
 		return errors.New(fmt.Sprintf("Waiting for DeleteVM transaction to start TIME OUT!"))
 	}
 
 	totalTime = time.Duration(0)
-	for totalTime < timeout {
+	for totalTime < bslcommon.TIMEOUT {
 		vm1, err := virtualGuestService.GetObject(virtualGuestId)
 		if err != nil || vm1.Id == 0 {
 			vm.logger.Info(deleteVMLogTag, "VM doesn't exist. Delete done", nil)
@@ -677,11 +672,11 @@ func (vm SoftLayerVM) postCheckActiveTransactionsForDeleteVM(softLayerClient sl.
 		}
 
 		vm.logger.Info(deleteVMLogTag, "This is a short transaction, waiting for all active transactions to complete", nil)
-		totalTime += pollingInterval
-		time.Sleep(pollingInterval)
+		totalTime += bslcommon.POLLING_INTERVAL
+		time.Sleep(bslcommon.POLLING_INTERVAL)
 	}
 
-	if totalTime >= timeout {
+	if totalTime >= bslcommon.TIMEOUT {
 		return errors.New(fmt.Sprintf("After deleting a vm, waiting for active transactions to complete TIME OUT!"))
 	}
 

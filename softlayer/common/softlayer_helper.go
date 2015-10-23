@@ -19,16 +19,15 @@ var (
 	TIMEOUT          time.Duration
 	POLLING_INTERVAL time.Duration
 	PAUSE_TIME       time.Duration
-	MAX_RETRY_COUNT  int
 )
 
-func AttachEphemeralDiskToVirtualGuest(softLayerClient sl.Client, virtualGuestId int, diskSize int, timeout, pollingInterval time.Duration) error {
-	err := WaitForVirtualGuest(softLayerClient, virtualGuestId, "RUNNING", timeout, pollingInterval)
+func AttachEphemeralDiskToVirtualGuest(softLayerClient sl.Client, virtualGuestId int, diskSize int) error {
+	err := WaitForVirtualGuest(softLayerClient, virtualGuestId, "RUNNING")
 	if err != nil {
 		return bosherr.WrapError(err, fmt.Sprintf("Waiting for VirtualGuest `%d`", virtualGuestId))
 	}
 
-	err = WaitForVirtualGuestToHaveNoRunningTransactions(softLayerClient, virtualGuestId, timeout, pollingInterval)
+	err = WaitForVirtualGuestToHaveNoRunningTransactions(softLayerClient, virtualGuestId)
 	if err != nil {
 		return bosherr.WrapError(err, fmt.Sprintf("Waiting for VirtualGuest `%d` to have no pending transactions", virtualGuestId))
 	}
@@ -47,12 +46,12 @@ func AttachEphemeralDiskToVirtualGuest(softLayerClient sl.Client, virtualGuestId
 }
 
 func ConfigureMetadataOnVirtualGuest(softLayerClient sl.Client, virtualGuestId int, metadata string) error {
-	err := WaitForVirtualGuest(softLayerClient, virtualGuestId, "RUNNING", TIMEOUT, POLLING_INTERVAL)
+	err := WaitForVirtualGuest(softLayerClient, virtualGuestId, "RUNNING")
 	if err != nil {
 		return bosherr.WrapError(err, fmt.Sprintf("Waiting for VirtualGuest `%d`", virtualGuestId))
 	}
 
-	err = WaitForVirtualGuestToHaveNoRunningTransactions(softLayerClient, virtualGuestId, TIMEOUT, POLLING_INTERVAL)
+	err = WaitForVirtualGuestToHaveNoRunningTransactions(softLayerClient, virtualGuestId)
 	if err != nil {
 		return bosherr.WrapError(err, fmt.Sprintf("Waiting for VirtualGuest `%d` to have no pending transactions", virtualGuestId))
 	}
@@ -62,7 +61,7 @@ func ConfigureMetadataOnVirtualGuest(softLayerClient sl.Client, virtualGuestId i
 		return bosherr.WrapError(err, fmt.Sprintf("Setting metadata on VirtualGuest `%d`", virtualGuestId))
 	}
 
-	err = WaitForVirtualGuestToHaveNoRunningTransactions(softLayerClient, virtualGuestId, TIMEOUT, POLLING_INTERVAL)
+	err = WaitForVirtualGuestToHaveNoRunningTransactions(softLayerClient, virtualGuestId)
 	if err != nil {
 		return bosherr.WrapError(err, fmt.Sprintf("Waiting for VirtualGuest `%d` to have no pending transactions", virtualGuestId))
 	}
@@ -75,7 +74,7 @@ func ConfigureMetadataOnVirtualGuest(softLayerClient sl.Client, virtualGuestId i
 	//The transaction (configureMetadataDisk) will shut down the guest while the metadata disk is configured. Pause 2 minutes for its back.
 	time.Sleep(PAUSE_TIME)
 
-	err = WaitForVirtualGuest(softLayerClient, virtualGuestId, "RUNNING", TIMEOUT, POLLING_INTERVAL)
+	err = WaitForVirtualGuest(softLayerClient, virtualGuestId, "RUNNING")
 	if err != nil {
 		return bosherr.WrapError(err, fmt.Sprintf("Waiting for VirtualGuest `%d`", virtualGuestId))
 	}
@@ -83,31 +82,25 @@ func ConfigureMetadataOnVirtualGuest(softLayerClient sl.Client, virtualGuestId i
 	return nil
 }
 
-func WaitForVirtualGuestToHaveNoRunningTransactions(softLayerClient sl.Client, virtualGuestId int, timeout, pollingInterval time.Duration) error {
+func WaitForVirtualGuestToHaveNoRunningTransactions(softLayerClient sl.Client, virtualGuestId int) error {
 	virtualGuestService, err := softLayerClient.GetSoftLayer_Virtual_Guest_Service()
 	if err != nil {
 		return bosherr.WrapError(err, "Creating VirtualGuestService from SoftLayer client")
 	}
 
-	retryCount := 0
 	totalTime := time.Duration(0)
-	for totalTime < timeout {
+	for totalTime < TIMEOUT {
 		activeTransactions, err := virtualGuestService.GetActiveTransactions(virtualGuestId)
 		if err != nil {
-			if retryCount > MAX_RETRY_COUNT {
-				return bosherr.WrapError(err, "Getting active transactions from SoftLayer client")
-			} else {
-				retryCount += 1
-				continue
-			}
+			return bosherr.WrapError(err, "Getting active transaction from SoftLayer client")
 		}
 
 		if len(activeTransactions) == 0 {
 			return nil
 		}
 
-		totalTime += pollingInterval
-		time.Sleep(pollingInterval)
+		totalTime += POLLING_INTERVAL
+		time.Sleep(POLLING_INTERVAL)
 	}
 
 	return bosherr.Errorf("Waiting for virtual guest with ID '%d' to have no active transactions", virtualGuestId)
@@ -171,31 +164,25 @@ func WaitForVirtualGuestToHaveNoRunningTransaction(softLayerClient sl.Client, vi
 	return nil
 }
 
-func WaitForVirtualGuest(softLayerClient sl.Client, virtualGuestId int, targetState string, timeout, pollingInterval time.Duration) error {
+func WaitForVirtualGuest(softLayerClient sl.Client, virtualGuestId int, targetState string) error {
 	virtualGuestService, err := softLayerClient.GetSoftLayer_Virtual_Guest_Service()
 	if err != nil {
 		return bosherr.WrapError(err, "Creating VirtualGuestService from SoftLayer client")
 	}
 
-	retryCount := 0
 	totalTime := time.Duration(0)
-	for totalTime < timeout {
+	for totalTime < TIMEOUT {
 		vgPowerState, err := virtualGuestService.GetPowerState(virtualGuestId)
 		if err != nil {
-			if retryCount > MAX_RETRY_COUNT {
-				return bosherr.WrapError(err, "Getting active transaction from SoftLayer client")
-			} else {
-				retryCount += 1
-				continue
-			}
+			return bosherr.WrapError(err, "Getting active transaction from SoftLayer client")
 		}
 
 		if vgPowerState.KeyName == targetState {
 			return nil
 		}
 
-		totalTime += pollingInterval
-		time.Sleep(pollingInterval)
+		totalTime += POLLING_INTERVAL
+		time.Sleep(POLLING_INTERVAL)
 	}
 
 	return bosherr.Errorf("Waiting for virtual guest with ID '%d' to have be in state '%s'", virtualGuestId, targetState)
