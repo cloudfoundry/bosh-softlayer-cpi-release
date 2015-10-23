@@ -48,7 +48,7 @@ var _ = Describe("SoftLayerVM", func() {
 				fileNames := []string{
 					"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
 					"SoftLayer_Virtual_Guest_Service_deleteObject_true.json",
-					"SoftLayer_Virtual_Guest_Service_getActiveTransactions_NotNone.json",
+					"SoftLayer_Virtual_Guest_Service_getActiveTransactions.json",
 					"SoftLayer_Virtual_Guest_Service_getObject.json",
 					"SoftLayer_Virtual_Guest_Service_getActiveTransaction.json",
 					"SoftLayer_Virtual_Guest_Service_getEmptyObject.json",
@@ -78,10 +78,10 @@ var _ = Describe("SoftLayerVM", func() {
 		Context("invalid VM ID is used", func() {
 			BeforeEach(func() {
 				fileNames := []string{
-					"SoftLayer_Virtual_Guest_Service_getActiveTransactions_NotNone.json",
+					"SoftLayer_Virtual_Guest_Service_getActiveTransactions.json",
 					"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
 					"SoftLayer_Virtual_Guest_Service_deleteObject_false.json",
-					"SoftLayer_Virtual_Guest_Service_getActiveTransactions_NotNone.json",
+					"SoftLayer_Virtual_Guest_Service_getActiveTransactions.json",
 					"SoftLayer_Virtual_Guest_Service_getObject.json",
 					"SoftLayer_Virtual_Guest_Service_getActiveTransaction.json",
 					"SoftLayer_Virtual_Guest_Service_getEmptyObject.json",
@@ -269,6 +269,7 @@ var _ = Describe("SoftLayerVM", func() {
 				"SoftLayer_Virtual_Guest_Service_setMetadata.json",
 				"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
 				"SoftLayer_Virtual_Guest_Service_configureMetadataDisk.json",
+				"SoftLayer_Virtual_Guest_Service_getActiveTransactions.json",
 				"SoftLayer_Virtual_Guest_Service_getPowerState.json",
 			}
 			testhelpers.SetTestFixturesForFakeSoftLayerClient(softLayerClient, fileNames)
@@ -373,6 +374,7 @@ var _ = Describe("SoftLayerVM", func() {
 				"SoftLayer_Virtual_Guest_Service_setMetadata.json",
 				"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
 				"SoftLayer_Virtual_Guest_Service_configureMetadataDisk.json",
+				"SoftLayer_Virtual_Guest_Service_getActiveTransactions.json",
 				"SoftLayer_Virtual_Guest_Service_getPowerState.json",
 			}
 			testhelpers.SetTestFixturesForFakeSoftLayerClient(softLayerClient, fileNames)

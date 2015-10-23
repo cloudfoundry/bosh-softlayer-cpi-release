@@ -2,7 +2,6 @@ package common
 
 import (
 	"encoding/base64"
-	"fmt"
 	"time"
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
@@ -21,62 +20,77 @@ var (
 	PAUSE_TIME       time.Duration
 )
 
-func AttachEphemeralDiskToVirtualGuest(softLayerClient sl.Client, virtualGuestId int, diskSize int) error {
+func AttachEphemeralDiskToVirtualGuest(softLayerClient sl.Client, virtualGuestId int, diskSize int, logger boshlog.Logger) error {
 	err := WaitForVirtualGuest(softLayerClient, virtualGuestId, "RUNNING")
 	if err != nil {
-		return bosherr.WrapError(err, fmt.Sprintf("Waiting for VirtualGuest `%d`", virtualGuestId))
+		return bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d`", virtualGuestId)
 	}
 
 	err = WaitForVirtualGuestToHaveNoRunningTransactions(softLayerClient, virtualGuestId)
 	if err != nil {
-		return bosherr.WrapError(err, fmt.Sprintf("Waiting for VirtualGuest `%d` to have no pending transactions", virtualGuestId))
+		return bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` to have no pending transactions", virtualGuestId)
 	}
 
 	service, err := softLayerClient.GetSoftLayer_Virtual_Guest_Service()
 	if err != nil {
-		return bosherr.WrapError(err, fmt.Sprintf("Attaching ephemeral disk to VirtualGuest `%d`", virtualGuestId))
+		return bosherr.WrapErrorf(err, "Attaching ephemeral disk to VirtualGuest `%d`", virtualGuestId)
 	}
 
 	err = service.AttachEphemeralDisk(virtualGuestId, diskSize)
 	if err != nil {
-		return bosherr.WrapError(err, fmt.Sprintf("Attaching ephemeral disk to VirtualGuest `%d`", virtualGuestId))
+		return bosherr.WrapErrorf(err, "Attaching ephemeral disk to VirtualGuest `%d`", virtualGuestId)
+	}
+
+	err = WaitForVirtualGuestToHaveRunningTransaction(softLayerClient, virtualGuestId, logger)
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` to launch transaction", virtualGuestId)
+	}
+
+	err = WaitForVirtualGuest(softLayerClient, virtualGuestId, "RUNNING")
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d`", virtualGuestId)
 	}
 
 	return nil
 }
 
-func ConfigureMetadataOnVirtualGuest(softLayerClient sl.Client, virtualGuestId int, metadata string) error {
+func ConfigureMetadataOnVirtualGuest(softLayerClient sl.Client, virtualGuestId int, metadata string, logger boshlog.Logger) error {
 	err := WaitForVirtualGuest(softLayerClient, virtualGuestId, "RUNNING")
 	if err != nil {
-		return bosherr.WrapError(err, fmt.Sprintf("Waiting for VirtualGuest `%d`", virtualGuestId))
+		return bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d`", virtualGuestId)
 	}
 
 	err = WaitForVirtualGuestToHaveNoRunningTransactions(softLayerClient, virtualGuestId)
 	if err != nil {
-		return bosherr.WrapError(err, fmt.Sprintf("Waiting for VirtualGuest `%d` to have no pending transactions", virtualGuestId))
+		return bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` to have no pending transactions", virtualGuestId)
 	}
 
 	err = SetMetadataOnVirtualGuest(softLayerClient, virtualGuestId, metadata)
 	if err != nil {
-		return bosherr.WrapError(err, fmt.Sprintf("Setting metadata on VirtualGuest `%d`", virtualGuestId))
+		return bosherr.WrapErrorf(err, "Setting metadata on VirtualGuest `%d`", virtualGuestId)
 	}
 
 	err = WaitForVirtualGuestToHaveNoRunningTransactions(softLayerClient, virtualGuestId)
 	if err != nil {
-		return bosherr.WrapError(err, fmt.Sprintf("Waiting for VirtualGuest `%d` to have no pending transactions", virtualGuestId))
+		return bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` to have no pending transactions", virtualGuestId)
 	}
 
 	err = ConfigureMetadataDiskOnVirtualGuest(softLayerClient, virtualGuestId)
 	if err != nil {
-		return bosherr.WrapError(err, fmt.Sprintf("Configuring metadata disk on VirtualGuest `%d`", POLLING_INTERVAL))
+		return bosherr.WrapErrorf(err, "Configuring metadata disk on VirtualGuest `%d`", POLLING_INTERVAL)
+	}
+
+	err = WaitForVirtualGuestToHaveRunningTransaction(softLayerClient, virtualGuestId, logger)
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` to launch transaction", virtualGuestId)
 	}
 
 	//The transaction (configureMetadataDisk) will shut down the guest while the metadata disk is configured. Pause 2 minutes for its back.
-	time.Sleep(PAUSE_TIME)
+	//time.Sleep(PAUSE_TIME)
 
 	err = WaitForVirtualGuest(softLayerClient, virtualGuestId, "RUNNING")
 	if err != nil {
-		return bosherr.WrapError(err, fmt.Sprintf("Waiting for VirtualGuest `%d`", virtualGuestId))
+		return bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d`", virtualGuestId)
 	}
 
 	return nil
@@ -117,12 +131,12 @@ func WaitForVirtualGuestToHaveRunningTransaction(softLayerClient sl.Client, virt
 		func() (bool, error) {
 			activeTransactions, err := virtualGuestService.GetActiveTransactions(virtualGuestId)
 			if err != nil {
-				return false, bosherr.WrapError(err, fmt.Sprintf("Getting active transaction against vitrual guest %d", virtualGuestId))
+				return false, bosherr.WrapErrorf(err, "Getting active transaction against vitrual guest %d", virtualGuestId)
 			} else {
-				if len(activeTransactions) == 0 {
-					return true, nil
+				if len(activeTransactions) == 1 {
+					return false, nil
 				}
-				return false, nil
+				return true, nil
 			}
 		})
 
@@ -132,6 +146,7 @@ func WaitForVirtualGuestToHaveRunningTransaction(softLayerClient sl.Client, virt
 	if err != nil {
 		return bosherr.Errorf("Waiting for virtual guest with ID '%d' to have active transactions", virtualGuestId)
 	}
+
 	return nil
 }
 
@@ -146,12 +161,12 @@ func WaitForVirtualGuestToHaveNoRunningTransaction(softLayerClient sl.Client, vi
 		func() (bool, error) {
 			activeTransactions, err := virtualGuestService.GetActiveTransactions(virtualGuestId)
 			if err != nil {
-				return true, bosherr.WrapError(err, fmt.Sprintf("Getting active transaction against vitrual guest %d", virtualGuestId))
+				return false, bosherr.WrapErrorf(err, "Getting active transaction against vitrual guest %d", virtualGuestId)
 			} else {
-				if len(activeTransactions) > 0 {
-					return true, nil
+				if len(activeTransactions) == 0 {
+					return false, nil
 				}
-				return false, nil
+				return true, nil
 			}
 		})
 
@@ -174,10 +189,10 @@ func WaitForVirtualGuest(softLayerClient sl.Client, virtualGuestId int, targetSt
 	for totalTime < TIMEOUT {
 		vgPowerState, err := virtualGuestService.GetPowerState(virtualGuestId)
 		if err != nil {
-			return bosherr.WrapError(err, "Getting active transaction from SoftLayer client")
+			return bosherr.WrapErrorf(err, "Getting Power State for virtual guest with ID '%d'", virtualGuestId)
 		}
 
-		if vgPowerState.KeyName == targetState {
+		if strings.Contains(vgPowerState.KeyName, targetState) {
 			return nil
 		}
 
@@ -198,7 +213,7 @@ func WaitForVirtualGuestToTargetState(softLayerClient sl.Client, virtualGuestId 
 		func() (bool, error) {
 			vgPowerState, err := virtualGuestService.GetPowerState(virtualGuestId)
 			if err != nil {
-				return false, bosherr.WrapError(err, fmt.Sprintf("Getting PowerState from vitrual guest %d", virtualGuestId))
+				return false, bosherr.WrapErrorf(err, "Getting PowerState from vitrual guest %d", virtualGuestId)
 			} else {
 				if strings.Contains(vgPowerState.KeyName, targetState) {
 					return false, nil
@@ -225,11 +240,11 @@ func SetMetadataOnVirtualGuest(softLayerClient sl.Client, virtualGuestId int, me
 
 	success, err := virtualGuestService.SetMetadata(virtualGuestId, metadata)
 	if err != nil {
-		return bosherr.WrapError(err, fmt.Sprintf("Setting metadata on VirtualGuest `%d`", virtualGuestId))
+		return bosherr.WrapErrorf(err, "Setting metadata on VirtualGuest `%d`", virtualGuestId)
 	}
 
 	if !success {
-		return bosherr.WrapError(err, fmt.Sprintf("Failed to set metadata on VirtualGuest `%d`", virtualGuestId))
+		return bosherr.WrapErrorf(err, "Failed to set metadata on VirtualGuest `%d`", virtualGuestId)
 	}
 
 	return nil
@@ -243,7 +258,7 @@ func ConfigureMetadataDiskOnVirtualGuest(softLayerClient sl.Client, virtualGuest
 
 	_, err = virtualGuestService.ConfigureMetadataDisk(virtualGuestId)
 	if err != nil {
-		return bosherr.WrapError(err, fmt.Sprintf("Configuring metadata on VirtualGuest `%d`", virtualGuestId))
+		return bosherr.WrapErrorf(err, "Configuring metadata on VirtualGuest `%d`", virtualGuestId)
 	}
 
 	return nil
@@ -257,17 +272,17 @@ func GetUserMetadataOnVirtualGuest(softLayerClient sl.Client, virtualGuestId int
 
 	attributes, err := virtualGuestService.GetUserData(virtualGuestId)
 	if err != nil {
-		return []byte{}, bosherr.WrapError(err, fmt.Sprintf("Getting metadata on VirtualGuest `%d`", virtualGuestId))
+		return []byte{}, bosherr.WrapErrorf(err, "Getting metadata on VirtualGuest `%d`", virtualGuestId)
 	}
 
 	if len(attributes) == 0 {
-		return []byte{}, bosherr.WrapError(err, fmt.Sprintf("Failed to get metadata on VirtualGuest `%d`", virtualGuestId))
+		return []byte{}, bosherr.WrapErrorf(err, "Failed to get metadata on VirtualGuest `%d`", virtualGuestId)
 	}
 
 	sEnc := attributes[0].Value
 	sDec, err := base64.StdEncoding.DecodeString(sEnc)
 	if err != nil {
-		return []byte{}, bosherr.WrapError(err, fmt.Sprintf("Failed to decode metadata returned from virtualGuest `%d`", virtualGuestId))
+		return []byte{}, bosherr.WrapErrorf(err, "Failed to decode metadata returned from virtualGuest `%d`", virtualGuestId)
 	}
 
 	return sDec, nil
