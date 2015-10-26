@@ -84,7 +84,7 @@ func ConfigureMetadataOnVirtualGuest(softLayerClient sl.Client, virtualGuestId i
 	if err != nil {
 		return bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` to launch transaction", virtualGuestId)
 	}
-	
+
 	err = WaitForVirtualGuestIsNotPingable(softLayerClient, virtualGuestId, logger)
 	if err != nil {
 		return bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` not pingable", virtualGuestId)
