@@ -84,9 +84,11 @@ func ConfigureMetadataOnVirtualGuest(softLayerClient sl.Client, virtualGuestId i
 	if err != nil {
 		return bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` to launch transaction", virtualGuestId)
 	}
-
-	//The transaction (configureMetadataDisk) will shut down the guest while the metadata disk is configured. Pause 2 minutes for its back.
-	//time.Sleep(PAUSE_TIME)
+	
+	err = WaitForVirtualGuestIsNotPingable(softLayerClient, virtualGuestId, logger)
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` not pingable", virtualGuestId)
+	}
 
 	err = WaitForVirtualGuest(softLayerClient, virtualGuestId, "RUNNING")
 	if err != nil {
@@ -201,6 +203,56 @@ func WaitForVirtualGuest(softLayerClient sl.Client, virtualGuestId int, targetSt
 	}
 
 	return bosherr.Errorf("Waiting for virtual guest with ID '%d' to have be in state '%s'", virtualGuestId, targetState)
+}
+
+func WaitForVirtualGuestIsNotPingable(softLayerClient sl.Client, virtualGuestId int, logger boshlog.Logger) error {
+	virtualGuestService, err := softLayerClient.GetSoftLayer_Virtual_Guest_Service()
+	if err != nil {
+		return bosherr.WrapError(err, "Creating VirtualGuestService from SoftLayer client")
+	}
+
+	checkPingableRetryable := boshretry.NewRetryable(
+		func() (bool, error) {
+			state, err := virtualGuestService.IsPingable(virtualGuestId)
+			if err != nil {
+				return false, bosherr.WrapErrorf(err, "Checking pingable against vitrual guest %d", virtualGuestId)
+			} else {
+				return state, nil
+			}
+		})
+
+	timeService := clock.NewClock()
+	timeoutRetryStrategy := boshretry.NewTimeoutRetryStrategy(TIMEOUT, POLLING_INTERVAL, checkPingableRetryable, timeService, logger)
+	err = timeoutRetryStrategy.Try()
+	if err != nil {
+		return bosherr.Errorf("Waiting for virtual guest with ID '%d' is not pingable", virtualGuestId)
+	}
+	return nil
+}
+
+func WaitForVirtualGuestIsPingable(softLayerClient sl.Client, virtualGuestId int, logger boshlog.Logger) error {
+	virtualGuestService, err := softLayerClient.GetSoftLayer_Virtual_Guest_Service()
+	if err != nil {
+		return bosherr.WrapError(err, "Creating VirtualGuestService from SoftLayer client")
+	}
+
+	checkPingableRetryable := boshretry.NewRetryable(
+		func() (bool, error) {
+			state, err := virtualGuestService.IsPingable(virtualGuestId)
+			if err != nil {
+				return false, bosherr.WrapErrorf(err, "Checking pingable against vitrual guest %d", virtualGuestId)
+			} else {
+				return !state, nil
+			}
+		})
+
+	timeService := clock.NewClock()
+	timeoutRetryStrategy := boshretry.NewTimeoutRetryStrategy(TIMEOUT, POLLING_INTERVAL, checkPingableRetryable, timeService, logger)
+	err = timeoutRetryStrategy.Try()
+	if err != nil {
+		return bosherr.Errorf("Waiting for virtual guest with ID '%d' is not pingable", virtualGuestId)
+	}
+	return nil
 }
 
 func WaitForVirtualGuestToTargetState(softLayerClient sl.Client, virtualGuestId int, targetState string, logger boshlog.Logger) error {

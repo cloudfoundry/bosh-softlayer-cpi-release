@@ -45,8 +45,8 @@ type SoftLayerVM struct {
 }
 
 func NewSoftLayerVM(id int, softLayerClient sl.Client, sshClient util.SshClient, agentEnvService AgentEnvService, logger boshlog.Logger) SoftLayerVM {
-	bslcommon.TIMEOUT = 10 * time.Minute
-	bslcommon.POLLING_INTERVAL = 5 * time.Second
+	bslcommon.TIMEOUT = 60 * time.Minute
+	bslcommon.POLLING_INTERVAL = 10 * time.Second
 
 	return SoftLayerVM{
 		id: id,
@@ -483,10 +483,16 @@ func (vm SoftLayerVM) restartOpenIscsiBasedOnShellScript(virtualGuest datatypes.
 }
 
 func (vm SoftLayerVM) discoveryOpenIscsiTargetsBasedOnShellScript(virtualGuest datatypes.SoftLayer_Virtual_Guest, volume datatypes.SoftLayer_Network_Storage) (bool, error) {
-	command := fmt.Sprintf("iscsiadm -m discovery -t sendtargets -p %s ; iscsiadm -m node -l", volume.ServiceResourceBackendIpAddress)
+	command := fmt.Sprintf("sleep 5; iscsiadm -m discovery -t sendtargets -p %s", volume.ServiceResourceBackendIpAddress)
 	_, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, command)
 	if err != nil {
 		return false, bosherr.WrapError(err, "discvoerying open iscsi targets")
+	}
+
+	command = "sleep 5; echo `iscsiadm -m node -l`"
+	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, command)
+	if err != nil {
+		return false, bosherr.WrapError(err, "login iscsi targets")
 	}
 
 	return true, nil
@@ -684,16 +690,16 @@ func (vm SoftLayerVM) postCheckActiveTransactionsForDeleteVM(softLayerClient sl.
 }
 
 func (vm SoftLayerVM) execCommand(virtualGuest datatypes.SoftLayer_Virtual_Guest, command string) (string, error) {
-	result, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryIpAddress, command)
+	result, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, command)
 	return result, err
 }
 
 func (vm SoftLayerVM) uploadFile(virtualGuest datatypes.SoftLayer_Virtual_Guest, srcFile string, destFile string) error {
-	err := vm.sshClient.UploadFile(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryIpAddress, srcFile, destFile)
+	err := vm.sshClient.UploadFile(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, srcFile, destFile)
 	return err
 }
 
 func (vm SoftLayerVM) downloadFile(virtualGuest datatypes.SoftLayer_Virtual_Guest, srcFile string, destFile string) error {
-	err := vm.sshClient.DownloadFile(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryIpAddress, srcFile, destFile)
+	err := vm.sshClient.DownloadFile(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, srcFile, destFile)
 	return err
 }

@@ -270,6 +270,7 @@ var _ = Describe("SoftLayerVM", func() {
 				"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
 				"SoftLayer_Virtual_Guest_Service_configureMetadataDisk.json",
 				"SoftLayer_Virtual_Guest_Service_getActiveTransactions.json",
+				"SoftLayer_Virtual_Guest_Service_isPingable.json",
 				"SoftLayer_Virtual_Guest_Service_getPowerState.json",
 			}
 			testhelpers.SetTestFixturesForFakeSoftLayerClient(softLayerClient, fileNames)
@@ -279,6 +280,7 @@ var _ = Describe("SoftLayerVM", func() {
 			expectedCmdResults := []string{
 				"/sbin/multipath",
 				"No devices found",
+				"",
 				"",
 				"",
 				"",
@@ -303,6 +305,7 @@ var _ = Describe("SoftLayerVM", func() {
 				"",
 				"",
 				"",
+				"",
 				expectedPartitions2,
 			}
 			testhelpers.SetTestFixturesForFakeSSHClient(sshClient, expectedCmdResults, nil)
@@ -319,6 +322,7 @@ var _ = Describe("SoftLayerVM", func() {
 			expectedCmdResults := []string{
 				"/sbin/multipath",
 				expectedDmSetupLs1,
+				"",
 				"",
 				"",
 				"",
@@ -375,6 +379,7 @@ var _ = Describe("SoftLayerVM", func() {
 				"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
 				"SoftLayer_Virtual_Guest_Service_configureMetadataDisk.json",
 				"SoftLayer_Virtual_Guest_Service_getActiveTransactions.json",
+				"SoftLayer_Virtual_Guest_Service_isPingable.json",
 				"SoftLayer_Virtual_Guest_Service_getPowerState.json",
 			}
 			testhelpers.SetTestFixturesForFakeSoftLayerClient(softLayerClient, fileNames)

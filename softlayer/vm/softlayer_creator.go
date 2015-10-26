@@ -33,7 +33,7 @@ type SoftLayerCreator struct {
 }
 
 func NewSoftLayerCreator(softLayerClient sl.Client, agentEnvServiceFactory AgentEnvServiceFactory, agentOptions AgentOptions, logger boshlog.Logger) SoftLayerCreator {
-	bslcommon.TIMEOUT = 30 * time.Minute
+	bslcommon.TIMEOUT = 60 * time.Minute
 	bslcommon.POLLING_INTERVAL = 10 * time.Second
 
 	return SoftLayerCreator{
