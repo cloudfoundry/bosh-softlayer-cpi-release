@@ -72,6 +72,11 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 		}
 	}
 
+	err = bslcommon.WaitForVirtualGuestIsPingable(c.softLayerClient, virtualGuest.Id, c.logger)
+	if err != nil {
+		return SoftLayerVM{}, bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` not pingable", virtualGuest.Id)
+	}
+
 	virtualGuest, err = bslcommon.GetObjectDetailsOnVirtualGuest(c.softLayerClient, virtualGuest.Id)
 	if err != nil {
 		return SoftLayerVM{}, bosherr.WrapErrorf(err, "Cannot get details from virtual guest with id: %d.", virtualGuest.Id)
@@ -94,11 +99,6 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 			return SoftLayerVM{}, bosherr.WrapErrorf(err, "Cannot construct mbus url.")
 		}
 		agentEnv.Mbus = mbus
-	}
-
-	err = bslcommon.WaitForVirtualGuestIsPingable(c.softLayerClient, virtualGuest.Id, c.logger)
-	if err != nil {
-		return bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` not pingable", virtualGuest.Id)
 	}
 
 	err = agentEnvService.Update(agentEnv)
