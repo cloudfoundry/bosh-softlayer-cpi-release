@@ -28,7 +28,7 @@ func (f BaremetalFinder) Find(id string) (datatypes.SoftLayer_Hardware, error) {
 	}
 
 	if baremetal.GlobalIdentifier == "" {
-		return datatypes.SoftLayer_Hardware{}, bosherr.Errorf("can not find the baremetal server with id: %s.", id)
+		return datatypes.SoftLayer_Hardware{}, bosherr.Errorf("cannot find the baremetal server with id: %s.", id)
 	}
 
 	return baremetal, nil

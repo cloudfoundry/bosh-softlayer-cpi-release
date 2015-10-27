@@ -29,7 +29,7 @@ func (s SoftLayerDisk) Delete() error {
 
 	service, err := s.softLayerClient.GetSoftLayer_Network_Storage_Service()
 	if err != nil {
-		return bosherr.WrapError(err, "Can not get network storage service.")
+		return bosherr.WrapError(err, "Cannot get network storage service.")
 	}
 
 	err = service.DeleteIscsiVolume(s.id, true)

@@ -22,7 +22,7 @@ func (f SoftLayerFinder) Find(id int) (Disk, bool, error) {
 
 	service, err := f.softLayerClient.GetSoftLayer_Network_Storage_Service()
 	if err != nil {
-		return nil, false, bosherr.WrapError(err, "Can not get network storage service.")
+		return nil, false, bosherr.WrapError(err, "Cannot get network storage service.")
 	}
 
 	disk, err := service.GetIscsiVolume(id)
