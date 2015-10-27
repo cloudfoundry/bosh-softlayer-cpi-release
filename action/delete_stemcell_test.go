@@ -8,6 +8,8 @@ import (
 
 	. "github.com/maximilien/bosh-softlayer-cpi/action"
 
+	boshlog "github.com/cloudfoundry/bosh-utils/logger"
+
 	fakestem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell/fakes"
 )
 
@@ -15,11 +17,14 @@ var _ = Describe("DeleteStemcell", func() {
 	var (
 		stemcellFinder *fakestem.FakeFinder
 		action         DeleteStemcell
+		logger         boshlog.Logger
 	)
 
 	BeforeEach(func() {
 		stemcellFinder = &fakestem.FakeFinder{}
-		action = NewDeleteStemcell(stemcellFinder)
+
+		logger = boshlog.NewLogger(boshlog.LevelNone)
+		action = NewDeleteStemcell(stemcellFinder, logger)
 	})
 
 	Describe("Run", func() {
@@ -41,24 +46,16 @@ var _ = Describe("DeleteStemcell", func() {
 				stemcellFinder.FindFound = true
 			})
 
-			It("deletes stemcell", func() {
+			It("does not delete stemcell", func() {
 				_, err := action.Run(1234)
 				Expect(err).ToNot(HaveOccurred())
 
-				Expect(stemcell.DeleteCalled).To(BeTrue())
-			})
-
-			It("returns error if deleting stemcell fails", func() {
-				stemcell.DeleteErr = errors.New("fake-delete-err")
-
-				_, err := action.Run(1234)
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("fake-delete-err"))
+				Expect(stemcell.DeleteCalled).To(BeFalse())
 			})
 		})
 
 		Context("when stemcell is not found with given cid", func() {
-			It("does not return error", func() {
+			It("logs instead of returning error", func() {
 				stemcellFinder.FindFound = false
 
 				_, err := action.Run(1234)
@@ -67,12 +64,11 @@ var _ = Describe("DeleteStemcell", func() {
 		})
 
 		Context("when stemcell finding fails", func() {
-			It("does not return error", func() {
+			It("logs instead of returning error", func() {
 				stemcellFinder.FindErr = errors.New("fake-find-err")
 
 				_, err := action.Run(1234)
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("fake-find-err"))
+				Expect(err).ToNot(HaveOccurred())
 			})
 		})
 	})
