@@ -96,6 +96,11 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 		agentEnv.Mbus = mbus
 	}
 
+	err = bslcommon.WaitForVirtualGuestIsPingable(c.softLayerClient, virtualGuest.Id, c.logger)
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` not pingable", virtualGuest.Id)
+	}
+
 	err = agentEnvService.Update(agentEnv)
 	if err != nil {
 		return SoftLayerVM{}, bosherr.WrapError(err, "Updating VM's agent env")
