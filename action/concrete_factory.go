@@ -19,7 +19,7 @@ type concreteFactory struct {
 func NewConcreteFactory(softLayerClient sl.Client, options ConcreteFactoryOptions, logger boshlog.Logger) concreteFactory {
 	stemcellFinder := bslcstem.NewSoftLayerFinder(softLayerClient, logger)
 
-	agentEnvServiceFactory := bslcvm.NewSoftLayerAgentEnvServiceFactory(softLayerClient, logger)
+	agentEnvServiceFactory := bslcvm.NewSoftLayerAgentEnvServiceFactory(options.AgentEnvService, options.Registry, logger)
 
 	vmCreator := bslcvm.NewSoftLayerCreator(
 		softLayerClient,

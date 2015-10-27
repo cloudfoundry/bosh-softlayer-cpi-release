@@ -1,23 +1,33 @@
 package vm
 
 import (
-	sl "github.com/maximilien/softlayer-go/softlayer"
-
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 )
 
 type SoftLayerAgentEnvServiceFactory struct {
-	client sl.Client
-	logger boshlog.Logger
+	agentEnvService string
+	registryOptions RegistryOptions
+	logger          boshlog.Logger
 }
 
-func NewSoftLayerAgentEnvServiceFactory(client sl.Client, logger boshlog.Logger) SoftLayerAgentEnvServiceFactory {
+func NewSoftLayerAgentEnvServiceFactory(
+agentEnvService string,
+registryOptions RegistryOptions,
+logger boshlog.Logger,
+) SoftLayerAgentEnvServiceFactory {
 	return SoftLayerAgentEnvServiceFactory{
-		client: client,
-		logger: logger,
+		logger:          logger,
+		agentEnvService: agentEnvService,
+		registryOptions: registryOptions,
 	}
 }
 
-func (f SoftLayerAgentEnvServiceFactory) New(vmId int) AgentEnvService {
-	return NewSoftLayerAgentEnvService(vmId, f.client, f.logger)
+func (f SoftLayerAgentEnvServiceFactory) New(
+softlayerFileService SoftlayerFileService,
+instanceID string,
+) AgentEnvService {
+	if f.agentEnvService == "registry" {
+		return NewRegistryAgentEnvService(f.registryOptions, instanceID, f.logger)
+	}
+	return NewFSAgentEnvService(softlayerFileService, f.logger)
 }

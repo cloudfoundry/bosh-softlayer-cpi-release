@@ -1,6 +1,8 @@
 package vm
 
 import (
+	"strconv"
+
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
@@ -39,7 +41,8 @@ func (f SoftLayerFinder) Find(vmID int) (VM, bool, error) {
 
 	vm, found := SoftLayerVM{}, true
 	if virtualGuest.Id == vmID {
-		vm = NewSoftLayerVM(vmID, f.softLayerClient, util.GetSshClient(), f.agentEnvServiceFactory.New(vmID), f.logger)
+		softlayerFileService := NewSoftlayerFileService(util.GetSshClient(), virtualGuest, f.logger)
+		vm = NewSoftLayerVM(vmID, f.softLayerClient, util.GetSshClient(), f.agentEnvServiceFactory.New(softlayerFileService, strconv.Itoa(vmID)), f.logger)
 	} else {
 		found = false
 	}

@@ -2,12 +2,9 @@ package vm
 
 import (
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
 	"strconv"
 	"time"
-
-	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 
 	sldatatypes "github.com/maximilien/softlayer-go/data_types"
 
@@ -31,17 +28,7 @@ func TimeStampForTime(now time.Time) string {
 	return now.Format("20060102-030405-") + strconv.Itoa(int(now.UnixNano()/1e6-now.Unix()*1e3))
 }
 
-func CreateVirtualGuestTemplate(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment, agentOptions AgentOptions) (sldatatypes.SoftLayer_Virtual_Guest_Template, error) {
-	agentName := fmt.Sprintf("vm-%s", agentID)
-	disks := CreateDisksSpec(cloudProps.EphemeralDiskSize)
-	powerdnsNetworks := AppendPowerDNSToNetworks(networks, cloudProps)
-
-	metadataBytes, err := CreateAgentMetadata(agentID, agentName, powerdnsNetworks, disks, env, agentOptions)
-	if err != nil {
-		return sldatatypes.SoftLayer_Virtual_Guest_Template{}, bosherr.WrapError(err, "Creating agent metadata")
-	}
-	base64EncodedMetadata := Base64EncodeData(string(metadataBytes))
-
+func CreateVirtualGuestTemplate(stemcell bslcstem.Stemcell, cloudProps VMCloudProperties) (sldatatypes.SoftLayer_Virtual_Guest_Template, error) {
 	virtualGuestTemplate := sldatatypes.SoftLayer_Virtual_Guest_Template{
 		Hostname:  cloudProps.VmNamePrefix,
 		Domain:    cloudProps.Domain,
@@ -67,14 +54,17 @@ func CreateVirtualGuestTemplate(agentID string, stemcell bslcstem.Stemcell, clou
 		PrivateNetworkOnlyFlag:         cloudProps.PrivateNetworkOnlyFlag,
 		PrimaryNetworkComponent:        &cloudProps.PrimaryNetworkComponent,
 		PrimaryBackendNetworkComponent: &cloudProps.PrimaryBackendNetworkComponent,
-		UserData: []sldatatypes.UserData{
-			sldatatypes.UserData{
-				Value: base64EncodedMetadata,
-			},
-		},
 	}
 
 	return virtualGuestTemplate, nil
+}
+
+func CreateAgentUserData(agentID string, cloudProps VMCloudProperties, networks Networks, env Environment, agentOptions AgentOptions) AgentEnv {
+	agentName := fmt.Sprintf("vm-%s", agentID)
+	disks := CreateDisksSpec(cloudProps.EphemeralDiskSize)
+	powerdnsNetworks := AppendPowerDNSToNetworks(networks, cloudProps)
+	agentEnv := NewAgentEnvForVM(agentID, agentName, powerdnsNetworks, disks, env, agentOptions)
+	return agentEnv
 }
 
 func AppendPowerDNSToNetworks(networks Networks, cloudProps VMCloudProperties) Networks {
@@ -92,7 +82,3 @@ func Base64EncodeData(unEncodedData string) string {
 	return base64.StdEncoding.EncodeToString(dataBytes)
 }
 
-func CreateAgentMetadata(agentID string, agentName string, networks Networks, disks DisksSpec, env Environment, agentOptions AgentOptions) ([]byte, error) {
-	agentEnv := NewAgentEnvForVM(agentID, agentName, networks, disks, env, agentOptions)
-	return json.Marshal(agentEnv)
-}
