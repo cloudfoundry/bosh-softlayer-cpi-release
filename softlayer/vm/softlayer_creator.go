@@ -72,9 +72,9 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 		}
 	}
 
-	err = bslcommon.WaitForVirtualGuestIsPingable(c.softLayerClient, virtualGuest.Id, c.logger)
+	err = bslcommon.WaitForVirtualGuestToHaveNoRunningTransaction(c.softLayerClient, virtualGuest.Id, c.logger)
 	if err != nil {
-		return SoftLayerVM{}, bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` not pingable", virtualGuest.Id)
+		return SoftLayerVM{}, bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` has no running transaction", virtualGuest.Id)
 	}
 
 	virtualGuest, err = bslcommon.GetObjectDetailsOnVirtualGuest(c.softLayerClient, virtualGuest.Id)
