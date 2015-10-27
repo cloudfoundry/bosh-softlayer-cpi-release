@@ -72,9 +72,9 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 		}
 	}
 
-	err = bslcommon.WaitForVirtualGuestToHaveNoRunningTransaction(c.softLayerClient, virtualGuest.Id, c.logger)
+	err = bslcommon.WaitForVirtualGuestLastCompleteTransaction(c.softLayerClient, virtualGuest.Id, "Service Setup")
 	if err != nil {
-		return SoftLayerVM{}, bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` has no running transaction", virtualGuest.Id)
+		return SoftLayerVM{}, bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` has Service Setup transaction complete", virtualGuest.Id)
 	}
 
 	virtualGuest, err = bslcommon.GetObjectDetailsOnVirtualGuest(c.softLayerClient, virtualGuest.Id)

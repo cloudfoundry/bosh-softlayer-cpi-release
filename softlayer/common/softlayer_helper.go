@@ -205,6 +205,30 @@ func WaitForVirtualGuest(softLayerClient sl.Client, virtualGuestId int, targetSt
 	return bosherr.Errorf("Waiting for virtual guest with ID '%d' to have be in state '%s'", virtualGuestId, targetState)
 }
 
+func WaitForVirtualGuestLastCompleteTransaction(softLayerClient sl.Client, virtualGuestId int, targetTransaction string) error {
+	virtualGuestService, err := softLayerClient.GetSoftLayer_Virtual_Guest_Service()
+	if err != nil {
+		return bosherr.WrapError(err, "Creating VirtualGuestService from SoftLayer client")
+	}
+
+	totalTime := time.Duration(0)
+	for totalTime < TIMEOUT {
+		lastTransaction, err := virtualGuestService.GetLastTransaction(virtualGuestId)
+		if err != nil {
+			return bosherr.WrapErrorf(err, "Getting Last Complete Transaction for virtual guest with ID '%d'", virtualGuestId)
+		}
+
+		if strings.Contains(lastTransaction.TransactionGroup.Name, targetTransaction) && strings.Contains(lastTransaction.TransactionStatus.FriendlyName, "Complete") {
+			return nil
+		}
+
+		totalTime += POLLING_INTERVAL
+		time.Sleep(POLLING_INTERVAL)
+	}
+
+	return bosherr.Errorf("Waiting for virtual guest with ID '%d' to have last transaction '%s'", virtualGuestId, targetTransaction)
+}
+
 func WaitForVirtualGuestIsNotPingable(softLayerClient sl.Client, virtualGuestId int, logger boshlog.Logger) error {
 	virtualGuestService, err := softLayerClient.GetSoftLayer_Virtual_Guest_Service()
 	if err != nil {
