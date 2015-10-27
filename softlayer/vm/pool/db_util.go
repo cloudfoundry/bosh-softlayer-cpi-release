@@ -8,21 +8,27 @@ import (
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
+	_ "github.com/mattn/go-sqlite3"
 	common "github.com/maximilien/bosh-softlayer-cpi/common"
 )
 
 var (
-	SQLITE_DB_FOLDER    = common.GetOSEnvVariable("SQLITE_DB_FOLDER", "/var/vcap/store/director/")
-	SQLITE_DB_FILE      = common.GetOSEnvVariable("SQLITE_DB_FILE", "vm_pool.sqlite")
-	SQLITE_DB_FILE_PATH = filepath.Join(SQLITE_DB_FOLDER, SQLITE_DB_FILE)
+	SQLITE_DB_FOLDER    string
+	SQLITE_DB_FILE      string
+	SQLITE_DB_FILE_PATH string
 	DB_RETRY_INTERVAL   = 1 * time.Second
 	DB_RETRY_TIMEOUT    = 30 * time.Second
 )
 
 func InitVMPoolDB(retryTimeout time.Duration, retryInterval time.Duration, logger boshlog.Logger) error {
-	err := os.MkdirAll(SQLITE_DB_FOLDER, 0777)
+
+	SQLITE_DB_FOLDER = common.GetOSEnvVariable("SQLITE_DB_FOLDER", "/var/vcap/store/director/")
+	SQLITE_DB_FILE = common.GetOSEnvVariable("SQLITE_DB_FILE", "vm_pool.sqlite")
+	SQLITE_DB_FILE_PATH = filepath.Join(SQLITE_DB_FOLDER, SQLITE_DB_FILE)
+
+	err := os.MkdirAll(SQLITE_DB_FOLDER, os.ModePerm)
 	if err != nil {
-		return bosherr.WrapError(err, "Failed to make director: "+SQLITE_DB_FOLDER)
+		return bosherr.WrapError(err, "Failed to make directory: "+SQLITE_DB_FOLDER)
 	}
 
 	db, err := OpenDB(SQLITE_DB_FILE_PATH)
@@ -45,10 +51,10 @@ func InitVMPoolDB(retryTimeout time.Duration, retryInterval time.Duration, logge
 }
 
 func OpenDB(dbPath string) (*sql.DB, error) {
-	_, err := IsDirectory(dbPath)
-	if err != nil {
-		return nil, bosherr.WrapError(err, "Failed to open VM Pool DB, invalid DB path")
-	}
+	/*	_, err := isDirectory(dbPath)
+		if err != nil {
+			return nil, bosherr.WrapError(err, "Failed to open VM Pool DB, invalid DB path")
+		}*/
 
 	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
@@ -58,7 +64,7 @@ func OpenDB(dbPath string) (*sql.DB, error) {
 	return db, nil
 }
 
-func IsDirectory(path string) (bool, error) {
+func isDirectory(path string) (bool, error) {
 	fileInfo, err := os.Stat(path)
 	if err != nil {
 		return false, err
