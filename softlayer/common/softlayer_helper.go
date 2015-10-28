@@ -2,6 +2,7 @@ package common
 
 import (
 	"encoding/base64"
+	"strings"
 	"time"
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
@@ -11,7 +12,6 @@ import (
 
 	datatypes "github.com/maximilien/softlayer-go/data_types"
 	sl "github.com/maximilien/softlayer-go/softlayer"
-	"strings"
 )
 
 var (
