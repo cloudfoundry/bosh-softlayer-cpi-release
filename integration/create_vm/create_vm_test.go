@@ -32,8 +32,8 @@ var _ = Describe("BOSH Director Level Integration for create_vm", func() {
 
 		rootTemplatePath, tmpConfigPath string
 		replacementMap                  map[string]string
-
-		output map[string]interface{}
+		errorOutput                     map[string]interface{}
+		resultOutput                    map[string]interface{}
 	)
 
 	BeforeEach(func() {
@@ -70,7 +70,20 @@ var _ = Describe("BOSH Director Level Integration for create_vm", func() {
 
 	Context("create_vm in SoftLayer", func() {
 
-		It("returns true because valid parameters", func() {
+		It("returns error because empty parameters", func() {
+			jsonPayload := `{"method": "create_vm", "arguments": [],"context": {}}`
+
+			outputBytes, err := testhelperscpi.RunCpi(rootTemplatePath, tmpConfigPath, jsonPayload)
+			log.Println("outputBytes=" + string(outputBytes))
+			Expect(err).ToNot(HaveOccurred())
+
+			err = json.Unmarshal(outputBytes, &errorOutput)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(errorOutput["result"]).To(BeNil())
+			Expect(errorOutput["error"]).ToNot(BeNil())
+		})
+
+		It("returns valid result because valid parameters", func() {
 			jsonPayload, err := testhelperscpi.GenerateCpiJsonPayload("create_vm", rootTemplatePath, replacementMap)
 			Expect(err).ToNot(HaveOccurred())
 
@@ -78,12 +91,12 @@ var _ = Describe("BOSH Director Level Integration for create_vm", func() {
 			log.Println("outputBytes=" + string(outputBytes))
 			Expect(err).ToNot(HaveOccurred())
 
-			err = json.Unmarshal(outputBytes, &output)
+			err = json.Unmarshal(outputBytes, &resultOutput)
 			Expect(err).ToNot(HaveOccurred())
-			Expect(output["result"]).ToNot(BeNil())
-			Expect(output["error"]).To(BeNil())
+			Expect(resultOutput["result"]).ToNot(BeNil())
+			Expect(resultOutput["error"]).To(BeNil())
 
-			id := output["result"].(string)
+			id := resultOutput["result"].(string)
 			vmId, err := strconv.Atoi(id)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(vmId).ToNot(BeNil())
@@ -91,21 +104,5 @@ var _ = Describe("BOSH Director Level Integration for create_vm", func() {
 			testhelpers.DeleteVirtualGuest(vmId)
 		})
 
-	})
-
-	Context("create_vm in SoftLayer", func() {
-
-		It("returns false because empty parameters", func() {
-			jsonPayload := `{"method": "create_vm", "arguments": [],"context": {}}`
-
-			outputBytes, err := testhelperscpi.RunCpi(rootTemplatePath, tmpConfigPath, jsonPayload)
-			log.Println("outputBytes=" + string(outputBytes))
-			Expect(err).ToNot(HaveOccurred())
-
-			err = json.Unmarshal(outputBytes, &output)
-			Expect(err).ToNot(HaveOccurred())
-			Expect(output["result"]).To(BeNil())
-			Expect(output["error"]).ToNot(BeNil())
-		})
 	})
 })
