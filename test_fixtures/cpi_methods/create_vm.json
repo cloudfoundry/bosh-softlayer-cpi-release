@@ -9,7 +9,7 @@
 	  "maxMemory": 1024,
 	  "operatingSystemReferenceCode": "UBUNTU_LATEST",
 	  "datacenter": {
-		"name": "ams01"
+		"name": "{{.Datacenter}}"
 	  },
 	  "sshKeys": [{
 		"id": 74826

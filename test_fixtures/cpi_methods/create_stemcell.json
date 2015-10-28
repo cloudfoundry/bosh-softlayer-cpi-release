@@ -3,11 +3,9 @@
   "arguments": [
     "/var/vcap/data/tmp/director/stemcell20150616-2069-131jrsy/image",
     {
-      "name": "bosh-warden-boshlite-ubuntu-trusty-go_agent",
-      "version": "389",
-      "infrastructure": "warden",
-      "architecture": "x86_64",
-      "root_device_name": "/dev/sda1"
+      "virtual-disk-image-id": "{{.ID}}",
+      "virtual-disk-image-uuid": "fake-uuid",
+      "datacenter-name": "{{.Datacenter}}"
     }
   ],
   "context": {
