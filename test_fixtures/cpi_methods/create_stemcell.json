@@ -3,7 +3,7 @@
   "arguments": [
     "/var/vcap/data/tmp/director/stemcell20150616-2069-131jrsy/image",
     {
-      "virtual-disk-image-id": "{{.ID}}",
+      "virtual-disk-image-id": {{.ID}},
       "virtual-disk-image-uuid": "fake-uuid",
       "datacenter-name": "{{.Datacenter}}"
     }
