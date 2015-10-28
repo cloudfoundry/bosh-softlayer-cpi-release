@@ -11,9 +11,9 @@ type SoftLayerAgentEnvServiceFactory struct {
 }
 
 func NewSoftLayerAgentEnvServiceFactory(
-agentEnvService string,
-registryOptions RegistryOptions,
-logger boshlog.Logger,
+	agentEnvService string,
+	registryOptions RegistryOptions,
+	logger boshlog.Logger,
 ) SoftLayerAgentEnvServiceFactory {
 	return SoftLayerAgentEnvServiceFactory{
 		logger:          logger,
@@ -23,8 +23,8 @@ logger boshlog.Logger,
 }
 
 func (f SoftLayerAgentEnvServiceFactory) New(
-softlayerFileService SoftlayerFileService,
-instanceID string,
+	softlayerFileService SoftlayerFileService,
+	instanceID string,
 ) AgentEnvService {
 	if f.agentEnvService == "registry" {
 		return NewRegistryAgentEnvService(f.registryOptions, instanceID, f.logger)

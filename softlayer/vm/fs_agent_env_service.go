@@ -9,9 +9,9 @@ import (
 
 type fsAgentEnvService struct {
 	softlayerFileService SoftlayerFileService
-	settingsPath      string
-	logger            boshlog.Logger
-	logTag            string
+	settingsPath         string
+	logger               boshlog.Logger
+	logTag               string
 }
 
 func NewFSAgentEnvService(
@@ -20,9 +20,9 @@ func NewFSAgentEnvService(
 ) AgentEnvService {
 	return fsAgentEnvService{
 		softlayerFileService: softlayerFileService,
-		settingsPath:      "/var/vcap/bosh/user_data.json",
-		logger:            logger,
-		logTag:            "FSAgentEnvService",
+		settingsPath:         "/var/vcap/bosh/user_data.json",
+		logger:               logger,
+		logTag:               "FSAgentEnvService",
 	}
 }
 

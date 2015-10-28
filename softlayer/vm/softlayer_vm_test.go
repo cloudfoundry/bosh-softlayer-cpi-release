@@ -15,8 +15,8 @@ import (
 	testhelpers "github.com/maximilien/bosh-softlayer-cpi/test_helpers"
 
 	bslcommon "github.com/maximilien/bosh-softlayer-cpi/softlayer/common"
-	bslcdisk "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk"
-	bslcvm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
+	bsldisk "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk"
+	bslvm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
 
 	fakedisk "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk/fakes"
 	fakevm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm/fakes"
@@ -137,7 +137,7 @@ var _ = Describe("SoftLayerVM", func() {
 				  "name": "fake-director"
 				}`)
 
-				metadata = bslcvm.VMMetadata{}
+				metadata = bslvm.VMMetadata{}
 				err := json.Unmarshal(metadataBytes, &metadata)
 				Expect(err).ToNot(HaveOccurred())
 			})
@@ -158,7 +158,7 @@ var _ = Describe("SoftLayerVM", func() {
 				  "tags": "test, tag, director"
 				}`)
 
-				metadata = bslcvm.VMMetadata{}
+				metadata = bslvm.VMMetadata{}
 				err := json.Unmarshal(metadataBytes, &metadata)
 				Expect(err).ToNot(HaveOccurred())
 
@@ -214,7 +214,7 @@ var _ = Describe("SoftLayerVM", func() {
 
 	Describe("#AttachDisk", func() {
 		var (
-			disk bslcdisk.Disk
+			disk bsldisk.Disk
 		)
 
 		const expectedDmSetupLs1 = `
@@ -291,7 +291,6 @@ var _ = Describe("SoftLayerVM", func() {
 			vm = NewSoftLayerVM(1234567, softLayerClient, sshClient, agentEnvService, logger)
 			bslcommon.TIMEOUT = 2 * time.Second
 			bslcommon.POLLING_INTERVAL = 1 * time.Second
-			bslcommon.PAUSE_TIME = 1 * time.Second
 
 			err := vm.AttachDisk(disk)
 			Expect(err).ToNot(HaveOccurred())
@@ -312,7 +311,6 @@ var _ = Describe("SoftLayerVM", func() {
 			vm = NewSoftLayerVM(1234567, softLayerClient, sshClient, agentEnvService, logger)
 			bslcommon.TIMEOUT = 2 * time.Second
 			bslcommon.POLLING_INTERVAL = 1 * time.Second
-			bslcommon.PAUSE_TIME = 1 * time.Second
 
 			err := vm.AttachDisk(disk)
 			Expect(err).ToNot(HaveOccurred())
@@ -333,7 +331,6 @@ var _ = Describe("SoftLayerVM", func() {
 			vm = NewSoftLayerVM(1234567, softLayerClient, sshClient, agentEnvService, logger)
 			bslcommon.TIMEOUT = 2 * time.Second
 			bslcommon.POLLING_INTERVAL = 1 * time.Second
-			bslcommon.PAUSE_TIME = 1 * time.Second
 
 			err := vm.AttachDisk(disk)
 			Expect(err).ToNot(HaveOccurred())
@@ -344,7 +341,6 @@ var _ = Describe("SoftLayerVM", func() {
 			vm = NewSoftLayerVM(1234567, softLayerClient, sshClient, agentEnvService, logger)
 			bslcommon.TIMEOUT = 2 * time.Second
 			bslcommon.POLLING_INTERVAL = 1 * time.Second
-			bslcommon.PAUSE_TIME = 1 * time.Second
 
 			err := vm.AttachDisk(disk)
 			Expect(err).To(HaveOccurred())
@@ -353,7 +349,7 @@ var _ = Describe("SoftLayerVM", func() {
 
 	Describe("#DetachDisk", func() {
 		var (
-			disk bslcdisk.Disk
+			disk bsldisk.Disk
 		)
 
 		const expectedTarget1 = `iqn.2001-05.com.equallogic:0-8a0906-ba580060c-fcc002c3743528a8-fake-user
@@ -395,7 +391,6 @@ var _ = Describe("SoftLayerVM", func() {
 			vm = NewSoftLayerVM(1234567, softLayerClient, sshClient, agentEnvService, logger)
 			bslcommon.TIMEOUT = 2 * time.Second
 			bslcommon.POLLING_INTERVAL = 1 * time.Second
-			bslcommon.PAUSE_TIME = 1 * time.Second
 
 			err := vm.DetachDisk(disk)
 			Expect(err).ToNot(HaveOccurred())
@@ -412,7 +407,6 @@ var _ = Describe("SoftLayerVM", func() {
 			vm = NewSoftLayerVM(1234567, softLayerClient, sshClient, agentEnvService, logger)
 			bslcommon.TIMEOUT = 2 * time.Second
 			bslcommon.POLLING_INTERVAL = 1 * time.Second
-			bslcommon.PAUSE_TIME = 1 * time.Second
 
 			err := vm.DetachDisk(disk)
 			Expect(err).ToNot(HaveOccurred())
@@ -423,7 +417,6 @@ var _ = Describe("SoftLayerVM", func() {
 			vm = NewSoftLayerVM(1234567, softLayerClient, sshClient, agentEnvService, logger)
 			bslcommon.TIMEOUT = 2 * time.Second
 			bslcommon.POLLING_INTERVAL = 1 * time.Second
-			bslcommon.PAUSE_TIME = 1 * time.Second
 
 			err := vm.DetachDisk(disk)
 			Expect(err).To(HaveOccurred())

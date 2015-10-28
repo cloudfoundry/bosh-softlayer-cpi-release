@@ -18,19 +18,18 @@ type SoftlayerFileService interface {
 }
 
 type softlayerFileService struct {
-	sshClient util.SshClient
-    virtualGuest datatypes.SoftLayer_Virtual_Guest
-	logger    boshlog.Logger
-	logTag    string
-
+	sshClient    util.SshClient
+	virtualGuest datatypes.SoftLayer_Virtual_Guest
+	logger       boshlog.Logger
+	logTag       string
 }
 
 func NewSoftlayerFileService(sshClient util.SshClient, virtualGuest datatypes.SoftLayer_Virtual_Guest, logger boshlog.Logger) SoftlayerFileService {
 	return &softlayerFileService{
-		sshClient: sshClient,
+		sshClient:    sshClient,
 		virtualGuest: virtualGuest,
-		logger:    logger,
-		logTag:    "softlayerFileService",
+		logger:       logger,
+		logTag:       "softlayerFileService",
 	}
 }
 

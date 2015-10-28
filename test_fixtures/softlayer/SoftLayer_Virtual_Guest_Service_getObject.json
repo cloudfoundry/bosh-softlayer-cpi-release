@@ -5,7 +5,7 @@
 	"domain": "fake-domain",
 	"fullyQualifiedDomainName": "fake-qualified-name",
 	"hostname": "fake-host",
-	"id": 1234,
+	"id": 1234567,
 	"lastPowerStateId": null,
 	"lastVerifiedDate": null,
 	"maxCpu": 1,

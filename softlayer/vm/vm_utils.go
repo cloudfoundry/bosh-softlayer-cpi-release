@@ -81,4 +81,3 @@ func Base64EncodeData(unEncodedData string) string {
 	dataBytes := []byte(unEncodedData)
 	return base64.StdEncoding.EncodeToString(dataBytes)
 }
-

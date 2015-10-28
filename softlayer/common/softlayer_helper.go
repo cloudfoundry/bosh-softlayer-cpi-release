@@ -17,13 +17,17 @@ import (
 var (
 	TIMEOUT          time.Duration
 	POLLING_INTERVAL time.Duration
-	PAUSE_TIME       time.Duration
 )
 
 func AttachEphemeralDiskToVirtualGuest(softLayerClient sl.Client, virtualGuestId int, diskSize int, logger boshlog.Logger) error {
 	err := WaitForVirtualGuest(softLayerClient, virtualGuestId, "RUNNING")
 	if err != nil {
 		return bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d`", virtualGuestId)
+	}
+
+	err = WaitForVirtualGuestLastCompleteTransaction(softLayerClient, virtualGuestId, "Service Setup")
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` has Service Setup transaction complete", virtualGuestId)
 	}
 
 	err = WaitForVirtualGuestToHaveNoRunningTransactions(softLayerClient, virtualGuestId)

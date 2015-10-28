@@ -13,7 +13,7 @@ import (
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
-	. "github.com/cppforlife/bosh-warden-cpi/vm"
+	. "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
 )
 
 var _ = Describe("RegistryAgentEnvService", func() {

@@ -43,14 +43,14 @@ var _ = Describe("SoftLayerFinder", func() {
 
 		Context("when the VM ID is valid and existing", func() {
 			BeforeEach(func() {
-				vmID = 1234
+				vmID = 1234567
 			})
 
 			It("finds and returns a new SoftLayerVM object with correct ID", func() {
 				vm, found, err := finder.Find(vmID)
 				Expect(err).ToNot(HaveOccurred())
-				Expect(found).To(BeTrue(), "could not find VM")
-				Expect(vm.ID()).To(Equal(vmID), "found VM but ID does not match")
+				Expect(found).To(BeTrue(), "found VM")
+				Expect(vm.ID()).To(Equal(vmID), "VM ID match")
 			})
 		})
 

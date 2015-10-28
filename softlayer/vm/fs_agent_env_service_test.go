@@ -5,24 +5,24 @@ import (
 	"errors"
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
-	fakebwcvm "github.com/cppforlife/bosh-warden-cpi/vm/fakes"
+	fakebslvm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm/fakes"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	. "github.com/cppforlife/bosh-warden-cpi/vm"
+	. "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
 )
 
-var _ = Describe("WardenAgentEnvService", func() {
+var _ = Describe("SoftlayerAgentEnvService", func() {
 	var (
-		fakeWardenFileService *fakebwcvm.FakeWardenFileService
-		agentEnvService       AgentEnvService
+		fakeSoftlayerFileService *fakebslvm.FakeSoftlayerFileService
+		agentEnvService          AgentEnvService
 	)
 
 	BeforeEach(func() {
-		fakeWardenFileService = fakebwcvm.NewFakeWardenFileService()
+		fakeSoftlayerFileService = fakebslvm.NewFakeSoftlayerFileService()
 		logger := boshlog.NewLogger(boshlog.LevelNone)
-		agentEnvService = NewFSAgentEnvService(fakeWardenFileService, logger)
+		agentEnvService = NewFSAgentEnvService(fakeSoftlayerFileService, logger)
 	})
 
 	Describe("Fetch", func() {
@@ -33,18 +33,18 @@ var _ = Describe("WardenAgentEnvService", func() {
 			downloadAgentEnvBytes, err := json.Marshal(expectedAgentEnv)
 			Expect(err).ToNot(HaveOccurred())
 
-			fakeWardenFileService.DownloadContents = downloadAgentEnvBytes
+			fakeSoftlayerFileService.DownloadContents = downloadAgentEnvBytes
 
 			agentEnv, err := agentEnvService.Fetch()
 			Expect(err).ToNot(HaveOccurred())
 
 			Expect(agentEnv).To(Equal(expectedAgentEnv))
-			Expect(fakeWardenFileService.DownloadSourcePath).To(Equal("/var/vcap/bosh/warden-cpi-agent-env.json"))
+			Expect(fakeSoftlayerFileService.DownloadSourcePath).To(Equal("/var/vcap/bosh/user_data.json"))
 		})
 
 		Context("when container fails to stream out because agent env cannot be deserialized", func() {
 			BeforeEach(func() {
-				fakeWardenFileService.DownloadContents = []byte("invalid-json")
+				fakeSoftlayerFileService.DownloadContents = []byte("invalid-json")
 			})
 
 			It("returns error", func() {
@@ -57,7 +57,7 @@ var _ = Describe("WardenAgentEnvService", func() {
 
 		Context("when warden fails to download from container", func() {
 			BeforeEach(func() {
-				fakeWardenFileService.DownloadErr = errors.New("fake-download-error")
+				fakeSoftlayerFileService.DownloadErr = errors.New("fake-download-error")
 			})
 
 			It("returns error", func() {
@@ -87,31 +87,8 @@ var _ = Describe("WardenAgentEnvService", func() {
 		It("uploads file contents to the warden container", func() {
 			err := agentEnvService.Update(newAgentEnv)
 			Expect(err).ToNot(HaveOccurred())
-			Expect(fakeWardenFileService.UploadInputs[0].Contents).To(Equal(expectedAgentEnvBytes))
+			Expect(fakeSoftlayerFileService.UploadInputs[0].Contents).To(Equal(expectedAgentEnvBytes))
 		})
 
-		Context("when container fails to stream in because agent env cannot be serialized", func() {
-			BeforeEach(func() {
-				newAgentEnv.Env = EnvSpec{"fake-net-name": NonJSONMarshable{}} // cheating!
-			})
-
-			It("returns error", func() {
-				err := agentEnvService.Update(newAgentEnv)
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("fake-marshal-err"))
-			})
-		})
-
-		Context("when warden fails to upload to container", func() {
-			BeforeEach(func() {
-				fakeWardenFileService.UploadErr = errors.New("fake-upload-error")
-			})
-
-			It("returns error", func() {
-				err := agentEnvService.Update(newAgentEnv)
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("fake-upload-error"))
-			})
-		})
 	})
 })
