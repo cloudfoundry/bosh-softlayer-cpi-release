@@ -8,7 +8,6 @@ import (
 )
 
 type VMCloudProperties struct {
-	Hostname                 string                               `json:"hostname,omitempty"`
 	Domain                   string                               `json:"domain,omitempty"`
 	StartCpus                int                                  `json:"startCpus,omitempty"`
 	MaxMemory                int                                  `json:"maxMemory,omitempty"`
