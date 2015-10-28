@@ -101,8 +101,10 @@ var _ = Describe("BOSH Director Level Integration for create_stemcell", func() {
 		})
 
 		It("returns true because valid parameters", func() {
-			replacementMap["ID"] = strconv.Itoa(virtual_disk_image_id)
-			replacementMap["Datacenter"] = testhelpers.DATACENTER
+			replacementMap = map[string]string{
+				"ID":         strconv.Itoa(virtual_disk_image_id),
+				"Datacenter": testhelpers.DATACENTER,
+			}
 			jsonPayload, err := testhelperscpi.GenerateCpiJsonPayload("create_stemcell", rootTemplatePath, replacementMap)
 			Expect(err).ToNot(HaveOccurred())
 
