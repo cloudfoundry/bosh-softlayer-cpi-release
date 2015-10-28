@@ -117,7 +117,7 @@ var _ = Describe("BOSH Director Level Integration for create_stemcell", func() {
 			Expect(output["result"]).ToNot(BeNil())
 			Expect(output["error"]).To(BeNil())
 
-			vmId, err = strconv.ParseFloat(output["result"].(string))
+			vmId, err = strconv.ParseFloat(output["result"].(string), 64)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(vmId).ToNot(BeZero())
 		})
