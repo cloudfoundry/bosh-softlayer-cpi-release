@@ -31,6 +31,10 @@
 			"Rev": "6c266c2d546fc0dfec0f3c2b0728f87b06fcd25e"
 		},
 		{
+			"ImportPath": "github.com/cloudfoundry/bosh-utils/retrystrategy",
+			"Rev": "6c266c2d546fc0dfec0f3c2b0728f87b06fcd25e"
+		},
+		{
 			"ImportPath": "github.com/cloudfoundry/bosh-utils/system",
 			"Rev": "6c266c2d546fc0dfec0f3c2b0728f87b06fcd25e"
 		},
@@ -44,38 +48,38 @@
 		},
 		{
 			"ImportPath": "github.com/maximilien/softlayer-go/client",
-			"Comment": "v0.2.0-187-g57c02c3",
-			"Rev": "57c02c3b9f2aa604abbb8122259db5a9d00c5d98"
+			"Comment": "v0.2.0-190-g7e2435e",
+			"Rev": "7e2435e588ce7fd474384954e711d6467c86addd"
 		},
 		{
 			"ImportPath": "github.com/maximilien/softlayer-go/common",
-			"Comment": "v0.2.0-187-g57c02c3",
-			"Rev": "57c02c3b9f2aa604abbb8122259db5a9d00c5d98"
+			"Comment": "v0.2.0-190-g7e2435e",
+			"Rev": "7e2435e588ce7fd474384954e711d6467c86addd"
 		},
 		{
 			"ImportPath": "github.com/maximilien/softlayer-go/data_types",
-			"Comment": "v0.2.0-187-g57c02c3",
-			"Rev": "57c02c3b9f2aa604abbb8122259db5a9d00c5d98"
+			"Comment": "v0.2.0-190-g7e2435e",
+			"Rev": "7e2435e588ce7fd474384954e711d6467c86addd"
 		},
 		{
 			"ImportPath": "github.com/maximilien/softlayer-go/services",
-			"Comment": "v0.2.0-187-g57c02c3",
-			"Rev": "57c02c3b9f2aa604abbb8122259db5a9d00c5d98"
+			"Comment": "v0.2.0-190-g7e2435e",
+			"Rev": "7e2435e588ce7fd474384954e711d6467c86addd"
 		},
 		{
 			"ImportPath": "github.com/maximilien/softlayer-go/softlayer",
-			"Comment": "v0.2.0-187-g57c02c3",
-			"Rev": "57c02c3b9f2aa604abbb8122259db5a9d00c5d98"
+			"Comment": "v0.2.0-190-g7e2435e",
+			"Rev": "7e2435e588ce7fd474384954e711d6467c86addd"
 		},
 		{
 			"ImportPath": "github.com/maximilien/softlayer-go/test_helpers",
-			"Comment": "v0.2.0-187-g57c02c3",
-			"Rev": "57c02c3b9f2aa604abbb8122259db5a9d00c5d98"
+			"Comment": "v0.2.0-190-g7e2435e",
+			"Rev": "7e2435e588ce7fd474384954e711d6467c86addd"
 		},
 		{
 			"ImportPath": "github.com/onsi/ginkgo",
-			"Comment": "v1.2.0-6-gd981d36",
-			"Rev": "d981d36e9884231afa909627b9c275e4ba678f90"
+			"Comment": "v1.2.0-8-g25380c6",
+			"Rev": "25380c62e61d3f90436be125b8127dbae578fdef"
 		},
 		{
 			"ImportPath": "github.com/onsi/gomega",
@@ -83,12 +87,12 @@
 			"Rev": "d6c945f9fdbf6cad99e85b0feff591caa268e0db"
 		},
 		{
-			"ImportPath": "github.com/pkg/sftp",
-			"Rev": "d2d0a435b798a9af27f5fc597cacc19d275df702"
+			"ImportPath": "github.com/pivotal-golang/clock",
+			"Rev": "3fd3c1944c59d9742e1cd333672181cd1a6f9fa0"
 		},
 		{
-			"ImportPath": "golang.org/x/crypto/curve25519",
-			"Rev": "60052bd85f2d91293457e8811b0cf26b773de469"
+			"ImportPath": "github.com/pkg/sftp",
+			"Rev": "d2d0a435b798a9af27f5fc597cacc19d275df702"
 		},
 		{
 			"ImportPath": "golang.org/x/crypto/ssh",

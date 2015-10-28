@@ -7,6 +7,8 @@ import (
 	slh "github.com/maximilien/bosh-softlayer-cpi/softlayer/common"
 	sl "github.com/maximilien/softlayer-go/softlayer"
 
+	bslcommon "github.com/maximilien/bosh-softlayer-cpi/softlayer/common"
+
 	"fmt"
 	"time"
 )
@@ -17,9 +19,6 @@ const (
 	VirtualDiskImageKind                = "VirtualDiskImage"
 	VirtualGuestDeviceTemplateGroupKind = "VirtualGuestDeviceTemplateGroup"
 	DefaultKind                         = VirtualGuestDeviceTemplateGroupKind
-
-	Timeout         = 10 * time.Minute
-	PollingInterval = 10 * time.Second
 )
 
 type SoftLayerStemcell struct {
@@ -33,6 +32,9 @@ type SoftLayerStemcell struct {
 }
 
 func NewSoftLayerStemcell(id int, uuid string, kind string, softLayerClient sl.Client, logger boshlog.Logger) SoftLayerStemcell {
+	bslcommon.TIMEOUT = 10 * time.Minute
+	bslcommon.POLLING_INTERVAL = 5 * time.Second
+
 	return SoftLayerStemcell{
 		id:              id,
 		uuid:            uuid,
@@ -69,7 +71,7 @@ func (s SoftLayerStemcell) deleteVirtualGuestDiskTemplateGroup(id int) error {
 		return bosherr.WrapError(err, "Deleting VirtualGuestBlockDeviceTemplateGroup from service")
 	}
 
-	err = slh.WaitForVirtualGuestToHaveNoRunningTransactions(s.softLayerClient, id, Timeout, PollingInterval)
+	err = slh.WaitForVirtualGuestToHaveNoRunningTransactions(s.softLayerClient, id)
 	if err != nil {
 		return bosherr.WrapError(err, fmt.Sprintf("Waiting for VirtualGuest `%d` to have no pending transactions", id))
 	}

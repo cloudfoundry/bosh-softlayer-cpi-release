@@ -39,7 +39,7 @@ func (f SoftLayerFinder) Find(vmID int) (VM, bool, error) {
 
 	vm, found := SoftLayerVM{}, true
 	if virtualGuest.Id == vmID {
-		vm = NewSoftLayerVM(vmID, f.softLayerClient, util.GetSshClient(), f.agentEnvServiceFactory.New(vmID), f.logger, TIMEOUT_TRANSACTIONS_DELETE_VM)
+		vm = NewSoftLayerVM(vmID, f.softLayerClient, util.GetSshClient(), f.agentEnvServiceFactory.New(vmID), f.logger)
 	} else {
 		found = false
 	}

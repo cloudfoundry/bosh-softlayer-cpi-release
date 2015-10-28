@@ -33,7 +33,7 @@ func (c SoftLayerCreator) Create(size int, cloudProps DiskCloudProperties, virtu
 
 	vm, err := vmService.GetObject(virtualGuestId)
 	if err != nil || vm.Id == 0 {
-		return SoftLayerDisk{}, bosherr.WrapError(err, fmt.Sprintf("Can not retrieve vitual guest with id: %d.", virtualGuestId))
+		return SoftLayerDisk{}, bosherr.WrapError(err, fmt.Sprintf("Cannot retrieve vitual guest with id: %d.", virtualGuestId))
 	}
 
 	storageService, err := c.softLayerClient.GetSoftLayer_Network_Storage_Service()
