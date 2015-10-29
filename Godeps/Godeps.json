@@ -39,6 +39,10 @@
 			"Rev": "6c266c2d546fc0dfec0f3c2b0728f87b06fcd25e"
 		},
 		{
+			"ImportPath": "github.com/cloudfoundry/bosh-utils/uuid",
+			"Rev": "6c266c2d546fc0dfec0f3c2b0728f87b06fcd25e"
+		},
+		{
 			"ImportPath": "github.com/kr/fs",
 			"Rev": "2788f0dbd16903de03cb8186e5c7d97b69ad387b"
 		},

@@ -10,6 +10,9 @@ type ConcreteFactoryOptions struct {
 	StemcellsDir string
 
 	Agent bslcvm.AgentOptions
+
+	AgentEnvService string
+	Registry        bslcvm.RegistryOptions
 }
 
 func (o ConcreteFactoryOptions) Validate() error {
