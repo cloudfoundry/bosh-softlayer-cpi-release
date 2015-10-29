@@ -3,6 +3,8 @@ package action
 import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
+	boshsys "github.com/cloudfoundry/bosh-utils/system"
+	boshuuid "github.com/cloudfoundry/bosh-utils/uuid"
 
 	sl "github.com/maximilien/softlayer-go/softlayer"
 
@@ -16,7 +18,8 @@ type concreteFactory struct {
 	availableActions map[string]Action
 }
 
-func NewConcreteFactory(softLayerClient sl.Client, options ConcreteFactoryOptions, logger boshlog.Logger) concreteFactory {
+func NewConcreteFactory(softLayerClient sl.Client, options ConcreteFactoryOptions, logger boshlog.Logger, uuidGenerator boshuuid.Generator, fs boshsys.FileSystem) concreteFactory {
+
 	stemcellFinder := bslcstem.NewSoftLayerFinder(softLayerClient, logger)
 
 	agentEnvServiceFactory := bslcvm.NewSoftLayerAgentEnvServiceFactory(options.AgentEnvService, options.Registry, logger)
@@ -26,12 +29,16 @@ func NewConcreteFactory(softLayerClient sl.Client, options ConcreteFactoryOption
 		agentEnvServiceFactory,
 		options.Agent,
 		logger,
+		uuidGenerator,
+		fs,
 	)
 
 	vmFinder := bslcvm.NewSoftLayerFinder(
 		softLayerClient,
 		agentEnvServiceFactory,
 		logger,
+		uuidGenerator,
+		fs,
 	)
 
 	bmCreator := bslcbm.NewBaremetalCreator(softLayerClient, logger)

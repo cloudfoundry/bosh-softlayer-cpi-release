@@ -6,6 +6,7 @@ import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	boshsys "github.com/cloudfoundry/bosh-utils/system"
+	boshuuid "github.com/cloudfoundry/bosh-utils/uuid"
 
 	datatypes "github.com/maximilien/softlayer-go/data_types"
 
@@ -18,31 +19,45 @@ type SoftlayerFileService interface {
 }
 
 type softlayerFileService struct {
-	sshClient    util.SshClient
-	virtualGuest datatypes.SoftLayer_Virtual_Guest
-	logger       boshlog.Logger
-	logTag       string
+	sshClient     util.SshClient
+	virtualGuest  datatypes.SoftLayer_Virtual_Guest
+	logger        boshlog.Logger
+	logTag        string
+	uuidGenerator boshuuid.Generator
+	fs            boshsys.FileSystem
 }
 
-func NewSoftlayerFileService(sshClient util.SshClient, virtualGuest datatypes.SoftLayer_Virtual_Guest, logger boshlog.Logger) SoftlayerFileService {
+func NewSoftlayerFileService(sshClient util.SshClient, virtualGuest datatypes.SoftLayer_Virtual_Guest, logger boshlog.Logger, uuidGenerator boshuuid.Generator, fs boshsys.FileSystem) SoftlayerFileService {
 	return &softlayerFileService{
-		sshClient:    sshClient,
-		virtualGuest: virtualGuest,
-		logger:       logger,
-		logTag:       "softlayerFileService",
+		sshClient:     sshClient,
+		virtualGuest:  virtualGuest,
+		logger:        logger,
+		logTag:        "softlayerFileService",
+		uuidGenerator: uuidGenerator,
+		fs:            fs,
 	}
 }
 
 func (s *softlayerFileService) Download(sourcePath string) ([]byte, error) {
-	sourceFileName := filepath.Base(sourcePath)
-	tmpFilePath := filepath.Join("/tmp", sourceFileName)
-
 	s.logger.Debug(s.logTag, "Downloading file at %s", sourcePath)
+
+	tmpDirUUID, err := s.uuidGenerator.Generate()
+	if err != nil {
+		return nil, bosherr.WrapError(err, "Generating uuid for temp file")
+	}
+	tmpDir, err := s.fs.TempDir(tmpDirUUID)
+	if err != nil {
+		return nil, bosherr.WrapError(err, "Getting temp dir for downloading user_data.json")
+	}
+
+	defer s.fs.RemoveAll(tmpDir)
+
+	sourceFileName := filepath.Base(sourcePath)
+	tmpFilePath := filepath.Join(tmpDir, sourceFileName)
 
 	s.sshClient.DownloadFile(ROOT_USER_NAME, s.getRootPassword(s.virtualGuest), s.virtualGuest.PrimaryBackendIpAddress, sourcePath, tmpFilePath)
 
-	fileSystem := boshsys.NewOsFileSystemWithStrictTempRoot(s.logger)
-	contents, err := fileSystem.ReadFile(tmpFilePath)
+	contents, err := s.fs.ReadFile(tmpFilePath)
 	if err != nil {
 		return nil, bosherr.WrapErrorf(err, "Reading from %s", tmpFilePath)
 	}
@@ -55,24 +70,34 @@ func (s *softlayerFileService) Download(sourcePath string) ([]byte, error) {
 func (s *softlayerFileService) Upload(destinationPath string, contents []byte) error {
 	s.logger.Debug(s.logTag, "Uploading file to %s", destinationPath)
 
-	destinationFileName := filepath.Base(destinationPath)
-	tmpFilePath := filepath.Join("/tmp", destinationFileName)
+	tmpDirUUID, err := s.uuidGenerator.Generate()
+	if err != nil {
+		return bosherr.WrapError(err, "Generating uuid for temp file")
+	}
+	tmpDir, err := s.fs.TempDir(tmpDirUUID)
+	if err != nil {
+		return bosherr.WrapError(err, "Getting temp dir for uploading user_data.json")
+	}
 
-	fileSystem := boshsys.NewOsFileSystemWithStrictTempRoot(s.logger)
+	defer s.fs.RemoveAll(tmpDir)
 
-	err := fileSystem.WriteFile(tmpFilePath, contents)
+	sourceFileName := filepath.Base(destinationPath)
+	tmpFilePath := filepath.Join(tmpDir, sourceFileName)
+
+	err = s.fs.WriteFile(tmpFilePath, contents)
 	if err != nil {
 		return bosherr.WrapErrorf(err, "Writing to %s", tmpFilePath)
 	}
 
 	err = s.sshClient.UploadFile(ROOT_USER_NAME, s.getRootPassword(s.virtualGuest), s.virtualGuest.PrimaryBackendIpAddress, tmpFilePath, destinationPath)
 	if err != nil {
-		return bosherr.WrapErrorf(err, "Moving temporary file to destination '%s'", destinationPath)
+		return bosherr.WrapErrorf(err, "Uploading temporary file to destination '%s'", destinationPath)
 	}
 
 	return nil
 }
 
+// private method
 func (s *softlayerFileService) getRootPassword(virtualGuest datatypes.SoftLayer_Virtual_Guest) string {
 	passwords := virtualGuest.OperatingSystem.Passwords
 	for _, password := range passwords {

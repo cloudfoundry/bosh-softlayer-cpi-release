@@ -11,13 +11,13 @@ import (
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
+	boshsys "github.com/cloudfoundry/bosh-utils/system"
+	boshuuid "github.com/cloudfoundry/bosh-utils/uuid"
 
 	sl "github.com/maximilien/softlayer-go/softlayer"
 
 	bslcommon "github.com/maximilien/bosh-softlayer-cpi/softlayer/common"
 	bslcstem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell"
-
-	boshsys "github.com/cloudfoundry/bosh-utils/system"
 
 	util "github.com/maximilien/bosh-softlayer-cpi/util"
 )
@@ -27,12 +27,13 @@ const softLayerCreatorLogTag = "SoftLayerCreator"
 type SoftLayerCreator struct {
 	softLayerClient        sl.Client
 	agentEnvServiceFactory AgentEnvServiceFactory
-
-	agentOptions AgentOptions
-	logger       boshlog.Logger
+	agentOptions           AgentOptions
+	logger                 boshlog.Logger
+	uuidGenerator          boshuuid.Generator
+	fs                     boshsys.FileSystem
 }
 
-func NewSoftLayerCreator(softLayerClient sl.Client, agentEnvServiceFactory AgentEnvServiceFactory, agentOptions AgentOptions, logger boshlog.Logger) SoftLayerCreator {
+func NewSoftLayerCreator(softLayerClient sl.Client, agentEnvServiceFactory AgentEnvServiceFactory, agentOptions AgentOptions, logger boshlog.Logger, uuidGenerator boshuuid.Generator, fs boshsys.FileSystem) SoftLayerCreator {
 	bslcommon.TIMEOUT = 60 * time.Minute
 	bslcommon.POLLING_INTERVAL = 10 * time.Second
 
@@ -41,6 +42,8 @@ func NewSoftLayerCreator(softLayerClient sl.Client, agentEnvServiceFactory Agent
 		agentEnvServiceFactory: agentEnvServiceFactory,
 		agentOptions:           agentOptions,
 		logger:                 logger,
+		uuidGenerator:          uuidGenerator,
+		fs:                     fs,
 	}
 }
 
@@ -82,7 +85,7 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 		return SoftLayerVM{}, bosherr.WrapErrorf(err, "Cannot get details from virtual guest with id: %d.", virtualGuest.Id)
 	}
 
-	softlayerFileService := NewSoftlayerFileService(util.GetSshClient(), virtualGuest, c.logger)
+	softlayerFileService := NewSoftlayerFileService(util.GetSshClient(), virtualGuest, c.logger, c.uuidGenerator, c.fs)
 	agentEnvService := c.agentEnvServiceFactory.New(softlayerFileService, strconv.Itoa(virtualGuest.Id))
 
 	agentEnv := CreateAgentUserData(agentID, cloudProps, networks, env, c.agentOptions)
@@ -138,8 +141,7 @@ func (c SoftLayerCreator) updateEtcHostsOfBoshInit(record string) (err error) {
 		return bosherr.WrapError(err, "Generating config from template")
 	}
 
-	fileSystem := boshsys.NewOsFileSystemWithStrictTempRoot(c.logger)
-	err = fileSystem.WriteFile("/etc/hosts", buffer.Bytes())
+	err = c.fs.WriteFile("/etc/hosts", buffer.Bytes())
 	if err != nil {
 		return bosherr.WrapError(err, "Writing to /etc/hosts")
 	}

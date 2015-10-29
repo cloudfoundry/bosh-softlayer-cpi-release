@@ -9,6 +9,8 @@ import (
 
 	testhelpers "github.com/maximilien/bosh-softlayer-cpi/test_helpers"
 
+	fakesys "github.com/cloudfoundry/bosh-utils/system/fakes"
+	fakeuuid "github.com/cloudfoundry/bosh-utils/uuid/fakes"
 	fakestem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell/fakes"
 	fakevm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm/fakes"
 	fakesutil "github.com/maximilien/bosh-softlayer-cpi/util/fakes"
@@ -27,6 +29,8 @@ var _ = Describe("SoftLayerCreator", func() {
 		softLayerClient        *fakeslclient.FakeSoftLayerClient
 		sshClient              *fakesutil.FakeSshClient
 		agentEnvServiceFactory *fakevm.FakeAgentEnvServiceFactory
+		fs                     *fakesys.FakeFileSystem
+		uuidGenerator          *fakeuuid.FakeGenerator
 		agentOptions           AgentOptions
 		logger                 boshlog.Logger
 		creator                SoftLayerCreator
@@ -35,6 +39,8 @@ var _ = Describe("SoftLayerCreator", func() {
 	BeforeEach(func() {
 		softLayerClient = fakeslclient.NewFakeSoftLayerClient("fake-username", "fake-api-key")
 		sshClient = fakesutil.NewFakeSshClient()
+		uuidGenerator = fakeuuid.NewFakeGenerator()
+		fs = fakesys.NewFakeFileSystem()
 		agentEnvServiceFactory = &fakevm.FakeAgentEnvServiceFactory{}
 		agentOptions = AgentOptions{Mbus: "fake-mbus"}
 		logger = boshlog.NewLogger(boshlog.LevelNone)
@@ -44,6 +50,8 @@ var _ = Describe("SoftLayerCreator", func() {
 			agentEnvServiceFactory,
 			agentOptions,
 			logger,
+			uuidGenerator,
+			fs,
 		)
 		bslcommon.TIMEOUT = 2 * time.Second
 		bslcommon.POLLING_INTERVAL = 1 * time.Second
