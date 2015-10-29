@@ -43,7 +43,7 @@ func CreateVirtualGuestTemplate(agentID string, stemcell bslcstem.Stemcell, clou
 	base64EncodedMetadata := Base64EncodeData(string(metadataBytes))
 
 	virtualGuestTemplate := sldatatypes.SoftLayer_Virtual_Guest_Template{
-		Hostname:  cloudProps.VmNamePrefix,
+		Hostname:  cloudProps.Hostname,
 		Domain:    cloudProps.Domain,
 		StartCpus: cloudProps.StartCpus,
 		MaxMemory: cloudProps.MaxMemory,

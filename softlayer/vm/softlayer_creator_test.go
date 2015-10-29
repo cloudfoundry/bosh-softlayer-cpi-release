@@ -74,7 +74,7 @@ var _ = Describe("SoftLayerCreator", func() {
 					Datacenter:                   sldatatypes.Datacenter{Name: "fake-datacenter"},
 					HourlyBillingFlag:            true,
 					LocalDiskFlag:                true,
-					VmNamePrefix:                 "bosh-",
+					Hostname:                     "bosh-",
 					PostInstallScriptUri:         "",
 					DedicatedAccountHostOnlyFlag: true,
 					PrivateNetworkOnlyFlag:       false,
