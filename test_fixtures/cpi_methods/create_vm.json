@@ -3,7 +3,7 @@
   "arguments": [
 	"45632666-9fb1-422a-af35-2ab6102c5c1b",
 	"651103", {
-	  "vmNamePrefix": "ecpi-go-test-",
+	  "vmNamePrefix": "ecpi-go-test-3",
 	  "domain": "softlayer.com",
 	  "startCpus": 1,
 	  "maxMemory": 1024,
@@ -11,6 +11,7 @@
 	  "datacenter": {
 		"name": "ams01"
 	  },
+	  "hourlyBillingFlag": true,
 	  "sshKeys": [{
 		"id": 74826
 	  }]

@@ -36,7 +36,7 @@ var _ = Describe("BOSH Director Level Integration for OS Reload", func() {
 
 		output map[string]interface{}
 
-		vmId float64
+		vmId int
 	)
 
 	BeforeEach(func() {
@@ -91,11 +91,12 @@ var _ = Describe("BOSH Director Level Integration for OS Reload", func() {
 		})
 
 		It("returns true if the VM creation procedure is correct", func() {
+
 			jsonPayload, err := testhelperscpi.GenerateCpiJsonPayload("create_vm", rootTemplatePath, replacementMap)
 			Expect(err).ToNot(HaveOccurred())
 
 			outputBytes, err := testhelperscpi.RunCpi(rootTemplatePath, tmpConfigPath, jsonPayload)
-			log.Println("outputBytes=" + string(outputBytes))
+			log.Println("outputBytes of vm creation: " + string(outputBytes))
 			Expect(err).ToNot(HaveOccurred())
 
 			err = json.Unmarshal(outputBytes, &output)
@@ -103,11 +104,11 @@ var _ = Describe("BOSH Director Level Integration for OS Reload", func() {
 			Expect(output["result"]).ToNot(BeNil())
 			Expect(output["error"]).To(BeNil())
 
-			vmId = output["result"].(float64)
-			Expect(vmId).ToNot(BeZero())
-			log.Println(fmt.Sprintf("Create a new VM with ID: %d", int(vmId)))
+			id := output["result"].(string)
+			vmId, err = strconv.Atoi(id)
+			log.Println(fmt.Sprintf("Create a new VM with ID: %d", vmId))
 
-			strVGID := strconv.Itoa(int(vmId))
+			strVGID := id
 			replacementMap1 := map[string]string{
 				"ID":           strVGID,
 				"DirectorUuid": "fake-director-uuid",
@@ -117,9 +118,11 @@ var _ = Describe("BOSH Director Level Integration for OS Reload", func() {
 			Expect(err).ToNot(HaveOccurred())
 
 			outputBytes, err = testhelperscpi.RunCpi(rootTemplatePath, tmpConfigPath, jsonPayload)
+			log.Println("outputBytes of vm deletion: " + string(outputBytes))
 			Expect(err).ToNot(HaveOccurred())
 
 			err = json.Unmarshal(outputBytes, &output)
+
 			Expect(err).ToNot(HaveOccurred())
 			Expect(output["error"]).To(BeNil())
 
@@ -137,7 +140,8 @@ var _ = Describe("BOSH Director Level Integration for OS Reload", func() {
 			Expect(output["result"]).ToNot(BeNil())
 			Expect(output["error"]).To(BeNil())
 
-			vmId = output["result"].(float64)
+			id = output["result"].(string)
+			vmId, err = strconv.Atoi(id)
 			Expect(vmId).ToNot(BeZero())
 			log.Println(fmt.Sprintf("OS reload on VM with ID: %d", int(vmId)))
 
@@ -168,9 +172,10 @@ var _ = Describe("BOSH Director Level Integration for OS Reload", func() {
 			Expect(output["result"]).ToNot(BeNil())
 			Expect(output["error"]).To(BeNil())
 
-			vmId = output["result"].(float64)
+			id := output["result"].(string)
+			vmId, err = strconv.Atoi(id)
 			Expect(vmId).ToNot(BeZero())
-			log.Println(fmt.Sprintf("Create a new VM with ID: %d", int(vmId)))
+			log.Println(fmt.Sprintf("Create a new VM with ID: %d", vmId))
 
 			jsonPayload, err = testhelperscpi.GenerateCpiJsonPayload("create_vm", rootTemplatePath, replacementMap)
 			Expect(err).ToNot(HaveOccurred())

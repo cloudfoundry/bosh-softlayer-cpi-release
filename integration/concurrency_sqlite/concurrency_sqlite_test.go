@@ -26,7 +26,7 @@ var (
 	SQLITE_DB_FILE_PATH = filepath.Join(SQLITE_DB_FOLDER, SQLITE_DB_FILE)
 	stemcellUuid        = "fake_stemcell_uuid"
 	domain              = "softalyer.com"
-	c                   chan int
+	c                   = make(chan string, 0)
 	logger              = boshlog.NewLogger(boshlog.LevelInfo)
 )
 
@@ -43,7 +43,6 @@ func populateDB() {
 
 		err = vmInfoDB.InsertVMInfo(bslcvmpool.DB_RETRY_TIMEOUT, bslcvmpool.DB_RETRY_INTERVAL)
 		Expect(err).ToNot(HaveOccurred())
-
 	}
 }
 
@@ -62,7 +61,7 @@ func insertVMInfo(init int) {
 		Expect(err).ToNot(HaveOccurred())
 	}
 
-	c <- 1
+	c <- "Done!"
 }
 
 func updateVMInfoByID() {
@@ -80,7 +79,7 @@ func updateVMInfoByID() {
 		Expect(err).ToNot(HaveOccurred())
 	}
 
-	c <- 1
+	c <- "Done!"
 }
 
 func queryVMInfobyID() {
@@ -99,7 +98,7 @@ func queryVMInfobyID() {
 
 	}
 
-	c <- 1
+	c <- "Done!"
 }
 
 func queryVMInfobyAgentID() {
@@ -117,7 +116,7 @@ func queryVMInfobyAgentID() {
 		Expect(err).ToNot(HaveOccurred())
 	}
 
-	c <- 1
+	c <- "Done!"
 }
 
 var _ = Describe("BOSH Director Level Integration for OS Reload", func() {
@@ -144,39 +143,29 @@ var _ = Describe("BOSH Director Level Integration for OS Reload", func() {
 	})
 
 	AfterEach(func() {
-		err = os.RemoveAll(SQLITE_DB_FOLDER)
-		Expect(err).ToNot(HaveOccurred())
+		//err = os.RemoveAll(SQLITE_DB_FOLDER)
+		//Expect(err).ToNot(HaveOccurred())
 
 	})
 
 	Context("Manipulate DB concurrently", func() {
 
-		It("Manipulate DB concurrently", func() {
+		It("Manipulate DB concurrently", func(done Done) {
 			runtime.GOMAXPROCS(2)
 
-			go insertVMInfo(1000)
-			go updateVMInfoByID()
-			go queryVMInfobyID()
-			go queryVMInfobyAgentID()
-			go insertVMInfo(2000)
-			go updateVMInfoByID()
-			go queryVMInfobyID()
-			go queryVMInfobyAgentID()
-			go insertVMInfo(3000)
-			go updateVMInfoByID()
-			go queryVMInfobyID()
-			go queryVMInfobyAgentID()
-			go insertVMInfo(4000)
-			go updateVMInfoByID()
-			go queryVMInfobyID()
-			go queryVMInfobyAgentID()
-			go insertVMInfo(5000)
-			go updateVMInfoByID()
-			go queryVMInfobyID()
-			go queryVMInfobyAgentID()
+			for i := 1000; i <= 5000; i += 1000 {
+				go insertVMInfo(i)
+				go updateVMInfoByID()
+				go queryVMInfobyID()
+				go queryVMInfobyAgentID()
+			}
 
-			time.Sleep(60 * time.Second)
-		})
+			for i := 0; i < 20; i++ {
+				Expect(<-c).To(ContainSubstring("Done!"))
+			}
+			close(done)
+
+		}, 50)
 	})
 
 })

@@ -103,7 +103,6 @@ func (vmInfoDB *VMInfoDB) QueryVMInfobyAgentID(retryTimeout time.Duration, retry
 			if err != nil && !strings.Contains(err.Error(), "no rows") {
 				sqliteErr := err.(sqlite3.Error)
 				if sqliteErr.Code == sqlite3.ErrBusy || sqliteErr.Code == sqlite3.ErrLocked {
-					fmt.Println("DB is busy or locked")
 					return true, bosherr.WrapError(sqliteErr, "retrying...")
 				} else {
 					return false, bosherr.WrapError(sqliteErr, "Failed to query VM info from vms table")
@@ -163,7 +162,6 @@ func (vmInfoDB *VMInfoDB) QueryVMInfobyID(retryTimeout time.Duration, retryInter
 			if err != nil && !strings.Contains(err.Error(), "no rows") {
 				sqliteErr := err.(sqlite3.Error)
 				if sqliteErr.Code == sqlite3.ErrBusy || sqliteErr.Code == sqlite3.ErrLocked {
-					fmt.Println("DB is busy or locked")
 					return true, bosherr.WrapError(sqliteErr, "retrying...")
 				} else {
 					return false, bosherr.WrapError(sqliteErr, "Failed to query VM info from vms table")
@@ -196,7 +194,6 @@ func (vmInfoDB *VMInfoDB) DeleteVMFromVMDB(retryTimeout time.Duration, retryInte
 
 func (vmInfoDB *VMInfoDB) InsertVMInfo(retryTimeout time.Duration, retryInterval time.Duration) error {
 	sqlStmt := fmt.Sprintf("insert into vms (id, name, in_use, image_id, agent_id, timestamp) values (%d, '%s', '%s', '%s', '%s', CURRENT_TIMESTAMP)", vmInfoDB.VmProperties.Id, vmInfoDB.VmProperties.Name, vmInfoDB.VmProperties.InUse, vmInfoDB.VmProperties.ImageId, vmInfoDB.VmProperties.AgentId)
-	//fmt.Println("sql statement: " + sqlStmt)
 	err := exec(vmInfoDB.db, sqlStmt, retryTimeout, retryInterval, vmInfoDB.logger)
 	if err != nil {
 		return bosherr.WrapError(err, "Failed to insert VM info into vms table")
@@ -221,12 +218,10 @@ func (vmInfoDB *VMInfoDB) UpdateVMInfoByID(retryTimeout time.Duration, retryInte
 
 			if vmInfoDB.VmProperties.InUse == "f" || vmInfoDB.VmProperties.InUse == "t" {
 				sqlStmt := fmt.Sprintf("update vms set in_use='%s', timestamp=CURRENT_TIMESTAMP where id = %d", vmInfoDB.VmProperties.InUse, vmInfoDB.VmProperties.Id)
-				fmt.Println("sql statement: " + sqlStmt)
 				_, err = tx.Exec(sqlStmt)
 				if err != nil {
 					sqliteErr := err.(sqlite3.Error)
 					if sqliteErr.Code == sqlite3.ErrBusy || sqliteErr.Code == sqlite3.ErrLocked {
-						fmt.Println("DB is busy or locked")
 						return true, bosherr.WrapError(sqliteErr, "retrying...")
 					} else {
 						return false, bosherr.WrapError(sqliteErr, "Failed to update in_use column in vms")
@@ -253,7 +248,6 @@ func (vmInfoDB *VMInfoDB) UpdateVMInfoByID(retryTimeout time.Duration, retryInte
 				if err != nil {
 					sqliteErr := err.(sqlite3.Error)
 					if sqliteErr.Code == sqlite3.ErrBusy || sqliteErr.Code == sqlite3.ErrLocked {
-						fmt.Println("DB is busy or locked")
 						return true, bosherr.WrapError(sqliteErr, "retrying...")
 					} else {
 						return false, bosherr.WrapError(sqliteErr, "Failed to update in_use column in vms")
@@ -295,7 +289,6 @@ func exec(db DB, sqlStmt string, retryTimeout time.Duration, retryInterval time.
 			if err != nil {
 				sqliteErr := err.(sqlite3.Error)
 				if sqliteErr.Code == sqlite3.ErrBusy || sqliteErr.Code == sqlite3.ErrLocked {
-					fmt.Println("DB is busy or locked")
 					return true, bosherr.WrapError(sqliteErr, "Retrying...")
 				} else {
 					return false, bosherr.WrapError(sqliteErr, "Failed to execute sql statement: "+sqlStmt)

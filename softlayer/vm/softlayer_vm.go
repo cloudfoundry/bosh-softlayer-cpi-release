@@ -32,7 +32,6 @@ import (
 )
 
 const (
-
 	softLayerVMtag   = "SoftLayerVM"
 	ROOT_USER_NAME   = "root"
 	deleteVMLogTag   = "DeleteVM"
@@ -41,7 +40,6 @@ const (
 	TIMEOUT_TRANSACTIONS_DELETE_VM   = 60 * time.Minute
 	TIMEOUT_TRANSACTIONS_CREATE_VM   = 100 * time.Minute
 	TIMEOUT_TRANSACTIONS_OSRELOAD_VM = 24 * time.Hour
-
 )
 
 type SoftLayerVM struct {
@@ -146,6 +144,19 @@ func (vm SoftLayerVM) DeleteVM() error {
 	err = vm.postCheckActiveTransactionsForDeleteVM(vm.softLayerClient, vmCID)
 	if err != nil {
 		return err
+	}
+
+	if strings.ToUpper(common.GetOSEnvVariable("OS_RELOAD_ENABLED", "TRUE")) == "TRUE" {
+		db, err := bslcvmpool.OpenDB(bslcvmpool.SQLITE_DB_FILE_PATH)
+		if err != nil {
+			return bosherr.WrapError(err, "Opening DB")
+		}
+
+		vmInfoDB := bslcvmpool.NewVMInfoDB(vm.ID(), "", "", "", "", vm.logger, db)
+		err = vmInfoDB.DeleteVMFromVMDB(bslcvmpool.DB_RETRY_TIMEOUT, bslcvmpool.DB_RETRY_INTERVAL)
+		if err != nil {
+			return bosherr.WrapError(err, "Failed to delete the record from VM pool DB")
+		}
 	}
 
 	return nil
@@ -754,7 +765,6 @@ func (vm SoftLayerVM) postCheckActiveTransactionsForOSReload(softLayerClient sl.
 
 	return nil
 }
-
 
 func (vm SoftLayerVM) postCheckActiveTransactionsForDeleteVM(softLayerClient sl.Client, virtualGuestId int) error {
 	virtualGuestService, err := softLayerClient.GetSoftLayer_Virtual_Guest_Service()

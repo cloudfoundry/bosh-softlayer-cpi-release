@@ -28,12 +28,12 @@ import (
 
 var _ = Describe("SoftLayerVM", func() {
 	var (
-		softLayerClient             *fakeslclient.FakeSoftLayerClient
-		sshClient                   *fakesutil.FakeSshClient
-		agentEnvService             *fakevm.FakeAgentEnvService
-		logger                      boshlog.Logger
-		vm                          SoftLayerVM
-		stemcell                    *fakestemcell.FakeStemcell
+		softLayerClient *fakeslclient.FakeSoftLayerClient
+		sshClient       *fakesutil.FakeSshClient
+		agentEnvService *fakevm.FakeAgentEnvService
+		logger          boshlog.Logger
+		vm              SoftLayerVM
+		stemcell        *fakestemcell.FakeStemcell
 	)
 
 	BeforeEach(func() {
