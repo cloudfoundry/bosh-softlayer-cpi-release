@@ -29,3 +29,6 @@ _testmain.go
 *.test
 .DS_STORE
 .DS_Store
+
+# vim
+*.swp
