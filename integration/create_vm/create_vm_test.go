@@ -50,6 +50,10 @@ var _ = Describe("BOSH Director Level Integration for create_vm", func() {
 		accountService, err = testhelpers.CreateAccountService()
 		Expect(err).ToNot(HaveOccurred())
 
+		replacementMap = map[string]string{
+			"Datacenter": testhelpers.GetDatacenter(),
+		}
+
 		virtualGuestService, err = testhelpers.CreateVirtualGuestService()
 		Expect(err).ToNot(HaveOccurred())
 

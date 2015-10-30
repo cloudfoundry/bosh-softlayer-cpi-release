@@ -2,9 +2,9 @@ package create_stemcell_test
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -15,7 +15,7 @@ import (
 	slclient "github.com/maximilien/softlayer-go/client"
 	datatypes "github.com/maximilien/softlayer-go/data_types"
 	softlayer "github.com/maximilien/softlayer-go/softlayer"
-	// testhelpers "github.com/maximilien/softlayer-go/test_helpers"
+	testhelpers "github.com/maximilien/softlayer-go/test_helpers"
 	"log"
 )
 
@@ -38,7 +38,8 @@ var _ = Describe("BOSH Director Level Integration for create_stemcell", func() {
 
 		virtual_disk_image_id int
 
-		output map[string]interface{}
+		output         map[string]interface{}
+		replacementMap map[string]string
 
 		vmId float64
 	)
@@ -100,15 +101,12 @@ var _ = Describe("BOSH Director Level Integration for create_stemcell", func() {
 		})
 
 		It("returns true because valid parameters", func() {
-			jsonPayload := fmt.Sprintf(
-				`{"method": "create_stemcell", "arguments": ["%s", {"virtual-disk-image-id": %d, "virtual-disk-image-uuid": "%s", "datacenter-name": "%s"}],"context": {"director_uuid": "%s"}}`,
-				"fake/root/path",
-				virtual_disk_image_id,
-				"fake-uuid",
-				"ams01",
-				"fake-director-uuid")
-			// jsonPayload, err := testhelperscpi.GenerateCpiJsonPayload("create_stemcell", rootTemplatePath, replacementMap)
-			// Expect(err).ToNot(HaveOccurred())
+			replacementMap = map[string]string{
+				"ID":         strconv.Itoa(virtual_disk_image_id),
+				"Datacenter": testhelpers.GetDatacenter(),
+			}
+			jsonPayload, err := testhelperscpi.GenerateCpiJsonPayload("create_stemcell", rootTemplatePath, replacementMap)
+			Expect(err).ToNot(HaveOccurred())
 
 			outputBytes, err := testhelperscpi.RunCpi(rootTemplatePath, tmpConfigPath, jsonPayload)
 			log.Println("outputBytes=" + string(outputBytes))
