@@ -69,7 +69,7 @@ func (b EstablishBareMetalEnv) Run() (interface{}, error) {
 
 		baremetal, err = b.bmFinder.Find(baremetal.GlobalIdentifier)
 		if err != nil {
-			return nil, bosherr.WrapErrorf(err, "Can not find the baremetal server of id: %s", baremetal.GlobalIdentifier)
+			return nil, bosherr.WrapErrorf(err, "Cannot find the baremetal server of id: %s", baremetal.GlobalIdentifier)
 		}
 	}
 

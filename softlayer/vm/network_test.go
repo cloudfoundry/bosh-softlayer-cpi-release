@@ -27,6 +27,7 @@ var _ = Describe("Network", func() {
 						"fake-dns1",
 					},
 					Default:         []string{},
+					Preconfigured:   true,
 					CloudProperties: map[string]interface{}{},
 				},
 			}
@@ -43,6 +44,7 @@ var _ = Describe("Network", func() {
 					"fake-dns1",
 				},
 				Default:         []string{},
+				Preconfigured:   true,
 				CloudProperties: map[string]interface{}{},
 			}
 		})
@@ -71,6 +73,7 @@ var _ = Describe("Network", func() {
 					"fake-dns1",
 				},
 				Default:         []string{},
+				Preconfigured:   true,
 				CloudProperties: map[string]interface{}{},
 			}
 
@@ -100,6 +103,7 @@ var _ = Describe("Network", func() {
 					"fake-dns1",
 				},
 				Default:         []string{},
+				Preconfigured:   true,
 				CloudProperties: map[string]interface{}{},
 			}
 
@@ -114,6 +118,7 @@ var _ = Describe("Network", func() {
 					"fake-dns2",
 				},
 				Default:         []string{},
+				Preconfigured:   true,
 				CloudProperties: map[string]interface{}{},
 			}
 		})

@@ -3,6 +3,7 @@ package vm_test
 import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"time"
 
 	. "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
 
@@ -12,6 +13,7 @@ import (
 	fakevm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm/fakes"
 	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
 
+	bslcommon "github.com/maximilien/bosh-softlayer-cpi/softlayer/common"
 	bslcstem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell"
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
@@ -41,6 +43,9 @@ var _ = Describe("SoftLayerCreator", func() {
 			agentOptions,
 			logger,
 		)
+		bslcommon.TIMEOUT = 2 * time.Second
+		bslcommon.POLLING_INTERVAL = 1 * time.Second
+		bslcommon.PAUSE_TIME = 1 * time.Second
 	})
 
 	Describe("#Create", func() {
@@ -64,6 +69,7 @@ var _ = Describe("SoftLayerCreator", func() {
 						GlobalIdentifier: "fake-uuid",
 					},
 					RootDiskSize:                 25,
+					BoshIp:                       "10.0.0.1",
 					EphemeralDiskSize:            25,
 					Datacenter:                   sldatatypes.Datacenter{Name: "fake-datacenter"},
 					HourlyBillingFlag:            true,
@@ -160,17 +166,13 @@ func setFakeSoftLayerClientCreateObjectTestFixtures(fakeSoftLayerClient *fakeslc
 		"SoftLayer_Virtual_Guest_Service_createObject.json",
 		"SoftLayer_Virtual_Guest_Service_getPowerState.json",
 
-		"SoftLayer_Virtual_Guest_Service_getActiveTransactions.json",
+		"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
 
-		"SoftLayer_Virtual_Guest_Service_setMetadata.json",
-		"SoftLayer_Virtual_Guest_Service_configureMetadataDisk.json",
-
-		"SoftLayer_Virtual_Guest_Service_getPowerState.json",
-
-		"SoftLayer_Virtual_Guest_Service_getPowerState.json",
-		"SoftLayer_Virtual_Guest_Service_getActiveTransactions.json",
 		"SoftLayer_Virtual_Guest_Service_getUpgradeItemPrices.json",
 		"SoftLayer_Product_Order_Service_placeOrder.json",
+
+		"SoftLayer_Virtual_Guest_Service_getActiveTransactions.json",
+		"SoftLayer_Virtual_Guest_Service_getPowerState.json",
 	}
 	testhelpers.SetTestFixturesForFakeSoftLayerClient(fakeSoftLayerClient, fileNames)
 }
