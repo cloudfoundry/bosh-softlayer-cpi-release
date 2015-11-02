@@ -3,13 +3,13 @@
   "arguments": [
 	"45632666-9fb1-422a-af35-2ab6102c5c1b",
 	"651103", {
-	  "hostname": "ecpitest",
+	  "hostname": "ecpi_test",
 	  "domain": "softlayer.com",
 	  "startCpus": 1,
 	  "maxMemory": 1024,
 	  "operatingSystemReferenceCode": "UBUNTU_LATEST",
 	  "datacenter": {
-		"name": "ams01"
+		"name": "{{.Datacenter}}"
 	  },
 	  "sshKeys": [{
 		"id": 74826
