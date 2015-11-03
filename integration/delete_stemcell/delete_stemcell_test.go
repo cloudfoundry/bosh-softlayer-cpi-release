@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -35,7 +36,9 @@ var _ = Describe("BOSH Director Level Integration for delete_stemcell", func() {
 		rootTemplatePath, tmpConfigPath string
 
 		virtual_disk_image_id int
-		output                map[string]interface{}
+
+		output         map[string]interface{}
+		replacementMap map[string]string
 	)
 
 	BeforeEach(func() {
