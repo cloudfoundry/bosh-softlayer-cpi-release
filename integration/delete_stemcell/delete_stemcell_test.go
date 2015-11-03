@@ -3,6 +3,7 @@ package delete_stemcell_test
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -15,8 +16,6 @@ import (
 	slclient "github.com/maximilien/softlayer-go/client"
 	datatypes "github.com/maximilien/softlayer-go/data_types"
 	softlayer "github.com/maximilien/softlayer-go/softlayer"
-	// testhelpers "github.com/maximilien/softlayer-go/test_helpers"
-	"log"
 )
 
 const configPath = "test_fixtures/cpi_methods/config.json"
