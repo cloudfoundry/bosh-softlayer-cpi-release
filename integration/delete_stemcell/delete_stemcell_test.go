@@ -89,7 +89,9 @@ var _ = Describe("BOSH Director Level Integration for delete_stemcell", func() {
 			virtual_disk_image_id = vgbdtGroup.Id
 
 			// Wait for transaction to complete
-			time.Sleep(1 * time.Minute)
+			testhelpers.TIMEOUT = 35 * time.Minute
+			testhelpers.POLLING_INTERVAL = 10 * time.Second
+			testhelpers.WaitForVirtualGuestBlockTemplateGroupToHaveNoActiveTransactions(vgbdtGroup.Id)
 		})
 
 		AfterEach(func() {
