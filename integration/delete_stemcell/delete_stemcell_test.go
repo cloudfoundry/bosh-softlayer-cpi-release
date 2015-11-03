@@ -2,7 +2,6 @@ package delete_stemcell_test
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -16,6 +15,7 @@ import (
 	slclient "github.com/maximilien/softlayer-go/client"
 	datatypes "github.com/maximilien/softlayer-go/data_types"
 	softlayer "github.com/maximilien/softlayer-go/softlayer"
+	testhelpers "github.com/maximilien/softlayer-go/test_helpers"
 )
 
 const configPath = "test_fixtures/cpi_methods/config.json"
@@ -95,10 +95,11 @@ var _ = Describe("BOSH Director Level Integration for delete_stemcell", func() {
 		})
 
 		It("returns nil when passed valid ID", func() {
-			jsonPayload := fmt.Sprintf(
-				`{"method": "delete_stemcell", "arguments": [%d], "context": {"director_uuid": "%s"}}`,
-				virtual_disk_image_id,
-				"fake-director-uuid")
+			replacementMap = map[string]string{
+				"ID":         strconv.Itoa(virtual_disk_image_id),
+				"Datacenter": testhelpers.GetDatacenter(),
+			}
+			jsonPayload, err := testhelperscpi.GenerateCpiJsonPayload("delete_stemcell", rootTemplatePath, replacementMap)
 			Expect(err).ToNot(HaveOccurred())
 
 			outputBytes, err := testhelperscpi.RunCpi(rootTemplatePath, tmpConfigPath, jsonPayload)
