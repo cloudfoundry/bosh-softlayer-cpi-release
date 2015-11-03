@@ -2,7 +2,6 @@ package vm
 
 import (
 	"bytes"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -180,7 +179,7 @@ func (vm SoftLayerVM) Reboot() error {
 	return nil
 }
 
-func (vm SoftLayerVM) ReloadOS(stemcell bslcstem.Stemcell, timeout time.Duration) error {
+func (vm SoftLayerVM) ReloadOS(stemcell bslcstem.Stemcell) error {
 	reload_OS_Config := sldatatypes.Image_Template_Config{
 		ImageTemplateId: strconv.Itoa(stemcell.ID()),
 	}
@@ -201,7 +200,7 @@ func (vm SoftLayerVM) ReloadOS(stemcell bslcstem.Stemcell, timeout time.Duration
 		return bosherr.WrapError(err, "Failed to reload OS on the specified VirtualGuest from SoftLayer client")
 	}
 
-	time.Sleep(timeout)
+	time.Sleep(1 * time.Minute)
 
 	err = vm.postCheckActiveTransactionsForOSReload(vm.softLayerClient)
 	if err != nil {
@@ -289,14 +288,9 @@ func (vm SoftLayerVM) AttachDisk(disk bslcdisk.Disk) error {
 		return bosherr.WrapError(err, fmt.Sprintf("Failed to attach volume `%d` to virtual guest `%d`", disk.ID(), virtualGuest.Id))
 	}
 
-	metadata, err := bslcommon.GetUserMetadataOnVirtualGuest(vm.softLayerClient, virtualGuest.Id)
+	oldAgentEnv, err := vm.agentEnvService.Fetch()
 	if err != nil {
-		return bosherr.WrapErrorf(err, "Failed to get metadata from virtual guest with id: %d.", virtualGuest.Id)
-	}
-
-	oldAgentEnv, err := NewAgentEnvFromJSON(metadata)
-	if err != nil {
-		return bosherr.WrapErrorf(err, "Failed to unmarshal metadata from virutal guest with id: %d.", virtualGuest.Id)
+		return bosherr.WrapErrorf(err, "Failed to unmarshal userdata from virutal guest with id: %d.", virtualGuest.Id)
 	}
 
 	var newAgentEnv AgentEnv
@@ -306,14 +300,9 @@ func (vm SoftLayerVM) AttachDisk(disk bslcdisk.Disk) error {
 		newAgentEnv = oldAgentEnv.AttachPersistentDisk(strconv.Itoa(disk.ID()), "/dev/"+deviceName)
 	}
 
-	metadata, err = json.Marshal(newAgentEnv)
+	err = vm.agentEnvService.Update(newAgentEnv)
 	if err != nil {
-		return bosherr.WrapError(err, "Marshalling agent environment metadata")
-	}
-
-	err = bslcommon.ConfigureMetadataOnVirtualGuest(vm.softLayerClient, virtualGuest.Id, string(metadata), vm.logger)
-	if err != nil {
-		return bosherr.WrapError(err, fmt.Sprintf("Configuring metadata on VirtualGuest `%d`", virtualGuest.Id))
+		return bosherr.WrapError(err, fmt.Sprintf("Configuring userdata on VirtualGuest with id: `%d`", virtualGuest.Id))
 	}
 
 	return nil
@@ -343,21 +332,15 @@ func (vm SoftLayerVM) DetachDisk(disk bslcdisk.Disk) error {
 		return bosherr.WrapError(err, fmt.Sprintf("Failed to revoke access of disk `%d` from virtual gusest `%d`", disk.ID(), virtualGuest.Id))
 	}
 
-	metadata, err := bslcommon.GetUserMetadataOnVirtualGuest(vm.softLayerClient, virtualGuest.Id)
+	oldAgentEnv, err := vm.agentEnvService.Fetch()
 	if err != nil {
-		return bosherr.WrapErrorf(err, "Failed to get metadata from virtual guest with id: %d.", virtualGuest.Id)
+		return bosherr.WrapErrorf(err, "Failed to unmarshal userdata from virutal guest with id: %d.", virtualGuest.Id)
 	}
-	oldAgentEnv, err := NewAgentEnvFromJSON(metadata)
+
 	newAgentEnv := oldAgentEnv.DetachPersistentDisk(strconv.Itoa(disk.ID()))
-
-	metadata, err = json.Marshal(newAgentEnv)
+	err = vm.agentEnvService.Update(newAgentEnv)
 	if err != nil {
-		return bosherr.WrapError(err, "Marshalling agent environment metadata")
-	}
-
-	err = bslcommon.ConfigureMetadataOnVirtualGuest(vm.softLayerClient, virtualGuest.Id, string(metadata), vm.logger)
-	if err != nil {
-		return bosherr.WrapError(err, fmt.Sprintf("Configuring metadata on VirtualGuest `%d`", virtualGuest.Id))
+		return bosherr.WrapError(err, fmt.Sprintf("Configuring userdata on VirtualGuest with id: `%d`", virtualGuest.Id))
 	}
 
 	return nil

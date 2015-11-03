@@ -2,6 +2,7 @@ package common
 
 import (
 	"encoding/base64"
+	"strings"
 	"time"
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
@@ -11,19 +12,22 @@ import (
 
 	datatypes "github.com/maximilien/softlayer-go/data_types"
 	sl "github.com/maximilien/softlayer-go/softlayer"
-	"strings"
 )
 
 var (
 	TIMEOUT          time.Duration
 	POLLING_INTERVAL time.Duration
-	PAUSE_TIME       time.Duration
 )
 
 func AttachEphemeralDiskToVirtualGuest(softLayerClient sl.Client, virtualGuestId int, diskSize int, logger boshlog.Logger) error {
 	err := WaitForVirtualGuest(softLayerClient, virtualGuestId, "RUNNING")
 	if err != nil {
 		return bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d`", virtualGuestId)
+	}
+
+	err = WaitForVirtualGuestLastCompleteTransaction(softLayerClient, virtualGuestId, "Service Setup")
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` has Service Setup transaction complete", virtualGuestId)
 	}
 
 	err = WaitForVirtualGuestToHaveNoRunningTransactions(softLayerClient, virtualGuestId)
@@ -203,6 +207,30 @@ func WaitForVirtualGuest(softLayerClient sl.Client, virtualGuestId int, targetSt
 	}
 
 	return bosherr.Errorf("Waiting for virtual guest with ID '%d' to have be in state '%s'", virtualGuestId, targetState)
+}
+
+func WaitForVirtualGuestLastCompleteTransaction(softLayerClient sl.Client, virtualGuestId int, targetTransaction string) error {
+	virtualGuestService, err := softLayerClient.GetSoftLayer_Virtual_Guest_Service()
+	if err != nil {
+		return bosherr.WrapError(err, "Creating VirtualGuestService from SoftLayer client")
+	}
+
+	totalTime := time.Duration(0)
+	for totalTime < TIMEOUT {
+		lastTransaction, err := virtualGuestService.GetLastTransaction(virtualGuestId)
+		if err != nil {
+			return bosherr.WrapErrorf(err, "Getting Last Complete Transaction for virtual guest with ID '%d'", virtualGuestId)
+		}
+
+		if strings.Contains(lastTransaction.TransactionGroup.Name, targetTransaction) && strings.Contains(lastTransaction.TransactionStatus.FriendlyName, "Complete") {
+			return nil
+		}
+
+		totalTime += POLLING_INTERVAL
+		time.Sleep(POLLING_INTERVAL)
+	}
+
+	return bosherr.Errorf("Waiting for virtual guest with ID '%d' to have last transaction '%s'", virtualGuestId, targetTransaction)
 }
 
 func WaitForVirtualGuestIsNotPingable(softLayerClient sl.Client, virtualGuestId int, logger boshlog.Logger) error {

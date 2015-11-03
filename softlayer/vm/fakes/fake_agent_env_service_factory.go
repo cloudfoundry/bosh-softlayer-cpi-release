@@ -1,17 +1,20 @@
 package fakes
 
 import (
-	bslcvm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
+	bslvm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
 )
 
 type FakeAgentEnvServiceFactory struct {
 	NewAgentEnvService *FakeAgentEnvService
 }
 
-func (f *FakeAgentEnvServiceFactory) New(vmId int) bslcvm.AgentEnvService {
+func (f *FakeAgentEnvServiceFactory) New(
+	softlayerFileService bslvm.SoftlayerFileService,
+	instanceID string,
+) bslvm.AgentEnvService {
 	if f.NewAgentEnvService == nil {
 		// Always return non-nil service for convenience
-		return &FakeAgentEnvService{vmId: vmId}
+		return &FakeAgentEnvService{}
 	}
 
 	return f.NewAgentEnvService

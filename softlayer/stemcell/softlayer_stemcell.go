@@ -32,8 +32,8 @@ type SoftLayerStemcell struct {
 }
 
 func NewSoftLayerStemcell(id int, uuid string, kind string, softLayerClient sl.Client, logger boshlog.Logger) SoftLayerStemcell {
-	bslcommon.TIMEOUT = 10 * time.Minute
-	bslcommon.POLLING_INTERVAL = 5 * time.Second
+	bslcommon.TIMEOUT = 60 * time.Minute
+	bslcommon.POLLING_INTERVAL = 10 * time.Second
 
 	return SoftLayerStemcell{
 		id:              id,

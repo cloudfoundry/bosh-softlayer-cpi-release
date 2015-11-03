@@ -30,7 +30,6 @@ var _ = Describe("SoftLayerStemcell", func() {
 
 		bslcommon.TIMEOUT = 2 * time.Second
 		bslcommon.POLLING_INTERVAL = 1 * time.Second
-		bslcommon.PAUSE_TIME = 1 * time.Second
 	})
 
 	Describe("#Delete", func() {

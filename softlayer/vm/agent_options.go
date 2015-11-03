@@ -14,6 +14,13 @@ type AgentOptions struct {
 	Blobstore BlobstoreOptions
 }
 
+type RegistryOptions struct {
+	Host     string
+	Port     int
+	Username string
+	Password string
+}
+
 type BlobstoreOptions struct {
 	// e.g. local
 	Type string

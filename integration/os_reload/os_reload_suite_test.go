@@ -9,5 +9,5 @@ import (
 
 func TestCreateVm(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Integration: create_vm Suite")
+	RunSpecs(t, "Integration: os_reload Suite")
 }
