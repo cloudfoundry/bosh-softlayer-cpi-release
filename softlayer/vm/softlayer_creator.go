@@ -67,7 +67,6 @@ func (c SoftLayerCreator) CreateNewVM(agentID string, stemcell bslcstem.Stemcell
 	if err != nil {
 		return SoftLayerVM{}, bosherr.WrapError(err, "Creating VirtualGuest from SoftLayer client")
 	}
-	fmt.Println(virtualGuest)
 
 	if cloudProps.EphemeralDiskSize == 0 {
 		err = bslcommon.WaitForVirtualGuestLastCompleteTransaction(c.softLayerClient, virtualGuest.Id, "Service Setup")

@@ -248,7 +248,6 @@ func (vm SoftLayerVM) ConfigureNetworks(networks Networks) error {
 
 func (vm SoftLayerVM) AttachDisk(disk bslcdisk.Disk) error {
 
-	time.Sleep(2 * time.Minute)
 	virtualGuest, volume, err := vm.fetchVMandIscsiVolume(vm.ID(), disk.ID())
 	if err != nil {
 		return bosherr.WrapError(err, fmt.Sprintf("Failed to fetch disk `%d` and virtual gusest `%d`", disk.ID(), virtualGuest.Id))
