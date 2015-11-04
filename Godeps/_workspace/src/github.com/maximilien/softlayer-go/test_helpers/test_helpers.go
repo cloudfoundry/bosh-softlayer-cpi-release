@@ -29,8 +29,9 @@ var (
 )
 
 const (
-	TEST_NOTES_PREFIX = "TEST:softlayer-go"
-	TEST_LABEL_PREFIX = "TEST:softlayer-go"
+	TEST_NOTES_PREFIX  = "TEST:softlayer-go"
+	TEST_LABEL_PREFIX  = "TEST:softlayer-go"
+    DEFAULT_DATACENTER = "dal09"
 
 	MAX_WAIT_RETRIES = 10
 	WAIT_TIME        = 5
@@ -137,6 +138,14 @@ func GetUsernameAndApiKey() (string, string, error) {
 	}
 
 	return username, apiKey, nil
+}
+
+func GetDatacenter() string {
+    datacenter := os.Getenv("SL_DATACENTER")
+    if datacenter == "" {
+        datacenter = DEFAULT_DATACENTER
+    }
+    return datacenter
 }
 
 func CreateAccountService() (softlayer.SoftLayer_Account_Service, error) {
@@ -355,7 +364,7 @@ func CreateVirtualGuestAndMarkItTest(securitySshKeys []datatypes.SoftLayer_Secur
 		StartCpus: 1,
 		MaxMemory: 1024,
 		Datacenter: datatypes.Datacenter{
-			Name: "ams01",
+			Name: GetDatacenter(),
 		},
 		SshKeys:                      sshKeys,
 		HourlyBillingFlag:            true,

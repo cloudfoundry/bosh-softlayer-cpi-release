@@ -18,7 +18,6 @@ type VMCloudProperties struct {
 	RootDiskSize             int                                  `json:"rootDiskSize,omitempty"`
 	EphemeralDiskSize        int                                  `json:"ephemeralDiskSize,omitempty"`
 
-	VmNamePrefix                   string                                     `json:"vmNamePrefix,omitempty"`
 	HourlyBillingFlag              bool                                       `json:"hourlyBillingFlag,omitempty"`
 	LocalDiskFlag                  bool                                       `json:"localDiskFlag,omitempty"`
 	DedicatedAccountHostOnlyFlag   bool                                       `json:"dedicatedAccountHostOnlyFlag,omitempty"`

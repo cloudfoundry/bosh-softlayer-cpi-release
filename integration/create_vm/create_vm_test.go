@@ -52,6 +52,10 @@ var _ = Describe("BOSH Director Level Integration for create_vm", func() {
 		virtualGuestService, err = testhelpers.CreateVirtualGuestService()
 		Expect(err).ToNot(HaveOccurred())
 
+		replacementMap = map[string]string{
+			"Datacenter": testhelpers.GetDatacenter(),
+		}
+
 		testhelpers.TIMEOUT = 35 * time.Minute
 		testhelpers.POLLING_INTERVAL = 10 * time.Second
 

@@ -1,30 +1,30 @@
 package action
 
 import (
-	bosherr "github.com/cloudfoundry/bosh-utils/errors"
+	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
 	bslcstem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell"
 )
 
+const (
+	deleteStemcellLogTag = "DeleteStemcell"
+)
+
 type DeleteStemcell struct {
 	stemcellFinder bslcstem.Finder
+	logger         boshlog.Logger
 }
 
-func NewDeleteStemcell(stemcellFinder bslcstem.Finder) DeleteStemcell {
-	return DeleteStemcell{stemcellFinder: stemcellFinder}
+func NewDeleteStemcell(stemcellFinder bslcstem.Finder, logger boshlog.Logger) DeleteStemcell {
+	return DeleteStemcell{stemcellFinder: stemcellFinder, logger: logger}
 }
 
 func (a DeleteStemcell) Run(stemcellCID StemcellCID) (interface{}, error) {
-	stemcell, found, err := a.stemcellFinder.FindById(int(stemcellCID))
+	_, found, err := a.stemcellFinder.FindById(int(stemcellCID))
 	if err != nil {
-		return nil, bosherr.WrapErrorf(err, "Finding stemcell '%s'", stemcellCID)
-	}
-
-	if found {
-		err := stemcell.Delete()
-		if err != nil {
-			return nil, bosherr.WrapErrorf(err, "Deleting stemcell '%s'", stemcellCID)
-		}
+		a.logger.Info(deleteStemcellLogTag, "Error trying to find stemcell '%s': %s", stemcellCID, err)
+	} else if !found {
+		a.logger.Info(deleteStemcellLogTag, "Stemcell '%s' not found", stemcellCID)
 	}
 
 	return nil, nil
