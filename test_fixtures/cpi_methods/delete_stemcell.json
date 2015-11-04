@@ -1,1 +1,9 @@
-{delete_stemcell [3ed54f9b-3269-437f-7cfd-d8ae3e136aee]}
+{
+  "method": "delete_stemcell",
+  "arguments": [
+    {{.ID}}
+  ],
+  "context": {
+    "director_uuid": "fake-director-uuid"
+  }
+}
