@@ -30,7 +30,6 @@ type SoftLayerCreator struct {
 	softLayerClient        sl.Client
 	agentEnvServiceFactory AgentEnvServiceFactory
 
-	//OsReloadTimeout time.Duration
 	agentOptions  AgentOptions
 	logger        boshlog.Logger
 	uuidGenerator boshuuid.Generator
