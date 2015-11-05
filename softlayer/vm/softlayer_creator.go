@@ -96,7 +96,7 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 
 	if len(cloudProps.BoshIp) == 0 {
 		// update /etc/hosts file of bosh-init vm
-		c.appenRecordToEtcHosts(fmt.Sprintf("%s  %s", virtualGuest.PrimaryBackendIpAddress, virtualGuest.FullyQualifiedDomainName))
+		c.updateEtcHostsOfBoshInit(fmt.Sprintf("%s  %s", virtualGuest.PrimaryBackendIpAddress, virtualGuest.FullyQualifiedDomainName))
 		// Update mbus url setting for bosh director: construct mbus url with new director ip
 		mbus, err := c.parseMbusURL(c.agentOptions.Mbus, virtualGuest.PrimaryBackendIpAddress)
 		if err != nil {
