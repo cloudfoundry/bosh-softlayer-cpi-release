@@ -15,7 +15,7 @@ import (
 type CreateVM struct {
 	stemcellFinder    bslcstem.Finder
 	vmCreator         bslcvm.Creator
-	vmCloudProperties bslcvm.VMCloudProperties
+	vmCloudProperties *bslcvm.VMCloudProperties
 }
 
 type Environment map[string]interface{}
@@ -24,12 +24,12 @@ func NewCreateVM(stemcellFinder bslcstem.Finder, vmCreator bslcvm.Creator) Creat
 	return CreateVM{
 		stemcellFinder:    stemcellFinder,
 		vmCreator:         vmCreator,
-		vmCloudProperties: bslcvm.VMCloudProperties{},
+		vmCloudProperties: &bslcvm.VMCloudProperties{},
 	}
 }
 
 func (a CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps bslcvm.VMCloudProperties, networks Networks, diskIDs []DiskCID, env Environment) (string, error) {
-	a.UpdateCloudProperties(cloudProps)
+	a.UpdateCloudProperties(&cloudProps)
 
 	stemcell, found, err := a.stemcellFinder.FindById(int(stemcellCID))
 	if err != nil {
@@ -44,7 +44,7 @@ func (a CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps bslcvm
 
 	vmEnv := bslcvm.Environment(env)
 
-	vm, err := a.vmCreator.Create(agentID, stemcell, a.vmCloudProperties, vmNetworks, vmEnv)
+	vm, err := a.vmCreator.Create(agentID, stemcell, cloudProps, vmNetworks, vmEnv)
 	if err != nil {
 		return "0", bosherr.WrapErrorf(err, "Creating VM with agent ID '%s'", agentID)
 	}
@@ -52,7 +52,7 @@ func (a CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps bslcvm
 	return VMCID(vm.ID()).String(), nil
 }
 
-func (a CreateVM) UpdateCloudProperties(cloudProps bslcvm.VMCloudProperties) {
+func (a CreateVM) UpdateCloudProperties(cloudProps *bslcvm.VMCloudProperties) {
 
 	a.vmCloudProperties = cloudProps
 
@@ -75,14 +75,6 @@ func (a CreateVM) UpdateCloudProperties(cloudProps bslcvm.VMCloudProperties) {
 	}
 	if len(cloudProps.NetworkComponents) == 0 {
 		a.vmCloudProperties.NetworkComponents = []sldatatypes.NetworkComponents{{MaxSpeed: 1000}}
-	}
-
-	if cloudProps.Datacenter.Name != a.vmCloudProperties.Datacenter.Name {
-		a.vmCloudProperties.Datacenter.Name = cloudProps.Datacenter.Name
-	}
-
-	if len(cloudProps.SshKeys) > 0 {
-		a.vmCloudProperties.SshKeys = cloudProps.SshKeys
 	}
 }
 
