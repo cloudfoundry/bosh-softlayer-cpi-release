@@ -111,7 +111,7 @@ func (c SoftLayerCreator) CreateNewVM(agentID string, stemcell bslcstem.Stemcell
 
 	vm := NewSoftLayerVM(virtualGuest.Id, c.softLayerClient, util.GetSshClient(), agentEnvService, c.logger)
 
-	if strings.ToUpper(common.GetOSEnvVariable("OS_RELOAD_ENABLED", "TRUE")) == "TRUE" {
+	if strings.ToUpper(common.GetOSEnvVariable("OS_RELOAD_ENABLED", "TRUE")) == "TRUE" && !strings.Contains(cloudProps.VmNamePrefix, "-worker") {
 		db, err := bslcvmpool.OpenDB(bslcvmpool.SQLITE_DB_FILE_PATH)
 		if err != nil {
 			return SoftLayerVM{}, bosherr.WrapError(err, "Opening DB")
@@ -132,14 +132,14 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 		return c.CreateNewVM(agentID, stemcell, cloudProps, networks, env)
 	}
 
-	if strings.Contains(cloudProps.VmNamePrefix, "-worker") {
-		vm, err := c.CreateNewVM(agentID, stemcell, cloudProps, networks, env)
-		return vm, err
-	}
-
 	err := bslcvmpool.InitVMPoolDB(bslcvmpool.DB_RETRY_TIMEOUT, bslcvmpool.DB_RETRY_INTERVAL, c.logger)
 	if err != nil {
 		return SoftLayerVM{}, bosherr.WrapError(err, "Failed to initialize VM pool DB")
+	}
+
+	if strings.Contains(cloudProps.VmNamePrefix, "-worker") {
+		vm, err := c.CreateNewVM(agentID, stemcell, cloudProps, networks, env)
+		return vm, err
 	}
 
 	db, err := bslcvmpool.OpenDB(bslcvmpool.SQLITE_DB_FILE_PATH)

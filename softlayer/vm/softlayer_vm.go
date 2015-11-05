@@ -154,7 +154,8 @@ func (vm SoftLayerVM) DeleteVM() error {
 		vmInfoDB := bslcvmpool.NewVMInfoDB(vm.ID(), "", "", "", "", vm.logger, db)
 		err = vmInfoDB.DeleteVMFromVMDB(bslcvmpool.DB_RETRY_TIMEOUT, bslcvmpool.DB_RETRY_INTERVAL)
 		if err != nil {
-			return bosherr.WrapError(err, "Failed to delete the record from VM pool DB")
+			//return bosherr.WrapError(err, "Failed to delete the record from VM pool DB")
+			return nil
 		}
 	}
 
