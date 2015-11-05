@@ -82,7 +82,7 @@ var _ = Describe("concreteFactory", func() {
 		It("delete_stemcell", func() {
 			action, err := factory.Create("delete_stemcell")
 			Expect(err).ToNot(HaveOccurred())
-			Expect(action).To(Equal(NewDeleteStemcell(stemcellFinder)))
+			Expect(action).To(Equal(NewDeleteStemcell(stemcellFinder, logger)))
 		})
 	})
 
