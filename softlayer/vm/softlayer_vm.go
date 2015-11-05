@@ -190,27 +190,6 @@ func (vm SoftLayerVM) AttachDisk(disk bslcdisk.Disk) error {
 		}
 	}
 
-	//	allowed, err := networkStorageService.HasAllowedVirtualGuest(disk.ID(), vm.ID())
-	//	totalTime := time.Duration(0)
-	//	if err == nil && allowed == false {
-	//		for totalTime < bslcommon.TIMEOUT {
-	//			allowable, err := networkStorageService.AttachIscsiVolume(virtualGuest, disk.ID())
-	//			if err != nil {
-	//				return bosherr.WrapError(err, fmt.Sprintf("Granting volume access to vitrual guest %d", virtualGuest.Id))
-	//			} else {
-	//				if allowable {
-	//					break
-	//				}
-	//			}
-	//
-	//			totalTime += bslcommon.POLLING_INTERVAL
-	//			time.Sleep(bslcommon.POLLING_INTERVAL)
-	//		}
-	//	}
-	//	if totalTime >= bslcommon.TIMEOUT {
-	//		return bosherr.Error("Waiting for grantting access to virutal guest TIME OUT!")
-	//	}
-
 	hasMultiPath, err := vm.hasMulitPathToolBasedOnShellScript(virtualGuest)
 	if err != nil {
 		return bosherr.WrapError(err, fmt.Sprintf("Failed to get multipath information from virtual guest `%d`", virtualGuest.Id))
