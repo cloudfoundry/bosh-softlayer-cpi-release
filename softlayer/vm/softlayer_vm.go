@@ -141,7 +141,23 @@ func (vm SoftLayerVM) SetMetadata(vmMetadata VMMetadata) error {
 }
 
 func (vm SoftLayerVM) ConfigureNetworks(networks Networks) error {
-	return NotSupportedError{}
+	virtualGuest, err := bslcommon.GetObjectDetailsOnVirtualGuest(vm.softLayerClient, vm.ID())
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Cannot get details from virtual guest with id: %d.", virtualGuest.Id)
+	}
+
+	oldAgentEnv, err := vm.agentEnvService.Fetch()
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Failed to unmarshal userdata from virutal guest with id: %d.", virtualGuest.Id)
+	}
+
+	oldAgentEnv.Networks = networks
+	err = vm.agentEnvService.Update(oldAgentEnv)
+	if err != nil {
+		return bosherr.WrapError(err, fmt.Sprintf("Configuring network setting on VirtualGuest with id: `%d`", virtualGuest.Id))
+	}
+
+	return nil
 }
 
 func (vm SoftLayerVM) AttachDisk(disk bslcdisk.Disk) error {
@@ -154,18 +170,16 @@ func (vm SoftLayerVM) AttachDisk(disk bslcdisk.Disk) error {
 	if err != nil {
 		return bosherr.WrapError(err, "Cannot get network storage service.")
 	}
+
 	allowed, err := networkStorageService.HasAllowedVirtualGuest(disk.ID(), vm.ID())
 	if err == nil && allowed == false {
 		attachIscsiVolumeRetryable := boshretry.NewRetryable(
 			func() (bool, error) {
-				resp, err := networkStorageService.AttachIscsiVolume(virtualGuest, disk.ID())
+				allowed, err := networkStorageService.AttachIscsiVolume(virtualGuest, disk.ID())
 				if err != nil {
 					return false, bosherr.WrapError(err, fmt.Sprintf("Granting volume access to vitrual guest %d", virtualGuest.Id))
 				} else {
-					if strings.Contains(resp, "A Volume Provisioning is currently in progress") {
-						return true, nil
-					}
-					return false, nil
+					return !allowed, nil
 				}
 			})
 		timeService := clock.NewClock()
@@ -175,6 +189,27 @@ func (vm SoftLayerVM) AttachDisk(disk bslcdisk.Disk) error {
 			return bosherr.WrapError(err, fmt.Sprintf("Failed to grant access of disk `%d` from virtual guest `%d`", disk.ID(), virtualGuest.Id))
 		}
 	}
+
+	//	allowed, err := networkStorageService.HasAllowedVirtualGuest(disk.ID(), vm.ID())
+	//	totalTime := time.Duration(0)
+	//	if err == nil && allowed == false {
+	//		for totalTime < bslcommon.TIMEOUT {
+	//			allowable, err := networkStorageService.AttachIscsiVolume(virtualGuest, disk.ID())
+	//			if err != nil {
+	//				return bosherr.WrapError(err, fmt.Sprintf("Granting volume access to vitrual guest %d", virtualGuest.Id))
+	//			} else {
+	//				if allowable {
+	//					break
+	//				}
+	//			}
+	//
+	//			totalTime += bslcommon.POLLING_INTERVAL
+	//			time.Sleep(bslcommon.POLLING_INTERVAL)
+	//		}
+	//	}
+	//	if totalTime >= bslcommon.TIMEOUT {
+	//		return bosherr.Error("Waiting for grantting access to virutal guest TIME OUT!")
+	//	}
 
 	hasMultiPath, err := vm.hasMulitPathToolBasedOnShellScript(virtualGuest)
 	if err != nil {

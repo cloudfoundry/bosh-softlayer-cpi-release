@@ -16,7 +16,7 @@ type AgentEnv struct {
 
 	Blobstore BlobstoreSpec `json:"blobstore"`
 
-	Networks NetworksSpec `json:"networks"`
+	Networks Networks `json:"networks"`
 
 	Disks DisksSpec `json:"disks"`
 
@@ -26,25 +26,6 @@ type AgentEnv struct {
 type VMSpec struct {
 	Name string `json:"name"`
 	ID   string `json:"id"`
-}
-
-type NetworksSpec map[string]NetworkSpec
-
-type NetworkSpec struct {
-	Type string `json:"type"`
-
-	IP      string `json:"ip"`
-	Netmask string `json:"netmask"`
-	Gateway string `json:"gateway"`
-
-	DNS     []string `json:"dns"`
-	Default []string `json:"default"`
-
-	Preconfigured bool `json:"preconfigured"`
-
-	MAC string `json:"mac"`
-
-	CloudProperties map[string]interface{} `json:"cloud_properties"`
 }
 
 type DisksSpec struct {
@@ -73,10 +54,10 @@ func NewAgentEnvFromJSON(bytes []byte) (AgentEnv, error) {
 }
 
 func NewAgentEnvForVM(agentID, vmCID string, networks Networks, disksSpec DisksSpec, env Environment, agentOptions AgentOptions) AgentEnv {
-	networksSpec := NetworksSpec{}
+	networksSpec := Networks{}
 
 	for netName, network := range networks {
-		networksSpec[netName] = NetworkSpec{
+		networksSpec[netName] = Network{
 			Type: network.Type,
 
 			IP:      network.IP,

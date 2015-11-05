@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 	"net/url"
+	"os"
 	"strconv"
 	"text/template"
 	"time"
@@ -95,7 +96,7 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 
 	if len(cloudProps.BoshIp) == 0 {
 		// update /etc/hosts file of bosh-init vm
-		c.updateEtcHostsOfBoshInit(fmt.Sprintf("%s  %s", virtualGuest.PrimaryBackendIpAddress, virtualGuest.FullyQualifiedDomainName))
+		c.appenRecordToEtcHosts(fmt.Sprintf("%s  %s", virtualGuest.PrimaryBackendIpAddress, virtualGuest.FullyQualifiedDomainName))
 		// Update mbus url setting for bosh director: construct mbus url with new director ip
 		mbus, err := c.parseMbusURL(c.agentOptions.Mbus, virtualGuest.PrimaryBackendIpAddress)
 		if err != nil {
@@ -152,3 +153,19 @@ func (c SoftLayerCreator) updateEtcHostsOfBoshInit(record string) (err error) {
 const ETC_HOSTS_TEMPLATE = `127.0.0.1 localhost
 {{.}}
 `
+
+func (c SoftLayerCreator) appenRecordToEtcHosts(record string) (err error) {
+	file, err := os.OpenFile("/etc/hosts", os.O_RDWR|os.O_APPEND, 0666)
+	if err != nil {
+		return bosherr.WrapError(err, "Failed to open file /etc/hosts")
+	}
+
+	defer file.Close()
+
+	_, err = fmt.Fprintf(file, "\n %s", record)
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Failed to append new record to /etc/hosts")
+	}
+
+	return nil
+}

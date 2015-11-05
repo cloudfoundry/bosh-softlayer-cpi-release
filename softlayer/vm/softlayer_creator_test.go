@@ -75,7 +75,7 @@ var _ = Describe("SoftLayerCreator", func() {
 
 			})
 
-			It("returns a new SoftLayerVM with ephemeral size ", func() {
+			It("returns a new SoftLayerVM with ephemeral size", func() {
 				cloudProps = VMCloudProperties{
 					StartCpus: 4,
 					MaxMemory: 2048,
@@ -89,7 +89,7 @@ var _ = Describe("SoftLayerCreator", func() {
 					Datacenter:                   sldatatypes.Datacenter{Name: "fake-datacenter"},
 					HourlyBillingFlag:            true,
 					LocalDiskFlag:                true,
-					Hostname:                     "bosh-",
+					Hostname:                     "bosh-test",
 					PostInstallScriptUri:         "",
 					DedicatedAccountHostOnlyFlag: true,
 					PrivateNetworkOnlyFlag:       false,
@@ -112,7 +112,7 @@ var _ = Describe("SoftLayerCreator", func() {
 				Expect(err).ToNot(HaveOccurred())
 				Expect(vm.ID()).To(Equal(1234567))
 			})
-			It("returns a new SoftLayerVM without", func() {
+			It("returns a new SoftLayerVM without ephemeral size", func() {
 				cloudProps = VMCloudProperties{
 					StartCpus: 4,
 					MaxMemory: 2048,
@@ -125,7 +125,7 @@ var _ = Describe("SoftLayerCreator", func() {
 					Datacenter:                   sldatatypes.Datacenter{Name: "fake-datacenter"},
 					HourlyBillingFlag:            true,
 					LocalDiskFlag:                true,
-					VmNamePrefix:                 "bosh-",
+					Hostname:                     "bosh-test",
 					PostInstallScriptUri:         "",
 					DedicatedAccountHostOnlyFlag: true,
 					PrivateNetworkOnlyFlag:       false,
@@ -161,7 +161,7 @@ var _ = Describe("SoftLayerCreator", func() {
 					Datacenter:                   sldatatypes.Datacenter{Name: "fake-datacenter"},
 					HourlyBillingFlag:            true,
 					LocalDiskFlag:                true,
-					VmNamePrefix:                 "bosh-",
+					Hostname:                     "bosh-",
 					PostInstallScriptUri:         "",
 					DedicatedAccountHostOnlyFlag: true,
 					PrivateNetworkOnlyFlag:       false,

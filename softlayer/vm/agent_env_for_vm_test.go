@@ -71,8 +71,8 @@ var _ = Describe("NewAgentEnvForVM", func() {
 				},
 			},
 
-			Networks: NetworksSpec{
-				"fake-net-name": NetworkSpec{
+			Networks: Networks{
+				"fake-net-name": Network{
 					Type: "fake-type",
 
 					IP:      "fake-ip",
