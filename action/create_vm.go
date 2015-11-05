@@ -29,7 +29,6 @@ func NewCreateVM(stemcellFinder bslcstem.Finder, vmCreator bslcvm.Creator) Creat
 }
 
 func (a CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps bslcvm.VMCloudProperties, networks Networks, diskIDs []DiskCID, env Environment) (string, error) {
-	a.vmCloudProperties = cloudProps
 	a.UpdateCloudProperties(cloudProps)
 
 	stemcell, found, err := a.stemcellFinder.FindById(int(stemcellCID))
@@ -54,6 +53,9 @@ func (a CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps bslcvm
 }
 
 func (a CreateVM) UpdateCloudProperties(cloudProps bslcvm.VMCloudProperties) {
+
+	a.vmCloudProperties = cloudProps
+
 	if len(cloudProps.BoshIp) == 0 {
 		a.vmCloudProperties.Hostname = cloudProps.VmNamePrefix
 	} else {

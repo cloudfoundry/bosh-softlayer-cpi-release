@@ -29,10 +29,9 @@ var (
 )
 
 const (
-
 	TEST_NOTES_PREFIX  = "TEST:softlayer-go"
 	TEST_LABEL_PREFIX  = "TEST:softlayer-go"
-    DEFAULT_DATACENTER = "dal09"
+	DEFAULT_DATACENTER = "dal09"
 
 	MAX_WAIT_RETRIES = 10
 	WAIT_TIME        = 5
@@ -142,11 +141,11 @@ func GetUsernameAndApiKey() (string, string, error) {
 }
 
 func GetDatacenter() string {
-    datacenter := os.Getenv("SL_DATACENTER")
-    if datacenter == "" {
-        datacenter = DEFAULT_DATACENTER
-    }
-    return datacenter
+	datacenter := os.Getenv("SL_DATACENTER")
+	if datacenter == "" {
+		datacenter = DEFAULT_DATACENTER
+	}
+	return datacenter
 }
 
 func CreateAccountService() (softlayer.SoftLayer_Account_Service, error) {
