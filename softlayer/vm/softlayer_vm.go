@@ -14,8 +14,7 @@ import (
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
-	boshretry "github.com/cloudfoundry/bosh-utils/retrystrategy"
-	"github.com/pivotal-golang/clock"
+
 
 	sl "github.com/maximilien/softlayer-go/softlayer"
 
@@ -172,23 +171,28 @@ func (vm SoftLayerVM) AttachDisk(disk bslcdisk.Disk) error {
 	}
 
 	allowed, err := networkStorageService.HasAllowedVirtualGuest(disk.ID(), vm.ID())
+
+	totalTime := time.Duration(0)
 	if err == nil && allowed == false {
-		attachIscsiVolumeRetryable := boshretry.NewRetryable(
-			func() (bool, error) {
-				allowed, err := networkStorageService.AttachIscsiVolume(virtualGuest, disk.ID())
-				if err != nil {
-					return false, bosherr.WrapError(err, fmt.Sprintf("Granting volume access to vitrual guest %d", virtualGuest.Id))
-				} else {
-					return !allowed, nil
+		for totalTime < bslcommon.TIMEOUT {
+			allowable, err := networkStorageService.AttachIscsiVolume(virtualGuest, disk.ID())
+			if err != nil {
+				return bosherr.WrapError(err, fmt.Sprintf("Granting volume access to vitrual guest %d", virtualGuest.Id))
+			} else {
+
+				if allowable {
+					break
 				}
-			})
-		timeService := clock.NewClock()
-		timeoutRetryStrategy := boshretry.NewTimeoutRetryStrategy(bslcommon.TIMEOUT, bslcommon.POLLING_INTERVAL, attachIscsiVolumeRetryable, timeService, vm.logger)
-		err := timeoutRetryStrategy.Try()
-		if err != nil {
-			return bosherr.WrapError(err, fmt.Sprintf("Failed to grant access of disk `%d` from virtual guest `%d`", disk.ID(), virtualGuest.Id))
+			}
+
+			totalTime += bslcommon.POLLING_INTERVAL
+			time.Sleep(bslcommon.POLLING_INTERVAL)
 		}
 	}
+	if totalTime >= bslcommon.TIMEOUT {
+		return bosherr.Error("Waiting for grantting access to virutal guest TIME OUT!")
+	}
+
 
 	hasMultiPath, err := vm.hasMulitPathToolBasedOnShellScript(virtualGuest)
 	if err != nil {
