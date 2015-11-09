@@ -70,7 +70,7 @@ func NewSoftLayerVM(id int, softLayerClient sl.Client, sshClient util.SshClient,
 
 func (vm SoftLayerVM) ID() int { return vm.id }
 
-func (vm SoftLayerVM) Delete() error {
+func (vm SoftLayerVM) Delete(agentID string) error {
 	if strings.ToUpper(common.GetOSEnvVariable("OS_RELOAD_ENABLED", "TRUE")) == "FALSE" {
 		return vm.DeleteVM()
 	}
@@ -95,27 +95,33 @@ func (vm SoftLayerVM) Delete() error {
 	vm.logger.Info(softLayerCreatorLogTag, fmt.Sprintf("vmInfoDB.vmProperties.id is %d", vmInfoDB.VmProperties.Id))
 
 	if vmInfoDB.VmProperties.Id != 0 {
-		vm.logger.Info(softLayerCreatorLogTag, fmt.Sprintf("Release the VM with id %d back to the VM pool", vmInfoDB.VmProperties.Id))
-		vmInfoDB.VmProperties.InUse = "f"
-		err = vmInfoDB.UpdateVMInfoByID(bslcvmpool.DB_RETRY_TIMEOUT, bslcvmpool.DB_RETRY_INTERVAL)
-		if err != nil {
-			return bosherr.WrapError(err, fmt.Sprintf("Failed to query VM info by given ID %d", vm.id))
+		if agentID != "" {
+			vm.logger.Info(softLayerCreatorLogTag, fmt.Sprintf("Release the VM with id %d back to the VM pool", vmInfoDB.VmProperties.Id))
+			vmInfoDB.VmProperties.InUse = "f"
+			err = vmInfoDB.UpdateVMInfoByID(bslcvmpool.DB_RETRY_TIMEOUT, bslcvmpool.DB_RETRY_INTERVAL)
+			if err != nil {
+				return bosherr.WrapError(err, fmt.Sprintf("Failed to query VM info by given ID %d", vm.id))
+			} else {
+				return nil
+			}
 		} else {
-			return nil
+			return vm.DeleteVM()
 		}
 	}
 
-	vmInfoDB.VmProperties.InUse = ""
-	err = vmInfoDB.QueryVMInfobyID(bslcvmpool.DB_RETRY_TIMEOUT, bslcvmpool.DB_RETRY_INTERVAL)
-	if err != nil {
-		return bosherr.WrapError(err, fmt.Sprintf("Failed to query VM info by given ID %d", vm.id))
-	}
+	return nil
+	/*
+		vmInfoDB.VmProperties.InUse = ""
+		err = vmInfoDB.QueryVMInfobyID(bslcvmpool.DB_RETRY_TIMEOUT, bslcvmpool.DB_RETRY_INTERVAL)
+		if err != nil {
+			return bosherr.WrapError(err, fmt.Sprintf("Failed to query VM info by given ID %d", vm.id))
+		}
 
-	if vmInfoDB.VmProperties.Id != 0 {
-		return bosherr.WrapError(err, fmt.Sprintf("Wrong in_use status in VM with ID %d, Do not delete this VM", vm.id))
-	} else {
-		return vm.DeleteVM()
-	}
+		if vmInfoDB.VmProperties.Id != 0 {
+			return bosherr.WrapError(err, fmt.Sprintf("Wrong in_use status in VM with ID %d, Do not delete this VM", vm.id))
+		} else {
+			return vm.DeleteVM()
+		}*/
 
 }
 
@@ -244,7 +250,8 @@ func (vm SoftLayerVM) SetMetadata(vmMetadata VMMetadata) error {
 }
 
 func (vm SoftLayerVM) ConfigureNetworks(networks Networks) error {
-	return NotSupportedError{}
+	//return NotSupportedError{}
+	return nil
 }
 
 func (vm SoftLayerVM) AttachDisk(disk bslcdisk.Disk) error {

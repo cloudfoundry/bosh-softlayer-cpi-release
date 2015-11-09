@@ -65,7 +65,7 @@ var _ = Describe("SoftLayerVM", func() {
 				bslcommon.POLLING_INTERVAL = 1 * time.Second
 
 				common.SetOSEnvVariable("OS_RELOAD_ENABLED", "FALSE")
-				err := vm.Delete()
+				err := vm.Delete("fake-agentID")
 				Expect(err).ToNot(HaveOccurred())
 			})
 
@@ -74,7 +74,7 @@ var _ = Describe("SoftLayerVM", func() {
 				bslcommon.TIMEOUT = 1 * time.Second
 				bslcommon.POLLING_INTERVAL = 1 * time.Second
 
-				err := vm.Delete()
+				err := vm.Delete("fake-agentID")
 				Expect(err).To(HaveOccurred())
 			})
 		})
@@ -231,9 +231,9 @@ var _ = Describe("SoftLayerVM", func() {
 
 		It("returns NotSupportedError", func() {
 			err := vm.ConfigureNetworks(networks)
-			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(Equal("Not supported"))
-			Expect(err.(NotSupportedError).Type()).To(Equal("Bosh::Clouds::NotSupported"))
+			Expect(err).ToNot(HaveOccurred())
+			//Expect(err.Error()).To(Equal("Not supported"))
+			//Expect(err.(NotSupportedError).Type()).To(Equal("Bosh::Clouds::NotSupported"))
 		})
 	})
 
