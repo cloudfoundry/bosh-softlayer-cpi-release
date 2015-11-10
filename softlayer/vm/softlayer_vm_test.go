@@ -200,15 +200,28 @@ var _ = Describe("SoftLayerVM", func() {
 		)
 
 		BeforeEach(func() {
-			networks = Networks{}
+			networks = map[string]Network{
+				"fake-network0": Network{
+					Type:    "fake-type",
+					IP:      "fake-IP",
+					Netmask: "fake-Netmask",
+					Gateway: "fake-Gateway",
+					DNS: []string{
+						"fake-dns0",
+						"fake-dns1",
+					},
+					Default:         []string{},
+					CloudProperties: map[string]interface{}{},
+				},
+			}
+
 			vm = NewSoftLayerVM(1234567, softLayerClient, sshClient, agentEnvService, logger)
+			testhelpers.SetTestFixtureForFakeSoftLayerClient(softLayerClient, "SoftLayer_Virtual_Guest_Service_getObject.json")
 		})
 
-		It("returns NotSupportedError", func() {
+		It("returns the expected network", func() {
 			err := vm.ConfigureNetworks(networks)
-			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(Equal("Not supported"))
-			Expect(err.(NotSupportedError).Type()).To(Equal("Bosh::Clouds::NotSupported"))
+			Expect(err).ToNot(HaveOccurred())
 		})
 	})
 

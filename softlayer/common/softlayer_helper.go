@@ -20,12 +20,7 @@ var (
 )
 
 func AttachEphemeralDiskToVirtualGuest(softLayerClient sl.Client, virtualGuestId int, diskSize int, logger boshlog.Logger) error {
-	err := WaitForVirtualGuest(softLayerClient, virtualGuestId, "RUNNING")
-	if err != nil {
-		return bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d`", virtualGuestId)
-	}
-
-	err = WaitForVirtualGuestLastCompleteTransaction(softLayerClient, virtualGuestId, "Service Setup")
+	err := WaitForVirtualGuestLastCompleteTransaction(softLayerClient, virtualGuestId, "Service Setup")
 	if err != nil {
 		return bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` has Service Setup transaction complete", virtualGuestId)
 	}
@@ -50,9 +45,9 @@ func AttachEphemeralDiskToVirtualGuest(softLayerClient sl.Client, virtualGuestId
 		return bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` to launch transaction", virtualGuestId)
 	}
 
-	err = WaitForVirtualGuest(softLayerClient, virtualGuestId, "RUNNING")
+	err = WaitForVirtualGuestLastCompleteTransaction(softLayerClient, virtualGuestId, "Cloud Instance Upgrade")
 	if err != nil {
-		return bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d`", virtualGuestId)
+		return bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` has Cloud Instance Upgrade transaction complete", virtualGuestId)
 	}
 
 	return nil
@@ -127,7 +122,6 @@ func WaitForVirtualGuestToHaveNoRunningTransactions(softLayerClient sl.Client, v
 }
 
 func WaitForVirtualGuestToHaveRunningTransaction(softLayerClient sl.Client, virtualGuestId int, logger boshlog.Logger) error {
-
 	virtualGuestService, err := softLayerClient.GetSoftLayer_Virtual_Guest_Service()
 	if err != nil {
 		return bosherr.WrapError(err, "Creating VirtualGuestService from SoftLayer client")
@@ -255,6 +249,7 @@ func WaitForVirtualGuestIsNotPingable(softLayerClient sl.Client, virtualGuestId 
 	if err != nil {
 		return bosherr.Errorf("Waiting for virtual guest with ID '%d' is not pingable", virtualGuestId)
 	}
+
 	return nil
 }
 
@@ -390,5 +385,6 @@ func GetObjectDetailsOnStorage(softLayerClient sl.Client, volumeId int) (datatyp
 	if err != nil {
 		return datatypes.SoftLayer_Network_Storage{}, bosherr.WrapErrorf(err, "Cannot get iSCSI volume with id: %d", volumeId)
 	}
+
 	return volume, nil
 }

@@ -88,7 +88,6 @@ var _ = Describe("CreateVM", func() {
 
 				Expect(vmCreator.CreateAgentID).To(Equal("fake-agent-id"))
 				Expect(vmCreator.CreateStemcell).To(Equal(stemcell))
-				Expect(vmCreator.CreateVMCloudProperties).To(Equal(vmCloudProp))
 				Expect(vmCreator.CreateNetworks).To(Equal(networks.AsVMNetworks()))
 				Expect(vmCreator.CreateEnvironment).To(Equal(
 					bslcvm.Environment{"fake-env-key": "fake-env-value"},

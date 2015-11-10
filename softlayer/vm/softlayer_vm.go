@@ -14,8 +14,6 @@ import (
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
-	boshretry "github.com/cloudfoundry/bosh-utils/retrystrategy"
-	"github.com/pivotal-golang/clock"
 
 	sl "github.com/maximilien/softlayer-go/softlayer"
 
@@ -141,7 +139,23 @@ func (vm SoftLayerVM) SetMetadata(vmMetadata VMMetadata) error {
 }
 
 func (vm SoftLayerVM) ConfigureNetworks(networks Networks) error {
-	return NotSupportedError{}
+	virtualGuest, err := bslcommon.GetObjectDetailsOnVirtualGuest(vm.softLayerClient, vm.ID())
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Cannot get details from virtual guest with id: %d.", virtualGuest.Id)
+	}
+
+	oldAgentEnv, err := vm.agentEnvService.Fetch()
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Failed to unmarshal userdata from virutal guest with id: %d.", virtualGuest.Id)
+	}
+
+	oldAgentEnv.Networks = networks
+	err = vm.agentEnvService.Update(oldAgentEnv)
+	if err != nil {
+		return bosherr.WrapError(err, fmt.Sprintf("Configuring network setting on VirtualGuest with id: `%d`", virtualGuest.Id))
+	}
+
+	return nil
 }
 
 func (vm SoftLayerVM) AttachDisk(disk bslcdisk.Disk) error {
@@ -154,26 +168,28 @@ func (vm SoftLayerVM) AttachDisk(disk bslcdisk.Disk) error {
 	if err != nil {
 		return bosherr.WrapError(err, "Cannot get network storage service.")
 	}
+
 	allowed, err := networkStorageService.HasAllowedVirtualGuest(disk.ID(), vm.ID())
+
+	totalTime := time.Duration(0)
 	if err == nil && allowed == false {
-		attachIscsiVolumeRetryable := boshretry.NewRetryable(
-			func() (bool, error) {
-				resp, err := networkStorageService.AttachIscsiVolume(virtualGuest, disk.ID())
-				if err != nil {
-					return false, bosherr.WrapError(err, fmt.Sprintf("Granting volume access to vitrual guest %d", virtualGuest.Id))
-				} else {
-					if strings.Contains(resp, "A Volume Provisioning is currently in progress") {
-						return true, nil
-					}
-					return false, nil
+		for totalTime < bslcommon.TIMEOUT {
+			allowable, err := networkStorageService.AttachIscsiVolume(virtualGuest, disk.ID())
+			if err != nil {
+				return bosherr.WrapError(err, fmt.Sprintf("Granting volume access to vitrual guest %d", virtualGuest.Id))
+			} else {
+
+				if allowable {
+					break
 				}
-			})
-		timeService := clock.NewClock()
-		timeoutRetryStrategy := boshretry.NewTimeoutRetryStrategy(bslcommon.TIMEOUT, bslcommon.POLLING_INTERVAL, attachIscsiVolumeRetryable, timeService, vm.logger)
-		err := timeoutRetryStrategy.Try()
-		if err != nil {
-			return bosherr.WrapError(err, fmt.Sprintf("Failed to grant access of disk `%d` from virtual guest `%d`", disk.ID(), virtualGuest.Id))
+			}
+
+			totalTime += bslcommon.POLLING_INTERVAL
+			time.Sleep(bslcommon.POLLING_INTERVAL)
 		}
+	}
+	if totalTime >= bslcommon.TIMEOUT {
+		return bosherr.Error("Waiting for grantting access to virutal guest TIME OUT!")
 	}
 
 	hasMultiPath, err := vm.hasMulitPathToolBasedOnShellScript(virtualGuest)
@@ -245,7 +261,6 @@ func (vm SoftLayerVM) DetachDisk(disk bslcdisk.Disk) error {
 }
 
 // Private methods
-
 func (vm SoftLayerVM) extractTagsFromVMMetadata(vmMetadata VMMetadata) ([]string, error) {
 	tags := []string{}
 	for key, value := range vmMetadata {

@@ -22,7 +22,7 @@ type RegistryOptions struct {
 }
 
 type BlobstoreOptions struct {
-	// e.g. local
+	// e.g. local, dav
 	Type string
 
 	Options map[string]interface{}
