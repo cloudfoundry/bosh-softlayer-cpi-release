@@ -102,6 +102,7 @@ var _ = Describe("BOSH Director Level Integration for create_disk", func() {
 			Expect(err).ToNot(HaveOccurred())
 
 			outputBytes, err := testhelperscpi.RunCpi(rootTemplatePath, tmpConfigPath, jsonPayload)
+			log.Println("outputBytes=" + string(outputBytes))
 			Expect(err).ToNot(HaveOccurred())
 			err = json.Unmarshal(outputBytes, &resultOutput)
 			Expect(err).ToNot(HaveOccurred())
@@ -139,6 +140,7 @@ var _ = Describe("BOSH Director Level Integration for create_disk", func() {
 			Expect(err).ToNot(HaveOccurred())
 
 			outputBytes, err := testhelperscpi.RunCpi(rootTemplatePath, tmpConfigPath, jsonPayload)
+			log.Println("outputBytes=" + string(outputBytes))
 			Expect(err).ToNot(HaveOccurred())
 			err = json.Unmarshal(outputBytes, &resultOutput)
 			Expect(err).ToNot(HaveOccurred())
