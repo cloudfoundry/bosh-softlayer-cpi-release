@@ -37,6 +37,11 @@ type PersistentSpec map[string]string
 
 type EnvSpec map[string]interface{}
 
+const (
+	BlobstoreTypeDav = "dav"
+	BlobstoreTypeLocal = "local"
+)
+
 type BlobstoreSpec struct {
 	Provider string                 `json:"provider"`
 	Options  map[string]interface{} `json:"options"`

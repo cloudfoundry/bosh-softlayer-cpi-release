@@ -263,7 +263,6 @@ func (vm SoftLayerVM) DetachDisk(disk bslcdisk.Disk) error {
 }
 
 // Private methods
-
 func (vm SoftLayerVM) extractTagsFromVMMetadata(vmMetadata VMMetadata) ([]string, error) {
 	tags := []string{}
 	for key, value := range vmMetadata {
