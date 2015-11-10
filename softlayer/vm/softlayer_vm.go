@@ -15,7 +15,6 @@ import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
-
 	sl "github.com/maximilien/softlayer-go/softlayer"
 
 	bslcommon "github.com/maximilien/bosh-softlayer-cpi/softlayer/common"
@@ -192,7 +191,6 @@ func (vm SoftLayerVM) AttachDisk(disk bslcdisk.Disk) error {
 	if totalTime >= bslcommon.TIMEOUT {
 		return bosherr.Error("Waiting for grantting access to virutal guest TIME OUT!")
 	}
-
 
 	hasMultiPath, err := vm.hasMulitPathToolBasedOnShellScript(virtualGuest)
 	if err != nil {

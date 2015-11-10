@@ -38,7 +38,7 @@ type PersistentSpec map[string]string
 type EnvSpec map[string]interface{}
 
 const (
-	BlobstoreTypeDav = "dav"
+	BlobstoreTypeDav   = "dav"
 	BlobstoreTypeLocal = "local"
 )
 
