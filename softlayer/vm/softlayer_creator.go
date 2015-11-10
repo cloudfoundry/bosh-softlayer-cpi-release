@@ -98,6 +98,12 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 			return SoftLayerVM{}, bosherr.WrapErrorf(err, "Cannot construct mbus url.")
 		}
 		agentEnv.Mbus = mbus
+	} else {
+		switch c.agentOptions.Blobstore.Type {
+		case BlobstoreTypeDav:
+			davConf := DavConfig(c.agentOptions.Blobstore.Options)
+			c.updateDavConfig(&davConf, cloudProps.BoshIp)
+		}
 	}
 
 	err = agentEnvService.Update(agentEnv)
@@ -111,6 +117,18 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 }
 
 // Private methods
+func (c SoftLayerCreator) updateDavConfig(config *DavConfig, directorIP string) (err error) {
+	url := (*config)["endpoint"].(string)
+	mbus, err := c.parseMbusURL(url, directorIP)
+	if err != nil {
+		return bosherr.WrapError(err, "Parsing Mbus URL")
+	}
+
+	(*config)["endpoint"] = mbus
+
+	return nil
+}
+
 func (c SoftLayerCreator) parseMbusURL(mbusURL string, primaryBackendIpAddress string) (string, error) {
 	parsedURL, err := url.Parse(mbusURL)
 	if err != nil {

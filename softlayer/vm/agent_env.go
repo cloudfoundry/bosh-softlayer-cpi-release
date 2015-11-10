@@ -47,6 +47,8 @@ type BlobstoreSpec struct {
 	Options  map[string]interface{} `json:"options"`
 }
 
+type DavConfig map[string]interface{}
+
 func NewAgentEnvFromJSON(bytes []byte) (AgentEnv, error) {
 	var agentEnv AgentEnv
 
