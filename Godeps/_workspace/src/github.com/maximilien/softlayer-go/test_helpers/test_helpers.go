@@ -31,7 +31,7 @@ var (
 const (
 	TEST_NOTES_PREFIX  = "TEST:softlayer-go"
 	TEST_LABEL_PREFIX  = "TEST:softlayer-go"
-    DEFAULT_DATACENTER = "dal09"
+	DEFAULT_DATACENTER = "dal09"
 
 	MAX_WAIT_RETRIES = 10
 	WAIT_TIME        = 5
@@ -141,11 +141,11 @@ func GetUsernameAndApiKey() (string, string, error) {
 }
 
 func GetDatacenter() string {
-    datacenter := os.Getenv("SL_DATACENTER")
-    if datacenter == "" {
-        datacenter = DEFAULT_DATACENTER
-    }
-    return datacenter
+	datacenter := os.Getenv("SL_DATACENTER")
+	if datacenter == "" {
+		datacenter = DEFAULT_DATACENTER
+	}
+	return datacenter
 }
 
 func CreateAccountService() (softlayer.SoftLayer_Account_Service, error) {
@@ -417,6 +417,15 @@ func DeleteSshKey(sshKeyId int) {
 	}
 
 	WaitForDeletedSshKeyToNoLongerBePresent(sshKeyId)
+}
+
+func DeleteDisk(diskId int) {
+	networkStorageService, err := CreateNetworkStorageService()
+	Expect(err).ToNot(HaveOccurred())
+
+	fmt.Printf("----> deleting disk: %d\n", diskId)
+	err = networkStorageService.DeleteIscsiVolume(diskId, true)
+	Expect(err).ToNot(HaveOccurred())
 }
 
 func WaitForVirtualGuest(virtualGuestId int, targetState string, timeout time.Duration) {
