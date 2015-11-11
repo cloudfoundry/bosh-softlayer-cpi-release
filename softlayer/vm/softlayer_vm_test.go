@@ -369,10 +369,18 @@ var _ = Describe("SoftLayerVM", func() {
 `
 		const expectedTarget2 = `iqn.1992-08.com.netapp:sjc0101
 `
+		const expectedTarget3 = `iqn.1992-08.com.netapp:sjc0101
+iqn.1992-08.com.netapp:sjc0101
+`
 		const exportedPortals1 = `10.1.107.49:3260
 `
-		const expectedPortals2 = `10.1.236.90:3260,1033
-10.1.106.75:3260,1030
+		const expectedPortals2 = `10.1.236.90:3260,1031
+10.1.106.75:3260,1032
+`
+		const expectedPortals3 = `10.1.236.90:3260,1031
+10.1.106.75:3260,1032
+10.1.222.64:3260,31
+10.1.222.55:3260,32
 `
 		BeforeEach(func() {
 			disk = fakedisk.NewFakeDisk(1234)
@@ -394,10 +402,16 @@ var _ = Describe("SoftLayerVM", func() {
 			testhelpers.SetTestFixturesForFakeSoftLayerClient(softLayerClient, fileNames)
 		})
 
-		It("detaches legacy iSCSI volume successfully", func() {
+		It("detaches legacy iSCSI volume successfully (one volume attached)", func() {
 			expectedCmdResults := []string{
+				"",
 				expectedTarget1,
 				exportedPortals1,
+				"",
+				"",
+				"",
+				"",
+				"",
 				"",
 			}
 			testhelpers.SetTestFixturesForFakeSSHClient(sshClient, expectedCmdResults, nil)
@@ -409,10 +423,51 @@ var _ = Describe("SoftLayerVM", func() {
 			Expect(err).ToNot(HaveOccurred())
 		})
 
-		It("detaches performance storage iSCSI volume successfully", func() {
+		It("detaches performance storage iSCSI volume successfully (one volume attached)", func() {
 			expectedCmdResults := []string{
+				"",
 				expectedTarget2,
 				expectedPortals2,
+				"",
+				"",
+				"",
+				"",
+				"",
+				"",
+				"",
+				"",
+				"",
+				"",
+				"",
+			}
+			testhelpers.SetTestFixturesForFakeSSHClient(sshClient, expectedCmdResults, nil)
+			vm = NewSoftLayerVM(1234567, softLayerClient, sshClient, agentEnvService, logger)
+			bslcommon.TIMEOUT = 2 * time.Second
+			bslcommon.POLLING_INTERVAL = 1 * time.Second
+
+			err := vm.DetachDisk(disk)
+			Expect(err).ToNot(HaveOccurred())
+		})
+
+		It("detaches performance storage iSCSI volume successfully (two volume attached)", func() {
+			expectedCmdResults := []string{
+				"",
+				expectedTarget2,
+				expectedPortals3,
+				"",
+				"",
+				"",
+				"",
+				"",
+				"",
+				"",
+				"",
+				"",
+				"",
+				"",
+				"",
+				"",
+				"",
 				"",
 				"",
 			}
