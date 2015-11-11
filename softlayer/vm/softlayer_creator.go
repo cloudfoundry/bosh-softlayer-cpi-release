@@ -94,12 +94,13 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 		}
 		c.agentOptions.Mbus = mbus
 	} else {
+		// Update mbus url setting
 		mbus, err := c.parseMbusURL(c.agentOptions.Mbus, cloudProps.BoshIp)
 		if err != nil {
 			return SoftLayerVM{}, bosherr.WrapErrorf(err, "Cannot construct mbus url.")
 		}
 		c.agentOptions.Mbus = mbus
-
+		// Update blobstore setting
 		switch c.agentOptions.Blobstore.Type {
 		case BlobstoreTypeDav:
 			davConf := DavConfig(c.agentOptions.Blobstore.Options)
