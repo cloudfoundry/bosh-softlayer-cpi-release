@@ -352,6 +352,18 @@ func CreateTestSshKey() (datatypes.SoftLayer_Security_Ssh_Key, string) {
 	return createdSshKey, string(testSshKeyValue)
 }
 
+func CreateDisk(size int, location string) datatypes.SoftLayer_Network_Storage {
+	networkStorageService, err := CreateNetworkStorageService()
+	Expect(err).ToNot(HaveOccurred())
+	
+	fmt.Printf("----> creating new disk\n")
+	disk, err := networkStorageService.CreateIscsiVolume(size, location)
+	Expect(err).ToNot(HaveOccurred())
+	fmt.Printf("----> created disk: %d\n", disk.Id)
+	
+	return disk
+}
+
 func CreateVirtualGuestAndMarkItTest(securitySshKeys []datatypes.SoftLayer_Security_Ssh_Key) datatypes.SoftLayer_Virtual_Guest {
 	sshKeys := make([]datatypes.SshKey, len(securitySshKeys))
 	for i, securitySshKey := range securitySshKeys {
@@ -401,6 +413,11 @@ func DeleteVirtualGuest(virtualGuestId int) {
 	Expect(deleted).To(BeTrue(), "could not delete virtual guest")
 
 	WaitForVirtualGuestToHaveNoActiveTransactions(virtualGuestId)
+}
+
+func CleanUpVirtualGuest(virtualGuestId int) {
+	WaitForVirtualGuestToHaveNoActiveTransactions(virtualGuestId)
+	DeleteVirtualGuest(virtualGuestId)
 }
 
 func DeleteSshKey(sshKeyId int) {
