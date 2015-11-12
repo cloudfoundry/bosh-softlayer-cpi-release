@@ -123,6 +123,7 @@ var _ = Describe("BOSH Director Level Integration for delete_disk", func() {
 
 		AfterEach(func() {
 			testhelpers.DeleteVirtualGuest(virtualGuest.Id)
+			testhelpers.WaitForVirtualGuestToHaveNoActiveTransactionsOrToErr(virtualGuest.Id)
 			testhelpers.DeleteSshKey(createdSshKey.Id)
 		})
 
