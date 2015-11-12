@@ -75,7 +75,7 @@ var _ = Describe("SoftLayerCreator", func() {
 
 			})
 
-			It("returns a new SoftLayerVM with ephemeral size ", func() {
+			It("returns a new SoftLayerVM with ephemeral size", func() {
 				cloudProps = VMCloudProperties{
 					StartCpus: 4,
 					MaxMemory: 2048,
@@ -89,7 +89,7 @@ var _ = Describe("SoftLayerCreator", func() {
 					Datacenter:                   sldatatypes.Datacenter{Name: "fake-datacenter"},
 					HourlyBillingFlag:            true,
 					LocalDiskFlag:                true,
-					Hostname:                     "bosh-",
+					Hostname:                     "bosh-test",
 					PostInstallScriptUri:         "",
 					DedicatedAccountHostOnlyFlag: true,
 					PrivateNetworkOnlyFlag:       false,
@@ -112,7 +112,7 @@ var _ = Describe("SoftLayerCreator", func() {
 				Expect(err).ToNot(HaveOccurred())
 				Expect(vm.ID()).To(Equal(1234567))
 			})
-			It("returns a new SoftLayerVM without", func() {
+			It("returns a new SoftLayerVM without ephemeral size", func() {
 				cloudProps = VMCloudProperties{
 					StartCpus: 4,
 					MaxMemory: 2048,
@@ -125,7 +125,7 @@ var _ = Describe("SoftLayerCreator", func() {
 					Datacenter:                   sldatatypes.Datacenter{Name: "fake-datacenter"},
 					HourlyBillingFlag:            true,
 					LocalDiskFlag:                true,
-					Hostname:                     "bosh-",
+					Hostname:                     "bosh-test",
 					PostInstallScriptUri:         "",
 					DedicatedAccountHostOnlyFlag: true,
 					PrivateNetworkOnlyFlag:       false,
@@ -235,14 +235,12 @@ var _ = Describe("SoftLayerCreator", func() {
 func setFakeSoftLayerClientCreateObjectTestFixturesWithEphemeralDiskSize(fakeSoftLayerClient *fakeslclient.FakeSoftLayerClient) {
 	fileNames := []string{
 		"SoftLayer_Virtual_Guest_Service_createObject.json",
-
-		"SoftLayer_Virtual_Guest_Service_getPowerState.json",
 		"SoftLayer_Virtual_Guest_Service_getLastTransaction.json",
 		"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
 		"SoftLayer_Virtual_Guest_Service_getUpgradeItemPrices.json",
 		"SoftLayer_Product_Order_Service_placeOrder.json",
 		"SoftLayer_Virtual_Guest_Service_getActiveTransactions.json",
-		"SoftLayer_Virtual_Guest_Service_getPowerState.json",
+		"SoftLayer_Virtual_Guest_Service_getLastTransaction_CloudInstanceUpgrade.json",
 
 		"SoftLayer_Virtual_Guest_Service_getObject.json",
 	}
@@ -252,8 +250,6 @@ func setFakeSoftLayerClientCreateObjectTestFixturesWithEphemeralDiskSize(fakeSof
 func setFakeSoftLayerClientCreateObjectTestFixturesWithoutEphemeralDiskSize(fakeSoftLayerClient *fakeslclient.FakeSoftLayerClient) {
 	fileNames := []string{
 		"SoftLayer_Virtual_Guest_Service_createObject.json",
-
-		"SoftLayer_Virtual_Guest_Service_getPowerState.json",
 
 		"SoftLayer_Virtual_Guest_Service_getLastTransaction.json",
 
@@ -265,14 +261,12 @@ func setFakeSoftLayerClientCreateObjectTestFixturesWithoutEphemeralDiskSize(fake
 func setFakeSoftLayerClientCreateObjectTestFixturesWithoutBoshIP(fakeSoftLayerClient *fakeslclient.FakeSoftLayerClient) {
 	fileNames := []string{
 		"SoftLayer_Virtual_Guest_Service_createObject.json",
-
-		"SoftLayer_Virtual_Guest_Service_getPowerState.json",
 		"SoftLayer_Virtual_Guest_Service_getLastTransaction.json",
 		"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
 		"SoftLayer_Virtual_Guest_Service_getUpgradeItemPrices.json",
 		"SoftLayer_Product_Order_Service_placeOrder.json",
 		"SoftLayer_Virtual_Guest_Service_getActiveTransactions.json",
-		"SoftLayer_Virtual_Guest_Service_getPowerState.json",
+		"SoftLayer_Virtual_Guest_Service_getLastTransaction_CloudInstanceUpgrade.json",
 
 		"SoftLayer_Virtual_Guest_Service_getObject.json",
 	}

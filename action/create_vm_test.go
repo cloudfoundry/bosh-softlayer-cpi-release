@@ -31,11 +31,11 @@ var _ = Describe("CreateVM", func() {
 
 	Describe("Run", func() {
 		var (
-			stemcellCID  StemcellCID
-			vmCloudProp  bslcvm.VMCloudProperties
-			networks     Networks
-			diskLocality []DiskCID
-			env          Environment
+			stemcellCID               StemcellCID
+			vmCloudProp, vmCloudProp2 bslcvm.VMCloudProperties
+			networks                  Networks
+			diskLocality              []DiskCID
+			env                       Environment
 		)
 
 		BeforeEach(func() {
@@ -88,7 +88,26 @@ var _ = Describe("CreateVM", func() {
 
 				Expect(vmCreator.CreateAgentID).To(Equal("fake-agent-id"))
 				Expect(vmCreator.CreateStemcell).To(Equal(stemcell))
-				Expect(vmCreator.CreateVMCloudProperties).To(Equal(vmCloudProp))
+				Expect(vmCreator.CreateNetworks).To(Equal(networks.AsVMNetworks()))
+				Expect(vmCreator.CreateEnvironment).To(Equal(
+					bslcvm.Environment{"fake-env-key": "fake-env-value"},
+				))
+			})
+
+			It("creates VM with requested agent ID, stemcell, cloud properties (without startCPU, Memory, NetworkSpeed), and networks", func() {
+				vmCloudProp2 = bslcvm.VMCloudProperties{
+					Datacenter: sldatatypes.Datacenter{Name: "fake-datacenter"},
+					SshKeys: []sldatatypes.SshKey{
+						sldatatypes.SshKey{Id: 1234},
+					},
+				}
+				vmCreator.CreateVM = fakevm.NewFakeVM(1234)
+
+				_, err := action.Run("fake-agent-id", stemcellCID, vmCloudProp2, networks, diskLocality, env)
+				Expect(err).ToNot(HaveOccurred())
+
+				Expect(vmCreator.CreateAgentID).To(Equal("fake-agent-id"))
+				Expect(vmCreator.CreateStemcell).To(Equal(stemcell))
 				Expect(vmCreator.CreateNetworks).To(Equal(networks.AsVMNetworks()))
 				Expect(vmCreator.CreateEnvironment).To(Equal(
 					bslcvm.Environment{"fake-env-key": "fake-env-value"},

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 	"net/url"
+	"os"
 	"strconv"
 	"text/template"
 	"time"
@@ -64,11 +65,6 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 	}
 
 	if cloudProps.EphemeralDiskSize == 0 {
-		err = bslcommon.WaitForVirtualGuest(c.softLayerClient, virtualGuest.Id, "RUNNING")
-		if err != nil {
-			return SoftLayerVM{}, bosherr.WrapError(err, fmt.Sprintf("PowerOn failed with VirtualGuest id `%d`", virtualGuest.Id))
-		}
-
 		err = bslcommon.WaitForVirtualGuestLastCompleteTransaction(c.softLayerClient, virtualGuest.Id, "Service Setup")
 		if err != nil {
 			return SoftLayerVM{}, bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` has Service Setup transaction complete", virtualGuest.Id)
@@ -88,11 +84,6 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 	softlayerFileService := NewSoftlayerFileService(util.GetSshClient(), virtualGuest, c.logger, c.uuidGenerator, c.fs)
 	agentEnvService := c.agentEnvServiceFactory.New(softlayerFileService, strconv.Itoa(virtualGuest.Id))
 
-	agentEnv := CreateAgentUserData(agentID, cloudProps, networks, env, c.agentOptions)
-	if err != nil {
-		return SoftLayerVM{}, bosherr.WrapErrorf(err, "Cannot agent env for virtual guest with id: %d.", virtualGuest.Id)
-	}
-
 	if len(cloudProps.BoshIp) == 0 {
 		// update /etc/hosts file of bosh-init vm
 		c.updateEtcHostsOfBoshInit(fmt.Sprintf("%s  %s", virtualGuest.PrimaryBackendIpAddress, virtualGuest.FullyQualifiedDomainName))
@@ -101,7 +92,25 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 		if err != nil {
 			return SoftLayerVM{}, bosherr.WrapErrorf(err, "Cannot construct mbus url.")
 		}
-		agentEnv.Mbus = mbus
+		c.agentOptions.Mbus = mbus
+	} else {
+		// Update mbus url setting
+		mbus, err := c.parseMbusURL(c.agentOptions.Mbus, cloudProps.BoshIp)
+		if err != nil {
+			return SoftLayerVM{}, bosherr.WrapErrorf(err, "Cannot construct mbus url.")
+		}
+		c.agentOptions.Mbus = mbus
+		// Update blobstore setting
+		switch c.agentOptions.Blobstore.Type {
+		case BlobstoreTypeDav:
+			davConf := DavConfig(c.agentOptions.Blobstore.Options)
+			c.updateDavConfig(&davConf, cloudProps.BoshIp)
+		}
+	}
+
+	agentEnv := CreateAgentUserData(agentID, cloudProps, networks, env, c.agentOptions)
+	if err != nil {
+		return SoftLayerVM{}, bosherr.WrapErrorf(err, "Cannot agent env for virtual guest with id: %d.", virtualGuest.Id)
 	}
 
 	err = agentEnvService.Update(agentEnv)
@@ -115,6 +124,18 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 }
 
 // Private methods
+func (c SoftLayerCreator) updateDavConfig(config *DavConfig, directorIP string) (err error) {
+	url := (*config)["endpoint"].(string)
+	mbus, err := c.parseMbusURL(url, directorIP)
+	if err != nil {
+		return bosherr.WrapError(err, "Parsing Mbus URL")
+	}
+
+	(*config)["endpoint"] = mbus
+
+	return nil
+}
+
 func (c SoftLayerCreator) parseMbusURL(mbusURL string, primaryBackendIpAddress string) (string, error) {
 	parsedURL, err := url.Parse(mbusURL)
 	if err != nil {
@@ -126,10 +147,10 @@ func (c SoftLayerCreator) parseMbusURL(mbusURL string, primaryBackendIpAddress s
 	if userInfo != nil {
 		username = userInfo.Username()
 		password, _ = userInfo.Password()
-		return fmt.Sprintf("https://%s:%s@%s:%s", username, password, primaryBackendIpAddress, port), nil
+		return fmt.Sprintf("%s://%s:%s@%s:%s", parsedURL.Scheme, username, password, primaryBackendIpAddress, port), nil
 	}
 
-	return fmt.Sprintf("https://%s:%s", primaryBackendIpAddress, port), nil
+	return fmt.Sprintf("%s://%s:%s", parsedURL.Scheme, primaryBackendIpAddress, port), nil
 }
 
 func (c SoftLayerCreator) updateEtcHostsOfBoshInit(record string) (err error) {
@@ -152,3 +173,19 @@ func (c SoftLayerCreator) updateEtcHostsOfBoshInit(record string) (err error) {
 const ETC_HOSTS_TEMPLATE = `127.0.0.1 localhost
 {{.}}
 `
+
+func (c SoftLayerCreator) appendRecordToEtcHosts(record string) (err error) {
+	file, err := os.OpenFile("/etc/hosts", os.O_RDWR|os.O_APPEND, 0666)
+	if err != nil {
+		return bosherr.WrapError(err, "Failed to open file /etc/hosts")
+	}
+
+	defer file.Close()
+
+	_, err = fmt.Fprintf(file, "\n %s", record)
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Failed to append new record to /etc/hosts")
+	}
+
+	return nil
+}
