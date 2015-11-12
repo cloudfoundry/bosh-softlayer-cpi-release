@@ -204,7 +204,7 @@ var _ = Describe("VM Utils", func() {
 				Datacenter:                   sldatatypes.Datacenter{Name: "fake-datacenter"},
 				HourlyBillingFlag:            true,
 				LocalDiskFlag:                true,
-				Hostname:                     "bosh-",
+				VmNamePrefix:                 "bosh-",
 				PostInstallScriptUri:         "",
 				DedicatedAccountHostOnlyFlag: true,
 				PrivateNetworkOnlyFlag:       false,

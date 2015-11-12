@@ -57,9 +57,9 @@ func (a CreateVM) UpdateCloudProperties(cloudProps *bslcvm.VMCloudProperties) {
 	a.vmCloudProperties = cloudProps
 
 	if len(cloudProps.BoshIp) == 0 {
-		a.vmCloudProperties.Hostname = cloudProps.VmNamePrefix
+		a.vmCloudProperties.VmNamePrefix = cloudProps.VmNamePrefix
 	} else {
-		a.vmCloudProperties.Hostname = cloudProps.VmNamePrefix + timeStampForTime(time.Now().UTC())
+		a.vmCloudProperties.VmNamePrefix = cloudProps.VmNamePrefix + timeStampForTime(time.Now().UTC())
 	}
 
 	if cloudProps.StartCpus == 0 {

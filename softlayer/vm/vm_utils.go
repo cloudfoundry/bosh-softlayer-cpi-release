@@ -30,7 +30,7 @@ func TimeStampForTime(now time.Time) string {
 
 func CreateVirtualGuestTemplate(stemcell bslcstem.Stemcell, cloudProps VMCloudProperties) (sldatatypes.SoftLayer_Virtual_Guest_Template, error) {
 	virtualGuestTemplate := sldatatypes.SoftLayer_Virtual_Guest_Template{
-		Hostname:  cloudProps.Hostname,
+		Hostname:  cloudProps.VmNamePrefix,
 		Domain:    cloudProps.Domain,
 		StartCpus: cloudProps.StartCpus,
 		MaxMemory: cloudProps.MaxMemory,
