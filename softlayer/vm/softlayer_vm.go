@@ -28,6 +28,7 @@ const (
 	softLayerVMtag = "SoftLayerVM"
 	ROOT_USER_NAME = "root"
 	deleteVMLogTag = "DeleteVM"
+	ISCSIMANAGEMENT = "ISCSI Management"
 )
 
 type SoftLayerVM struct {
@@ -264,12 +265,12 @@ func (vm SoftLayerVM) DetachDisk(disk bslcdisk.Disk) error {
 
 	if len(newAgentEnv.Disks.Persistent) == 1 {
 		for key, _ := range newAgentEnv.Disks.Persistent {
-			existingDiskId, err := strconv.Atoi(key)
+			leftDiskId, err := strconv.Atoi(key)
 			if err != nil {
 				return bosherr.WrapError(err, fmt.Sprintf("Failed to transfer disk id %s from string to int", key))
 			}
-			vm.logger.Debug("Iscsi:", "Existing Disk Id %d", existingDiskId)
-			virtualGuest, volume, err := vm.fetchVMandIscsiVolume(vm.ID(), existingDiskId)
+			vm.logger.Debug(ISCSIMANAGEMENT, "Left Disk Id %d", leftDiskId)
+			virtualGuest, volume, err := vm.fetchVMandIscsiVolume(vm.ID(), leftDiskId)
 			if err != nil {
 				return bosherr.WrapError(err, fmt.Sprintf("Failed to fetch disk `%d` and virtual gusest `%d`", disk.ID(), virtualGuest.Id))
 			}
@@ -585,7 +586,7 @@ func (vm SoftLayerVM) detachVolumeBasedOnShellScript(virtualGuest datatypes.Soft
 	if err != nil {
 		return bosherr.WrapError(err, "Restarting open iscsi")
 	}
-	vm.logger.Debug("Iscsi:", "/etc/init.d/open-iscsi stop", nil)
+	vm.logger.Debug(ISCSIMANAGEMENT, "/etc/init.d/open-iscsi stop", nil)
 
 	// clean up /etc/iscsi/send_targets/
 	step2 := fmt.Sprintf("rm -r /etc/iscsi/send_targets/")
@@ -593,7 +594,7 @@ func (vm SoftLayerVM) detachVolumeBasedOnShellScript(virtualGuest datatypes.Soft
 	if err != nil {
 		return bosherr.WrapError(err, "Removing /etc/iscsi/send_targets/")
 	}
-	vm.logger.Debug("Iscsi:", "rm -r /etc/iscsi/send_targets/", nil)
+	vm.logger.Debug(ISCSIMANAGEMENT, "rm -r /etc/iscsi/send_targets/", nil)
 
 	// clean up /etc/iscsi/nodes/
 	step3 := fmt.Sprintf("rm -r /etc/iscsi/nodes/")
@@ -601,7 +602,7 @@ func (vm SoftLayerVM) detachVolumeBasedOnShellScript(virtualGuest datatypes.Soft
 	if err != nil {
 		return bosherr.WrapError(err, "Removing /etc/iscsi/nodes/")
 	}
-	vm.logger.Debug("Iscsi:", "rm -r /etc/iscsi/nodes/", nil)
+	vm.logger.Debug(ISCSIMANAGEMENT, "rm -r /etc/iscsi/nodes/", nil)
 
 	// start open-iscsi
 	step4 := fmt.Sprintf("/etc/init.d/open-iscsi start")
@@ -609,7 +610,7 @@ func (vm SoftLayerVM) detachVolumeBasedOnShellScript(virtualGuest datatypes.Soft
 	if err != nil {
 		return bosherr.WrapError(err, "Restarting open iscsi")
 	}
-	vm.logger.Debug("Iscsi:", "/etc/init.d/open-iscsi start", nil)
+	vm.logger.Debug(ISCSIMANAGEMENT, "/etc/init.d/open-iscsi start", nil)
 
 	if hasMultiPath {
 		// restart dm-multipath tool
@@ -618,7 +619,7 @@ func (vm SoftLayerVM) detachVolumeBasedOnShellScript(virtualGuest datatypes.Soft
 		if err != nil {
 			return bosherr.WrapError(err, "Restarting Multipath deamon")
 		}
-		vm.logger.Debug("Iscsi:", "service multipath-tools restart", nil)
+		vm.logger.Debug(ISCSIMANAGEMENT, "service multipath-tools restart", nil)
 	}
 
 	return nil
