@@ -1,4 +1,4 @@
-package delete_vm_test
+package create_disk_test
 
 import (
 	"encoding/json"
@@ -15,11 +15,12 @@ import (
 	datatypes "github.com/maximilien/softlayer-go/data_types"
 	softlayer "github.com/maximilien/softlayer-go/softlayer"
 	testhelpers "github.com/maximilien/softlayer-go/test_helpers"
+	"log"
 )
 
 const configPath = "test_fixtures/cpi_methods/config.json"
 
-var _ = Describe("BOSH Director Level Integration for delete_vm", func() {
+var _ = Describe("BOSH Director Level Integration for create_disk", func() {
 	var (
 		err error
 
@@ -27,17 +28,15 @@ var _ = Describe("BOSH Director Level Integration for delete_vm", func() {
 
 		username, apiKey string
 
-		accountService      softlayer.SoftLayer_Account_Service
-		virtualGuestService softlayer.SoftLayer_Virtual_Guest_Service
-
 		virtualGuest  datatypes.SoftLayer_Virtual_Guest
 		createdSshKey datatypes.SoftLayer_Security_Ssh_Key
 
+		accountService      softlayer.SoftLayer_Account_Service
+		virtualGuestService softlayer.SoftLayer_Virtual_Guest_Service
+
 		rootTemplatePath, tmpConfigPath, strVGID string
-
-		replacementMap map[string]string
-
-		output map[string]interface{}
+		replacementMap                           map[string]string
+		resultOutput                             map[string]interface{}
 	)
 
 	BeforeEach(func() {
@@ -56,6 +55,10 @@ var _ = Describe("BOSH Director Level Integration for delete_vm", func() {
 		virtualGuestService, err = testhelpers.CreateVirtualGuestService()
 		Expect(err).ToNot(HaveOccurred())
 
+		replacementMap = map[string]string{
+			"Datacenter": testhelpers.GetDatacenter(),
+		}
+
 		testhelpers.TIMEOUT = 35 * time.Minute
 		testhelpers.POLLING_INTERVAL = 10 * time.Second
 
@@ -72,7 +75,42 @@ var _ = Describe("BOSH Director Level Integration for delete_vm", func() {
 		Expect(err).ToNot(HaveOccurred())
 	})
 
-	Context("delete_vm with a valid VM ID", func() {
+	Context("create_disk in SoftLayer with empty parameters", func() {
+		It("fails to create disk", func() {
+			jsonPayload := `{"method": "create_disk", "arguments": [],"context": {}}`
+
+			outputBytes, err := testhelperscpi.RunCpi(rootTemplatePath, tmpConfigPath, jsonPayload)
+			log.Println("outputBytes=" + string(outputBytes))
+			Expect(err).ToNot(HaveOccurred())
+
+			err = json.Unmarshal(outputBytes, &resultOutput)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(resultOutput["result"]).To(BeNil())
+			Expect(resultOutput["error"]).ToNot(BeNil())
+		})
+	})
+
+	Context("create_disk in SoftLayer with invalid virtual guest id", func() {
+		BeforeEach(func() {
+			replacementMap = map[string]string{
+				"ID": "123456",
+			}
+		})
+
+		It("returns error because invalid guest id", func() {
+			jsonPayload, err := testhelperscpi.GenerateCpiJsonPayload("create_disk", rootTemplatePath, replacementMap)
+			Expect(err).ToNot(HaveOccurred())
+
+			outputBytes, err := testhelperscpi.RunCpi(rootTemplatePath, tmpConfigPath, jsonPayload)
+			log.Println("outputBytes=" + string(outputBytes))
+			Expect(err).ToNot(HaveOccurred())
+			err = json.Unmarshal(outputBytes, &resultOutput)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(resultOutput["error"]).ToNot(BeNil())
+		})
+	})
+
+	Context("create_disk in SoftLayer with valid virtual guest id", func() {
 		BeforeEach(func() {
 			err = testhelpers.FindAndDeleteTestSshKeys()
 			Expect(err).ToNot(HaveOccurred())
@@ -88,49 +126,32 @@ var _ = Describe("BOSH Director Level Integration for delete_vm", func() {
 			strVGID = strconv.Itoa(virtualGuest.Id)
 
 			replacementMap = map[string]string{
-				"ID":           strVGID,
-				"DirectorUuid": "fake-director-uuid",
+				"ID": strVGID,
 			}
 		})
 
 		AfterEach(func() {
-			// assume errors are either because service was already deleted or will be caught later anyway
+			testhelpers.DeleteVirtualGuest(virtualGuest.Id)
 			testhelpers.WaitForVirtualGuestToHaveNoActiveTransactionsOrToErr(virtualGuest.Id)
 			testhelpers.DeleteSshKey(createdSshKey.Id)
 		})
 
-		It("deletes the VM susseccfully", func() {
-			jsonPayload, err := testhelperscpi.GenerateCpiJsonPayload("delete_vm", rootTemplatePath, replacementMap)
+		It("returns valid result because valid parameters", func() {
+			jsonPayload, err := testhelperscpi.GenerateCpiJsonPayload("create_disk", rootTemplatePath, replacementMap)
 			Expect(err).ToNot(HaveOccurred())
 
 			outputBytes, err := testhelperscpi.RunCpi(rootTemplatePath, tmpConfigPath, jsonPayload)
+			log.Println("outputBytes=" + string(outputBytes))
 			Expect(err).ToNot(HaveOccurred())
+			err = json.Unmarshal(outputBytes, &resultOutput)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(resultOutput["result"]).ToNot(BeNil())
+			Expect(resultOutput["error"]).To(BeNil())
 
-			err = json.Unmarshal(outputBytes, &output)
-			Expect(err).ToNot(HaveOccurred())
-			Expect(output["error"]).To(BeNil())
+			id := resultOutput["result"].(string)
+			diskId, err := strconv.Atoi(id)
+			testhelpers.DeleteDisk(diskId)
 		})
 
 	})
-
-	Context("delete_vm with an invalid VM ID", func() {
-		BeforeEach(func() {
-			replacementMap = map[string]string{
-				"ID":           "123456",
-				"DirectorUuid": "fake-director-uuid",
-			}
-		})
-
-		It("can't find the VM and exit delete_vm", func() {
-			jsonPayload, err := testhelperscpi.GenerateCpiJsonPayload("delete_vm", rootTemplatePath, replacementMap)
-			Expect(err).ToNot(HaveOccurred())
-
-			outputBytes, err := testhelperscpi.RunCpi(rootTemplatePath, tmpConfigPath, jsonPayload)
-			Expect(err).ToNot(HaveOccurred())
-			err = json.Unmarshal(outputBytes, &output)
-			Expect(err).ToNot(HaveOccurred())
-			Expect(output["error"]).To(BeNil())
-		})
-	})
-
 })

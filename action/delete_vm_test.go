@@ -51,11 +51,11 @@ var _ = Describe("DeleteVM", func() {
 		})
 
 		Context("when vm is not found with given cid", func() {
-			It("does vmFinder return error", func() {
+			It("does vmFinder does not return error", func() {
 				vmFinder.FindFound = false
 
 				_, err := action.Run(1234, "fake-agentID")
-				Expect(err).To(HaveOccurred())
+				Expect(err).ToNot(HaveOccurred())
 			})
 		})
 

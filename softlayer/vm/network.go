@@ -3,18 +3,20 @@ package vm
 type Networks map[string]Network
 
 type Network struct {
-	Type string
+	Type string `json:"type"`
 
-	IP      string
-	Netmask string
-	Gateway string
+	IP      string `json:"ip,omitempty"`
+	Netmask string `json:"netmask,omitempty"`
+	Gateway string `json:"gateway,omitempty"`
 
-	DNS     []string
-	Default []string
+	DNS     []string `json:"dns,omitempty"`
+	Default []string `json:"default,omitempty"`
 
-	Preconfigured bool
+	Preconfigured bool `json:"preconfigured,omitempty"`
 
-	CloudProperties map[string]interface{}
+	MAC string `json:"mac,omitempty"`
+
+	CloudProperties map[string]interface{} `json:"cloud_properties,omitempty"`
 }
 
 func (ns Networks) First() Network {

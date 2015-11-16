@@ -62,8 +62,7 @@ func CreateVirtualGuestTemplate(stemcell bslcstem.Stemcell, cloudProps VMCloudPr
 func CreateAgentUserData(agentID string, cloudProps VMCloudProperties, networks Networks, env Environment, agentOptions AgentOptions) AgentEnv {
 	agentName := fmt.Sprintf("vm-%s", agentID)
 	disks := CreateDisksSpec(cloudProps.EphemeralDiskSize)
-	powerdnsNetworks := AppendPowerDNSToNetworks(networks, cloudProps)
-	agentEnv := NewAgentEnvForVM(agentID, agentName, powerdnsNetworks, disks, env, agentOptions)
+	agentEnv := NewAgentEnvForVM(agentID, agentName, networks, disks, env, agentOptions)
 	return agentEnv
 }
 

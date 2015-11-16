@@ -48,8 +48,8 @@ var _ = Describe("NewAgentEnvFromJSON", func() {
 					ID:   "fake-vm-id",
 				},
 
-				Networks: NetworksSpec{
-					"fake-net-name": NetworkSpec{
+				Networks: Networks{
+					"fake-net-name": Network{
 						IP:      "fake-ip",
 						Netmask: "fake-netmask",
 						Gateway: "fake-gateway",
