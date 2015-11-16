@@ -125,7 +125,6 @@ var _ = Describe("BOSH Director Level Integration for attach_disk", func() {
 			Expect(err).ToNot(HaveOccurred())
 			err = json.Unmarshal(outputBytes, &resultOutput)
 			Expect(err).ToNot(HaveOccurred())
-			Expect(resultOutput["result"]).To(BeNil())
 			Expect(resultOutput["error"]).To(BeNil())
 
 			id := resultOutput["result"].(string)
