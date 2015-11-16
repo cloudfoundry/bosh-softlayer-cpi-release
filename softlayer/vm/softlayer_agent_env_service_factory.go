@@ -26,8 +26,5 @@ func (f SoftLayerAgentEnvServiceFactory) New(
 	softlayerFileService SoftlayerFileService,
 	instanceID string,
 ) AgentEnvService {
-	if f.agentEnvService == "registry" {
-		return NewRegistryAgentEnvService(f.registryOptions, instanceID, f.logger)
-	}
 	return NewFSAgentEnvService(softlayerFileService, f.logger)
 }
