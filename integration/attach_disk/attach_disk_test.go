@@ -156,9 +156,9 @@ var _ = Describe("BOSH Director Level Integration for attach_disk", func() {
 		})
 
 		AfterEach(func() {
-			//	testhelpers.DeleteVirtualGuest(virtualGuest.Id)
-			//	testhelpers.WaitForVirtualGuestToHaveNoActiveTransactionsOrToErr(virtualGuest.Id)
-			//	testhelpers.DeleteDisk(disk.Id)
+			testhelpers.DeleteVirtualGuest(virtualGuest.Id)
+			testhelpers.WaitForVirtualGuestToHaveNoActiveTransactionsOrToErr(virtualGuest.Id)
+			testhelpers.DeleteDisk(disk.Id)
 			testhelpers.DeleteSshKey(createdSshKey.Id)
 		})
 
