@@ -34,6 +34,7 @@ var _ = Describe("BOSH Director Level Integration for attach_disk", func() {
 		disk          datatypes.SoftLayer_Network_Storage
 		createdSshKey datatypes.SoftLayer_Security_Ssh_Key
 		//		sshClient     util.SshClient
+		vmId int
 
 		accountService      softlayer.SoftLayer_Account_Service
 		virtualGuestService softlayer.SoftLayer_Virtual_Guest_Service
@@ -128,7 +129,7 @@ var _ = Describe("BOSH Director Level Integration for attach_disk", func() {
 			Expect(resultOutput["error"]).To(BeNil())
 
 			id := resultOutput["result"].(string)
-			vmId, err := strconv.Atoi(id)
+			vmId, err = strconv.Atoi(id)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(vmId).ToNot(BeNil())
 			log.Println("---> created vm ", vmId)
@@ -156,8 +157,10 @@ var _ = Describe("BOSH Director Level Integration for attach_disk", func() {
 		})
 
 		AfterEach(func() {
-			testhelpers.DeleteVirtualGuest(virtualGuest.Id)
-			testhelpers.WaitForVirtualGuestToHaveNoActiveTransactionsOrToErr(virtualGuest.Id)
+			//testhelpers.DeleteVirtualGuest(virtualGuest.Id)
+			//testhelpers.WaitForVirtualGuestToHaveNoActiveTransactionsOrToErr(virtualGuest.Id)
+			testhelpers.DeleteVirtualGuest(vmId)
+			testhelpers.WaitForVirtualGuestToHaveNoActiveTransactionsOrToErr(vmId)
 			testhelpers.DeleteDisk(disk.Id)
 			testhelpers.DeleteSshKey(createdSshKey.Id)
 		})
