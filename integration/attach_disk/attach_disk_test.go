@@ -12,7 +12,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	testhelperscpi "github.com/maximilien/bosh-softlayer-cpi/test_helpers"
-	//	util "github.com/maximilien/bosh-softlayer-cpi/util"
+	util "github.com/maximilien/bosh-softlayer-cpi/util"
 	slclient "github.com/maximilien/softlayer-go/client"
 	datatypes "github.com/maximilien/softlayer-go/data_types"
 	softlayer "github.com/maximilien/softlayer-go/softlayer"
@@ -33,8 +33,8 @@ var _ = Describe("BOSH Director Level Integration for attach_disk", func() {
 		//virtualGuest  datatypes.SoftLayer_Virtual_Guest
 		disk          datatypes.SoftLayer_Network_Storage
 		createdSshKey datatypes.SoftLayer_Security_Ssh_Key
-		//		sshClient     util.SshClient
-		vmId int
+		sshClient     util.SshClient
+		vmId          int
 
 		accountService      softlayer.SoftLayer_Account_Service
 		virtualGuestService softlayer.SoftLayer_Virtual_Guest_Service
@@ -102,7 +102,7 @@ var _ = Describe("BOSH Director Level Integration for attach_disk", func() {
 		})
 	})
 
-	Context("attach_disk in SoftLayer with valid virtual guest id(NO multipath installed) and disk id", func() {
+	/*	Context("attach_disk in SoftLayer with valid virtual guest id(NO multipath installed) and disk id", func() {
 		BeforeEach(func() {
 			err = testhelpers.FindAndDeleteTestSshKeys()
 			Expect(err).ToNot(HaveOccurred())
@@ -181,9 +181,9 @@ var _ = Describe("BOSH Director Level Integration for attach_disk", func() {
 			Expect(resultOutput["result"]).To(BeNil())
 			Expect(resultOutput["error"]).To(BeNil())
 		})
-	})
+	})*/
 
-		Context("attach_disk in SoftLayer with valid virtual guest id(with multipath installed) and disk id", func() {
+	Context("attach_disk in SoftLayer with valid virtual guest id(with multipath installed) and disk id", func() {
 		BeforeEach(func() {
 			err = testhelpers.FindAndDeleteTestSshKeys()
 			Expect(err).ToNot(HaveOccurred())
@@ -237,7 +237,7 @@ var _ = Describe("BOSH Director Level Integration for attach_disk", func() {
 			}
 
 			log.Println("---> installing multipath-tools to created vm ", vmId)
-			passwords := virtualGuest.OperatingSystem.Passwords
+			passwords := vm.OperatingSystem.Passwords
 			var rootPassword string
 			for _, password := range passwords {
 				if password.Username == "root" {
@@ -246,7 +246,7 @@ var _ = Describe("BOSH Director Level Integration for attach_disk", func() {
 			}
 
 			command := "apt-get install multipath-tools"
-			_, err1 := sshClient.ExecCommand("root", rootPassword, virtualGuest.PrimaryBackendIpAddress, command)
+			_, err1 := sshClient.ExecCommand("root", rootPassword, vm.PrimaryBackendIpAddress, command)
 			Expect(err1).ToNot(HaveOccurred())
 			log.Println("---> multipath-tools installed")
 		})
@@ -276,5 +276,5 @@ var _ = Describe("BOSH Director Level Integration for attach_disk", func() {
 			Expect(resultOutput["result"]).To(BeNil())
 			Expect(resultOutput["error"]).To(BeNil())
 		})
-	}) 
+	})
 })
