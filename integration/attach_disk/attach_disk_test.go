@@ -183,7 +183,7 @@ var _ = Describe("BOSH Director Level Integration for attach_disk", func() {
 		})
 	})
 
-/*		Context("attach_disk in SoftLayer with valid virtual guest id(with multipath installed) and disk id", func() {
+		Context("attach_disk in SoftLayer with valid virtual guest id(with multipath installed) and disk id", func() {
 		BeforeEach(func() {
 			err = testhelpers.FindAndDeleteTestSshKeys()
 			Expect(err).ToNot(HaveOccurred())
@@ -252,8 +252,10 @@ var _ = Describe("BOSH Director Level Integration for attach_disk", func() {
 		})
 
 		AfterEach(func() {
-			testhelpers.DeleteVirtualGuest(virtualGuest.Id)
-			testhelpers.WaitForVirtualGuestToHaveNoActiveTransactionsOrToErr(virtualGuest.Id)
+			//testhelpers.DeleteVirtualGuest(virtualGuest.Id)
+			//testhelpers.WaitForVirtualGuestToHaveNoActiveTransactionsOrToErr(virtualGuest.Id)
+			testhelpers.DeleteVirtualGuest(vmId)
+			testhelpers.WaitForVirtualGuestToHaveNoActiveTransactionsOrToErr(vmId)
 			testhelpers.DeleteDisk(disk.Id)
 			testhelpers.DeleteSshKey(createdSshKey.Id)
 		})
@@ -261,6 +263,10 @@ var _ = Describe("BOSH Director Level Integration for attach_disk", func() {
 		It("attach_disk successfully", func() {
 			jsonPayload, err := testhelperscpi.GenerateCpiJsonPayload("attach_disk", rootTemplatePath, replacementMap)
 			Expect(err).ToNot(HaveOccurred())
+
+			log.Println("jsonPayload --> ", jsonPayload)
+
+			log.Println("---> starting attach disk")
 
 			outputBytes, err := testhelperscpi.RunCpi(rootTemplatePath, tmpConfigPath, jsonPayload)
 			log.Println("outputBytes=" + string(outputBytes))
@@ -270,5 +276,5 @@ var _ = Describe("BOSH Director Level Integration for attach_disk", func() {
 			Expect(resultOutput["result"]).To(BeNil())
 			Expect(resultOutput["error"]).To(BeNil())
 		})
-	}) */
+	}) 
 })
