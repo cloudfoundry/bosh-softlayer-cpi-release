@@ -183,7 +183,7 @@ var _ = Describe("BOSH Director Level Integration for attach_disk", func() {
 		})
 	})
 
-	/*	Context("attach_disk in SoftLayer with valid virtual guest id(with multipath installed) and disk id", func() {
+		Context("attach_disk in SoftLayer with valid virtual guest id(with multipath installed) and disk id", func() {
 		BeforeEach(func() {
 			err = testhelpers.FindAndDeleteTestSshKeys()
 			Expect(err).ToNot(HaveOccurred())
@@ -191,24 +191,52 @@ var _ = Describe("BOSH Director Level Integration for attach_disk", func() {
 			createdSshKey, _ = testhelpers.CreateTestSshKey()
 			testhelpers.WaitForCreatedSshKeyToBePresent(createdSshKey.Id)
 
-			virtualGuest = testhelpers.CreateVirtualGuestAndMarkItTest([]datatypes.SoftLayer_Security_Ssh_Key{createdSshKey})
+			//virtualGuest = testhelpers.CreateVirtualGuestAndMarkItTest([]datatypes.SoftLayer_Security_Ssh_Key{createdSshKey})
+			createvmJsonPath := filepath.Join(rootTemplatePath, "dev", "create_vm.json")
+			f, err := os.Open(createvmJsonPath)
+			Expect(err).ToNot(HaveOccurred())
+			defer f.Close()
+			fb, err := ioutil.ReadAll(f)
+			Expect(err).ToNot(HaveOccurred())
+			jsonPayload := string(fb)
+			log.Println("jsonPayload --> ", jsonPayload)
 
-			testhelpers.WaitForVirtualGuestToBeRunning(virtualGuest.Id)
-			testhelpers.WaitForVirtualGuestToHaveNoActiveTransactions(virtualGuest.Id)
+			log.Println("---> starting create vm")
+			outputBytes, err := testhelperscpi.RunCpi(rootTemplatePath, tmpConfigPath, jsonPayload)
+			log.Println("outputBytes=" + string(outputBytes))
+			Expect(err).ToNot(HaveOccurred())
+			err = json.Unmarshal(outputBytes, &resultOutput)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(resultOutput["error"]).To(BeNil())
 
-			vm, err := virtualGuestService.GetObject(virtualGuest.Id)
+			id := resultOutput["result"].(string)
+			vmId, err = strconv.Atoi(id)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(vmId).ToNot(BeNil())
+			log.Println("---> created vm ", vmId)
+			//
+
+			//			testhelpers.WaitForVirtualGuestToBeRunning(virtualGuest.Id)
+			//			testhelpers.WaitForVirtualGuestToHaveNoActiveTransactions(virtualGuest.Id)
+			testhelpers.WaitForVirtualGuestToBeRunning(vmId)
+			testhelpers.WaitForVirtualGuestToHaveNoActiveTransactions(vmId)
+
+			//vm, err := virtualGuestService.GetObject(virtualGuest.Id)
+			vm, err := virtualGuestService.GetObject(vmId)
 			Expect(err).ToNot(HaveOccurred())
 
 			disk = testhelpers.CreateDisk(20, strconv.Itoa(vm.Datacenter.Id))
 
-			strVGID = strconv.Itoa(virtualGuest.Id)
+			//strVGID = strconv.Itoa(virtualGuest.Id)
+			strVGID = strconv.Itoa(vmId)
 			strDID = strconv.Itoa(disk.Id)
 
 			replacementMap = map[string]string{
-				"vmID":   strVGID,
-				"diskID": strDID,
+				"VMID":   strVGID,
+				"DiskID": strDID,
 			}
 
+			log.Println("---> installing multipath-tools to created vm ", vmId)
 			passwords := virtualGuest.OperatingSystem.Passwords
 			var rootPassword string
 			for _, password := range passwords {
@@ -220,6 +248,7 @@ var _ = Describe("BOSH Director Level Integration for attach_disk", func() {
 			command := "apt-get install multipath-tools"
 			_, err1 := sshClient.ExecCommand("root", rootPassword, virtualGuest.PrimaryBackendIpAddress, command)
 			Expect(err1).ToNot(HaveOccurred())
+			log.Println("---> multipath-tools installed")
 		})
 
 		AfterEach(func() {
@@ -241,5 +270,5 @@ var _ = Describe("BOSH Director Level Integration for attach_disk", func() {
 			Expect(resultOutput["result"]).To(BeNil())
 			Expect(resultOutput["error"]).To(BeNil())
 		})
-	}) */
+	}) 
 })

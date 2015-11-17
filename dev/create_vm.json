@@ -5,7 +5,6 @@
     "477767",
     {
       "vmNamePrefix": "ecpi-test",
-	  "ephemeralDiskSize": 25,
       "domain": "softlayer.com",
       "startCpus": 1,
       "maxMemory": 1024,
