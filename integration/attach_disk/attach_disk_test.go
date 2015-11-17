@@ -246,6 +246,7 @@ var _ = Describe("BOSH Director Level Integration for attach_disk", func() {
 			}
 
 			command := "apt-get install multipath-tools"
+			sshClient = util.GetSshClient()
 			_, err1 := sshClient.ExecCommand("root", rootPassword, vm.PrimaryBackendIpAddress, command)
 			Expect(err1).ToNot(HaveOccurred())
 			log.Println("---> multipath-tools installed")
