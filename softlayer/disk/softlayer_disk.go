@@ -6,7 +6,7 @@ import (
 	slc "github.com/maximilien/softlayer-go/softlayer"
 )
 
-const softLayerDiskLogTag = "SoftLayerDisk"
+const SOFTLAYER_DISK_LOG_TAG = "SoftLayerDisk"
 
 type SoftLayerDisk struct {
 	id              int
@@ -25,7 +25,7 @@ func NewSoftLayerDisk(id int, client slc.Client, logger boshlog.Logger) SoftLaye
 func (s SoftLayerDisk) ID() int { return s.id }
 
 func (s SoftLayerDisk) Delete() error {
-	s.logger.Debug(softLayerDiskLogTag, "Deleting disk '%s'", s.id)
+	s.logger.Debug(SOFTLAYER_DISK_LOG_TAG, "Deleting disk '%s'", s.id)
 
 	service, err := s.softLayerClient.GetSoftLayer_Network_Storage_Service()
 	if err != nil {

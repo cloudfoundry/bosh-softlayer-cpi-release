@@ -6,7 +6,7 @@ import (
 	slc "github.com/maximilien/softlayer-go/softlayer"
 )
 
-const softLayerFinderLogTag = "SoftLayerFinder"
+const SOFTLAYER_DISK_FINDER_LOG_TAG = "SoftLayerDiskFinder"
 
 type SoftLayerFinder struct {
 	softLayerClient slc.Client
@@ -18,7 +18,7 @@ func NewSoftLayerDiskFinder(client slc.Client, logger boshlog.Logger) SoftLayerF
 }
 
 func (f SoftLayerFinder) Find(id int) (Disk, bool, error) {
-	f.logger.Debug(softLayerFinderLogTag, "Finding disk '%s'", id)
+	f.logger.Debug(SOFTLAYER_DISK_FINDER_LOG_TAG, "Finding disk '%s'", id)
 
 	service, err := f.softLayerClient.GetSoftLayer_Network_Storage_Service()
 	if err != nil {

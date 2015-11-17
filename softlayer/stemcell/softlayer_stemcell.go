@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	softLayerStemcellLogTag = "SoftLayerStemcell"
+	SOFTLAYER_STEMCELL_LOG_TAG = "SoftLayerStemcell"
 
 	VirtualDiskImageKind                = "VirtualDiskImage"
 	VirtualGuestDeviceTemplateGroupKind = "VirtualGuestDeviceTemplateGroup"
