@@ -511,13 +511,13 @@ func (vm SoftLayerVM) restartOpenIscsiBasedOnShellScript(virtualGuest datatypes.
 }
 
 func (vm SoftLayerVM) discoveryOpenIscsiTargetsBasedOnShellScript(virtualGuest datatypes.SoftLayer_Virtual_Guest, volume datatypes.SoftLayer_Network_Storage) (bool, error) {
-	command := fmt.Sprintf("sleep 2; iscsiadm -m discovery -t sendtargets -p %s", volume.ServiceResourceBackendIpAddress)
+	command := fmt.Sprintf("sleep 5; iscsiadm -m discovery -t sendtargets -p %s", volume.ServiceResourceBackendIpAddress)
 	_, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, command)
 	if err != nil {
-		return false, bosherr.WrapError(err, "discvoerying open iscsi targets")
+		return false, bosherr.WrapError(err, "discoverying open iscsi targets")
 	}
 
-	command = "sleep 2; echo `iscsiadm -m node -l`"
+	command = "sleep 5; echo `iscsiadm -m node -l`"
 	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, command)
 	if err != nil {
 		return false, bosherr.WrapError(err, "login iscsi targets")
@@ -639,7 +639,7 @@ func (vm SoftLayerVM) detachVolumeBasedOnShellScript(virtualGuest datatypes.Soft
 }
 
 func (vm SoftLayerVM) findOpenIscsiTargetBasedOnShellScript(virtualGuest datatypes.SoftLayer_Virtual_Guest) ([]string, error) {
-	command := "sleep 2 ; iscsiadm -m session -P3 | awk '/Target: /{print $2}'"
+	command := "sleep 5 ; iscsiadm -m session -P3 | awk '/Target: /{print $2}'"
 	output, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, command)
 	if err != nil {
 		return []string{}, err
@@ -659,7 +659,7 @@ func (vm SoftLayerVM) findOpenIscsiTargetBasedOnShellScript(virtualGuest datatyp
 }
 
 func (vm SoftLayerVM) findOpenIscsiPortalsBasedOnShellScript(virtualGuest datatypes.SoftLayer_Virtual_Guest, volume datatypes.SoftLayer_Network_Storage) ([]string, error) {
-	command := "sleep 2 ; iscsiadm -m session -P3 | awk 'BEGIN{ lel=0} { if($0 ~ /Current Portal: /){ portal = $3 ; lel=NR } else { if( NR==(lel+46) && $0 ~ /Attached scsi disk /) {print portal}}}'"
+	command := "sleep 5 ; iscsiadm -m session -P3 | awk 'BEGIN{ lel=0} { if($0 ~ /Current Portal: /){ portal = $3 ; lel=NR } else { if( NR==(lel+46) && $0 ~ /Attached scsi disk /) {print portal}}}'"
 	output, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, command)
 	if err != nil {
 		return []string{}, err
