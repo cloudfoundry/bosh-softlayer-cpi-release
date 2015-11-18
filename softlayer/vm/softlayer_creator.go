@@ -23,7 +23,7 @@ import (
 	util "github.com/maximilien/bosh-softlayer-cpi/util"
 )
 
-const softLayerCreatorLogTag = "SoftLayerCreator"
+const SOFTLAYER_VM_CREATOR_LOG_TAG = "SoftLayerVMCreator"
 
 type SoftLayerCreator struct {
 	softLayerClient        sl.Client

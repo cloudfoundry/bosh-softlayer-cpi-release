@@ -9,7 +9,7 @@ import (
 	sl "github.com/maximilien/softlayer-go/softlayer"
 )
 
-const softLayerCreatorLogTag = "SoftLayerCreator"
+const SOFTLAYER_DISK_CREATOR_LOG_TAG = "SoftLayerDiskCreator"
 
 type SoftLayerCreator struct {
 	softLayerClient sl.Client
@@ -24,7 +24,7 @@ func NewSoftLayerDiskCreator(client sl.Client, logger boshlog.Logger) SoftLayerC
 }
 
 func (c SoftLayerCreator) Create(size int, cloudProps DiskCloudProperties, virtualGuestId int) (Disk, error) {
-	c.logger.Debug(softLayerCreatorLogTag, "Creating disk of size '%d'", size)
+	c.logger.Debug(SOFTLAYER_DISK_CREATOR_LOG_TAG, "Creating disk of size '%d'", size)
 
 	vmService, err := c.softLayerClient.GetSoftLayer_Virtual_Guest_Service()
 	if err != nil {

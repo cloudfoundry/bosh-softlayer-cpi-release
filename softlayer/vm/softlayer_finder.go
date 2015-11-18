@@ -12,7 +12,7 @@ import (
 	sl "github.com/maximilien/softlayer-go/softlayer"
 )
 
-const softLayerFinderLogTag = "SoftLayerFinder"
+const SOFTLAYER_VM_FINDER_LOG_TAG = "SoftLayerVMFinder"
 
 type SoftLayerFinder struct {
 	softLayerClient        sl.Client

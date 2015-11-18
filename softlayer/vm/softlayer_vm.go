@@ -25,9 +25,8 @@ import (
 )
 
 const (
-	softLayerVMtag = "SoftLayerVM"
-	ROOT_USER_NAME = "root"
-	deleteVMLogTag = "DeleteVM"
+	SOFTLAYER_VM_LOG_TAG = "SoftLayerVM"
+	ROOT_USER_NAME       = "root"
 )
 
 type SoftLayerVM struct {
@@ -264,51 +263,17 @@ func (vm SoftLayerVM) DetachDisk(disk bslcdisk.Disk) error {
 
 	if len(newAgentEnv.Disks.Persistent) == 1 {
 		for key, _ := range newAgentEnv.Disks.Persistent {
-			existingDiskId, err := strconv.Atoi(key)
+			leftDiskId, err := strconv.Atoi(key)
 			if err != nil {
 				return bosherr.WrapError(err, fmt.Sprintf("Failed to transfer disk id %s from string to int", key))
 			}
-
-			virtualGuest, volume, err := vm.fetchVMandIscsiVolume(vm.ID(), existingDiskId)
+			vm.logger.Debug(SOFTLAYER_VM_LOG_TAG, "Left Disk Id %d", leftDiskId)
+			virtualGuest, volume, err := vm.fetchVMandIscsiVolume(vm.ID(), leftDiskId)
 			if err != nil {
 				return bosherr.WrapError(err, fmt.Sprintf("Failed to fetch disk `%d` and virtual gusest `%d`", disk.ID(), virtualGuest.Id))
 			}
 
-			networkStorageService, err := vm.softLayerClient.GetSoftLayer_Network_Storage_Service()
-			if err != nil {
-				return bosherr.WrapError(err, "Cannot get network storage service.")
-			}
-
-			allowed, err := networkStorageService.HasAllowedVirtualGuest(existingDiskId, vm.ID())
-
-			totalTime := time.Duration(0)
-			if err == nil && allowed == false {
-				for totalTime < bslcommon.TIMEOUT {
-					allowable, err := networkStorageService.AttachIscsiVolume(virtualGuest, existingDiskId)
-					if err != nil {
-						return bosherr.WrapError(err, fmt.Sprintf("Granting volume access to vitrual guest %d", virtualGuest.Id))
-					} else {
-
-						if allowable {
-							break
-						}
-					}
-					totalTime += bslcommon.POLLING_INTERVAL
-					time.Sleep(bslcommon.POLLING_INTERVAL)
-				}
-			}
-			if totalTime >= bslcommon.TIMEOUT {
-				return bosherr.Error("Waiting for grantting access to virutal guest TIME OUT!")
-			}
-
-			deviceName, err := vm.waitForVolumeAttached(virtualGuest, volume, hasMultiPath)
-			if err != nil {
-				return bosherr.WrapError(err, fmt.Sprintf("Failed to reattach volume `%s` to virtual guest `%d`", key, virtualGuest.Id))
-			}
-
-			if len(deviceName) > 0 {
-				return nil
-			} else {
+			if _, err = vm.discoveryOpenIscsiTargetsBasedOnShellScript(virtualGuest, volume); err != nil {
 				return bosherr.WrapError(err, fmt.Sprintf("Failed to reattach volume `%s` to virtual guest `%d`", key, virtualGuest.Id))
 			}
 		}
@@ -339,7 +304,6 @@ func (vm SoftLayerVM) parseTags(value string) []string {
 }
 
 func (vm SoftLayerVM) waitForVolumeAttached(virtualGuest datatypes.SoftLayer_Virtual_Guest, volume datatypes.SoftLayer_Network_Storage, hasMultiPath bool) (string, error) {
-	var deviceName string
 
 	oldDisks, err := vm.getIscsiDeviceNamesBasedOnShellScript(virtualGuest, hasMultiPath)
 	if err != nil {
@@ -354,27 +318,34 @@ func (vm SoftLayerVM) waitForVolumeAttached(virtualGuest datatypes.SoftLayer_Vir
 		return "", bosherr.WrapError(err, fmt.Sprintf("Failed to get iscsi host auth from virtual guest `%d`", virtualGuest.Id))
 	}
 
-	if _, err = vm.backupOpenIscsiConfBasedOnShellScript(virtualGuest); err != nil {
+	_, err = vm.backupOpenIscsiConfBasedOnShellScript(virtualGuest)
+	if err != nil {
 		return "", bosherr.WrapError(err, fmt.Sprintf("Failed to backup open iscsi conf files from virtual guest `%d`", virtualGuest.Id))
 	}
 
-	if _, err = vm.writeOpenIscsiInitiatornameBasedOnShellScript(virtualGuest, credential); err != nil {
+	_, err = vm.writeOpenIscsiInitiatornameBasedOnShellScript(virtualGuest, credential)
+	if err != nil {
 		return "", bosherr.WrapError(err, fmt.Sprintf("Failed to write open iscsi initiatorname from virtual guest `%d`", virtualGuest.Id))
 	}
 
-	if _, err = vm.writeOpenIscsiConfBasedOnShellScript(virtualGuest, volume, credential); err != nil {
+	_, err = vm.writeOpenIscsiConfBasedOnShellScript(virtualGuest, volume, credential)
+	if err != nil {
 		return "", bosherr.WrapError(err, fmt.Sprintf("Failed to write open iscsi conf from virtual guest `%d`", virtualGuest.Id))
 	}
 
-	if _, err = vm.restartOpenIscsiBasedOnShellScript(virtualGuest); err != nil {
+	_, err = vm.restartOpenIscsiBasedOnShellScript(virtualGuest)
+	if err != nil {
 		return "", bosherr.WrapError(err, fmt.Sprintf("Failed to restart open iscsi from virtual guest `%d`", virtualGuest.Id))
 	}
 
+	_, err = vm.discoveryOpenIscsiTargetsBasedOnShellScript(virtualGuest, volume)
+	if err != nil {
+		return "", bosherr.WrapErrorf(err, "Failed to attach volume with id %d to virtual guest with id: %d.", volume.Id, virtualGuest.Id)
+	}
+
+	var deviceName string
 	totalTime := time.Duration(0)
 	for totalTime < bslcommon.TIMEOUT {
-		if _, err = vm.discoveryOpenIscsiTargetsBasedOnShellScript(virtualGuest, volume); err != nil {
-			return "", bosherr.WrapErrorf(err, "Failed to attach volume with id %d to virtual guest with id: %d.", volume.Id, virtualGuest.Id)
-		}
 		newDisks, err := vm.getIscsiDeviceNamesBasedOnShellScript(virtualGuest, hasMultiPath)
 		if err != nil {
 			return "", bosherr.WrapError(err, fmt.Sprintf("Failed to get devices names from virtual guest `%d`", virtualGuest.Id))
@@ -421,6 +392,7 @@ func (vm SoftLayerVM) hasMulitPathToolBasedOnShellScript(virtualGuest datatypes.
 	if len(output) > 0 && strings.Contains(output, "multipath") {
 		return true, nil
 	}
+
 	return false, nil
 }
 
@@ -459,6 +431,7 @@ func (vm SoftLayerVM) getIscsiDeviceNamesBasedOnShellScript(virtualGuest datatyp
 			}
 		}
 	}
+
 	return devices, nil
 }
 
@@ -538,10 +511,10 @@ func (vm SoftLayerVM) restartOpenIscsiBasedOnShellScript(virtualGuest datatypes.
 }
 
 func (vm SoftLayerVM) discoveryOpenIscsiTargetsBasedOnShellScript(virtualGuest datatypes.SoftLayer_Virtual_Guest, volume datatypes.SoftLayer_Network_Storage) (bool, error) {
-	command := fmt.Sprintf("sleep 5; iscsiadm -m discoverydb -t sendtargets -p %s -o new -o delete --discover", volume.ServiceResourceBackendIpAddress)
+	command := fmt.Sprintf("sleep 5; iscsiadm -m discovery -t sendtargets -p %s", volume.ServiceResourceBackendIpAddress)
 	_, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, command)
 	if err != nil {
-		return false, bosherr.WrapError(err, "discvoerying open iscsi targets")
+		return false, bosherr.WrapError(err, "discoverying open iscsi targets")
 	}
 
 	command = "sleep 5; echo `iscsiadm -m node -l`"
@@ -608,75 +581,58 @@ discovery.sendtargets.auth.authmethod = CHAP
 discovery.sendtargets.auth.username = {{.Username}}
 discovery.sendtargets.auth.password = {{.Password}}
 node.session.timeo.replacement_timeout = 120
-node.conn[0].timeo.noop_out_interval = 5
-node.conn[0].timeo.noop_out_timeout = 10
+node.conn[0].timeo.login_timeout = 15
+node.conn[0].timeo.logout_timeout = 15
+node.conn[0].timeo.noop_out_interval = 10
+node.conn[0].timeo.noop_out_timeout = 15
+node.session.iscsi.InitialR2T = No
+node.session.iscsi.ImmediateData = Yes
+node.session.iscsi.FirstBurstLength = 262144
+node.session.iscsi.MaxBurstLength = 16776192
+node.conn[0].iscsi.MaxRecvDataSegmentLength = 65536
 `
 
 func (vm SoftLayerVM) detachVolumeBasedOnShellScript(virtualGuest datatypes.SoftLayer_Virtual_Guest, volume datatypes.SoftLayer_Network_Storage, hasMultiPath bool) error {
-	targets, err := vm.findOpenIscsiTargetBasedOnShellScript(virtualGuest)
-	if err != nil {
-		return err
-	}
-
-	if len(targets) == 1 {
-		portals, err := vm.findOpenIscsiPortalsBasedOnShellScript(virtualGuest, volume)
-		if err != nil {
-			return err
-		}
-
-		for _, portal := range portals {
-			step1 := fmt.Sprintf("iscsiadm -m node -T %s --portal %s:3260 -u", targets[0], portal)
-			_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, step1)
-			if err != nil {
-				return bosherr.WrapErrorf(err, "Logout portal: %s", portal)
-			}
-
-			step2 := fmt.Sprintf("iscsiadm -m node -o delete -T %s:3260 --portal %s", targets[0], portal)
-			_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, step2)
-			if err != nil {
-				return bosherr.WrapErrorf(err, "Removing iSCSI portal: %s", portal)
-			}
-
-			step3 := fmt.Sprintf("iscsiadm -m discoverydb -t sendtargets -p %s:3260 -o delete", portal)
-			_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, step3)
-			if err != nil {
-				return bosherr.WrapErrorf(err, "Deleting discovery record from portal: %s", portal)
-			}
-		}
-	} else {
-		step1 := fmt.Sprintf("iscsiadm -m node -u")
-		_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, step1)
-		if err != nil {
-			return bosherr.WrapErrorf(err, "Logout all portals")
-		}
-	}
-
-	// clean up /etc/iscsi/send_targets/
-	step4 := fmt.Sprintf("rm -r /etc/iscsi/send_targets/")
-	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, step4)
-	if err != nil {
-		return bosherr.WrapError(err, "Removing /etc/iscsi/send_targets/")
-	}
-	// clean up /etc/iscsi/nodes/
-	step5 := fmt.Sprintf("rm -r /etc/iscsi/nodes/")
-	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, step5)
-	if err != nil {
-		return bosherr.WrapError(err, "Removing /etc/iscsi/nodes/")
-	}
-	// restart open-iscsi
-	step6 := fmt.Sprintf("/etc/init.d/open-iscsi restart")
-	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, step6)
+	// stop open-iscsi
+	step1 := fmt.Sprintf("/etc/init.d/open-iscsi stop")
+	_, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, step1)
 	if err != nil {
 		return bosherr.WrapError(err, "Restarting open iscsi")
 	}
+	vm.logger.Debug(SOFTLAYER_VM_LOG_TAG, "/etc/init.d/open-iscsi stop", nil)
+
+	// clean up /etc/iscsi/send_targets/
+	step2 := fmt.Sprintf("rm -r /etc/iscsi/send_targets/")
+	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, step2)
+	if err != nil {
+		return bosherr.WrapError(err, "Removing /etc/iscsi/send_targets/")
+	}
+	vm.logger.Debug(SOFTLAYER_VM_LOG_TAG, "rm -r /etc/iscsi/send_targets/", nil)
+
+	// clean up /etc/iscsi/nodes/
+	step3 := fmt.Sprintf("rm -r /etc/iscsi/nodes/")
+	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, step3)
+	if err != nil {
+		return bosherr.WrapError(err, "Removing /etc/iscsi/nodes/")
+	}
+	vm.logger.Debug(SOFTLAYER_VM_LOG_TAG, "rm -r /etc/iscsi/nodes/", nil)
+
+	// start open-iscsi
+	step4 := fmt.Sprintf("/etc/init.d/open-iscsi start")
+	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, step4)
+	if err != nil {
+		return bosherr.WrapError(err, "Restarting open iscsi")
+	}
+	vm.logger.Debug(SOFTLAYER_VM_LOG_TAG, "/etc/init.d/open-iscsi start", nil)
 
 	if hasMultiPath {
 		// restart dm-multipath tool
-		step7 := fmt.Sprintf("service multipath-tools restart")
-		_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, step7)
+		step5 := fmt.Sprintf("service multipath-tools restart")
+		_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, step5)
 		if err != nil {
 			return bosherr.WrapError(err, "Restarting Multipath deamon")
 		}
+		vm.logger.Debug(SOFTLAYER_VM_LOG_TAG, "service multipath-tools restart", nil)
 	}
 
 	return nil
@@ -743,7 +699,7 @@ func (vm SoftLayerVM) postCheckActiveTransactionsForDeleteVM(softLayerClient sl.
 		}
 
 		if len(activeTransactions) > 0 {
-			vm.logger.Info(deleteVMLogTag, "Delete VM transaction started", nil)
+			vm.logger.Info(SOFTLAYER_VM_LOG_TAG, "Delete VM transaction started", nil)
 			break
 		}
 
@@ -759,7 +715,7 @@ func (vm SoftLayerVM) postCheckActiveTransactionsForDeleteVM(softLayerClient sl.
 	for totalTime < bslcommon.TIMEOUT {
 		vm1, err := virtualGuestService.GetObject(virtualGuestId)
 		if err != nil || vm1.Id == 0 {
-			vm.logger.Info(deleteVMLogTag, "VM doesn't exist. Delete done", nil)
+			vm.logger.Info(SOFTLAYER_VM_LOG_TAG, "VM doesn't exist. Delete done", nil)
 			break
 		}
 
@@ -779,11 +735,11 @@ func (vm SoftLayerVM) postCheckActiveTransactionsForDeleteVM(softLayerClient sl.
 		}
 
 		if averageTransactionDuration > 30 {
-			vm.logger.Info(deleteVMLogTag, "Deleting VM instance had been launched and it is a long transaction. Please check Softlayer Portal", nil)
+			vm.logger.Info(SOFTLAYER_VM_LOG_TAG, "Deleting VM instance had been launched and it is a long transaction. Please check Softlayer Portal", nil)
 			break
 		}
 
-		vm.logger.Info(deleteVMLogTag, "This is a short transaction, waiting for all active transactions to complete", nil)
+		vm.logger.Info(SOFTLAYER_VM_LOG_TAG, "This is a short transaction, waiting for all active transactions to complete", nil)
 		totalTime += bslcommon.POLLING_INTERVAL
 		time.Sleep(bslcommon.POLLING_INTERVAL)
 	}
