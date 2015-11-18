@@ -102,7 +102,7 @@ var _ = Describe("BOSH Director Level Integration for attach_disk", func() {
 		})
 	})
 
-	/*	Context("attach_disk in SoftLayer with valid virtual guest id(with multipath installed) and disk id", func() {
+	Context("attach_disk in SoftLayer with valid virtual guest id(with multipath installed) and disk id", func() {
 		BeforeEach(func() {
 			err = testhelpers.FindAndDeleteTestSshKeys()
 			Expect(err).ToNot(HaveOccurred())
@@ -181,7 +181,7 @@ var _ = Describe("BOSH Director Level Integration for attach_disk", func() {
 			Expect(resultOutput["result"]).To(BeNil())
 			Expect(resultOutput["error"]).To(BeNil())
 		})
-	})*/
+	})
 
 	Context("attach_disk in SoftLayer with valid virtual guest id(with no multipath installed) and disk id", func() {
 		BeforeEach(func() {
@@ -256,9 +256,9 @@ var _ = Describe("BOSH Director Level Integration for attach_disk", func() {
 		AfterEach(func() {
 			//testhelpers.DeleteVirtualGuest(virtualGuest.Id)
 			//testhelpers.WaitForVirtualGuestToHaveNoActiveTransactionsOrToErr(virtualGuest.Id)
-			//testhelpers.DeleteVirtualGuest(vmId)
-			//testhelpers.WaitForVirtualGuestToHaveNoActiveTransactionsOrToErr(vmId)
-			//testhelpers.DeleteDisk(disk.Id)
+			testhelpers.DeleteVirtualGuest(vmId)
+			testhelpers.WaitForVirtualGuestToHaveNoActiveTransactionsOrToErr(vmId)
+			testhelpers.DeleteDisk(disk.Id)
 			testhelpers.DeleteSshKey(createdSshKey.Id)
 		})
 
