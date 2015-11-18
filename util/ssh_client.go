@@ -3,7 +3,6 @@ package util
 import (
 	"code.google.com/p/go.crypto/ssh"
 	"errors"
-	"fmt"
 	"github.com/pkg/sftp"
 	myssh "golang.org/x/crypto/ssh"
 	"io/ioutil"
@@ -34,20 +33,13 @@ func IsDir(d string) (b bool) {
 }
 
 func (c *sshClientImpl) ExecCommand(username string, password string, ip string, command string) (string, error) {
-	fmt.Println("username ---> ", username)
-	fmt.Println("password ---> ", password)
-	fmt.Println("ip ---> ", ip)
-	fmt.Println("command ---> ", command)
-
 	config := &ssh.ClientConfig{
 		User: username,
 		Auth: []ssh.AuthMethod{
 			ssh.Password(password),
 		},
 	}
-	fmt.Println("config ---> ", config)
 	client, err := ssh.Dial("tcp", ip+":22", config)
-	fmt.Println("client ---> ", client)
 
 	session, err := client.NewSession()
 	if err != nil {
