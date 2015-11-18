@@ -192,7 +192,7 @@ var _ = Describe("BOSH Director Level Integration for attach_disk", func() {
 			testhelpers.WaitForCreatedSshKeyToBePresent(createdSshKey.Id)
 
 			//virtualGuest = testhelpers.CreateVirtualGuestAndMarkItTest([]datatypes.SoftLayer_Security_Ssh_Key{createdSshKey})
-			createvmJsonPath := filepath.Join(rootTemplatePath, "dev", "create_vm.json")
+			createvmJsonPath := filepath.Join(rootTemplatePath, "dev", "create_vm_no_multipath.json")
 			f, err := os.Open(createvmJsonPath)
 			Expect(err).ToNot(HaveOccurred())
 			defer f.Close()
@@ -236,7 +236,7 @@ var _ = Describe("BOSH Director Level Integration for attach_disk", func() {
 				"DiskID": strDID,
 			}
 
-			log.Println("---> installing multipath-tools to created vm ", vmId)
+/*			log.Println("---> installing multipath-tools to created vm ", vmId)
 			passwords := vm.OperatingSystem.Passwords
 			var rootPassword string
 			for _, password := range passwords {
@@ -250,7 +250,7 @@ var _ = Describe("BOSH Director Level Integration for attach_disk", func() {
 			op, err1 := sshClient.ExecCommand("root", rootPassword, vm.PrimaryBackendIpAddress, command)
 			log.Println("---> output of install multipath-tools: ", op)
 			Expect(err1).ToNot(HaveOccurred())
-			log.Println("---> multipath-tools installed")
+			log.Println("---> multipath-tools installed") */
 		})
 
 		AfterEach(func() {
