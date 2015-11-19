@@ -14,6 +14,8 @@ type CpiTemplate struct {
 	DirectorUuid string
 	Tags         string
 	Datacenter   string
+	VMID         string
+	DiskID       string
 }
 
 type ConfigTemplate struct {
@@ -57,6 +59,8 @@ func GenerateCpiJsonPayload(methodName string, rootTemplatePath string, replacem
 		DirectorUuid: replacementMap["DirectorUuid"],
 		Tags:         replacementMap["Tags"],
 		Datacenter:   replacementMap["Datacenter"],
+		VMID:         replacementMap["VMID"],
+		DiskID:       replacementMap["DiskID"],
 	}
 
 	t := template.New(fmt.Sprintf("%s.json", methodName))
