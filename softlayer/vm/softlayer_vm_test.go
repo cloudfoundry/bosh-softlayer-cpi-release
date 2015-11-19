@@ -43,7 +43,7 @@ var _ = Describe("SoftLayerVM", func() {
 	})
 
 	Describe("Delete", func() {
-		Context("valid VM ID is used", func() {
+		Context("valid VM ID is used and averageDuration is normal", func() {
 			BeforeEach(func() {
 				fileNames := []string{
 					"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
@@ -72,6 +72,52 @@ var _ = Describe("SoftLayerVM", func() {
 
 				err := vm.Delete()
 				Expect(err).To(HaveOccurred())
+			})
+		})
+
+		Context("valid VM ID is used and averageDuration is \"\"", func() {
+			BeforeEach(func() {
+				fileNames := []string{
+					"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
+					"SoftLayer_Virtual_Guest_Service_deleteObject_true.json",
+					"SoftLayer_Virtual_Guest_Service_getActiveTransactions.json",
+					"SoftLayer_Virtual_Guest_Service_getObject.json",
+					"SoftLayer_Virtual_Guest_Service_getActiveTransaction_ADEmpty.json",
+					"SoftLayer_Virtual_Guest_Service_getEmptyObject.json",
+				}
+				testhelpers.SetTestFixturesForFakeSoftLayerClient(softLayerClient, fileNames)
+			})
+
+			It("deletes the VM successfully", func() {
+				vm = NewSoftLayerVM(1234567, softLayerClient, sshClient, agentEnvService, logger)
+				bslcommon.TIMEOUT = 2 * time.Second
+				bslcommon.POLLING_INTERVAL = 1 * time.Second
+
+				err := vm.Delete()
+				Expect(err).ToNot(HaveOccurred())
+			})
+		})
+
+		Context("valid VM ID is used and averageDuration is invalid", func() {
+			BeforeEach(func() {
+				fileNames := []string{
+					"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
+					"SoftLayer_Virtual_Guest_Service_deleteObject_true.json",
+					"SoftLayer_Virtual_Guest_Service_getActiveTransactions.json",
+					"SoftLayer_Virtual_Guest_Service_getObject.json",
+					"SoftLayer_Virtual_Guest_Service_getActiveTransaction_ADInvalid.json",
+					"SoftLayer_Virtual_Guest_Service_getEmptyObject.json",
+				}
+				testhelpers.SetTestFixturesForFakeSoftLayerClient(softLayerClient, fileNames)
+			})
+
+			It("deletes the VM successfully", func() {
+				vm = NewSoftLayerVM(1234567, softLayerClient, sshClient, agentEnvService, logger)
+				bslcommon.TIMEOUT = 2 * time.Second
+				bslcommon.POLLING_INTERVAL = 1 * time.Second
+
+				err := vm.Delete()
+				Expect(err).ToNot(HaveOccurred())
 			})
 		})
 

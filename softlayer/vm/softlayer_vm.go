@@ -731,7 +731,7 @@ func (vm SoftLayerVM) postCheckActiveTransactionsForDeleteVM(softLayerClient sl.
 
 		averageTransactionDuration, err := strconv.ParseFloat(averageDuration, 32)
 		if err != nil {
-			averageTransactionDuration = 0;
+			averageTransactionDuration = 0
 		}
 
 		if averageTransactionDuration > 30 {
