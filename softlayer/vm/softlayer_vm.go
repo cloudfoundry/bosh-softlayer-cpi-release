@@ -103,19 +103,6 @@ func (vm SoftLayerVM) Delete(agentID string) error {
 	}
 
 	return nil
-	/*
-		vmInfoDB.VmProperties.InUse = ""
-		err = vmInfoDB.QueryVMInfobyID(bslcvmpool.DB_RETRY_TIMEOUT, bslcvmpool.DB_RETRY_INTERVAL)
-		if err != nil {
-			return bosherr.WrapError(err, fmt.Sprintf("Failed to query VM info by given ID %d", vm.id))
-		}
-
-		if vmInfoDB.VmProperties.Id != 0 {
-			return bosherr.WrapError(err, fmt.Sprintf("Wrong in_use status in VM with ID %d, Do not delete this VM", vm.id))
-		} else {
-			return vm.DeleteVM()
-		}*/
-
 }
 
 func (vm SoftLayerVM) DeleteVM() error {
@@ -153,8 +140,7 @@ func (vm SoftLayerVM) DeleteVM() error {
 		vmInfoDB := bslcvmpool.NewVMInfoDB(vm.ID(), "", "", "", "", vm.logger, db)
 		err = vmInfoDB.DeleteVMFromVMDB(bslcvmpool.DB_RETRY_TIMEOUT, bslcvmpool.DB_RETRY_INTERVAL)
 		if err != nil {
-			//return bosherr.WrapError(err, "Failed to delete the record from VM pool DB")
-			return nil
+			return bosherr.WrapError(err, "Failed to delete the record from VM pool DB")
 		}
 	}
 
@@ -199,8 +185,6 @@ func (vm SoftLayerVM) ReloadOS(stemcell bslcstem.Stemcell) error {
 	if err != nil {
 		return bosherr.WrapError(err, "Failed to reload OS on the specified VirtualGuest from SoftLayer client")
 	}
-
-	time.Sleep(1 * time.Minute)
 
 	err = vm.postCheckActiveTransactionsForOSReload(vm.softLayerClient)
 	if err != nil {
