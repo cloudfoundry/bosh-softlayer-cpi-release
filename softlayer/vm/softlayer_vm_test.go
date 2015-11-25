@@ -97,7 +97,7 @@ var _ = Describe("SoftLayerVM", func() {
 				bslcommon.TIMEOUT = 2 * time.Second
 				bslcommon.POLLING_INTERVAL = 1 * time.Second
 
-				err := vm.Delete()
+				err := vm.Delete("")
 				Expect(err).ToNot(HaveOccurred())
 			})
 		})
@@ -120,7 +120,7 @@ var _ = Describe("SoftLayerVM", func() {
 				bslcommon.TIMEOUT = 2 * time.Second
 				bslcommon.POLLING_INTERVAL = 1 * time.Second
 
-				err := vm.Delete()
+				err := vm.Delete("")
 				Expect(err).ToNot(HaveOccurred())
 			})
 		})
