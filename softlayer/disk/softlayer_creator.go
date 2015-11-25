@@ -47,8 +47,6 @@ func (c SoftLayerCreator) Create(size int, cloudProps DiskCloudProperties, virtu
 		return SoftLayerDisk{}, bosherr.WrapError(err, "Create SoftLayer iSCSI disk error.")
 	}
 
-	time.Sleep(2 * time.Minute)
-
 	return NewSoftLayerDisk(disk.Id, c.softLayerClient, c.logger), nil
 }
 
