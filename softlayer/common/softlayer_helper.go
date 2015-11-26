@@ -45,9 +45,9 @@ func AttachEphemeralDiskToVirtualGuest(softLayerClient sl.Client, virtualGuestId
 		return bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` to launch transaction", virtualGuestId)
 	}
 
-	err = WaitForVirtualGuestLastCompleteTransaction(softLayerClient, virtualGuestId, "Cloud Instance Upgrade")
+	err = WaitForVirtualGuestLastCompleteTransaction(softLayerClient, virtualGuestId, "Cloud Migrate")
 	if err != nil {
-		return bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` has Cloud Instance Upgrade transaction complete", virtualGuestId)
+		return bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` has Cloud Migrate transaction complete", virtualGuestId)
 	}
 
 	return nil
