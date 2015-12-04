@@ -50,6 +50,8 @@ func AttachEphemeralDiskToVirtualGuest(softLayerClient sl.Client, virtualGuestId
 		return bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` has Cloud Migrate transaction complete", virtualGuestId)
 	}
 
+	time.Sleep(1 * time.Minute)
+
 	return nil
 }
 
