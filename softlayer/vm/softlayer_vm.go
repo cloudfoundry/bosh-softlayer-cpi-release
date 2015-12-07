@@ -731,9 +731,14 @@ func (vm SoftLayerVM) postCheckActiveTransactionsForDeleteVM(softLayerClient sl.
 			return bosherr.WrapError(err, "Getting active transactions from SoftLayer client")
 		}
 
-		averageTransactionDuration, err := strconv.ParseFloat(activeTransaction.TransactionStatus.AverageDuration, 32)
+		averageDuration := activeTransaction.TransactionStatus.AverageDuration
+		if strings.HasPrefix(averageDuration, ".") || averageDuration == "" {
+			averageDuration = "0" + averageDuration
+		}
+
+		averageTransactionDuration, err := strconv.ParseFloat(averageDuration, 32)
 		if err != nil {
-			return bosherr.WrapError(err, "Parsing float for average transaction duration")
+			averageTransactionDuration = 0
 		}
 
 		if averageTransactionDuration > 30 {

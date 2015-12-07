@@ -3,7 +3,7 @@
   "arguments": [
 	"45632666-9fb1-422a-af35-2ab6102c5c1b",
 	"651103", {
-	  "hostname": "ecpi-test",
+	  "vmNamePrefix": "ecpi-test",
 	  "domain": "softlayer.com",
 	  "startCpus": 1,
 	  "maxMemory": 1024,
