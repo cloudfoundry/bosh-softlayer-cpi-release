@@ -137,27 +137,22 @@ func WaitForVirtualGuestToHaveRunningTransaction(softLayerClient sl.Client, virt
 		return bosherr.WrapError(err, "Creating VirtualGuestService from SoftLayer client")
 	}
 
-	runningTransactionsRetryable := boshretry.NewRetryable(
-		func() (bool, error) {
-			activeTransactions, err := virtualGuestService.GetActiveTransactions(virtualGuestId)
-			if err != nil {
-				return false, bosherr.WrapErrorf(err, "Getting active transaction against vitrual guest %d", virtualGuestId)
-			} else {
-				if len(activeTransactions) == 1 {
-					return false, nil
-				}
-				return true, nil
-			}
-		})
+	totalTime := time.Duration(0)
+	for totalTime < TIMEOUT {
+		activeTransactions, err := virtualGuestService.GetActiveTransactions(virtualGuestId)
+		if err != nil {
+			return bosherr.WrapErrorf(err, "Getting active transaction against vitrual guest %d", virtualGuestId)
+		}
 
-	timeService := clock.NewClock()
-	timeoutRetryStrategy := boshretry.NewTimeoutRetryStrategy(TIMEOUT, POLLING_INTERVAL, runningTransactionsRetryable, timeService, logger)
-	err = timeoutRetryStrategy.Try()
-	if err != nil {
-		return bosherr.Errorf("Waiting for virtual guest with ID '%d' to have active transactions", virtualGuestId)
+		if len(activeTransactions) > 0 {
+			return nil
+		}
+
+		totalTime += POLLING_INTERVAL
+		time.Sleep(POLLING_INTERVAL)
 	}
 
-	return nil
+	return bosherr.Errorf("Waiting for virtual guest with ID '%d' to have no active transactions", virtualGuestId)
 }
 
 func WaitForVirtualGuestToHaveNoRunningTransaction(softLayerClient sl.Client, virtualGuestId int, logger boshlog.Logger) error {
@@ -167,26 +162,23 @@ func WaitForVirtualGuestToHaveNoRunningTransaction(softLayerClient sl.Client, vi
 		return bosherr.WrapError(err, "Creating VirtualGuestService from SoftLayer client")
 	}
 
-	runningTransactionsRetryable := boshretry.NewRetryable(
-		func() (bool, error) {
-			activeTransactions, err := virtualGuestService.GetActiveTransactions(virtualGuestId)
-			if err != nil {
-				return false, bosherr.WrapErrorf(err, "Getting active transaction against vitrual guest %d", virtualGuestId)
-			} else {
-				if len(activeTransactions) == 0 {
-					return false, nil
-				}
-				return true, nil
-			}
-		})
+	totalTime := time.Duration(0)
+	for totalTime < TIMEOUT {
+		activeTransactions, err := virtualGuestService.GetActiveTransactions(virtualGuestId)
+		if err != nil {
+			return bosherr.WrapErrorf(err, "Getting active transaction against vitrual guest %d", virtualGuestId)
+		}
 
-	timeService := clock.NewClock()
-	timeoutRetryStrategy := boshretry.NewTimeoutRetryStrategy(TIMEOUT, POLLING_INTERVAL, runningTransactionsRetryable, timeService, logger)
-	err = timeoutRetryStrategy.Try()
-	if err != nil {
-		return bosherr.Errorf("Waiting for virtual guest with ID '%d' to have no active transactions", virtualGuestId)
+		if len(activeTransactions) == 0 {
+			return nil
+		}
+
+		totalTime += POLLING_INTERVAL
+		time.Sleep(POLLING_INTERVAL)
 	}
-	return nil
+
+	return bosherr.Errorf("Waiting for virtual guest with ID '%d' to have no active transactions", virtualGuestId)
+
 }
 
 func WaitForVirtualGuest(softLayerClient sl.Client, virtualGuestId int, targetState string) error {
