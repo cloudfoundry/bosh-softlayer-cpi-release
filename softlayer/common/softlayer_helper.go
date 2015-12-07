@@ -55,6 +55,16 @@ func AttachEphemeralDiskToVirtualGuest(softLayerClient sl.Client, virtualGuestId
 		return bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` no transcation in progress", virtualGuestId)
 	}
 
+	err = WaitForVirtualGuestUpgradeComplete(softLayerClient, virtualGuestId)
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` upgrade complete", virtualGuestId)
+	}
+
+	err = WaitForVirtualGuest(softLayerClient, virtualGuestId, "RUNNING")
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d`", virtualGuestId)
+	}
+
 	return nil
 }
 
@@ -281,6 +291,34 @@ func WaitForVirtualGuestIsPingable(softLayerClient sl.Client, virtualGuestId int
 		return bosherr.Errorf("Waiting for virtual guest with ID '%d' is not pingable", virtualGuestId)
 	}
 	return nil
+}
+
+func WaitForVirtualGuestUpgradeComplete(softLayerClient sl.Client, virtualGuestId int) error {
+	virtualGuestService, err := softLayerClient.GetSoftLayer_Virtual_Guest_Service()
+	if err != nil {
+		return bosherr.WrapError(err, "Creating VirtualGuestService from SoftLayer client")
+	}
+
+	totalTime := time.Duration(0)
+	for totalTime < TIMEOUT {
+		lastTransaction, err := virtualGuestService.GetLastTransaction(virtualGuestId)
+		if err != nil {
+			return bosherr.WrapErrorf(err, "Getting Last Complete Transaction for virtual guest with ID '%d'", virtualGuestId)
+		}
+
+		if strings.Contains(lastTransaction.TransactionGroup.Name, "Cloud Migrate") && strings.Contains(lastTransaction.TransactionStatus.FriendlyName, "Complete") {
+			return nil
+		}
+
+		if strings.Contains(lastTransaction.TransactionGroup.Name, "Cloud Instance Upgrade") && strings.Contains(lastTransaction.TransactionStatus.FriendlyName, "Complete") {
+			return nil
+		}
+
+		totalTime += POLLING_INTERVAL
+		time.Sleep(POLLING_INTERVAL)
+	}
+
+	return bosherr.Errorf("Waiting for virtual guest with ID '%d' to update complete", virtualGuestId)
 }
 
 func WaitForVirtualGuestToTargetState(softLayerClient sl.Client, virtualGuestId int, targetState string, logger boshlog.Logger) error {
