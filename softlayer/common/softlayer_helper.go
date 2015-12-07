@@ -45,11 +45,6 @@ func AttachEphemeralDiskToVirtualGuest(softLayerClient sl.Client, virtualGuestId
 		return bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` to launch transaction", virtualGuestId)
 	}
 
-	err = WaitForVirtualGuestIsPingable(softLayerClient, virtualGuestId, logger)
-	if err != nil {
-		return bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` pingable", virtualGuestId)
-	}
-
 	err = WaitForVirtualGuestToHaveNoRunningTransaction(softLayerClient, virtualGuestId, logger)
 	if err != nil {
 		return bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` no transcation in progress", virtualGuestId)
