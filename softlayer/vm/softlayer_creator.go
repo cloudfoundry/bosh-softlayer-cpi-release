@@ -9,7 +9,6 @@ import (
 	"strconv"
 	"strings"
 	"text/template"
-	"time"
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
