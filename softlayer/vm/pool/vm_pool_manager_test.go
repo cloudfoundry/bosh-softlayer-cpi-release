@@ -27,8 +27,6 @@ var _ = Describe("VMInfoDB", func() {
 		fakeDB = fakes.NewFakeDB()
 	})
 
-	//TODO: add tests for methods: #QueryVMInfobyAgentID, #QueryVMInfobyID, #DeleteVMFromVMDB, #InsertVMInfo, #UpdateVMInfoByID
-
 	Describe("#CloseDB", func() {
 		BeforeEach(func() {
 			vmInfoDB = NewVMInfoDB(0, "fake-name", "f", "fake-image-id", "fake-agent-id", logger, fakeDB)

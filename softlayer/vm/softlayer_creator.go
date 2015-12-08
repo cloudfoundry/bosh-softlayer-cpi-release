@@ -245,7 +245,6 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 	} else {
 		return c.CreateNewVM(agentID, stemcell, cloudProps, networks, env)
 	}
-
 }
 
 // Private methods

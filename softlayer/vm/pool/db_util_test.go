@@ -17,8 +17,6 @@ var _ = Describe("DB Util", func() {
 		SQLITE_DB_FILE_PATH string
 	)
 
-	//TODO: add tests for function: #InitVMPoolDB
-
 	Describe("#OpenDB", func() {
 		BeforeEach(func() {
 			dbPath, err = ioutil.TempDir("", "OpenDB")

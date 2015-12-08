@@ -81,11 +81,11 @@ func (vmInfoDB *VMInfoDB) QueryVMInfobyAgentID(retryTimeout time.Duration, retry
 
 			var prepareStmt string
 			if vmInfoDB.VmProperties.InUse == "t" {
-				prepareStmt = "select id, image_id, agent_id from vms where in_use='t' and agent_id=?"
+				prepareStmt = "SELECT id, image_id, agent_id FROM vms WHERE in_use='t' AND agent_id=?"
 			} else if vmInfoDB.VmProperties.InUse == "f" {
-				prepareStmt = "select id, image_id, agent_id from vms where in_use='f' and agent_id=?"
+				prepareStmt = "SELECT id, image_id, agent_id FROM vms WHERE in_use='f' AND agent_id=?"
 			} else {
-				prepareStmt = "select id, image_id, agent_id from vms where agent_id==?"
+				prepareStmt = "SELECT id, image_id, agent_id FROM vms WHERE agent_id==?"
 			}
 
 			sqlStmt, err := tx.Prepare(prepareStmt)
@@ -140,11 +140,11 @@ func (vmInfoDB *VMInfoDB) QueryVMInfobyID(retryTimeout time.Duration, retryInter
 
 			var prepareStmt string
 			if vmInfoDB.VmProperties.InUse == "t" {
-				prepareStmt = "select id, in_use, image_id, agent_id from vms where id=? and in_use='t'"
+				prepareStmt = "SELECT id, in_use, image_id, agent_id FROM vms WHERE id=? AND in_use='t'"
 			} else if vmInfoDB.VmProperties.InUse == "f" {
-				prepareStmt = "select id, in_use, image_id, agent_id from vms where id=? and in_use='f'"
+				prepareStmt = "SELECT id, in_use, image_id, agent_id FROM vms WHERE id=? AND in_use='f'"
 			} else {
-				prepareStmt = "select id, in_use, image_id, agent_id from vms where id=?"
+				prepareStmt = "SELECT id, in_use, image_id, agent_id FROM vms WHERE id=?"
 			}
 
 			sqlStmt, err := tx.Prepare(prepareStmt)
@@ -184,7 +184,7 @@ func (vmInfoDB *VMInfoDB) QueryVMInfobyID(retryTimeout time.Duration, retryInter
 }
 
 func (vmInfoDB *VMInfoDB) DeleteVMFromVMDB(retryTimeout time.Duration, retryInterval time.Duration) error {
-	sqlStmt := fmt.Sprintf("delete from vms where id=%d", vmInfoDB.VmProperties.Id)
+	sqlStmt := fmt.Sprintf("DELETE FROM vms WHERE id=%d", vmInfoDB.VmProperties.Id)
 	err := exec(vmInfoDB.db, sqlStmt, retryTimeout, retryInterval, vmInfoDB.logger)
 	if err != nil {
 		return bosherr.WrapError(err, "Failed to delete VM info from vms table")
@@ -193,7 +193,7 @@ func (vmInfoDB *VMInfoDB) DeleteVMFromVMDB(retryTimeout time.Duration, retryInte
 }
 
 func (vmInfoDB *VMInfoDB) InsertVMInfo(retryTimeout time.Duration, retryInterval time.Duration) error {
-	sqlStmt := fmt.Sprintf("insert into vms (id, name, in_use, image_id, agent_id, timestamp) values (%d, '%s', '%s', '%s', '%s', CURRENT_TIMESTAMP)", vmInfoDB.VmProperties.Id, vmInfoDB.VmProperties.Name, vmInfoDB.VmProperties.InUse, vmInfoDB.VmProperties.ImageId, vmInfoDB.VmProperties.AgentId)
+	sqlStmt := fmt.Sprintf("INSERT INTO vms (id, name, in_use, image_id, agent_id, timestamp) VALUE (%d, '%s', '%s', '%s', '%s', CURRENT_TIMESTAMP)", vmInfoDB.VmProperties.Id, vmInfoDB.VmProperties.Name, vmInfoDB.VmProperties.InUse, vmInfoDB.VmProperties.ImageId, vmInfoDB.VmProperties.AgentId)
 	err := exec(vmInfoDB.db, sqlStmt, retryTimeout, retryInterval, vmInfoDB.logger)
 	if err != nil {
 		return bosherr.WrapError(err, "Failed to insert VM info into vms table")
@@ -217,7 +217,7 @@ func (vmInfoDB *VMInfoDB) UpdateVMInfoByID(retryTimeout time.Duration, retryInte
 			}
 
 			if vmInfoDB.VmProperties.InUse == "f" || vmInfoDB.VmProperties.InUse == "t" {
-				sqlStmt := fmt.Sprintf("update vms set in_use='%s', timestamp=CURRENT_TIMESTAMP where id = %d", vmInfoDB.VmProperties.InUse, vmInfoDB.VmProperties.Id)
+				sqlStmt := fmt.Sprintf("UPDATE vms SET in_use='%s', timestamp=CURRENT_TIMESTAMP WHERE id = %d", vmInfoDB.VmProperties.InUse, vmInfoDB.VmProperties.Id)
 				_, err = tx.Exec(sqlStmt)
 				if err != nil {
 					sqliteErr := err.(sqlite3.Error)
@@ -230,7 +230,7 @@ func (vmInfoDB *VMInfoDB) UpdateVMInfoByID(retryTimeout time.Duration, retryInte
 			}
 
 			if vmInfoDB.VmProperties.ImageId != "" {
-				sqlStmt := fmt.Sprintf("update vms set image_id='%s' where id = %d", vmInfoDB.VmProperties.ImageId, vmInfoDB.VmProperties.Id)
+				sqlStmt := fmt.Sprintf("UPDATE vms SET image_id='%s' WHERE id = %d", vmInfoDB.VmProperties.ImageId, vmInfoDB.VmProperties.Id)
 				_, err = tx.Exec(sqlStmt)
 				if err != nil {
 					sqliteErr := err.(sqlite3.Error)
@@ -243,7 +243,7 @@ func (vmInfoDB *VMInfoDB) UpdateVMInfoByID(retryTimeout time.Duration, retryInte
 			}
 
 			if vmInfoDB.VmProperties.AgentId != "" {
-				sqlStmt := fmt.Sprintf("update vms set agent_id='%s' where id = %d", vmInfoDB.VmProperties.AgentId, vmInfoDB.VmProperties.Id)
+				sqlStmt := fmt.Sprintf("UPDATE vms SET agent_id='%s' WHERE id = %d", vmInfoDB.VmProperties.AgentId, vmInfoDB.VmProperties.Id)
 				_, err = tx.Exec(sqlStmt)
 				if err != nil {
 					sqliteErr := err.(sqlite3.Error)

@@ -144,7 +144,6 @@ var _ = Describe("BOSH Director Level Integration for OS Reload", func() {
 			vmId, err = strconv.Atoi(id)
 			Expect(vmId).ToNot(BeZero())
 			log.Println(fmt.Sprintf("OS reload on VM with ID: %d", int(vmId)))
-
 		})
 	})
 
