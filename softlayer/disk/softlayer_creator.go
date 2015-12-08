@@ -3,8 +3,7 @@ package disk
 import (
 	"fmt"
 	"strconv"
-	"time"
-
+	
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	sl "github.com/maximilien/softlayer-go/softlayer"
