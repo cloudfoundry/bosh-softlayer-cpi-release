@@ -2,6 +2,7 @@ package vm
 
 import (
 	"encoding/json"
+	"time"
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
@@ -52,5 +53,13 @@ func (s fsAgentEnvService) Update(agentEnv AgentEnv) error {
 		return bosherr.WrapError(err, "Marshalling agent env")
 	}
 
-	return s.softlayerFileService.Upload(s.settingsPath, jsonBytes)
+	for i := 0; i < 30; i++ {
+		s.logger.Debug(s.logTag, "Updating Agent Env: Making attempt #%d", i)
+		err = s.softlayerFileService.Upload(s.settingsPath, jsonBytes)
+		if err == nil {
+			return nil
+		}
+		time.Sleep(10 * time.Second)
+	}
+	return bosherr.WrapError(err, "Updating Agent Env timeout")
 }
