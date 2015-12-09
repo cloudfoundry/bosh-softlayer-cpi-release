@@ -292,15 +292,21 @@ func (vm SoftLayerVM) DetachDisk(disk bslcdisk.Disk) error {
 // Private methods
 func (vm SoftLayerVM) extractTagsFromVMMetadata(vmMetadata VMMetadata) ([]string, error) {
 	tags := []string{}
+	status := ""
 	for key, value := range vmMetadata {
-		if key == "tags" {
-			stringValue, ok := value.(string)
-			if !ok {
+		if key == "compiling" || key == "job" || key == "index" || key == "deployment" {
+			stringValue, err := value.(string)
+			if !err {
 				return []string{}, bosherr.Errorf("Cannot convert tags metadata value `%v` to string", value)
 			}
 
-			tags = vm.parseTags(stringValue)
+			if status == "" {
+				status = key + ":" + stringValue
+			} else {
+				status = status + "," + key + ":" + stringValue
+			}
 		}
+		tags = vm.parseTags(status)
 	}
 
 	return tags, nil
