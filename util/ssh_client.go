@@ -6,7 +6,6 @@ import (
 	"github.com/pkg/sftp"
 	myssh "golang.org/x/crypto/ssh"
 	"io/ioutil"
-	"log"
 	"regexp"
 )
 
@@ -68,40 +67,34 @@ func (c *sshClientImpl) UploadFile(username string, password string, ip string, 
 
 	client, err := myssh.Dial("tcp", ip+":22", config)
 	if err != nil {
-		log.Fatal(err)
 		return err
 	}
 	defer client.Close()
 
 	sftp, err := sftp.NewClient(client)
 	if err != nil {
-		log.Fatal(err)
 		return err
 	}
 	defer sftp.Close()
 
 	data, err := ioutil.ReadFile(srcFile)
 	if err != nil {
-		log.Fatal(err)
 		return err
 	}
 
 	f, err := sftp.Create(destFile)
 	if err != nil {
-		log.Fatal(err)
 		return err
 	}
 	defer f.Close()
 
 	_, err = f.Write([]byte(data))
 	if err != nil {
-		log.Fatal(err)
 		return err
 	}
 
 	_, err = sftp.Lstat(destFile)
 	if err != nil {
-		log.Fatal(err)
 		return err
 	}
 	return nil
@@ -125,34 +118,29 @@ func (c *sshClientImpl) DownloadFile(username string, password string, ip string
 
 	client, err := myssh.Dial("tcp", ip+":22", config)
 	if err != nil {
-		log.Fatal(err)
 		return err
 	}
 	defer client.Close()
 
 	sftp, err := sftp.NewClient(client)
 	if err != nil {
-		log.Fatal(err)
 		return err
 	}
 	defer sftp.Close()
 
 	pFile, err := sftp.Open(srcFile)
 	if err != nil {
-		log.Fatal(err)
 		return err
 	}
 	defer pFile.Close()
 
 	data, err := ioutil.ReadAll(pFile)
 	if err != nil {
-		log.Fatal(err)
 		return err
 	}
 
 	err = ioutil.WriteFile(destFile, data, 0755)
 	if err != nil {
-		log.Fatal(err)
 		return err
 	}
 
