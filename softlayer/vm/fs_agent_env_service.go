@@ -8,6 +8,11 @@ import (
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 )
 
+const (
+	maxAttempts = 30
+	delay       = 10
+)
+
 type fsAgentEnvService struct {
 	softlayerFileService SoftlayerFileService
 	settingsPath         string
@@ -53,13 +58,13 @@ func (s fsAgentEnvService) Update(agentEnv AgentEnv) error {
 		return bosherr.WrapError(err, "Marshalling agent env")
 	}
 
-	for i := 0; i < 30; i++ {
+	for i := 0; i < maxAttempts; i++ {
 		s.logger.Debug(s.logTag, "Updating Agent Env: Making attempt #%d", i)
 		err = s.softlayerFileService.Upload(s.settingsPath, jsonBytes)
 		if err == nil {
 			return nil
 		}
-		time.Sleep(10 * time.Second)
+		time.Sleep(delay * time.Second)
 	}
 	return bosherr.WrapError(err, "Updating Agent Env timeout")
 }
