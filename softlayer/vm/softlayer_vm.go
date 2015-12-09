@@ -19,14 +19,19 @@ import (
 
 	bslcommon "github.com/maximilien/bosh-softlayer-cpi/softlayer/common"
 	bslcdisk "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk"
+	bslcstem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell"
+	bslcvmpool "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm/pool"
 
+	common "github.com/maximilien/bosh-softlayer-cpi/common"
 	util "github.com/maximilien/bosh-softlayer-cpi/util"
 	datatypes "github.com/maximilien/softlayer-go/data_types"
+	sldatatypes "github.com/maximilien/softlayer-go/data_types"
 )
 
 const (
-	SOFTLAYER_VM_LOG_TAG = "SoftLayerVM"
-	ROOT_USER_NAME       = "root"
+	SOFTLAYER_VM_OS_RELOAD_TAG = "OSReload"
+	SOFTLAYER_VM_LOG_TAG       = "SoftLayerVM"
+	ROOT_USER_NAME             = "root"
 )
 
 type SoftLayerVM struct {
@@ -58,7 +63,49 @@ func NewSoftLayerVM(id int, softLayerClient sl.Client, sshClient util.SshClient,
 
 func (vm SoftLayerVM) ID() int { return vm.id }
 
-func (vm SoftLayerVM) Delete() error {
+func (vm SoftLayerVM) Delete(agentID string) error {
+	if strings.ToUpper(common.GetOSEnvVariable("OS_RELOAD_ENABLED", "TRUE")) == "FALSE" {
+		return vm.DeleteVM()
+	}
+
+	err := bslcvmpool.InitVMPoolDB(bslcvmpool.DB_RETRY_TIMEOUT, bslcvmpool.DB_RETRY_INTERVAL, vm.logger)
+	if err != nil {
+		return bosherr.WrapError(err, "Failed to initialize VM pool DB")
+	}
+
+	db, err := bslcvmpool.OpenDB(bslcvmpool.SQLITE_DB_FILE_PATH)
+	if err != nil {
+		return bosherr.WrapError(err, "Opening DB")
+	}
+
+	vmInfoDB := bslcvmpool.NewVMInfoDB(vm.id, "", "t", "", "", vm.logger, db)
+	defer vmInfoDB.CloseDB()
+
+	err = vmInfoDB.QueryVMInfobyID(bslcvmpool.DB_RETRY_TIMEOUT, bslcvmpool.DB_RETRY_INTERVAL)
+	if err != nil {
+		return bosherr.WrapError(err, fmt.Sprintf("Failed to query VM info by given ID %d", vm.id))
+	}
+	vm.logger.Info(SOFTLAYER_VM_LOG_TAG, fmt.Sprintf("vmInfoDB.vmProperties.id is %d", vmInfoDB.VmProperties.Id))
+
+	if vmInfoDB.VmProperties.Id != 0 {
+		if agentID != "" {
+			vm.logger.Info(SOFTLAYER_VM_LOG_TAG, fmt.Sprintf("Release the VM with id %d back to the VM pool", vmInfoDB.VmProperties.Id))
+			vmInfoDB.VmProperties.InUse = "f"
+			err = vmInfoDB.UpdateVMInfoByID(bslcvmpool.DB_RETRY_TIMEOUT, bslcvmpool.DB_RETRY_INTERVAL)
+			if err != nil {
+				return bosherr.WrapError(err, fmt.Sprintf("Failed to query VM info by given ID %d", vm.id))
+			} else {
+				return nil
+			}
+		} else {
+			return vm.DeleteVM()
+		}
+	}
+
+	return nil
+}
+
+func (vm SoftLayerVM) DeleteVM() error {
 	virtualGuestService, err := vm.softLayerClient.GetSoftLayer_Virtual_Guest_Service()
 	if err != nil {
 		return bosherr.WrapError(err, "Creating SoftLayer VirtualGuestService from client")
@@ -84,6 +131,19 @@ func (vm SoftLayerVM) Delete() error {
 		return err
 	}
 
+	if strings.ToUpper(common.GetOSEnvVariable("OS_RELOAD_ENABLED", "TRUE")) == "TRUE" {
+		db, err := bslcvmpool.OpenDB(bslcvmpool.SQLITE_DB_FILE_PATH)
+		if err != nil {
+			return bosherr.WrapError(err, "Opening DB")
+		}
+
+		vmInfoDB := bslcvmpool.NewVMInfoDB(vm.ID(), "", "", "", "", vm.logger, db)
+		err = vmInfoDB.DeleteVMFromVMDB(bslcvmpool.DB_RETRY_TIMEOUT, bslcvmpool.DB_RETRY_INTERVAL)
+		if err != nil {
+			return bosherr.WrapError(err, "Failed to delete the record from VM pool DB")
+		}
+	}
+
 	return nil
 }
 
@@ -105,18 +165,47 @@ func (vm SoftLayerVM) Reboot() error {
 	return nil
 }
 
+func (vm SoftLayerVM) ReloadOS(stemcell bslcstem.Stemcell) error {
+	reload_OS_Config := sldatatypes.Image_Template_Config{
+		ImageTemplateId: strconv.Itoa(stemcell.ID()),
+	}
+
+	virtualGuestService, err := vm.softLayerClient.GetSoftLayer_Virtual_Guest_Service()
+	if err != nil {
+		return bosherr.WrapError(err, "Creating VirtualGuestService from SoftLayer client")
+	}
+
+	err = bslcommon.WaitForVirtualGuestToHaveNoRunningTransactions(vm.softLayerClient, vm.ID())
+	if err != nil {
+		return bosherr.WrapError(err, fmt.Sprintf("Waiting for VirtualGuest %d to have no pending transactions before os reload", vm.ID()))
+	}
+	vm.logger.Info(SOFTLAYER_VM_OS_RELOAD_TAG, fmt.Sprintf("No transaction is running on this VM %d", vm.ID()))
+
+	err = virtualGuestService.ReloadOperatingSystem(vm.ID(), reload_OS_Config)
+	if err != nil {
+		return bosherr.WrapError(err, "Failed to reload OS on the specified VirtualGuest from SoftLayer client")
+	}
+
+	err = vm.postCheckActiveTransactionsForOSReload(vm.softLayerClient)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (vm SoftLayerVM) SetMetadata(vmMetadata VMMetadata) error {
 	tags, err := vm.extractTagsFromVMMetadata(vmMetadata)
 	if err != nil {
 		return err
 	}
 
-	if len(tags) == 0 {
+	//Check below needed since Golang strings.Split return [""] on strings.Split("", ",")
+	if len(tags) == 1 && tags[0] == "" {
 		return nil
 	}
 
-	//Check below needed since Golang strings.Split return [""] on strings.Split("", ",")
-	if len(tags) == 1 && tags[0] == "" {
+	if len(tags) == 0 {
 		return nil
 	}
 
@@ -158,6 +247,7 @@ func (vm SoftLayerVM) ConfigureNetworks(networks Networks) error {
 }
 
 func (vm SoftLayerVM) AttachDisk(disk bslcdisk.Disk) error {
+
 	virtualGuest, volume, err := vm.fetchVMandIscsiVolume(vm.ID(), disk.ID())
 	if err != nil {
 		return bosherr.WrapError(err, fmt.Sprintf("Failed to fetch disk `%d` and virtual gusest `%d`", disk.ID(), virtualGuest.Id))
@@ -690,6 +780,42 @@ func (vm SoftLayerVM) getRootPassword(virtualGuest datatypes.SoftLayer_Virtual_G
 	}
 
 	return ""
+}
+
+func (vm SoftLayerVM) postCheckActiveTransactionsForOSReload(softLayerClient sl.Client) error {
+	virtualGuestService, err := softLayerClient.GetSoftLayer_Virtual_Guest_Service()
+	if err != nil {
+		return bosherr.WrapError(err, "Creating VirtualGuestService from SoftLayer client")
+	}
+
+	totalTime := time.Duration(0)
+	for totalTime < bslcommon.TIMEOUT {
+		activeTransactions, err := virtualGuestService.GetActiveTransactions(vm.ID())
+		if err != nil {
+			return bosherr.WrapError(err, "Getting active transactions from SoftLayer client")
+		}
+
+		if len(activeTransactions) > 0 {
+			vm.logger.Info(SOFTLAYER_VM_OS_RELOAD_TAG, "OS Reload transaction started")
+			break
+		}
+
+		totalTime += bslcommon.POLLING_INTERVAL
+		time.Sleep(bslcommon.POLLING_INTERVAL)
+	}
+
+	if totalTime >= bslcommon.TIMEOUT {
+		return errors.New(fmt.Sprintf("Waiting for OS Reload transaction to start TIME OUT!"))
+	}
+
+	err = bslcommon.WaitForVirtualGuest(vm.softLayerClient, vm.ID(), "RUNNING")
+	if err != nil {
+		return bosherr.WrapError(err, fmt.Sprintf("PowerOn failed with VirtualGuest id %d", vm.ID()))
+	}
+
+	vm.logger.Info(SOFTLAYER_VM_OS_RELOAD_TAG, fmt.Sprintf("The virtual guest %d is powered on", vm.ID()))
+
+	return nil
 }
 
 func (vm SoftLayerVM) postCheckActiveTransactionsForDeleteVM(softLayerClient sl.Client, virtualGuestId int) error {
