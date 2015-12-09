@@ -195,10 +195,7 @@ func (vm SoftLayerVM) ReloadOS(stemcell bslcstem.Stemcell) error {
 }
 
 func (vm SoftLayerVM) SetMetadata(vmMetadata VMMetadata) error {
-	tags, err := vm.extractTagsFromVMMetadata(vmMetadata)
-	if err != nil {
-		return err
-	}
+	tags := vm.extractTagsFromVMMetadata(vmMetadata)
 
 	//Check below needed since Golang strings.Split return [""] on strings.Split("", ",")
 	if len(tags) == 1 && tags[0] == "" {
@@ -380,20 +377,21 @@ func (vm SoftLayerVM) DetachDisk(disk bslcdisk.Disk) error {
 }
 
 // Private methods
-func (vm SoftLayerVM) extractTagsFromVMMetadata(vmMetadata VMMetadata) ([]string, error) {
+func (vm SoftLayerVM) extractTagsFromVMMetadata(vmMetadata VMMetadata) ([]string) {
 	tags := []string{}
+	status := ""
 	for key, value := range vmMetadata {
-		if key == "tags" {
-			stringValue, ok := value.(string)
-			if !ok {
-				return []string{}, bosherr.Errorf("Cannot convert tags metadata value `%v` to string", value)
+		if key == "compiling" || key == "job" || key == "index" || key == "deployment" {
+			if status == "" {
+				status = key + ":" + value
+			} else {
+				status = status + "," + key + ":" + value
 			}
-
-			tags = vm.parseTags(stringValue)
 		}
+		tags = vm.parseTags(status)
 	}
 
-	return tags, nil
+	return tags
 }
 
 func (vm SoftLayerVM) parseTags(value string) []string {
