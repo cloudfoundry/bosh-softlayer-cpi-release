@@ -200,11 +200,6 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 		softlayerFileService := NewSoftlayerFileService(util.GetSshClient(), virtualGuest, c.logger, c.uuidGenerator, c.fs)
 		agentEnvService := c.agentEnvServiceFactory.New(softlayerFileService, strconv.Itoa(virtualGuest.Id))
 
-		agentEnv := CreateAgentUserData(agentID, cloudProps, networks, env, c.agentOptions)
-		if err != nil {
-			return SoftLayerVM{}, bosherr.WrapErrorf(err, "Cannot agent env for virtual guest with id: %d.", virtualGuest.Id)
-		}
-
 		if len(cloudProps.BoshIp) == 0 {
 			// update /etc/hosts file of bosh-init vm
 			c.updateEtcHostsOfBoshInit(fmt.Sprintf("%s  %s", virtualGuest.PrimaryBackendIpAddress, virtualGuest.FullyQualifiedDomainName))
@@ -213,7 +208,25 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 			if err != nil {
 				return SoftLayerVM{}, bosherr.WrapErrorf(err, "Cannot construct mbus url.")
 			}
-			agentEnv.Mbus = mbus
+			c.agentOptions.Mbus = mbus
+		} else {
+			// Update mbus url setting
+			mbus, err := c.parseMbusURL(c.agentOptions.Mbus, cloudProps.BoshIp)
+			if err != nil {
+				return SoftLayerVM{}, bosherr.WrapErrorf(err, "Cannot construct mbus url.")
+			}
+			c.agentOptions.Mbus = mbus
+			// Update blobstore setting
+			switch c.agentOptions.Blobstore.Type {
+			case BlobstoreTypeDav:
+				davConf := DavConfig(c.agentOptions.Blobstore.Options)
+				c.updateDavConfig(&davConf, cloudProps.BoshIp)
+			}
+		}
+
+		agentEnv := CreateAgentUserData(agentID, cloudProps, networks, env, c.agentOptions)
+		if err != nil {
+			return SoftLayerVM{}, bosherr.WrapErrorf(err, "Cannot agent env for virtual guest with id: %d.", virtualGuest.Id)
 		}
 
 		err = agentEnvService.Update(agentEnv)
