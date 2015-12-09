@@ -363,9 +363,16 @@ func (vm SoftLayerVM) DetachDisk(disk bslcdisk.Disk) error {
 				return bosherr.WrapError(err, fmt.Sprintf("Failed to fetch disk `%d` and virtual gusest `%d`", disk.ID(), virtualGuest.Id))
 			}
 
-			if _, err = vm.discoveryOpenIscsiTargetsBasedOnShellScript(virtualGuest, volume); err != nil {
+			_, err = vm.discoveryOpenIscsiTargetsBasedOnShellScript(virtualGuest, volume)
+			if err != nil {
 				return bosherr.WrapError(err, fmt.Sprintf("Failed to reattach volume `%s` to virtual guest `%d`", key, virtualGuest.Id))
 			}
+
+			_, err = vm.restartOpenIscsiBasedOnShellScript(virtualGuest)
+			if err != nil {
+				return bosherr.WrapError(err, fmt.Sprintf("Failed to restart open iscsi from virtual guest `%d`", virtualGuest.Id))
+			}
+
 		}
 	}
 
@@ -692,20 +699,20 @@ func (vm SoftLayerVM) detachVolumeBasedOnShellScript(virtualGuest datatypes.Soft
 	vm.logger.Debug(SOFTLAYER_VM_LOG_TAG, "/etc/init.d/open-iscsi stop", nil)
 
 	// clean up /etc/iscsi/send_targets/
-	step2 := fmt.Sprintf("rm -r /etc/iscsi/send_targets/")
+	step2 := fmt.Sprintf("rm -rf /etc/iscsi/send_targets/*")
 	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, step2)
 	if err != nil {
-		return bosherr.WrapError(err, "Removing /etc/iscsi/send_targets/")
+		return bosherr.WrapError(err, "Removing /etc/iscsi/send_targets/*")
 	}
-	vm.logger.Debug(SOFTLAYER_VM_LOG_TAG, "rm -r /etc/iscsi/send_targets/", nil)
+	vm.logger.Debug(SOFTLAYER_VM_LOG_TAG, "rm -rf /etc/iscsi/send_targets/*", nil)
 
 	// clean up /etc/iscsi/nodes/
-	step3 := fmt.Sprintf("rm -r /etc/iscsi/nodes/")
+	step3 := fmt.Sprintf("rm -rf /etc/iscsi/nodes/*")
 	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, step3)
 	if err != nil {
-		return bosherr.WrapError(err, "Removing /etc/iscsi/nodes/")
+		return bosherr.WrapError(err, "Removing /etc/iscsi/nodes/*")
 	}
-	vm.logger.Debug(SOFTLAYER_VM_LOG_TAG, "rm -r /etc/iscsi/nodes/", nil)
+	vm.logger.Debug(SOFTLAYER_VM_LOG_TAG, "rm -rf /etc/iscsi/nodes/*", nil)
 
 	// start open-iscsi
 	step4 := fmt.Sprintf("/etc/init.d/open-iscsi start")
