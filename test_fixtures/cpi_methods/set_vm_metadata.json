@@ -5,7 +5,7 @@
     {
       "director": "BOSH Director",
       "deployment": "softlayer",
-      "tags": "{{.Tags}}"
+      "compiling": "{{.Tags}}"
     }
   ],
   "context": {

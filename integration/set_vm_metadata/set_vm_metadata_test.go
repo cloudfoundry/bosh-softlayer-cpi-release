@@ -80,7 +80,7 @@ var _ = Describe("BOSH Director Level Integration for set_vm_metadata", func() {
 			replacementMap = map[string]string{
 				"ID":           strVGID,
 				"DirectorUuid": "fake-director-uuid",
-				"Tags":         "cpi-test, softlayer",
+				"Compiling":         "fake-package",
 			}
 		})
 
