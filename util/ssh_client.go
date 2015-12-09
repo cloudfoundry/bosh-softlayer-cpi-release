@@ -6,7 +6,6 @@ import (
 	"github.com/pkg/sftp"
 	myssh "golang.org/x/crypto/ssh"
 	"io/ioutil"
-	"log"
 	"regexp"
 )
 
