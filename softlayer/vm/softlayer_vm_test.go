@@ -329,7 +329,7 @@ var _ = Describe("SoftLayerVM", func() {
 				"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
 				"SoftLayer_Virtual_Guest_Service_configureMetadataDisk.json",
 				"SoftLayer_Virtual_Guest_Service_getActiveTransactions.json",
-				"SoftLayer_Virtual_Guest_Service_isPingable.json",
+				"SoftLayer_Virtual_Guest_Service_isNotPingable.json",
 				"SoftLayer_Virtual_Guest_Service_getPowerState.json",
 			}
 			testhelpers.SetTestFixturesForFakeSoftLayerClient(softLayerClient, fileNames)
@@ -454,7 +454,7 @@ iscsiadm: No records found
 				"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
 				"SoftLayer_Virtual_Guest_Service_configureMetadataDisk.json",
 				"SoftLayer_Virtual_Guest_Service_getActiveTransactions.json",
-				"SoftLayer_Virtual_Guest_Service_isPingable.json",
+				"SoftLayer_Virtual_Guest_Service_isNotPingable.json",
 				"SoftLayer_Virtual_Guest_Service_getPowerState.json",
 			}
 			testhelpers.SetTestFixturesForFakeSoftLayerClient(softLayerClient, fileNames)

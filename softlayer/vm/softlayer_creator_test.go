@@ -240,7 +240,9 @@ func setFakeSoftLayerClientCreateObjectTestFixturesWithEphemeralDiskSize(fakeSof
 		"SoftLayer_Virtual_Guest_Service_getUpgradeItemPrices.json",
 		"SoftLayer_Product_Order_Service_placeOrder.json",
 		"SoftLayer_Virtual_Guest_Service_getActiveTransactions.json",
+		"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
 		"SoftLayer_Virtual_Guest_Service_getLastTransaction_CloudInstanceUpgrade.json",
+		"SoftLayer_Virtual_Guest_Service_getPowerState.json",
 
 		"SoftLayer_Virtual_Guest_Service_getObject.json",
 	}
@@ -266,7 +268,9 @@ func setFakeSoftLayerClientCreateObjectTestFixturesWithoutBoshIP(fakeSoftLayerCl
 		"SoftLayer_Virtual_Guest_Service_getUpgradeItemPrices.json",
 		"SoftLayer_Product_Order_Service_placeOrder.json",
 		"SoftLayer_Virtual_Guest_Service_getActiveTransactions.json",
+		"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
 		"SoftLayer_Virtual_Guest_Service_getLastTransaction_CloudInstanceUpgrade.json",
+		"SoftLayer_Virtual_Guest_Service_getPowerState.json",
 
 		"SoftLayer_Virtual_Guest_Service_getObject.json",
 	}
