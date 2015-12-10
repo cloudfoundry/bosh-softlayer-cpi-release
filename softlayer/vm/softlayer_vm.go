@@ -372,7 +372,7 @@ func (vm SoftLayerVM) DetachDisk(disk bslcdisk.Disk) error {
 			command := fmt.Sprintf("sleep 5; mount %s-part1 /var/vcap/store", devicePath)
 			_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, command)
 			if err != nil {
-				return false, bosherr.WrapError(err, "mount /var/vcap/store")
+				return bosherr.WrapError(err, "mount /var/vcap/store")
 			}
 		}
 	}
