@@ -35,29 +35,33 @@ func AttachEphemeralDiskToVirtualGuest(softLayerClient sl.Client, virtualGuestId
 		return bosherr.WrapErrorf(err, "Attaching ephemeral disk to VirtualGuest `%d`", virtualGuestId)
 	}
 
-	err = service.AttachEphemeralDisk(virtualGuestId, diskSize)
+	receipt, err := service.AttachEphemeralDisk(virtualGuestId, diskSize)
 	if err != nil {
+		return err
+	}
+
+	if receipt.OrderId == 0 {
 		return nil
-	} else {
-		err = WaitForVirtualGuestToHaveRunningTransaction(softLayerClient, virtualGuestId, logger)
-		if err != nil {
-			return bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` to launch transaction", virtualGuestId)
-		}
+	}
 
-		err = WaitForVirtualGuestToHaveNoRunningTransaction(softLayerClient, virtualGuestId, logger)
-		if err != nil {
-			return bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` no transcation in progress", virtualGuestId)
-		}
+	err = WaitForVirtualGuestToHaveRunningTransaction(softLayerClient, virtualGuestId, logger)
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` to launch transaction", virtualGuestId)
+	}
 
-		err = WaitForVirtualGuestUpgradeComplete(softLayerClient, virtualGuestId)
-		if err != nil {
-			return bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` upgrade complete", virtualGuestId)
-		}
+	err = WaitForVirtualGuestToHaveNoRunningTransaction(softLayerClient, virtualGuestId, logger)
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` no transcation in progress", virtualGuestId)
+	}
 
-		err = WaitForVirtualGuest(softLayerClient, virtualGuestId, "RUNNING")
-		if err != nil {
-			return bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d`", virtualGuestId)
-		}
+	err = WaitForVirtualGuestUpgradeComplete(softLayerClient, virtualGuestId)
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` upgrade complete", virtualGuestId)
+	}
+
+	err = WaitForVirtualGuest(softLayerClient, virtualGuestId, "RUNNING")
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d`", virtualGuestId)
 	}
 
 	return nil
