@@ -21,8 +21,8 @@ type fsAgentEnvService struct {
 }
 
 func NewFSAgentEnvService(
-softlayerFileService SoftlayerFileService,
-logger boshlog.Logger,
+	softlayerFileService SoftlayerFileService,
+	logger boshlog.Logger,
 ) AgentEnvService {
 	return fsAgentEnvService{
 		softlayerFileService: softlayerFileService,
