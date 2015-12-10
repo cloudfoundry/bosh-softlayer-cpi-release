@@ -10,12 +10,13 @@ import (
 )
 
 type CpiTemplate struct {
-	ID           string
-	DirectorUuid string
-	Tags         string
-	Datacenter   string
-	VMID         string
-	DiskID       string
+	ID             string
+	DirectorUuid   string
+	Tag_deployment string
+	Tag_compiling  string
+	Datacenter     string
+	VMID           string
+	DiskID         string
 }
 
 type ConfigTemplate struct {
@@ -55,12 +56,13 @@ func RunCpi(rootCpiPath string, configPath string, jsonPayload string) ([]byte, 
 
 func GenerateCpiJsonPayload(methodName string, rootTemplatePath string, replacementMap map[string]string) (string, error) {
 	cpiTemplate := CpiTemplate{
-		ID:           replacementMap["ID"],
-		DirectorUuid: replacementMap["DirectorUuid"],
-		Tags:         replacementMap["Tags"],
-		Datacenter:   replacementMap["Datacenter"],
-		VMID:         replacementMap["VMID"],
-		DiskID:       replacementMap["DiskID"],
+		ID:             replacementMap["ID"],
+		DirectorUuid:   replacementMap["DirectorUuid"],
+		Tag_compiling:  replacementMap["Tag_compiling"],
+		Tag_deployment: replacementMap["Tag_deployment"],
+		Datacenter:     replacementMap["Datacenter"],
+		VMID:           replacementMap["VMID"],
+		DiskID:         replacementMap["DiskID"],
 	}
 
 	t := template.New(fmt.Sprintf("%s.json", methodName))

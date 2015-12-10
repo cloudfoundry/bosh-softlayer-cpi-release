@@ -363,16 +363,15 @@ func (vm SoftLayerVM) DetachDisk(disk bslcdisk.Disk) error {
 				return bosherr.WrapError(err, fmt.Sprintf("Failed to fetch disk `%d` and virtual gusest `%d`", disk.ID(), virtualGuest.Id))
 			}
 
-			_, err = vm.discoveryOpenIscsiTargetsBasedOnShellScript(virtualGuest, volume)
-			if err != nil {
-				return bosherr.WrapError(err, fmt.Sprintf("Failed to reattach volume `%s` to virtual guest `%d`", key, virtualGuest.Id))
-			}
-
 			_, err = vm.restartOpenIscsiBasedOnShellScript(virtualGuest)
 			if err != nil {
 				return bosherr.WrapError(err, fmt.Sprintf("Failed to restart open iscsi from virtual guest `%d`", virtualGuest.Id))
 			}
 
+			_, err = vm.discoveryOpenIscsiTargetsBasedOnShellScript(virtualGuest, volume)
+			if err != nil {
+				return bosherr.WrapError(err, fmt.Sprintf("Failed to reattach volume `%s` to virtual guest `%d`", key, virtualGuest.Id))
+			}
 		}
 	}
 
@@ -382,15 +381,21 @@ func (vm SoftLayerVM) DetachDisk(disk bslcdisk.Disk) error {
 // Private methods
 func (vm SoftLayerVM) extractTagsFromVMMetadata(vmMetadata VMMetadata) ([]string, error) {
 	tags := []string{}
+	status := ""
 	for key, value := range vmMetadata {
-		if key == "tags" {
-			stringValue, ok := value.(string)
-			if !ok {
+		if key == "compiling" || key == "job" || key == "index" || key == "deployment" {
+			stringValue, err := value.(string)
+			if !err {
 				return []string{}, bosherr.Errorf("Cannot convert tags metadata value `%v` to string", value)
 			}
 
-			tags = vm.parseTags(stringValue)
+			if status == "" {
+				status = key + ":" + stringValue
+			} else {
+				status = status + "," + key + ":" + stringValue
+			}
 		}
+		tags = vm.parseTags(status)
 	}
 
 	return tags, nil
