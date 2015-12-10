@@ -5,7 +5,6 @@ import (
 	"errors"
 	"strconv"
 	"strings"
-	"reflect"
 )
 
 type StemcellCID int
@@ -22,13 +21,11 @@ func (stemcellCID *StemcellCID) UnmarshalJSON(data []byte) error {
 	}
 
 	dataString := strings.Trim(string(data), "\"")
-	if isNumber(dataString) {
-		intValue, err := strconv.Atoi(dataString)
-		if err != nil {
-			return err
-		}
-		*stemcellCID = StemcellCID(intValue)
+	intValue, err := strconv.Atoi(dataString)
+	if err != nil {
+		return err
 	}
+	*stemcellCID = StemcellCID(intValue)
 
 	return nil
 }
@@ -93,11 +90,4 @@ func (diskCID DiskCID) Int() int {
 	return int(diskCID)
 }
 
-func isNumber(a interface{}) bool {
-	if a == nil {
-		return false
-	}
-	kind := reflect.TypeOf(a).Kind()
-	return reflect.Int <= kind && kind <= reflect.Float64
-}
 
