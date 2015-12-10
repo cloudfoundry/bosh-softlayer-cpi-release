@@ -30,7 +30,8 @@ func (a DeleteStemcell) Run(stemcellCID StemcellCID) (interface{}, error) {
 		   a.logger.Info(deleteStemcellLogTag, "Stemcell '%s' not found", stemcellCID)
 	   }
    }
-	return nil, nil
+
+   return nil, nil
 }
 
 func isInteger(a interface{}) bool {
