@@ -5,6 +5,7 @@ import (
 	"errors"
 	"strconv"
 	"strings"
+	"reflect"
 )
 
 type StemcellCID int

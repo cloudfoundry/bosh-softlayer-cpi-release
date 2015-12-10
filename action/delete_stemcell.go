@@ -1,8 +1,6 @@
 package action
 
 import (
-	"reflect"
-
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
 	bslcstem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell"
@@ -28,7 +26,7 @@ func (a DeleteStemcell) Run(stemcellCID StemcellCID) (interface{}, error) {
 	} else if !found {
 		a.logger.Info(deleteStemcellLogTag, "Stemcell '%s' not found", stemcellCID)
 	}
-	
+
 	return nil, nil
 }
 
