@@ -193,7 +193,7 @@ func (vmInfoDB *VMInfoDB) DeleteVMFromVMDB(retryTimeout time.Duration, retryInte
 }
 
 func (vmInfoDB *VMInfoDB) InsertVMInfo(retryTimeout time.Duration, retryInterval time.Duration) error {
-	sqlStmt := fmt.Sprintf("INSERT INTO vms (id, name, in_use, image_id, agent_id, timestamp) VALUE (%d, '%s', '%s', '%s', '%s', CURRENT_TIMESTAMP)", vmInfoDB.VmProperties.Id, vmInfoDB.VmProperties.Name, vmInfoDB.VmProperties.InUse, vmInfoDB.VmProperties.ImageId, vmInfoDB.VmProperties.AgentId)
+	sqlStmt := fmt.Sprintf("INSERT INTO vms (id, name, in_use, image_id, agent_id, timestamp) VALUES (%d, '%s', '%s', '%s', '%s', CURRENT_TIMESTAMP)", vmInfoDB.VmProperties.Id, vmInfoDB.VmProperties.Name, vmInfoDB.VmProperties.InUse, vmInfoDB.VmProperties.ImageId, vmInfoDB.VmProperties.AgentId)
 	err := exec(vmInfoDB.db, sqlStmt, retryTimeout, retryInterval, vmInfoDB.logger)
 	if err != nil {
 		return bosherr.WrapError(err, "Failed to insert VM info into vms table")
