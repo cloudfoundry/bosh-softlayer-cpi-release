@@ -52,7 +52,7 @@ type Finder interface {
 type VM interface {
 	ID() int
 
-	Delete() error
+	Delete(agentId string) error
 	Reboot() error
 
 	SetMetadata(VMMetadata) error

@@ -4,8 +4,8 @@
     "{{.ID}}",
     {
       "director": "BOSH Director",
-      "deployment": "softlayer",
-      "compiling": "{{.Tags}}"
+      "deployment": "{{.Tag_deployment}}",
+      "compiling": "{{.Tag_compiling}}"
     }
   ],
   "context": {
