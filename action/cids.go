@@ -25,7 +25,6 @@ func (stemcellCID *StemcellCID) UnmarshalJSON(data []byte) error {
 	if err != nil {
 		return err
 	}
-
 	*stemcellCID = StemcellCID(intValue)
 
 	return nil
@@ -90,3 +89,5 @@ func (diskCID DiskCID) String() string {
 func (diskCID DiskCID) Int() int {
 	return int(diskCID)
 }
+
+
