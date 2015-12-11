@@ -41,7 +41,7 @@ var _ = Describe("helper functions for integration tests", func() {
 								{
 									"director": "BOSH Director",
 									"deployment": "softlayer",
-									"tags": "some, tags"
+									"compiling": "nats",
 								}
 							],
 							"context": {
@@ -72,9 +72,10 @@ var _ = Describe("helper functions for integration tests", func() {
 		Context("set_vm_metadata CPI method", func() {
 			BeforeEach(func() {
 				cpiTemplate = testhelpers.CpiTemplate{
-					ID:           "fake-id",
-					DirectorUuid: "fake-director-uuid",
-					Tags:         "fake, tags",
+					ID:             "fake-id",
+					DirectorUuid:   "fake-director-uuid",
+					Tag_compiling:  "fake-compiling",
+					Tag_deployment: "fake-deployment",
 				}
 			})
 
@@ -88,8 +89,8 @@ var _ = Describe("helper functions for integration tests", func() {
 							"some ID",
 							{
 								"director": "BOSH Director",
-								"deployment": "softlayer",
-								"tags": "some, tags"
+								"deployment": "",
+								"compiling": ""
 							}
 						],
 						"context": {
@@ -104,18 +105,6 @@ var _ = Describe("helper functions for integration tests", func() {
 				Expect(err).To(HaveOccurred())
 			})
 
-			It("this is just a string, it's probably taken care of elsewhere", func() {
-				replacementMap["Tags"] = `[{"key 1": "value 1"}, {"key 2": "value 2"}]`
-				_, err := testhelpers.GenerateCpiJsonPayload("set_vm_metadata", rootTemplatePath, replacementMap)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			It("ignores irrelevant replacement keys", func() {
-				replacementMap["no such key"] = "fake, value"
-				payload, err := testhelpers.GenerateCpiJsonPayload("set_vm_metadata", rootTemplatePath, replacementMap)
-				Expect(err).ToNot(HaveOccurred())
-				Expect(payload).ToNot(ContainSubstring("fake, value"))
-			})
 		})
 	})
 })

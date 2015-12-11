@@ -180,9 +180,16 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 			return SoftLayerVM{}, bosherr.WrapError(err, "Failed to reload OS")
 		}
 
-		err = bslcommon.WaitForVirtualGuestLastCompleteTransaction(c.softLayerClient, vm.ID(), "Service Setup")
-		if err != nil {
-			return SoftLayerVM{}, bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` has Service Setup transaction complete", vm.ID())
+		if cloudProps.EphemeralDiskSize == 0 {
+			err = bslcommon.WaitForVirtualGuestLastCompleteTransaction(c.softLayerClient, vmInfoDB.VmProperties.Id, "Service Setup")
+			if err != nil {
+				return SoftLayerVM{}, bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` has Service Setup transaction complete", vmInfoDB.VmProperties.Id)
+			}
+		} else {
+			err = bslcommon.AttachEphemeralDiskToVirtualGuest(c.softLayerClient, vmInfoDB.VmProperties.Id, cloudProps.EphemeralDiskSize, c.logger)
+			if err != nil {
+				return SoftLayerVM{}, bosherr.WrapError(err, fmt.Sprintf("Attaching ephemeral disk to VirtualGuest `%d`", vmInfoDB.VmProperties.Id))
+			}
 		}
 
 		virtualGuest, err := bslcommon.GetObjectDetailsOnVirtualGuest(c.softLayerClient, vmInfoDB.VmProperties.Id)

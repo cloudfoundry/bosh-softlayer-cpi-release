@@ -1,14 +1,14 @@
 {
   "method": "set_vm_metadata",
   "arguments": [
-	"10498259",
+    "14402229",
     {
-      "director": "5276b588-1016-4023-acae-9a0d797168be",
-      "name": "fake-director",
-      "compiling": "nats"
+      "compiling": "buildpack_python",
+      "director": "bosh",
+      "deployment": "fake-test"
     }
   ],
   "context": {
-	"director_uuid": "5276b588-1016-4023-acae-9a0d797168be"
+    "director_uuid": "ee4a88be-e78f-4fe0-9e99-e458a2fa5d48"
   }
 }
