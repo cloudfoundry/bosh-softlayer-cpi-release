@@ -226,31 +226,6 @@ var _ = Describe("SoftLayerVM", func() {
 				softLayerClient.DoRawHttpRequestResponse = []byte("true")
 			})
 
-<<<<<<< HEAD
-			It("the tags value is empty", func() {
-				metadataBytes := []byte(`{
-				  "director": "fake-director-uuid",
-				  "fake1": "fake-deployment",
-				  "fake2": "buildpack_python"
-=======
-			It("at least one tag found", func() {
-				metadataBytes := []byte(`{
-				  "director": "fake-director-uuid",
-				  "deployment": "fake-deployment",
-				  "compiling": "buildpack_python"
->>>>>>> 6bbb85234fdab160abd5b7f719c3a3d9a1f251e6
-				}`)
-				metadata = bslvm.VMMetadata{}
-				err := json.Unmarshal(metadataBytes, &metadata)
-				Expect(err).ToNot(HaveOccurred())
-
-				err = vm.SetMetadata(metadata)
-<<<<<<< HEAD
-
-				Expect(err).ToNot(HaveOccurred())
-				Expect(softLayerClient.DoRawHttpRequestResponseCount).To(Equal(0))
-			})
-
 			It("at least one tag found", func() {
 				metadataBytes := []byte(`{
 				  "director": "fake-director-uuid",
@@ -263,8 +238,6 @@ var _ = Describe("SoftLayerVM", func() {
 				Expect(err).ToNot(HaveOccurred())
 
 				err = vm.SetMetadata(metadata)
-=======
->>>>>>> 6bbb85234fdab160abd5b7f719c3a3d9a1f251e6
 
 				Expect(err).ToNot(HaveOccurred())
 				Expect(softLayerClient.DoRawHttpRequestResponseCount).To(Equal(1))
