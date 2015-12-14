@@ -32,7 +32,7 @@
 
 if [ -z "$1" ]; then
   echo -e "\n Integration Testing ALL CPI methods"
-  ginkgo -r -p -v --noisyPendings integration
+  ginkgo -r -p -v --noisyPendings integration --skipPackage=concurrency_sqlite
 else
   echo -e "\n Integration Testing for $1 methods"
   ginkgo -r -p -v --noisyPendings integration/$1

@@ -25,7 +25,6 @@ func (stemcellCID *StemcellCID) UnmarshalJSON(data []byte) error {
 	if err != nil {
 		return err
 	}
-
 	*stemcellCID = StemcellCID(intValue)
 
 	return nil

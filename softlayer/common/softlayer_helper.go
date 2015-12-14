@@ -35,9 +35,13 @@ func AttachEphemeralDiskToVirtualGuest(softLayerClient sl.Client, virtualGuestId
 		return bosherr.WrapErrorf(err, "Attaching ephemeral disk to VirtualGuest `%d`", virtualGuestId)
 	}
 
-	err = service.AttachEphemeralDisk(virtualGuestId, diskSize)
+	receipt, err := service.AttachEphemeralDisk(virtualGuestId, diskSize)
 	if err != nil {
-		return bosherr.WrapErrorf(err, "Attaching ephemeral disk to VirtualGuest `%d`", virtualGuestId)
+		return err
+	}
+
+	if receipt.OrderId == 0 {
+		return nil
 	}
 
 	err = WaitForVirtualGuestToHaveRunningTransaction(softLayerClient, virtualGuestId, logger)
@@ -46,6 +50,7 @@ func AttachEphemeralDiskToVirtualGuest(softLayerClient sl.Client, virtualGuestId
 	}
 
 	err = WaitForVirtualGuestToHaveNoRunningTransaction(softLayerClient, virtualGuestId, logger)
+
 	if err != nil {
 		return bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` no transcation in progress", virtualGuestId)
 	}

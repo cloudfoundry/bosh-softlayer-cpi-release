@@ -37,7 +37,7 @@ func InitVMPoolDB(retryTimeout time.Duration, retryInterval time.Duration, logge
 		return bosherr.WrapError(err, "Opening DB")
 	}
 
-	sqlStmt := `create table if not exists vms (id int not null primary key, name varchar(32), in_use varchar(32),
+	sqlStmt := `CREATE TABLE IF NOT EXISTS vms (id int not null primary key, name varchar(32), in_use varchar(32),
 										  public_ip varchar(32), private_ip varchar(32), root_pwd varchar(32),
 										  image_id varchar(64),
 										  agent_id varchar(32),

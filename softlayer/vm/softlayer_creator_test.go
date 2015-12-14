@@ -55,6 +55,9 @@ var _ = Describe("SoftLayerCreator", func() {
 		)
 		bslcommon.TIMEOUT = 2 * time.Second
 		bslcommon.POLLING_INTERVAL = 1 * time.Second
+
+		os.Setenv("OS_RELOAD_ENABLED", "FALSE")
+		os.Setenv("SQLITE_DB_FOLDER", "/tmp")
 	})
 
 	Describe("#Create", func() {
