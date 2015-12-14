@@ -89,5 +89,3 @@ func (diskCID DiskCID) String() string {
 func (diskCID DiskCID) Int() int {
 	return int(diskCID)
 }
-
-
