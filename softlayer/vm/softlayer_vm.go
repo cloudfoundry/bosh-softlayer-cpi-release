@@ -103,7 +103,6 @@ func (vm SoftLayerVM) Delete(agentID string) error {
 	}
 
 	return nil
-
 }
 
 func (vm SoftLayerVM) DeleteVM() error {
@@ -364,7 +363,13 @@ func (vm SoftLayerVM) DetachDisk(disk bslcdisk.Disk) error {
 				return bosherr.WrapError(err, fmt.Sprintf("Failed to fetch disk `%d` and virtual gusest `%d`", disk.ID(), virtualGuest.Id))
 			}
 
-			if _, err = vm.discoveryOpenIscsiTargetsBasedOnShellScript(virtualGuest, volume); err != nil {
+			_, err = vm.restartOpenIscsiBasedOnShellScript(virtualGuest)
+			if err != nil {
+				return bosherr.WrapError(err, fmt.Sprintf("Failed to restart open iscsi from virtual guest `%d`", virtualGuest.Id))
+			}
+
+			_, err = vm.discoveryOpenIscsiTargetsBasedOnShellScript(virtualGuest, volume)
+			if err != nil {
 				return bosherr.WrapError(err, fmt.Sprintf("Failed to reattach volume `%s` to virtual guest `%d`", key, virtualGuest.Id))
 			}
 		}
@@ -376,15 +381,21 @@ func (vm SoftLayerVM) DetachDisk(disk bslcdisk.Disk) error {
 // Private methods
 func (vm SoftLayerVM) extractTagsFromVMMetadata(vmMetadata VMMetadata) ([]string, error) {
 	tags := []string{}
+	status := ""
 	for key, value := range vmMetadata {
-		if key == "tags" {
-			stringValue, ok := value.(string)
-			if !ok {
+		if key == "compiling" || key == "job" || key == "index" || key == "deployment" {
+			stringValue, err := value.(string)
+			if !err {
 				return []string{}, bosherr.Errorf("Cannot convert tags metadata value `%v` to string", value)
 			}
 
-			tags = vm.parseTags(stringValue)
+			if status == "" {
+				status = key + ":" + stringValue
+			} else {
+				status = status + "," + key + ":" + stringValue
+			}
 		}
+		tags = vm.parseTags(status)
 	}
 
 	return tags, nil
@@ -693,20 +704,20 @@ func (vm SoftLayerVM) detachVolumeBasedOnShellScript(virtualGuest datatypes.Soft
 	vm.logger.Debug(SOFTLAYER_VM_LOG_TAG, "/etc/init.d/open-iscsi stop", nil)
 
 	// clean up /etc/iscsi/send_targets/
-	step2 := fmt.Sprintf("rm -r /etc/iscsi/send_targets/")
+	step2 := fmt.Sprintf("rm -rf /etc/iscsi/send_targets/*")
 	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, step2)
 	if err != nil {
-		return bosherr.WrapError(err, "Removing /etc/iscsi/send_targets/")
+		return bosherr.WrapError(err, "Removing /etc/iscsi/send_targets/*")
 	}
-	vm.logger.Debug(SOFTLAYER_VM_LOG_TAG, "rm -r /etc/iscsi/send_targets/", nil)
+	vm.logger.Debug(SOFTLAYER_VM_LOG_TAG, "rm -rf /etc/iscsi/send_targets/*", nil)
 
 	// clean up /etc/iscsi/nodes/
-	step3 := fmt.Sprintf("rm -r /etc/iscsi/nodes/")
+	step3 := fmt.Sprintf("rm -rf /etc/iscsi/nodes/*")
 	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, step3)
 	if err != nil {
-		return bosherr.WrapError(err, "Removing /etc/iscsi/nodes/")
+		return bosherr.WrapError(err, "Removing /etc/iscsi/nodes/*")
 	}
-	vm.logger.Debug(SOFTLAYER_VM_LOG_TAG, "rm -r /etc/iscsi/nodes/", nil)
+	vm.logger.Debug(SOFTLAYER_VM_LOG_TAG, "rm -rf /etc/iscsi/nodes/*", nil)
 
 	// start open-iscsi
 	step4 := fmt.Sprintf("/etc/init.d/open-iscsi start")
@@ -852,13 +863,13 @@ func (vm SoftLayerVM) postCheckActiveTransactionsForDeleteVM(softLayerClient sl.
 		}
 
 		averageDuration := activeTransaction.TransactionStatus.AverageDuration
-		if strings.HasPrefix(averageDuration, ".") {
+		if strings.HasPrefix(averageDuration, ".") || averageDuration == "" {
 			averageDuration = "0" + averageDuration
 		}
 
 		averageTransactionDuration, err := strconv.ParseFloat(averageDuration, 32)
 		if err != nil {
-			return bosherr.WrapError(err, "Parsing float for average transaction duration")
+			averageTransactionDuration = 0
 		}
 
 		if averageTransactionDuration > 30 {
