@@ -24,6 +24,7 @@ import (
 	fakevm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm/fakes"
 	fakesutil "github.com/maximilien/bosh-softlayer-cpi/util/fakes"
 	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
+	"os"
 )
 
 var _ = Describe("SoftLayerVM", func() {
@@ -41,6 +42,9 @@ var _ = Describe("SoftLayerVM", func() {
 		sshClient = fakesutil.NewFakeSshClient()
 		agentEnvService = &fakevm.FakeAgentEnvService{}
 		logger = boshlog.NewLogger(boshlog.LevelNone)
+
+		os.Setenv("SQLITE_DB_FOLDER", "/tmp")
+		os.Setenv("OS_RELOAD_ENABLED", "FALSE")
 
 		vm = NewSoftLayerVM(1234, softLayerClient, sshClient, agentEnvService, logger)
 	})
@@ -74,7 +78,7 @@ var _ = Describe("SoftLayerVM", func() {
 				bslcommon.TIMEOUT = 1 * time.Second
 				bslcommon.POLLING_INTERVAL = 1 * time.Second
 
-				err := vm.Delete("fake-agentID")
+				err := vm.Delete("")
 				Expect(err).To(HaveOccurred())
 			})
 		})

@@ -71,12 +71,12 @@ var _ = Describe("BOSH Director Level Integration for OS Reload", func() {
 				go queryVMInfobyAgentID()
 			}
 
-			for i := 0; i < 20; i++ {
+			for i := 0; i < 15; i++ {
 				Expect(<-c).To(ContainSubstring("Done!"))
 			}
 			close(done)
 
-		}, 50)
+		}, 100000)
 	})
 
 })
@@ -121,8 +121,8 @@ func updateVMInfoByID() {
 	db, err := bslcvmpool.OpenDB(SQLITE_DB_FILE_PATH)
 	Expect(err).ToNot(HaveOccurred())
 
-	for i := 0; i < 100; i++ {
-		vmID := rand.Intn(100)
+	for i := 0; i < 1000; i++ {
+		vmID := rand.Intn(1000)
 		hostname := fmt.Sprintf("concurrency_test_%d", vmID)
 		agentID := strconv.Itoa(i)
 		vmInfoDB := bslcvmpool.NewVMInfoDB(vmID, hostname+"."+domain, "f", stemcellUuid, agentID, logger, db)
