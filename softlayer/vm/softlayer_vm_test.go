@@ -494,6 +494,8 @@ iscsiadm: No records found
 		It("detaches iSCSI volume successfully without multipath-tools installed (one volume attached)", func() {
 			expectedCmdResults := []string{
 				"",
+				"",
+				"",
 				expectStopOpenIscsi,
 				"",
 				"",
@@ -511,6 +513,8 @@ iscsiadm: No records found
 		It("detaches iSCSI volume successfully with multipath-tools installed (one volume attached)", func() {
 			expectedCmdResults := []string{
 				expectMultipathInstalled,
+				"",
+				"",
 				expectStopOpenIscsi,
 				"",
 				"",
