@@ -22,16 +22,16 @@ func NewDeleteStemcell(stemcellFinder bslcstem.Finder, logger boshlog.Logger) De
 }
 
 func (a DeleteStemcell) Run(stemcellCID StemcellCID) (interface{}, error) {
-   if isInteger(stemcellCID) {
-	   _, found, err := a.stemcellFinder.FindById(int(stemcellCID))
-	   if err != nil {
-		   a.logger.Info(deleteStemcellLogTag, "Error trying to find stemcell '%s': %s", stemcellCID, err)
-	   } else if !found {
-		   a.logger.Info(deleteStemcellLogTag, "Stemcell '%s' not found", stemcellCID)
-	   }
-   }
+	if isInteger(stemcellCID) {
+		_, found, err := a.stemcellFinder.FindById(int(stemcellCID))
+		if err != nil {
+			a.logger.Info(deleteStemcellLogTag, "Error trying to find stemcell '%s': %s", stemcellCID, err)
+		} else if !found {
+			a.logger.Info(deleteStemcellLogTag, "Stemcell '%s' not found", stemcellCID)
+		}
+	}
 
-   return nil, nil
+	return nil, nil
 }
 
 func isInteger(a interface{}) bool {
