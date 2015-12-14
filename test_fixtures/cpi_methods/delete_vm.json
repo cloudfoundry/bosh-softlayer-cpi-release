@@ -1,7 +1,8 @@
 {
   "method": "delete_vm",
   "arguments": [
-    "{{.ID}}"
+    "{{.ID}}",
+    ""
   ],
   "context": {
     "director_uuid": "{{.DirectorUuid}}"
