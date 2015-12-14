@@ -74,7 +74,7 @@ var _ = Describe("SoftLayerVM", func() {
 				bslcommon.TIMEOUT = 1 * time.Second
 				bslcommon.POLLING_INTERVAL = 1 * time.Second
 
-				err := vm.Delete("fake-agentID")
+				err := vm.Delete("")
 				Expect(err).To(HaveOccurred())
 			})
 		})
