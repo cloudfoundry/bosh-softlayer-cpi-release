@@ -71,12 +71,12 @@ var _ = Describe("BOSH Director Level Integration for OS Reload", func() {
 				go queryVMInfobyAgentID()
 			}
 
-			for i := 0; i < 20; i++ {
+			for i := 0; i < 15; i++ {
 				Expect(<-c).To(ContainSubstring("Done!"))
 			}
 			close(done)
 
-		}, 1000)
+		}, 100000)
 	})
 
 })
