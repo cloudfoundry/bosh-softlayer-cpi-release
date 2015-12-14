@@ -372,6 +372,11 @@ func (vm SoftLayerVM) DetachDisk(disk bslcdisk.Disk) error {
 			if err != nil {
 				return bosherr.WrapError(err, fmt.Sprintf("Failed to reattach volume `%s` to virtual guest `%d`", key, virtualGuest.Id))
 			}
+			
+			_, err = vm.restartOpenIscsiBasedOnShellScript(virtualGuest)
+			if err != nil {
+				return bosherr.WrapError(err, fmt.Sprintf("Failed to restart open iscsi from virtual guest `%d`", virtualGuest.Id))
+			}
 		}
 	}
 

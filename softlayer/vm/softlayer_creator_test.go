@@ -3,8 +3,8 @@ package vm_test
 import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"os"
 	"time"
+	"os"
 
 	. "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
 
