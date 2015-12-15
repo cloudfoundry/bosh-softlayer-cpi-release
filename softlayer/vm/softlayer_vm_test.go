@@ -444,6 +444,12 @@ var _ = Describe("SoftLayerVM", func() {
 
 		const expectMultipathInstalled = `/sbin/multipath
 `
+		const expectMountPoints = `/dev/xvda1 on /boot type ext3 (rw,noatime,barrier=0)
+rpc_pipefs on /run/rpc_pipefs type rpc_pipefs (rw)
+none on /proc/xen type xenfs (rw)
+/var/vcap/data/root_tmp on /tmp type ext4 (rw)
+/dev/mapper/3600a09803830304f3124457a4575725a-part1 on /var/vcap/store type ext4 (rw)
+`
 
 		const expectLogoutIscsi = `Logging out of session [sid: 1, target: iqn.1992-08.com.netapp:lon0201, portal: 10.1.222.67,3260]
 Logging out of session [sid: 2, target: iqn.1992-08.com.netapp:lon0201, portal: 10.1.222.52,3260]
@@ -494,6 +500,7 @@ iscsiadm: No records found
 		It("detaches iSCSI volume successfully without multipath-tools installed (one volume attached)", func() {
 			expectedCmdResults := []string{
 				"",
+				expectMountPoints,
 				"",
 				"",
 				expectStopOpenIscsi,
@@ -514,6 +521,7 @@ iscsiadm: No records found
 			expectedCmdResults := []string{
 				expectMultipathInstalled,
 				"",
+				expectMountPoints,
 				"",
 				expectStopOpenIscsi,
 				"",

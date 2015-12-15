@@ -63,3 +63,9 @@ type VM interface {
 }
 
 type Environment map[string]interface{}
+
+type Mount struct {
+	PartitionPath string
+	MountPoint    string
+}
+

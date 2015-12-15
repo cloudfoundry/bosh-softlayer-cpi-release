@@ -698,16 +698,18 @@ node.conn[0].iscsi.MaxRecvDataSegmentLength = 65536
 
 func (vm SoftLayerVM) detachVolumeBasedOnShellScript(virtualGuest datatypes.SoftLayer_Virtual_Guest, volume datatypes.SoftLayer_Network_Storage, hasMultiPath bool) error {
 	// umount /var/vcap/store in case read-only mount
-	step00 := fmt.Sprintf("umount -l /var/vcap/store")
-	_, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, step00)
-	if err != nil {
-		return bosherr.WrapError(err, "umount -l /var/vcap/store")
+	if vm.IsMountPoint(virtualGuest, "/var/vcap/store") {
+		step00 := fmt.Sprintf("umount -l /var/vcap/store")
+		_, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, step00)
+		if err != nil {
+			return bosherr.WrapError(err, "umount -l /var/vcap/store")
+		}
+		vm.logger.Debug(SOFTLAYER_VM_LOG_TAG, "umount -l /var/vcap/store", nil)
 	}
-	vm.logger.Debug(SOFTLAYER_VM_LOG_TAG, "umount -l /var/vcap/store", nil)
 
 	// logout out all nodes
 	step000 := fmt.Sprintf("iscsiadm -m session -u")
-	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, step000)
+	_, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, step000)
 	if err != nil {
 		return bosherr.WrapError(err, "iscsiadm -m session -u")
 	}
@@ -921,4 +923,44 @@ func (vm SoftLayerVM) uploadFile(virtualGuest datatypes.SoftLayer_Virtual_Guest,
 func (vm SoftLayerVM) downloadFile(virtualGuest datatypes.SoftLayer_Virtual_Guest, srcFile string, destFile string) error {
 	err := vm.sshClient.DownloadFile(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, srcFile, destFile)
 	return err
+}
+
+func (vm SoftLayerVM) IsMountPoint(virtualGuest datatypes.SoftLayer_Virtual_Guest, path string) (bool, error) {
+	mounts, err := vm.SearchMounts(virtualGuest)
+	if err != nil {
+		return false, bosherr.WrapError(err, "Searching mounts")
+	}
+
+	for _, mount := range mounts {
+		if mount.MountPoint == path {
+			return true, nil
+		}
+	}
+
+	return false, nil
+}
+
+func (vm SoftLayerVM) SearchMounts(virtualGuest datatypes.SoftLayer_Virtual_Guest) ([]Mount, error) {
+	var mounts []Mount
+	stdout, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, "mount")
+	if err != nil {
+		return mounts, bosherr.WrapError(err, "Running mount")
+	}
+
+	// e.g. '/dev/sda on /boot type ext2 (rw)'
+	for _, mountEntry := range strings.Split(stdout, "\n") {
+		if mountEntry == "" {
+			continue
+		}
+
+		mountFields := strings.Fields(mountEntry)
+
+		mountFields[2].
+			mounts = append(mounts, Mount{
+			PartitionPath: mountFields[0],
+			MountPoint:    mountFields[2],
+		})
+	}
+
+	return mounts, nil
 }
