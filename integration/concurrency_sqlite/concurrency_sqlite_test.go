@@ -30,7 +30,7 @@ var (
 	logger              = boshlog.NewLogger(boshlog.LevelInfo)
 )
 
-var _ = Describe("BOSH Director Level Integration for OS Reload", func() {
+var _ = Describe("Concurrency test for Sqlite DB", func() {
 	var (
 		err error
 	)
@@ -61,22 +61,19 @@ var _ = Describe("BOSH Director Level Integration for OS Reload", func() {
 
 	Context("Manipulate DB concurrently", func() {
 
-		It("Manipulate DB concurrently", func(done Done) {
-			runtime.GOMAXPROCS(2)
+		It("Manipulate DB concurrently", func() {
+			runtime.GOMAXPROCS(1)
 
-			for i := 1000; i <= 5000; i += 1000 {
+			for i := 1000; i <= 3000; i += 1000 {
 				go insertVMInfo(i)
 				go updateVMInfoByID()
 				go queryVMInfobyID()
 				go queryVMInfobyAgentID()
 			}
 
-			for i := 0; i < 15; i++ {
-				Expect(<-c).To(ContainSubstring("Done!"))
-			}
-			close(done)
+			time.Sleep(240 * time.Second)
 
-		}, 100000)
+		})
 	})
 
 })
@@ -114,7 +111,6 @@ func insertVMInfo(init int) {
 		time.Sleep(time.Duration(rand.Int63n(100)) * time.Millisecond)
 	}
 
-	c <- "Done!"
 }
 
 func updateVMInfoByID() {
@@ -134,7 +130,6 @@ func updateVMInfoByID() {
 		time.Sleep(time.Duration(rand.Int63n(100)) * time.Millisecond)
 	}
 
-	c <- "Done!"
 }
 
 func queryVMInfobyID() {
@@ -154,7 +149,6 @@ func queryVMInfobyID() {
 		time.Sleep(time.Duration(rand.Int63n(100)) * time.Millisecond)
 	}
 
-	c <- "Done!"
 }
 
 func queryVMInfobyAgentID() {
@@ -174,5 +168,4 @@ func queryVMInfobyAgentID() {
 		time.Sleep(time.Duration(rand.Int63n(100)) * time.Millisecond)
 	}
 
-	c <- "Done!"
 }

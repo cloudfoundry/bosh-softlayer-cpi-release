@@ -68,6 +68,8 @@ var _ = Describe("BOSH Director Level Integration for create_disk", func() {
 
 		tmpConfigPath, err = testhelperscpi.CreateTmpConfigPath(rootTemplatePath, configPath, username, apiKey)
 		Expect(err).ToNot(HaveOccurred())
+
+		os.Setenv("OS_RELOAD_ENABLED", "FALSE")
 	})
 
 	AfterEach(func() {
