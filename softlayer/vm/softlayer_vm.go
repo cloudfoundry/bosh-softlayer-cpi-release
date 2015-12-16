@@ -698,7 +698,7 @@ node.conn[0].iscsi.MaxRecvDataSegmentLength = 65536
 
 func (vm SoftLayerVM) detachVolumeBasedOnShellScript(virtualGuest datatypes.SoftLayer_Virtual_Guest, volume datatypes.SoftLayer_Network_Storage, hasMultiPath bool) error {
 	// umount /var/vcap/store in case read-only mount
-	isMounted, err := vm.IsMountPoint(virtualGuest, "/var/vcap/store")
+	isMounted, err := vm.isMountPoint(virtualGuest, "/var/vcap/store")
 	if err != nil {
 		return bosherr.WrapError(err, "check mount point /var/vcap/store")
 	}
@@ -915,23 +915,8 @@ func (vm SoftLayerVM) postCheckActiveTransactionsForDeleteVM(softLayerClient sl.
 	return nil
 }
 
-func (vm SoftLayerVM) execCommand(virtualGuest datatypes.SoftLayer_Virtual_Guest, command string) (string, error) {
-	result, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, command)
-	return result, err
-}
-
-func (vm SoftLayerVM) uploadFile(virtualGuest datatypes.SoftLayer_Virtual_Guest, srcFile string, destFile string) error {
-	err := vm.sshClient.UploadFile(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, srcFile, destFile)
-	return err
-}
-
-func (vm SoftLayerVM) downloadFile(virtualGuest datatypes.SoftLayer_Virtual_Guest, srcFile string, destFile string) error {
-	err := vm.sshClient.DownloadFile(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, srcFile, destFile)
-	return err
-}
-
-func (vm SoftLayerVM) IsMountPoint(virtualGuest datatypes.SoftLayer_Virtual_Guest, path string) (bool, error) {
-	mounts, err := vm.SearchMounts(virtualGuest)
+func (vm SoftLayerVM) isMountPoint(virtualGuest datatypes.SoftLayer_Virtual_Guest, path string) (bool, error) {
+	mounts, err := vm.searchMounts(virtualGuest)
 	if err != nil {
 		return false, bosherr.WrapError(err, "Searching mounts")
 	}
@@ -945,7 +930,7 @@ func (vm SoftLayerVM) IsMountPoint(virtualGuest datatypes.SoftLayer_Virtual_Gues
 	return false, nil
 }
 
-func (vm SoftLayerVM) SearchMounts(virtualGuest datatypes.SoftLayer_Virtual_Guest) ([]Mount, error) {
+func (vm SoftLayerVM) searchMounts(virtualGuest datatypes.SoftLayer_Virtual_Guest) ([]Mount, error) {
 	var mounts []Mount
 	stdout, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, "mount")
 	if err != nil {
@@ -968,4 +953,19 @@ func (vm SoftLayerVM) SearchMounts(virtualGuest datatypes.SoftLayer_Virtual_Gues
 	}
 
 	return mounts, nil
+}
+
+func (vm SoftLayerVM) execCommand(virtualGuest datatypes.SoftLayer_Virtual_Guest, command string) (string, error) {
+	result, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, command)
+	return result, err
+}
+
+func (vm SoftLayerVM) uploadFile(virtualGuest datatypes.SoftLayer_Virtual_Guest, srcFile string, destFile string) error {
+	err := vm.sshClient.UploadFile(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, srcFile, destFile)
+	return err
+}
+
+func (vm SoftLayerVM) downloadFile(virtualGuest datatypes.SoftLayer_Virtual_Guest, srcFile string, destFile string) error {
+	err := vm.sshClient.DownloadFile(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, srcFile, destFile)
+	return err
 }
