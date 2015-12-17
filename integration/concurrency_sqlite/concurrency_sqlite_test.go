@@ -71,7 +71,7 @@ var _ = Describe("Concurrency test for Sqlite DB", func() {
 				go queryVMInfobyAgentID()
 			}
 
-			time.Sleep(240 * time.Second)
+			time.Sleep(480 * time.Second)
 
 		})
 	})
