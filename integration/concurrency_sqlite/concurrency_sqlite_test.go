@@ -64,7 +64,7 @@ var _ = Describe("Concurrency test for Sqlite DB", func() {
 		It("Manipulate DB concurrently", func() {
 			runtime.GOMAXPROCS(1)
 
-			for i := 1000; i <= 3000; i += 1000 {
+			for i := 1000; i <= 2000; i += 1000 {
 				go insertVMInfo(i)
 				go updateVMInfoByID()
 				go queryVMInfobyID()
