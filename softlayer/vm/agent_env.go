@@ -77,6 +77,8 @@ func NewAgentEnvForVM(agentID, vmCID string, networks Networks, disksSpec DisksS
 
 			MAC: "",
 
+			Preconfigured: true,
+
 			CloudProperties: network.CloudProperties,
 		}
 	}
