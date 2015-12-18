@@ -65,7 +65,11 @@ func (vm SoftLayerVM) ID() int { return vm.id }
 
 func (vm SoftLayerVM) Delete(agentID string) error {
 	if strings.ToUpper(common.GetOSEnvVariable("OS_RELOAD_ENABLED", "TRUE")) == "FALSE" {
-		return vm.DeleteVM()
+		if strings.ToUpper(common.GetOSEnvVariable("DEL_NOT_ALLOWED", "FALSE")) == "FALSE" {
+			return vm.DeleteVM()
+		} else {
+			return bosherr.Error("DEL_NOT_ALLOWED is set to TRUE, the VM deletion reqeust is refused.")
+		}
 	}
 
 	err := bslcvmpool.InitVMPoolDB(bslcvmpool.DB_RETRY_TIMEOUT, bslcvmpool.DB_RETRY_INTERVAL, vm.logger)
@@ -98,7 +102,11 @@ func (vm SoftLayerVM) Delete(agentID string) error {
 				return nil
 			}
 		} else {
-			return vm.DeleteVM()
+			if strings.ToUpper(common.GetOSEnvVariable("DEL_NOT_ALLOWED", "FALSE")) == "FALSE" {
+				return vm.DeleteVM()
+			} else {
+				return bosherr.Error("DEL_NOT_ALLOWED is set to TRUE, the VM deletion reqeust is refused.")
+			}
 		}
 	}
 

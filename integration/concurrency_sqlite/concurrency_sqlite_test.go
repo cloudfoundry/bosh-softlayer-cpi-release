@@ -64,14 +64,14 @@ var _ = Describe("Concurrency test for Sqlite DB", func() {
 		It("Manipulate DB concurrently", func() {
 			runtime.GOMAXPROCS(1)
 
-			for i := 1000; i <= 3000; i += 1000 {
+			for i := 100; i <= 500; i += 100 {
 				go insertVMInfo(i)
 				go updateVMInfoByID()
 				go queryVMInfobyID()
 				go queryVMInfobyAgentID()
 			}
 
-			time.Sleep(240 * time.Second)
+			time.Sleep(480 * time.Second)
 
 		})
 	})
@@ -82,7 +82,7 @@ func populateDB() {
 	db, err := bslcvmpool.OpenDB(SQLITE_DB_FILE_PATH)
 	Expect(err).ToNot(HaveOccurred())
 
-	for i := 0; i < 1000; i++ {
+	for i := 0; i < 100; i++ {
 		vmID := i
 		hostname := fmt.Sprintf("concurrency_test_%d", vmID)
 		agentID := strconv.Itoa(i)
@@ -98,7 +98,7 @@ func insertVMInfo(init int) {
 	db, err := bslcvmpool.OpenDB(SQLITE_DB_FILE_PATH)
 	Expect(err).ToNot(HaveOccurred())
 
-	for i := init; i < init+1000; i++ {
+	for i := init; i < init+100; i++ {
 		vmID := i
 		hostname := fmt.Sprintf("concurrency_test_%d", vmID)
 		agentID := strconv.Itoa(i)
@@ -117,8 +117,8 @@ func updateVMInfoByID() {
 	db, err := bslcvmpool.OpenDB(SQLITE_DB_FILE_PATH)
 	Expect(err).ToNot(HaveOccurred())
 
-	for i := 0; i < 1000; i++ {
-		vmID := rand.Intn(1000)
+	for i := 0; i < 100; i++ {
+		vmID := rand.Intn(100)
 		hostname := fmt.Sprintf("concurrency_test_%d", vmID)
 		agentID := strconv.Itoa(i)
 		vmInfoDB := bslcvmpool.NewVMInfoDB(vmID, hostname+"."+domain, "f", stemcellUuid, agentID, logger, db)
@@ -136,8 +136,8 @@ func queryVMInfobyID() {
 	db, err := bslcvmpool.OpenDB(SQLITE_DB_FILE_PATH)
 	Expect(err).ToNot(HaveOccurred())
 
-	for i := 0; i < 1000; i++ {
-		vmID := rand.Intn(1000)
+	for i := 0; i < 100; i++ {
+		vmID := rand.Intn(100)
 		hostname := fmt.Sprintf("concurrency_test_%d", vmID)
 		agentID := strconv.Itoa(i)
 		vmInfoDB := bslcvmpool.NewVMInfoDB(vmID, hostname+"."+domain, "t", stemcellUuid, agentID, logger, db)
@@ -155,8 +155,8 @@ func queryVMInfobyAgentID() {
 	db, err := bslcvmpool.OpenDB(SQLITE_DB_FILE_PATH)
 	Expect(err).ToNot(HaveOccurred())
 
-	for i := 0; i < 1000; i++ {
-		vmID := rand.Intn(1000)
+	for i := 0; i < 100; i++ {
+		vmID := rand.Intn(100)
 		hostname := fmt.Sprintf("concurrency_test_%d", vmID)
 		agentID := strconv.Itoa(i)
 		vmInfoDB := bslcvmpool.NewVMInfoDB(vmID, hostname+"."+domain, "t", stemcellUuid, agentID, logger, db)
