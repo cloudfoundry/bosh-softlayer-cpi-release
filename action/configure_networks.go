@@ -42,7 +42,7 @@ func (a ConfigureNetworks) Run(vmCID VMCID, networks bslcvm.Networks) (interface
 			}
 		}
 
-		err := vm.ConfigureNetworks(networks)
+		err := vm.ConfigureNetworks(networksSpec)
 		if err != nil {
 			return nil, bosherr.WrapErrorf(err, "Configuring networks vm '%s'", vmCID)
 		}
