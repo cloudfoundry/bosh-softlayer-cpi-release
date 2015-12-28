@@ -97,7 +97,7 @@ func (vm SoftLayerVM) Delete(agentID string) error {
 			vmInfoDB.VmProperties.InUse = "f"
 			err = vmInfoDB.UpdateVMInfoByID(bslcvmpool.DB_RETRY_TIMEOUT, bslcvmpool.DB_RETRY_INTERVAL)
 			if err != nil {
-				return bosherr.WrapError(err, fmt.Sprintf("Failed to query VM info by given ID %d", vm.id))
+				return bosherr.WrapError(err, fmt.Sprintf("Failed to update in_use to %s by given ID %d", vmInfoDB.VmProperties.InUse, vm.id))
 			} else {
 				return nil
 			}
@@ -108,9 +108,14 @@ func (vm SoftLayerVM) Delete(agentID string) error {
 				return bosherr.Error("DEL_NOT_ALLOWED is set to TRUE, the VM deletion reqeust is refused.")
 			}
 		}
+	} else {
+		if strings.ToUpper(common.GetOSEnvVariable("DEL_NOT_ALLOWED", "FALSE")) == "FALSE" {
+			return vm.DeleteVM()
+		} else {
+			return bosherr.Error("DEL_NOT_ALLOWED is set to TRUE, the VM deletion reqeust is refused.")
+		}
 	}
 
-	return nil
 }
 
 func (vm SoftLayerVM) DeleteVM() error {
