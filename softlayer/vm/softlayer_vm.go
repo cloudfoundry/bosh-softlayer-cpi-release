@@ -275,7 +275,6 @@ func (vm SoftLayerVM) AttachDisk(disk bslcdisk.Disk) error {
 			if err != nil {
 				return bosherr.WrapError(err, fmt.Sprintf("Granting volume access to vitrual guest %d", virtualGuest.Id))
 			} else {
-
 				if allowable {
 					break
 				}
