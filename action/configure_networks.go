@@ -16,33 +16,15 @@ func NewConfigureNetworks(vmFinder bslcvm.Finder) ConfigureNetworks {
 	}
 }
 
-func (a ConfigureNetworks) Run(vmCID VMCID, networks bslcvm.Networks) (interface{}, error) {
+func (a ConfigureNetworks) Run(vmCID VMCID, networks Networks) (interface{}, error) {
 	vm, found, err := a.vmFinder.Find(int(vmCID))
 	if err != nil {
 		return nil, bosherr.WrapErrorf(err, "Finding vm '%s'", vmCID)
 	}
 
 	if found {
-		networksSpec := Networks{}
-		for netName, network := range networks {
-			networksSpec[netName] = Network{
-				Type: network.Type,
-
-				IP:      network.IP,
-				Netmask: network.Netmask,
-				Gateway: network.Gateway,
-
-				DNS:           network.DNS,
-				Default:       network.Default,
-				Preconfigured: true,
-
-				MAC: "",
-
-				CloudProperties: network.CloudProperties,
-			}
-		}
-
-		err := vm.ConfigureNetworks(networksSpec)
+		vmNetworks := networks.AsVMNetworks()
+		err := vm.ConfigureNetworks(vmNetworks)
 		if err != nil {
 			return nil, bosherr.WrapErrorf(err, "Configuring networks vm '%s'", vmCID)
 		}
