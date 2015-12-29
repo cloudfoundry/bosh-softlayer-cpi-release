@@ -2,7 +2,7 @@
 	"method": "create_vm",
 	"arguments": [
 		"45632666-9fb1-422a-af35-2ab6102c5c1b",
-		"811203",
+		"879741",
 		{
 			"vmNamePrefix": "ecpi-test",
 			"domain": "softlayer.com",
