@@ -82,7 +82,7 @@ func (vm SoftLayerVM) Delete(agentID string) error {
 		return bosherr.WrapError(err, "Opening DB")
 	}
 
-	vmInfoDB := bslcvmpool.NewVMInfoDB(vm.id, "", "t", "", "", vm.logger, db)
+	vmInfoDB := bslcvmpool.NewVMInfoDB(vm.id, "", "", "", "", vm.logger, db)
 	defer vmInfoDB.CloseDB()
 
 	err = vmInfoDB.QueryVMInfobyID(bslcvmpool.DB_RETRY_TIMEOUT, bslcvmpool.DB_RETRY_INTERVAL)
