@@ -724,14 +724,6 @@ func (vm SoftLayerVM) detachVolumeBasedOnShellScript(virtualGuest datatypes.Soft
 		vm.logger.Debug(SOFTLAYER_VM_LOG_TAG, "umount -l /var/vcap/store", nil)
 	}
 
-	// logout out all nodes
-	step000 := fmt.Sprintf("iscsiadm -m session -u")
-	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, step000)
-	if err != nil {
-		return bosherr.WrapError(err, "iscsiadm -m session -u")
-	}
-	vm.logger.Debug(SOFTLAYER_VM_LOG_TAG, "iscsiadm -m session -u", nil)
-
 	// stop open-iscsi
 	step1 := fmt.Sprintf("/etc/init.d/open-iscsi stop")
 	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, step1)
