@@ -174,7 +174,7 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 
 		vm := NewSoftLayerVM(vmInfoDB.VmProperties.Id, c.softLayerClient, util.GetSshClient(), nil, c.logger)
 
-		bslcommon.TIMEOUT = 24 * time.Hour
+		bslcommon.TIMEOUT = 2 * time.Hour
 		err = vm.ReloadOS(stemcell)
 		if err != nil {
 			return SoftLayerVM{}, bosherr.WrapError(err, "Failed to reload OS")
