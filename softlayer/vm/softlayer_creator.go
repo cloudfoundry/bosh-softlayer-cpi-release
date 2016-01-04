@@ -20,6 +20,7 @@ import (
 	bslcommon "github.com/maximilien/bosh-softlayer-cpi/softlayer/common"
 	bslcstem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell"
 	bslcvmpool "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm/pool"
+	datatypes "github.com/maximilien/softlayer-go/data_types"
 	sl "github.com/maximilien/softlayer-go/softlayer"
 
 	util "github.com/maximilien/bosh-softlayer-cpi/util"
@@ -138,6 +139,13 @@ func (c SoftLayerCreator) CreateNewVM(agentID string, stemcell bslcstem.Stemcell
 		}
 	}
 
+	if len(c.agentOptions.VcapPassword) > 0 {
+		err = c.SetVcapPassword(vm, virtualGuest, c.agentOptions.VcapPassword)
+		if err != nil {
+			return SoftLayerVM{}, bosherr.WrapError(err, "Updating VM's vcap password")
+		}
+	}
+
 	return vm, nil
 }
 
@@ -242,6 +250,12 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 		if err != nil {
 			return vm, bosherr.WrapError(err, fmt.Sprintf("Failed to query VM info by given ID %d", vm.ID()))
 		} else {
+			if len(c.agentOptions.VcapPassword) > 0 {
+				err = c.SetVcapPassword(vm, virtualGuest, c.agentOptions.VcapPassword)
+				if err != nil {
+					return SoftLayerVM{}, bosherr.WrapError(err, "Updating VM's vcap password")
+				}
+			}
 			return vm, nil
 		}
 
@@ -325,4 +339,13 @@ func (c SoftLayerCreator) appendRecordToEtcHosts(record string) (err error) {
 	}
 
 	return nil
+}
+
+func (c SoftLayerCreator) SetVcapPassword(vm SoftLayerVM, virtualGuest datatypes.SoftLayer_Virtual_Guest, encryptedPwd string) (err error) {
+	command := fmt.Sprintf("usermod -p %s vcap", c.agentOptions.VcapPassword)
+	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, command)
+	if err != nil {
+		return bosherr.WrapError(err, "Shelling out to usermod vcap")
+	}
+	return
 }
