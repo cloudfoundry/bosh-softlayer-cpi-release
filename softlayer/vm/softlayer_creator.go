@@ -342,7 +342,7 @@ func (c SoftLayerCreator) appendRecordToEtcHosts(record string) (err error) {
 }
 
 func (c SoftLayerCreator) SetVcapPassword(vm SoftLayerVM, virtualGuest datatypes.SoftLayer_Virtual_Guest, encryptedPwd string) (err error) {
-	command := fmt.Sprintf("usermod -p %s vcap", c.agentOptions.VcapPassword)
+	command := fmt.Sprintf("usermod -p '%s' vcap", c.agentOptions.VcapPassword)
 	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, command)
 	if err != nil {
 		return bosherr.WrapError(err, "Shelling out to usermod vcap")
