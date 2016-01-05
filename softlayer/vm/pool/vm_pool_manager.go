@@ -282,7 +282,6 @@ func (vmInfoDB *VMInfoDB) UpdateVMInfoByID(retryTimeout time.Duration, retryInte
 
 func exec(db DB, sqlStmt string, retryTimeout time.Duration, retryInterval time.Duration, logger boshlog.Logger) error {
 
-	logger.Info(VM_POOL_MANIPULATION_TAG, fmt.Sprintf("retryTimeout - %s, retryInterval - %s", retryTimeout, retryInterval))
 	execStmtRetryable := boshretry.NewRetryable(
 		func() (bool, error) {
 			tx, err := db.Begin()
