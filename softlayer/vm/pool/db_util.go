@@ -16,8 +16,8 @@ var (
 	SQLITE_DB_FOLDER    string
 	SQLITE_DB_FILE      string
 	SQLITE_DB_FILE_PATH string
-	DB_RETRY_INTERVAL   = 3 * time.Second
-	DB_RETRY_TIMEOUT    = 60 * time.Second
+	DB_RETRY_INTERVAL   = 5 * time.Second
+	DB_RETRY_TIMEOUT    = 300 * time.Second
 )
 
 func InitVMPoolDB(retryTimeout time.Duration, retryInterval time.Duration, logger boshlog.Logger) error {
