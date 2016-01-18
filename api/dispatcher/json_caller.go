@@ -3,6 +3,7 @@ package dispatcher
 import (
 	"encoding/json"
 	"reflect"
+	"strings"
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 
@@ -78,7 +79,15 @@ func (r JSONCaller) extractMethodArgs(runMethodType reflect.Type, args []interfa
 
 	for i, argFromPayload := range args {
 		var rawArgBytes []byte
-		rawArgBytes, err = json.Marshal(argFromPayload)
+
+		decodedPayload := json.NewDecoder(strings.NewReader(argFromPayload))
+		decodedPayload.UseNumber()
+		var x interface{}
+		if err := decodedPayload.Decode(&x); err != nil {
+			err = bosherr.WrapError(err, "decoding action argument")
+		}
+
+		rawArgBytes, err = json.Marshal(x)
 		if err != nil {
 			err = bosherr.WrapError(err, "Marshalling action argument")
 			return
