@@ -80,14 +80,7 @@ func (r JSONCaller) extractMethodArgs(runMethodType reflect.Type, args []interfa
 	for i, argFromPayload := range args {
 		var rawArgBytes []byte
 
-		decodedPayload := json.NewDecoder(strings.NewReader(argFromPayload))
-		decodedPayload.UseNumber()
-		var x interface{}
-		if err := decodedPayload.Decode(&x); err != nil {
-			err = bosherr.WrapError(err, "decoding action argument")
-		}
-
-		rawArgBytes, err = json.Marshal(x)
+		rawArgBytes, err = json.Marshal(argFromPayload)
 		if err != nil {
 			err = bosherr.WrapError(err, "Marshalling action argument")
 			return
