@@ -3,7 +3,6 @@ package dispatcher
 import (
 	"encoding/json"
 	"reflect"
-	"strings"
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 
