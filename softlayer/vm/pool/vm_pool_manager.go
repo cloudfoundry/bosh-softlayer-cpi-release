@@ -16,6 +16,10 @@ import (
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 )
 
+const (
+	VM_POOL_MANIPULATION_TAG = "VMPoolManipulation"
+)
+
 type DB interface {
 	Begin() (*sql.Tx, error)
 	Close() error
@@ -159,15 +163,21 @@ func (vmInfoDB *VMInfoDB) QueryVMInfobyID(retryTimeout time.Duration, retryInter
 			defer sqlStmt.Close()
 
 			err = sqlStmt.QueryRow(vmInfoDB.VmProperties.Id).Scan(&vmInfoDB.VmProperties.Id, &vmInfoDB.VmProperties.InUse, &vmInfoDB.VmProperties.ImageId, &vmInfoDB.VmProperties.AgentId)
-			if err != nil && !strings.Contains(err.Error(), "no rows") {
-				sqliteErr := err.(sqlite3.Error)
-				if sqliteErr.Code == sqlite3.ErrBusy || sqliteErr.Code == sqlite3.ErrLocked {
-					return true, bosherr.WrapError(sqliteErr, "retrying...")
+			if err != nil {
+				if strings.Contains(err.Error(), "no rows") {
+					vmInfoDB.logger.Info(VM_POOL_MANIPULATION_TAG, fmt.Sprintf("No record found by given VM ID %d", vmInfoDB.VmProperties.Id))
+					vmInfoDB.VmProperties.Id = 0
+					return false, nil
 				} else {
-					return false, bosherr.WrapError(sqliteErr, "Failed to query VM info from vms table")
+					sqliteErr := err.(sqlite3.Error)
+					if sqliteErr.Code == sqlite3.ErrBusy || sqliteErr.Code == sqlite3.ErrLocked {
+						return true, bosherr.WrapError(sqliteErr, "retrying...")
+					} else {
+						return false, bosherr.WrapError(sqliteErr, "Failed to query VM info from vms table")
+					}
 				}
-
 			}
+
 			tx.Commit()
 			return false, nil
 		})
@@ -278,7 +288,6 @@ func exec(db DB, sqlStmt string, retryTimeout time.Duration, retryInterval time.
 			if err != nil {
 				sqliteErr := err.(sqlite3.Error)
 				if sqliteErr.Code == sqlite3.ErrBusy || sqliteErr.Code == sqlite3.ErrLocked {
-					fmt.Println("err is " + err.Error())
 					return true, bosherr.WrapError(sqliteErr, "Retrying...")
 				} else {
 					return false, bosherr.WrapError(sqliteErr, "Failed to begin DB transcation")

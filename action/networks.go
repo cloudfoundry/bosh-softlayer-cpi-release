@@ -36,7 +36,7 @@ func (ns Networks) AsVMNetworks() bslcvm.Networks {
 
 			DNS:           network.DNS,
 			Default:       network.Default,
-			Preconfigured: network.Preconfigured,
+			Preconfigured: true,
 
 			CloudProperties: network.CloudProperties,
 		}

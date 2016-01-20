@@ -71,6 +71,8 @@ var _ = Describe("BOSH Director Level Integration for detach_disk", func() {
 
 		tmpConfigPath, err = testhelperscpi.CreateTmpConfigPath(rootTemplatePath, configPath, username, apiKey)
 		Expect(err).ToNot(HaveOccurred())
+
+		os.Setenv("OS_RELOAD_ENABLED", "FALSE")
 	})
 
 	AfterEach(func() {
@@ -162,9 +164,9 @@ var _ = Describe("BOSH Director Level Integration for detach_disk", func() {
 		})
 
 		AfterEach(func() {
-			testhelpers.DeleteVirtualGuest(vmId)
-			testhelpers.WaitForVirtualGuestToHaveNoActiveTransactionsOrToErr(vmId)
-			testhelpers.DeleteDisk(disk.Id)
+			/*			testhelpers.DeleteVirtualGuest(vmId)
+						testhelpers.WaitForVirtualGuestToHaveNoActiveTransactionsOrToErr(vmId)
+						testhelpers.DeleteDisk(disk.Id)*/
 			testhelpers.DeleteSshKey(createdSshKey.Id)
 		})
 
@@ -184,7 +186,7 @@ var _ = Describe("BOSH Director Level Integration for detach_disk", func() {
 		})
 	})
 
-	Context("detach_disk in SoftLayer with valid virtual guest id(with no multipath installed) and disk id", func() {
+	/*	Context("detach_disk in SoftLayer with valid virtual guest id(with no multipath installed) and disk id", func() {
 		BeforeEach(func() {
 			err = testhelpers.FindAndDeleteTestSshKeys()
 			Expect(err).ToNot(HaveOccurred())
@@ -267,5 +269,5 @@ var _ = Describe("BOSH Director Level Integration for detach_disk", func() {
 			Expect(resultOutput["result"]).To(BeNil())
 			Expect(resultOutput["error"]).To(BeNil())
 		})
-	})
+	}) */
 })

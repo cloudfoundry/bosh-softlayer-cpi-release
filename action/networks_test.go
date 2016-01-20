@@ -52,16 +52,18 @@ var _ = Describe("Networks", func() {
 					Netmask: "fake-net1-netmask",
 					Gateway: "fake-net1-gateway",
 
-					DNS:     []string{"fake-net1-dns"},
-					Default: []string{"fake-net1-default"},
+					DNS:           []string{"fake-net1-dns"},
+					Default:       []string{"fake-net1-default"},
+					Preconfigured: true,
 
 					CloudProperties: map[string]interface{}{
 						"fake-net1-cp-key": "fake-net1-cp-value",
 					},
 				},
 				"fake-net2-name": bslcvm.Network{
-					Type: "fake-net2-type",
-					IP:   "fake-net2-ip",
+					Type:          "fake-net2-type",
+					IP:            "fake-net2-ip",
+					Preconfigured: true,
 				},
 				"fake-net3-name": bslcvm.Network{
 					Type:          "fake-net3-type",

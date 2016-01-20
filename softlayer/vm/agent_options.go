@@ -12,6 +12,9 @@ type AgentOptions struct {
 	NTP []string
 
 	Blobstore BlobstoreOptions
+
+	//vcap password
+	VcapPassword string
 }
 
 type RegistryOptions struct {
