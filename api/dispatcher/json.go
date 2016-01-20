@@ -1,8 +1,8 @@
 package dispatcher
 
 import (
-	"encoding/json"
 	"bytes"
+	"encoding/json"
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
@@ -62,10 +62,10 @@ func (c JSON) Dispatch(reqBytes []byte) []byte {
 
 	c.logger.DebugWithDetails(jsonLogTag, "Request bytes", string(reqBytes))
 
-//	err := json.Unmarshal(reqBytes, &req)
-//	if err != nil {
-//		return c.buildCpiError("Must provide valid JSON payload")
-//	}
+	//	err := json.Unmarshal(reqBytes, &req)
+	//	if err != nil {
+	//		return c.buildCpiError("Must provide valid JSON payload")
+	//	}
 
 	digitalDecoder := json.NewDecoder(bytes.NewReader(reqBytes))
 	digitalDecoder.UseNumber()
