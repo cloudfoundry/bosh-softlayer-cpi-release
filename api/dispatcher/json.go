@@ -61,12 +61,6 @@ func (c JSON) Dispatch(reqBytes []byte) []byte {
 	var req Request
 
 	c.logger.DebugWithDetails(jsonLogTag, "Request bytes", string(reqBytes))
-
-	//	err := json.Unmarshal(reqBytes, &req)
-	//	if err != nil {
-	//		return c.buildCpiError("Must provide valid JSON payload")
-	//	}
-
 	digitalDecoder := json.NewDecoder(bytes.NewReader(reqBytes))
 	digitalDecoder.UseNumber()
 	if err := digitalDecoder.Decode(&req); err != nil {
