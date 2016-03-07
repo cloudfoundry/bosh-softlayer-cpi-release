@@ -10,7 +10,6 @@ import (
 	"net/http/httputil"
 	"os"
 	"path/filepath"
-	"regexp"
 	"text/template"
 
 	services "github.com/maximilien/softlayer-go/services"
@@ -265,13 +264,6 @@ func (slc *SoftLayerClient) initSoftLayerServices() {
 	slc.softLayerServices["SoftLayer_Hardware"] = services.NewSoftLayer_Hardware_Service(slc)
 }
 
-func hideCredentials(s string) string {
-	hiddenStr := "\"password\":\"******\""
-	r := regexp.MustCompile(`"password":"[^"]*"`)
-
-	return r.ReplaceAllString(s, hiddenStr)
-}
-
 func (slc *SoftLayerClient) makeHttpRequest(url string, requestType string, requestBody *bytes.Buffer) ([]byte, error) {
 	req, err := http.NewRequest(requestType, url, requestBody)
 	if err != nil {
@@ -284,7 +276,7 @@ func (slc *SoftLayerClient) makeHttpRequest(url string, requestType string, requ
 	}
 
 	if !slc.nonVerbose {
-		fmt.Fprintf(os.Stderr, "\n---\n[softlayer-go] Request:\n%s\n", hideCredentials(string(bs)))
+		fmt.Fprintf(os.Stderr, "\n---\n[softlayer-go] Request:\n%s\n", string(bs))
 	}
 
 	resp, err := slc.HTTPClient.Do(req)
@@ -300,7 +292,7 @@ func (slc *SoftLayerClient) makeHttpRequest(url string, requestType string, requ
 	}
 
 	if !slc.nonVerbose {
-		fmt.Fprintf(os.Stderr, "[softlayer-go] Response:\n%s\n", hideCredentials(string(bs)))
+		fmt.Fprintf(os.Stderr, "[softlayer-go] Response:\n%s\n", string(bs))
 	}
 
 	responseBody, err := ioutil.ReadAll(resp.Body)
