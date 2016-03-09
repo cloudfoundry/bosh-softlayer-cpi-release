@@ -16,14 +16,15 @@ func NewConfigureNetworks(vmFinder bslcvm.Finder) ConfigureNetworks {
 	}
 }
 
-func (a ConfigureNetworks) Run(vmCID VMCID, networks bslcvm.Networks) (interface{}, error) {
+func (a ConfigureNetworks) Run(vmCID VMCID, networks Networks) (interface{}, error) {
 	vm, found, err := a.vmFinder.Find(int(vmCID))
 	if err != nil {
 		return nil, bosherr.WrapErrorf(err, "Finding vm '%s'", vmCID)
 	}
 
 	if found {
-		err := vm.ConfigureNetworks(networks)
+		vmNetworks := networks.AsVMNetworks()
+		err := vm.ConfigureNetworks(vmNetworks)
 		if err != nil {
 			return nil, bosherr.WrapErrorf(err, "Configuring networks vm '%s'", vmCID)
 		}

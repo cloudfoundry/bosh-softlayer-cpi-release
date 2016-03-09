@@ -8,8 +8,6 @@ import (
 
 	. "github.com/maximilien/bosh-softlayer-cpi/action"
 
-	bslcvm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
-
 	fakevm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm/fakes"
 )
 
@@ -17,13 +15,13 @@ var _ = Describe("ConfigureNetworks", func() {
 	var (
 		vmFinder *fakevm.FakeFinder
 		action   ConfigureNetworks
-		networks bslcvm.Networks
+		networks Networks
 	)
 
 	BeforeEach(func() {
 		vmFinder = &fakevm.FakeFinder{}
 		action = NewConfigureNetworks(vmFinder)
-		networks = bslcvm.Networks{}
+		networks = Networks{}
 	})
 
 	Describe("Run", func() {
@@ -50,7 +48,7 @@ var _ = Describe("ConfigureNetworks", func() {
 				Expect(err).ToNot(HaveOccurred())
 
 				Expect(vm.ConfigureNetworksCalled).To(BeTrue())
-				Expect(vm.Networks).To(Equal(networks))
+				Expect(vm.Networks).To(Equal(networks.AsVMNetworks()))
 			})
 
 			It("returns error if configure networks fails", func() {

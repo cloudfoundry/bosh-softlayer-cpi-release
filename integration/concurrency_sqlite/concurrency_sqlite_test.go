@@ -5,7 +5,6 @@ import (
 	"math/rand"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strconv"
 	"time"
 
@@ -26,7 +25,6 @@ var (
 	SQLITE_DB_FILE_PATH = filepath.Join(SQLITE_DB_FOLDER, SQLITE_DB_FILE)
 	stemcellUuid        = "fake_stemcell_uuid"
 	domain              = "softlayer.com"
-	c                   = make(chan string, 0)
 	logger              = boshlog.NewLogger(boshlog.LevelInfo)
 )
 
@@ -62,21 +60,23 @@ var _ = Describe("BOSH Director Level Integration for OS Reload", func() {
 	Context("Manipulate DB concurrently", func() {
 
 		It("Manipulate DB concurrently", func(done Done) {
-			runtime.GOMAXPROCS(2)
 
-			for i := 1000; i <= 5000; i += 1000 {
-				go insertVMInfo(i)
-				go updateVMInfoByID()
-				go queryVMInfobyID()
-				go queryVMInfobyAgentID()
+			c := make(chan string, 0)
+
+			for i := 200; i <= 1000; i += 200 {
+				go insertVMInfo(i, c)
+				go updateVMInfoByID(c)
+				go queryVMInfobyID(c)
+				go queryVMInfobyAgentID(c)
 			}
 
 			for i := 0; i < 20; i++ {
 				Expect(<-c).To(ContainSubstring("Done!"))
 			}
+
 			close(done)
 
-		}, 50)
+		}, 600)
 	})
 
 })
@@ -85,7 +85,7 @@ func populateDB() {
 	db, err := bslcvmpool.OpenDB(SQLITE_DB_FILE_PATH)
 	Expect(err).ToNot(HaveOccurred())
 
-	for i := 0; i < 1000; i++ {
+	for i := 0; i < 200; i++ {
 		vmID := i
 		hostname := fmt.Sprintf("concurrency_test_%d", vmID)
 		agentID := strconv.Itoa(i)
@@ -97,11 +97,11 @@ func populateDB() {
 	}
 }
 
-func insertVMInfo(init int) {
+func insertVMInfo(init int, c chan string) {
 	db, err := bslcvmpool.OpenDB(SQLITE_DB_FILE_PATH)
 	Expect(err).ToNot(HaveOccurred())
 
-	for i := init; i < init+1000; i++ {
+	for i := init; i < init+200; i++ {
 		vmID := i
 		hostname := fmt.Sprintf("concurrency_test_%d", vmID)
 		agentID := strconv.Itoa(i)
@@ -117,12 +117,12 @@ func insertVMInfo(init int) {
 	c <- "Done!"
 }
 
-func updateVMInfoByID() {
+func updateVMInfoByID(c chan string) {
 	db, err := bslcvmpool.OpenDB(SQLITE_DB_FILE_PATH)
 	Expect(err).ToNot(HaveOccurred())
 
-	for i := 0; i < 100; i++ {
-		vmID := rand.Intn(100)
+	for i := 0; i < 200; i++ {
+		vmID := rand.Intn(200)
 		hostname := fmt.Sprintf("concurrency_test_%d", vmID)
 		agentID := strconv.Itoa(i)
 		vmInfoDB := bslcvmpool.NewVMInfoDB(vmID, hostname+"."+domain, "f", stemcellUuid, agentID, logger, db)
@@ -137,12 +137,12 @@ func updateVMInfoByID() {
 	c <- "Done!"
 }
 
-func queryVMInfobyID() {
+func queryVMInfobyID(c chan string) {
 	db, err := bslcvmpool.OpenDB(SQLITE_DB_FILE_PATH)
 	Expect(err).ToNot(HaveOccurred())
 
-	for i := 0; i < 1000; i++ {
-		vmID := rand.Intn(1000)
+	for i := 0; i < 200; i++ {
+		vmID := rand.Intn(200)
 		hostname := fmt.Sprintf("concurrency_test_%d", vmID)
 		agentID := strconv.Itoa(i)
 		vmInfoDB := bslcvmpool.NewVMInfoDB(vmID, hostname+"."+domain, "t", stemcellUuid, agentID, logger, db)
@@ -157,12 +157,12 @@ func queryVMInfobyID() {
 	c <- "Done!"
 }
 
-func queryVMInfobyAgentID() {
+func queryVMInfobyAgentID(c chan string) {
 	db, err := bslcvmpool.OpenDB(SQLITE_DB_FILE_PATH)
 	Expect(err).ToNot(HaveOccurred())
 
-	for i := 0; i < 1000; i++ {
-		vmID := rand.Intn(1000)
+	for i := 0; i < 200; i++ {
+		vmID := rand.Intn(200)
 		hostname := fmt.Sprintf("concurrency_test_%d", vmID)
 		agentID := strconv.Itoa(i)
 		vmInfoDB := bslcvmpool.NewVMInfoDB(vmID, hostname+"."+domain, "t", stemcellUuid, agentID, logger, db)

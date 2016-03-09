@@ -35,9 +35,13 @@ func AttachEphemeralDiskToVirtualGuest(softLayerClient sl.Client, virtualGuestId
 		return bosherr.WrapErrorf(err, "Attaching ephemeral disk to VirtualGuest `%d`", virtualGuestId)
 	}
 
-	err = service.AttachEphemeralDisk(virtualGuestId, diskSize)
+	receipt, err := service.AttachEphemeralDisk(virtualGuestId, diskSize)
 	if err != nil {
-		return bosherr.WrapErrorf(err, "Attaching ephemeral disk to VirtualGuest `%d`", virtualGuestId)
+		return err
+	}
+
+	if receipt.OrderId == 0 {
+		return nil
 	}
 
 	err = WaitForVirtualGuestToHaveRunningTransaction(softLayerClient, virtualGuestId, logger)
@@ -46,6 +50,7 @@ func AttachEphemeralDiskToVirtualGuest(softLayerClient sl.Client, virtualGuestId
 	}
 
 	err = WaitForVirtualGuestToHaveNoRunningTransaction(softLayerClient, virtualGuestId, logger)
+
 	if err != nil {
 		return bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` no transcation in progress", virtualGuestId)
 	}
@@ -241,7 +246,11 @@ func WaitForVirtualGuestIsNotPingable(softLayerClient sl.Client, virtualGuestId 
 			if err != nil {
 				return false, bosherr.WrapErrorf(err, "Checking pingable against vitrual guest %d", virtualGuestId)
 			} else {
-				return state, nil
+				if state {
+					return true, bosherr.Errorf("vitrual guest %d is pingable", virtualGuestId)
+				} else {
+					return false, nil
+				}
 			}
 		})
 
@@ -267,7 +276,11 @@ func WaitForVirtualGuestIsPingable(softLayerClient sl.Client, virtualGuestId int
 			if err != nil {
 				return false, bosherr.WrapErrorf(err, "Checking pingable against vitrual guest %d", virtualGuestId)
 			} else {
-				return !state, nil
+				if state {
+					return false, nil
+				} else {
+					return true, bosherr.Errorf("vitrual guest %d is not pingable", virtualGuestId)
+				}
 			}
 		})
 
@@ -323,7 +336,7 @@ func WaitForVirtualGuestToTargetState(softLayerClient sl.Client, virtualGuestId 
 				if strings.Contains(vgPowerState.KeyName, targetState) {
 					return false, nil
 				}
-				return true, nil
+				return true, bosherr.Errorf("The PowerState of vitrual guest %d is not targetState %s", virtualGuestId, targetState)
 			}
 		})
 

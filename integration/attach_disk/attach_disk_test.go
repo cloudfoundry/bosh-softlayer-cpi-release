@@ -71,6 +71,8 @@ var _ = Describe("BOSH Director Level Integration for attach_disk", func() {
 
 		tmpConfigPath, err = testhelperscpi.CreateTmpConfigPath(rootTemplatePath, configPath, username, apiKey)
 		Expect(err).ToNot(HaveOccurred())
+
+		os.Setenv("OS_RELOAD_ENABLED", "FALSE")
 	})
 
 	AfterEach(func() {
@@ -170,75 +172,4 @@ var _ = Describe("BOSH Director Level Integration for attach_disk", func() {
 		})
 	})
 
-	Context("attach_disk in SoftLayer with valid virtual guest id(with no multipath installed) and disk id", func() {
-		BeforeEach(func() {
-			err = testhelpers.FindAndDeleteTestSshKeys()
-			Expect(err).ToNot(HaveOccurred())
-
-			createdSshKey, _ = testhelpers.CreateTestSshKey()
-			testhelpers.WaitForCreatedSshKeyToBePresent(createdSshKey.Id)
-
-			createvmJsonPath := filepath.Join(rootTemplatePath, "dev", "create_vm_no_multipath.json")
-			f, err := os.Open(createvmJsonPath)
-			Expect(err).ToNot(HaveOccurred())
-			defer f.Close()
-			fb, err := ioutil.ReadAll(f)
-			Expect(err).ToNot(HaveOccurred())
-			jsonPayload := string(fb)
-			log.Println("jsonPayload --> ", jsonPayload)
-
-			log.Println("---> starting create vm")
-			outputBytes, err := testhelperscpi.RunCpi(rootTemplatePath, tmpConfigPath, jsonPayload)
-			log.Println("outputBytes=" + string(outputBytes))
-			Expect(err).ToNot(HaveOccurred())
-			err = json.Unmarshal(outputBytes, &resultOutput)
-			Expect(err).ToNot(HaveOccurred())
-			Expect(resultOutput["error"]).To(BeNil())
-
-			id := resultOutput["result"].(string)
-			vmId, err = strconv.Atoi(id)
-			Expect(err).ToNot(HaveOccurred())
-			Expect(vmId).ToNot(BeNil())
-			log.Println("---> created vm ", vmId)
-			//
-
-			testhelpers.WaitForVirtualGuestToBeRunning(vmId)
-			testhelpers.WaitForVirtualGuestToHaveNoActiveTransactions(vmId)
-
-			vm, err := virtualGuestService.GetObject(vmId)
-			Expect(err).ToNot(HaveOccurred())
-
-			disk = testhelpers.CreateDisk(20, strconv.Itoa(vm.Datacenter.Id))
-
-			strVGID = strconv.Itoa(vmId)
-			strDID = strconv.Itoa(disk.Id)
-
-			replacementMap = map[string]string{
-				"VMID":   strVGID,
-				"DiskID": strDID,
-			}
-		})
-
-		AfterEach(func() {
-			testhelpers.DeleteVirtualGuest(vmId)
-			testhelpers.WaitForVirtualGuestToHaveNoActiveTransactionsOrToErr(vmId)
-			testhelpers.DeleteDisk(disk.Id)
-			testhelpers.DeleteSshKey(createdSshKey.Id)
-		})
-
-		It("attach_disk successfully", func() {
-			jsonPayload, err := testhelperscpi.GenerateCpiJsonPayload("attach_disk", rootTemplatePath, replacementMap)
-			Expect(err).ToNot(HaveOccurred())
-			log.Println("jsonPayload --> ", jsonPayload)
-
-			log.Println("---> starting attach disk")
-			outputBytes, err := testhelperscpi.RunCpi(rootTemplatePath, tmpConfigPath, jsonPayload)
-			log.Println("outputBytes=" + string(outputBytes))
-			Expect(err).ToNot(HaveOccurred())
-			err = json.Unmarshal(outputBytes, &resultOutput)
-			Expect(err).ToNot(HaveOccurred())
-			Expect(resultOutput["result"]).To(BeNil())
-			Expect(resultOutput["error"]).To(BeNil())
-		})
-	})
 })

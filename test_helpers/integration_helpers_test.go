@@ -21,9 +21,10 @@ var _ = Describe("helper functions for integration tests", func() {
 
 	BeforeEach(func() {
 		replacementMap = map[string]string{
-			"ID":           "some ID",
-			"DirectorUuid": "some director UUID",
-			"Tags":         "some, tags",
+			"ID":             "some ID",
+			"DirectorUuid":   "some director UUID",
+			"Tag_deployment": "fake_deployment",
+			"Tag_compiling":  "fake_compiling",
 		}
 
 		pwd, err := os.Getwd()
@@ -40,8 +41,8 @@ var _ = Describe("helper functions for integration tests", func() {
 								"some ID",
 								{
 									"director": "BOSH Director",
-									"deployment": "softlayer",
-									"tags": "some, tags"
+									"deployment": "fake-deployment",
+									"compiling": "fake-deployment"
 								}
 							],
 							"context": {
@@ -72,9 +73,10 @@ var _ = Describe("helper functions for integration tests", func() {
 		Context("set_vm_metadata CPI method", func() {
 			BeforeEach(func() {
 				cpiTemplate = testhelpers.CpiTemplate{
-					ID:           "fake-id",
-					DirectorUuid: "fake-director-uuid",
-					Tags:         "fake, tags",
+					ID:             "fake-id",
+					DirectorUuid:   "fake-director-uuid",
+					Tag_deployment: "fake_deployment",
+					Tag_compiling:  "fake_compiling",
 				}
 			})
 
@@ -88,8 +90,8 @@ var _ = Describe("helper functions for integration tests", func() {
 							"some ID",
 							{
 								"director": "BOSH Director",
-								"deployment": "softlayer",
-								"tags": "some, tags"
+								"deployment": "fake_deployment",
+								"compiling": "fake_compiling"
 							}
 						],
 						"context": {

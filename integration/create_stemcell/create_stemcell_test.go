@@ -60,6 +60,8 @@ var _ = Describe("BOSH Director Level Integration for create_stemcell", func() {
 
 		tmpConfigPath, err = testhelperscpi.CreateTmpConfigPath(rootTemplatePath, configPath, username, apiKey)
 		Expect(err).ToNot(HaveOccurred())
+
+		os.Setenv("OS_RELOAD_ENABLED", "FALSE")
 	})
 
 	AfterEach(func() {
@@ -83,7 +85,7 @@ var _ = Describe("BOSH Director Level Integration for create_stemcell", func() {
 				Name: "integration-test-vgbtg",
 				Note: "",
 				OperatingSystemReferenceCode: "UBUNTU_14_64",
-				Uri: "swift://" + swiftUsername + "@" + swiftCluster + "/stemcells/bosh-stemcell-3147-softlayer.vhd",
+				Uri: "swift://" + swiftUsername + "@" + swiftCluster + "/stemcells/bosh-stemcell-3178-softlayer.vhd",
 			}
 
 			vgbdtGroup, err := vgbdtgService.CreateFromExternalSource(configuration)

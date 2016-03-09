@@ -78,6 +78,7 @@ func (r JSONCaller) extractMethodArgs(runMethodType reflect.Type, args []interfa
 
 	for i, argFromPayload := range args {
 		var rawArgBytes []byte
+
 		rawArgBytes, err = json.Marshal(argFromPayload)
 		if err != nil {
 			err = bosherr.WrapError(err, "Marshalling action argument")
