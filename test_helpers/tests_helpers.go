@@ -19,7 +19,7 @@ func SetTestFixtureForFakeSoftLayerClient(fakeSoftLayerClient *fakesslclient.Fak
 	workingDir, err := os.Getwd()
 	Expect(err).ToNot(HaveOccurred())
 
-	fakeSoftLayerClient.DoRawHttpRequestResponse, err = ReadJsonTestFixtures(filepath.Join(workingDir, "..", ".."), "softlayer", fileName)
+	fakeSoftLayerClient.FakeHttpClient.DoRawHttpRequestResponse, err = ReadJsonTestFixtures(filepath.Join(workingDir, "..", ".."), "softlayer", fileName)
 	Expect(err).ToNot(HaveOccurred())
 }
 
@@ -31,7 +31,7 @@ func SetTestFixturesForFakeSoftLayerClient(fakeSoftLayerClient *fakesslclient.Fa
 		fileContents, err := ReadJsonTestFixtures(filepath.Join(workingDir, "..", ".."), "softlayer", fileName)
 		Expect(err).ToNot(HaveOccurred())
 
-		fakeSoftLayerClient.DoRawHttpRequestResponses = append(fakeSoftLayerClient.DoRawHttpRequestResponses, fileContents)
+		fakeSoftLayerClient.FakeHttpClient.DoRawHttpRequestResponses = append(fakeSoftLayerClient.FakeHttpClient.DoRawHttpRequestResponses, fileContents)
 	}
 }
 

@@ -16,17 +16,17 @@ import (
 
 var _ = Describe("SoftLayerStemcell", func() {
 	var (
-		softLayerClient *fakesslclient.FakeSoftLayerClient
-		stemcell        SoftLayerStemcell
-		logger          boshlog.Logger
+		fakeSoftLayerClient *fakesslclient.FakeSoftLayerClient
+		stemcell            SoftLayerStemcell
+		logger              boshlog.Logger
 	)
 
 	BeforeEach(func() {
-		softLayerClient = fakesslclient.NewFakeSoftLayerClient("fake-username", "fake-api-key")
+		fakeSoftLayerClient = fakesslclient.NewFakeSoftLayerClient("fake-username", "fake-api-key")
 
 		logger = boshlog.NewLogger(boshlog.LevelNone)
 
-		stemcell = NewSoftLayerStemcell(1234, "fake-stemcell-uuid", DefaultKind, softLayerClient, logger)
+		stemcell = NewSoftLayerStemcell(1234, "fake-stemcell-uuid", DefaultKind, fakeSoftLayerClient, logger)
 
 		bslcommon.TIMEOUT = 2 * time.Second
 		bslcommon.POLLING_INTERVAL = 1 * time.Second
@@ -39,7 +39,7 @@ var _ = Describe("SoftLayerStemcell", func() {
 				"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
 				"SoftLayer_Virtual_Guest_Block_Device_Template_Group_Service_GetObject_None.json"}
 
-			testhelpers.SetTestFixturesForFakeSoftLayerClient(softLayerClient, fixturesFileNames)
+			testhelpers.SetTestFixturesForFakeSoftLayerClient(fakeSoftLayerClient, fixturesFileNames)
 		})
 
 		Context("when stemcell exists", func() {
@@ -51,7 +51,7 @@ var _ = Describe("SoftLayerStemcell", func() {
 
 		Context("when stemcell does not exist", func() {
 			BeforeEach(func() {
-				softLayerClient.DoRawHttpRequestResponse = []byte("false")
+				fakeSoftLayerClient.FakeHttpClient.DoRawHttpRequestResponse = []byte("false")
 			})
 
 			It("returns error if deleting stemcell does not exist", func() {
