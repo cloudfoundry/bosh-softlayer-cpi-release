@@ -1,12 +1,13 @@
 package util
 
 import (
-	"code.google.com/p/go.crypto/ssh"
 	"errors"
-	"github.com/pkg/sftp"
-	myssh "golang.org/x/crypto/ssh"
 	"io/ioutil"
 	"regexp"
+
+	"github.com/pkg/sftp"
+
+	"golang.org/x/crypto/ssh"
 )
 
 type SshClient interface {
@@ -51,10 +52,10 @@ func (c *sshClientImpl) ExecCommand(username string, password string, ip string,
 }
 
 func (c *sshClientImpl) UploadFile(username string, password string, ip string, srcFile string, destFile string) error {
-	config := &myssh.ClientConfig{
+	config := &ssh.ClientConfig{
 		User: username,
-		Auth: []myssh.AuthMethod{
-			myssh.Password(password),
+		Auth: []ssh.AuthMethod{
+			ssh.Password(password),
 		},
 	}
 	if !IsIP(ip) {
@@ -65,7 +66,7 @@ func (c *sshClientImpl) UploadFile(username string, password string, ip string, 
 		return errors.New("Is a directory")
 	}
 
-	client, err := myssh.Dial("tcp", ip+":22", config)
+	client, err := ssh.Dial("tcp", ip+":22", config)
 	if err != nil {
 		return err
 	}
@@ -101,10 +102,10 @@ func (c *sshClientImpl) UploadFile(username string, password string, ip string, 
 }
 
 func (c *sshClientImpl) DownloadFile(username string, password string, ip string, srcFile string, destFile string) error {
-	config := &myssh.ClientConfig{
+	config := &ssh.ClientConfig{
 		User: username,
-		Auth: []myssh.AuthMethod{
-			myssh.Password(password),
+		Auth: []ssh.AuthMethod{
+			ssh.Password(password),
 		},
 	}
 
@@ -116,7 +117,7 @@ func (c *sshClientImpl) DownloadFile(username string, password string, ip string
 		return errors.New("Is a directory")
 	}
 
-	client, err := myssh.Dial("tcp", ip+":22", config)
+	client, err := ssh.Dial("tcp", ip+":22", config)
 	if err != nil {
 		return err
 	}
