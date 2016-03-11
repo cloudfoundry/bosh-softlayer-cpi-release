@@ -1,8 +1,8 @@
 package vm
 
 import (
-	bslcdisk "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk"
-	bslcstem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell"
+	bslcdisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk"
+	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
 
 	sldatatypes "github.com/maximilien/softlayer-go/data_types"
 )

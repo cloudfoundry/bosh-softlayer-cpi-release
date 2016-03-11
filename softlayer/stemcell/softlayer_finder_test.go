@@ -4,9 +4,9 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	. "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell"
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
 
-	testhelpers "github.com/maximilien/bosh-softlayer-cpi/test_helpers"
+	testhelpers "github.com/cloudfoundry/bosh-softlayer-cpi/test_helpers"
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 

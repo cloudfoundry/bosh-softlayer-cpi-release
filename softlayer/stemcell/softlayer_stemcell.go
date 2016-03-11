@@ -4,10 +4,10 @@ import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
-	slh "github.com/maximilien/bosh-softlayer-cpi/softlayer/common"
+	slh "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 	sl "github.com/maximilien/softlayer-go/softlayer"
 
-	bslcommon "github.com/maximilien/bosh-softlayer-cpi/softlayer/common"
+	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 
 	"fmt"
 	"time"

@@ -7,7 +7,7 @@ import (
 
 	. "github.com/onsi/gomega"
 
-	fakesshclient "github.com/maximilien/bosh-softlayer-cpi/util/fakes"
+	fakesshclient "github.com/cloudfoundry/bosh-softlayer-cpi/util/fakes"
 	fakesslclient "github.com/maximilien/softlayer-go/client/fakes"
 )
 

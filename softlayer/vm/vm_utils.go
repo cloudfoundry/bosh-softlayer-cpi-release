@@ -11,7 +11,7 @@ import (
 
 	sldatatypes "github.com/maximilien/softlayer-go/data_types"
 
-	bslcstem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell"
+	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
 )
 
 func CreateDisksSpec(ephemeralDiskSize int) DisksSpec {

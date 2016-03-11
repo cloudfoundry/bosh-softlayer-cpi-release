@@ -20,10 +20,10 @@ import (
 
 	sl "github.com/maximilien/softlayer-go/softlayer"
 
-	bslcommon "github.com/maximilien/bosh-softlayer-cpi/softlayer/common"
-	bslcdisk "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk"
+	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
+	bslcdisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk"
 
-	util "github.com/maximilien/bosh-softlayer-cpi/util"
+	util "github.com/cloudfoundry/bosh-softlayer-cpi/util"
 	datatypes "github.com/maximilien/softlayer-go/data_types"
 )
 

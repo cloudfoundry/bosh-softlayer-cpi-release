@@ -4,13 +4,13 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	. "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
 
-	testhelpers "github.com/maximilien/bosh-softlayer-cpi/test_helpers"
+	testhelpers "github.com/cloudfoundry/bosh-softlayer-cpi/test_helpers"
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
-	fakevm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm/fakes"
+	fakevm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm/fakes"
 	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
 )
 

@@ -8,10 +8,10 @@ import (
 
 	sl "github.com/maximilien/softlayer-go/softlayer"
 
-	bslcbm "github.com/maximilien/bosh-softlayer-cpi/softlayer/baremetal"
-	bslcdisk "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk"
-	bslcstem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell"
-	bslcvm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
+	bslcbm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/baremetal"
+	bslcdisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk"
+	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
+	bslcvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
 )
 
 type concreteFactory struct {

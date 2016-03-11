@@ -28,7 +28,7 @@
   cd $base
 
   echo -e "\n Creating cpi binary..."
-  go build -o out/cpi github.com/maximilien/bosh-softlayer-cpi/main
+  go build -o out/cpi github.com/cloudfoundry/bosh-softlayer-cpi/main
 
 if [ -z "$1" ]; then
   echo -e "\n Integration Testing ALL CPI methods"

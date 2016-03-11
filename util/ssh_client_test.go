@@ -1,8 +1,8 @@
 package util_test
 
 import (
-	bscutil "github.com/maximilien/bosh-softlayer-cpi/util"
-	bscutilfakes "github.com/maximilien/bosh-softlayer-cpi/util/fakes"
+	bscutil "github.com/cloudfoundry/bosh-softlayer-cpi/util"
+	bscutilfakes "github.com/cloudfoundry/bosh-softlayer-cpi/util/fakes"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

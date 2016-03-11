@@ -6,11 +6,11 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	. "github.com/maximilien/bosh-softlayer-cpi/action"
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/action"
 
-	fakedisk "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk/fakes"
+	fakedisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk/fakes"
 
-	bslcdisk "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk"
+	bslcdisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk"
 )
 
 var _ = Describe("CreateDisk", func() {

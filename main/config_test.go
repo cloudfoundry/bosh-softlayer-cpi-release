@@ -8,9 +8,9 @@ import (
 
 	fakesys "github.com/cloudfoundry/bosh-utils/system/fakes"
 
-	. "github.com/maximilien/bosh-softlayer-cpi/main"
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/main"
 
-	bslcaction "github.com/maximilien/bosh-softlayer-cpi/action"
+	bslcaction "github.com/cloudfoundry/bosh-softlayer-cpi/action"
 )
 
 var validProperties = bslcaction.ConcreteFactoryOptions{

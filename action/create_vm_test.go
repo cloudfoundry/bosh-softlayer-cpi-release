@@ -6,12 +6,12 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	. "github.com/maximilien/bosh-softlayer-cpi/action"
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/action"
 
-	fakestem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell/fakes"
-	fakevm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm/fakes"
+	fakestem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell/fakes"
+	fakevm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm/fakes"
 
-	bslcvm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
+	bslcvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
 
 	sldatatypes "github.com/maximilien/softlayer-go/data_types"
 )

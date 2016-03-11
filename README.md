@@ -22,7 +22,7 @@ Clone this repo and build it. Using the following commands on a Linux or Mac OS 
 $ mkdir -p bosh-softlayer-cpi/src/github.com/maximilien
 $ export GOPATH=$(pwd)/bosh-softlayer-cpi:$GOPATH
 $ cd bosh-softlayer-cpi/src/github.com/maximilien
-$ git clone https://github.com/maximilien/bosh-softlayer-cpi.git
+$ git clone https://github.com/cloudfoundry/bosh-softlayer-cpi.git
 $ cd bosh-softlayer-cpi
 $ ./bin/build
 $ ./bin/test-unit
@@ -33,7 +33,7 @@ $ ./bin/test-integration
 
 NOTE: if you get any dependency errors, then use `go get path/to/dependency` to get it, e.g., `go get github.com/onsi/ginkgo` and `go get github.com/onsi/gomega`
 
-The executable output should now be located in: `out/cpi`. You will need to package this into a BOSH release. The easiest way is to use the [bosh-softlayer-cpi-release](https://github.com/maximilien/bosh-softlayer-cpi-release) project.
+The executable output should now be located in: `out/cpi`. You will need to package this into a BOSH release. The easiest way is to use the [bosh-softlayer-cpi-release](https://github.com/cloudfoundry/bosh-softlayer-cpi-release) project.
 
 ### Running Tests
 -----------------
@@ -97,7 +97,7 @@ SWEET SUITE SUCCESS
 ## Contributing
 ---------------
 
-* We gratefully acknowledge and thank the [current contributors](https://github.com/maximilien/bosh-softlayer-cpi/graphs/contributors)
+* We gratefully acknowledge and thank the [current contributors](https://github.com/cloudfoundry/bosh-softlayer-cpi/graphs/contributors)
 * We welcome any and all contributions as Pull Requests (PR)
 * We also welcome issues and bug report and new feature request. We will address as time permits
 * Follow the steps above in Developing to get your system setup correctly
@@ -108,7 +108,7 @@ SWEET SUITE SUCCESS
 ### Managing dependencies
 -------------------------
 
-* All dependencies managed via [Godep](https://github.com/tools/godep). See [Godeps/_workspace](https://github.com/maximilien/bosh-softlayer-cpi/tree/master/Godeps/_workspace) directory on master
+* All dependencies managed via [Godep](https://github.com/tools/godep). See [Godeps/_workspace](https://github.com/cloudfoundry/bosh-softlayer-cpi/tree/master/Godeps/_workspace) directory on master
 
 #### Short `godep` Guide
 * If you ever import a new package `foo/bar` (after you `go get foo/bar`, so that foo/bar is in `$GOPATH`), you can type `godep save ./...` to add it to the `Godeps` directory.

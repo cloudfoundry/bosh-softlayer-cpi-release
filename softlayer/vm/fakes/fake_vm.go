@@ -1,9 +1,9 @@
 package fakes
 
 import (
-	bslcdisk "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk"
+	bslcdisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk"
 
-	bslcvm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
+	bslcvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
 )
 
 type FakeVM struct {
