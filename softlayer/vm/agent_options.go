@@ -12,13 +12,21 @@ type AgentOptions struct {
 	NTP []string
 
 	Blobstore BlobstoreOptions
+
+	//vcap password
+	VcapPassword string
+}
+
+type RegistryOptions struct {
+	Host     string
+	Port     int
+	Username string
+	Password string
 }
 
 type BlobstoreOptions struct {
-	// e.g. local
-	Type string
-
-	Options map[string]interface{}
+	Provider string                 `json:"provider"`
+	Options  map[string]interface{} `json:"options"`
 }
 
 func (o AgentOptions) Validate() error {
@@ -35,7 +43,7 @@ func (o AgentOptions) Validate() error {
 }
 
 func (o BlobstoreOptions) Validate() error {
-	if o.Type == "" {
+	if o.Provider == "" {
 		return bosherr.Error("Must provide non-empty Type")
 	}
 
