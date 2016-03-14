@@ -1,0 +1,54 @@
+{
+  "method": "create_vm",
+  "arguments": [
+    "45632666-9fb1-422a-af35-2ab6102c5c1b",
+    "828353",
+    {
+      "vmNamePrefix": "ecpi-test",
+      "domain": "softlayer.com",
+      "startCpus": 1,
+      "maxMemory": 1024,
+      "hourlyBillingFlag": true,
+      "localDiskFlag": true,
+      "dedicatedAccountHostOnlyFlag": false,
+      "datacenter": {
+        "name": "lon02"
+      },
+      "bosh_ip": "10.112.116.127",
+      "primaryNetworkComponent": {
+        "networkVlan": {
+          "id": 524956
+        }
+      },
+      "primaryBackendNetworkComponent": {
+        "networkVlan": {
+          "id": 524954
+        }
+      },
+      "sshKeys": [
+        {
+          "id": 74826
+        }
+      ]
+    },
+    {
+      "default": {
+        "type": "dynamic",
+        "dns": [
+          "8.8.8.8",
+          "10.0.80.11",
+          "10.0.80.12"
+        ],
+        "default": [
+          "dns",
+          "gateway"
+        ]
+      }
+    },
+    null,
+    {}
+  ],
+  "context": {
+    "director_uuid": "5276b588-1016-4023-acae-9a0d797168be"
+  }
+}

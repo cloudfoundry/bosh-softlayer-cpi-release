@@ -45,23 +45,6 @@ var _ = Describe("JSON", func() {
 				dispatcher.Dispatch([]byte(`{"method":"fake-action","arguments":["fake-arg"]}`))
 				Expect(caller.CallAction).To(Equal(action))
 				Expect(caller.CallArgs).To(Equal([]interface{}{"fake-arg"}))
-
-				dispatcher.Dispatch([]byte(`{
-          "method":"fake-action",
-          "arguments":[
-            123, 
-            "fake-arg",
-            [123, "fake-arg"],
-            {"fake-arg2-key":"fake-arg2-value"}
-          ]
-        }`))
-				Expect(caller.CallAction).To(Equal(action))
-				Expect(caller.CallArgs).To(Equal([]interface{}{
-					float64(123),
-					"fake-arg",
-					[]interface{}{float64(123), "fake-arg"},
-					map[string]interface{}{"fake-arg2-key": "fake-arg2-value"},
-				}))
 			})
 
 			Context("when running action succeeds", func() {

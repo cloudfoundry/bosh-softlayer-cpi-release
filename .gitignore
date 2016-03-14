@@ -12,6 +12,7 @@ gobin/*
 # Folders
 _obj
 _test
+.idea
 
 # Architecture specific extensions/prefixes
 *.[568vq]
@@ -29,3 +30,6 @@ _testmain.go
 *.test
 .DS_STORE
 .DS_Store
+
+# vim
+*.swp

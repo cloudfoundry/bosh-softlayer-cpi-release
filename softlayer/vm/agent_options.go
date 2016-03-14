@@ -15,6 +15,7 @@ type AgentOptions struct {
 
 	//vcap password
 	VcapPassword string
+
 }
 
 type RegistryOptions struct {
@@ -23,6 +24,7 @@ type RegistryOptions struct {
 	Username string
 	Password string
 }
+
 
 type BlobstoreOptions struct {
 	Provider string                 `json:"provider"`

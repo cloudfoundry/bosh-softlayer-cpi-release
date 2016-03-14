@@ -1,13 +1,13 @@
 package util
 
 import (
-	"code.google.com/p/go.crypto/ssh"
 	"errors"
-	"github.com/pkg/sftp"
-	myssh "golang.org/x/crypto/ssh"
 	"io/ioutil"
-	"log"
 	"regexp"
+
+	"github.com/pkg/sftp"
+
+	"golang.org/x/crypto/ssh"
 )
 
 type SshClient interface {
@@ -52,10 +52,10 @@ func (c *sshClientImpl) ExecCommand(username string, password string, ip string,
 }
 
 func (c *sshClientImpl) UploadFile(username string, password string, ip string, srcFile string, destFile string) error {
-	config := &myssh.ClientConfig{
+	config := &ssh.ClientConfig{
 		User: username,
-		Auth: []myssh.AuthMethod{
-			myssh.Password(password),
+		Auth: []ssh.AuthMethod{
+			ssh.Password(password),
 		},
 	}
 	if !IsIP(ip) {
@@ -66,52 +66,46 @@ func (c *sshClientImpl) UploadFile(username string, password string, ip string, 
 		return errors.New("Is a directory")
 	}
 
-	client, err := myssh.Dial("tcp", ip+":22", config)
+	client, err := ssh.Dial("tcp", ip+":22", config)
 	if err != nil {
-		log.Fatal(err)
 		return err
 	}
 	defer client.Close()
 
 	sftp, err := sftp.NewClient(client)
 	if err != nil {
-		log.Fatal(err)
 		return err
 	}
 	defer sftp.Close()
 
 	data, err := ioutil.ReadFile(srcFile)
 	if err != nil {
-		log.Fatal(err)
 		return err
 	}
 
 	f, err := sftp.Create(destFile)
 	if err != nil {
-		log.Fatal(err)
 		return err
 	}
 	defer f.Close()
 
 	_, err = f.Write([]byte(data))
 	if err != nil {
-		log.Fatal(err)
 		return err
 	}
 
 	_, err = sftp.Lstat(destFile)
 	if err != nil {
-		log.Fatal(err)
 		return err
 	}
 	return nil
 }
 
 func (c *sshClientImpl) DownloadFile(username string, password string, ip string, srcFile string, destFile string) error {
-	config := &myssh.ClientConfig{
+	config := &ssh.ClientConfig{
 		User: username,
-		Auth: []myssh.AuthMethod{
-			myssh.Password(password),
+		Auth: []ssh.AuthMethod{
+			ssh.Password(password),
 		},
 	}
 
@@ -123,36 +117,31 @@ func (c *sshClientImpl) DownloadFile(username string, password string, ip string
 		return errors.New("Is a directory")
 	}
 
-	client, err := myssh.Dial("tcp", ip+":22", config)
+	client, err := ssh.Dial("tcp", ip+":22", config)
 	if err != nil {
-		log.Fatal(err)
 		return err
 	}
 	defer client.Close()
 
 	sftp, err := sftp.NewClient(client)
 	if err != nil {
-		log.Fatal(err)
 		return err
 	}
 	defer sftp.Close()
 
 	pFile, err := sftp.Open(srcFile)
 	if err != nil {
-		log.Fatal(err)
 		return err
 	}
 	defer pFile.Close()
 
 	data, err := ioutil.ReadAll(pFile)
 	if err != nil {
-		log.Fatal(err)
 		return err
 	}
 
 	err = ioutil.WriteFile(destFile, data, 0755)
 	if err != nil {
-		log.Fatal(err)
 		return err
 	}
 

@@ -8,6 +8,7 @@ import (
 )
 
 type VMCloudProperties struct {
+	VmNamePrefix             string                               `json:"vmNamePrefix,omitempty"`
 	Domain                   string                               `json:"domain,omitempty"`
 	StartCpus                int                                  `json:"startCpus,omitempty"`
 	MaxMemory                int                                  `json:"maxMemory,omitempty"`
@@ -17,7 +18,6 @@ type VMCloudProperties struct {
 	RootDiskSize             int                                  `json:"rootDiskSize,omitempty"`
 	EphemeralDiskSize        int                                  `json:"ephemeralDiskSize,omitempty"`
 
-	VmNamePrefix                   string                                     `json:"vmNamePrefix,omitempty"`
 	HourlyBillingFlag              bool                                       `json:"hourlyBillingFlag,omitempty"`
 	LocalDiskFlag                  bool                                       `json:"localDiskFlag,omitempty"`
 	DedicatedAccountHostOnlyFlag   bool                                       `json:"dedicatedAccountHostOnlyFlag,omitempty"`
@@ -52,7 +52,7 @@ type Finder interface {
 type VM interface {
 	ID() int
 
-	Delete() error
+	Delete(agentId string) error
 	Reboot() error
 
 	SetMetadata(VMMetadata) error
@@ -63,3 +63,8 @@ type VM interface {
 }
 
 type Environment map[string]interface{}
+
+type Mount struct {
+	PartitionPath string
+	MountPoint    string
+}

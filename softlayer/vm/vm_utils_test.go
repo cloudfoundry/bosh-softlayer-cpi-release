@@ -1,7 +1,7 @@
 package vm_test
 
 import (
-	"encoding/base64"
+	"encoding/json"
 	"strconv"
 	"time"
 
@@ -96,12 +96,17 @@ var _ = Describe("VM Utils", func() {
 			disks              DisksSpec
 			env                Environment
 			agentOptions       AgentOptions
+			cloudProps         VMCloudProperties
 			expectedMetadata   string
 		)
 
 		BeforeEach(func() {
 			agentID = "fake-agentID"
 			agentName = "fake-agentName"
+			cloudProps = VMCloudProperties{
+				BoshIp:            "fake-powerdns",
+				EphemeralDiskSize: 100,
+			}
 			networks = Networks{}
 			disks = DisksSpec{}
 			env = Environment{}
@@ -110,8 +115,8 @@ var _ = Describe("VM Utils", func() {
 			expectedMetadata = `{
   "agent_id": "fake-agentID",
   "vm": {
-    "name": "fake-agentName",
-    "id": "fake-agentName"
+    "name": "vm-fake-agentID",
+    "id": "vm-fake-agentID"
   },
   "mbus": "",
   "ntp": null,
@@ -123,7 +128,7 @@ var _ = Describe("VM Utils", func() {
 
   },
   "disks": {
-    "ephemeral": "",
+    "ephemeral": "/dev/xvdc",
     "persistent": null
   },
   "env": {
@@ -133,9 +138,8 @@ var _ = Describe("VM Utils", func() {
 		})
 
 		It("return agent metadata", func() {
-			metadata, err := CreateAgentMetadata(agentID, agentName, networks, disks, env, agentOptions)
-			Expect(err).ToNot(HaveOccurred())
-			Expect(metadata).To(MatchJSON(expectedMetadata))
+			userdata := CreateAgentUserData(agentID, cloudProps, networks, env, agentOptions)
+			Expect(json.Marshal(userdata)).To(MatchJSON(expectedMetadata))
 		})
 	})
 
@@ -213,7 +217,6 @@ var _ = Describe("VM Utils", func() {
 					NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
 				PrimaryBackendNetworkComponent: sldatatypes.PrimaryBackendNetworkComponent{
 					NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
-				UserData: []sldatatypes.UserData{{Value: "fake-userdata"}},
 			}
 
 			networks = Networks{}
@@ -265,10 +268,6 @@ var _ = Describe("VM Utils", func() {
 					},
 				},
 
-				UserData: []sldatatypes.UserData{
-					sldatatypes.UserData{Value: "eyJhZ2VudF9pZCI6ImZha2UtYWdlbnRJRCIsInZtIjp7Im5hbWUiOiJ2bS1mYWtlLWFnZW50SUQiLCJpZCI6InZtLWZha2UtYWdlbnRJRCJ9LCJtYnVzIjoiIiwibnRwIjpudWxsLCJibG9ic3RvcmUiOnsicHJvdmlkZXIiOiIiLCJvcHRpb25zIjpudWxsfSwibmV0d29ya3MiOnt9LCJkaXNrcyI6eyJlcGhlbWVyYWwiOiIvZGV2L3h2ZGMiLCJwZXJzaXN0ZW50IjpudWxsfSwiZW52Ijp7fX0="},
-				},
-
 				SshKeys: []sldatatypes.SshKey{
 					sldatatypes.SshKey{Id: 74826},
 				},
@@ -278,7 +277,7 @@ var _ = Describe("VM Utils", func() {
 		})
 
 		It("returns a correct virtual guest template", func() {
-			vgt, err := CreateVirtualGuestTemplate(agentID, stemcell, cloudProps, networks, env, agentOptions)
+			vgt, err := CreateVirtualGuestTemplate(stemcell, cloudProps)
 			Expect(err).ToNot(HaveOccurred())
 
 			//Since VGT.Hostname use timestamp we need to fix it here
@@ -286,15 +285,5 @@ var _ = Describe("VM Utils", func() {
 			Expect(vgt).To(Equal(expectedVgt))
 		})
 
-		It("returns a correct virtual guest template with agent name with pattern `vm-agentID`", func() {
-			vgt, err := CreateVirtualGuestTemplate(agentID, stemcell, cloudProps, networks, env, agentOptions)
-			Expect(err).ToNot(HaveOccurred())
-			Expect(vgt.UserData[0].Value).ToNot(Equal(""))
-
-			decodedMetadataBytes, err := base64.StdEncoding.DecodeString(vgt.UserData[0].Value)
-			Expect(err).ToNot(HaveOccurred())
-
-			Expect(string(decodedMetadataBytes)).To(ContainSubstring("vm-fake-agentID"))
-		})
 	})
 })

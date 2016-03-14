@@ -36,7 +36,7 @@ func NewFakeVM(id int) *FakeVM {
 
 func (vm FakeVM) ID() int { return vm.id }
 
-func (vm *FakeVM) Delete() error {
+func (vm *FakeVM) Delete(agentID string) error {
 	vm.DeleteCalled = true
 	return vm.DeleteErr
 }

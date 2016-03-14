@@ -35,7 +35,7 @@ var _ = Describe("DeleteVM", func() {
 			})
 
 			It("deletes vm", func() {
-				_, err := action.Run(1234)
+				_, err := action.Run(1234, "fake-agentID")
 				Expect(err).ToNot(HaveOccurred())
 
 				Expect(vm.DeleteCalled).To(BeTrue())
@@ -44,18 +44,18 @@ var _ = Describe("DeleteVM", func() {
 			It("returns error if deleting vm fails", func() {
 				vm.DeleteErr = errors.New("fake-delete-err")
 
-				_, err := action.Run(1234)
+				_, err := action.Run(1234, "fake-agentID")
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("fake-delete-err"))
 			})
 		})
 
 		Context("when vm is not found with given cid", func() {
-			It("does vmFinder return error", func() {
+			It("does vmFinder does not return error", func() {
 				vmFinder.FindFound = false
 
-				_, err := action.Run(1234)
-				Expect(err).To(HaveOccurred())
+				_, err := action.Run(1234, "fake-agentID")
+				Expect(err).ToNot(HaveOccurred())
 			})
 		})
 
@@ -63,7 +63,7 @@ var _ = Describe("DeleteVM", func() {
 			It("does not return error", func() {
 				vmFinder.FindErr = errors.New("fake-find-err")
 
-				_, err := action.Run(1234)
+				_, err := action.Run(1234, "fake-agentID")
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("fake-find-err"))
 			})

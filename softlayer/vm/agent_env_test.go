@@ -171,8 +171,8 @@ var _ = Describe("AgentEnv", func() {
 					ID:   "fake-vm-id",
 				},
 
-				Networks: NetworksSpec{
-					"fake-net-name": NetworkSpec{
+				Networks: Networks{
+					"fake-net-name": Network{
 						Type: "fake-type",
 
 						IP:      "fake-ip",
@@ -212,8 +212,8 @@ var _ = Describe("AgentEnv", func() {
 
 		It("returns error if agent env cannot be JSON encoded", func() {
 			agentEnv := AgentEnv{
-				Networks: NetworksSpec{
-					"fake-net-name": NetworkSpec{
+				Networks: Networks{
+					"fake-net-name": Network{
 						CloudProperties: map[string]interface{}{
 							"fake-key": NonJSONMarshable{},
 						},

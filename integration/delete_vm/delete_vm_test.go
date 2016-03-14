@@ -65,6 +65,8 @@ var _ = Describe("BOSH Director Level Integration for delete_vm", func() {
 
 		tmpConfigPath, err = testhelperscpi.CreateTmpConfigPath(rootTemplatePath, configPath, username, apiKey)
 		Expect(err).ToNot(HaveOccurred())
+
+		os.Setenv("OS_RELOAD_ENABLED", "FALSE")
 	})
 
 	AfterEach(func() {
@@ -121,7 +123,7 @@ var _ = Describe("BOSH Director Level Integration for delete_vm", func() {
 			}
 		})
 
-		It("fails to delete the VM", func() {
+		It("can't find the VM and exit delete_vm", func() {
 			jsonPayload, err := testhelperscpi.GenerateCpiJsonPayload("delete_vm", rootTemplatePath, replacementMap)
 			Expect(err).ToNot(HaveOccurred())
 
@@ -129,7 +131,7 @@ var _ = Describe("BOSH Director Level Integration for delete_vm", func() {
 			Expect(err).ToNot(HaveOccurred())
 			err = json.Unmarshal(outputBytes, &output)
 			Expect(err).ToNot(HaveOccurred())
-			Expect(output["error"]).ToNot(BeNil())
+			Expect(output["error"]).To(BeNil())
 		})
 	})
 

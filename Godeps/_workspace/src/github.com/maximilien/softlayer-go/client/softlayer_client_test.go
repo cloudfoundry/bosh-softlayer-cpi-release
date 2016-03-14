@@ -1,6 +1,10 @@
 package client_test
 
 import (
+	"bytes"
+	"errors"
+	"net"
+	"net/http"
 	"os"
 
 	. "github.com/onsi/ginkgo"
@@ -22,6 +26,8 @@ var _ = Describe("SoftLayerClient", func() {
 		username = os.Getenv("SL_USERNAME")
 		apiKey = os.Getenv("SL_API_KEY")
 
+		os.Setenv("SL_GO_NON_VERBOSE", "TRUE")
+
 		client = slclient.NewSoftLayerClient(username, apiKey)
 	})
 
@@ -32,6 +38,36 @@ var _ = Describe("SoftLayerClient", func() {
 
 			client = slclient.NewSoftLayerClient(username, apiKey)
 			Expect(client).ToNot(BeNil())
+		})
+	})
+
+	Context("#NewSoftLayerClient_HTTPClient", func() {
+		It("creates a new client which should have an initialized default HTTP client", func() {
+			client = slclient.NewSoftLayerClient(username, apiKey)
+
+			c, ok := client.(*slclient.SoftLayerClient)
+			Expect(ok).To(BeTrue())
+			Expect(c.HttpClient).ToNot(BeNil())
+
+			httpClient, ok := c.GetHttpClient().(*slclient.HttpClient)
+			Expect(ok).To(BeTrue())
+			Expect(httpClient.HTTPClient).ToNot(BeNil())
+
+			// Assign a malformed dialer to test if the HTTP client really works
+			var errDialFailed = errors.New("dial failed")
+			httpClient.HTTPClient = &http.Client{
+				Transport: &http.Transport{
+					Dial: func(network, addr string) (net.Conn, error) {
+						return nil, errDialFailed
+					},
+				},
+			}
+
+			Expect(client.GetHttpClient()).ToNot(BeNil())
+
+			_, errorCode, err := client.GetHttpClient().DoRawHttpRequest("/foo", "application/text", bytes.NewBufferString("random text"))
+			Expect(err).To(Equal(errDialFailed))
+			Expect(errorCode).To(BeNumerically(">", 400))
 		})
 	})
 

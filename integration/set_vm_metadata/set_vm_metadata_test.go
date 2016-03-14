@@ -56,6 +56,8 @@ var _ = Describe("BOSH Director Level Integration for set_vm_metadata", func() {
 
 		testhelpers.TIMEOUT = 35 * time.Minute
 		testhelpers.POLLING_INTERVAL = 10 * time.Second
+
+		os.Setenv("OS_RELOAD_ENABLED", "FALSE")
 	})
 
 	Context("set_vm_metadata", func() {
@@ -78,9 +80,10 @@ var _ = Describe("BOSH Director Level Integration for set_vm_metadata", func() {
 			strVGID = strconv.Itoa(virtualGuest.Id)
 
 			replacementMap = map[string]string{
-				"ID":           strVGID,
-				"DirectorUuid": "fake-director-uuid",
-				"Tags":         "cpi-test, softlayer",
+				"ID":             strVGID,
+				"DirectorUuid":   "fake-director-uuid",
+				"Tag_compiling":  "buildpack_python",
+				"Tag_deployment": "metadata_deployment",
 			}
 		})
 
@@ -112,8 +115,8 @@ var _ = Describe("BOSH Director Level Integration for set_vm_metadata", func() {
 			tagReferencesJSON, err := json.Marshal(tagReferences)
 			Expect(err).ToNot(HaveOccurred())
 
-			Ω(tagReferencesJSON).Should(ContainSubstring("cpi-test"))
-			Ω(tagReferencesJSON).Should(ContainSubstring("softlayer"))
+			Ω(tagReferencesJSON).Should(ContainSubstring("buildpack_python"))
+			Ω(tagReferencesJSON).Should(ContainSubstring("metadata_deployment"))
 		})
 	})
 })
