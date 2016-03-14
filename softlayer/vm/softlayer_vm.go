@@ -17,13 +17,13 @@ import (
 
 	sl "github.com/maximilien/softlayer-go/softlayer"
 
-	bslcommon "github.com/maximilien/bosh-softlayer-cpi/softlayer/common"
-	bslcdisk "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk"
-	bslcstem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell"
-	bslcvmpool "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm/pool"
+	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
+	bslcdisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk"
+	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
+	bslcvmpool "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm/pool"
 
-	common "github.com/maximilien/bosh-softlayer-cpi/common"
-	util "github.com/maximilien/bosh-softlayer-cpi/util"
+	common "github.com/cloudfoundry/bosh-softlayer-cpi/common"
+	util "github.com/cloudfoundry/bosh-softlayer-cpi/util"
 	datatypes "github.com/maximilien/softlayer-go/data_types"
 	sldatatypes "github.com/maximilien/softlayer-go/data_types"
 )
@@ -127,12 +127,16 @@ func (vm SoftLayerVM) DeleteVM() error {
 	vmCID := vm.ID()
 	err = bslcommon.WaitForVirtualGuestToHaveNoRunningTransactions(vm.softLayerClient, vmCID)
 	if err != nil {
-		return bosherr.WrapError(err, fmt.Sprintf("Waiting for VirtualGuest `%d` to have no pending transactions before deleting vm", vmCID))
+		if !strings.Contains(err.Error(),"HTTP error code") {
+			return bosherr.WrapError(err, fmt.Sprintf("Waiting for VirtualGuest `%d` to have no pending transactions before deleting vm", vmCID))
+		}
 	}
 
 	deleted, err := virtualGuestService.DeleteObject(vm.ID())
 	if err != nil {
-		return bosherr.WrapError(err, "Deleting SoftLayer VirtualGuest from client")
+		if !strings.Contains(err.Error(),"HTTP error code") {
+			return bosherr.WrapError(err, "Deleting SoftLayer VirtualGuest from client")
+		}
 	}
 
 	if !deleted {
@@ -141,7 +145,9 @@ func (vm SoftLayerVM) DeleteVM() error {
 
 	err = vm.postCheckActiveTransactionsForDeleteVM(vm.softLayerClient, vmCID)
 	if err != nil {
-		return err
+		if !strings.Contains(err.Error(),"HTTP error code") {
+			return err
+		}
 	}
 
 	if strings.ToUpper(common.GetOSEnvVariable("OS_RELOAD_ENABLED", "TRUE")) == "TRUE" {
@@ -278,7 +284,9 @@ func (vm SoftLayerVM) AttachDisk(disk bslcdisk.Disk) error {
 		for totalTime < bslcommon.TIMEOUT {
 			allowable, err := networkStorageService.AttachIscsiVolume(virtualGuest, disk.ID())
 			if err != nil {
-				return bosherr.WrapError(err, fmt.Sprintf("Granting volume access to vitrual guest %d", virtualGuest.Id))
+				if !strings.Contains(err.Error(),"HTTP error code") {
+					return bosherr.WrapError(err, fmt.Sprintf("Granting volume access to vitrual guest %d", virtualGuest.Id))
+				}
 			} else {
 				if allowable {
 					break
@@ -827,7 +835,9 @@ func (vm SoftLayerVM) postCheckActiveTransactionsForOSReload(softLayerClient sl.
 	for totalTime < bslcommon.TIMEOUT {
 		activeTransactions, err := virtualGuestService.GetActiveTransactions(vm.ID())
 		if err != nil {
-			return bosherr.WrapError(err, "Getting active transactions from SoftLayer client")
+			if !strings.Contains(err.Error(),"HTTP error code") {
+				return bosherr.WrapError(err, "Getting active transactions from SoftLayer client")
+			}
 		}
 
 		if len(activeTransactions) > 0 {
@@ -845,7 +855,9 @@ func (vm SoftLayerVM) postCheckActiveTransactionsForOSReload(softLayerClient sl.
 
 	err = bslcommon.WaitForVirtualGuest(vm.softLayerClient, vm.ID(), "RUNNING")
 	if err != nil {
-		return bosherr.WrapError(err, fmt.Sprintf("PowerOn failed with VirtualGuest id %d", vm.ID()))
+		if !strings.Contains(err.Error(),"HTTP error code") {
+			return bosherr.WrapError(err, fmt.Sprintf("PowerOn failed with VirtualGuest id %d", vm.ID()))
+		}
 	}
 
 	vm.logger.Info(SOFTLAYER_VM_OS_RELOAD_TAG, fmt.Sprintf("The virtual guest %d is powered on", vm.ID()))
@@ -863,7 +875,9 @@ func (vm SoftLayerVM) postCheckActiveTransactionsForDeleteVM(softLayerClient sl.
 	for totalTime < bslcommon.TIMEOUT {
 		activeTransactions, err := virtualGuestService.GetActiveTransactions(virtualGuestId)
 		if err != nil {
-			return bosherr.WrapError(err, "Getting active transactions from SoftLayer client")
+			if !strings.Contains(err.Error(),"HTTP error code") {
+				return bosherr.WrapError(err, "Getting active transactions from SoftLayer client")
+			}
 		}
 
 		if len(activeTransactions) > 0 {
@@ -889,7 +903,9 @@ func (vm SoftLayerVM) postCheckActiveTransactionsForDeleteVM(softLayerClient sl.
 
 		activeTransaction, err := virtualGuestService.GetActiveTransaction(virtualGuestId)
 		if err != nil {
-			return bosherr.WrapError(err, "Getting active transactions from SoftLayer client")
+			if !strings.Contains(err.Error(),"HTTP error code") {
+				return bosherr.WrapError(err, "Getting active transactions from SoftLayer client")
+			}
 		}
 
 		averageDuration := activeTransaction.TransactionStatus.AverageDuration

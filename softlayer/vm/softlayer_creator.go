@@ -16,14 +16,14 @@ import (
 	boshsys "github.com/cloudfoundry/bosh-utils/system"
 	boshuuid "github.com/cloudfoundry/bosh-utils/uuid"
 
-	common "github.com/maximilien/bosh-softlayer-cpi/common"
-	bslcommon "github.com/maximilien/bosh-softlayer-cpi/softlayer/common"
-	bslcstem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell"
-	bslcvmpool "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm/pool"
+	common "github.com/cloudfoundry/bosh-softlayer-cpi/common"
+	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
+	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
+	bslcvmpool "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm/pool"
 	datatypes "github.com/maximilien/softlayer-go/data_types"
 	sl "github.com/maximilien/softlayer-go/softlayer"
 
-	util "github.com/maximilien/bosh-softlayer-cpi/util"
+	util "github.com/cloudfoundry/bosh-softlayer-cpi/util"
 )
 
 const SOFTLAYER_VM_CREATOR_LOG_TAG = "SoftLayerVMCreator"
@@ -107,7 +107,7 @@ func (c SoftLayerCreator) CreateNewVM(agentID string, stemcell bslcstem.Stemcell
 		}
 		c.agentOptions.Mbus = mbus
 		// Update blobstore setting
-		switch c.agentOptions.Blobstore.Type {
+		switch c.agentOptions.Blobstore.Provider {
 		case BlobstoreTypeDav:
 			davConf := DavConfig(c.agentOptions.Blobstore.Options)
 			c.updateDavConfig(&davConf, cloudProps.BoshIp)
@@ -225,7 +225,7 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 			}
 			c.agentOptions.Mbus = mbus
 			// Update blobstore setting
-			switch c.agentOptions.Blobstore.Type {
+			switch c.agentOptions.Blobstore.Provider {
 			case BlobstoreTypeDav:
 				davConf := DavConfig(c.agentOptions.Blobstore.Options)
 				c.updateDavConfig(&davConf, cloudProps.BoshIp)

@@ -10,7 +10,7 @@ import (
 
 	datatypes "github.com/maximilien/softlayer-go/data_types"
 
-	util "github.com/maximilien/bosh-softlayer-cpi/util"
+	util "github.com/cloudfoundry/bosh-softlayer-cpi/util"
 )
 
 type SoftlayerFileService interface {

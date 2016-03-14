@@ -8,7 +8,7 @@ import (
 	boshsys "github.com/cloudfoundry/bosh-utils/system"
 	boshuuid "github.com/cloudfoundry/bosh-utils/uuid"
 
-	util "github.com/maximilien/bosh-softlayer-cpi/util"
+	util "github.com/cloudfoundry/bosh-softlayer-cpi/util"
 	sl "github.com/maximilien/softlayer-go/softlayer"
 )
 
@@ -40,7 +40,9 @@ func (f SoftLayerFinder) Find(vmID int) (VM, bool, error) {
 
 	virtualGuest, err := virtualGuestService.GetObject(vmID)
 	if err != nil {
-		return SoftLayerVM{}, false, bosherr.WrapErrorf(err, "Finding SoftLayer Virtual Guest with id `%d`", vmID)
+		if !strings.Contains(err.Error(),"HTTP error code") {
+			return SoftLayerVM{}, false, bosherr.WrapErrorf(err, "Finding SoftLayer Virtual Guest with id `%d`", vmID)
+		}
 	}
 
 	vm, found := SoftLayerVM{}, true

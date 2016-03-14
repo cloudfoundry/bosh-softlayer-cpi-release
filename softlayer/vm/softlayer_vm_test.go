@@ -8,21 +8,22 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	. "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
-	testhelpers "github.com/maximilien/bosh-softlayer-cpi/test_helpers"
+	testhelpers "github.com/cloudfoundry/bosh-softlayer-cpi/test_helpers"
+	util "github.com/cloudfoundry/bosh-softlayer-cpi/util/fakes"
 
-	bslcommon "github.com/maximilien/bosh-softlayer-cpi/softlayer/common"
-	bsldisk "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk"
-	bslvm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
+	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
+	bsldisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk"
+	bslvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
 
-	common "github.com/maximilien/bosh-softlayer-cpi/common"
-	fakedisk "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk/fakes"
-	fakestemcell "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell/fakes"
-	fakevm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm/fakes"
-	fakesutil "github.com/maximilien/bosh-softlayer-cpi/util/fakes"
+	common "github.com/cloudfoundry/bosh-softlayer-cpi/common"
+	fakedisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk/fakes"
+	fakestemcell "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell/fakes"
+	fakevm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm/fakes"
+	fakesutil "github.com/cloudfoundry/bosh-softlayer-cpi/util/fakes"
 	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
 	"os"
 )

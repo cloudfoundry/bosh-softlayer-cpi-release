@@ -1,7 +1,7 @@
 package fakes
 
 import (
-	bslcdisk "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk"
+	bslcdisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk"
 )
 
 type FakeCreator struct {

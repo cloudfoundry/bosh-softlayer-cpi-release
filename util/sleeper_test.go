@@ -3,7 +3,7 @@ package util_test
 import (
 	"time"
 
-	bscutil "github.com/maximilien/bosh-softlayer-cpi/util"
+	bscutil "github.com/cloudfoundry/bosh-softlayer-cpi/util"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

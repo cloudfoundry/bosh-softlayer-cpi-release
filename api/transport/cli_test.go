@@ -7,11 +7,11 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	. "github.com/maximilien/bosh-softlayer-cpi/api/transport"
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/api/transport"
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
-	fakedisp "github.com/maximilien/bosh-softlayer-cpi/api/dispatcher/fakes"
+	fakedisp "github.com/cloudfoundry/bosh-softlayer-cpi/api/dispatcher/fakes"
 )
 
 type FakeReader struct {

@@ -4,7 +4,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	. "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
 )
 
 var _ = Describe("NewAgentEnvForVM", func() {
@@ -36,7 +36,7 @@ var _ = Describe("NewAgentEnvForVM", func() {
 			NTP:  []string{"fake-ntp"},
 
 			Blobstore: BlobstoreOptions{
-				Type: "fake-blobstore-type",
+				Provider: "fake-blobstore-type",
 				Options: map[string]interface{}{
 					"fake-blobstore-key": "fake-blobstore-value",
 				},

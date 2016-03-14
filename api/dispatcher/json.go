@@ -6,8 +6,8 @@ import (
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
-	bslcaction "github.com/maximilien/bosh-softlayer-cpi/action"
-	bslcapi "github.com/maximilien/bosh-softlayer-cpi/api"
+	bslcaction "github.com/cloudfoundry/bosh-softlayer-cpi/action"
+	bslcapi "github.com/cloudfoundry/bosh-softlayer-cpi/api"
 )
 
 const (

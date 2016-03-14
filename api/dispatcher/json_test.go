@@ -6,13 +6,13 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	. "github.com/maximilien/bosh-softlayer-cpi/api/dispatcher"
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/api/dispatcher"
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
-	fakeaction "github.com/maximilien/bosh-softlayer-cpi/action/fakes"
-	fakedisp "github.com/maximilien/bosh-softlayer-cpi/api/dispatcher/fakes"
-	fakeapi "github.com/maximilien/bosh-softlayer-cpi/api/fakes"
+	fakeaction "github.com/cloudfoundry/bosh-softlayer-cpi/action/fakes"
+	fakedisp "github.com/cloudfoundry/bosh-softlayer-cpi/api/dispatcher/fakes"
+	fakeapi "github.com/cloudfoundry/bosh-softlayer-cpi/api/fakes"
 )
 
 var _ = Describe("JSON", func() {

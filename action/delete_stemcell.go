@@ -3,7 +3,7 @@ package action
 import (
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
-	bslcstem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell"
+	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
 )
 
 const (

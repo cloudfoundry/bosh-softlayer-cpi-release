@@ -4,7 +4,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	. "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
 )
 
 var _ = Describe("AgentOptions", func() {
@@ -16,7 +16,7 @@ var _ = Describe("AgentOptions", func() {
 			NTP:  []string{},
 
 			Blobstore: BlobstoreOptions{
-				Type: "fake-blobstore-type",
+				Provider: "fake-blobstore-type",
 			},
 		}
 	)
@@ -40,7 +40,7 @@ var _ = Describe("AgentOptions", func() {
 		})
 
 		It("returns error if blobstore section is not valid", func() {
-			options.Blobstore.Type = ""
+			options.Blobstore.Provider = ""
 
 			err := options.Validate()
 			Expect(err).To(HaveOccurred())
@@ -54,7 +54,7 @@ var _ = Describe("BlobstoreOptions", func() {
 		options BlobstoreOptions
 
 		validOptions = BlobstoreOptions{
-			Type:    "fake-type",
+			Provider:    "fake-type",
 			Options: map[string]interface{}{"fake-key": "fake-value"},
 		}
 	)
@@ -70,7 +70,7 @@ var _ = Describe("BlobstoreOptions", func() {
 		})
 
 		It("returns error if Type is empty", func() {
-			options.Type = ""
+			options.Provider = ""
 
 			err := options.Validate()
 			Expect(err).To(HaveOccurred())

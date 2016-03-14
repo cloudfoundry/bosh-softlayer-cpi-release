@@ -3,13 +3,13 @@ package action_test
 import (
 	"encoding/json"
 
-	. "github.com/maximilien/bosh-softlayer-cpi/action"
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/action"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	action "github.com/maximilien/bosh-softlayer-cpi/action"
-	bslcvm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
-	fakevm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm/fakes"
+	action "github.com/cloudfoundry/bosh-softlayer-cpi/action"
+	bslcvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
+	fakevm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm/fakes"
 )
 
 var _ = Describe("SetVMMetadata", func() {

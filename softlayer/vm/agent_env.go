@@ -93,7 +93,7 @@ func NewAgentEnvForVM(agentID, vmCID string, networks Networks, disksSpec DisksS
 		NTP:  agentOptions.NTP,
 
 		Blobstore: BlobstoreSpec{
-			Provider: agentOptions.Blobstore.Type,
+			Provider: agentOptions.Blobstore.Provider,
 			Options:  agentOptions.Blobstore.Options,
 		},
 
