@@ -278,7 +278,9 @@ func (vm SoftLayerVM) AttachDisk(disk bslcdisk.Disk) error {
 		for totalTime < bslcommon.TIMEOUT {
 			allowable, err := networkStorageService.AttachIscsiVolume(virtualGuest, disk.ID())
 			if err != nil {
-				return bosherr.WrapError(err, fmt.Sprintf("Granting volume access to vitrual guest %d", virtualGuest.Id))
+				if !strings.Contains(err.Error(),"HTTP error code") {
+					return bosherr.WrapError(err, fmt.Sprintf("Granting volume access to vitrual guest %d", virtualGuest.Id))
+				}
 			} else {
 				if allowable {
 					break
