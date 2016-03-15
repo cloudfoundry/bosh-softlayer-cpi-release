@@ -7,22 +7,43 @@ import (
 )
 
 type ConcreteFactoryOptions struct {
-	StemcellsDir string
+	Softlayer SoftLayerConfig `json:"softlayer"`
 
-	Agent bslcvm.AgentOptions
+	StemcellsDir string `json:"stemcelldir,omitempty"`
 
-	AgentEnvService string
-	Registry        bslcvm.RegistryOptions
+	Agent bslcvm.AgentOptions `json:"agent"`
+
+	AgentEnvService string `json:"agentenvservice,omitempty`
+
+	Registry bslcvm.RegistryOptions `json:"registry,omitempty"`
 }
 
 func (o ConcreteFactoryOptions) Validate() error {
-	if o.StemcellsDir == "" {
-		return bosherr.Error("Must provide non-empty StemcellsDir")
-	}
-
 	err := o.Agent.Validate()
 	if err != nil {
 		return bosherr.WrapError(err, "Validating Agent configuration")
+	}
+
+	err = o.Softlayer.Validate()
+	if err != nil {
+		return bosherr.WrapError(err, "Validating SoftLayer configuration")
+	}
+
+	return nil
+}
+
+type SoftLayerConfig struct {
+	Username string `json:"username"`
+	ApiKey   string `json:"apiKey"`
+}
+
+func (c SoftLayerConfig) Validate() error {
+	if c.Username == "" {
+		return bosherr.Error("Must provide non-empty Username")
+	}
+
+	if c.ApiKey == "" {
+		return bosherr.Error("Must provide non-empty ApiKey")
 	}
 
 	return nil

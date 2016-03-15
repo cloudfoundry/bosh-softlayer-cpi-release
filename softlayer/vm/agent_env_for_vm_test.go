@@ -36,7 +36,7 @@ var _ = Describe("NewAgentEnvForVM", func() {
 			NTP:  []string{"fake-ntp"},
 
 			Blobstore: BlobstoreOptions{
-				Type: "fake-blobstore-type",
+				Provider: "fake-blobstore-type",
 				Options: map[string]interface{}{
 					"fake-blobstore-key": "fake-blobstore-value",
 				},

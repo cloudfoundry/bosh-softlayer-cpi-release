@@ -32,29 +32,6 @@ var _ = Describe("helper functions for integration tests", func() {
 		rootTemplatePath = filepath.Join(pwd, "..")
 	})
 
-	Context("#RunCpi", func() {
-		It("/out/cpi to exist and run", func() {
-			configPath := filepath.Join(rootTemplatePath, "dev", "config.json")
-			payload := `{
-							"method": "set_vm_metadata",
-							"arguments": [
-								"some ID",
-								{
-									"director": "BOSH Director",
-									"deployment": "fake-deployment",
-									"compiling": "fake-deployment"
-								}
-							],
-							"context": {
-								"director_uuid": "some director UUID"
-							}
-						}`
-
-			_, err := testhelpers.RunCpi(rootTemplatePath, configPath, payload)
-			Expect(err).ToNot(HaveOccurred())
-		})
-	})
-
 	Context("#CreateTmpConfigPath", func() {
 		It("creates a config.json in temp dir with new config template values", func() {
 			tmpConfigPath, err := testhelpers.CreateTmpConfigPath(rootTemplatePath, "test_fixtures/cpi_methods/config.json", "some username", "some ApiKey")

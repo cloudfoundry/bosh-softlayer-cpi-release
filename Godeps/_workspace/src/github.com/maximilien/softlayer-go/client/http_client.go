@@ -14,37 +14,36 @@ import (
 	"text/template"
 )
 
-const NON_VERBOSE = "NON_VERBOSE"
-
 type HttpClient struct {
 	HTTPClient *http.Client
 
 	username string
-	password string
-
-	apiUrl string
+	apiKey   string
 
 	nonVerbose bool
 
 	templatePath string
 }
 
-func NewHttpClient(username, password, apiUrl, templatePath string) *HttpClient {
+const (
+	SOFTLAYER_API_URL  = "api.softlayer.com/rest/v3"
+	TEMPLATE_ROOT_PATH = "templates"
+	SL_GO_NON_VERBOSE  = "SL_GO_NON_VERBOSE"
+)
+
+func NewHttpClient(username, apiKey string) *HttpClient {
 	pwd, err := os.Getwd()
 	if err != nil {
-		panic(err)
+		panic(err) // this should be handled by the user
 	}
 
 	hClient := &HttpClient{
 		username: username,
-		password: password,
+		apiKey:   apiKey,
 
-		apiUrl: apiUrl,
-
-		templatePath: filepath.Join(pwd, templatePath),
+		templatePath: filepath.Join(pwd, TEMPLATE_ROOT_PATH),
 
 		HTTPClient: http.DefaultClient,
-
 		nonVerbose: checkNonVerbose(),
 	}
 
@@ -54,7 +53,7 @@ func NewHttpClient(username, password, apiUrl, templatePath string) *HttpClient 
 // Public methods
 
 func (slc *HttpClient) DoRawHttpRequestWithObjectMask(path string, masks []string, requestType string, requestBody *bytes.Buffer) ([]byte, int, error) {
-	url := fmt.Sprintf("https://%s:%s@%s/%s", slc.username, slc.password, slc.apiUrl, path)
+	url := fmt.Sprintf("https://%s:%s@%s/%s", slc.username, slc.apiKey, SOFTLAYER_API_URL, path)
 
 	url += "?objectMask="
 	for i := 0; i < len(masks); i++ {
@@ -68,14 +67,14 @@ func (slc *HttpClient) DoRawHttpRequestWithObjectMask(path string, masks []strin
 }
 
 func (slc *HttpClient) DoRawHttpRequestWithObjectFilter(path string, filters string, requestType string, requestBody *bytes.Buffer) ([]byte, int, error) {
-	url := fmt.Sprintf("https://%s:%s@%s/%s", slc.username, slc.password, slc.apiUrl, path)
+	url := fmt.Sprintf("https://%s:%s@%s/%s", slc.username, slc.apiKey, SOFTLAYER_API_URL, path)
 	url += "?objectFilter=" + filters
 
 	return slc.makeHttpRequest(url, requestType, requestBody)
 }
 
 func (slc *HttpClient) DoRawHttpRequestWithObjectFilterAndObjectMask(path string, masks []string, filters string, requestType string, requestBody *bytes.Buffer) ([]byte, int, error) {
-	url := fmt.Sprintf("https://%s:%s@%s/%s", slc.username, slc.password, slc.apiUrl, path)
+	url := fmt.Sprintf("https://%s:%s@%s/%s", slc.username, slc.apiKey, SOFTLAYER_API_URL, path)
 
 	url += "?objectFilter=" + filters
 
@@ -92,7 +91,7 @@ func (slc *HttpClient) DoRawHttpRequestWithObjectFilterAndObjectMask(path string
 }
 
 func (slc *HttpClient) DoRawHttpRequest(path string, requestType string, requestBody *bytes.Buffer) ([]byte, int, error) {
-	url := fmt.Sprintf("https://%s:%s@%s/%s", slc.username, slc.password, slc.apiUrl, path)
+	url := fmt.Sprintf("https://%s:%s@%s/%s", slc.username, slc.apiKey, SOFTLAYER_API_URL, path)
 	return slc.makeHttpRequest(url, requestType, requestBody)
 }
 
@@ -182,7 +181,7 @@ func hideCredentials(s string) string {
 }
 
 func checkNonVerbose() bool {
-	slGoNonVerbose := os.Getenv(NON_VERBOSE)
+	slGoNonVerbose := os.Getenv(SL_GO_NON_VERBOSE)
 	switch slGoNonVerbose {
 	case "yes":
 		return true

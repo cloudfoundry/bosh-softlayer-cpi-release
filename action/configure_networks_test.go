@@ -8,6 +8,8 @@ import (
 
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/action"
 
+	bslcvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
+
 	fakevm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm/fakes"
 )
 

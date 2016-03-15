@@ -13,14 +13,13 @@ var _ = Describe("ConcreteFactoryOptions", func() {
 		options ConcreteFactoryOptions
 
 		validOptions = ConcreteFactoryOptions{
-			StemcellsDir: "/tmp/stemcells",
 
 			Agent: bslcvm.AgentOptions{
 				Mbus: "fake-mbus",
 				NTP:  []string{},
 
 				Blobstore: bslcvm.BlobstoreOptions{
-					Type: "fake-blobstore-type",
+					Provider: "fake-blobstore-type",
 				},
 			},
 		}
@@ -29,14 +28,6 @@ var _ = Describe("ConcreteFactoryOptions", func() {
 	Describe("Validate", func() {
 		BeforeEach(func() {
 			options = validOptions
-		})
-
-		It("returns error if StemcellsDir is empty", func() {
-			options.StemcellsDir = ""
-
-			err := options.Validate()
-			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring("Must provide non-empty StemcellsDir"))
 		})
 
 		It("returns error if agent section is not valid", func() {

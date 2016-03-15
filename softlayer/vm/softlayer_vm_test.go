@@ -13,6 +13,7 @@ import (
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
 	testhelpers "github.com/cloudfoundry/bosh-softlayer-cpi/test_helpers"
+	util "github.com/cloudfoundry/bosh-softlayer-cpi/util/fakes"
 
 	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 	bsldisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk"

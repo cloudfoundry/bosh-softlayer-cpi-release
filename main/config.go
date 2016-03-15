@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"strings"
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshsys "github.com/cloudfoundry/bosh-utils/system"
@@ -10,14 +11,12 @@ import (
 )
 
 type Config struct {
-	SoftLayer SoftLayerConfig
-
-	Actions bslcaction.ConcreteFactoryOptions
+	Cloud CloudConfig `json:"cloud"`
 }
 
-type SoftLayerConfig struct {
-	Username string `json:"username"`
-	ApiKey   string `json:"apiKey"`
+type CloudConfig struct {
+	Plugin     string                            `json:"plugin"`
+	Properties bslcaction.ConcreteFactoryOptions `json:"properties"`
 }
 
 func NewConfigFromPath(path string, fs boshsys.FileSystem) (Config, error) {
@@ -42,21 +41,13 @@ func NewConfigFromPath(path string, fs boshsys.FileSystem) (Config, error) {
 }
 
 func (c Config) Validate() error {
-	err := c.SoftLayer.Validate()
+	if !strings.EqualFold(c.Cloud.Plugin, "softlayer") {
+		return bosherr.Error("Should softlayer plugin")
+	}
+
+	err := c.Cloud.Properties.Validate()
 	if err != nil {
-		return bosherr.WrapError(err, "Validating SoftLayer configuration")
-	}
-
-	return nil
-}
-
-func (c SoftLayerConfig) Validate() error {
-	if c.Username == "" {
-		return bosherr.Error("Must provide non-empty Username")
-	}
-
-	if c.ApiKey == "" {
-		return bosherr.Error("Must provide non-empty ApiKey")
+		return bosherr.WrapError(err, "Validating Cloud Properties")
 	}
 
 	return nil

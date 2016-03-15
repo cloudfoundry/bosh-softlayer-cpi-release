@@ -6,7 +6,7 @@ import (
 
 type FakeHttpClient struct {
 	Username string
-	Password string
+	ApiKey   string
 
 	DoRawHttpRequestInt            int
 	DoRawHttpRequestError          error
@@ -53,10 +53,10 @@ type FakeHttpClient struct {
 	CheckForHttpResponseErrorsError error
 }
 
-func NewFakeHttpClient(username, Password string) *FakeHttpClient {
+func NewFakeHttpClient(username, apiKey string) *FakeHttpClient {
 	return &FakeHttpClient{
 		Username: username,
-		Password: Password,
+		ApiKey:   apiKey,
 
 		DoRawHttpRequestInt:            200,
 		DoRawHttpRequestError:          nil,

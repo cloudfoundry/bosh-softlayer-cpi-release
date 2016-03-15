@@ -15,6 +15,7 @@ import (
 	fakesutil "github.com/cloudfoundry/bosh-softlayer-cpi/util/fakes"
 	fakesys "github.com/cloudfoundry/bosh-utils/system/fakes"
 	fakeuuid "github.com/cloudfoundry/bosh-utils/uuid/fakes"
+
 	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
 
 	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"

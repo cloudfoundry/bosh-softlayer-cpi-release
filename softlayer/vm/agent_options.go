@@ -25,10 +25,8 @@ type RegistryOptions struct {
 }
 
 type BlobstoreOptions struct {
-	// e.g. local, dav
-	Type string
-
-	Options map[string]interface{}
+	Provider string                 `json:"provider"`
+	Options  map[string]interface{} `json:"options"`
 }
 
 func (o AgentOptions) Validate() error {
@@ -45,7 +43,7 @@ func (o AgentOptions) Validate() error {
 }
 
 func (o BlobstoreOptions) Validate() error {
-	if o.Type == "" {
+	if o.Provider == "" {
 		return bosherr.Error("Must provide non-empty Type")
 	}
 

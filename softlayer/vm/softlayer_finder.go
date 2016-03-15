@@ -40,7 +40,9 @@ func (f SoftLayerFinder) Find(vmID int) (VM, bool, error) {
 
 	virtualGuest, err := virtualGuestService.GetObject(vmID)
 	if err != nil {
-		return SoftLayerVM{}, false, bosherr.WrapErrorf(err, "Finding SoftLayer Virtual Guest with id `%d`", vmID)
+		if !strings.Contains(err.Error(), "HTTP error code") {
+			return SoftLayerVM{}, false, bosherr.WrapErrorf(err, "Finding SoftLayer Virtual Guest with id `%d`", vmID)
+		}
 	}
 
 	vm, found := SoftLayerVM{}, true

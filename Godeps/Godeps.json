@@ -39,38 +39,38 @@
 		},
 		{
 			"ImportPath": "github.com/mattn/go-sqlite3",
-			"Comment": "v1.1.0-48-g1f19959",
-			"Rev": "1f1995912cdbac7c04279923e7c243f3dd1abc50"
+			"Comment": "v1.1.0-46-g10876d7",
+			"Rev": "10876d7dac65f02064c03d7372a2f1dfb90043fe"
 		},
 		{
 			"ImportPath": "github.com/maximilien/softlayer-go/client",
-			"Comment": "v0.5.0-5-gd56146c",
-			"Rev": "d56146c55d3264332ae2e5324b3cd9fd917039f3"
+			"Comment": "v0.4.0-34-g6436296",
+			"Rev": "643629618e7a3f8f4a4fa07ff922908606e2cd9e"
 		},
 		{
 			"ImportPath": "github.com/maximilien/softlayer-go/common",
-			"Comment": "v0.5.0-5-gd56146c",
-			"Rev": "d56146c55d3264332ae2e5324b3cd9fd917039f3"
+			"Comment": "v0.4.0-34-g6436296",
+			"Rev": "643629618e7a3f8f4a4fa07ff922908606e2cd9e"
 		},
 		{
 			"ImportPath": "github.com/maximilien/softlayer-go/data_types",
-			"Comment": "v0.5.0-5-gd56146c",
-			"Rev": "d56146c55d3264332ae2e5324b3cd9fd917039f3"
+			"Comment": "v0.4.0-34-g6436296",
+			"Rev": "643629618e7a3f8f4a4fa07ff922908606e2cd9e"
 		},
 		{
 			"ImportPath": "github.com/maximilien/softlayer-go/services",
-			"Comment": "v0.5.0-5-gd56146c",
-			"Rev": "d56146c55d3264332ae2e5324b3cd9fd917039f3"
+			"Comment": "v0.4.0-34-g6436296",
+			"Rev": "643629618e7a3f8f4a4fa07ff922908606e2cd9e"
 		},
 		{
 			"ImportPath": "github.com/maximilien/softlayer-go/softlayer",
-			"Comment": "v0.5.0-5-gd56146c",
-			"Rev": "d56146c55d3264332ae2e5324b3cd9fd917039f3"
+			"Comment": "v0.4.0-34-g6436296",
+			"Rev": "643629618e7a3f8f4a4fa07ff922908606e2cd9e"
 		},
 		{
 			"ImportPath": "github.com/maximilien/softlayer-go/test_helpers",
-			"Comment": "v0.5.0-5-gd56146c",
-			"Rev": "d56146c55d3264332ae2e5324b3cd9fd917039f3"
+			"Comment": "v0.4.0-34-g6436296",
+			"Rev": "643629618e7a3f8f4a4fa07ff922908606e2cd9e"
 		},
 		{
 			"ImportPath": "github.com/nu7hatch/gouuid",
@@ -78,8 +78,8 @@
 		},
 		{
 			"ImportPath": "github.com/onsi/ginkgo",
-			"Comment": "v1.2.0-46-gc3a655f",
-			"Rev": "c3a655f9b37a2207fa39721b078b3173ee9218d6"
+			"Comment": "v1.2.0-44-gac3d45d",
+			"Rev": "ac3d45ddd7ef5c4d7fc4d037b615a81f4d67981e"
 		},
 		{
 			"ImportPath": "github.com/onsi/gomega",
@@ -96,11 +96,11 @@
 		},
 		{
 			"ImportPath": "golang.org/x/crypto/curve25519",
-			"Rev": "6025851c7c2bf210daf74d22300c699b16541847"
+			"Rev": "5dc8cb4b8a8eb076cbb5a06bc3b8682c15bdbbd3"
 		},
 		{
 			"ImportPath": "golang.org/x/crypto/ssh",
-			"Rev": "6025851c7c2bf210daf74d22300c699b16541847"
+			"Rev": "5dc8cb4b8a8eb076cbb5a06bc3b8682c15bdbbd3"
 		}
 	]
 }

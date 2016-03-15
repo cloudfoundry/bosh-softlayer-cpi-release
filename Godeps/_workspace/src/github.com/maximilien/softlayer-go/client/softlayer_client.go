@@ -8,11 +8,6 @@ import (
 	softlayer "github.com/maximilien/softlayer-go/softlayer"
 )
 
-const (
-	SOFTLAYER_API_URL  = "api.softlayer.com/rest/v3"
-	TEMPLATE_ROOT_PATH = "templates"
-)
-
 type SoftLayerClient struct {
 	HttpClient softlayer.HttpClient
 
@@ -21,7 +16,7 @@ type SoftLayerClient struct {
 
 func NewSoftLayerClient(username, apiKey string) *SoftLayerClient {
 	slc := &SoftLayerClient{
-		HttpClient: NewHttpClient(username, apiKey, SOFTLAYER_API_URL, TEMPLATE_ROOT_PATH),
+		HttpClient: NewHttpClient(username, apiKey),
 
 		softLayerServices: map[string]softlayer.Service{},
 	}

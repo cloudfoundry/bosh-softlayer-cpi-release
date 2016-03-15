@@ -107,7 +107,7 @@ func (c SoftLayerCreator) CreateNewVM(agentID string, stemcell bslcstem.Stemcell
 		}
 		c.agentOptions.Mbus = mbus
 		// Update blobstore setting
-		switch c.agentOptions.Blobstore.Type {
+		switch c.agentOptions.Blobstore.Provider {
 		case BlobstoreTypeDav:
 			davConf := DavConfig(c.agentOptions.Blobstore.Options)
 			c.updateDavConfig(&davConf, cloudProps.BoshIp)
@@ -225,7 +225,7 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 			}
 			c.agentOptions.Mbus = mbus
 			// Update blobstore setting
-			switch c.agentOptions.Blobstore.Type {
+			switch c.agentOptions.Blobstore.Provider {
 			case BlobstoreTypeDav:
 				davConf := DavConfig(c.agentOptions.Blobstore.Options)
 				c.updateDavConfig(&davConf, cloudProps.BoshIp)

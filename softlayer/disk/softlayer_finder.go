@@ -27,7 +27,9 @@ func (f SoftLayerFinder) Find(id int) (Disk, bool, error) {
 
 	disk, err := service.GetIscsiVolume(id)
 	if err != nil {
-		return nil, false, bosherr.WrapErrorf(err, "Failed to find iSCSI volume with id: %d", id)
+		if !strings.Contains(err.Error(), "HTTP error code") {
+			return nil, false, bosherr.WrapErrorf(err, "Failed to find iSCSI volume with id: %d", id)
+		}
 	}
 
 	if disk.Id == 0 {
