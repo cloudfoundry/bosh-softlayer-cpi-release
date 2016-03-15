@@ -8,7 +8,7 @@ import (
 	boshsys "github.com/cloudfoundry/bosh-utils/system"
 	boshuuid "github.com/cloudfoundry/bosh-utils/uuid"
 
-	util "github.com/maximilien/bosh-softlayer-cpi/util"
+	util "github.com/cloudfoundry/bosh-softlayer-cpi/util"
 	sl "github.com/maximilien/softlayer-go/softlayer"
 )
 

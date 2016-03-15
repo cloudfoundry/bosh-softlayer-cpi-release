@@ -6,15 +6,15 @@ import (
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
+	testhelpers "github.com/cloudfoundry/bosh-softlayer-cpi/test_helpers"
+	fakesutil "github.com/cloudfoundry/bosh-softlayer-cpi/util/fakes"
 	fakesys "github.com/cloudfoundry/bosh-utils/system/fakes"
 	fakeuuid "github.com/cloudfoundry/bosh-utils/uuid/fakes"
-	testhelpers "github.com/maximilien/bosh-softlayer-cpi/test_helpers"
-	fakesutil "github.com/maximilien/bosh-softlayer-cpi/util/fakes"
 	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
 
 	softlayer "github.com/maximilien/softlayer-go/softlayer"
 
-	. "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
 )
 
 var _ = Describe("SoftlayerFileService", func() {

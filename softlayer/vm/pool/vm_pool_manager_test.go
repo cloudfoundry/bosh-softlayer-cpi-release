@@ -6,9 +6,9 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	. "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm/pool"
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm/pool"
 
-	fakes "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm/pool/fakes"
+	fakes "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm/pool/fakes"
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 )

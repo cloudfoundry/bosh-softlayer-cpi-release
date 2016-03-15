@@ -6,7 +6,7 @@ import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshsys "github.com/cloudfoundry/bosh-utils/system"
 
-	bslcaction "github.com/maximilien/bosh-softlayer-cpi/action"
+	bslcaction "github.com/cloudfoundry/bosh-softlayer-cpi/action"
 )
 
 type Config struct {

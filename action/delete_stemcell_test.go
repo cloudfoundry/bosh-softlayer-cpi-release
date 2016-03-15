@@ -6,11 +6,11 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	. "github.com/maximilien/bosh-softlayer-cpi/action"
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/action"
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
-	fakestem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell/fakes"
+	fakestem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell/fakes"
 )
 
 var _ = Describe("DeleteStemcell", func() {

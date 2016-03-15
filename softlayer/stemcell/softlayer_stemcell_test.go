@@ -5,12 +5,12 @@ import (
 	. "github.com/onsi/gomega"
 	"time"
 
-	. "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell"
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
 
+	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
-	bslcommon "github.com/maximilien/bosh-softlayer-cpi/softlayer/common"
 
-	testhelpers "github.com/maximilien/bosh-softlayer-cpi/test_helpers"
+	testhelpers "github.com/cloudfoundry/bosh-softlayer-cpi/test_helpers"
 	fakesslclient "github.com/maximilien/softlayer-go/client/fakes"
 )
 

@@ -1,8 +1,8 @@
 package fakes
 
 import (
-	bslcstem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell"
-	bslcvm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
+	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
+	bslcvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
 )
 
 type FakeCreator struct {

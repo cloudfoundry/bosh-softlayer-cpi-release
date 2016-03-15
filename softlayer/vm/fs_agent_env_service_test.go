@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 	"errors"
 
+	fakebslvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm/fakes"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
-	fakebslvm "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm/fakes"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	. "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
 )
 
 var _ = Describe("SoftlayerAgentEnvService", func() {

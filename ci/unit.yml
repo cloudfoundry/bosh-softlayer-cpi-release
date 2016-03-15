@@ -4,7 +4,7 @@ image: docker:///cloudfoundry/bosh-lite-ci
 
 inputs:
   - name: bosh-softlayer-cpi
-    path: gopath/src/github.com/maximilien/bosh-softlayer-cpi
+    path: gopath/src/github.com/cloudfoundry/bosh-softlayer-cpi
 
 run:
-  path: gopath/src/github.com/maximilien/bosh-softlayer-cpi/bin/ci
+  path: gopath/src/github.com/cloudfoundry/bosh-softlayer-cpi/bin/ci

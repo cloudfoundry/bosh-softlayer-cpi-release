@@ -10,9 +10,9 @@ import (
 
 	slclient "github.com/maximilien/softlayer-go/client"
 
-	bslcaction "github.com/maximilien/bosh-softlayer-cpi/action"
-	bslcdisp "github.com/maximilien/bosh-softlayer-cpi/api/dispatcher"
-	bslctrans "github.com/maximilien/bosh-softlayer-cpi/api/transport"
+	bslcaction "github.com/cloudfoundry/bosh-softlayer-cpi/action"
+	bslcdisp "github.com/cloudfoundry/bosh-softlayer-cpi/api/dispatcher"
+	bslctrans "github.com/cloudfoundry/bosh-softlayer-cpi/api/transport"
 )
 
 const mainLogTag = "main"

@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	. "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm/pool"
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm/pool"
 )
 
 var _ = Describe("DB Util", func() {

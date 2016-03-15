@@ -17,13 +17,13 @@ import (
 
 	sl "github.com/maximilien/softlayer-go/softlayer"
 
-	bslcommon "github.com/maximilien/bosh-softlayer-cpi/softlayer/common"
-	bslcdisk "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk"
-	bslcstem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell"
-	bslcvmpool "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm/pool"
+	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
+	bslcdisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk"
+	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
+	bslcvmpool "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm/pool"
 
-	common "github.com/maximilien/bosh-softlayer-cpi/common"
-	util "github.com/maximilien/bosh-softlayer-cpi/util"
+	common "github.com/cloudfoundry/bosh-softlayer-cpi/common"
+	util "github.com/cloudfoundry/bosh-softlayer-cpi/util"
 	datatypes "github.com/maximilien/softlayer-go/data_types"
 	sldatatypes "github.com/maximilien/softlayer-go/data_types"
 )

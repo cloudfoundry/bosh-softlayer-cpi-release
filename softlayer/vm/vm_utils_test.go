@@ -8,12 +8,12 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	. "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm"
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
 
-	fakestem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell/fakes"
+	fakestem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell/fakes"
 	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
 
-	bslcstem "github.com/maximilien/bosh-softlayer-cpi/softlayer/stemcell"
+	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 

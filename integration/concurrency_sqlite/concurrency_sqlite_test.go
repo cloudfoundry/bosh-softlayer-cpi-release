@@ -13,9 +13,9 @@ import (
 
 	_ "github.com/mattn/go-sqlite3"
 
+	common "github.com/cloudfoundry/bosh-softlayer-cpi/common"
+	bslcvmpool "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm/pool"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
-	common "github.com/maximilien/bosh-softlayer-cpi/common"
-	bslcvmpool "github.com/maximilien/bosh-softlayer-cpi/softlayer/vm/pool"
 	testhelpers "github.com/maximilien/softlayer-go/test_helpers"
 )
 

@@ -4,8 +4,8 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	bm "github.com/maximilien/bosh-softlayer-cpi/softlayer/baremetal"
-	testhelpers "github.com/maximilien/bosh-softlayer-cpi/test_helpers"
+	bm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/baremetal"
+	testhelpers "github.com/cloudfoundry/bosh-softlayer-cpi/test_helpers"
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 

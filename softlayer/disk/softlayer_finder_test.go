@@ -3,14 +3,14 @@ package disk_test
 import (
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
-	testhelpers "github.com/maximilien/bosh-softlayer-cpi/test_helpers"
+	testhelpers "github.com/cloudfoundry/bosh-softlayer-cpi/test_helpers"
 
 	fakeclient "github.com/maximilien/softlayer-go/client/fakes"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	. "github.com/maximilien/bosh-softlayer-cpi/softlayer/disk"
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk"
 )
 
 var _ = Describe("SoftLayerFinder", func() {

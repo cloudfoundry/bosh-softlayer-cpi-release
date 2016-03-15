@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"time"
 
+	bm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/baremetal"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
-	bm "github.com/maximilien/bosh-softlayer-cpi/softlayer/baremetal"
 )
 
 const (

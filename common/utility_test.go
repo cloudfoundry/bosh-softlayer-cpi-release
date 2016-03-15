@@ -1,7 +1,7 @@
 package common_test
 
 import (
-	. "github.com/maximilien/bosh-softlayer-cpi/common"
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/common"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
