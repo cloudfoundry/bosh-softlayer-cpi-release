@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 
-	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	fakebslvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm/fakes"
+	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

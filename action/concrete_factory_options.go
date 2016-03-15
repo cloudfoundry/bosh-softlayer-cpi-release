@@ -9,13 +9,13 @@ import (
 type ConcreteFactoryOptions struct {
 	Softlayer SoftLayerConfig `json:"softlayer"`
 
-    StemcellsDir  string `json:"stemcelldir,omitempty"`
+	StemcellsDir string `json:"stemcelldir,omitempty"`
 
-    Agent bslcvm.AgentOptions `json:"agent"`
+	Agent bslcvm.AgentOptions `json:"agent"`
 
 	AgentEnvService string `json:"agentenvservice,omitempty`
 
-	Registry        bslcvm.RegistryOptions `json:"registry,omitempty"`
+	Registry bslcvm.RegistryOptions `json:"registry,omitempty"`
 }
 
 func (o ConcreteFactoryOptions) Validate() error {

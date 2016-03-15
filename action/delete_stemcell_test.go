@@ -11,7 +11,6 @@ import (
 	fakestem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell/fakes"
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
-
 )
 
 var _ = Describe("DeleteStemcell", func() {

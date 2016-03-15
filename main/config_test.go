@@ -14,8 +14,8 @@ import (
 )
 
 var validProperties = bslcaction.ConcreteFactoryOptions{
-	Softlayer: validSoftLayerConfig,
-	StemcellsDir: "/tmp/stemcells" ,
+	Softlayer:    validSoftLayerConfig,
+	StemcellsDir: "/tmp/stemcells",
 }
 
 var validSoftLayerConfig = bslcaction.SoftLayerConfig{
@@ -27,8 +27,8 @@ var validActionsOptions = bslcaction.ConcreteFactoryOptions{
 	StemcellsDir: "/tmp/stemcells",
 }
 
-var validConfig = CloudConfig {
-	Plugin: "softlayer",
+var validConfig = CloudConfig{
+	Plugin:     "softlayer",
 	Properties: validProperties,
 }
 
@@ -99,4 +99,3 @@ var _ = Describe("Config", func() {
 		})
 	})
 })
-

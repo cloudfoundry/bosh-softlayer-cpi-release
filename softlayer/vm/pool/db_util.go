@@ -6,10 +6,10 @@ import (
 	"path/filepath"
 	"time"
 
+	common "github.com/cloudfoundry/bosh-softlayer-cpi/common"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	_ "github.com/mattn/go-sqlite3"
-	common "github.com/cloudfoundry/bosh-softlayer-cpi/common"
 )
 
 var (

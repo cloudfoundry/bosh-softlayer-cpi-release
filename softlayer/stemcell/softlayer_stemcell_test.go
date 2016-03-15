@@ -7,8 +7,8 @@ import (
 
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
 
-	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
+	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
 	testhelpers "github.com/cloudfoundry/bosh-softlayer-cpi/test_helpers"
 	fakesslclient "github.com/maximilien/softlayer-go/client/fakes"

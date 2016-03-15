@@ -2,7 +2,6 @@ package fakes
 
 import (
 	bslvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
-
 )
 
 type FakeAgentEnvServiceFactory struct {
