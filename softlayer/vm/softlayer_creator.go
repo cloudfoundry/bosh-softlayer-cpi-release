@@ -15,8 +15,7 @@ import (
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	boshsys "github.com/cloudfoundry/bosh-utils/system"
 	boshuuid "github.com/cloudfoundry/bosh-utils/uuid"
-
-	common "github.com/cloudfoundry/bosh-softlayer-cpi/common"
+	
 	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
 	bslcvmpool "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm/pool"
@@ -126,7 +125,7 @@ func (c SoftLayerCreator) CreateNewVM(agentID string, stemcell bslcstem.Stemcell
 
 	vm := NewSoftLayerVM(virtualGuest.Id, c.softLayerClient, util.GetSshClient(), agentEnvService, c.logger)
 
-	if strings.ToUpper(common.GetOSEnvVariable("OS_RELOAD_ENABLED", "TRUE")) == "TRUE" && !strings.Contains(cloudProps.VmNamePrefix, "-worker") {
+	if  !strings.Contains(cloudProps.VmNamePrefix, "-worker") {
 		db, err := bslcvmpool.OpenDB(bslcvmpool.SQLITE_DB_FILE_PATH)
 		if err != nil {
 			return SoftLayerVM{}, bosherr.WrapError(err, "Opening DB")
@@ -150,37 +149,23 @@ func (c SoftLayerCreator) CreateNewVM(agentID string, stemcell bslcstem.Stemcell
 }
 
 func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
-	if strings.ToUpper(common.GetOSEnvVariable("OS_RELOAD_ENABLED", "TRUE")) == "FALSE" {
+
+	if len(networks.First().IP) == 0 {
 		return c.CreateNewVM(agentID, stemcell, cloudProps, networks, env)
-	}
+	} else {
+		virtualGuestService, err := c.softLayerClient.GetSoftLayer_Virtual_Guest_Service()
+		if err != nil {
+			return SoftLayerVM{}, bosherr.WrapError(err, "Creating VirtualGuestService from SoftLayer client")
+		}
 
-	err := bslcvmpool.InitVMPoolDB(bslcvmpool.DB_RETRY_TIMEOUT, bslcvmpool.DB_RETRY_INTERVAL, c.logger)
-	if err != nil {
-		return SoftLayerVM{}, bosherr.WrapError(err, "Failed to initialize VM pool DB")
-	}
+		virtualGuest, err := virtualGuestService.GetObjectByPrimaryIpAddress(networks.First().IP)
+		if err != nil || virtualGuest.Id == 0 {
+			return SoftLayerVM{}, bosherr.WrapErrorf(err, "Could not find virtual guest by primary ip address: %s", networks.First().IP)
+		}
 
-	if strings.Contains(cloudProps.VmNamePrefix, "-worker") {
-		vm, err := c.CreateNewVM(agentID, stemcell, cloudProps, networks, env)
-		return vm, err
-	}
+		c.logger.Info(SOFTLAYER_VM_CREATOR_LOG_TAG, fmt.Sprintf("OS reload on the server id %d with stemcell %d", virtualGuest.Id, stemcell.ID()))
 
-	db, err := bslcvmpool.OpenDB(bslcvmpool.SQLITE_DB_FILE_PATH)
-	if err != nil {
-		return SoftLayerVM{}, bosherr.WrapError(err, "Opening DB")
-	}
-
-	vmInfoDB := bslcvmpool.NewVMInfoDB(0, "", "f", "", agentID, c.logger, db)
-	defer vmInfoDB.CloseDB()
-
-	err = vmInfoDB.QueryVMInfobyAgentID(bslcvmpool.DB_RETRY_TIMEOUT, bslcvmpool.DB_RETRY_INTERVAL)
-	if err != nil {
-		return SoftLayerVM{}, bosherr.WrapError(err, "Failed to query VM info by given agent ID "+agentID)
-	}
-
-	if vmInfoDB.VmProperties.Id != 0 {
-		c.logger.Info(SOFTLAYER_VM_CREATOR_LOG_TAG, fmt.Sprintf("OS reload on the server id %d with stemcell %d", vmInfoDB.VmProperties.Id, stemcell.ID()))
-
-		vm := NewSoftLayerVM(vmInfoDB.VmProperties.Id, c.softLayerClient, util.GetSshClient(), nil, c.logger)
+		vm := NewSoftLayerVM(virtualGuest.Id, c.softLayerClient, util.GetSshClient(), nil, c.logger)
 
 		bslcommon.TIMEOUT = 2 * time.Hour
 		err = vm.ReloadOS(stemcell)
@@ -189,20 +174,15 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 		}
 
 		if cloudProps.EphemeralDiskSize == 0 {
-			err = bslcommon.WaitForVirtualGuestLastCompleteTransaction(c.softLayerClient, vmInfoDB.VmProperties.Id, "Service Setup")
+			err = bslcommon.WaitForVirtualGuestLastCompleteTransaction(c.softLayerClient, virtualGuest.Id, "Service Setup")
 			if err != nil {
-				return SoftLayerVM{}, bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` has Service Setup transaction complete", vmInfoDB.VmProperties.Id)
+				return SoftLayerVM{}, bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` has Service Setup transaction complete", virtualGuest.Id)
 			}
 		} else {
-			err = bslcommon.AttachEphemeralDiskToVirtualGuest(c.softLayerClient, vmInfoDB.VmProperties.Id, cloudProps.EphemeralDiskSize, c.logger)
+			err = bslcommon.AttachEphemeralDiskToVirtualGuest(c.softLayerClient, virtualGuest.Id, cloudProps.EphemeralDiskSize, c.logger)
 			if err != nil {
-				return SoftLayerVM{}, bosherr.WrapError(err, fmt.Sprintf("Attaching ephemeral disk to VirtualGuest `%d`", vmInfoDB.VmProperties.Id))
+				return SoftLayerVM{}, bosherr.WrapError(err, fmt.Sprintf("Attaching ephemeral disk to VirtualGuest `%d`", virtualGuest.Id))
 			}
-		}
-
-		virtualGuest, err := bslcommon.GetObjectDetailsOnVirtualGuest(c.softLayerClient, vmInfoDB.VmProperties.Id)
-		if err != nil {
-			return SoftLayerVM{}, bosherr.WrapErrorf(err, "Cannot get details from virtual guest with id: %d.", virtualGuest.Id)
 		}
 
 		softlayerFileService := NewSoftlayerFileService(util.GetSshClient(), virtualGuest, c.logger, c.uuidGenerator, c.fs)
@@ -244,33 +224,13 @@ func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, clo
 
 		vm = NewSoftLayerVM(virtualGuest.Id, c.softLayerClient, util.GetSshClient(), agentEnvService, c.logger)
 
-		c.logger.Info(SOFTLAYER_VM_CREATOR_LOG_TAG, fmt.Sprintf("Updated in_use flag to 't' for the VM %d in VM pool", vmInfoDB.VmProperties.Id))
-		vmInfoDB.VmProperties.InUse = "t"
-		err = vmInfoDB.UpdateVMInfoByID(bslcvmpool.DB_RETRY_TIMEOUT, bslcvmpool.DB_RETRY_INTERVAL)
-		if err != nil {
-			return vm, bosherr.WrapError(err, fmt.Sprintf("Failed to query VM info by given ID %d", vm.ID()))
-		} else {
-			if len(c.agentOptions.VcapPassword) > 0 {
-				err = c.SetVcapPassword(vm, virtualGuest, c.agentOptions.VcapPassword)
-				if err != nil {
-					return SoftLayerVM{}, bosherr.WrapError(err, "Updating VM's vcap password")
-				}
+		if len(c.agentOptions.VcapPassword) > 0 {
+			err = c.SetVcapPassword(vm, virtualGuest, c.agentOptions.VcapPassword)
+			if err != nil {
+				return SoftLayerVM{}, bosherr.WrapError(err, "Updating VM's vcap password")
 			}
-			return vm, nil
 		}
-
-	}
-
-	vmInfoDB.VmProperties.InUse = ""
-	err = vmInfoDB.QueryVMInfobyAgentID(bslcvmpool.DB_RETRY_TIMEOUT, bslcvmpool.DB_RETRY_INTERVAL)
-	if err != nil {
-		return SoftLayerVM{}, bosherr.WrapError(err, "Failed to query VM info by given agent ID "+agentID)
-	}
-
-	if vmInfoDB.VmProperties.Id != 0 {
-		return SoftLayerVM{}, bosherr.WrapError(err, "Wrong in_use status in VM with agent ID "+agentID+", Do not create a new VM")
-	} else {
-		return c.CreateNewVM(agentID, stemcell, cloudProps, networks, env)
+		return vm, nil
 	}
 }
 

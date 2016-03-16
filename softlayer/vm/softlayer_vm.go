@@ -64,58 +64,7 @@ func NewSoftLayerVM(id int, softLayerClient sl.Client, sshClient util.SshClient,
 func (vm SoftLayerVM) ID() int { return vm.id }
 
 func (vm SoftLayerVM) Delete(agentID string) error {
-	if strings.ToUpper(common.GetOSEnvVariable("OS_RELOAD_ENABLED", "TRUE")) == "FALSE" {
-		if strings.ToUpper(common.GetOSEnvVariable("DEL_NOT_ALLOWED", "FALSE")) == "FALSE" {
-			return vm.DeleteVM()
-		} else {
-			return bosherr.Error("DEL_NOT_ALLOWED is set to TRUE, the VM deletion reqeust is refused.")
-		}
-	}
-
-	err := bslcvmpool.InitVMPoolDB(bslcvmpool.DB_RETRY_TIMEOUT, bslcvmpool.DB_RETRY_INTERVAL, vm.logger)
-	if err != nil {
-		return bosherr.WrapError(err, "Failed to initialize VM pool DB")
-	}
-
-	db, err := bslcvmpool.OpenDB(bslcvmpool.SQLITE_DB_FILE_PATH)
-	if err != nil {
-		return bosherr.WrapError(err, "Opening DB")
-	}
-
-	vmInfoDB := bslcvmpool.NewVMInfoDB(vm.id, "", "", "", "", vm.logger, db)
-	defer vmInfoDB.CloseDB()
-
-	err = vmInfoDB.QueryVMInfobyID(bslcvmpool.DB_RETRY_TIMEOUT, bslcvmpool.DB_RETRY_INTERVAL)
-	if err != nil {
-		return bosherr.WrapError(err, fmt.Sprintf("Failed to query VM info by given ID %d", vm.id))
-	}
-	vm.logger.Info(SOFTLAYER_VM_LOG_TAG, fmt.Sprintf("vmInfoDB.vmProperties.id is %d", vmInfoDB.VmProperties.Id))
-
-	if vmInfoDB.VmProperties.Id != 0 {
-		if agentID != "" {
-			vm.logger.Info(SOFTLAYER_VM_LOG_TAG, fmt.Sprintf("Release the VM with id %d back to the VM pool", vmInfoDB.VmProperties.Id))
-			vmInfoDB.VmProperties.InUse = "f"
-			err = vmInfoDB.UpdateVMInfoByID(bslcvmpool.DB_RETRY_TIMEOUT, bslcvmpool.DB_RETRY_INTERVAL)
-			if err != nil {
-				return bosherr.WrapError(err, fmt.Sprintf("Failed to update in_use to %s by given ID %d", vmInfoDB.VmProperties.InUse, vm.id))
-			} else {
-				return nil
-			}
-		} else {
-			if strings.ToUpper(common.GetOSEnvVariable("DEL_NOT_ALLOWED", "FALSE")) == "FALSE" {
-				return vm.DeleteVM()
-			} else {
-				return bosherr.Error("DEL_NOT_ALLOWED is set to TRUE, the VM deletion reqeust is refused.")
-			}
-		}
-	} else {
-		if strings.ToUpper(common.GetOSEnvVariable("DEL_NOT_ALLOWED", "FALSE")) == "FALSE" {
-			return vm.DeleteVM()
-		} else {
-			return bosherr.Error("DEL_NOT_ALLOWED is set to TRUE, the VM deletion reqeust is refused.")
-		}
-	}
-
+	return nil
 }
 
 func (vm SoftLayerVM) DeleteVM() error {
