@@ -189,6 +189,39 @@ var _ = Describe("SoftLayer_Virtual_Guest_Service", func() {
 		})
 	})
 
+	Context("#GetObjectByPrimaryIpAddress", func() {
+		BeforeEach(func() {
+			virtualGuest.PrimaryIpAddress = "23.246.234.32"
+			fakeClient.FakeHttpClient.DoRawHttpRequestResponse, err = testhelpers.ReadJsonTestFixtures("services", "SoftLayer_Account_Service_getVirtualGuestsByFilter.json")
+			Expect(err).ToNot(HaveOccurred())
+		})
+
+		It("sucessfully retrieves SoftLayer_Virtual_Guest instance", func() {
+			_, err := virtualGuestService.GetObjectByPrimaryIpAddress(virtualGuest.PrimaryIpAddress)
+			Expect(err).ToNot(HaveOccurred())
+		})
+
+		Context("when HTTP client returns error codes 40x or 50x", func() {
+			It("fails for error code 40x", func() {
+				errorCodes := []int{400, 401, 499}
+				for _, errorCode := range errorCodes {
+					fakeClient.FakeHttpClient.DoRawHttpRequestInt = errorCode
+					_, err := virtualGuestService.GetObject(virtualGuest.Id)
+					Expect(err).To(HaveOccurred())
+				}
+			})
+
+			It("fails for error code 50x", func() {
+				errorCodes := []int{500, 501, 599}
+				for _, errorCode := range errorCodes {
+					fakeClient.FakeHttpClient.DoRawHttpRequestInt = errorCode
+					_, err := virtualGuestService.GetObject(virtualGuest.Id)
+					Expect(err).To(HaveOccurred())
+				}
+			})
+		})
+	})
+
 	Context("#EditObject", func() {
 		BeforeEach(func() {
 			virtualGuest.Id = 1234567

@@ -74,20 +74,6 @@ void _sqlite3_result_blob(sqlite3_context* ctx, const void* b, int l) {
   sqlite3_result_blob(ctx, b, l, SQLITE_TRANSIENT);
 }
 
-
-int _sqlite3_create_function(
-  sqlite3 *db,
-  const char *zFunctionName,
-  int nArg,
-  int eTextRep,
-  uintptr_t pApp,
-  void (*xFunc)(sqlite3_context*,int,sqlite3_value**),
-  void (*xStep)(sqlite3_context*,int,sqlite3_value**),
-  void (*xFinal)(sqlite3_context*)
-) {
-  return sqlite3_create_function(db, zFunctionName, nArg, eTextRep, (void*) pApp, xFunc, xStep, xFinal);
-}
-
 void callbackTrampoline(sqlite3_context*, int, sqlite3_value**);
 void stepTrampoline(sqlite3_context*, int, sqlite3_value**);
 void doneTrampoline(sqlite3_context*);
@@ -130,7 +116,7 @@ func init() {
 	sql.Register("sqlite3", &SQLiteDriver{})
 }
 
-// Version returns SQLite library version information.
+// Return SQLite library Version information.
 func Version() (libVersion string, libVersionNumber int, sourceId string) {
 	libVersion = C.GoString(C.sqlite3_libversion())
 	libVersionNumber = int(C.sqlite3_libversion_number())
@@ -367,7 +353,7 @@ func (c *SQLiteConn) RegisterFunc(name string, impl interface{}, pure bool) erro
 	if pure {
 		opts |= C.SQLITE_DETERMINISTIC
 	}
-	rv := C._sqlite3_create_function(c.db, cname, C.int(numArgs), C.int(opts), C.uintptr_t(newHandle(c, &fi)), (*[0]byte)(unsafe.Pointer(C.callbackTrampoline)), nil, nil)
+	rv := C.sqlite3_create_function(c.db, cname, C.int(numArgs), C.int(opts), unsafe.Pointer(&fi), (*[0]byte)(unsafe.Pointer(C.callbackTrampoline)), nil, nil)
 	if rv != C.SQLITE_OK {
 		return c.lastError()
 	}
@@ -492,7 +478,7 @@ func (c *SQLiteConn) RegisterAggregator(name string, impl interface{}, pure bool
 	if pure {
 		opts |= C.SQLITE_DETERMINISTIC
 	}
-	rv := C._sqlite3_create_function(c.db, cname, C.int(stepNArgs), C.int(opts), C.uintptr_t(newHandle(c, &ai)), nil, (*[0]byte)(unsafe.Pointer(C.stepTrampoline)), (*[0]byte)(unsafe.Pointer(C.doneTrampoline)))
+	rv := C.sqlite3_create_function(c.db, cname, C.int(stepNArgs), C.int(opts), unsafe.Pointer(&ai), nil, (*[0]byte)(unsafe.Pointer(C.stepTrampoline)), (*[0]byte)(unsafe.Pointer(C.doneTrampoline)))
 	if rv != C.SQLITE_OK {
 		return c.lastError()
 	}
@@ -598,7 +584,7 @@ func errorString(err Error) string {
 }
 
 // Open database and return a new connection.
-// You can specify a DSN string using a URI as the filename.
+// You can specify DSN string with URI filename.
 //   test.db
 //   file:test.db?cache=shared&mode=memory
 //   :memory:
@@ -705,7 +691,6 @@ func (d *SQLiteDriver) Open(dsn string) (driver.Conn, error) {
 
 // Close the connection.
 func (c *SQLiteConn) Close() error {
-	deleteHandles(c)
 	rv := C.sqlite3_close_v2(c.db)
 	if rv != C.SQLITE_OK {
 		return c.lastError()
@@ -715,7 +700,7 @@ func (c *SQLiteConn) Close() error {
 	return nil
 }
 
-// Prepare the query string. Return a new statement.
+// Prepare query string. Return a new statement.
 func (c *SQLiteConn) Prepare(query string) (driver.Stmt, error) {
 	pquery := C.CString(query)
 	defer C.free(unsafe.Pointer(pquery))
@@ -815,11 +800,11 @@ func (s *SQLiteStmt) bind(args []driver.Value) error {
 		case float64:
 			rv = C.sqlite3_bind_double(s.s, n, C.double(v))
 		case []byte:
-			if len(v) == 0 {
-				rv = C._sqlite3_bind_blob(s.s, n, nil, 0)
-			} else {
-				rv = C._sqlite3_bind_blob(s.s, n, unsafe.Pointer(&v[0]), C.int(len(v)))
+			var p *byte
+			if len(v) > 0 {
+				p = &v[0]
 			}
+			rv = C._sqlite3_bind_blob(s.s, n, unsafe.Pointer(p), C.int(len(v)))
 		case time.Time:
 			b := []byte(v.Format(SQLiteTimestampFormats[0]))
 			rv = C._sqlite3_bind_text(s.s, n, (*C.char)(unsafe.Pointer(&b[0])), C.int(len(b)))
@@ -893,17 +878,6 @@ func (rc *SQLiteRows) Columns() []string {
 	return rc.cols
 }
 
-// Return column types.
-func (rc *SQLiteRows) DeclTypes() []string {
-	if rc.decltype == nil {
-		rc.decltype = make([]string, rc.nc)
-		for i := 0; i < rc.nc; i++ {
-			rc.decltype[i] = strings.ToLower(C.GoString(C.sqlite3_column_decltype(rc.s.s, C.int(i))))
-		}
-	}
-	return rc.decltype
-}
-
 // Move cursor to next.
 func (rc *SQLiteRows) Next(dest []driver.Value) error {
 	rv := C.sqlite3_step(rc.s.s)
@@ -918,7 +892,12 @@ func (rc *SQLiteRows) Next(dest []driver.Value) error {
 		return nil
 	}
 
-	rc.DeclTypes()
+	if rc.decltype == nil {
+		rc.decltype = make([]string, rc.nc)
+		for i := 0; i < rc.nc; i++ {
+			rc.decltype[i] = strings.ToLower(C.GoString(C.sqlite3_column_decltype(rc.s.s, C.int(i))))
+		}
+	}
 
 	for i := range dest {
 		switch C.sqlite3_column_type(rc.s.s, C.int(i)) {
