@@ -126,19 +126,6 @@ func (c SoftLayerCreator) CreateBySoftlayer(agentID string, stemcell bslcstem.St
 
 	vm := NewSoftLayerVM(virtualGuest.Id, c.softLayerClient, util.GetSshClient(), agentEnvService, c.logger)
 
-	if !strings.Contains(cloudProps.VmNamePrefix, "-worker") {
-		db, err := bslcvmpool.OpenDB(bslcvmpool.SQLITE_DB_FILE_PATH)
-		if err != nil {
-			return SoftLayerVM{}, bosherr.WrapError(err, "Opening DB")
-		}
-
-		vmInfoDB := bslcvmpool.NewVMInfoDB(vm.ID(), virtualGuestTemplate.Hostname+"."+virtualGuestTemplate.Domain, "t", stemcell.Uuid(), agentID, c.logger, db)
-		err = vmInfoDB.InsertVMInfo(bslcvmpool.DB_RETRY_TIMEOUT, bslcvmpool.DB_RETRY_INTERVAL)
-		if err != nil {
-			return SoftLayerVM{}, bosherr.WrapError(err, "Failed to insert the record into VM pool DB")
-		}
-	}
-
 	if len(c.agentOptions.VcapPassword) > 0 {
 		err = c.SetVcapPassword(vm, virtualGuest, c.agentOptions.VcapPassword)
 		if err != nil {
