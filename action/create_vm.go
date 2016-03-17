@@ -52,7 +52,7 @@ func (a CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps bslcvm
 		return VMCID(vm.ID()).String(), nil
 
 	} else {
-		vm, err :=a.vmCreator.CreateByOSReload(agentID, stemcell, cloudProps, vmNetworks, vmEnv)
+		vm, err := a.vmCreator.CreateByOSReload(agentID, stemcell, cloudProps, vmNetworks, vmEnv)
 		if err != nil {
 			return "0", bosherr.WrapErrorf(err, "OS Reloading VM with agent ID '%s'", agentID)
 		}

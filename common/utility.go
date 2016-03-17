@@ -1,11 +1,11 @@
 package common
 
 import (
+	"bytes"
+	"net"
 	"os"
 	"strconv"
 	"time"
-	"net"
-	"bytes"
 )
 
 func GetOSEnvVariable(varName string, defaultValue string) string {
@@ -25,43 +25,42 @@ func GetTimeStamp(now time.Time) string {
 	return now.Format("20060102-030405-") + strconv.Itoa(int(now.UnixNano()/1e6-now.Unix()*1e3))
 }
 
-
 type ipRange struct {
 	start net.IP
-	end net.IP
+	end   net.IP
 }
 
 var privateRanges = []ipRange{
 	ipRange{
 		start: net.ParseIP("10.0.0.0"),
-		start: net.ParseIP("10.255.255.255"),
+		end: net.ParseIP("10.255.255.255"),
 	},
 	ipRange{
 		start: net.ParseIP("100.64.0.0"),
-		start: net.ParseIP("100.127.255.255"),
+		end: net.ParseIP("100.127.255.255"),
 	},
 	ipRange{
 		start: net.ParseIP("172.16.0.0"),
-		start: net.ParseIP("172.31.255.255"),
+		end: net.ParseIP("172.31.255.255"),
 	},
 	ipRange{
 		start: net.ParseIP("192.0.0.0"),
-		start: net.ParseIP("192.0.0.255"),
+		end: net.ParseIP("192.0.0.255"),
 	},
 	ipRange{
 		start: net.ParseIP("192.168.0.0"),
-		start: net.ParseIP("192.168.255.255"),
+		end: net.ParseIP("192.168.255.255"),
 	},
 	ipRange{
 		start: net.ParseIP("198.18.0.0"),
-		start: net.ParseIP("198.19.255.255"),
+		end: net.ParseIP("198.19.255.255"),
 	},
 }
 
 func IsPrivateSubnet(ipAddress net.IP) bool {
 	if ipCheck := ipAddress.To4(); ipCheck != nil {
 		for _, r := range privateRanges {
-			if inRange(r, ipAddress){
+			if inRange(r, ipAddress) {
 				return true
 			}
 		}
@@ -75,4 +74,3 @@ func inRange(r ipRange, ipAddress net.IP) bool {
 	}
 	return false
 }
-
