@@ -63,11 +63,11 @@ func basicDeps() (boshlog.Logger, boshsys.FileSystem, boshsys.CmdRunner, boshuui
 }
 
 func buildDispatcher(config Config, logger boshlog.Logger, fs boshsys.FileSystem, cmdRunner boshsys.CmdRunner, uuidGenerator boshuuid.Generator) bslcdisp.Dispatcher {
-	softLayerClient := slclient.NewSoftLayerClient(config.SoftLayer.Username, config.SoftLayer.ApiKey)
+	softLayerClient := slclient.NewSoftLayerClient(config.Cloud.Properties.Softlayer.Username, config.Cloud.Properties.Softlayer.ApiKey)
 
 	actionFactory := bslcaction.NewConcreteFactory(
 		softLayerClient,
-		config.Actions,
+		config.Cloud.Properties,
 		logger,
 		uuidGenerator,
 		fs,
