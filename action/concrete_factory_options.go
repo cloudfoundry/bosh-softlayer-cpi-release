@@ -9,9 +9,9 @@ import (
 type ConcreteFactoryOptions struct {
 	Softlayer SoftLayerConfig `json:"softlayer"`
 
-	StemcellsDir  string `json:"stemcelldir,omitempty"`
+    StemcellsDir  string `json:"stemcelldir,omitempty"`
 
-	Agent bslcvm.AgentOptions `json:"agent"`
+    Agent bslcvm.AgentOptions `json:"agent"`
 
 	AgentEnvService string `json:"agentenvservice,omitempty`
 

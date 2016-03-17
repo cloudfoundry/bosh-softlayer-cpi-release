@@ -16,6 +16,7 @@ import (
 	common "github.com/cloudfoundry/bosh-softlayer-cpi/common"
 	bslcvmpool "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm/pool"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
+
 	testhelpers "github.com/maximilien/softlayer-go/test_helpers"
 )
 

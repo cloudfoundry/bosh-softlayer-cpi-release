@@ -10,4 +10,6 @@
 
   cd $base
   go build -o out/cpi github.com/cloudfoundry/bosh-softlayer-cpi/main
+
 )
+
