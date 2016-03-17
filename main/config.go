@@ -1,8 +1,8 @@
 package main
 
 import (
-	"strings"
 	"encoding/json"
+	"strings"
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshsys "github.com/cloudfoundry/bosh-utils/system"
@@ -15,7 +15,7 @@ type Config struct {
 }
 
 type CloudConfig struct {
-	Plugin string `json:"plugin"`
+	Plugin     string                            `json:"plugin"`
 	Properties bslcaction.ConcreteFactoryOptions `json:"properties"`
 }
 

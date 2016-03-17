@@ -22,7 +22,6 @@ import (
 	datatypes "github.com/maximilien/softlayer-go/data_types"
 	sl "github.com/maximilien/softlayer-go/softlayer"
 
-
 	common "github.com/cloudfoundry/bosh-softlayer-cpi/common"
 	util "github.com/cloudfoundry/bosh-softlayer-cpi/util"
 )
@@ -210,7 +209,7 @@ func (c SoftLayerCreator) CreateByOSReload(agentID string, stemcell bslcstem.Ste
 		}
 		c.agentOptions.Mbus = mbus
 		// Update blobstore setting
-		switch c.agentOptions.Blobstore.Type {
+		switch c.agentOptions.Blobstore.Provider {
 		case BlobstoreTypeDav:
 			davConf := DavConfig(c.agentOptions.Blobstore.Options)
 			c.updateDavConfig(&davConf, cloudProps.BoshIp)

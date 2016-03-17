@@ -54,8 +54,8 @@ var _ = Describe("BlobstoreOptions", func() {
 		options BlobstoreOptions
 
 		validOptions = BlobstoreOptions{
-			Provider:    "fake-type",
-			Options: map[string]interface{}{"fake-key": "fake-value"},
+			Provider: "fake-type",
+			Options:  map[string]interface{}{"fake-key": "fake-value"},
 		}
 	)
 

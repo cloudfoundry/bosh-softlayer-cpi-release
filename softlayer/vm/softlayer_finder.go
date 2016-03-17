@@ -2,6 +2,7 @@ package vm
 
 import (
 	"strconv"
+	"strings"
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
@@ -40,7 +41,7 @@ func (f SoftLayerFinder) Find(vmID int) (VM, bool, error) {
 
 	virtualGuest, err := virtualGuestService.GetObject(vmID)
 	if err != nil {
-		if !strings.Contains(err.Error(),"HTTP error code") {
+		if !strings.Contains(err.Error(), "HTTP error code") {
 			return SoftLayerVM{}, false, bosherr.WrapErrorf(err, "Finding SoftLayer Virtual Guest with id `%d`", vmID)
 		}
 	}

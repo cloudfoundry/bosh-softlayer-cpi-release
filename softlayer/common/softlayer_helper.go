@@ -37,7 +37,7 @@ func AttachEphemeralDiskToVirtualGuest(softLayerClient sl.Client, virtualGuestId
 
 	receipt, err := service.AttachEphemeralDisk(virtualGuestId, diskSize)
 	if err != nil {
-		if !strings.Contains(err.Error(),"HTTP error code") {
+		if !strings.Contains(err.Error(), "HTTP error code") {
 			return err
 		}
 	}
