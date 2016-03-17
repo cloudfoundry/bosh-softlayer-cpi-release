@@ -41,15 +41,23 @@ func (a CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps bslcvm
 	}
 
 	vmNetworks := networks.AsVMNetworks()
-
 	vmEnv := bslcvm.Environment(env)
 
-	vm, err := a.vmCreator.Create(agentID, stemcell, cloudProps, vmNetworks, vmEnv)
-	if err != nil {
-		return "0", bosherr.WrapErrorf(err, "Creating VM with agent ID '%s'", agentID)
-	}
+	if len(vmNetworks.First().IP) == 0 {
 
-	return VMCID(vm.ID()).String(), nil
+		vm, err := a.vmCreator.CreateBySoftlayer(agentID, stemcell, cloudProps, vmNetworks, vmEnv)
+		if err != nil {
+			return "0", bosherr.WrapErrorf(err, "Creating VM with agent ID '%s'", agentID)
+		}
+		return VMCID(vm.ID()).String(), nil
+
+	} else {
+		vm, err :=a.vmCreator.CreateByOSReload(agentID, stemcell, cloudProps, vmNetworks, vmEnv)
+		if err != nil {
+			return "0", bosherr.WrapErrorf(err, "OS Reloading VM with agent ID '%s'", agentID)
+		}
+		return VMCID(vm.ID()).String(), nil
+	}
 }
 
 func (a CreateVM) UpdateCloudProperties(cloudProps *bslcvm.VMCloudProperties) {

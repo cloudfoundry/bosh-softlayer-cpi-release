@@ -15,13 +15,14 @@ import (
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	boshsys "github.com/cloudfoundry/bosh-utils/system"
 	boshuuid "github.com/cloudfoundry/bosh-utils/uuid"
-	
+
 	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
 	bslcvmpool "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm/pool"
 	datatypes "github.com/maximilien/softlayer-go/data_types"
 	sl "github.com/maximilien/softlayer-go/softlayer"
 
+	common "github.com/cloudfoundry/bosh-softlayer-cpi/common"
 	util "github.com/cloudfoundry/bosh-softlayer-cpi/util"
 )
 
@@ -51,7 +52,7 @@ func NewSoftLayerCreator(softLayerClient sl.Client, agentEnvServiceFactory Agent
 	}
 }
 
-func (c SoftLayerCreator) CreateNewVM(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
+func (c SoftLayerCreator) CreateBySoftlayer(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
 
 	virtualGuestTemplate, err := CreateVirtualGuestTemplate(stemcell, cloudProps)
 
@@ -125,7 +126,7 @@ func (c SoftLayerCreator) CreateNewVM(agentID string, stemcell bslcstem.Stemcell
 
 	vm := NewSoftLayerVM(virtualGuest.Id, c.softLayerClient, util.GetSshClient(), agentEnvService, c.logger)
 
-	if  !strings.Contains(cloudProps.VmNamePrefix, "-worker") {
+	if !strings.Contains(cloudProps.VmNamePrefix, "-worker") {
 		db, err := bslcvmpool.OpenDB(bslcvmpool.SQLITE_DB_FILE_PATH)
 		if err != nil {
 			return SoftLayerVM{}, bosherr.WrapError(err, "Opening DB")
@@ -148,90 +149,90 @@ func (c SoftLayerCreator) CreateNewVM(agentID string, stemcell bslcstem.Stemcell
 	return vm, nil
 }
 
-func (c SoftLayerCreator) Create(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
-
-	if len(networks.First().IP) == 0 {
-		return c.CreateNewVM(agentID, stemcell, cloudProps, networks, env)
-	} else {
-		virtualGuestService, err := c.softLayerClient.GetSoftLayer_Virtual_Guest_Service()
-		if err != nil {
-			return SoftLayerVM{}, bosherr.WrapError(err, "Creating VirtualGuestService from SoftLayer client")
-		}
-
-		virtualGuest, err := virtualGuestService.GetObjectByPrimaryIpAddress(networks.First().IP)
-		if err != nil || virtualGuest.Id == 0 {
-			return SoftLayerVM{}, bosherr.WrapErrorf(err, "Could not find virtual guest by primary ip address: %s", networks.First().IP)
-		}
-
-		c.logger.Info(SOFTLAYER_VM_CREATOR_LOG_TAG, fmt.Sprintf("OS reload on the server id %d with stemcell %d", virtualGuest.Id, stemcell.ID()))
-
-		vm := NewSoftLayerVM(virtualGuest.Id, c.softLayerClient, util.GetSshClient(), nil, c.logger)
-
-		bslcommon.TIMEOUT = 2 * time.Hour
-		err = vm.ReloadOS(stemcell)
-		if err != nil {
-			return SoftLayerVM{}, bosherr.WrapError(err, "Failed to reload OS")
-		}
-
-		if cloudProps.EphemeralDiskSize == 0 {
-			err = bslcommon.WaitForVirtualGuestLastCompleteTransaction(c.softLayerClient, virtualGuest.Id, "Service Setup")
-			if err != nil {
-				return SoftLayerVM{}, bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` has Service Setup transaction complete", virtualGuest.Id)
-			}
-		} else {
-			err = bslcommon.AttachEphemeralDiskToVirtualGuest(c.softLayerClient, virtualGuest.Id, cloudProps.EphemeralDiskSize, c.logger)
-			if err != nil {
-				return SoftLayerVM{}, bosherr.WrapError(err, fmt.Sprintf("Attaching ephemeral disk to VirtualGuest `%d`", virtualGuest.Id))
-			}
-		}
-
-		softlayerFileService := NewSoftlayerFileService(util.GetSshClient(), virtualGuest, c.logger, c.uuidGenerator, c.fs)
-		agentEnvService := c.agentEnvServiceFactory.New(softlayerFileService, strconv.Itoa(virtualGuest.Id))
-
-		if len(cloudProps.BoshIp) == 0 {
-			// update /etc/hosts file of bosh-init vm
-			c.updateEtcHostsOfBoshInit(fmt.Sprintf("%s  %s", virtualGuest.PrimaryBackendIpAddress, virtualGuest.FullyQualifiedDomainName))
-			// Update mbus url setting for bosh director: construct mbus url with new director ip
-			mbus, err := c.parseMbusURL(c.agentOptions.Mbus, virtualGuest.PrimaryBackendIpAddress)
-			if err != nil {
-				return SoftLayerVM{}, bosherr.WrapErrorf(err, "Cannot construct mbus url.")
-			}
-			c.agentOptions.Mbus = mbus
-		} else {
-			// Update mbus url setting
-			mbus, err := c.parseMbusURL(c.agentOptions.Mbus, cloudProps.BoshIp)
-			if err != nil {
-				return SoftLayerVM{}, bosherr.WrapErrorf(err, "Cannot construct mbus url.")
-			}
-			c.agentOptions.Mbus = mbus
-			// Update blobstore setting
-			switch c.agentOptions.Blobstore.Type {
-			case BlobstoreTypeDav:
-				davConf := DavConfig(c.agentOptions.Blobstore.Options)
-				c.updateDavConfig(&davConf, cloudProps.BoshIp)
-			}
-		}
-
-		agentEnv := CreateAgentUserData(agentID, cloudProps, networks, env, c.agentOptions)
-		if err != nil {
-			return SoftLayerVM{}, bosherr.WrapErrorf(err, "Cannot agent env for virtual guest with id: %d.", virtualGuest.Id)
-		}
-
-		err = agentEnvService.Update(agentEnv)
-		if err != nil {
-			return SoftLayerVM{}, bosherr.WrapError(err, "Updating VM's agent env")
-		}
-
-		vm = NewSoftLayerVM(virtualGuest.Id, c.softLayerClient, util.GetSshClient(), agentEnvService, c.logger)
-
-		if len(c.agentOptions.VcapPassword) > 0 {
-			err = c.SetVcapPassword(vm, virtualGuest, c.agentOptions.VcapPassword)
-			if err != nil {
-				return SoftLayerVM{}, bosherr.WrapError(err, "Updating VM's vcap password")
-			}
-		}
-		return vm, nil
+func (c SoftLayerCreator) CreateByOSReload(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
+	virtualGuestService, err := c.softLayerClient.GetSoftLayer_Virtual_Guest_Service()
+	if err != nil {
+		return SoftLayerVM{}, bosherr.WrapError(err, "Creating VirtualGuestService from SoftLayer client")
 	}
+
+	var virtualGuest datatypes.SoftLayer_Virtual_Guest
+
+	if common.IsPrivateSubnet(net.ParseIP(networks.First().IP)) {
+		virtualGuest, err = virtualGuestService.GetObjectByPrimaryIpAddress(networks.First().IP)
+	} else {
+		virtualGuest, err = virtualGuestService.GetObjectByPrimaryBackendIpAddress(networks.First().IP)
+	}
+
+	if err != nil || virtualGuest.Id == 0 {
+		return SoftLayerVM{}, bosherr.WrapErrorf(err, "Could not find virtual guest by ip address: %s", networks.First().IP)
+	}
+
+	c.logger.Info(SOFTLAYER_VM_CREATOR_LOG_TAG, fmt.Sprintf("OS reload on the server id %d with stemcell %d", virtualGuest.Id, stemcell.ID()))
+
+	vm := NewSoftLayerVM(virtualGuest.Id, c.softLayerClient, util.GetSshClient(), nil, c.logger)
+
+	bslcommon.TIMEOUT = 4 * time.Hour
+	err = vm.ReloadOS(stemcell)
+	if err != nil {
+		return SoftLayerVM{}, bosherr.WrapError(err, "Failed to reload OS")
+	}
+
+	if cloudProps.EphemeralDiskSize == 0 {
+		err = bslcommon.WaitForVirtualGuestLastCompleteTransaction(c.softLayerClient, virtualGuest.Id, "Service Setup")
+		if err != nil {
+			return SoftLayerVM{}, bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` has Service Setup transaction complete", virtualGuest.Id)
+		}
+	} else {
+		err = bslcommon.AttachEphemeralDiskToVirtualGuest(c.softLayerClient, virtualGuest.Id, cloudProps.EphemeralDiskSize, c.logger)
+		if err != nil {
+			return SoftLayerVM{}, bosherr.WrapError(err, fmt.Sprintf("Attaching ephemeral disk to VirtualGuest `%d`", virtualGuest.Id))
+		}
+	}
+
+	softlayerFileService := NewSoftlayerFileService(util.GetSshClient(), virtualGuest, c.logger, c.uuidGenerator, c.fs)
+	agentEnvService := c.agentEnvServiceFactory.New(softlayerFileService, strconv.Itoa(virtualGuest.Id))
+
+	if len(cloudProps.BoshIp) == 0 {
+		// update /etc/hosts file of bosh-init vm
+		c.updateEtcHostsOfBoshInit(fmt.Sprintf("%s  %s", virtualGuest.PrimaryBackendIpAddress, virtualGuest.FullyQualifiedDomainName))
+		// Update mbus url setting for bosh director: construct mbus url with new director ip
+		mbus, err := c.parseMbusURL(c.agentOptions.Mbus, virtualGuest.PrimaryBackendIpAddress)
+		if err != nil {
+			return SoftLayerVM{}, bosherr.WrapErrorf(err, "Cannot construct mbus url.")
+		}
+		c.agentOptions.Mbus = mbus
+	} else {
+		// Update mbus url setting
+		mbus, err := c.parseMbusURL(c.agentOptions.Mbus, cloudProps.BoshIp)
+		if err != nil {
+			return SoftLayerVM{}, bosherr.WrapErrorf(err, "Cannot construct mbus url.")
+		}
+		c.agentOptions.Mbus = mbus
+		// Update blobstore setting
+		switch c.agentOptions.Blobstore.Type {
+		case BlobstoreTypeDav:
+			davConf := DavConfig(c.agentOptions.Blobstore.Options)
+			c.updateDavConfig(&davConf, cloudProps.BoshIp)
+		}
+	}
+
+	agentEnv := CreateAgentUserData(agentID, cloudProps, networks, env, c.agentOptions)
+	if err != nil {
+		return SoftLayerVM{}, bosherr.WrapErrorf(err, "Cannot agent env for virtual guest with id: %d.", virtualGuest.Id)
+	}
+
+	err = agentEnvService.Update(agentEnv)
+	if err != nil {
+		return SoftLayerVM{}, bosherr.WrapError(err, "Updating VM's agent env")
+	}
+
+	if len(c.agentOptions.VcapPassword) > 0 {
+		err = c.SetVcapPassword(vm, virtualGuest, c.agentOptions.VcapPassword)
+		if err != nil {
+			return SoftLayerVM{}, bosherr.WrapError(err, "Updating VM's vcap password")
+		}
+	}
+	return vm, nil
 }
 
 // Private methods

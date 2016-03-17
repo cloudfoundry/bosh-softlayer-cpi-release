@@ -41,8 +41,8 @@ type AllowedHostCredential struct {
 type VMMetadata map[string]interface{}
 
 type Creator interface {
-	// Create takes an agent id and creates a VM with provided configuration
-	Create(string, bslcstem.Stemcell, VMCloudProperties, Networks, Environment) (VM, error)
+	CreateBySoftlayer(string, bslcstem.Stemcell, VMCloudProperties, Networks, Environment) (VM, error)
+	CreateByOSReload(string, bslcstem.Stemcell, VMCloudProperties, Networks, Environment) (VM, error)
 }
 
 type Finder interface {
@@ -60,6 +60,8 @@ type VM interface {
 
 	AttachDisk(bslcdisk.Disk) error
 	DetachDisk(bslcdisk.Disk) error
+
+	ReloadOS(bslcstem.Stemcell) error
 }
 
 type Environment map[string]interface{}
