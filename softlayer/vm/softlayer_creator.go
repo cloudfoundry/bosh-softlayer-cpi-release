@@ -143,9 +143,9 @@ func (c SoftLayerCreator) CreateByOSReload(agentID string, stemcell bslcstem.Ste
 	var virtualGuest datatypes.SoftLayer_Virtual_Guest
 
 	if common.IsPrivateSubnet(net.ParseIP(networks.First().IP)) {
-		virtualGuest, err = virtualGuestService.GetObjectByPrimaryIpAddress(networks.First().IP)
-	} else {
 		virtualGuest, err = virtualGuestService.GetObjectByPrimaryBackendIpAddress(networks.First().IP)
+	} else {
+		virtualGuest, err = virtualGuestService.GetObjectByPrimaryIpAddress(networks.First().IP)
 	}
 
 	if err != nil || virtualGuest.Id == 0 {
