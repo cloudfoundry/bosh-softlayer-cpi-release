@@ -1,21 +1,23 @@
 {
-  "Actions": {
-    "Agent": {
-      "Blobstore": {
-        "Options": {
-          "user": "agent",
-          "password": "agent-password",
-          "endpoint": "http://10.254.50.4:25251"
-        },
-        "Type": "dav"
+  "cloud": {
+    "plugin": "softlayer",
+    "properties": {
+      "softlayer": {
+        "username": "fake-username",
+        "apiKey": "fake-api-key"
       },
-      "NTP": [],
-      "Mbus": "nats://nats:nats-password@10.254.50.4:4222"
-    },
-    "StemcellsDir": "/var/vcap/store/cpi/stemcells"
-  },
-  "SoftLayer": {
-    "username": "{{.Username}}",
-    "apiKey": "{{.ApiKey}}"
+      "agent": {
+        "ntp": [],
+        "blobstore": {
+          "provider": "dav",
+          "options": {
+            "endpoint": "http://127.0.0.1:25250",
+            "user": "agent",
+            "password": "agent"
+          }
+        },
+        "mbus": "nats://nats:nats@127.0.0.1:4222"
+      }
+    }
   }
 }
