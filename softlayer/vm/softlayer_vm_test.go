@@ -72,15 +72,6 @@ var _ = Describe("SoftLayerVM", func() {
 				err := vm.Delete("fake-agentID")
 				Expect(err).ToNot(HaveOccurred())
 			})
-
-			It("postCheckActiveTransactionsForDeleteVM time out", func() {
-				vm = NewSoftLayerVM(1234567, fakeSoftLayerClient, sshClient, agentEnvService, logger)
-				bslcommon.TIMEOUT = 1 * time.Second
-				bslcommon.POLLING_INTERVAL = 1 * time.Second
-
-				err := vm.Delete("")
-				Expect(err).To(HaveOccurred())
-			})
 		})
 
 		Context("valid VM ID is used and averageDuration is \"\"", func() {

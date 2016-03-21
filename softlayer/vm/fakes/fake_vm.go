@@ -2,7 +2,7 @@ package fakes
 
 import (
 	bslcdisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk"
-
+	bslcstemcell "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
 	bslcvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
 )
 
@@ -28,6 +28,9 @@ type FakeVM struct {
 
 	DetachDiskDisk bslcdisk.Disk
 	DetachDiskErr  error
+
+	ReloadOSStemcell bslcstemcell.Stemcell
+	ReloadOSErr      error
 }
 
 func NewFakeVM(id int) *FakeVM {
@@ -66,4 +69,9 @@ func (vm *FakeVM) AttachDisk(disk bslcdisk.Disk) error {
 func (vm *FakeVM) DetachDisk(disk bslcdisk.Disk) error {
 	vm.DetachDiskDisk = disk
 	return vm.DetachDiskErr
+}
+
+func (vm *FakeVM) ReloadOS(stemcell bslcstemcell.Stemcell) error {
+	vm.ReloadOSStemcell = stemcell
+	return vm.ReloadOSErr
 }

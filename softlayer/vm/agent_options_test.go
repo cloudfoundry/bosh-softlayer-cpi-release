@@ -74,7 +74,7 @@ var _ = Describe("BlobstoreOptions", func() {
 
 			err := options.Validate()
 			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring("Must provide non-empty Type"))
+			Expect(err.Error()).To(ContainSubstring("Must provide non-empty provider"))
 		})
 	})
 })

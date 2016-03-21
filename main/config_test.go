@@ -11,11 +11,25 @@ import (
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/main"
 
 	bslcaction "github.com/cloudfoundry/bosh-softlayer-cpi/action"
+
+	bslcvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
 )
 
 var validProperties = bslcaction.ConcreteFactoryOptions{
 	Softlayer:    validSoftLayerConfig,
 	StemcellsDir: "/tmp/stemcells",
+	Agent:        validAgentOption,
+}
+
+var validAgentOption = bslcvm.AgentOptions{
+	Mbus:         "fake-mubus",
+	NTP:          []string{""},
+	Blobstore:    validBlobstoreOptions,
+	VcapPassword: "fake-vcappassword",
+}
+
+var validBlobstoreOptions = bslcvm.BlobstoreOptions{
+	Provider: "local",
 }
 
 var validSoftLayerConfig = bslcaction.SoftLayerConfig{
@@ -23,17 +37,13 @@ var validSoftLayerConfig = bslcaction.SoftLayerConfig{
 	ApiKey:   "fake-api-key",
 }
 
-var validActionsOptions = bslcaction.ConcreteFactoryOptions{
-	StemcellsDir: "/tmp/stemcells",
-}
-
-var validConfig = CloudConfig{
+var validCloudConfig = CloudConfig{
 	Plugin:     "softlayer",
 	Properties: validProperties,
 }
 
 var validConfig = Config{
-	Cloud: validConfig,
+	Cloud: validCloudConfig,
 }
 
 var _ = Describe("NewConfigFromPath", func() {
@@ -95,7 +105,7 @@ var _ = Describe("Config", func() {
 
 			err := config.Validate()
 			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring("Validating SoftLayer configuration"))
+			Expect(err.Error()).To(ContainSubstring("Validating Cloud Properties"))
 		})
 	})
 })

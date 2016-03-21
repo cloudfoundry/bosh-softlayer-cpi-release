@@ -13,7 +13,7 @@ type ConcreteFactoryOptions struct {
 
 	Agent bslcvm.AgentOptions `json:"agent"`
 
-	AgentEnvService string `json:"agentenvservice,omitempty`
+	AgentEnvService string `json:"agentenvservice,omitempty"`
 
 	Registry bslcvm.RegistryOptions `json:"registry,omitempty"`
 }

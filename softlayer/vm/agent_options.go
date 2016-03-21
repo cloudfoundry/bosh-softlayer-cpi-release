@@ -44,7 +44,7 @@ func (o AgentOptions) Validate() error {
 
 func (o BlobstoreOptions) Validate() error {
 	if o.Provider == "" {
-		return bosherr.Error("Must provide non-empty Type")
+		return bosherr.Error("Must provide non-empty provider")
 	}
 
 	return nil

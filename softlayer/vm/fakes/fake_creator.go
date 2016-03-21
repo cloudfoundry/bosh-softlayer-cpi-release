@@ -15,7 +15,16 @@ type FakeCreator struct {
 	CreateErr               error
 }
 
-func (c *FakeCreator) Create(agentID string, stemcell bslcstem.Stemcell, vmCloudProperties bslcvm.VMCloudProperties, networks bslcvm.Networks, env bslcvm.Environment) (bslcvm.VM, error) {
+func (c *FakeCreator) CreateBySoftlayer(agentID string, stemcell bslcstem.Stemcell, vmCloudProperties bslcvm.VMCloudProperties, networks bslcvm.Networks, env bslcvm.Environment) (bslcvm.VM, error) {
+	c.CreateAgentID = agentID
+	c.CreateStemcell = stemcell
+	c.CreateVMCloudProperties = vmCloudProperties
+	c.CreateNetworks = networks
+	c.CreateEnvironment = env
+	return c.CreateVM, c.CreateErr
+}
+
+func (c *FakeCreator) CreateByOSReload(agentID string, stemcell bslcstem.Stemcell, vmCloudProperties bslcvm.VMCloudProperties, networks bslcvm.Networks, env bslcvm.Environment) (bslcvm.VM, error) {
 	c.CreateAgentID = agentID
 	c.CreateStemcell = stemcell
 	c.CreateVMCloudProperties = vmCloudProperties

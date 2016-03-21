@@ -113,7 +113,7 @@ var _ = Describe("SoftLayerCreator", func() {
 				}
 				testhelpers.SetTestFixturesForFakeSSHClient(sshClient, expectedCmdResults, nil)
 				setFakeSoftLayerClientCreateObjectTestFixturesWithEphemeralDiskSize(softLayerClient)
-				vm, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
+				vm, err := creator.CreateBySoftlayer(agentID, stemcell, cloudProps, networks, env)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(vm.ID()).To(Equal(1234567))
 			})
@@ -149,7 +149,7 @@ var _ = Describe("SoftLayerCreator", func() {
 				}
 				testhelpers.SetTestFixturesForFakeSSHClient(sshClient, expectedCmdResults, nil)
 				setFakeSoftLayerClientCreateObjectTestFixturesWithoutEphemeralDiskSize(softLayerClient)
-				vm, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
+				vm, err := creator.CreateBySoftlayer(agentID, stemcell, cloudProps, networks, env)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(vm.ID()).To(Equal(1234567))
 			})
@@ -186,7 +186,7 @@ var _ = Describe("SoftLayerCreator", func() {
 				}
 				testhelpers.SetTestFixturesForFakeSSHClient(sshClient, expectedCmdResults, nil)
 				setFakeSoftLayerClientCreateObjectTestFixturesWithoutBoshIP(softLayerClient)
-				vm, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
+				vm, err := creator.CreateBySoftlayer(agentID, stemcell, cloudProps, networks, env)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(vm.ID()).To(Equal(1234567))
 			})
@@ -209,7 +209,7 @@ var _ = Describe("SoftLayerCreator", func() {
 						Datacenter: sldatatypes.Datacenter{Name: "fake-datacenter"},
 					}
 
-					_, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
+					_, err := creator.CreateBySoftlayer(agentID, stemcell, cloudProps, networks, env)
 					Expect(err).To(HaveOccurred())
 				})
 
@@ -219,7 +219,7 @@ var _ = Describe("SoftLayerCreator", func() {
 						Datacenter: sldatatypes.Datacenter{Name: "fake-datacenter"},
 					}
 
-					_, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
+					_, err := creator.CreateBySoftlayer(agentID, stemcell, cloudProps, networks, env)
 					Expect(err).To(HaveOccurred())
 				})
 
@@ -229,7 +229,7 @@ var _ = Describe("SoftLayerCreator", func() {
 						MaxMemory: 1024,
 					}
 
-					_, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
+					_, err := creator.CreateBySoftlayer(agentID, stemcell, cloudProps, networks, env)
 					Expect(err).To(HaveOccurred())
 				})
 			})
