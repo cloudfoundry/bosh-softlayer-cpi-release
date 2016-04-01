@@ -20,9 +20,7 @@ import (
 	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 	bslcdisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk"
 	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
-	bslcvmpool "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm/pool"
 
-	common "github.com/cloudfoundry/bosh-softlayer-cpi/common"
 	util "github.com/cloudfoundry/bosh-softlayer-cpi/util"
 	datatypes "github.com/maximilien/softlayer-go/data_types"
 	sldatatypes "github.com/maximilien/softlayer-go/data_types"
@@ -64,7 +62,17 @@ func NewSoftLayerVM(id int, softLayerClient sl.Client, sshClient util.SshClient,
 func (vm SoftLayerVM) ID() int { return vm.id }
 
 func (vm SoftLayerVM) Delete(agentID string) error {
-	return nil
+	virtualGuest, err := bslcommon.GetObjectDetailsOnVirtualGuest(vm.softLayerClient, vm.ID())
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Cannot get details from virtual guest with id: %d.", vm.ID())
+	}
+
+	if strings.contains(virtualGuest.FullyQualifiedDomainName, "-worker-") {
+		return vm.DeleteVM()
+	}
+
+	metadata := VMMetadata{}
+	return vm.SetMetadata(metadata)
 }
 
 func (vm SoftLayerVM) DeleteVM() error {
@@ -90,26 +98,6 @@ func (vm SoftLayerVM) DeleteVM() error {
 
 	if !deleted {
 		return bosherr.WrapError(nil, "Did not delete SoftLayer VirtualGuest from client")
-	}
-
-	err = vm.postCheckActiveTransactionsForDeleteVM(vm.softLayerClient, vmCID)
-	if err != nil {
-		if !strings.Contains(err.Error(), "HTTP error code") {
-			return err
-		}
-	}
-
-	if strings.ToUpper(common.GetOSEnvVariable("OS_RELOAD_ENABLED", "TRUE")) == "TRUE" {
-		db, err := bslcvmpool.OpenDB(bslcvmpool.SQLITE_DB_FILE_PATH)
-		if err != nil {
-			return bosherr.WrapError(err, "Opening DB")
-		}
-
-		vmInfoDB := bslcvmpool.NewVMInfoDB(vm.ID(), "", "", "", "", vm.logger, db)
-		err = vmInfoDB.DeleteVMFromVMDB(bslcvmpool.DB_RETRY_TIMEOUT, bslcvmpool.DB_RETRY_INTERVAL)
-		if err != nil {
-			return bosherr.WrapError(err, "Failed to delete the record from VM pool DB")
-		}
 	}
 
 	return nil
