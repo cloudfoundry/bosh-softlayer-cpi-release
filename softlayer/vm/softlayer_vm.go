@@ -11,6 +11,7 @@ import (
 	"strings"
 	"text/template"
 	"time"
+	"encoding/json"
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
@@ -72,6 +73,12 @@ func (vm SoftLayerVM) Delete(agentID string) error {
 	}
 
 	metadata := VMMetadata{}
+	metadataBytes := []byte(`{"deleted": "true"}`)
+	err = json.Unmarshal(metadataBytes, &metadata)
+	if err != nil {
+		return bosherr.WrapError(err, "Unmarshal delete_vm metadata")
+	}
+
 	return vm.SetMetadata(metadata)
 }
 
