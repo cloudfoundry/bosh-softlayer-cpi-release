@@ -67,7 +67,7 @@ func (vm SoftLayerVM) Delete(agentID string) error {
 		return bosherr.WrapErrorf(err, "Cannot get details from virtual guest with id: %d.", vm.ID())
 	}
 
-	if strings.contains(virtualGuest.FullyQualifiedDomainName, "-worker-") {
+	if strings.Contains(virtualGuest.FullyQualifiedDomainName, "-worker-") {
 		return vm.DeleteVM()
 	}
 
