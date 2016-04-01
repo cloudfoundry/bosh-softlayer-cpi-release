@@ -157,13 +157,13 @@ func (vm SoftLayerVM) SetMetadata(vmMetadata VMMetadata) error {
 	}
 
 	//Check below needed since Golang strings.Split return [""] on strings.Split("", ",")
-	if len(tags) == 1 && tags[0] == "" {
-		return nil
-	}
-
-	if len(tags) == 0 {
-		return nil
-	}
+	//if len(tags) == 1 && tags[0] == "" {
+	//	return nil
+	//}
+	//
+	//if len(tags) == 0 {
+	//	return nil
+	//}
 
 	virtualGuestService, err := vm.softLayerClient.GetSoftLayer_Virtual_Guest_Service()
 	if err != nil {
