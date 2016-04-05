@@ -349,7 +349,7 @@ func (vm SoftLayerVM) extractTagsFromVMMetadata(vmMetadata VMMetadata) ([]string
 	tags := []string{}
 	status := ""
 	for key, value := range vmMetadata {
-		if key == "compiling" || key == "job" || key == "index" || key == "deployment" {
+		if key == "compiling" || key == "job" || key == "index" || key == "deployment" || key == "deleted" {
 			stringValue, err := value.(string)
 			if !err {
 				return []string{}, bosherr.Errorf("Cannot convert tags metadata value `%v` to string", value)
