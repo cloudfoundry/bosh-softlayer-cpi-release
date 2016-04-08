@@ -63,23 +63,24 @@ func NewSoftLayerVM(id int, softLayerClient sl.Client, sshClient util.SshClient,
 func (vm SoftLayerVM) ID() int { return vm.id }
 
 func (vm SoftLayerVM) Delete(agentID string) error {
-	virtualGuest, err := bslcommon.GetObjectDetailsOnVirtualGuest(vm.softLayerClient, vm.ID())
-	if err != nil {
-		return bosherr.WrapErrorf(err, "Cannot get details from virtual guest with id: %d.", vm.ID())
-	}
+	//virtualGuest, err := bslcommon.GetObjectDetailsOnVirtualGuest(vm.softLayerClient, vm.ID())
+	//if err != nil {
+	//	return bosherr.WrapErrorf(err, "Cannot get details from virtual guest with id: %d.", vm.ID())
+	//}
+	//
+	//if strings.Contains(virtualGuest.FullyQualifiedDomainName, "-worker-") {
+	//	return vm.DeleteVM()
+	//}
+	//
+	//metadata := VMMetadata{}
+	//metadataBytes := []byte(`{"deleted": "true"}`)
+	//err = json.Unmarshal(metadataBytes, &metadata)
+	//if err != nil {
+	//	return bosherr.WrapError(err, "Unmarshal delete_vm metadata")
+	//}
 
-	if strings.Contains(virtualGuest.FullyQualifiedDomainName, "-worker-") {
-		return vm.DeleteVM()
-	}
-
-	metadata := VMMetadata{}
-	metadataBytes := []byte(`{"deleted": "true"}`)
-	err = json.Unmarshal(metadataBytes, &metadata)
-	if err != nil {
-		return bosherr.WrapError(err, "Unmarshal delete_vm metadata")
-	}
-
-	return vm.SetMetadata(metadata)
+	//return vm.SetMetadata(metadata)
+	return vm.DeleteVM()
 }
 
 func (vm SoftLayerVM) DeleteVM() error {
