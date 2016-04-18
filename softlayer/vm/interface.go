@@ -30,6 +30,10 @@ type VMCloudProperties struct {
 	PostInstallScriptUri           string                                     `json:"postInstallScriptUri,omitempty"`
 
 	BoshIp string `json:"bosh_ip,omitempty"`
+
+	Baremetal             bool   `json:"baremetal,omitempty"`
+	BaremetalStemcell     string `json:"bm_stemcell,omitempty"`
+	BaremetalNetbootImage string `json:"bm_netboot_image,omitempty"`
 }
 
 type AllowedHostCredential struct {
@@ -43,6 +47,7 @@ type VMMetadata map[string]interface{}
 type Creator interface {
 	CreateBySoftlayer(string, bslcstem.Stemcell, VMCloudProperties, Networks, Environment) (VM, error)
 	CreateByOSReload(string, bslcstem.Stemcell, VMCloudProperties, Networks, Environment) (VM, error)
+	CreateByBPS(string, VMCloudProperties, Networks, Environment) (VM, error)
 }
 
 type Finder interface {
@@ -62,6 +67,10 @@ type VM interface {
 	DetachDisk(bslcdisk.Disk) error
 
 	ReloadOS(bslcstem.Stemcell) error
+
+	GetPrimaryIP() (string, error)
+	GetRootPassword() (string, error)
+	SetVcapPassword(string) error
 }
 
 type Environment map[string]interface{}

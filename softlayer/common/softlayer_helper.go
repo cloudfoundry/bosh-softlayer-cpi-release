@@ -2,6 +2,7 @@ package common
 
 import (
 	"encoding/base64"
+	"strconv"
 	"strings"
 	"time"
 
@@ -418,6 +419,18 @@ func GetObjectDetailsOnVirtualGuest(softLayerClient sl.Client, virtualGuestId in
 		return datatypes.SoftLayer_Virtual_Guest{}, bosherr.WrapErrorf(err, "Cannot get virtual guest with id: %d", virtualGuestId)
 	}
 	return virtualGuest, nil
+}
+
+func GetObjectDetailsOnHardware(softLayerClient sl.Client, hardwareId int) (datatypes.SoftLayer_Hardware, error) {
+	hardwareService, err := softLayerClient.GetSoftLayer_Hardware_Service()
+	if err != nil {
+		return datatypes.SoftLayer_Hardware{}, bosherr.WrapError(err, "Cannot get softlayer hardeare service.")
+	}
+	hardware, err := hardwareService.GetObject(strconv.Itoa(hardwareId))
+	if err != nil {
+		return datatypes.SoftLayer_Hardware{}, bosherr.WrapErrorf(err, "Cannot get hardware with id: %d", hardwareId)
+	}
+	return hardware, nil
 }
 
 func GetObjectDetailsOnStorage(softLayerClient sl.Client, volumeId int) (datatypes.SoftLayer_Network_Storage, error) {

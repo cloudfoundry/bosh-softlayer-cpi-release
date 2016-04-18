@@ -2,6 +2,7 @@ package vm
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"net"
 	"net/url"
@@ -50,6 +51,52 @@ func NewSoftLayerCreator(softLayerClient sl.Client, agentEnvServiceFactory Agent
 	}
 }
 
+func (c SoftLayerCreator) CreateByBPS(agentID string, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
+	var server_id int
+	var err error
+	if server_id, err = c.CreateBaremetal(cloudProps.VmNamePrefix, cloudProps.BaremetalStemcell, cloudProps.BaremetalNetbootImage); err != nil {
+		return SoftLayerVM{}, bosherr.WrapError(err, "Create baremetal error")
+	}
+
+	hardware := NewSoftLayerVM(server_id, c.softLayerClient, util.GetSshClient(), c.logger)
+
+	softlayerFileService := NewSoftlayerFileService(util.GetSshClient(), hardware, c.logger, c.uuidGenerator, c.fs)
+	agentEnvService := c.agentEnvServiceFactory.New(softlayerFileService, strconv.Itoa(server_id))
+	hardware.SetAgentEnvService(agentEnvService)
+
+	// Update mbus url setting
+	mbus, err := c.parseMbusURL(c.agentOptions.Mbus, cloudProps.BoshIp)
+	if err != nil {
+		return SoftLayerVM{}, bosherr.WrapErrorf(err, "Cannot construct mbus url.")
+	}
+	c.agentOptions.Mbus = mbus
+	// Update blobstore setting
+	switch c.agentOptions.Blobstore.Provider {
+	case BlobstoreTypeDav:
+		davConf := DavConfig(c.agentOptions.Blobstore.Options)
+		c.updateDavConfig(&davConf, cloudProps.BoshIp)
+	}
+
+	agentEnv := CreateAgentUserData(agentID, cloudProps, networks, env, c.agentOptions)
+	if err != nil {
+		return SoftLayerVM{}, bosherr.WrapErrorf(err, "Cannot agent env for virtual guest with id: %d.", server_id)
+	}
+
+	err = agentEnvService.Update(agentEnv)
+	if err != nil {
+		return SoftLayerVM{}, bosherr.WrapError(err, "Updating VM's agent env")
+	}
+
+	if len(c.agentOptions.VcapPassword) > 0 {
+		err = hardware.SetVcapPassword(c.agentOptions.VcapPassword)
+		if err != nil {
+			return SoftLayerVM{}, bosherr.WrapError(err, "Updating VM's vcap password")
+		}
+	}
+
+	return hardware, nil
+}
+
 func (c SoftLayerCreator) CreateBySoftlayer(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
 
 	virtualGuestTemplate, err := CreateVirtualGuestTemplate(stemcell, cloudProps)
@@ -85,8 +132,10 @@ func (c SoftLayerCreator) CreateBySoftlayer(agentID string, stemcell bslcstem.St
 		return SoftLayerVM{}, bosherr.WrapErrorf(err, "Cannot get details from virtual guest with id: %d.", virtualGuest.Id)
 	}
 
-	softlayerFileService := NewSoftlayerFileService(util.GetSshClient(), virtualGuest, c.logger, c.uuidGenerator, c.fs)
+	vm := NewSoftLayerVM(virtualGuest.Id, c.softLayerClient, util.GetSshClient(), c.logger)
+	softlayerFileService := NewSoftlayerFileService(util.GetSshClient(), vm, c.logger, c.uuidGenerator, c.fs)
 	agentEnvService := c.agentEnvServiceFactory.New(softlayerFileService, strconv.Itoa(virtualGuest.Id))
+	vm.SetAgentEnvService(agentEnvService)
 
 	if len(cloudProps.BoshIp) == 0 {
 		// update /etc/hosts file of bosh-init vm
@@ -122,10 +171,8 @@ func (c SoftLayerCreator) CreateBySoftlayer(agentID string, stemcell bslcstem.St
 		return SoftLayerVM{}, bosherr.WrapError(err, "Updating VM's agent env")
 	}
 
-	vm := NewSoftLayerVM(virtualGuest.Id, c.softLayerClient, util.GetSshClient(), agentEnvService, c.logger)
-
 	if len(c.agentOptions.VcapPassword) > 0 {
-		err = c.SetVcapPassword(vm, virtualGuest, c.agentOptions.VcapPassword)
+		err = vm.SetVcapPassword(c.agentOptions.VcapPassword)
 		if err != nil {
 			return SoftLayerVM{}, bosherr.WrapError(err, "Updating VM's vcap password")
 		}
@@ -154,7 +201,7 @@ func (c SoftLayerCreator) CreateByOSReload(agentID string, stemcell bslcstem.Ste
 
 	c.logger.Info(SOFTLAYER_VM_CREATOR_LOG_TAG, fmt.Sprintf("OS reload on the server id %d with stemcell %d", virtualGuest.Id, stemcell.ID()))
 
-	vm := NewSoftLayerVM(virtualGuest.Id, c.softLayerClient, util.GetSshClient(), nil, c.logger)
+	vm := NewSoftLayerVM(virtualGuest.Id, c.softLayerClient, util.GetSshClient(), c.logger)
 
 	bslcommon.TIMEOUT = 4 * time.Hour
 	err = vm.ReloadOS(stemcell)
@@ -179,8 +226,9 @@ func (c SoftLayerCreator) CreateByOSReload(agentID string, stemcell bslcstem.Ste
 		return SoftLayerVM{}, bosherr.WrapErrorf(err, "Cannot get details from virtual guest with id: %d.", virtualGuest.Id)
 	}
 
-	softlayerFileService := NewSoftlayerFileService(util.GetSshClient(), virtualGuest, c.logger, c.uuidGenerator, c.fs)
+	softlayerFileService := NewSoftlayerFileService(util.GetSshClient(), vm, c.logger, c.uuidGenerator, c.fs)
 	agentEnvService := c.agentEnvServiceFactory.New(softlayerFileService, strconv.Itoa(virtualGuest.Id))
+	vm.SetAgentEnvService(agentEnvService)
 
 	if len(cloudProps.BoshIp) == 0 {
 		// update /etc/hosts file of bosh-init vm
@@ -217,7 +265,7 @@ func (c SoftLayerCreator) CreateByOSReload(agentID string, stemcell bslcstem.Ste
 	}
 
 	if len(c.agentOptions.VcapPassword) > 0 {
-		err = c.SetVcapPassword(vm, virtualGuest, c.agentOptions.VcapPassword)
+		err = vm.SetVcapPassword(c.agentOptions.VcapPassword)
 		if err != nil {
 			return SoftLayerVM{}, bosherr.WrapError(err, "Updating VM's vcap password")
 		}
@@ -292,11 +340,54 @@ func (c SoftLayerCreator) appendRecordToEtcHosts(record string) (err error) {
 	return nil
 }
 
-func (c SoftLayerCreator) SetVcapPassword(vm SoftLayerVM, virtualGuest datatypes.SoftLayer_Virtual_Guest, encryptedPwd string) (err error) {
-	command := fmt.Sprintf("usermod -p '%s' vcap", c.agentOptions.VcapPassword)
-	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.getRootPassword(virtualGuest), virtualGuest.PrimaryBackendIpAddress, command)
+func (c SoftLayerCreator) CreateBaremetal(server_name string, stemcell string, netboot_image string) (server_id int, err error) {
+	body, err := util.CallBPS("PUT", "/baremetal/spec/"+server_name+"/"+stemcell+"/"+netboot_image, "")
 	if err != nil {
-		return bosherr.WrapError(err, "Shelling out to usermod vcap")
+		return 0, bosherr.WrapErrorf(err, "Faled to call BPS")
 	}
-	return
+
+	fmt.Println(string(body))
+
+	var result map[string]interface{}
+
+	if err = json.Unmarshal(body, &result); err != nil {
+		return 0, err
+	}
+	if result["status"].(float64) != 200 {
+		return 0, bosherr.Errorf("Error: " + string(body))
+	}
+	data := result["data"].(map[string]interface{})
+	task_id := strconv.FormatFloat(data["task_id"].(float64), 'f', 0, 32)
+	for {
+		time.Sleep(5 * time.Second)
+		if body, err = util.CallBPS("GET", "/task/"+task_id+"/json/task", ""); err != nil {
+			return 0, bosherr.WrapErrorf(err, "Faled to call BPS")
+		}
+		fmt.Println(string(body))
+		if err = json.Unmarshal(body, &result); err != nil {
+			return 0, bosherr.WrapErrorf(err, "Faled to call BPS")
+		}
+		data := result["data"].(map[string]interface{})
+		info := data["info"].(map[string]interface{})
+		if info["status"] == nil {
+			continue
+		}
+		state := info["status"].(string)
+		fmt.Println("Status: " + state)
+		if state == "failed" {
+			return 0, bosherr.Errorf("Failed to install the stemcell: " + string(body))
+		}
+		if state == "completed" {
+			if body, err = util.CallBPS("GET", "/task/"+task_id+"/json/server", ""); err != nil {
+				return 0, bosherr.WrapErrorf(err, "Faled to call BPS")
+			}
+			if err = json.Unmarshal(body, &result); err != nil {
+				return 0, bosherr.WrapErrorf(err, "Faled to call BPS")
+			}
+			data = result["data"].(map[string]interface{})
+			info = data["info"].(map[string]interface{})
+			return info["id"].(int), nil
+		}
+	}
+	return 0, bosherr.Errorf("Failed to install the stemcell: ")
 }

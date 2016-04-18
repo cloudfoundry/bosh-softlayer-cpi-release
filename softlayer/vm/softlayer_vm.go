@@ -2,6 +2,7 @@ package vm
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -11,7 +12,6 @@ import (
 	"strings"
 	"text/template"
 	"time"
-	"encoding/json"
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
@@ -34,7 +34,10 @@ const (
 )
 
 type SoftLayerVM struct {
-	id int
+	id           int
+	is_vm        bool
+	virtualGuest datatypes.SoftLayer_Virtual_Guest
+	hardware     datatypes.SoftLayer_Hardware
 
 	softLayerClient sl.Client
 	agentEnvService AgentEnvService
@@ -44,20 +47,37 @@ type SoftLayerVM struct {
 	logger boshlog.Logger
 }
 
-func NewSoftLayerVM(id int, softLayerClient sl.Client, sshClient util.SshClient, agentEnvService AgentEnvService, logger boshlog.Logger) SoftLayerVM {
+func NewSoftLayerVM(id int, softLayerClient sl.Client, sshClient util.SshClient, logger boshlog.Logger) SoftLayerVM {
 	bslcommon.TIMEOUT = 60 * time.Minute
 	bslcommon.POLLING_INTERVAL = 10 * time.Second
 
+	var is_vm bool = true
+	var hardware datatypes.SoftLayer_Hardware
+	virtualGuest, err := bslcommon.GetObjectDetailsOnVirtualGuest(softLayerClient, id)
+	if err != nil {
+		hardware, err = bslcommon.GetObjectDetailsOnHardware(softLayerClient, id)
+		if err != nil {
+			return SoftLayerVM{}
+		}
+		is_vm = false
+	}
+
 	return SoftLayerVM{
-		id: id,
+		id:           id,
+		is_vm:        is_vm,
+		virtualGuest: virtualGuest,
+		hardware:     hardware,
 
 		softLayerClient: softLayerClient,
-		agentEnvService: agentEnvService,
 
 		sshClient: sshClient,
 
 		logger: logger,
 	}
+}
+
+func (vm SoftLayerVM) SetAgentEnvService(agentEnvService AgentEnvService) {
+	vm.agentEnvService = agentEnvService
 }
 
 func (vm SoftLayerVM) ID() int { return vm.id }
@@ -210,7 +230,6 @@ func (vm SoftLayerVM) ConfigureNetworks(networks Networks) error {
 }
 
 func (vm SoftLayerVM) AttachDisk(disk bslcdisk.Disk) error {
-
 	virtualGuest, volume, err := vm.fetchVMandIscsiVolume(vm.ID(), disk.ID())
 	if err != nil {
 		return bosherr.WrapError(err, fmt.Sprintf("Failed to fetch disk `%d` and virtual gusest `%d`", disk.ID(), virtualGuest.Id))
@@ -226,10 +245,10 @@ func (vm SoftLayerVM) AttachDisk(disk bslcdisk.Disk) error {
 	totalTime := time.Duration(0)
 	if err == nil && allowed == false {
 		for totalTime < bslcommon.TIMEOUT {
-			allowable, err := networkStorageService.AttachIscsiVolume(virtualGuest, disk.ID())
+			allowable, err := networkStorageService.AttachIscsiVolume(vm.virtualGuest, disk.ID())
 			if err != nil {
 				if !strings.Contains(err.Error(), "HTTP error code") {
-					return bosherr.WrapError(err, fmt.Sprintf("Granting volume access to vitrual guest %d", virtualGuest.Id))
+					return bosherr.WrapError(err, fmt.Sprintf("Granting volume access to vitrual guest %d", vm.virtualGuest.Id))
 				}
 			} else {
 				if allowable {
@@ -245,19 +264,19 @@ func (vm SoftLayerVM) AttachDisk(disk bslcdisk.Disk) error {
 		return bosherr.Error("Waiting for grantting access to virutal guest TIME OUT!")
 	}
 
-	hasMultiPath, err := vm.hasMulitPathToolBasedOnShellScript(virtualGuest)
+	hasMultiPath, err := vm.hasMulitPathToolBasedOnShellScript(vm.virtualGuest)
 	if err != nil {
-		return bosherr.WrapError(err, fmt.Sprintf("Failed to get multipath information from virtual guest `%d`", virtualGuest.Id))
+		return bosherr.WrapError(err, fmt.Sprintf("Failed to get multipath information from virtual guest `%d`", vm.virtualGuest.Id))
 	}
 
-	deviceName, err := vm.waitForVolumeAttached(virtualGuest, volume, hasMultiPath)
+	deviceName, err := vm.waitForVolumeAttached(vm.virtualGuest, volume, hasMultiPath)
 	if err != nil {
-		return bosherr.WrapError(err, fmt.Sprintf("Failed to attach volume `%d` to virtual guest `%d`", disk.ID(), virtualGuest.Id))
+		return bosherr.WrapError(err, fmt.Sprintf("Failed to attach volume `%d` to virtual guest `%d`", disk.ID(), vm.virtualGuest.Id))
 	}
 
 	oldAgentEnv, err := vm.agentEnvService.Fetch()
 	if err != nil {
-		return bosherr.WrapErrorf(err, "Failed to unmarshal userdata from virutal guest with id: %d.", virtualGuest.Id)
+		return bosherr.WrapErrorf(err, "Failed to unmarshal userdata from virutal guest with id: %d.", vm.virtualGuest.Id)
 	}
 
 	var newAgentEnv AgentEnv
@@ -269,7 +288,7 @@ func (vm SoftLayerVM) AttachDisk(disk bslcdisk.Disk) error {
 
 	err = vm.agentEnvService.Update(newAgentEnv)
 	if err != nil {
-		return bosherr.WrapError(err, fmt.Sprintf("Configuring userdata on VirtualGuest with id: `%d`", virtualGuest.Id))
+		return bosherr.WrapError(err, fmt.Sprintf("Configuring userdata on VirtualGuest with id: `%d`", vm.virtualGuest.Id))
 	}
 
 	return nil
@@ -342,6 +361,45 @@ func (vm SoftLayerVM) DetachDisk(disk bslcdisk.Disk) error {
 	}
 
 	return nil
+}
+
+func (vm SoftLayerVM) GetPrimaryIP() (string, error) {
+	if vm.is_vm {
+		return vm.virtualGuest.PrimaryBackendIpAddress, nil
+	} else {
+		return vm.hardware.PrimaryIpAddress, nil
+	}
+}
+
+func (vm SoftLayerVM) GetRootPassword() (string, error) {
+	if vm.is_vm {
+		passwords := vm.virtualGuest.OperatingSystem.Passwords
+		for _, password := range passwords {
+			if password.Username == ROOT_USER_NAME {
+				return password.Password, nil
+			}
+		}
+	} else {
+		passwords := vm.hardware.OperatingSystem.Passwords
+		for _, password := range passwords {
+			if password.Username == ROOT_USER_NAME {
+				return password.Password, nil
+			}
+		}
+	}
+
+	return "", bosherr.Errorf("The root password is not found for VM '%s'", vm.ID())
+}
+
+func (vm SoftLayerVM) SetVcapPassword(encryptedPwd string) (err error) {
+	command := fmt.Sprintf("usermod -p '%s' vcap", encryptedPwd)
+	password, _ := vm.GetRootPassword()
+	primaryIp, _ := vm.GetPrimaryIP()
+	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, password, primaryIp, command)
+	if err != nil {
+		return bosherr.WrapError(err, "Shelling out to usermod vcap")
+	}
+	return
 }
 
 // Private methods
