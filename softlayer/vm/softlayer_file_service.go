@@ -12,6 +12,7 @@ import (
 )
 
 type SoftlayerFileService interface {
+	SetVM( VM )
 	Upload(string, []byte) error
 	Download(string) ([]byte, error)
 }
@@ -26,14 +27,28 @@ type softlayerFileService struct {
 }
 
 func NewSoftlayerFileService(sshClient util.SshClient, vm VM, logger boshlog.Logger, uuidGenerator boshuuid.Generator, fs boshsys.FileSystem) SoftlayerFileService {
+        return &softlayerFileService{
+                sshClient:     sshClient,
+		vm:		vm,
+                logger:        logger,
+                logTag:        "softlayerFileService",
+                uuidGenerator: uuidGenerator,
+                fs:            fs,
+        }
+}
+
+func NewSoftlayerFileService1(sshClient util.SshClient, logger boshlog.Logger, uuidGenerator boshuuid.Generator, fs boshsys.FileSystem) SoftlayerFileService {
 	return &softlayerFileService{
 		sshClient:     sshClient,
-		vm:            vm,
 		logger:        logger,
 		logTag:        "softlayerFileService",
 		uuidGenerator: uuidGenerator,
 		fs:            fs,
 	}
+}
+
+func (s *softlayerFileService) SetVM(vm VM) {
+	s.vm = vm
 }
 
 func (s *softlayerFileService) Download(sourcePath string) ([]byte, error) {
@@ -53,8 +68,8 @@ func (s *softlayerFileService) Download(sourcePath string) ([]byte, error) {
 	sourceFileName := filepath.Base(sourcePath)
 	tmpFilePath := filepath.Join(tmpDir, sourceFileName)
 
-	password, _ := s.vm.GetRootPassword()
-	primaryIp, _ := s.vm.GetPrimaryIP()
+	password := s.vm.GetRootPassword()
+	primaryIp := s.vm.GetPrimaryIP()
 
 	s.sshClient.DownloadFile(ROOT_USER_NAME, password, primaryIp, sourcePath, tmpFilePath)
 
@@ -90,8 +105,8 @@ func (s *softlayerFileService) Upload(destinationPath string, contents []byte) e
 		return bosherr.WrapErrorf(err, "Writing to %s", tmpFilePath)
 	}
 
-	password, _ := s.vm.GetRootPassword()
-	primaryIp, _ := s.vm.GetPrimaryIP()
+	password := s.vm.GetRootPassword()
+	primaryIp := s.vm.GetPrimaryIP()
 
 	err = s.sshClient.UploadFile(ROOT_USER_NAME, password, primaryIp, tmpFilePath, destinationPath)
 	if err != nil {

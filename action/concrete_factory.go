@@ -24,6 +24,14 @@ func NewConcreteFactory(softLayerClient sl.Client, options ConcreteFactoryOption
 
 	agentEnvServiceFactory := bslcvm.NewSoftLayerAgentEnvServiceFactory(options.AgentEnvService, options.Registry, logger)
 
+	vmFinder := bslcvm.NewSoftLayerFinder(
+		softLayerClient,
+		agentEnvServiceFactory,
+		logger,
+		uuidGenerator,
+		fs,
+	)
+
 	vmCreator := bslcvm.NewSoftLayerCreator(
 		softLayerClient,
 		agentEnvServiceFactory,
@@ -31,14 +39,7 @@ func NewConcreteFactory(softLayerClient sl.Client, options ConcreteFactoryOption
 		logger,
 		uuidGenerator,
 		fs,
-	)
-
-	vmFinder := bslcvm.NewSoftLayerFinder(
-		softLayerClient,
-		agentEnvServiceFactory,
-		logger,
-		uuidGenerator,
-		fs,
+		vmFinder,
 	)
 
 	bmCreator := bslcbm.NewBaremetalCreator(softLayerClient, logger)
@@ -69,9 +70,9 @@ func NewConcreteFactory(softLayerClient sl.Client, options ConcreteFactoryOption
 			"configure_networks": NewConfigureNetworks(vmFinder),
 
 			// Disk management
-			"create_disk": NewCreateDisk(diskCreator),
+			"create_disk": NewCreateDisk(vmFinder, diskCreator),
 			"delete_disk": NewDeleteDisk(diskFinder),
-			"attach_disk": NewAttachDisk(vmFinder, diskFinder),
+			"attach_disk": NewAttachDisk(vmFinder, diskFinder, logger),
 			"detach_disk": NewDetachDisk(vmFinder, diskFinder),
 
 			"establish_bare_metal_env": NewEstablishBareMetalEnv(bmCreator, bmFinder),

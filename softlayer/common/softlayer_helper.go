@@ -5,6 +5,10 @@ import (
 	"strconv"
 	"strings"
 	"time"
+        "fmt"
+        "bytes"
+        "encoding/json"
+        "errors"
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
@@ -13,12 +17,118 @@ import (
 
 	datatypes "github.com/maximilien/softlayer-go/data_types"
 	sl "github.com/maximilien/softlayer-go/softlayer"
+        slcommon "github.com/maximilien/softlayer-go/common"
 )
 
 var (
 	TIMEOUT          time.Duration
 	POLLING_INTERVAL time.Duration
 )
+
+type SoftLayer_Hardware_Parameters struct {
+	Parameters []datatypes.SoftLayer_Hardware `json:"parameters"`
+}
+
+func IscsiHasAllowedHardware(softLayerClient sl.Client, volumeId int, hardwareId int) (bool, error) {
+	filter := string(`{"allowedHardwares":{"id":{"operation":"` + strconv.Itoa(hardwareId) + `"}}}`)
+	response, errorCode, err := softLayerClient.GetHttpClient().DoRawHttpRequestWithObjectFilterAndObjectMask(fmt.Sprintf("%s/%d/getAllowedVirtualGuests.json", "SoftLayer_Network_Storage", volumeId), []string{"id"}, fmt.Sprintf(string(filter)), "GET", new(bytes.Buffer))
+
+	if err != nil {
+		return false, errors.New(fmt.Sprintf("Cannot check authentication for volume %d in vm %d", volumeId, hardwareId))
+	}
+
+	if slcommon.IsHttpErrorCode(errorCode) {
+		errorMessage := fmt.Sprintf("softlayer-go: could not SoftLayer_Network_Storage#hasAllowedVirtualGuest, HTTP error code: '%d'", errorCode)
+		return false, errors.New(errorMessage)
+	}
+
+	hardware := []datatypes.SoftLayer_Hardware{}
+	err = json.Unmarshal(response, &hardware)
+	if err != nil {
+		return false, errors.New(fmt.Sprintf("Failed to unmarshal response of checking authentication for volume %d in vm %d", volumeId, hardwareId))
+	}
+
+	if len(hardware) > 0 {
+		return true, nil
+	}
+
+	return false, nil
+}
+
+func AttachHardwareIscsiVolume(softLayerClient sl.Client, hardware datatypes.SoftLayer_Hardware, volumeId int) (bool, error) {
+        parameters := SoftLayer_Hardware_Parameters{
+                Parameters: []datatypes.SoftLayer_Hardware{
+                        hardware,
+                },
+        }
+	requestBody, err := json.Marshal(parameters)
+	if err != nil {
+		return false, err
+	}
+
+	resp, errorCode, err := softLayerClient.GetHttpClient().DoRawHttpRequest(fmt.Sprintf("%s/%d/allowAccessFromHardware.json", "SoftLayer_Network_Storage", volumeId), "PUT", bytes.NewBuffer(requestBody))
+
+	if err != nil {
+		return false, err
+	}
+
+	if slcommon.IsHttpErrorCode(errorCode) {
+		errorMessage := fmt.Sprintf("softlayer-go: could not SoftLayer_Network_Storage#attachIscsiVolume, HTTP error code: '%d'", errorCode)
+		return false, errors.New(errorMessage)
+	}
+
+	allowable, err := strconv.ParseBool(string(resp[:]))
+	if err != nil {
+		return false, nil
+	}
+
+	return allowable, nil
+}
+
+func DetachHardwareIscsiVolume(softLayerClient sl.Client, hardware datatypes.SoftLayer_Hardware, volumeId int) error {
+	parameters := SoftLayer_Hardware_Parameters{
+		Parameters: []datatypes.SoftLayer_Hardware{
+			hardware,
+		},
+	}
+	requestBody, err := json.Marshal(parameters)
+	if err != nil {
+		return err
+	}
+
+	_, errorCode, err := softLayerClient.GetHttpClient().DoRawHttpRequest(fmt.Sprintf("%s/%d/removeAccessFromVirtualGuest.json", "SoftLayer_Network_Storage", volumeId), "PUT", bytes.NewBuffer(requestBody))
+	if err != nil {
+		return err
+	}
+
+	if slcommon.IsHttpErrorCode(errorCode) {
+		errorMessage := fmt.Sprintf("softlayer-go: could not SoftLayer_Account#getAccountStatus, HTTP error code: '%d'", errorCode)
+		return errors.New(errorMessage)
+	}
+
+	return nil
+}
+
+func GetHardwareAllowedHost(softLayerClient sl.Client, instanceId int) (datatypes.SoftLayer_Network_Storage_Allowed_Host, error) {
+	response, errorCode, err := softLayerClient.GetHttpClient().DoRawHttpRequest(fmt.Sprintf("%s/%d/getAllowedHost.json", "SoftLayer_Hardware", instanceId), "GET", new(bytes.Buffer))
+	if err != nil {
+		return datatypes.SoftLayer_Network_Storage_Allowed_Host{}, err
+	}
+
+	if slcommon.IsHttpErrorCode(errorCode) {
+		errorMessage := fmt.Sprintf("softlayer-go: could not SoftLayer_Hardware#getAllowedHost, HTTP error code: '%d'", errorCode)
+		return datatypes.SoftLayer_Network_Storage_Allowed_Host{}, errors.New(errorMessage)
+	}
+
+	allowedHost := datatypes.SoftLayer_Network_Storage_Allowed_Host{}
+	err = json.Unmarshal(response, &allowedHost)
+	if err != nil {
+		return datatypes.SoftLayer_Network_Storage_Allowed_Host{}, err
+	}
+
+	return allowedHost, nil
+}
+
 
 func AttachEphemeralDiskToVirtualGuest(softLayerClient sl.Client, virtualGuestId int, diskSize int, logger boshlog.Logger) error {
 	err := WaitForVirtualGuestLastCompleteTransaction(softLayerClient, virtualGuestId, "Service Setup")

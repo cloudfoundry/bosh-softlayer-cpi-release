@@ -68,8 +68,10 @@ type VM interface {
 
 	ReloadOS(bslcstem.Stemcell) error
 
-	GetPrimaryIP() (string, error)
-	GetRootPassword() (string, error)
+	GetDataCenterId() int
+
+	GetPrimaryIP() string
+	GetRootPassword() string
 	SetVcapPassword(string) error
 }
 

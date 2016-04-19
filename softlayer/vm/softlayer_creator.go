@@ -35,9 +35,10 @@ type SoftLayerCreator struct {
 	logger        boshlog.Logger
 	uuidGenerator boshuuid.Generator
 	fs            boshsys.FileSystem
+	vmFinder Finder
 }
 
-func NewSoftLayerCreator(softLayerClient sl.Client, agentEnvServiceFactory AgentEnvServiceFactory, agentOptions AgentOptions, logger boshlog.Logger, uuidGenerator boshuuid.Generator, fs boshsys.FileSystem) SoftLayerCreator {
+func NewSoftLayerCreator(softLayerClient sl.Client, agentEnvServiceFactory AgentEnvServiceFactory, agentOptions AgentOptions, logger boshlog.Logger, uuidGenerator boshuuid.Generator, fs boshsys.FileSystem,vmFinder Finder) SoftLayerCreator {
 	bslcommon.TIMEOUT = 120 * time.Minute
 	bslcommon.POLLING_INTERVAL = 5 * time.Second
 
@@ -48,6 +49,7 @@ func NewSoftLayerCreator(softLayerClient sl.Client, agentEnvServiceFactory Agent
 		logger:                 logger,
 		uuidGenerator:          uuidGenerator,
 		fs:                     fs,
+		vmFinder: vmFinder,
 	}
 }
 
@@ -58,11 +60,9 @@ func (c SoftLayerCreator) CreateByBPS(agentID string, cloudProps VMCloudProperti
 		return SoftLayerVM{}, bosherr.WrapError(err, "Create baremetal error")
 	}
 
-	hardware := NewSoftLayerVM(server_id, c.softLayerClient, util.GetSshClient(), c.logger)
-
+	hardware, _, _ := c.vmFinder.Find(server_id)
 	softlayerFileService := NewSoftlayerFileService(util.GetSshClient(), hardware, c.logger, c.uuidGenerator, c.fs)
 	agentEnvService := c.agentEnvServiceFactory.New(softlayerFileService, strconv.Itoa(server_id))
-	hardware.SetAgentEnvService(agentEnvService)
 
 	// Update mbus url setting
 	mbus, err := c.parseMbusURL(c.agentOptions.Mbus, cloudProps.BoshIp)
@@ -132,10 +132,9 @@ func (c SoftLayerCreator) CreateBySoftlayer(agentID string, stemcell bslcstem.St
 		return SoftLayerVM{}, bosherr.WrapErrorf(err, "Cannot get details from virtual guest with id: %d.", virtualGuest.Id)
 	}
 
-	vm := NewSoftLayerVM(virtualGuest.Id, c.softLayerClient, util.GetSshClient(), c.logger)
+        vm, _, _ := c.vmFinder.Find(virtualGuest.Id)
 	softlayerFileService := NewSoftlayerFileService(util.GetSshClient(), vm, c.logger, c.uuidGenerator, c.fs)
 	agentEnvService := c.agentEnvServiceFactory.New(softlayerFileService, strconv.Itoa(virtualGuest.Id))
-	vm.SetAgentEnvService(agentEnvService)
 
 	if len(cloudProps.BoshIp) == 0 {
 		// update /etc/hosts file of bosh-init vm
@@ -201,7 +200,7 @@ func (c SoftLayerCreator) CreateByOSReload(agentID string, stemcell bslcstem.Ste
 
 	c.logger.Info(SOFTLAYER_VM_CREATOR_LOG_TAG, fmt.Sprintf("OS reload on the server id %d with stemcell %d", virtualGuest.Id, stemcell.ID()))
 
-	vm := NewSoftLayerVM(virtualGuest.Id, c.softLayerClient, util.GetSshClient(), c.logger)
+	vm, _, _ := c.vmFinder.Find(virtualGuest.Id)
 
 	bslcommon.TIMEOUT = 4 * time.Hour
 	err = vm.ReloadOS(stemcell)
@@ -228,7 +227,6 @@ func (c SoftLayerCreator) CreateByOSReload(agentID string, stemcell bslcstem.Ste
 
 	softlayerFileService := NewSoftlayerFileService(util.GetSshClient(), vm, c.logger, c.uuidGenerator, c.fs)
 	agentEnvService := c.agentEnvServiceFactory.New(softlayerFileService, strconv.Itoa(virtualGuest.Id))
-	vm.SetAgentEnvService(agentEnvService)
 
 	if len(cloudProps.BoshIp) == 0 {
 		// update /etc/hosts file of bosh-init vm
@@ -346,7 +344,7 @@ func (c SoftLayerCreator) CreateBaremetal(server_name string, stemcell string, n
 		return 0, bosherr.WrapErrorf(err, "Faled to call BPS")
 	}
 
-	fmt.Println(string(body))
+        c.logger.Info(SOFTLAYER_VM_CREATOR_LOG_TAG, fmt.Sprintf("Returns from BPS: %", string(body)))
 
 	var result map[string]interface{}
 
@@ -363,7 +361,7 @@ func (c SoftLayerCreator) CreateBaremetal(server_name string, stemcell string, n
 		if body, err = util.CallBPS("GET", "/task/"+task_id+"/json/task", ""); err != nil {
 			return 0, bosherr.WrapErrorf(err, "Faled to call BPS")
 		}
-		fmt.Println(string(body))
+                c.logger.Info(SOFTLAYER_VM_CREATOR_LOG_TAG, fmt.Sprintf("Returns from BPS: %", string(body)))
 		if err = json.Unmarshal(body, &result); err != nil {
 			return 0, bosherr.WrapErrorf(err, "Faled to call BPS")
 		}
@@ -373,7 +371,6 @@ func (c SoftLayerCreator) CreateBaremetal(server_name string, stemcell string, n
 			continue
 		}
 		state := info["status"].(string)
-		fmt.Println("Status: " + state)
 		if state == "failed" {
 			return 0, bosherr.Errorf("Failed to install the stemcell: " + string(body))
 		}
@@ -386,7 +383,7 @@ func (c SoftLayerCreator) CreateBaremetal(server_name string, stemcell string, n
 			}
 			data = result["data"].(map[string]interface{})
 			info = data["info"].(map[string]interface{})
-			return info["id"].(int), nil
+                        return int(info["id"].(float64)), nil
 		}
 	}
 	return 0, bosherr.Errorf("Failed to install the stemcell: ")

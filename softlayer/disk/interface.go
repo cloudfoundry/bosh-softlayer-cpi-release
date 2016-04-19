@@ -5,7 +5,7 @@ type DiskCloudProperties struct {
 }
 
 type Creator interface {
-	Create(size int, cloudProp DiskCloudProperties, virtualGuestId int) (Disk, error)
+	Create(size int, cloudProp DiskCloudProperties, datacenter_id int) (Disk, error)
 }
 
 type Finder interface {
