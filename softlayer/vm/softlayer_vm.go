@@ -80,17 +80,7 @@ func NewSoftLayerVM(id int, softLayerClient sl.Client, sshClient util.SshClient,
 func (vm SoftLayerVM) ID() int { return vm.id }
 
 func (vm SoftLayerVM) Delete(agentID string) error {
-        if vm.is_vm {
-		return vm.DeleteVM()
-	} else {
-		body, err := util.CallBPS("PUT", "/baremetal/"+strconv.Itoa(vm.ID())+"/bm.state.deleted", "")
-		if err != nil {
-			return bosherr.WrapErrorf(err, "Faled to call BPS to delete baremetal:" + string(body))
-		}
-		command := "rm -f /var/vcap/bosh/*.json ; sv stop agent"
-		_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryIP(), command)
-		return err
-	}
+	return vm.DeleteVM()
 }
 
 func (vm SoftLayerVM) DeleteVM() error {
@@ -400,7 +390,7 @@ func (vm SoftLayerVM) extractTagsFromVMMetadata(vmMetadata VMMetadata) ([]string
 	tags := []string{}
 	status := ""
 	for key, value := range vmMetadata {
-		if key == "compiling" || key == "job" || key == "index" || key == "deployment" {
+		if key == "compiling" || key == "job" || key == "index" || key == "deployment" || key == "deleted" {
 			stringValue, err := value.(string)
 			if !err {
 				return []string{}, bosherr.Errorf("Cannot convert tags metadata value `%v` to string", value)
