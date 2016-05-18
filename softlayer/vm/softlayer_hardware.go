@@ -34,6 +34,7 @@ const (
 
 type SoftLayerHardware struct {
 	id           int
+	hardware  datatypes.SoftLayer_Hardware
 
 	softLayerClient sl.Client
 	agentEnvService AgentEnvService
@@ -47,9 +48,14 @@ func NewSoftLayerHardware(id int, softLayerClient sl.Client, sshClient util.SshC
 	bslcommon.TIMEOUT = 60 * time.Minute
 	bslcommon.POLLING_INTERVAL = 10 * time.Second
 
+	hardware, err := bslcommon.GetObjectDetailsOnHardware(softLayerClient, id)
+	if err != nil {
+		return SoftLayerHardware{}
+	}
 
 	return SoftLayerHardware{
 		id:           id,
+		hardware:     hardware,
 
 		softLayerClient: softLayerClient,
 		agentEnvService: agentEnvService,
@@ -118,27 +124,16 @@ func (vm SoftLayerHardware) AttachDisk(disk bslcdisk.Disk) error {
 	volume, err := vm.fetchIscsiVolume(disk.ID())
 	if err != nil {
 		return bosherr.WrapError(err, fmt.Sprintf("Failed to fetch disk `%d`", disk.ID()))
-       }
+        }
 
-	var allowed bool
-	networkStorageService, err := vm.softLayerClient.GetSoftLayer_Network_Storage_Service()
-	if err != nil {
-		return bosherr.WrapError(err, "Cannot get network storage service.")
-	}
-       if vm.is_vm {
-		allowed, err = networkStorageService.HasAllowedVirtualGuest(disk.ID(), vm.ID())
-	} else {
-		allowed, err = bslcommon.IscsiHasAllowedHardware( vm.softLayerClient, disk.ID(), vm.ID())
-	}
+	allowed, err := bslcommon.IscsiHasAllowedHardware( vm.softLayerClient, disk.ID(), vm.ID())
+
 	totalTime := time.Duration(0)
 	if err == nil && allowed == false {
 		for totalTime < bslcommon.TIMEOUT {
-			var allowable bool
-                        if vm.is_vm {
-				allowable, err = networkStorageService.AttachIscsiVolume(vm.virtualGuest, disk.ID())
-                        } else {
-                                allowable, err = bslcommon.AttachHardwareIscsiVolume(vm.softLayerClient, vm.hardware, disk.ID())
-			}
+
+			allowable, err := bslcommon.AttachHardwareIscsiVolume(vm.softLayerClient, vm.hardware, disk.ID())
+
 			if err != nil {
 				if !strings.Contains(err.Error(), "HTTP error code") {
 					return bosherr.WrapError(err, fmt.Sprintf("Granting volume access to vitrual guest %d", vm.ID()))
@@ -264,14 +259,12 @@ func (vm SoftLayerHardware) GetPrimaryIP() string {
 }
 
 func (vm SoftLayerHardware) GetRootPassword() string {
-
 	passwords := vm.hardware.OperatingSystem.Passwords
 	for _, password := range passwords {
 		if password.Username == ROOT_USER_NAME {
 			return password.Password
 		}
 	}
-
 	return ""
 }
 
@@ -285,39 +278,13 @@ func (vm SoftLayerHardware) SetVcapPassword(encryptedPwd string) (err error) {
 }
 
 // Private methods
-func (vm SoftLayerHardware) extractTagsFromVMMetadata(vmMetadata VMMetadata) ([]string, error) {
-	tags := []string{}
-	status := ""
-	for key, value := range vmMetadata {
-		if key == "compiling" || key == "job" || key == "index" || key == "deployment" {
-			stringValue, err := value.(string)
-			if !err {
-				return []string{}, bosherr.Errorf("Cannot convert tags metadata value `%v` to string", value)
-			}
-
-			if status == "" {
-				status = key + ":" + stringValue
-			} else {
-				status = status + "," + key + ":" + stringValue
-			}
-		}
-		tags = vm.parseTags(status)
-	}
-
-	return tags, nil
-}
-
-func (vm SoftLayerHardware) parseTags(value string) []string {
-	return strings.Split(value, ",")
-}
-
 func (vm SoftLayerHardware) waitForVolumeAttached(volume datatypes.SoftLayer_Network_Storage, hasMultiPath bool) (string, error) {
 
 	oldDisks, err := vm.getIscsiDeviceNamesBasedOnShellScript(hasMultiPath)
 	if err != nil {
 		return "", bosherr.WrapError(err, fmt.Sprintf("Failed to get devices names from virtual guest `%d`", vm.ID()))
 	}
-	if vm.is_vm && len(oldDisks) > 2 {
+	if len(oldDisks) > 2 {
 		return "", bosherr.Error(fmt.Sprintf("Too manay persistent disks attached to virtual guest `%d`", vm.ID()))
 	}
 
