@@ -27,8 +27,8 @@ var _ = Describe("SoftLayerDisk", func() {
 	Describe("Delete", func() {
 		It("deletes an iSCSI disk successfully", func() {
 			fileNames := []string{
-				"SoftLayer_Account_Service_getIscsiVolume.json",
-				"SoftLayer_Billing_Item_Cancellation_Request_Service_createObject.json",
+				"SoftLayer_Network_Storage_Service_getBillingItem.json",
+				"SoftLayer_Billing_Item_Service_cancelService.json",
 			}
 			testhelpers.SetTestFixturesForFakeSoftLayerClient(fc, fileNames)
 

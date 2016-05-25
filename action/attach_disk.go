@@ -5,7 +5,6 @@ import (
 
 	bslcdisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk"
 	bslcvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
-	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 )
 
 const (
@@ -15,14 +14,12 @@ const (
 type AttachDisk struct {
 	vmFinder   bslcvm.Finder
 	diskFinder bslcdisk.Finder
-	logger         boshlog.Logger
 }
 
-func NewAttachDisk(vmFinder bslcvm.Finder, diskFinder bslcdisk.Finder, logger boshlog.Logger) AttachDisk {
+func NewAttachDisk(vmFinder bslcvm.Finder, diskFinder bslcdisk.Finder) AttachDisk {
 	return AttachDisk{
 		vmFinder:   vmFinder,
 		diskFinder: diskFinder,
-		logger: logger,
 	}
 }
 

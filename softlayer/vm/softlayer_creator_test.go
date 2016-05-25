@@ -33,6 +33,7 @@ var _ = Describe("SoftLayerCreator", func() {
 		agentEnvServiceFactory *fakevm.FakeAgentEnvServiceFactory
 		fs                     *fakesys.FakeFileSystem
 		uuidGenerator          *fakeuuid.FakeGenerator
+		vmFinder               *fakevm.FakeFinder
 		agentOptions           AgentOptions
 		logger                 boshlog.Logger
 		creator                SoftLayerCreator
@@ -46,6 +47,7 @@ var _ = Describe("SoftLayerCreator", func() {
 		agentEnvServiceFactory = &fakevm.FakeAgentEnvServiceFactory{}
 		agentOptions = AgentOptions{Mbus: "fake-mbus"}
 		logger = boshlog.NewLogger(boshlog.LevelNone)
+		vmFinder = &fakevm.FakeFinder{}
 
 		creator = NewSoftLayerCreator(
 			softLayerClient,
@@ -54,12 +56,12 @@ var _ = Describe("SoftLayerCreator", func() {
 			logger,
 			uuidGenerator,
 			fs,
+			vmFinder,
 		)
 		bslcommon.TIMEOUT = 2 * time.Second
 		bslcommon.POLLING_INTERVAL = 1 * time.Second
 
 		os.Setenv("OS_RELOAD_ENABLED", "FALSE")
-		os.Setenv("SQLITE_DB_FOLDER", "/tmp")
 	})
 
 	Describe("#Create", func() {
@@ -78,6 +80,7 @@ var _ = Describe("SoftLayerCreator", func() {
 				networks = Networks{}
 				env = Environment{}
 
+				vmFinder.FindVM = fakevm.NewFakeVM(1234567)
 			})
 
 			It("returns a new SoftLayerVM with ephemeral size", func() {
@@ -200,6 +203,8 @@ var _ = Describe("SoftLayerCreator", func() {
 					networks = Networks{}
 					env = Environment{}
 
+					vmFinder.FindVM = fakevm.NewFakeVM(1234567)
+
 					setFakeSoftLayerClientCreateObjectTestFixturesWithEphemeralDiskSize(softLayerClient)
 				})
 
@@ -250,6 +255,7 @@ func setFakeSoftLayerClientCreateObjectTestFixturesWithEphemeralDiskSize(fakeSof
 		"SoftLayer_Virtual_Guest_Service_getPowerState.json",
 
 		"SoftLayer_Virtual_Guest_Service_getObject.json",
+		"SoftLayer_Virtual_Guest_Service_getObject.json",
 	}
 	testhelpers.SetTestFixturesForFakeSoftLayerClient(fakeSoftLayerClient, fileNames)
 }
@@ -260,6 +266,7 @@ func setFakeSoftLayerClientCreateObjectTestFixturesWithoutEphemeralDiskSize(fake
 
 		"SoftLayer_Virtual_Guest_Service_getLastTransaction.json",
 
+		"SoftLayer_Virtual_Guest_Service_getObject.json",
 		"SoftLayer_Virtual_Guest_Service_getObject.json",
 	}
 	testhelpers.SetTestFixturesForFakeSoftLayerClient(fakeSoftLayerClient, fileNames)
@@ -277,6 +284,7 @@ func setFakeSoftLayerClientCreateObjectTestFixturesWithoutBoshIP(fakeSoftLayerCl
 		"SoftLayer_Virtual_Guest_Service_getLastTransaction_CloudInstanceUpgrade.json",
 		"SoftLayer_Virtual_Guest_Service_getPowerState.json",
 
+		"SoftLayer_Virtual_Guest_Service_getObject.json",
 		"SoftLayer_Virtual_Guest_Service_getObject.json",
 	}
 	testhelpers.SetTestFixturesForFakeSoftLayerClient(fakeSoftLayerClient, fileNames)

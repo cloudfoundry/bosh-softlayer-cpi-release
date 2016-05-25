@@ -67,7 +67,7 @@ func (b EstablishBareMetalEnv) Run() (interface{}, error) {
 	for step := 1; baremetal.ProvisionDate == nil || step >= MAX_RETRIES; step++ {
 		time.Sleep(60 * time.Second)
 
-		baremetal, err = b.bmFinder.Find(baremetal.GlobalIdentifier)
+		baremetal, err = b.bmFinder.Find(baremetal.Id)
 		if err != nil {
 			return nil, bosherr.WrapErrorf(err, "Cannot find the baremetal server of id: %s", baremetal.GlobalIdentifier)
 		}

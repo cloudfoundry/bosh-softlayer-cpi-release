@@ -2,7 +2,6 @@ package vm
 
 import (
 	"bytes"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -24,17 +23,12 @@ import (
 
 	util "github.com/cloudfoundry/bosh-softlayer-cpi/util"
 	datatypes "github.com/maximilien/softlayer-go/data_types"
-
-)
-
-const (
-	SOFTLAYER_HARDWARE_LOG_TAG = "SoftLayerHardware"
-	ROOT_USER_NAME             = "root"
 )
 
 type SoftLayerHardware struct {
-	id           int
-	hardware  datatypes.SoftLayer_Hardware
+	id int
+
+	hardware datatypes.SoftLayer_Hardware
 
 	softLayerClient sl.Client
 	agentEnvService AgentEnvService
@@ -44,18 +38,18 @@ type SoftLayerHardware struct {
 	logger boshlog.Logger
 }
 
-func NewSoftLayerHardware(id int, softLayerClient sl.Client, sshClient util.SshClient, agentEnvService AgentEnvService, logger boshlog.Logger) SoftLayerHardware {
+func NewSoftLayerHardware(id int, softLayerClient sl.Client, sshClient util.SshClient, agentEnvService AgentEnvService, logger boshlog.Logger) VM {
 	bslcommon.TIMEOUT = 60 * time.Minute
 	bslcommon.POLLING_INTERVAL = 10 * time.Second
 
 	hardware, err := bslcommon.GetObjectDetailsOnHardware(softLayerClient, id)
 	if err != nil {
-		return SoftLayerHardware{}
+		return &SoftLayerHardware{}
 	}
 
-	return SoftLayerHardware{
-		id:           id,
-		hardware:     hardware,
+	return &SoftLayerHardware{
+		id:       id,
+		hardware: hardware,
 
 		softLayerClient: softLayerClient,
 		agentEnvService: agentEnvService,
@@ -69,31 +63,16 @@ func NewSoftLayerHardware(id int, softLayerClient sl.Client, sshClient util.SshC
 func (vm SoftLayerHardware) ID() int { return vm.id }
 
 func (vm SoftLayerHardware) Delete(agentID string) error {
-	body, err := util.CallBPS("PUT", "/baremetal/"+strconv.Itoa(vm.ID())+"/bm.state.deleted", "")
+	body, err := util.CallBPS("PUT", "/baremetal/"+strconv.Itoa(vm.id)+"/bm.state.deleted", "")
 	if err != nil {
-		return bosherr.WrapErrorf(err, "Faled to call BPS to delete baremetal:" + string(body))
+		return bosherr.WrapErrorf(err, "Faled to call BPS to delete baremetal:"+string(body))
 	}
 	command := "rm -f /var/vcap/bosh/*.json ; sv stop agent"
 	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryIP(), command)
 	return err
-
 }
 
 func (vm SoftLayerHardware) Reboot() error {
-	virtualGuestService, err := vm.softLayerClient.GetSoftLayer_Virtual_Guest_Service()
-	if err != nil {
-		return bosherr.WrapError(err, "Creating SoftLayer VirtualGuestService from client")
-	}
-
-	rebooted, err := virtualGuestService.RebootSoft(vm.ID())
-	if err != nil {
-		return bosherr.WrapError(err, "Rebooting (soft) SoftLayer VirtualGuest from client")
-	}
-
-	if !rebooted {
-		return bosherr.WrapError(nil, "Did not reboot (soft) SoftLayer VirtualGuest from client")
-	}
-
 	return nil
 }
 
@@ -124,9 +103,9 @@ func (vm SoftLayerHardware) AttachDisk(disk bslcdisk.Disk) error {
 	volume, err := vm.fetchIscsiVolume(disk.ID())
 	if err != nil {
 		return bosherr.WrapError(err, fmt.Sprintf("Failed to fetch disk `%d`", disk.ID()))
-        }
+	}
 
-	allowed, err := bslcommon.IscsiHasAllowedHardware( vm.softLayerClient, disk.ID(), vm.ID())
+	allowed, err := bslcommon.IscsiHasAllowedHardware(vm.softLayerClient, disk.ID(), vm.ID())
 
 	totalTime := time.Duration(0)
 	if err == nil && allowed == false {
@@ -136,7 +115,7 @@ func (vm SoftLayerHardware) AttachDisk(disk bslcdisk.Disk) error {
 
 			if err != nil {
 				if !strings.Contains(err.Error(), "HTTP error code") {
-					return bosherr.WrapError(err, fmt.Sprintf("Granting volume access to vitrual guest %d", vm.ID()))
+					return bosherr.WrapError(err, fmt.Sprintf("Granting volume access to hardware %d", vm.ID()))
 				}
 			} else {
 				if allowable {
@@ -192,7 +171,7 @@ func (vm SoftLayerHardware) DetachDisk(disk bslcdisk.Disk) error {
 		return bosherr.WrapError(err, fmt.Sprintf("Failed to get multipath information from virtual guest `%d`", vm.ID()))
 	}
 
-	err = vm.detachVolumeBasedOnShellScript(vm.virtualGuest, volume, hasMultiPath)
+	err = vm.detachVolumeBasedOnShellScript(vm.hardware, volume, hasMultiPath)
 	if err != nil {
 		return bosherr.WrapErrorf(err, "Failed to detach volume with id %d from virtual guest with id: %d.", volume.Id, vm.ID())
 	}
@@ -204,7 +183,7 @@ func (vm SoftLayerHardware) DetachDisk(disk bslcdisk.Disk) error {
 
 	allowed, err := networkStorageService.HasAllowedVirtualGuest(disk.ID(), vm.ID())
 	if err == nil && allowed == true {
-		err = networkStorageService.DetachIscsiVolume(vm.virtualGuest, disk.ID())
+		//err = networkStorageService.DetachIscsiVolume(vm.hardware, disk.ID())
 	}
 	if err != nil {
 		return bosherr.WrapError(err, fmt.Sprintf("Failed to revoke access of disk `%d` from virtual gusest `%d`", disk.ID(), vm.ID()))
@@ -385,7 +364,7 @@ func (vm SoftLayerHardware) getIscsiDeviceNamesBasedOnShellScript(hasMultiPath b
 		if strings.Contains(result, "No devices found") {
 			return devices, nil
 		}
-		vm.logger.Info(SOFTLAYER_HARDWARE_LOG_TAG, fmt.Sprintf("Devices on VM %d: %s", vm.ID(), result))
+		vm.logger.Info(SOFTLAYER_HARDWARE_LOG_TAG, fmt.Sprintf("Devices on hardware %d: %s", vm.ID(), result))
 		lines := strings.Split(strings.Trim(result, "\n"), "\n")
 		for i := 0; i < len(lines); i++ {
 			if match, _ := regexp.MatchString("-part1", lines[i]); !match {
@@ -398,7 +377,7 @@ func (vm SoftLayerHardware) getIscsiDeviceNamesBasedOnShellScript(hasMultiPath b
 			return devices, err
 		}
 
-		vm.logger.Info(SOFTLAYER_HARDWARE_LOG_TAG, fmt.Sprintf("Devices on VM %d: %s", vm.ID(), result))
+		vm.logger.Info(SOFTLAYER_HARDWARE_LOG_TAG, fmt.Sprintf("Devices on hardware %d: %s", vm.ID(), result))
 		lines := strings.Split(strings.Trim(result, "\n"), "\n")
 		for i := 0; i < len(lines); i++ {
 			if match, _ := regexp.MatchString("sd[a-z]$", lines[i]); match {
@@ -427,7 +406,7 @@ func (vm SoftLayerHardware) fetchIscsiVolume(volumeId int) (datatypes.SoftLayer_
 
 func (vm SoftLayerHardware) getAllowedHostCredential() (AllowedHostCredential, error) {
 
-	allowedHost, err := bslcommon.GetHardwareAllowedHost( vm.softLayerClient, vm.ID() )
+	allowedHost, err := bslcommon.GetHardwareAllowedHost(vm.softLayerClient, vm.ID())
 
 	if allowedHost.Id == 0 {
 		return AllowedHostCredential{}, bosherr.Errorf("Cannot get allowed host with instance id: %d", vm.ID())
@@ -532,29 +511,9 @@ func (vm SoftLayerHardware) writeOpenIscsiConfBasedOnShellScript(volume datatype
 	return true, nil
 }
 
-const etcIscsidConfTemplate = `# Generated by bosh-agent
-node.startup = automatic
-node.session.auth.authmethod = CHAP
-node.session.auth.username = {{.Username}}
-node.session.auth.password = {{.Password}}
-discovery.sendtargets.auth.authmethod = CHAP
-discovery.sendtargets.auth.username = {{.Username}}
-discovery.sendtargets.auth.password = {{.Password}}
-node.session.timeo.replacement_timeout = 120
-node.conn[0].timeo.login_timeout = 15
-node.conn[0].timeo.logout_timeout = 15
-node.conn[0].timeo.noop_out_interval = 10
-node.conn[0].timeo.noop_out_timeout = 15
-node.session.iscsi.InitialR2T = No
-node.session.iscsi.ImmediateData = Yes
-node.session.iscsi.FirstBurstLength = 262144
-node.session.iscsi.MaxBurstLength = 16776192
-node.conn[0].iscsi.MaxRecvDataSegmentLength = 65536
-`
-
-func (vm SoftLayerHardware) detachVolumeBasedOnShellScript(virtualGuest datatypes.SoftLayer_Virtual_Guest, volume datatypes.SoftLayer_Network_Storage, hasMultiPath bool) error {
+func (vm SoftLayerHardware) detachVolumeBasedOnShellScript(hardware datatypes.SoftLayer_Hardware, volume datatypes.SoftLayer_Network_Storage, hasMultiPath bool) error {
 	// umount /var/vcap/store in case read-only mount
-	isMounted, err := vm.isMountPoint(virtualGuest, "/var/vcap/store")
+	isMounted, err := vm.isMountPoint(hardware, "/var/vcap/store")
 	if err != nil {
 		return bosherr.WrapError(err, "check mount point /var/vcap/store")
 	}
@@ -649,18 +608,6 @@ func (vm SoftLayerHardware) findOpenIscsiPortalsBasedOnShellScript(virtualGuest 
 	return portals, nil
 }
 
-func (vm SoftLayerHardware) getRootPassword(virtualGuest datatypes.SoftLayer_Virtual_Guest) string {
-	passwords := virtualGuest.OperatingSystem.Passwords
-
-	for _, password := range passwords {
-		if password.Username == ROOT_USER_NAME {
-			return password.Password
-		}
-	}
-
-	return ""
-}
-
 func (vm SoftLayerHardware) postCheckActiveTransactionsForOSReload(softLayerClient sl.Client) error {
 	virtualGuestService, err := softLayerClient.GetSoftLayer_Virtual_Guest_Service()
 	if err != nil {
@@ -701,7 +648,7 @@ func (vm SoftLayerHardware) postCheckActiveTransactionsForOSReload(softLayerClie
 	return nil
 }
 
-func (vm SoftLayerHardware) isMountPoint(virtualGuest datatypes.SoftLayer_Virtual_Guest, path string) (bool, error) {
+func (vm SoftLayerHardware) isMountPoint(virtualGuest datatypes.SoftLayer_Hardware, path string) (bool, error) {
 	mounts, err := vm.searchMounts(virtualGuest)
 	if err != nil {
 		return false, bosherr.WrapError(err, "Searching mounts")
@@ -716,7 +663,7 @@ func (vm SoftLayerHardware) isMountPoint(virtualGuest datatypes.SoftLayer_Virtua
 	return false, nil
 }
 
-func (vm SoftLayerHardware) searchMounts(virtualGuest datatypes.SoftLayer_Virtual_Guest) ([]Mount, error) {
+func (vm SoftLayerHardware) searchMounts(virtualGuest datatypes.SoftLayer_Hardware) ([]Mount, error) {
 	var mounts []Mount
 	stdout, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryIP(), "mount")
 	if err != nil {
@@ -751,7 +698,7 @@ func (vm SoftLayerHardware) uploadFile(srcFile string, destFile string) error {
 	return err
 }
 
-func (vm SoftLayerHardware) downloadFile(srcFile string, destFile string) error {
-	err := vm.sshClient.DownloadFile(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryIP(), srcFile, destFile)
+func (hardware SoftLayerHardware) downloadFile(srcFile string, destFile string) error {
+	err := hardware.sshClient.DownloadFile(ROOT_USER_NAME, hardware.GetRootPassword(), hardware.GetPrimaryIP(), srcFile, destFile)
 	return err
 }

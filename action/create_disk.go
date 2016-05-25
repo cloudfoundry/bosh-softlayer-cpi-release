@@ -9,7 +9,7 @@ import (
 
 type CreateDisk struct {
 	diskCreator bslcdisk.Creator
-	vmFinder bslcvm.Finder
+	vmFinder    bslcvm.Finder
 }
 
 func NewCreateDisk(vmFinder bslcvm.Finder, diskCreator bslcdisk.Creator) CreateDisk {
@@ -19,7 +19,7 @@ func NewCreateDisk(vmFinder bslcvm.Finder, diskCreator bslcdisk.Creator) CreateD
 func (a CreateDisk) Run(size int, cloudProps bslcdisk.DiskCloudProperties, instanceId VMCID) (string, error) {
 	vm, found, err := a.vmFinder.Find(int(instanceId))
 
-	if err != nil || ! found {
+	if err != nil || !found {
 		return "0", bosherr.WrapErrorf(err, "Not Finding vm '%s'", instanceId)
 	}
 

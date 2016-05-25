@@ -34,7 +34,6 @@ var _ = Describe("SoftLayerCreator", func() {
 		Context("Creates disk successfully", func() {
 			BeforeEach(func() {
 				fileNames := []string{
-					"SoftLayer_Virtual_Guest_Service_getObject.json",
 					"SoftLayer_Product_Order_Service_getItemPrices.json",
 					"SoftLayer_Product_Order_Service_placeOrder.json",
 					"SoftLayer_Account_Service_getIscsiVolume.json",

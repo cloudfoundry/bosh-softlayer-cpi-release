@@ -1,11 +1,13 @@
 package vm
 
 import (
-        "strconv"   
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	boshsys "github.com/cloudfoundry/bosh-utils/system"
 	boshuuid "github.com/cloudfoundry/bosh-utils/uuid"
+	"strconv"
+
+	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 
 	util "github.com/cloudfoundry/bosh-softlayer-cpi/util"
 	sl "github.com/maximilien/softlayer-go/softlayer"
@@ -32,15 +34,22 @@ func NewSoftLayerFinder(softLayerClient sl.Client, agentEnvServiceFactory AgentE
 }
 
 func (f SoftLayerFinder) Find(vmID int) (VM, bool, error) {
-	softlayerFileService := NewSoftlayerFileService1(util.GetSshClient(), f.logger, f.uuidGenerator, f.fs)
+	softlayerFileService := NewSoftlayerFileService(util.GetSshClient(), f.logger, f.uuidGenerator, f.fs)
 	agentEnvService := f.agentEnvServiceFactory.New(softlayerFileService, strconv.Itoa(vmID))
-	vm := NewSoftLayerVM(vmID, f.softLayerClient, util.GetSshClient(), agentEnvService, f.logger)
-f.logger.Debug(SOFTLAYER_VM_FINDER_LOG_TAG, "Object Jimmy attachdisk 44 %v ", vm)
-	if vm.ID() == 0 {
-		return SoftLayerVM{}, false, bosherr.Errorf("Failed to find VM or Baremetal %d", vmID)
-	}
-        softlayerFileService.SetVM( vm )
-f.logger.Debug(SOFTLAYER_VM_FINDER_LOG_TAG, "Object Jimmy attachdisk 55 %v ", vm)
 
+	_, err := bslcommon.GetObjectDetailsOnVirtualGuest(f.softLayerClient, vmID)
+	if err != nil {
+		_, err := bslcommon.GetObjectDetailsOnHardware(f.softLayerClient, vmID)
+		if err != nil {
+			return SoftLayerHardware{}, false, bosherr.Errorf("Failed to find VM or Baremetal %d", vmID)
+		}
+		vm := NewSoftLayerHardware(vmID, f.softLayerClient, util.GetSshClient(), agentEnvService, f.logger)
+		softlayerFileService.SetVM(vm)
+		return vm, true, nil
+	}
+
+	vm := NewSoftLayerVirtualGuest(vmID, f.softLayerClient, util.GetSshClient(), agentEnvService, f.logger)
+
+	softlayerFileService.SetVM(vm)
 	return vm, true, nil
 }

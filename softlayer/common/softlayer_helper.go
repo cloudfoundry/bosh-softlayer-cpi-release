@@ -1,23 +1,22 @@
 package common
 
 import (
-	"encoding/base64"
+	"bytes"
+	"encoding/json"
+	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
-        "fmt"
-        "bytes"
-        "encoding/json"
-        "errors"
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	boshretry "github.com/cloudfoundry/bosh-utils/retrystrategy"
 	"github.com/pivotal-golang/clock"
 
+	slcommon "github.com/maximilien/softlayer-go/common"
 	datatypes "github.com/maximilien/softlayer-go/data_types"
 	sl "github.com/maximilien/softlayer-go/softlayer"
-        slcommon "github.com/maximilien/softlayer-go/common"
 )
 
 var (
@@ -56,11 +55,11 @@ func IscsiHasAllowedHardware(softLayerClient sl.Client, volumeId int, hardwareId
 }
 
 func AttachHardwareIscsiVolume(softLayerClient sl.Client, hardware datatypes.SoftLayer_Hardware, volumeId int) (bool, error) {
-        parameters := SoftLayer_Hardware_Parameters{
-                Parameters: []datatypes.SoftLayer_Hardware{
-                        hardware,
-                },
-        }
+	parameters := SoftLayer_Hardware_Parameters{
+		Parameters: []datatypes.SoftLayer_Hardware{
+			hardware,
+		},
+	}
 	requestBody, err := json.Marshal(parameters)
 	if err != nil {
 		return false, err
@@ -128,7 +127,6 @@ func GetHardwareAllowedHost(softLayerClient sl.Client, instanceId int) (datatype
 
 	return allowedHost, nil
 }
-
 
 func AttachEphemeralDiskToVirtualGuest(softLayerClient sl.Client, virtualGuestId int, diskSize int, logger boshlog.Logger) error {
 	err := WaitForVirtualGuestLastCompleteTransaction(softLayerClient, virtualGuestId, "Service Setup")
@@ -436,7 +434,7 @@ func GetObjectDetailsOnHardware(softLayerClient sl.Client, hardwareId int) (data
 	if err != nil {
 		return datatypes.SoftLayer_Hardware{}, bosherr.WrapError(err, "Cannot get softlayer hardeare service.")
 	}
-	hardware, err := hardwareService.GetObject(strconv.Itoa(hardwareId))
+	hardware, err := hardwareService.GetObject(hardwareId)
 	if err != nil {
 		return datatypes.SoftLayer_Hardware{}, bosherr.WrapErrorf(err, "Cannot get hardware with id: %d", hardwareId)
 	}

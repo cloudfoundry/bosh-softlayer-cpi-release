@@ -95,6 +95,7 @@ var _ = Describe("concreteFactory", func() {
 				logger,
 				uuidGenerator,
 				fs,
+				vmFinder,
 			)
 
 			action, err := factory.Create("create_vm")
@@ -161,7 +162,7 @@ var _ = Describe("concreteFactory", func() {
 		It("creates an iSCSI disk", func() {
 			action, err := factory.Create("create_disk")
 			Expect(err).ToNot(HaveOccurred())
-			Expect(action).To(Equal(NewCreateDisk(diskCreator)))
+			Expect(action).To(Equal(NewCreateDisk(vmFinder, diskCreator)))
 		})
 
 		It("deletes the detached iSCSI disk", func() {

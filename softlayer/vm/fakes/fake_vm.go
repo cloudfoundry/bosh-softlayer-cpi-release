@@ -37,7 +37,7 @@ func NewFakeVM(id int) *FakeVM {
 	return &FakeVM{id: id}
 }
 
-func (vm FakeVM) ID() int { return vm.id }
+func (vm *FakeVM) ID() int { return vm.id }
 
 func (vm *FakeVM) Delete(agentID string) error {
 	vm.DeleteCalled = true
@@ -74,4 +74,20 @@ func (vm *FakeVM) DetachDisk(disk bslcdisk.Disk) error {
 func (vm *FakeVM) ReloadOS(stemcell bslcstemcell.Stemcell) error {
 	vm.ReloadOSStemcell = stemcell
 	return vm.ReloadOSErr
+}
+
+func (vm *FakeVM) GetDataCenterId() int {
+	return 1234
+}
+
+func (vm *FakeVM) GetPrimaryIP() string {
+	return "127.0.0.1"
+}
+
+func (vm *FakeVM) GetRootPassword() string {
+	return "password"
+}
+
+func (vm *FakeVM) SetVcapPassword(encryptedPwd string) error {
+	return nil
 }

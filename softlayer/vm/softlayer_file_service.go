@@ -12,7 +12,7 @@ import (
 )
 
 type SoftlayerFileService interface {
-	SetVM( VM )
+	SetVM(VM)
 	Upload(string, []byte) error
 	Download(string) ([]byte, error)
 }
@@ -26,18 +26,7 @@ type softlayerFileService struct {
 	fs            boshsys.FileSystem
 }
 
-func NewSoftlayerFileService(sshClient util.SshClient, vm VM, logger boshlog.Logger, uuidGenerator boshuuid.Generator, fs boshsys.FileSystem) SoftlayerFileService {
-        return &softlayerFileService{
-                sshClient:     sshClient,
-		vm:		vm,
-                logger:        logger,
-                logTag:        "softlayerFileService",
-                uuidGenerator: uuidGenerator,
-                fs:            fs,
-        }
-}
-
-func NewSoftlayerFileService1(sshClient util.SshClient, logger boshlog.Logger, uuidGenerator boshuuid.Generator, fs boshsys.FileSystem) SoftlayerFileService {
+func NewSoftlayerFileService(sshClient util.SshClient, logger boshlog.Logger, uuidGenerator boshuuid.Generator, fs boshsys.FileSystem) SoftlayerFileService {
 	return &softlayerFileService{
 		sshClient:     sshClient,
 		logger:        logger,
