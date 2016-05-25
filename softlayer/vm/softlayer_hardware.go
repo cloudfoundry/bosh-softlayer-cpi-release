@@ -237,6 +237,10 @@ func (vm SoftLayerHardware) GetPrimaryIP() string {
 	return vm.hardware.PrimaryIpAddress
 }
 
+func (vm SoftLayerHardware) GetPrimaryBackendIP() string {
+	return vm.hardware.PrimaryBackendIpAddress
+}
+
 func (vm SoftLayerHardware) GetRootPassword() string {
 	passwords := vm.hardware.OperatingSystem.Passwords
 	for _, password := range passwords {

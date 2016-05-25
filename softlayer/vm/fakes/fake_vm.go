@@ -84,6 +84,10 @@ func (vm *FakeVM) GetPrimaryIP() string {
 	return "127.0.0.1"
 }
 
+func (vm *FakeVM) GetPrimaryBackendIP() string {
+	return "10.0.0.1"
+}
+
 func (vm *FakeVM) GetRootPassword() string {
 	return "password"
 }

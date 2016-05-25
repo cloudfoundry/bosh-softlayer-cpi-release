@@ -71,7 +71,9 @@ type VM interface {
 	GetDataCenterId() int
 
 	GetPrimaryIP() string
+	GetPrimaryBackendIP() string
 	GetRootPassword() string
+
 	SetVcapPassword(string) error
 }
 

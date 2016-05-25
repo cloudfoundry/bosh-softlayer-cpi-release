@@ -54,15 +54,14 @@ func NewSoftLayerCreator(softLayerClient sl.Client, agentEnvServiceFactory Agent
 }
 
 func (c SoftLayerCreator) CreateByBPS(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
-	var server_id int
-	var err error
-	if server_id, err = c.CreateBaremetal(cloudProps.VmNamePrefix, cloudProps.BaremetalStemcell, cloudProps.BaremetalNetbootImage); err != nil {
+	hardwareId, err := c.CreateBaremetal(cloudProps.VmNamePrefix, cloudProps.BaremetalStemcell, cloudProps.BaremetalNetbootImage)
+	if err != nil {
 		return SoftLayerHardware{}, bosherr.WrapError(err, "Create baremetal error")
 	}
 
-	hardware, _, _ := c.vmFinder.Find(server_id)
+	hardware, _, _ := c.vmFinder.Find(hardwareId)
 	softlayerFileService := NewSoftlayerFileService(util.GetSshClient(), c.logger, c.uuidGenerator, c.fs)
-	agentEnvService := c.agentEnvServiceFactory.New(softlayerFileService, strconv.Itoa(server_id))
+	agentEnvService := c.agentEnvServiceFactory.New(softlayerFileService, strconv.Itoa(hardwareId))
 
 	// Update mbus url setting
 	mbus, err := c.parseMbusURL(c.agentOptions.Mbus, cloudProps.BoshIp)
@@ -79,7 +78,7 @@ func (c SoftLayerCreator) CreateByBPS(agentID string, stemcell bslcstem.Stemcell
 
 	agentEnv := CreateAgentUserData(agentID, cloudProps, networks, env, c.agentOptions)
 	if err != nil {
-		return SoftLayerHardware{}, bosherr.WrapErrorf(err, "Cannot agent env for virtual guest with id: %d.", server_id)
+		return SoftLayerHardware{}, bosherr.WrapErrorf(err, "Cannot agent env for virtual guest with id: %d.", hardwareId)
 	}
 
 	err = agentEnvService.Update(agentEnv)
@@ -98,9 +97,7 @@ func (c SoftLayerCreator) CreateByBPS(agentID string, stemcell bslcstem.Stemcell
 }
 
 func (c SoftLayerCreator) CreateBySoftlayer(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
-
 	virtualGuestTemplate, err := CreateVirtualGuestTemplate(stemcell, cloudProps)
-
 	if err != nil {
 		return SoftLayerVirtualGuest{}, bosherr.WrapError(err, "Creating virtual guest template")
 	}
@@ -344,7 +341,7 @@ func (c SoftLayerCreator) CreateBaremetal(server_name string, stemcell string, n
 		return 0, bosherr.WrapErrorf(err, "Faled to call BPS")
 	}
 
-	c.logger.Info(SOFTLAYER_VM_CREATOR_LOG_TAG, fmt.Sprintf("Returns from BPS: %", string(body)))
+	c.logger.Info(SOFTLAYER_VM_CREATOR_LOG_TAG, fmt.Sprintf("Returns from BPS: %s", string(body)))
 
 	var result map[string]interface{}
 
@@ -361,7 +358,7 @@ func (c SoftLayerCreator) CreateBaremetal(server_name string, stemcell string, n
 		if body, err = util.CallBPS("GET", "/task/"+task_id+"/json/task", ""); err != nil {
 			return 0, bosherr.WrapErrorf(err, "Faled to call BPS")
 		}
-		c.logger.Info(SOFTLAYER_VM_CREATOR_LOG_TAG, fmt.Sprintf("Returns from BPS: %", string(body)))
+		c.logger.Info(SOFTLAYER_VM_CREATOR_LOG_TAG, fmt.Sprintf("Returns from BPS: %s", string(body)))
 		if err = json.Unmarshal(body, &result); err != nil {
 			return 0, bosherr.WrapErrorf(err, "Faled to call BPS")
 		}
@@ -386,5 +383,4 @@ func (c SoftLayerCreator) CreateBaremetal(server_name string, stemcell string, n
 			return int(info["id"].(float64)), nil
 		}
 	}
-	return 0, bosherr.Errorf("Failed to install the stemcell: ")
 }

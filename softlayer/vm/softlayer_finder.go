@@ -49,7 +49,6 @@ func (f SoftLayerFinder) Find(vmID int) (VM, bool, error) {
 	}
 
 	vm := NewSoftLayerVirtualGuest(vmID, f.softLayerClient, util.GetSshClient(), agentEnvService, f.logger)
-
 	softlayerFileService.SetVM(vm)
 	return vm, true, nil
 }

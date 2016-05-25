@@ -322,6 +322,10 @@ func (vm SoftLayerVirtualGuest) GetPrimaryIP() string {
 	return vm.virtualGuest.PrimaryIpAddress
 }
 
+func (vm SoftLayerVirtualGuest) GetPrimaryBackendIP() string {
+	return vm.virtualGuest.PrimaryBackendIpAddress
+}
+
 func (vm SoftLayerVirtualGuest) GetRootPassword() string {
 	passwords := vm.virtualGuest.OperatingSystem.Passwords
 	for _, password := range passwords {
