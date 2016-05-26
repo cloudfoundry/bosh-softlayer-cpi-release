@@ -206,13 +206,16 @@ var _ = Describe("SoftLayerVM", func() {
 				metadata = bslvm.VMMetadata{}
 				err := json.Unmarshal(metadataBytes, &metadata)
 				Expect(err).ToNot(HaveOccurred())
+
+				fileNames := []string{
+					"SoftLayer_Virtual_Guest_Service_setMetadata.json",
+				}
+				testhelpers.SetTestFixturesForFakeSoftLayerClient(fakeSoftLayerClient, fileNames)
 			})
 
 			It("does not set any tag values on the VM", func() {
 				err := vm.SetMetadata(metadata)
-
 				Expect(err).ToNot(HaveOccurred())
-				Expect(fakeSoftLayerClient.FakeHttpClient.DoRawHttpRequestResponsesCount).To(Equal(0))
 			})
 		})
 
@@ -233,9 +236,7 @@ var _ = Describe("SoftLayerVM", func() {
 				Expect(err).ToNot(HaveOccurred())
 
 				err = vm.SetMetadata(metadata)
-
 				Expect(err).ToNot(HaveOccurred())
-				Expect(fakeSoftLayerClient.FakeHttpClient.DoRawHttpRequestResponsesCount).To(Equal(1))
 			})
 
 			Context("when SLVG.SetTags call fails", func() {
@@ -255,7 +256,6 @@ var _ = Describe("SoftLayerVM", func() {
 
 				It("fails with error", func() {
 					err := vm.SetMetadata(metadata)
-
 					Expect(err).To(HaveOccurred())
 				})
 			})

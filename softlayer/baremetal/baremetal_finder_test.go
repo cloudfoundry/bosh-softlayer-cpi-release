@@ -36,7 +36,7 @@ var _ = Describe("BaremetalFinder", func() {
 			})
 
 			It("returns a new Softlayer Hardware without an error", func() {
-				baremetal, err := finder.Find("fake-id")
+				baremetal, err := finder.Find(1234)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(baremetal.GlobalIdentifier).To(Equal("fake-id"))
 				Expect(baremetal.BareMetalInstanceFlag).To(Equal(1))
@@ -51,9 +51,9 @@ var _ = Describe("BaremetalFinder", func() {
 			})
 
 			It("return an error when the specified hardward id can not be found", func() {
-				_, err := finder.Find("none-exist-id")
+				_, err := finder.Find(1234)
 				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(Equal("cannot find the baremetal server with id: none-exist-id."))
+				Expect(err.Error()).To(Equal("cannot find the baremetal server with id: 1234."))
 			})
 
 		})
