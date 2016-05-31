@@ -60,8 +60,6 @@ var _ = Describe("SoftLayerCreator", func() {
 		)
 		bslcommon.TIMEOUT = 2 * time.Second
 		bslcommon.POLLING_INTERVAL = 1 * time.Second
-
-		os.Setenv("OS_RELOAD_ENABLED", "FALSE")
 	})
 
 	Describe("#Create", func() {
@@ -81,6 +79,8 @@ var _ = Describe("SoftLayerCreator", func() {
 				env = Environment{}
 
 				vmFinder.FindVM = fakevm.NewFakeVM(1234567)
+				vmFinder.FindFound = true
+				vmFinder.FindErr = nil
 			})
 
 			It("returns a new SoftLayerVM with ephemeral size", func() {
@@ -116,6 +116,7 @@ var _ = Describe("SoftLayerCreator", func() {
 				}
 				testhelpers.SetTestFixturesForFakeSSHClient(sshClient, expectedCmdResults, nil)
 				setFakeSoftLayerClientCreateObjectTestFixturesWithEphemeralDiskSize(softLayerClient)
+
 				vm, err := creator.CreateBySoftlayer(agentID, stemcell, cloudProps, networks, env)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(vm.ID()).To(Equal(1234567))
@@ -204,6 +205,7 @@ var _ = Describe("SoftLayerCreator", func() {
 					env = Environment{}
 
 					vmFinder.FindVM = fakevm.NewFakeVM(1234567)
+					vmFinder.FindFound = false
 
 					setFakeSoftLayerClientCreateObjectTestFixturesWithEphemeralDiskSize(softLayerClient)
 				})

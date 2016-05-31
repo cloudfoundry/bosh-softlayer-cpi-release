@@ -251,6 +251,10 @@ func (vm SoftLayerHardware) GetRootPassword() string {
 	return ""
 }
 
+func (vm SoftLayerHardware) GetFullyQualifiedDomainName() string {
+	return vm.hardware.FullyQualifiedDomainName
+}
+
 func (vm SoftLayerHardware) SetVcapPassword(encryptedPwd string) (err error) {
 	command := fmt.Sprintf("usermod -p '%s' vcap", encryptedPwd)
 	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryIP(), command)
@@ -508,7 +512,7 @@ func (vm SoftLayerHardware) writeOpenIscsiConfBasedOnShellScript(volume datatype
 		return false, bosherr.WrapError(err, "Generating config from template")
 	}
 
-	if err = vm.uploadFile(file.Name(), "/etc/iscsi/iscsid.conf"); err != nil {
+	if err = vm.sshClient.UploadFile(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryBackendIP(), file.Name(), "/etc/iscsi/iscsid.conf"); err != nil {
 		return false, bosherr.WrapError(err, "Writing to /etc/iscsi/iscsid.conf")
 	}
 
@@ -690,19 +694,4 @@ func (vm SoftLayerHardware) searchMounts(virtualGuest datatypes.SoftLayer_Hardwa
 	}
 
 	return mounts, nil
-}
-
-func (vm SoftLayerHardware) execCommand(command string) (string, error) {
-	result, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryIP(), command)
-	return result, err
-}
-
-func (vm SoftLayerHardware) uploadFile(srcFile string, destFile string) error {
-	err := vm.sshClient.UploadFile(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryIP(), srcFile, destFile)
-	return err
-}
-
-func (hardware SoftLayerHardware) downloadFile(srcFile string, destFile string) error {
-	err := hardware.sshClient.DownloadFile(ROOT_USER_NAME, hardware.GetRootPassword(), hardware.GetPrimaryIP(), srcFile, destFile)
-	return err
 }

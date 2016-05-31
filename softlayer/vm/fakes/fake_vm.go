@@ -19,6 +19,8 @@ type FakeVM struct {
 	SetMetadataErr    error
 	VMMetadata        bslcvm.VMMetadata
 
+	SetVcapPasswordErr error
+
 	ConfigureNetworksCalled bool
 	ConfigureNetworksErr    error
 	Networks                bslcvm.Networks
@@ -77,21 +79,25 @@ func (vm *FakeVM) ReloadOS(stemcell bslcstemcell.Stemcell) error {
 }
 
 func (vm *FakeVM) GetDataCenterId() int {
-	return 1234
+	return 1234567
 }
 
 func (vm *FakeVM) GetPrimaryIP() string {
-	return "127.0.0.1"
+	return "fake-public-ip"
 }
 
 func (vm *FakeVM) GetPrimaryBackendIP() string {
-	return "10.0.0.1"
+	return "fake-private-ip"
 }
 
 func (vm *FakeVM) GetRootPassword() string {
-	return "password"
+	return "fake-password"
+}
+
+func (vm *FakeVM) GetFullyQualifiedDomainName() string {
+	return "fake-fullyQualifiedDomainName"
 }
 
 func (vm *FakeVM) SetVcapPassword(encryptedPwd string) error {
-	return nil
+	return vm.SetVcapPasswordErr
 }

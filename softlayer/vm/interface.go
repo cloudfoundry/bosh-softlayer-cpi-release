@@ -55,25 +55,25 @@ type Finder interface {
 }
 
 type VM interface {
-	ID() int
+	AttachDisk(bslcdisk.Disk) error
 
-	Delete(agentId string) error
-	Reboot() error
-
-	SetMetadata(VMMetadata) error
 	ConfigureNetworks(Networks) error
 
-	AttachDisk(bslcdisk.Disk) error
 	DetachDisk(bslcdisk.Disk) error
-
-	ReloadOS(bslcstem.Stemcell) error
+	Delete(agentId string) error
 
 	GetDataCenterId() int
-
 	GetPrimaryIP() string
 	GetPrimaryBackendIP() string
 	GetRootPassword() string
+	GetFullyQualifiedDomainName() string
 
+	ID() int
+
+	Reboot() error
+	ReloadOS(bslcstem.Stemcell) error
+
+	SetMetadata(VMMetadata) error
 	SetVcapPassword(string) error
 }
 
