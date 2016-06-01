@@ -1,7 +1,11 @@
 package common
 
 import (
-	"encoding/base64"
+	"bytes"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -10,6 +14,7 @@ import (
 	boshretry "github.com/cloudfoundry/bosh-utils/retrystrategy"
 	"github.com/pivotal-golang/clock"
 
+	slcommon "github.com/maximilien/softlayer-go/common"
 	datatypes "github.com/maximilien/softlayer-go/data_types"
 	sl "github.com/maximilien/softlayer-go/softlayer"
 )
@@ -18,6 +23,110 @@ var (
 	TIMEOUT          time.Duration
 	POLLING_INTERVAL time.Duration
 )
+
+type SoftLayer_Hardware_Parameters struct {
+	Parameters []datatypes.SoftLayer_Hardware `json:"parameters"`
+}
+
+func IscsiHasAllowedHardware(softLayerClient sl.Client, volumeId int, hardwareId int) (bool, error) {
+	filter := string(`{"allowedHardwares":{"id":{"operation":"` + strconv.Itoa(hardwareId) + `"}}}`)
+	response, errorCode, err := softLayerClient.GetHttpClient().DoRawHttpRequestWithObjectFilterAndObjectMask(fmt.Sprintf("%s/%d/getAllowedVirtualGuests.json", "SoftLayer_Network_Storage", volumeId), []string{"id"}, fmt.Sprintf(string(filter)), "GET", new(bytes.Buffer))
+
+	if err != nil {
+		return false, errors.New(fmt.Sprintf("Cannot check authentication for volume %d in vm %d", volumeId, hardwareId))
+	}
+
+	if slcommon.IsHttpErrorCode(errorCode) {
+		errorMessage := fmt.Sprintf("softlayer-go: could not SoftLayer_Network_Storage#hasAllowedVirtualGuest, HTTP error code: '%d'", errorCode)
+		return false, errors.New(errorMessage)
+	}
+
+	hardware := []datatypes.SoftLayer_Hardware{}
+	err = json.Unmarshal(response, &hardware)
+	if err != nil {
+		return false, errors.New(fmt.Sprintf("Failed to unmarshal response of checking authentication for volume %d in vm %d", volumeId, hardwareId))
+	}
+
+	if len(hardware) > 0 {
+		return true, nil
+	}
+
+	return false, nil
+}
+
+func AttachHardwareIscsiVolume(softLayerClient sl.Client, hardware datatypes.SoftLayer_Hardware, volumeId int) (bool, error) {
+	parameters := SoftLayer_Hardware_Parameters{
+		Parameters: []datatypes.SoftLayer_Hardware{
+			hardware,
+		},
+	}
+	requestBody, err := json.Marshal(parameters)
+	if err != nil {
+		return false, err
+	}
+
+	resp, errorCode, err := softLayerClient.GetHttpClient().DoRawHttpRequest(fmt.Sprintf("%s/%d/allowAccessFromHardware.json", "SoftLayer_Network_Storage", volumeId), "PUT", bytes.NewBuffer(requestBody))
+
+	if err != nil {
+		return false, err
+	}
+
+	if slcommon.IsHttpErrorCode(errorCode) {
+		errorMessage := fmt.Sprintf("softlayer-go: could not SoftLayer_Network_Storage#attachIscsiVolume, HTTP error code: '%d'", errorCode)
+		return false, errors.New(errorMessage)
+	}
+
+	allowable, err := strconv.ParseBool(string(resp[:]))
+	if err != nil {
+		return false, nil
+	}
+
+	return allowable, nil
+}
+
+func DetachHardwareIscsiVolume(softLayerClient sl.Client, hardware datatypes.SoftLayer_Hardware, volumeId int) error {
+	parameters := SoftLayer_Hardware_Parameters{
+		Parameters: []datatypes.SoftLayer_Hardware{
+			hardware,
+		},
+	}
+	requestBody, err := json.Marshal(parameters)
+	if err != nil {
+		return err
+	}
+
+	_, errorCode, err := softLayerClient.GetHttpClient().DoRawHttpRequest(fmt.Sprintf("%s/%d/removeAccessFromVirtualGuest.json", "SoftLayer_Network_Storage", volumeId), "PUT", bytes.NewBuffer(requestBody))
+	if err != nil {
+		return err
+	}
+
+	if slcommon.IsHttpErrorCode(errorCode) {
+		errorMessage := fmt.Sprintf("softlayer-go: could not SoftLayer_Account#getAccountStatus, HTTP error code: '%d'", errorCode)
+		return errors.New(errorMessage)
+	}
+
+	return nil
+}
+
+func GetHardwareAllowedHost(softLayerClient sl.Client, instanceId int) (datatypes.SoftLayer_Network_Storage_Allowed_Host, error) {
+	response, errorCode, err := softLayerClient.GetHttpClient().DoRawHttpRequest(fmt.Sprintf("%s/%d/getAllowedHost.json", "SoftLayer_Hardware", instanceId), "GET", new(bytes.Buffer))
+	if err != nil {
+		return datatypes.SoftLayer_Network_Storage_Allowed_Host{}, err
+	}
+
+	if slcommon.IsHttpErrorCode(errorCode) {
+		errorMessage := fmt.Sprintf("softlayer-go: could not SoftLayer_Hardware#getAllowedHost, HTTP error code: '%d'", errorCode)
+		return datatypes.SoftLayer_Network_Storage_Allowed_Host{}, errors.New(errorMessage)
+	}
+
+	allowedHost := datatypes.SoftLayer_Network_Storage_Allowed_Host{}
+	err = json.Unmarshal(response, &allowedHost)
+	if err != nil {
+		return datatypes.SoftLayer_Network_Storage_Allowed_Host{}, err
+	}
+
+	return allowedHost, nil
+}
 
 func AttachEphemeralDiskToVirtualGuest(softLayerClient sl.Client, virtualGuestId int, diskSize int, logger boshlog.Logger) error {
 	err := WaitForVirtualGuestLastCompleteTransaction(softLayerClient, virtualGuestId, "Service Setup")
@@ -60,50 +169,6 @@ func AttachEphemeralDiskToVirtualGuest(softLayerClient sl.Client, virtualGuestId
 	err = WaitForVirtualGuestUpgradeComplete(softLayerClient, virtualGuestId)
 	if err != nil {
 		return bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` upgrade complete", virtualGuestId)
-	}
-
-	err = WaitForVirtualGuest(softLayerClient, virtualGuestId, "RUNNING")
-	if err != nil {
-		return bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d`", virtualGuestId)
-	}
-
-	return nil
-}
-
-func ConfigureMetadataOnVirtualGuest(softLayerClient sl.Client, virtualGuestId int, metadata string, logger boshlog.Logger) error {
-	err := WaitForVirtualGuest(softLayerClient, virtualGuestId, "RUNNING")
-	if err != nil {
-		return bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d`", virtualGuestId)
-	}
-
-	err = WaitForVirtualGuestToHaveNoRunningTransactions(softLayerClient, virtualGuestId)
-	if err != nil {
-		return bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` to have no pending transactions", virtualGuestId)
-	}
-
-	err = SetMetadataOnVirtualGuest(softLayerClient, virtualGuestId, metadata)
-	if err != nil {
-		return bosherr.WrapErrorf(err, "Setting metadata on VirtualGuest `%d`", virtualGuestId)
-	}
-
-	err = WaitForVirtualGuestToHaveNoRunningTransactions(softLayerClient, virtualGuestId)
-	if err != nil {
-		return bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` to have no pending transactions", virtualGuestId)
-	}
-
-	err = ConfigureMetadataDiskOnVirtualGuest(softLayerClient, virtualGuestId)
-	if err != nil {
-		return bosherr.WrapErrorf(err, "Configuring metadata disk on VirtualGuest `%d`", POLLING_INTERVAL)
-	}
-
-	err = WaitForVirtualGuestToHaveRunningTransaction(softLayerClient, virtualGuestId, logger)
-	if err != nil {
-		return bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` to launch transaction", virtualGuestId)
-	}
-
-	err = WaitForVirtualGuestIsNotPingable(softLayerClient, virtualGuestId, logger)
-	if err != nil {
-		return bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` not pingable", virtualGuestId)
 	}
 
 	err = WaitForVirtualGuest(softLayerClient, virtualGuestId, "RUNNING")
@@ -352,62 +417,6 @@ func WaitForVirtualGuestToTargetState(softLayerClient sl.Client, virtualGuestId 
 	return nil
 }
 
-func SetMetadataOnVirtualGuest(softLayerClient sl.Client, virtualGuestId int, metadata string) error {
-	virtualGuestService, err := softLayerClient.GetSoftLayer_Virtual_Guest_Service()
-	if err != nil {
-		return bosherr.WrapError(err, "Creating VirtualGuestService from SoftLayer client")
-	}
-
-	success, err := virtualGuestService.SetMetadata(virtualGuestId, metadata)
-	if err != nil {
-		return bosherr.WrapErrorf(err, "Setting metadata on VirtualGuest `%d`", virtualGuestId)
-	}
-
-	if !success {
-		return bosherr.WrapErrorf(err, "Failed to set metadata on VirtualGuest `%d`", virtualGuestId)
-	}
-
-	return nil
-}
-
-func ConfigureMetadataDiskOnVirtualGuest(softLayerClient sl.Client, virtualGuestId int) error {
-	virtualGuestService, err := softLayerClient.GetSoftLayer_Virtual_Guest_Service()
-	if err != nil {
-		return bosherr.WrapError(err, "Creating VirtualGuestService from SoftLayer client")
-	}
-
-	_, err = virtualGuestService.ConfigureMetadataDisk(virtualGuestId)
-	if err != nil {
-		return bosherr.WrapErrorf(err, "Configuring metadata on VirtualGuest `%d`", virtualGuestId)
-	}
-
-	return nil
-}
-
-func GetUserMetadataOnVirtualGuest(softLayerClient sl.Client, virtualGuestId int) ([]byte, error) {
-	virtualGuestService, err := softLayerClient.GetSoftLayer_Virtual_Guest_Service()
-	if err != nil {
-		return []byte{}, bosherr.WrapError(err, "Creating VirtualGuestService from SoftLayer client")
-	}
-
-	attributes, err := virtualGuestService.GetUserData(virtualGuestId)
-	if err != nil {
-		return []byte{}, bosherr.WrapErrorf(err, "Getting metadata on VirtualGuest `%d`", virtualGuestId)
-	}
-
-	if len(attributes) == 0 {
-		return []byte{}, bosherr.WrapErrorf(err, "Failed to get metadata on VirtualGuest `%d`", virtualGuestId)
-	}
-
-	sEnc := attributes[0].Value
-	sDec, err := base64.StdEncoding.DecodeString(sEnc)
-	if err != nil {
-		return []byte{}, bosherr.WrapErrorf(err, "Failed to decode metadata returned from virtualGuest `%d`", virtualGuestId)
-	}
-
-	return sDec, nil
-}
-
 func GetObjectDetailsOnVirtualGuest(softLayerClient sl.Client, virtualGuestId int) (datatypes.SoftLayer_Virtual_Guest, error) {
 	virtualGuestService, err := softLayerClient.GetSoftLayer_Virtual_Guest_Service()
 	if err != nil {
@@ -418,6 +427,18 @@ func GetObjectDetailsOnVirtualGuest(softLayerClient sl.Client, virtualGuestId in
 		return datatypes.SoftLayer_Virtual_Guest{}, bosherr.WrapErrorf(err, "Cannot get virtual guest with id: %d", virtualGuestId)
 	}
 	return virtualGuest, nil
+}
+
+func GetObjectDetailsOnHardware(softLayerClient sl.Client, hardwareId int) (datatypes.SoftLayer_Hardware, error) {
+	hardwareService, err := softLayerClient.GetSoftLayer_Hardware_Service()
+	if err != nil {
+		return datatypes.SoftLayer_Hardware{}, bosherr.WrapError(err, "Cannot get softlayer hardeare service.")
+	}
+	hardware, err := hardwareService.GetObject(hardwareId)
+	if err != nil {
+		return datatypes.SoftLayer_Hardware{}, bosherr.WrapErrorf(err, "Cannot get hardware with id: %d", hardwareId)
+	}
+	return hardware, nil
 }
 
 func GetObjectDetailsOnStorage(softLayerClient sl.Client, volumeId int) (datatypes.SoftLayer_Network_Storage, error) {

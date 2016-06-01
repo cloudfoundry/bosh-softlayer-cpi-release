@@ -1,5 +1,9 @@
 package fakes
 
+import (
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
+)
+
 type FakeSoftlayerFileService struct {
 	UploadInputs []UploadInput
 	UploadErr    error
@@ -7,6 +11,8 @@ type FakeSoftlayerFileService struct {
 	DownloadSourcePath string
 	DownloadContents   []byte
 	DownloadErr        error
+
+	vm VM
 }
 
 type UploadInput struct {
@@ -18,6 +24,10 @@ func NewFakeSoftlayerFileService() *FakeSoftlayerFileService {
 	return &FakeSoftlayerFileService{
 		UploadInputs: []UploadInput{},
 	}
+}
+
+func (s *FakeSoftlayerFileService) SetVM(vm VM) {
+	s.vm = vm
 }
 
 func (s *FakeSoftlayerFileService) Upload(destinationPath string, contents []byte) error {

@@ -8,34 +8,36 @@ import (
 	boshsys "github.com/cloudfoundry/bosh-utils/system"
 	boshuuid "github.com/cloudfoundry/bosh-utils/uuid"
 
-	datatypes "github.com/maximilien/softlayer-go/data_types"
-
 	util "github.com/cloudfoundry/bosh-softlayer-cpi/util"
 )
 
 type SoftlayerFileService interface {
+	SetVM(VM)
 	Upload(string, []byte) error
 	Download(string) ([]byte, error)
 }
 
 type softlayerFileService struct {
 	sshClient     util.SshClient
-	virtualGuest  datatypes.SoftLayer_Virtual_Guest
+	vm            VM
 	logger        boshlog.Logger
 	logTag        string
 	uuidGenerator boshuuid.Generator
 	fs            boshsys.FileSystem
 }
 
-func NewSoftlayerFileService(sshClient util.SshClient, virtualGuest datatypes.SoftLayer_Virtual_Guest, logger boshlog.Logger, uuidGenerator boshuuid.Generator, fs boshsys.FileSystem) SoftlayerFileService {
+func NewSoftlayerFileService(sshClient util.SshClient, logger boshlog.Logger, uuidGenerator boshuuid.Generator, fs boshsys.FileSystem) SoftlayerFileService {
 	return &softlayerFileService{
 		sshClient:     sshClient,
-		virtualGuest:  virtualGuest,
 		logger:        logger,
 		logTag:        "softlayerFileService",
 		uuidGenerator: uuidGenerator,
 		fs:            fs,
 	}
+}
+
+func (s *softlayerFileService) SetVM(vm VM) {
+	s.vm = vm
 }
 
 func (s *softlayerFileService) Download(sourcePath string) ([]byte, error) {
@@ -55,7 +57,10 @@ func (s *softlayerFileService) Download(sourcePath string) ([]byte, error) {
 	sourceFileName := filepath.Base(sourcePath)
 	tmpFilePath := filepath.Join(tmpDir, sourceFileName)
 
-	s.sshClient.DownloadFile(ROOT_USER_NAME, s.getRootPassword(s.virtualGuest), s.virtualGuest.PrimaryBackendIpAddress, sourcePath, tmpFilePath)
+	password := s.vm.GetRootPassword()
+	primaryIp := s.vm.GetPrimaryIP()
+
+	s.sshClient.DownloadFile(ROOT_USER_NAME, password, primaryIp, sourcePath, tmpFilePath)
 
 	contents, err := s.fs.ReadFile(tmpFilePath)
 	if err != nil {
@@ -89,22 +94,13 @@ func (s *softlayerFileService) Upload(destinationPath string, contents []byte) e
 		return bosherr.WrapErrorf(err, "Writing to %s", tmpFilePath)
 	}
 
-	err = s.sshClient.UploadFile(ROOT_USER_NAME, s.getRootPassword(s.virtualGuest), s.virtualGuest.PrimaryBackendIpAddress, tmpFilePath, destinationPath)
+	password := s.vm.GetRootPassword()
+	primaryIp := s.vm.GetPrimaryIP()
+
+	err = s.sshClient.UploadFile(ROOT_USER_NAME, password, primaryIp, tmpFilePath, destinationPath)
 	if err != nil {
 		return bosherr.WrapErrorf(err, "Uploading temporary file to destination '%s'", destinationPath)
 	}
 
 	return nil
-}
-
-// private method
-func (s *softlayerFileService) getRootPassword(virtualGuest datatypes.SoftLayer_Virtual_Guest) string {
-	passwords := virtualGuest.OperatingSystem.Passwords
-	for _, password := range passwords {
-		if password.Username == ROOT_USER_NAME {
-			return password.Password
-		}
-	}
-
-	return ""
 }

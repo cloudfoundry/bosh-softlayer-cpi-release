@@ -29,6 +29,9 @@ func NewCreateVM(stemcellFinder bslcstem.Finder, vmCreator bslcvm.Creator) Creat
 }
 
 func (a CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps bslcvm.VMCloudProperties, networks Networks, diskIDs []DiskCID, env Environment) (string, error) {
+	vmNetworks := networks.AsVMNetworks()
+	vmEnv := bslcvm.Environment(env)
+
 	a.UpdateCloudProperties(&cloudProps)
 
 	stemcell, found, err := a.stemcellFinder.FindById(int(stemcellCID))
@@ -40,8 +43,13 @@ func (a CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps bslcvm
 		return "0", bosherr.Errorf("Expected to find stemcell '%s'", stemcellCID)
 	}
 
-	vmNetworks := networks.AsVMNetworks()
-	vmEnv := bslcvm.Environment(env)
+	if cloudProps.Baremetal {
+		vm, err := a.vmCreator.CreateByBPS(agentID, stemcell, cloudProps, vmNetworks, vmEnv)
+		if err != nil {
+			return "0", bosherr.WrapErrorf(err, "Creating Baremetal with agent ID '%s'", agentID)
+		}
+		return VMCID(vm.ID()).String(), nil
+	}
 
 	if len(vmNetworks.First().IP) == 0 {
 

@@ -40,8 +40,6 @@ var _ = Describe("SoftLayerFinder", func() {
 			uuidGenerator,
 			fs,
 		)
-
-		testhelpers.SetTestFixtureForFakeSoftLayerClient(softLayerClient, "SoftLayer_Virtual_Guest_Service_getObject.json")
 	})
 
 	Describe("Find", func() {
@@ -52,6 +50,7 @@ var _ = Describe("SoftLayerFinder", func() {
 		Context("when the VM ID is valid and existing", func() {
 			BeforeEach(func() {
 				vmID = 1234567
+				testhelpers.SetTestFixtureForFakeSoftLayerClient(softLayerClient, "SoftLayer_Virtual_Guest_Service_getObject.json")
 			})
 
 			It("finds and returns a new SoftLayerVM object with correct ID", func() {
@@ -62,11 +61,5 @@ var _ = Describe("SoftLayerFinder", func() {
 			})
 		})
 
-		Context("when the VM ID does not exist", func() {
-			It("fails finding the VM", func() {
-				_, found, _ := finder.Find(000000)
-				Expect(found).To(BeFalse())
-			})
-		})
 	})
 })

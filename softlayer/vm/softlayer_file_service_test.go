@@ -12,7 +12,7 @@ import (
 	fakeuuid "github.com/cloudfoundry/bosh-utils/uuid/fakes"
 	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
 
-	softlayer "github.com/maximilien/softlayer-go/softlayer"
+	fakevm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm/fakes"
 
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
 )
@@ -24,6 +24,7 @@ var _ = Describe("SoftlayerFileService", func() {
 		sshClient            *fakesutil.FakeSshClient
 		fs                   *fakesys.FakeFileSystem
 		uuidGenerator        *fakeuuid.FakeGenerator
+		vm                   *fakevm.FakeVM
 		softlayerFileService SoftlayerFileService
 	)
 
@@ -33,6 +34,7 @@ var _ = Describe("SoftlayerFileService", func() {
 		sshClient = fakesutil.NewFakeSshClient()
 		uuidGenerator = fakeuuid.NewFakeGenerator()
 		fs = fakesys.NewFakeFileSystem()
+		vm = fakevm.NewFakeVM(1234567)
 
 		testhelpers.SetTestFixtureForFakeSoftLayerClient(softLayerClient, "SoftLayer_Virtual_Guest_Service_getObject.json")
 	})
@@ -44,14 +46,9 @@ var _ = Describe("SoftlayerFileService", func() {
 			}
 			testhelpers.SetTestFixturesForFakeSSHClient(sshClient, expectedCmdResults, nil)
 
-			var virtualGuestService softlayer.SoftLayer_Virtual_Guest_Service
-			virtualGuestService, err := softLayerClient.GetSoftLayer_Virtual_Guest_Service()
-			Expect(err).ToNot(HaveOccurred())
-			virtualGuest, err := virtualGuestService.GetObject(1234567)
-			Expect(err).ToNot(HaveOccurred())
-
-			softlayerFileService = NewSoftlayerFileService(sshClient, virtualGuest, logger, uuidGenerator, fs)
-			err = softlayerFileService.Upload("/var/vcap/file.ext", []byte("fake-contents"))
+			softlayerFileService = NewSoftlayerFileService(sshClient, logger, uuidGenerator, fs)
+			softlayerFileService.SetVM(vm)
+			err := softlayerFileService.Upload("/var/vcap/file.ext", []byte("fake-contents"))
 			Expect(err).ToNot(HaveOccurred())
 		})
 	})
@@ -63,14 +60,9 @@ var _ = Describe("SoftlayerFileService", func() {
 			}
 			testhelpers.SetTestFixturesForFakeSSHClient(sshClient, expectedCmdResults, nil)
 
-			var virtualGuestService softlayer.SoftLayer_Virtual_Guest_Service
-			virtualGuestService, err := softLayerClient.GetSoftLayer_Virtual_Guest_Service()
-			Expect(err).ToNot(HaveOccurred())
-			virtualGuest, err := virtualGuestService.GetObject(1234567)
-			Expect(err).ToNot(HaveOccurred())
-
-			softlayerFileService = NewSoftlayerFileService(sshClient, virtualGuest, logger, uuidGenerator, fs)
-			_, err = softlayerFileService.Download("/fake-download-path/file.ext")
+			softlayerFileService = NewSoftlayerFileService(sshClient, logger, uuidGenerator, fs)
+			softlayerFileService.SetVM(vm)
+			_, err := softlayerFileService.Download("/fake-download-path/file.ext")
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("File not found"))
 		})
