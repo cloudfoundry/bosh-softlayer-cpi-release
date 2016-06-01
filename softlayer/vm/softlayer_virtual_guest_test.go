@@ -18,13 +18,11 @@ import (
 	bsldisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk"
 	bslvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
 
-	common "github.com/cloudfoundry/bosh-softlayer-cpi/common"
 	fakedisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk/fakes"
 	fakestemcell "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell/fakes"
 	fakevm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm/fakes"
 	fakesutil "github.com/cloudfoundry/bosh-softlayer-cpi/util/fakes"
 	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
-	"os"
 )
 
 var _ = Describe("SoftLayerVM", func() {
@@ -42,8 +40,6 @@ var _ = Describe("SoftLayerVM", func() {
 		sshClient = fakesutil.NewFakeSshClient()
 		agentEnvService = &fakevm.FakeAgentEnvService{}
 		logger = boshlog.NewLogger(boshlog.LevelNone)
-
-		os.Setenv("OS_RELOAD_ENABLED", "FALSE")
 	})
 
 	Describe("Delete", func() {
@@ -66,7 +62,6 @@ var _ = Describe("SoftLayerVM", func() {
 				bslcommon.TIMEOUT = 2 * time.Second
 				bslcommon.POLLING_INTERVAL = 1 * time.Second
 
-				common.SetOSEnvVariable("OS_RELOAD_ENABLED", "FALSE")
 				err := vm.Delete("fake-agentID")
 				Expect(err).ToNot(HaveOccurred())
 			})

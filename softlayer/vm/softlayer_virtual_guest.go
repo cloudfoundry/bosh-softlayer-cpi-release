@@ -93,6 +93,11 @@ func (vm SoftLayerVirtualGuest) DeleteVM() error {
 		return bosherr.WrapError(nil, "Did not delete SoftLayer VirtualGuest from client")
 	}
 
+	err = vm.postCheckActiveTransactionsForDeleteVM(vm.softLayerClient, vmCID)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
