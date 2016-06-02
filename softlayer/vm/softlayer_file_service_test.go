@@ -30,7 +30,7 @@ var _ = Describe("SoftlayerFileService", func() {
 	BeforeEach(func() {
 		logger = boshlog.NewLogger(boshlog.LevelNone)
 		softLayerClient = fakeslclient.NewFakeSoftLayerClient("fake-username", "fake-api-key")
-		sshClient = fakesutil.NewFakeSshClient()
+		sshClient = &fakesutil.FakeSshClient{}
 		uuidGenerator = fakeuuid.NewFakeGenerator()
 		fs = fakesys.NewFakeFileSystem()
 
@@ -39,11 +39,6 @@ var _ = Describe("SoftlayerFileService", func() {
 
 	Describe("Upload", func() {
 		It("file contents into /var/vcap/file.ext", func() {
-			expectedCmdResults := []string{
-				"",
-			}
-			testhelpers.SetTestFixturesForFakeSSHClient(sshClient, expectedCmdResults, nil)
-
 			var virtualGuestService softlayer.SoftLayer_Virtual_Guest_Service
 			virtualGuestService, err := softLayerClient.GetSoftLayer_Virtual_Guest_Service()
 			Expect(err).ToNot(HaveOccurred())
@@ -58,11 +53,6 @@ var _ = Describe("SoftlayerFileService", func() {
 
 	Describe("Download", func() {
 		It("copies agent env into temporary location", func() {
-			expectedCmdResults := []string{
-				"",
-			}
-			testhelpers.SetTestFixturesForFakeSSHClient(sshClient, expectedCmdResults, nil)
-
 			var virtualGuestService softlayer.SoftLayer_Virtual_Guest_Service
 			virtualGuestService, err := softLayerClient.GetSoftLayer_Virtual_Guest_Service()
 			Expect(err).ToNot(HaveOccurred())
@@ -74,6 +64,5 @@ var _ = Describe("SoftlayerFileService", func() {
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("File not found"))
 		})
-
 	})
 })

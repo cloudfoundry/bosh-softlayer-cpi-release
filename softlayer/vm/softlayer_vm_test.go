@@ -37,7 +37,7 @@ var _ = Describe("SoftLayerVM", func() {
 
 	BeforeEach(func() {
 		fakeSoftLayerClient = fakeslclient.NewFakeSoftLayerClient("fake-username", "fake-api-key")
-		sshClient = fakesutil.NewFakeSshClient()
+		sshClient = &fakesutil.FakeSshClient{}
 		agentEnvService = &fakevm.FakeAgentEnvService{}
 		logger = boshlog.NewLogger(boshlog.LevelNone)
 
@@ -362,7 +362,9 @@ var _ = Describe("SoftLayerVM", func() {
 				"",
 				expectedDmSetupLs1,
 			}
-			testhelpers.SetTestFixturesForFakeSSHClient(sshClient, expectedCmdResults, nil)
+			sshClient.ExecCommandStub = func(_, _, _, _ string) (string, error) {
+				return expectedCmdResults[sshClient.ExecCommandCallCount()-1], nil
+			}
 			vm = NewSoftLayerVM(1234567, fakeSoftLayerClient, sshClient, agentEnvService, logger)
 			bslcommon.TIMEOUT = 2 * time.Second
 			bslcommon.POLLING_INTERVAL = 1 * time.Second
@@ -382,7 +384,9 @@ var _ = Describe("SoftLayerVM", func() {
 				"",
 				expectedPartitions2,
 			}
-			testhelpers.SetTestFixturesForFakeSSHClient(sshClient, expectedCmdResults, nil)
+			sshClient.ExecCommandStub = func(_, _, _, _ string) (string, error) {
+				return expectedCmdResults[sshClient.ExecCommandCallCount()-1], nil
+			}
 			vm = NewSoftLayerVM(1234567, fakeSoftLayerClient, sshClient, agentEnvService, logger)
 			bslcommon.TIMEOUT = 2 * time.Second
 			bslcommon.POLLING_INTERVAL = 1 * time.Second
@@ -402,7 +406,9 @@ var _ = Describe("SoftLayerVM", func() {
 				"",
 				expectedDmSetupLs2,
 			}
-			testhelpers.SetTestFixturesForFakeSSHClient(sshClient, expectedCmdResults, nil)
+			sshClient.ExecCommandStub = func(_, _, _, _ string) (string, error) {
+				return expectedCmdResults[sshClient.ExecCommandCallCount()-1], nil
+			}
 			vm = NewSoftLayerVM(1234567, fakeSoftLayerClient, sshClient, agentEnvService, logger)
 			bslcommon.TIMEOUT = 2 * time.Second
 			bslcommon.POLLING_INTERVAL = 1 * time.Second
@@ -412,7 +418,7 @@ var _ = Describe("SoftLayerVM", func() {
 		})
 
 		It("reports error when failed to attach the iSCSI volume", func() {
-			testhelpers.SetTestFixturesForFakeSSHClient(sshClient, []string{"fake-result"}, errors.New("fake-error"))
+			sshClient.ExecCommandReturns("fake-result", errors.New("fake-error"))
 			vm = NewSoftLayerVM(1234567, fakeSoftLayerClient, sshClient, agentEnvService, logger)
 			bslcommon.TIMEOUT = 2 * time.Second
 			bslcommon.POLLING_INTERVAL = 1 * time.Second
@@ -492,7 +498,9 @@ iscsiadm: No records found
 				"",
 				expectStartOpenIscsi,
 			}
-			testhelpers.SetTestFixturesForFakeSSHClient(sshClient, expectedCmdResults, nil)
+			sshClient.ExecCommandStub = func(_, _, _, _ string) (string, error) {
+				return expectedCmdResults[sshClient.ExecCommandCallCount()-1], nil
+			}
 			vm = NewSoftLayerVM(1234567, fakeSoftLayerClient, sshClient, agentEnvService, logger)
 			bslcommon.TIMEOUT = 2 * time.Second
 			bslcommon.POLLING_INTERVAL = 1 * time.Second
@@ -512,7 +520,9 @@ iscsiadm: No records found
 				expectStartOpenIscsi,
 				expectRestartMultipathd,
 			}
-			testhelpers.SetTestFixturesForFakeSSHClient(sshClient, expectedCmdResults, nil)
+			sshClient.ExecCommandStub = func(_, _, _, _ string) (string, error) {
+				return expectedCmdResults[sshClient.ExecCommandCallCount()-1], nil
+			}
 			vm = NewSoftLayerVM(1234567, fakeSoftLayerClient, sshClient, agentEnvService, logger)
 			bslcommon.TIMEOUT = 2 * time.Second
 			bslcommon.POLLING_INTERVAL = 1 * time.Second
@@ -522,7 +532,7 @@ iscsiadm: No records found
 		})
 
 		It("reports error when failed to detach iSCSI volume", func() {
-			testhelpers.SetTestFixturesForFakeSSHClient(sshClient, []string{"fake-result"}, errors.New("fake-error"))
+			sshClient.ExecCommandReturns("fake-result", errors.New("fake-error"))
 			vm = NewSoftLayerVM(1234567, fakeSoftLayerClient, sshClient, agentEnvService, logger)
 			bslcommon.TIMEOUT = 2 * time.Second
 			bslcommon.POLLING_INTERVAL = 1 * time.Second
