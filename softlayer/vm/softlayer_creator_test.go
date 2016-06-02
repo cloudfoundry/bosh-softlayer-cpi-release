@@ -1,10 +1,11 @@
 package vm_test
 
 import (
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
 	"os"
 	"time"
+
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
 
@@ -58,7 +59,6 @@ var _ = Describe("SoftLayerCreator", func() {
 		bslcommon.TIMEOUT = 2 * time.Second
 		bslcommon.POLLING_INTERVAL = 1 * time.Second
 
-		os.Setenv("OS_RELOAD_ENABLED", "FALSE")
 		os.Setenv("SQLITE_DB_FOLDER", "/tmp")
 	})
 

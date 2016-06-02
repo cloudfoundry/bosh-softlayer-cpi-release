@@ -35,7 +35,6 @@ var _ = Describe("BOSH Director Level Integration for OS Reload", func() {
 	)
 
 	BeforeEach(func() {
-		common.SetOSEnvVariable("OS_RELOAD_ENABLED", "TRUE")
 		common.SetOSEnvVariable("SQLITE_DB_FOLDER", SQLITE_DB_FOLDER)
 		common.SetOSEnvVariable("SQLITE_DB_FILE", SQLITE_DB_FILE)
 
