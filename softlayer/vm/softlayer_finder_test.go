@@ -12,7 +12,6 @@ import (
 
 	fakevm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm/fakes"
 	fakesys "github.com/cloudfoundry/bosh-utils/system/fakes"
-	fakeuuid "github.com/cloudfoundry/bosh-utils/uuid/fakes"
 	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
 )
 
@@ -21,25 +20,17 @@ var _ = Describe("SoftLayerFinder", func() {
 		softLayerClient        *fakeslclient.FakeSoftLayerClient
 		agentEnvServiceFactory *fakevm.FakeAgentEnvServiceFactory
 		fs                     *fakesys.FakeFileSystem
-		uuidGenerator          *fakeuuid.FakeGenerator
 		logger                 boshlog.Logger
 		finder                 SoftLayerFinder
 	)
 
 	BeforeEach(func() {
 		softLayerClient = fakeslclient.NewFakeSoftLayerClient("fake-username", "fake-api-key")
-		uuidGenerator = fakeuuid.NewFakeGenerator()
 		fs = fakesys.NewFakeFileSystem()
 		agentEnvServiceFactory = &fakevm.FakeAgentEnvServiceFactory{}
 		logger = boshlog.NewLogger(boshlog.LevelNone)
 
-		finder = NewSoftLayerFinder(
-			softLayerClient,
-			agentEnvServiceFactory,
-			logger,
-			uuidGenerator,
-			fs,
-		)
+		finder = NewSoftLayerFinder(softLayerClient, agentEnvServiceFactory, logger)
 
 		testhelpers.SetTestFixtureForFakeSoftLayerClient(softLayerClient, "SoftLayer_Virtual_Guest_Service_getObject.json")
 	})

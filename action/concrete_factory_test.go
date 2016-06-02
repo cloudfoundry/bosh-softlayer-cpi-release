@@ -10,7 +10,6 @@ import (
 
 	fakecmd "github.com/cloudfoundry/bosh-utils/fileutil/fakes"
 	fakesys "github.com/cloudfoundry/bosh-utils/system/fakes"
-	fakeuuid "github.com/cloudfoundry/bosh-utils/uuid/fakes"
 
 	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
 
@@ -23,7 +22,6 @@ var _ = Describe("concreteFactory", func() {
 	var (
 		softLayerClient *fakeslclient.FakeSoftLayerClient
 		fs              *fakesys.FakeFileSystem
-		uuidGenerator   *fakeuuid.FakeGenerator
 		cmdRunner       *fakesys.FakeCmdRunner
 		compressor      *fakecmd.FakeCompressor
 		logger          boshlog.Logger
@@ -53,7 +51,6 @@ var _ = Describe("concreteFactory", func() {
 			softLayerClient,
 			options,
 			logger,
-			uuidGenerator,
 			fs,
 		)
 	})
@@ -67,8 +64,6 @@ var _ = Describe("concreteFactory", func() {
 			softLayerClient,
 			agentEnvServiceFactory,
 			logger,
-			uuidGenerator,
-			fs,
 		)
 	})
 
@@ -93,7 +88,6 @@ var _ = Describe("concreteFactory", func() {
 				agentEnvServiceFactory,
 				options.Agent,
 				logger,
-				uuidGenerator,
 				fs,
 			)
 
@@ -145,8 +139,6 @@ var _ = Describe("concreteFactory", func() {
 				softLayerClient,
 				agentEnvServiceFactory,
 				logger,
-				uuidGenerator,
-				fs,
 			)
 			diskFinder = bslcdisk.NewSoftLayerDiskFinder(
 				softLayerClient,
