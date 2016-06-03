@@ -11,11 +11,12 @@ import (
 	. "github.com/onsi/gomega"
 
 	"fmt"
+	"log"
+
 	testhelperscpi "github.com/cloudfoundry/bosh-softlayer-cpi/test_helpers"
 	slclient "github.com/maximilien/softlayer-go/client"
 	softlayer "github.com/maximilien/softlayer-go/softlayer"
 	testhelpers "github.com/maximilien/softlayer-go/test_helpers"
-	"log"
 )
 
 const configPath = "test_fixtures/cpi_methods/config.json"
@@ -55,7 +56,6 @@ var _ = Describe("BOSH Director Level Integration for OS Reload", func() {
 		virtualGuestService, err = testhelpers.CreateVirtualGuestService()
 		Expect(err).ToNot(HaveOccurred())
 
-		os.Setenv("OS_RELOAD_ENABLED", "TRUE")
 		os.Setenv("SQLITE_DB_FOLDER", "/tmp")
 
 		testhelpers.TIMEOUT = 35 * time.Minute
