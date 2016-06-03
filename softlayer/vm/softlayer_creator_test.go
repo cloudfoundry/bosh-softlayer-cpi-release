@@ -1,10 +1,11 @@
 package vm_test
 
 import (
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
 	"os"
 	"time"
+
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
 
@@ -40,7 +41,7 @@ var _ = Describe("SoftLayerCreator", func() {
 
 	BeforeEach(func() {
 		softLayerClient = fakeslclient.NewFakeSoftLayerClient("fake-username", "fake-api-key")
-		sshClient = fakesutil.NewFakeSshClient()
+		sshClient = &fakesutil.FakeSshClient{}
 		uuidGenerator = fakeuuid.NewFakeGenerator()
 		fs = fakesys.NewFakeFileSystem()
 		agentEnvServiceFactory = &fakevm.FakeAgentEnvServiceFactory{}
@@ -64,11 +65,10 @@ var _ = Describe("SoftLayerCreator", func() {
 
 	Describe("#Create", func() {
 		var (
-			agentID    string
-			stemcell   bslcstem.SoftLayerStemcell
-			cloudProps VMCloudProperties
-			networks   Networks
-			env        Environment
+			agentID  string
+			stemcell bslcstem.SoftLayerStemcell
+			networks Networks
+			env      Environment
 		)
 
 		Context("valid arguments", func() {
@@ -77,11 +77,10 @@ var _ = Describe("SoftLayerCreator", func() {
 				stemcell = bslcstem.NewSoftLayerStemcell(1234, "fake-stemcell-uuid", fakestem.FakeStemcellKind, softLayerClient, logger)
 				networks = Networks{}
 				env = Environment{}
-
 			})
 
 			It("returns a new SoftLayerVM with ephemeral size", func() {
-				cloudProps = VMCloudProperties{
+				cloudProps := VMCloudProperties{
 					StartCpus: 4,
 					MaxMemory: 2048,
 					Domain:    "fake-domain.com",
@@ -101,24 +100,26 @@ var _ = Describe("SoftLayerCreator", func() {
 					SshKeys:                      []sldatatypes.SshKey{{Id: 74826}},
 					BlockDevices: []sldatatypes.BlockDevice{{
 						Device:    "0",
-						DiskImage: sldatatypes.DiskImage{Capacity: 100}}},
+						DiskImage: sldatatypes.DiskImage{Capacity: 100},
+					}},
 					NetworkComponents: []sldatatypes.NetworkComponents{{MaxSpeed: 1000}},
 					PrimaryNetworkComponent: sldatatypes.PrimaryNetworkComponent{
-						NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
+						NetworkVlan: sldatatypes.NetworkVlan{Id: 524956},
+					},
 					PrimaryBackendNetworkComponent: sldatatypes.PrimaryBackendNetworkComponent{
-						NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
+						NetworkVlan: sldatatypes.NetworkVlan{Id: 524956},
+					},
 				}
-				expectedCmdResults := []string{
-					"",
-				}
-				testhelpers.SetTestFixturesForFakeSSHClient(sshClient, expectedCmdResults, nil)
+
 				setFakeSoftLayerClientCreateObjectTestFixturesWithEphemeralDiskSize(softLayerClient)
+
 				vm, err := creator.CreateBySoftlayer(agentID, stemcell, cloudProps, networks, env)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(vm.ID()).To(Equal(1234567))
 			})
+
 			It("returns a new SoftLayerVM without ephemeral size", func() {
-				cloudProps = VMCloudProperties{
+				cloudProps := VMCloudProperties{
 					StartCpus: 4,
 					MaxMemory: 2048,
 					Domain:    "fake-domain.com",
@@ -137,24 +138,26 @@ var _ = Describe("SoftLayerCreator", func() {
 					SshKeys:                      []sldatatypes.SshKey{{Id: 74826}},
 					BlockDevices: []sldatatypes.BlockDevice{{
 						Device:    "0",
-						DiskImage: sldatatypes.DiskImage{Capacity: 100}}},
+						DiskImage: sldatatypes.DiskImage{Capacity: 100},
+					}},
 					NetworkComponents: []sldatatypes.NetworkComponents{{MaxSpeed: 1000}},
 					PrimaryNetworkComponent: sldatatypes.PrimaryNetworkComponent{
-						NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
+						NetworkVlan: sldatatypes.NetworkVlan{Id: 524956},
+					},
 					PrimaryBackendNetworkComponent: sldatatypes.PrimaryBackendNetworkComponent{
-						NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
+						NetworkVlan: sldatatypes.NetworkVlan{Id: 524956},
+					},
 				}
-				expectedCmdResults := []string{
-					"",
-				}
-				testhelpers.SetTestFixturesForFakeSSHClient(sshClient, expectedCmdResults, nil)
+
 				setFakeSoftLayerClientCreateObjectTestFixturesWithoutEphemeralDiskSize(softLayerClient)
+
 				vm, err := creator.CreateBySoftlayer(agentID, stemcell, cloudProps, networks, env)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(vm.ID()).To(Equal(1234567))
 			})
+
 			It("returns a new SoftLayerVM without bosh ip", func() {
-				cloudProps = VMCloudProperties{
+				cloudProps := VMCloudProperties{
 					StartCpus: 4,
 					MaxMemory: 2048,
 					Domain:    "fake-domain.com",
@@ -173,19 +176,19 @@ var _ = Describe("SoftLayerCreator", func() {
 					SshKeys:                      []sldatatypes.SshKey{{Id: 74826}},
 					BlockDevices: []sldatatypes.BlockDevice{{
 						Device:    "0",
-						DiskImage: sldatatypes.DiskImage{Capacity: 100}}},
+						DiskImage: sldatatypes.DiskImage{Capacity: 100},
+					}},
 					NetworkComponents: []sldatatypes.NetworkComponents{{MaxSpeed: 1000}},
 					PrimaryNetworkComponent: sldatatypes.PrimaryNetworkComponent{
-						NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
+						NetworkVlan: sldatatypes.NetworkVlan{Id: 524956},
+					},
 					PrimaryBackendNetworkComponent: sldatatypes.PrimaryBackendNetworkComponent{
-						NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
+						NetworkVlan: sldatatypes.NetworkVlan{Id: 524956},
+					},
 				}
 
-				expectedCmdResults := []string{
-					"",
-				}
-				testhelpers.SetTestFixturesForFakeSSHClient(sshClient, expectedCmdResults, nil)
 				setFakeSoftLayerClientCreateObjectTestFixturesWithoutBoshIP(softLayerClient)
+
 				vm, err := creator.CreateBySoftlayer(agentID, stemcell, cloudProps, networks, env)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(vm.ID()).To(Equal(1234567))
@@ -204,7 +207,7 @@ var _ = Describe("SoftLayerCreator", func() {
 				})
 
 				It("fails when VMProperties is missing StartCpus", func() {
-					cloudProps = VMCloudProperties{
+					cloudProps := VMCloudProperties{
 						MaxMemory:  2048,
 						Datacenter: sldatatypes.Datacenter{Name: "fake-datacenter"},
 					}
@@ -214,7 +217,7 @@ var _ = Describe("SoftLayerCreator", func() {
 				})
 
 				It("fails when VMProperties is missing MaxMemory", func() {
-					cloudProps = VMCloudProperties{
+					cloudProps := VMCloudProperties{
 						StartCpus:  4,
 						Datacenter: sldatatypes.Datacenter{Name: "fake-datacenter"},
 					}
@@ -224,7 +227,7 @@ var _ = Describe("SoftLayerCreator", func() {
 				})
 
 				It("fails when VMProperties is missing Domain", func() {
-					cloudProps = VMCloudProperties{
+					cloudProps := VMCloudProperties{
 						StartCpus: 4,
 						MaxMemory: 1024,
 					}
@@ -257,7 +260,6 @@ func setFakeSoftLayerClientCreateObjectTestFixturesWithEphemeralDiskSize(fakeSof
 func setFakeSoftLayerClientCreateObjectTestFixturesWithoutEphemeralDiskSize(fakeSoftLayerClient *fakeslclient.FakeSoftLayerClient) {
 	fileNames := []string{
 		"SoftLayer_Virtual_Guest_Service_createObject.json",
-
 		"SoftLayer_Virtual_Guest_Service_getLastTransaction.json",
 
 		"SoftLayer_Virtual_Guest_Service_getObject.json",
