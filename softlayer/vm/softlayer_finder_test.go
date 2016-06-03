@@ -23,7 +23,7 @@ var _ = Describe("SoftLayerFinder", func() {
 		fs                     *fakesys.FakeFileSystem
 		uuidGenerator          *fakeuuid.FakeGenerator
 		logger                 boshlog.Logger
-		finder                 SoftLayerFinder
+		finder softLayerFinder
 	)
 
 	BeforeEach(func() {

@@ -6,13 +6,12 @@ import (
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	boshsys "github.com/cloudfoundry/bosh-utils/system"
-	boshuuid "github.com/cloudfoundry/bosh-utils/uuid"
-
-	slclient "github.com/maximilien/softlayer-go/client"
 
 	bslcaction "github.com/cloudfoundry/bosh-softlayer-cpi/action"
 	bslcdisp "github.com/cloudfoundry/bosh-softlayer-cpi/api/dispatcher"
 	bslctrans "github.com/cloudfoundry/bosh-softlayer-cpi/api/transport"
+
+	"github.com/cloudfoundry/bosh-softlayer-cpi/config"
 )
 
 const mainLogTag = "main"
@@ -23,7 +22,7 @@ var (
 )
 
 func main() {
-	logger, fs, cmdRunner, uuidGenerator := basicDeps()
+	logger, fs, cmdRunner := basicDeps()
 
 	defer logger.HandlePanic("Main")
 
@@ -33,13 +32,13 @@ func main() {
 		os.Exit(0)
 	}
 
-	config, err := NewConfigFromPath(*configPathOpt, fs)
+	config, err := config.NewConfigFromPath(*configPathOpt, fs)
 	if err != nil {
 		logger.Error(mainLogTag, "Loading config %s", err.Error())
 		os.Exit(1)
 	}
 
-	dispatcher := buildDispatcher(config, logger, fs, cmdRunner, uuidGenerator)
+	dispatcher := buildDispatcher(config, logger, fs, cmdRunner)
 
 	cli := bslctrans.NewCLI(os.Stdin, os.Stdout, dispatcher, logger)
 
@@ -50,26 +49,20 @@ func main() {
 	}
 }
 
-func basicDeps() (boshlog.Logger, boshsys.FileSystem, boshsys.CmdRunner, boshuuid.Generator) {
+func basicDeps() (boshlog.Logger, boshsys.FileSystem, boshsys.CmdRunner) {
 	logger := boshlog.NewWriterLogger(boshlog.LevelDebug, os.Stderr, os.Stderr)
 
 	fs := boshsys.NewOsFileSystem(logger)
 
-	uuidGenerator := boshuuid.NewGenerator()
-
 	cmdRunner := boshsys.NewExecCmdRunner(logger)
 
-	return logger, fs, cmdRunner, uuidGenerator
+	return logger, fs, cmdRunner
 }
 
-func buildDispatcher(config Config, logger boshlog.Logger, fs boshsys.FileSystem, cmdRunner boshsys.CmdRunner, uuidGenerator boshuuid.Generator) bslcdisp.Dispatcher {
-	softLayerClient := slclient.NewSoftLayerClient(config.Cloud.Properties.Softlayer.Username, config.Cloud.Properties.Softlayer.ApiKey)
-
+func buildDispatcher(config config.Config, logger boshlog.Logger, fs boshsys.FileSystem, cmdRunner boshsys.CmdRunner) bslcdisp.Dispatcher {
 	actionFactory := bslcaction.NewConcreteFactory(
-		softLayerClient,
 		config.Cloud.Properties,
 		logger,
-		uuidGenerator,
 		fs,
 	)
 

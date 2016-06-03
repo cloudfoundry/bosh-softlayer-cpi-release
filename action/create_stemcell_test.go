@@ -14,7 +14,7 @@ import (
 var _ = Describe("CreateStemcell", func() {
 	var (
 		stemcellFinder *fakestem.FakeFinder
-		action         CreateStemcell
+		action createStemcell
 	)
 
 	BeforeEach(func() {

@@ -14,7 +14,7 @@ import (
 var _ = Describe("RebootVM", func() {
 	var (
 		vmFinder *fakevm.FakeFinder
-		action   RebootVM
+		action rebootVM
 	)
 
 	BeforeEach(func() {

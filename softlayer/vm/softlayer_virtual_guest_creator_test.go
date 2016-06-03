@@ -3,7 +3,6 @@ package vm_test
 import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"os"
 	"time"
 
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
@@ -36,7 +35,7 @@ var _ = Describe("SoftLayerCreator", func() {
 		vmFinder               *fakevm.FakeFinder
 		agentOptions           AgentOptions
 		logger                 boshlog.Logger
-		creator                SoftLayerCreator
+		creator                VMCreator
 	)
 
 	BeforeEach(func() {

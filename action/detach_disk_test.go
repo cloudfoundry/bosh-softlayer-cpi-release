@@ -16,7 +16,7 @@ var _ = Describe("DetachDisk", func() {
 	var (
 		vmFinder   *fakevm.FakeFinder
 		diskFinder *fakedisk.FakeFinder
-		action     DetachDisk
+		action detachDisk
 	)
 
 	BeforeEach(func() {

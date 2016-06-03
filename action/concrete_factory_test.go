@@ -50,10 +50,8 @@ var _ = Describe("concreteFactory", func() {
 		logger = boshlog.NewLogger(boshlog.LevelNone)
 
 		factory = NewConcreteFactory(
-			softLayerClient,
 			options,
 			logger,
-			uuidGenerator,
 			fs,
 		)
 	})

@@ -1,4 +1,4 @@
-package baremetal_test
+package config_test
 
 import (
 	. "github.com/onsi/ginkgo"
@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestBaremetal(t *testing.T) {
+func TestConfig(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Baremetal Suite")
+	RunSpecs(t, "Config Suite")
 }

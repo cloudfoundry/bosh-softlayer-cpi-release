@@ -6,7 +6,7 @@ import (
 	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
 )
 
-type CreateStemcell struct {
+type createStemcell struct {
 	stemcellFinder bslcstem.Finder
 }
 
@@ -16,11 +16,13 @@ type CreateStemcellCloudProps struct {
 	DatacenterName string `json:"datacenter-name"`
 }
 
-func NewCreateStemcell(stemcellFinder bslcstem.Finder) CreateStemcell {
-	return CreateStemcell{stemcellFinder: stemcellFinder}
+func NewCreateStemcell(stemcellFinder bslcstem.Finder) Action {
+	return &createStemcell {
+		stemcellFinder: stemcellFinder,
+	}
 }
 
-func (a CreateStemcell) Run(imagePath string, stemcellCloudProps CreateStemcellCloudProps) (string, error) {
+func (a *createStemcell) Run(imagePath string, stemcellCloudProps CreateStemcellCloudProps) (string, error) {
 	stemcell, found, err := a.stemcellFinder.FindById(stemcellCloudProps.Id)
 	if err != nil {
 		return "0", bosherr.WrapErrorf(err, "Finding stemcell with ID '%d'", stemcellCloudProps.Id)

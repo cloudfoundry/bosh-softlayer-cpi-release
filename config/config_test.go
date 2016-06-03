@@ -1,4 +1,4 @@
-package main_test
+package config_test
 
 import (
 	"errors"
@@ -8,11 +8,11 @@ import (
 
 	fakesys "github.com/cloudfoundry/bosh-utils/system/fakes"
 
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/main"
-
 	bslcaction "github.com/cloudfoundry/bosh-softlayer-cpi/action"
 
 	bslcvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
+
+	"github.com/cloudfoundry/bosh-softlayer-cpi/config"
 )
 
 var validProperties = bslcaction.ConcreteFactoryOptions{
@@ -37,12 +37,12 @@ var validSoftLayerConfig = bslcaction.SoftLayerConfig{
 	ApiKey:   "fake-api-key",
 }
 
-var validCloudConfig = CloudConfig{
+var validCloudConfig = config.CloudConfig{
 	Plugin:     "softlayer",
 	Properties: validProperties,
 }
 
-var validConfig = Config{
+var validConfig = config.Config{
 	Cloud: validCloudConfig,
 }
 
@@ -59,7 +59,7 @@ var _ = Describe("NewConfigFromPath", func() {
 		err := fs.WriteFileString("/config.json", "{}")
 		Expect(err).ToNot(HaveOccurred())
 
-		_, err = NewConfigFromPath("/config.json", fs)
+		_, err = config.NewConfigFromPath("/config.json", fs)
 		Expect(err).To(HaveOccurred())
 		Expect(err.Error()).To(ContainSubstring("Validating config"))
 	})
@@ -68,7 +68,7 @@ var _ = Describe("NewConfigFromPath", func() {
 		err := fs.WriteFileString("/config.json", "-")
 		Expect(err).ToNot(HaveOccurred())
 
-		_, err = NewConfigFromPath("/config.json", fs)
+		_, err = config.NewConfigFromPath("/config.json", fs)
 		Expect(err).To(HaveOccurred())
 		Expect(err.Error()).To(ContainSubstring("Unmarshalling config"))
 	})
@@ -79,7 +79,7 @@ var _ = Describe("NewConfigFromPath", func() {
 
 		fs.ReadFileError = errors.New("fake-read-err")
 
-		_, err = NewConfigFromPath("/config.json", fs)
+		_, err = config.NewConfigFromPath("/config.json", fs)
 		Expect(err).To(HaveOccurred())
 		Expect(err.Error()).To(ContainSubstring("fake-read-err"))
 	})
@@ -87,7 +87,7 @@ var _ = Describe("NewConfigFromPath", func() {
 
 var _ = Describe("Config", func() {
 	var (
-		config Config
+		config config.Config
 	)
 
 	Describe("Validate", func() {

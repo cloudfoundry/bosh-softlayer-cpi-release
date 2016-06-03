@@ -5,10 +5,14 @@ import (
 	"fmt"
 	"strconv"
 	"time"
+	"os"
+	"text/template"
 
 	sldatatypes "github.com/maximilien/softlayer-go/data_types"
 
 	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
+
+	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 )
 
 func CreateDisksSpec(ephemeralDiskSize int) DisksSpec {
@@ -80,3 +84,53 @@ func Base64EncodeData(unEncodedData string) string {
 	dataBytes := []byte(unEncodedData)
 	return base64.StdEncoding.EncodeToString(dataBytes)
 }
+
+func UpdateDavConfig(config *DavConfig, directorIP string) (err error) {
+	url := (*config)["endpoint"].(string)
+	mbus, err := parseMbusURL(url, directorIP)
+	if err != nil {
+		return bosherr.WrapError(err, "Parsing Mbus URL")
+	}
+
+	(*config)["endpoint"] = mbus
+
+	return nil
+}
+
+func ParseMbusURL(mbusURL string, primaryBackendIpAddress string) (string, error) {
+	parsedURL, err := url.Parse(mbusURL)
+	if err != nil {
+		return "", bosherr.WrapError(err, "Parsing Mbus URL")
+	}
+	var username, password, port string
+	_, port, _ = net.SplitHostPort(parsedURL.Host)
+	userInfo := parsedURL.User
+	if userInfo != nil {
+		username = userInfo.Username()
+		password, _ = userInfo.Password()
+		return fmt.Sprintf("%s://%s:%s@%s:%s", parsedURL.Scheme, username, password, primaryBackendIpAddress, port), nil
+	}
+
+	return fmt.Sprintf("%s://%s:%s", parsedURL.Scheme, primaryBackendIpAddress, port), nil
+}
+
+func UpdateEtcHostsOfBoshInit(record string) (err error) {
+	buffer := bytes.NewBuffer([]byte{})
+	t := template.Must(template.New("etc-hosts").Parse(ETC_HOSTS_TEMPLATE))
+
+	err = t.Execute(buffer, record)
+	if err != nil {
+		return bosherr.WrapError(err, "Generating config from template")
+	}
+
+	err = c.fs.WriteFile("/etc/hosts", buffer.Bytes())
+	if err != nil {
+		return bosherr.WrapError(err, "Writing to /etc/hosts")
+	}
+
+	return nil
+}
+
+const ETC_HOSTS_TEMPLATE = `127.0.0.1 localhost
+{{.}}
+`

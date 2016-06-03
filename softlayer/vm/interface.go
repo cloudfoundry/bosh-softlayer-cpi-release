@@ -44,10 +44,8 @@ type AllowedHostCredential struct {
 
 type VMMetadata map[string]interface{}
 
-type Creator interface {
-	CreateBySoftlayer(string, bslcstem.Stemcell, VMCloudProperties, Networks, Environment) (VM, error)
-	CreateByOSReload(string, bslcstem.Stemcell, VMCloudProperties, Networks, Environment) (VM, error)
-	CreateByBPS(string, bslcstem.Stemcell, VMCloudProperties, Networks, Environment) (VM, error)
+type VMCreator interface {
+	Create(string, bslcstem.Stemcell, VMCloudProperties, Networks, Environment) (VM, error)
 }
 
 type Finder interface {
@@ -106,6 +104,7 @@ node.conn[0].iscsi.MaxRecvDataSegmentLength = 65536
 
 const (
 	SOFTLAYER_HARDWARE_LOG_TAG = "SoftLayerHardware"
+	SOFTLAYER_VM_FINDER_LOG_TAG = "SoftLayerVMFinder"
 	SOFTLAYER_VM_OS_RELOAD_TAG = "OSReload"
 	SOFTLAYER_VM_LOG_TAG       = "SoftLayerVM"
 	ROOT_USER_NAME             = "root"

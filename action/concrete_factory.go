@@ -6,9 +6,9 @@ import (
 	boshsys "github.com/cloudfoundry/bosh-utils/system"
 	boshuuid "github.com/cloudfoundry/bosh-utils/uuid"
 
-	sl "github.com/maximilien/softlayer-go/softlayer"
+	slclient "github.com/maximilien/softlayer-go/client"
+        bmsclient "github.com/cloudfoundry-community/bosh-softlayer-tools/clients"
 
-	bslcbm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/baremetal"
 	bslcdisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk"
 	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
 	bslcvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
@@ -18,7 +18,11 @@ type concreteFactory struct {
 	availableActions map[string]Action
 }
 
-func NewConcreteFactory(softLayerClient sl.Client, options ConcreteFactoryOptions, logger boshlog.Logger, uuidGenerator boshuuid.Generator, fs boshsys.FileSystem) concreteFactory {
+func NewConcreteFactory(options ConcreteFactoryOptions, logger boshlog.Logger, fs boshsys.FileSystem) concreteFactory {
+	uuidGenerator := boshuuid.NewGenerator()
+
+	softLayerClient := slclient.NewSoftLayerClient(options.Softlayer.Username, options.Softlayer.ApiKey)
+	baremetalClient := bmsclient.NewBmpClient(options.Baremetal.Username, options.Baremetal.Password, options.Baremetal.EndPoint, nil, nil )
 
 	stemcellFinder := bslcstem.NewSoftLayerFinder(softLayerClient, logger)
 
@@ -26,24 +30,21 @@ func NewConcreteFactory(softLayerClient sl.Client, options ConcreteFactoryOption
 
 	vmFinder := bslcvm.NewSoftLayerFinder(
 		softLayerClient,
+		baremetalClient,
 		agentEnvServiceFactory,
 		logger,
 		uuidGenerator,
 		fs,
 	)
 
-	vmCreator := bslcvm.NewSoftLayerCreator(
+	vmCreatorProvider := NewProvider(
 		softLayerClient,
-		agentEnvServiceFactory,
-		options.Agent,
+		baremetalClient,
+		options,
 		logger,
 		uuidGenerator,
 		fs,
-		vmFinder,
 	)
-
-	bmCreator := bslcbm.NewBaremetalCreator(softLayerClient, logger)
-	bmFinder := bslcbm.NewBaremetalFinder(softLayerClient, logger)
 
 	diskCreator := bslcdisk.NewSoftLayerDiskCreator(
 		softLayerClient,
@@ -62,7 +63,7 @@ func NewConcreteFactory(softLayerClient sl.Client, options ConcreteFactoryOption
 			"delete_stemcell": NewDeleteStemcell(stemcellFinder, logger),
 
 			// VM management
-			"create_vm":          NewCreateVM(stemcellFinder, vmCreator),
+			"create_vm":          NewCreateVM(stemcellFinder, vmCreatorProvider),
 			"delete_vm":          NewDeleteVM(vmFinder),
 			"has_vm":             NewHasVM(vmFinder),
 			"reboot_vm":          NewRebootVM(vmFinder),
@@ -74,8 +75,6 @@ func NewConcreteFactory(softLayerClient sl.Client, options ConcreteFactoryOption
 			"delete_disk": NewDeleteDisk(diskFinder),
 			"attach_disk": NewAttachDisk(vmFinder, diskFinder),
 			"detach_disk": NewDetachDisk(vmFinder, diskFinder),
-
-			"establish_bare_metal_env": NewEstablishBareMetalEnv(bmCreator, bmFinder),
 
 			// Not implemented (disk related):
 			//   snapshot_disk

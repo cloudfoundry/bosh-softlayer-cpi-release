@@ -9,23 +9,24 @@ import (
 
 	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 
-	util "github.com/cloudfoundry/bosh-softlayer-cpi/util"
+	"github.com/cloudfoundry/bosh-softlayer-cpi/util"
 	sl "github.com/maximilien/softlayer-go/softlayer"
+	bmscl "github.com/cloudfoundry-community/bosh-softlayer-tools/clients"
 )
 
-const SOFTLAYER_VM_FINDER_LOG_TAG = "SoftLayerVMFinder"
-
-type SoftLayerFinder struct {
+type softLayerFinder struct {
 	softLayerClient        sl.Client
+	baremetalClient        bmscl.BmpClient
 	agentEnvServiceFactory AgentEnvServiceFactory
 	logger                 boshlog.Logger
 	uuidGenerator          boshuuid.Generator
 	fs                     boshsys.FileSystem
 }
 
-func NewSoftLayerFinder(softLayerClient sl.Client, agentEnvServiceFactory AgentEnvServiceFactory, logger boshlog.Logger, uuidGenerator boshuuid.Generator, fs boshsys.FileSystem) SoftLayerFinder {
-	return SoftLayerFinder{
+func NewSoftLayerFinder(softLayerClient sl.Client, baremetalClient bmscl.BmpClient, agentEnvServiceFactory AgentEnvServiceFactory, logger boshlog.Logger, uuidGenerator boshuuid.Generator, fs boshsys.FileSystem) Finder {
+	return &softLayerFinder{
 		softLayerClient:        softLayerClient,
+		baremetalClient:        baremetalClient,
 		agentEnvServiceFactory: agentEnvServiceFactory,
 		logger:                 logger,
 		uuidGenerator:          uuidGenerator,
@@ -33,7 +34,7 @@ func NewSoftLayerFinder(softLayerClient sl.Client, agentEnvServiceFactory AgentE
 	}
 }
 
-func (f SoftLayerFinder) Find(vmID int) (VM, bool, error) {
+func (f *softLayerFinder) Find(vmID int) (VM, bool, error) {
 	softlayerFileService := NewSoftlayerFileService(util.GetSshClient(), f.logger, f.uuidGenerator, f.fs)
 	agentEnvService := f.agentEnvServiceFactory.New(softlayerFileService, strconv.Itoa(vmID))
 
@@ -41,9 +42,9 @@ func (f SoftLayerFinder) Find(vmID int) (VM, bool, error) {
 	if err != nil {
 		_, err := bslcommon.GetObjectDetailsOnHardware(f.softLayerClient, vmID)
 		if err != nil {
-			return SoftLayerHardware{}, false, bosherr.Errorf("Failed to find VM or Baremetal %d", vmID)
+			return nil, false, bosherr.Errorf("Failed to find VM or Baremetal %d", vmID)
 		}
-		vm := NewSoftLayerHardware(vmID, f.softLayerClient, util.GetSshClient(), agentEnvService, f.logger)
+		vm := NewSoftLayerHardware(vmID, f.softLayerClient,f.baremetalClient, util.GetSshClient(), agentEnvService, f.logger)
 		softlayerFileService.SetVM(vm)
 		return vm, true, nil
 	}

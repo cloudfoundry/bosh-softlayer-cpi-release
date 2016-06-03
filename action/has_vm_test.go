@@ -14,7 +14,7 @@ import (
 var _ = Describe("HasVM", func() {
 	var (
 		vmFinder *fakevm.FakeFinder
-		action   HasVM
+		action hasVM
 	)
 
 	BeforeEach(func() {

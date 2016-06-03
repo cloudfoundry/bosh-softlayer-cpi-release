@@ -14,7 +14,7 @@ import (
 var _ = Describe("ConfigureNetworks", func() {
 	var (
 		vmFinder *fakevm.FakeFinder
-		action   ConfigureNetworks
+		action configureNetworks
 		networks Networks
 	)
 

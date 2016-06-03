@@ -16,7 +16,7 @@ var _ = Describe("SetVMMetadata", func() {
 	var (
 		vmID     action.VMCID
 		vmFinder *fakevm.FakeFinder
-		action   SetVMMetadata
+		action setVMMetadata
 		metadata bslcvm.VMMetadata
 	)
 

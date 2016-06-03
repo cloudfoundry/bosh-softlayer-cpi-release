@@ -12,23 +12,23 @@ import (
 	sldatatypes "github.com/maximilien/softlayer-go/data_types"
 )
 
-type CreateVM struct {
+type createVM struct {
 	stemcellFinder    bslcstem.Finder
-	vmCreator         bslcvm.Creator
+	vmCreatorProvider         Provider
 	vmCloudProperties *bslcvm.VMCloudProperties
 }
 
 type Environment map[string]interface{}
 
-func NewCreateVM(stemcellFinder bslcstem.Finder, vmCreator bslcvm.Creator) CreateVM {
-	return CreateVM{
+func NewCreateVM(stemcellFinder bslcstem.Finder, vmCreatorProvider Provider) Action {
+	return &createVM{
 		stemcellFinder:    stemcellFinder,
-		vmCreator:         vmCreator,
+		vmCreatorProvider:  vmCreatorProvider,
 		vmCloudProperties: &bslcvm.VMCloudProperties{},
 	}
 }
 
-func (a CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps bslcvm.VMCloudProperties, networks Networks, diskIDs []DiskCID, env Environment) (string, error) {
+func (a *createVM) Run(agentID string, stemcellCID StemcellCID, cloudProps bslcvm.VMCloudProperties, networks Networks, diskIDs []DiskCID, env Environment) (string, error) {
 	vmNetworks := networks.AsVMNetworks()
 	vmEnv := bslcvm.Environment(env)
 
@@ -36,39 +36,39 @@ func (a CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps bslcvm
 
 	stemcell, found, err := a.stemcellFinder.FindById(int(stemcellCID))
 	if err != nil {
-		return "0", bosherr.WrapErrorf(err, "Finding stemcell '%s'", stemcellCID)
+		return "", bosherr.WrapErrorf(err, "Finding stemcell '%s'", stemcellCID)
 	}
 
 	if !found {
-		return "0", bosherr.Errorf("Expected to find stemcell '%s'", stemcellCID)
+		return "", bosherr.Errorf("Expected to find stemcell '%s'", stemcellCID)
 	}
 
 	if cloudProps.Baremetal {
-		vm, err := a.vmCreator.CreateByBPS(agentID, stemcell, cloudProps, vmNetworks, vmEnv)
+		vmCreator, err := a.vmCreatorProvider.Get("baremetal")
 		if err != nil {
-			return "0", bosherr.WrapErrorf(err, "Creating Baremetal with agent ID '%s'", agentID)
+			return "", bosherr.WrapError(err, "Failed to get baremetal creator'")
+		}
+
+		vm, err := vmCreator.Create(agentID, stemcell, cloudProps, vmNetworks, vmEnv)
+		if err != nil {
+			return "", bosherr.WrapErrorf(err, "Creating Baremetal with agent ID '%s'", agentID)
 		}
 		return VMCID(vm.ID()).String(), nil
-	}
-
-	if len(vmNetworks.First().IP) == 0 {
-
-		vm, err := a.vmCreator.CreateBySoftlayer(agentID, stemcell, cloudProps, vmNetworks, vmEnv)
-		if err != nil {
-			return "0", bosherr.WrapErrorf(err, "Creating VM with agent ID '%s'", agentID)
-		}
-		return VMCID(vm.ID()).String(), nil
-
 	} else {
-		vm, err := a.vmCreator.CreateByOSReload(agentID, stemcell, cloudProps, vmNetworks, vmEnv)
+		vmCreator, err := a.vmCreatorProvider.Get("virtualguest")
 		if err != nil {
-			return "0", bosherr.WrapErrorf(err, "OS Reloading VM with agent ID '%s'", agentID)
+			return "", bosherr.WrapError(err, "Failed to get virtual_guest creator'")
+		}
+
+		vm, err := vmCreator.Create(agentID, stemcell, cloudProps, vmNetworks, vmEnv)
+		if err != nil {
+			return "", bosherr.WrapErrorf(err, "Creating Virtual_Guest with agent ID '%s'", agentID)
 		}
 		return VMCID(vm.ID()).String(), nil
 	}
 }
 
-func (a CreateVM) UpdateCloudProperties(cloudProps *bslcvm.VMCloudProperties) {
+func (a *createVM) UpdateCloudProperties(cloudProps *bslcvm.VMCloudProperties) {
 
 	a.vmCloudProperties = cloudProps
 
