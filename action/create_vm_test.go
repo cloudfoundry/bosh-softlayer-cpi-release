@@ -20,7 +20,7 @@ var _ = Describe("CreateVM", func() {
 	var (
 		stemcellFinder *fakestem.FakeFinder
 		vmCreator      *fakevm.FakeCreator
-		action createVM
+		action         createVM
 	)
 
 	BeforeEach(func() {

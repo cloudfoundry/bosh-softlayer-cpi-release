@@ -9,9 +9,9 @@ import (
 
 	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 
+	bmscl "github.com/cloudfoundry-community/bosh-softlayer-tools/clients"
 	"github.com/cloudfoundry/bosh-softlayer-cpi/util"
 	sl "github.com/maximilien/softlayer-go/softlayer"
-	bmscl "github.com/cloudfoundry-community/bosh-softlayer-tools/clients"
 )
 
 type softLayerFinder struct {
@@ -44,7 +44,7 @@ func (f *softLayerFinder) Find(vmID int) (VM, bool, error) {
 		if err != nil {
 			return nil, false, bosherr.Errorf("Failed to find VM or Baremetal %d", vmID)
 		}
-		vm := NewSoftLayerHardware(vmID, f.softLayerClient,f.baremetalClient, util.GetSshClient(), agentEnvService, f.logger)
+		vm := NewSoftLayerHardware(vmID, f.softLayerClient, f.baremetalClient, util.GetSshClient(), agentEnvService, f.logger)
 		softlayerFileService.SetVM(vm)
 		return vm, true, nil
 	}

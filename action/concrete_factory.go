@@ -6,8 +6,8 @@ import (
 	boshsys "github.com/cloudfoundry/bosh-utils/system"
 	boshuuid "github.com/cloudfoundry/bosh-utils/uuid"
 
+	bmsclient "github.com/cloudfoundry-community/bosh-softlayer-tools/clients"
 	slclient "github.com/maximilien/softlayer-go/client"
-        bmsclient "github.com/cloudfoundry-community/bosh-softlayer-tools/clients"
 
 	bslcdisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk"
 	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
@@ -22,7 +22,7 @@ func NewConcreteFactory(options ConcreteFactoryOptions, logger boshlog.Logger, f
 	uuidGenerator := boshuuid.NewGenerator()
 
 	softLayerClient := slclient.NewSoftLayerClient(options.Softlayer.Username, options.Softlayer.ApiKey)
-	baremetalClient := bmsclient.NewBmpClient(options.Baremetal.Username, options.Baremetal.Password, options.Baremetal.EndPoint, nil, nil )
+	baremetalClient := bmsclient.NewBmpClient(options.Baremetal.Username, options.Baremetal.Password, options.Baremetal.EndPoint, nil, nil)
 
 	stemcellFinder := bslcstem.NewSoftLayerFinder(softLayerClient, logger)
 

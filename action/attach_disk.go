@@ -17,7 +17,7 @@ type attachDisk struct {
 }
 
 func NewAttachDisk(vmFinder bslcvm.Finder, diskFinder bslcdisk.Finder) Action {
-	return &attachDisk {
+	return &attachDisk{
 		vmFinder:   vmFinder,
 		diskFinder: diskFinder,
 	}

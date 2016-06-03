@@ -1,8 +1,8 @@
 package action
 
 import (
-	sl "github.com/maximilien/softlayer-go/softlayer"
 	bmscl "github.com/cloudfoundry-community/bosh-softlayer-tools/clients"
+	sl "github.com/maximilien/softlayer-go/softlayer"
 
 	bosherror "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
@@ -22,10 +22,11 @@ type provider struct {
 
 func NewProvider(softLayerClient sl.Client, baremetalClient bmscl.BmpClient, options ConcreteFactoryOptions, logger boshlog.Logger, uuidGenerator boshuuid.Generator, fs boshsys.FileSystem) Provider {
 
-	agentEnvServiceFactory := bslcvm.NewSoftLayerAgentEnvServiceFactory(options., options.Registry, logger)
+	agentEnvServiceFactory := bslcvm.NewSoftLayerAgentEnvServiceFactory(options.AgentEnvService, options.Registry, logger)
 
 	vmFinder := bslcvm.NewSoftLayerFinder(
 		softLayerClient,
+		baremetalClient,
 		agentEnvServiceFactory,
 		logger,
 		uuidGenerator,
@@ -56,7 +57,7 @@ func NewProvider(softLayerClient sl.Client, baremetalClient bmscl.BmpClient, opt
 	return provider{
 		creators: map[string]bslcvm.VMCreator{
 			"virtualguest": virtualGuestCreator,
-			"baremetal": baremetalCreator,
+			"baremetal":    baremetalCreator,
 		},
 	}
 }

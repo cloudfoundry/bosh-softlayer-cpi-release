@@ -17,7 +17,7 @@ type CreateStemcellCloudProps struct {
 }
 
 func NewCreateStemcell(stemcellFinder bslcstem.Finder) Action {
-	return &createStemcell {
+	return &createStemcell{
 		stemcellFinder: stemcellFinder,
 	}
 }

@@ -15,8 +15,8 @@ import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
-	sl "github.com/maximilien/softlayer-go/softlayer"
 	bmscl "github.com/cloudfoundry-community/bosh-softlayer-tools/clients"
+	sl "github.com/maximilien/softlayer-go/softlayer"
 
 	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 	bslcdisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk"
@@ -33,7 +33,7 @@ type softLayerHardware struct {
 
 	softLayerClient sl.Client
 	baremetalClient bmscl.BmpClient
-	sshClient util.SshClient
+	sshClient       util.SshClient
 
 	agentEnvService AgentEnvService
 
@@ -55,7 +55,7 @@ func NewSoftLayerHardware(id int, softLayerClient sl.Client, baremetalClient bms
 
 		softLayerClient: softLayerClient,
 		baremetalClient: baremetalClient,
-		sshClient: sshClient,
+		sshClient:       sshClient,
 
 		agentEnvService: agentEnvService,
 
@@ -67,7 +67,7 @@ func (vm *softLayerHardware) ID() int { return vm.id }
 
 func (vm *softLayerHardware) Delete(agentID string) error {
 	updateStateResponse, err := vm.baremetalClient.UpdateState(strconv.Itoa(vm.ID()), "bm.state.deleted")
-	if err != nil || updateStateResponse.Status != 200{
+	if err != nil || updateStateResponse.Status != 200 {
 		return bosherr.WrapErrorf(err, "Faled to call bms to delete baremetal:"+string(body))
 	}
 

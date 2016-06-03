@@ -16,13 +16,13 @@ import (
 	boshsys "github.com/cloudfoundry/bosh-utils/system"
 	boshuuid "github.com/cloudfoundry/bosh-utils/uuid"
 
+	bmslc "github.com/cloudfoundry-community/bosh-softlayer-tools/clients"
 	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
 	sl "github.com/maximilien/softlayer-go/softlayer"
-	bmslc "github.com/cloudfoundry-community/bosh-softlayer-tools/clients"
 
-	"github.com/cloudfoundry/bosh-softlayer-cpi/util"
 	"github.com/cloudfoundry-community/bosh-softlayer-tools/common"
+	"github.com/cloudfoundry/bosh-softlayer-cpi/util"
 )
 
 type baremetalCreator struct {

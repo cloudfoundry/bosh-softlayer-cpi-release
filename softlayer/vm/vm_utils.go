@@ -3,10 +3,10 @@ package vm
 import (
 	"encoding/base64"
 	"fmt"
-	"strconv"
-	"time"
 	"os"
+	"strconv"
 	"text/template"
+	"time"
 
 	sldatatypes "github.com/maximilien/softlayer-go/data_types"
 

@@ -39,7 +39,7 @@ func NewSoftLayerCreator(softLayerClient sl.Client, agentEnvServiceFactory Agent
 	bslcommon.TIMEOUT = 120 * time.Minute
 	bslcommon.POLLING_INTERVAL = 5 * time.Second
 
-	return &softLayerVirtualGuestCreator {
+	return &softLayerVirtualGuestCreator{
 		softLayerClient:        softLayerClient,
 		agentEnvServiceFactory: agentEnvServiceFactory,
 		agentOptions:           agentOptions,
