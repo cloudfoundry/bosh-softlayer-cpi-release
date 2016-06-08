@@ -14,7 +14,7 @@ import (
 var _ = Describe("DeleteVM", func() {
 	var (
 		vmFinder *fakevm.FakeFinder
-		action   deleteVM
+		action   DeleteVMAction
 	)
 
 	BeforeEach(func() {

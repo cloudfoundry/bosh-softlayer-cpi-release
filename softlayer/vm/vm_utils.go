@@ -1,8 +1,11 @@
 package vm
 
 import (
+	"bytes"
 	"encoding/base64"
 	"fmt"
+	"net"
+	"net/url"
 	"os"
 	"strconv"
 	"text/template"
@@ -11,6 +14,9 @@ import (
 	sldatatypes "github.com/maximilien/softlayer-go/data_types"
 
 	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
+
+	boshlog "github.com/cloudfoundry/bosh-utils/logger"
+	boshsys "github.com/cloudfoundry/bosh-utils/system"
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 )
@@ -87,7 +93,7 @@ func Base64EncodeData(unEncodedData string) string {
 
 func UpdateDavConfig(config *DavConfig, directorIP string) (err error) {
 	url := (*config)["endpoint"].(string)
-	mbus, err := parseMbusURL(url, directorIP)
+	mbus, err := ParseMbusURL(url, directorIP)
 	if err != nil {
 		return bosherr.WrapError(err, "Parsing Mbus URL")
 	}
@@ -123,7 +129,10 @@ func UpdateEtcHostsOfBoshInit(record string) (err error) {
 		return bosherr.WrapError(err, "Generating config from template")
 	}
 
-	err = c.fs.WriteFile("/etc/hosts", buffer.Bytes())
+	logger := boshlog.NewWriterLogger(boshlog.LevelError, os.Stderr, os.Stderr)
+	fs := boshsys.NewOsFileSystem(logger)
+
+	err = fs.WriteFile("/etc/hosts", buffer.Bytes())
 	if err != nil {
 		return bosherr.WrapError(err, "Writing to /etc/hosts")
 	}

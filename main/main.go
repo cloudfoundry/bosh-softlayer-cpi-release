@@ -38,7 +38,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	dispatcher := buildDispatcher(config, logger, fs, cmdRunner)
+	dispatcher := buildDispatcher(config, logger, cmdRunner)
 
 	cli := bslctrans.NewCLI(os.Stdin, os.Stdout, dispatcher, logger)
 
@@ -59,11 +59,10 @@ func basicDeps() (boshlog.Logger, boshsys.FileSystem, boshsys.CmdRunner) {
 	return logger, fs, cmdRunner
 }
 
-func buildDispatcher(config config.Config, logger boshlog.Logger, fs boshsys.FileSystem, cmdRunner boshsys.CmdRunner) bslcdisp.Dispatcher {
+func buildDispatcher(config config.Config, logger boshlog.Logger, cmdRunner boshsys.CmdRunner) bslcdisp.Dispatcher {
 	actionFactory := bslcaction.NewConcreteFactory(
 		config.Cloud.Properties,
 		logger,
-		fs,
 	)
 
 	caller := bslcdisp.NewJSONCaller()

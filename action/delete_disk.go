@@ -6,15 +6,18 @@ import (
 	bslcdisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk"
 )
 
-type deleteDisk struct {
+type DeleteDiskAction struct {
 	diskFinder bslcdisk.Finder
 }
 
-func NewDeleteDisk(diskFinder bslcdisk.Finder) Action {
-	return &deleteDisk{diskFinder: diskFinder}
+func NewDeleteDisk(
+	diskFinder bslcdisk.Finder,
+) (action DeleteDiskAction) {
+	action.diskFinder = diskFinder
+	return
 }
 
-func (a *deleteDisk) Run(diskCID DiskCID) (interface{}, error) {
+func (a DeleteDiskAction) Run(diskCID DiskCID) (interface{}, error) {
 	disk, found, err := a.diskFinder.Find(int(diskCID))
 	if err != nil {
 		return nil, bosherr.WrapErrorf(err, "Finding disk '%s'", diskCID)

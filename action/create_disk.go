@@ -7,16 +7,21 @@ import (
 	bslcvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
 )
 
-type createDisk struct {
+type CreateDiskAction struct {
 	diskCreator bslcdisk.Creator
 	vmFinder    bslcvm.Finder
 }
 
-func NewCreateDisk(vmFinder bslcvm.Finder, diskCreator bslcdisk.Creator) Action {
-	return &createDisk{diskCreator: diskCreator, vmFinder: vmFinder}
+func NewCreateDisk(
+	vmFinder bslcvm.Finder,
+	diskCreator bslcdisk.Creator,
+) (action CreateDiskAction) {
+	action.diskCreator = diskCreator
+	action.vmFinder = vmFinder
+	return
 }
 
-func (a *createDisk) Run(size int, cloudProps bslcdisk.DiskCloudProperties, instanceId VMCID) (string, error) {
+func (a CreateDiskAction) Run(size int, cloudProps bslcdisk.DiskCloudProperties, instanceId VMCID) (string, error) {
 	vm, found, err := a.vmFinder.Find(int(instanceId))
 
 	if err != nil || !found {

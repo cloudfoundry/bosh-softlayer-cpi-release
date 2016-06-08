@@ -6,15 +6,18 @@ import (
 	bslcvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
 )
 
-type rebootVM struct {
+type RebootVMAction struct {
 	vmFinder bslcvm.Finder
 }
 
-func NewRebootVM(vmFinder bslcvm.Finder) Action {
-	return &rebootVM{vmFinder: vmFinder}
+func NewRebootVM(
+	vmFinder bslcvm.Finder,
+) (action RebootVMAction) {
+	action.vmFinder = vmFinder
+	return
 }
 
-func (a *rebootVM) Run(vmCID VMCID) (interface{}, error) {
+func (a RebootVMAction) Run(vmCID VMCID) (interface{}, error) {
 	vm, found, err := a.vmFinder.Find(int(vmCID))
 	if err != nil {
 		return nil, bosherr.WrapErrorf(err, "Finding vm '%s'", vmCID)

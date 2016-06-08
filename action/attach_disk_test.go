@@ -16,7 +16,7 @@ var _ = Describe("AttachDisk", func() {
 	var (
 		vmFinder   *fakevm.FakeFinder
 		diskFinder *fakedisk.FakeFinder
-		action     attachDisk
+		action     AttachDiskAction
 	)
 
 	BeforeEach(func() {

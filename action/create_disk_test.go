@@ -18,7 +18,7 @@ var _ = Describe("CreateDisk", func() {
 	var (
 		vmFinder    *fakevm.FakeFinder
 		diskCreator *fakedisk.FakeCreator
-		action      CreateDisk
+		action      CreateDiskAction
 	)
 
 	BeforeEach(func() {

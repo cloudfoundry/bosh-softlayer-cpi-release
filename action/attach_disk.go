@@ -11,19 +11,21 @@ const (
 	Attach_Disk_Log_Tag = "AttachDisk"
 )
 
-type attachDisk struct {
+type AttachDiskAction struct {
 	vmFinder   bslcvm.Finder
 	diskFinder bslcdisk.Finder
 }
 
-func NewAttachDisk(vmFinder bslcvm.Finder, diskFinder bslcdisk.Finder) Action {
-	return &attachDisk{
-		vmFinder:   vmFinder,
-		diskFinder: diskFinder,
-	}
+func NewAttachDisk(
+	vmFinder bslcvm.Finder,
+	diskFinder bslcdisk.Finder,
+) (action AttachDiskAction) {
+	action.vmFinder = vmFinder
+	action.diskFinder = diskFinder
+	return
 }
 
-func (a *attachDisk) Run(vmCID VMCID, diskCID DiskCID) (interface{}, error) {
+func (a AttachDiskAction) Run(vmCID VMCID, diskCID DiskCID) (interface{}, error) {
 	vm, found, err := a.vmFinder.Find(vmCID.Int())
 	if err != nil {
 		return nil, bosherr.WrapErrorf(err, "Finding VM '%s'", vmCID)

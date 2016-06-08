@@ -1,7 +1,6 @@
 package action
 
 import (
-	"strconv"
 	"time"
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
@@ -12,23 +11,26 @@ import (
 	sldatatypes "github.com/maximilien/softlayer-go/data_types"
 )
 
-type createVM struct {
+type CreateVMAction struct {
 	stemcellFinder    bslcstem.Finder
 	vmCreatorProvider Provider
+	vmCreator         bslcvm.VMCreator
 	vmCloudProperties *bslcvm.VMCloudProperties
 }
 
 type Environment map[string]interface{}
 
-func NewCreateVM(stemcellFinder bslcstem.Finder, vmCreatorProvider Provider) Action {
-	return &createVM{
-		stemcellFinder:    stemcellFinder,
-		vmCreatorProvider: vmCreatorProvider,
-		vmCloudProperties: &bslcvm.VMCloudProperties{},
-	}
+func NewCreateVM(
+	stemcellFinder bslcstem.Finder,
+	vmCreatorProvider Provider,
+) (action CreateVMAction) {
+	action.stemcellFinder = stemcellFinder
+	action.vmCreatorProvider = vmCreatorProvider
+	action.vmCloudProperties = &bslcvm.VMCloudProperties{}
+	return
 }
 
-func (a *createVM) Run(agentID string, stemcellCID StemcellCID, cloudProps bslcvm.VMCloudProperties, networks Networks, diskIDs []DiskCID, env Environment) (string, error) {
+func (a CreateVMAction) Run(agentID string, stemcellCID StemcellCID, cloudProps bslcvm.VMCloudProperties, networks Networks, diskIDs []DiskCID, env Environment) (string, error) {
 	vmNetworks := networks.AsVMNetworks()
 	vmEnv := bslcvm.Environment(env)
 
@@ -36,46 +38,45 @@ func (a *createVM) Run(agentID string, stemcellCID StemcellCID, cloudProps bslcv
 
 	stemcell, found, err := a.stemcellFinder.FindById(int(stemcellCID))
 	if err != nil {
-		return "", bosherr.WrapErrorf(err, "Finding stemcell '%s'", stemcellCID)
+		return "0", bosherr.WrapErrorf(err, "Finding stemcell '%s'", stemcellCID)
 	}
 
 	if !found {
-		return "", bosherr.Errorf("Expected to find stemcell '%s'", stemcellCID)
+		return "0", bosherr.Errorf("Expected to find stemcell '%s'", stemcellCID)
 	}
 
 	if cloudProps.Baremetal {
-		vmCreator, err := a.vmCreatorProvider.Get("baremetal")
+		a.vmCreator, err = a.vmCreatorProvider.Get("baremetal")
 		if err != nil {
-			return "", bosherr.WrapError(err, "Failed to get baremetal creator'")
+			return "0", bosherr.WrapError(err, "Failed to get baremetal creator'")
 		}
 
-		vm, err := vmCreator.Create(agentID, stemcell, cloudProps, vmNetworks, vmEnv)
+		vm, err := a.vmCreator.Create(agentID, stemcell, cloudProps, vmNetworks, vmEnv)
 		if err != nil {
-			return "", bosherr.WrapErrorf(err, "Creating Baremetal with agent ID '%s'", agentID)
+			return "0", bosherr.WrapErrorf(err, "Creating Baremetal with agent ID '%s'", agentID)
 		}
 		return VMCID(vm.ID()).String(), nil
 	} else {
-		vmCreator, err := a.vmCreatorProvider.Get("virtualguest")
+		a.vmCreator, err = a.vmCreatorProvider.Get("virtualguest")
 		if err != nil {
-			return "", bosherr.WrapError(err, "Failed to get virtual_guest creator'")
+			return "0", bosherr.WrapError(err, "Failed to get virtual_guest creator'")
 		}
 
-		vm, err := vmCreator.Create(agentID, stemcell, cloudProps, vmNetworks, vmEnv)
+		vm, err := a.vmCreator.Create(agentID, stemcell, cloudProps, vmNetworks, vmEnv)
 		if err != nil {
-			return "", bosherr.WrapErrorf(err, "Creating Virtual_Guest with agent ID '%s'", agentID)
+			return "0", bosherr.WrapErrorf(err, "Creating Virtual_Guest with agent ID '%s'", agentID)
 		}
 		return VMCID(vm.ID()).String(), nil
 	}
 }
 
-func (a *createVM) UpdateCloudProperties(cloudProps *bslcvm.VMCloudProperties) {
-
+func (a CreateVMAction) UpdateCloudProperties(cloudProps *bslcvm.VMCloudProperties) {
 	a.vmCloudProperties = cloudProps
 
 	if len(cloudProps.BoshIp) == 0 {
 		a.vmCloudProperties.VmNamePrefix = cloudProps.VmNamePrefix
 	} else {
-		a.vmCloudProperties.VmNamePrefix = cloudProps.VmNamePrefix + timeStampForTime(time.Now().UTC())
+		a.vmCloudProperties.VmNamePrefix = cloudProps.VmNamePrefix + bslcvm.TimeStampForTime(time.Now().UTC())
 	}
 
 	if cloudProps.StartCpus == 0 {
@@ -92,9 +93,4 @@ func (a *createVM) UpdateCloudProperties(cloudProps *bslcvm.VMCloudProperties) {
 	if len(cloudProps.NetworkComponents) == 0 {
 		a.vmCloudProperties.NetworkComponents = []sldatatypes.NetworkComponents{{MaxSpeed: 1000}}
 	}
-}
-
-func timeStampForTime(now time.Time) string {
-	//utilize the constants list in the http://golang.org/src/time/format.go file to get the expect time formats
-	return now.Format("20060102-030405-") + strconv.Itoa(int(now.UnixNano()/1e6-now.Unix()*1e3))
 }

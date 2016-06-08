@@ -18,11 +18,12 @@ type concreteFactory struct {
 	availableActions map[string]Action
 }
 
-func NewConcreteFactory(options ConcreteFactoryOptions, logger boshlog.Logger, fs boshsys.FileSystem) concreteFactory {
+func NewConcreteFactory(options ConcreteFactoryOptions, logger boshlog.Logger) concreteFactory {
+	fs := boshsys.NewOsFileSystem(logger)
 	uuidGenerator := boshuuid.NewGenerator()
 
 	softLayerClient := slclient.NewSoftLayerClient(options.Softlayer.Username, options.Softlayer.ApiKey)
-	baremetalClient := bmsclient.NewBmpClient(options.Baremetal.Username, options.Baremetal.Password, options.Baremetal.EndPoint, nil, nil)
+	baremetalClient := bmsclient.NewBmpClient(options.Baremetal.Username, options.Baremetal.Password, options.Baremetal.EndPoint, nil, "")
 
 	stemcellFinder := bslcstem.NewSoftLayerFinder(softLayerClient, logger)
 

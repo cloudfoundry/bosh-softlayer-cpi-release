@@ -1,14 +1,7 @@
 package vm
 
 import (
-	"bytes"
-	"encoding/json"
-	"fmt"
-	"net"
-	"net/url"
-	"os"
 	"strconv"
-	"text/template"
 	"time"
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
@@ -21,7 +14,6 @@ import (
 	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
 	sl "github.com/maximilien/softlayer-go/softlayer"
 
-	"github.com/cloudfoundry-community/bosh-softlayer-tools/common"
 	"github.com/cloudfoundry/bosh-softlayer-cpi/util"
 )
 
@@ -56,12 +48,12 @@ func NewBaremetalCreator(softLayerClient sl.Client, bmsClient bmslc.BmpClient, a
 func (c *baremetalCreator) Create(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
 	hardwareId, err := c.createBaremetal(cloudProps.VmNamePrefix, cloudProps.BaremetalStemcell, cloudProps.BaremetalNetbootImage)
 	if err != nil {
-		return SoftLayerHardware{}, bosherr.WrapError(err, "Create baremetal error")
+		return nil, bosherr.WrapError(err, "Create baremetal error")
 	}
 
 	hardware, found, err := c.vmFinder.Find(hardwareId)
 	if err != nil || !found {
-		return SoftLayerHardware{}, bosherr.WrapErrorf(err, "Cannot find hardware with id: %d.", hardwareId)
+		return nil, bosherr.WrapErrorf(err, "Cannot find hardware with id: %d.", hardwareId)
 	}
 
 	softlayerFileService := NewSoftlayerFileService(util.GetSshClient(), c.logger, c.uuidGenerator, c.fs)
@@ -70,7 +62,7 @@ func (c *baremetalCreator) Create(agentID string, stemcell bslcstem.Stemcell, cl
 	// Update mbus url setting
 	mbus, err := ParseMbusURL(c.agentOptions.Mbus, cloudProps.BoshIp)
 	if err != nil {
-		return SoftLayerHardware{}, bosherr.WrapErrorf(err, "Cannot construct mbus url.")
+		return nil, bosherr.WrapErrorf(err, "Cannot construct mbus url.")
 	}
 	c.agentOptions.Mbus = mbus
 	// Update blobstore setting
@@ -82,18 +74,18 @@ func (c *baremetalCreator) Create(agentID string, stemcell bslcstem.Stemcell, cl
 
 	agentEnv := CreateAgentUserData(agentID, cloudProps, networks, env, c.agentOptions)
 	if err != nil {
-		return SoftLayerHardware{}, bosherr.WrapErrorf(err, "Cannot agent env for virtual guest with id: %d.", hardwareId)
+		return nil, bosherr.WrapErrorf(err, "Cannot agent env for virtual guest with id: %d.", hardwareId)
 	}
 
 	err = agentEnvService.Update(agentEnv)
 	if err != nil {
-		return SoftLayerHardware{}, bosherr.WrapError(err, "Updating VM's agent env")
+		return nil, bosherr.WrapError(err, "Updating VM's agent env")
 	}
 
 	if len(c.agentOptions.VcapPassword) > 0 {
 		err = hardware.SetVcapPassword(c.agentOptions.VcapPassword)
 		if err != nil {
-			return SoftLayerHardware{}, bosherr.WrapError(err, "Updating VM's vcap password")
+			return nil, bosherr.WrapError(err, "Updating VM's vcap password")
 		}
 	}
 
@@ -113,16 +105,16 @@ func (c *baremetalCreator) createBaremetal(server_name string, stemcell string, 
 	}
 
 	task_id := createBaremetalResponse.Data.TaskId
+	bslcommon.TIMEOUT = 120 * time.Minute
 	totalTime := time.Duration(0)
-	for totalTime < common.TIMEOUT {
+	for totalTime < bslcommon.TIMEOUT {
 
 		taskOutput, err := c.bmsClient.TaskJsonOutput(task_id, "task")
 		if err != nil {
 			return 0, bosherr.WrapErrorf(err, "Failed to get state with task_id: %d", task_id)
 		}
 
-		data := taskOutput.Data.(map[string]interface{})
-		info := data["info"].(map[string]interface{})
+		info := taskOutput.Data["info"].(map[string]interface{})
 		switch info["status"].(string) {
 		case "failed":
 			return 0, bosherr.Errorf("Failed to install the stemcell: %v", taskOutput)
@@ -132,15 +124,12 @@ func (c *baremetalCreator) createBaremetal(server_name string, stemcell string, 
 			if err != nil {
 				return 0, bosherr.WrapErrorf(err, "Failed to get server_id with task_id: %d", task_id)
 			}
-			data = serverOutput["data"].(map[string]interface{})
-			info = data["info"].(map[string]interface{})
+			info = serverOutput.Data["info"].(map[string]interface{})
 			return int(info["id"].(float64)), nil
 		default:
-			continue
+			totalTime += bslcommon.POLLING_INTERVAL
+			time.Sleep(bslcommon.POLLING_INTERVAL)
 		}
-
-		totalTime += common.POLLING_INTERVAL
-		time.Sleep(common.POLLING_INTERVAL)
 	}
 
 	return 0, bosherr.Error("Provisioning baremetal timeout")

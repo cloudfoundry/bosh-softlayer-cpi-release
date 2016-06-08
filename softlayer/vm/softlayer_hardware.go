@@ -68,7 +68,7 @@ func (vm *softLayerHardware) ID() int { return vm.id }
 func (vm *softLayerHardware) Delete(agentID string) error {
 	updateStateResponse, err := vm.baremetalClient.UpdateState(strconv.Itoa(vm.ID()), "bm.state.deleted")
 	if err != nil || updateStateResponse.Status != 200 {
-		return bosherr.WrapErrorf(err, "Faled to call bms to delete baremetal:"+string(body))
+		return bosherr.WrapError(err, "Faled to call bms to delete baremetal")
 	}
 
 	command := "rm -f /var/vcap/bosh/*.json ; sv stop agent"
@@ -618,46 +618,6 @@ func (vm *softLayerHardware) findOpenIscsiPortalsBasedOnShellScript(virtualGuest
 		portals = append(portals, strings.Split(line, ",")[0])
 	}
 	return portals, nil
-}
-
-func (vm *softLayerHardware) postCheckActiveTransactionsForOSReload(softLayerClient sl.Client) error {
-	virtualGuestService, err := softLayerClient.GetSoftLayer_Virtual_Guest_Service()
-	if err != nil {
-		return bosherr.WrapError(err, "Creating VirtualGuestService from SoftLayer client")
-	}
-
-	totalTime := time.Duration(0)
-	for totalTime < bslcommon.TIMEOUT {
-		activeTransactions, err := virtualGuestService.GetActiveTransactions(vm.ID())
-		if err != nil {
-			if !strings.Contains(err.Error(), "HTTP error code") {
-				return bosherr.WrapError(err, "Getting active transactions from SoftLayer client")
-			}
-		}
-
-		if len(activeTransactions) > 0 {
-			vm.logger.Info(SOFTLAYER_VM_OS_RELOAD_TAG, "OS Reload transaction started")
-			break
-		}
-
-		totalTime += bslcommon.POLLING_INTERVAL
-		time.Sleep(bslcommon.POLLING_INTERVAL)
-	}
-
-	if totalTime >= bslcommon.TIMEOUT {
-		return errors.New(fmt.Sprintf("Waiting for OS Reload transaction to start TIME OUT!"))
-	}
-
-	err = bslcommon.WaitForVirtualGuest(vm.softLayerClient, vm.ID(), "RUNNING")
-	if err != nil {
-		if !strings.Contains(err.Error(), "HTTP error code") {
-			return bosherr.WrapError(err, fmt.Sprintf("PowerOn failed with VirtualGuest id %d", vm.ID()))
-		}
-	}
-
-	vm.logger.Info(SOFTLAYER_VM_OS_RELOAD_TAG, fmt.Sprintf("The virtual guest %d is powered on", vm.ID()))
-
-	return nil
 }
 
 func (vm *softLayerHardware) isMountPoint(virtualGuest datatypes.SoftLayer_Hardware, path string) (bool, error) {

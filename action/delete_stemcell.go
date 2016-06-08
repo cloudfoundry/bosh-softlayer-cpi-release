@@ -10,16 +10,21 @@ const (
 	deleteStemcellLogTag = "DeleteStemcell"
 )
 
-type DeleteStemcell struct {
+type DeleteStemcellAction struct {
 	stemcellFinder bslcstem.Finder
 	logger         boshlog.Logger
 }
 
-func NewDeleteStemcell(stemcellFinder bslcstem.Finder, logger boshlog.Logger) DeleteStemcell {
-	return DeleteStemcell{stemcellFinder: stemcellFinder, logger: logger}
+func NewDeleteStemcell(
+	stemcellFinder bslcstem.Finder,
+	logger boshlog.Logger,
+) (action DeleteStemcellAction) {
+	action.stemcellFinder = stemcellFinder
+	action.logger = logger
+	return
 }
 
-func (a DeleteStemcell) Run(stemcellCID StemcellCID) (interface{}, error) {
+func (a DeleteStemcellAction) Run(stemcellCID StemcellCID) (interface{}, error) {
 	_, found, err := a.stemcellFinder.FindById(int(stemcellCID))
 	if err != nil {
 		a.logger.Info(deleteStemcellLogTag, "Error trying to find stemcell '%s': %s", stemcellCID, err)

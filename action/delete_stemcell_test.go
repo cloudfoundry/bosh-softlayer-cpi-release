@@ -16,7 +16,7 @@ import (
 var _ = Describe("DeleteStemcell", func() {
 	var (
 		stemcellFinder *fakestem.FakeFinder
-		action         DeleteStemcell
+		action         DeleteStemcellAction
 		logger         boshlog.Logger
 	)
 
