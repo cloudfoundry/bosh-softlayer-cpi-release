@@ -65,8 +65,6 @@ var _ = Describe("BOSH Director Level Integration for has_vm", func() {
 
 		tmpConfigPath, err = testhelperscpi.CreateTmpConfigPath(rootTemplatePath, configPath, username, apiKey)
 		Expect(err).ToNot(HaveOccurred())
-
-		os.Setenv("OS_RELOAD_ENABLED", "FALSE")
 	})
 
 	AfterEach(func() {

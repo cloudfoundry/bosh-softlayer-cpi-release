@@ -1,0 +1,36 @@
+[{
+	"accountId": 12345,
+	"createDate": "2014-08-12T12:13:01-08:00",
+	"dedicatedAccountHostOnlyFlag": false,
+	"domain": "fake-domain",
+	"fullyQualifiedDomainName": "fake-qualified-name",
+	"hostname": "fake-host",
+	"id": 1234567,
+	"lastPowerStateId": null,
+	"lastVerifiedDate": null,
+	"maxCpu": 1,
+	"maxCpuUnits": "fake-unit",
+	"maxMemory": 1024,
+	"metricPollDate": null,
+	"modifyDate": "2014-08-12T12:14:39-08:00",
+	"startCpus": 1,
+	"statusId": 1,
+	"uuid": "fake-uuid",
+	"globalIdentifier": "fake-id",
+	"primaryBackendIpAddress": "fake-backend-ip",
+	"primaryIpAddress": "fake-ip",
+	"location": {
+		"id": 1234567
+	},
+	"operatingSystem": {
+		"passwords": [
+			{
+				"username": "fake-user",
+				"password": "fake-password"
+			}
+		]
+	},
+	"datacenter": {
+		"id": 123
+	}
+}]

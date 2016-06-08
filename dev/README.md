@@ -4,7 +4,7 @@ There are two general strategies for testing a CPI.
 
 ## Normal testing
 
-Generally the CPI can be tested by using the CPI release and deploying that using bosh lite using vagrant. See the [bosh-softlayer-cpi-release](http://github.com/cloudfoundry/bosh-softlayer-cpi-release/tree/master/README.md) for details.
+Generally the CPI can be tested by using the CPI release and deploying that using bosh lite using vagrant. See the [bosh-softlayer-cpi-release](https://github.com/cloudfoundry-incubator/bosh-softlayer-cpi-release/tree/master/README.md) for details.
 
 Once the release is successfully deployed, the CPI is then located and associated with a BOSH director which can use it. You can then test the CPI by executing BOSH commands. If you make changes to the CPI code then you can test these changes by pushing your changes to github and doing the following:
 

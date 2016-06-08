@@ -1,36 +1,26 @@
 package util
 
 import (
-	"errors"
-	"io/ioutil"
-	"regexp"
+	"io"
+	"net"
+	"os"
 
 	"github.com/pkg/sftp"
-
 	"golang.org/x/crypto/ssh"
 )
 
+//go:generate counterfeiter -o fakes/fake_ssh_client.go . SshClient
 type SshClient interface {
 	ExecCommand(username string, password string, ip string, command string) (string, error)
-	UploadFile(username string, password string, ip string, srcFile string, destFile string) error
+
+	Download(username, password, ip, srcFile string, destination io.Writer) error
 	DownloadFile(username string, password string, ip string, srcFile string, destFile string) error
+
+	Upload(username, password, ip string, source io.Reader, destFile string) error
+	UploadFile(username string, password string, ip string, srcFile string, destFile string) error
 }
 
 type sshClientImpl struct{}
-
-func IsIP(ip string) (b bool) {
-	if m, _ := regexp.MatchString("^[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}$", ip); !m {
-		return false
-	}
-	return true
-}
-
-func IsDir(d string) (b bool) {
-	if m, _ := regexp.MatchString("^/.*/$", d); !m {
-		return false
-	}
-	return true
-}
 
 func (c *sshClientImpl) ExecCommand(username string, password string, ip string, command string) (string, error) {
 	config := &ssh.ClientConfig{
@@ -39,34 +29,45 @@ func (c *sshClientImpl) ExecCommand(username string, password string, ip string,
 			ssh.Password(password),
 		},
 	}
-	client, err := ssh.Dial("tcp", ip+":22", config)
+
+	client, err := ssh.Dial("tcp", address(ip), config)
+	if err != nil {
+		return "", err
+	}
 
 	session, err := client.NewSession()
 	if err != nil {
 		return "", err
 	}
 	defer session.Close()
-	output, err := session.Output(command)
 
-	return string(output), err
+	output, err := session.Output(command)
+	if err != nil {
+		return "", err
+	}
+
+	return string(output), nil
 }
 
 func (c *sshClientImpl) UploadFile(username string, password string, ip string, srcFile string, destFile string) error {
+	source, err := os.Open(srcFile)
+	if err != nil {
+		return err
+	}
+	defer source.Close()
+
+	return c.Upload(username, password, ip, source, destFile)
+}
+
+func (c *sshClientImpl) Upload(username, password, ip string, source io.Reader, destFile string) error {
 	config := &ssh.ClientConfig{
 		User: username,
 		Auth: []ssh.AuthMethod{
 			ssh.Password(password),
 		},
 	}
-	if !IsIP(ip) {
-		return errors.New("invalid IP address")
-	}
 
-	if IsDir(srcFile) || IsDir(destFile) {
-		return errors.New("Is a directory")
-	}
-
-	client, err := ssh.Dial("tcp", ip+":22", config)
+	client, err := ssh.Dial("tcp", address(ip), config)
 	if err != nil {
 		return err
 	}
@@ -77,11 +78,6 @@ func (c *sshClientImpl) UploadFile(username string, password string, ip string, 
 		return err
 	}
 	defer sftp.Close()
-
-	data, err := ioutil.ReadFile(srcFile)
-	if err != nil {
-		return err
-	}
 
 	f, err := sftp.Create(destFile)
 	if err != nil {
@@ -89,19 +85,25 @@ func (c *sshClientImpl) UploadFile(username string, password string, ip string, 
 	}
 	defer f.Close()
 
-	_, err = f.Write([]byte(data))
+	_, err = f.ReadFrom(source)
 	if err != nil {
 		return err
 	}
 
-	_, err = sftp.Lstat(destFile)
-	if err != nil {
-		return err
-	}
 	return nil
 }
 
 func (c *sshClientImpl) DownloadFile(username string, password string, ip string, srcFile string, destFile string) error {
+	writer, err := os.OpenFile(destFile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0755)
+	if err != nil {
+		return err
+	}
+	defer writer.Close()
+
+	return c.Download(username, password, ip, srcFile, writer)
+}
+
+func (c *sshClientImpl) Download(username, password, ip, srcFile string, destination io.Writer) error {
 	config := &ssh.ClientConfig{
 		User: username,
 		Auth: []ssh.AuthMethod{
@@ -109,15 +111,7 @@ func (c *sshClientImpl) DownloadFile(username string, password string, ip string
 		},
 	}
 
-	if !IsIP(ip) {
-		return errors.New("invalid IP address")
-	}
-
-	if IsDir(srcFile) || IsDir(destFile) {
-		return errors.New("Is a directory")
-	}
-
-	client, err := ssh.Dial("tcp", ip+":22", config)
+	client, err := ssh.Dial("tcp", address(ip), config)
 	if err != nil {
 		return err
 	}
@@ -129,23 +123,26 @@ func (c *sshClientImpl) DownloadFile(username string, password string, ip string
 	}
 	defer sftp.Close()
 
-	pFile, err := sftp.Open(srcFile)
+	f, err := sftp.Open(srcFile)
 	if err != nil {
 		return err
 	}
-	defer pFile.Close()
+	defer f.Close()
 
-	data, err := ioutil.ReadAll(pFile)
-	if err != nil {
-		return err
-	}
-
-	err = ioutil.WriteFile(destFile, data, 0755)
+	_, err = f.WriteTo(destination)
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func address(a string) string {
+	if _, _, err := net.SplitHostPort(a); err != nil {
+		a = net.JoinHostPort(a, "22")
+	}
+
+	return a
 }
 
 func GetSshClient() SshClient {

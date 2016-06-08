@@ -31,7 +31,7 @@ var _ = Describe("SoftlayerFileService", func() {
 	BeforeEach(func() {
 		logger = boshlog.NewLogger(boshlog.LevelNone)
 		softLayerClient = fakeslclient.NewFakeSoftLayerClient("fake-username", "fake-api-key")
-		sshClient = fakesutil.NewFakeSshClient()
+		sshClient = &fakesutil.FakeSshClient{}
 		uuidGenerator = fakeuuid.NewFakeGenerator()
 		fs = fakesys.NewFakeFileSystem()
 		vm = fakevm.NewFakeVM(1234567)
@@ -41,31 +41,20 @@ var _ = Describe("SoftlayerFileService", func() {
 
 	Describe("Upload", func() {
 		It("file contents into /var/vcap/file.ext", func() {
-			expectedCmdResults := []string{
-				"",
-			}
-			testhelpers.SetTestFixturesForFakeSSHClient(sshClient, expectedCmdResults, nil)
-
 			softlayerFileService = NewSoftlayerFileService(sshClient, logger, uuidGenerator, fs)
-			softlayerFileService.SetVM(vm)
-			err := softlayerFileService.Upload("/var/vcap/file.ext", []byte("fake-contents"))
+		        softlayerFileService.SetVM(vm)
+			err := softlayerFileService.Upload("/var/vcap/file.ext", []byte("fake-contents"))7
 			Expect(err).ToNot(HaveOccurred())
 		})
 	})
 
 	Describe("Download", func() {
 		It("copies agent env into temporary location", func() {
-			expectedCmdResults := []string{
-				"",
-			}
-			testhelpers.SetTestFixturesForFakeSSHClient(sshClient, expectedCmdResults, nil)
-
 			softlayerFileService = NewSoftlayerFileService(sshClient, logger, uuidGenerator, fs)
-			softlayerFileService.SetVM(vm)
+		        softlayerFileService.SetVM(vm)
 			_, err := softlayerFileService.Download("/fake-download-path/file.ext")
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("File not found"))
 		})
-
 	})
 })

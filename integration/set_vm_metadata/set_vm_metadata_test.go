@@ -56,8 +56,6 @@ var _ = Describe("BOSH Director Level Integration for set_vm_metadata", func() {
 
 		testhelpers.TIMEOUT = 35 * time.Minute
 		testhelpers.POLLING_INTERVAL = 10 * time.Second
-
-		os.Setenv("OS_RELOAD_ENABLED", "FALSE")
 	})
 
 	Context("set_vm_metadata", func() {

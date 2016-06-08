@@ -11,12 +11,13 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	"log"
+
 	testhelperscpi "github.com/cloudfoundry/bosh-softlayer-cpi/test_helpers"
 	slclient "github.com/maximilien/softlayer-go/client"
 	datatypes "github.com/maximilien/softlayer-go/data_types"
 	softlayer "github.com/maximilien/softlayer-go/softlayer"
 	testhelpers "github.com/maximilien/softlayer-go/test_helpers"
-	"log"
 )
 
 const configPath = "test_fixtures/cpi_methods/config.json"
@@ -71,8 +72,6 @@ var _ = Describe("BOSH Director Level Integration for attach_disk", func() {
 
 		tmpConfigPath, err = testhelperscpi.CreateTmpConfigPath(rootTemplatePath, configPath, username, apiKey)
 		Expect(err).ToNot(HaveOccurred())
-
-		os.Setenv("OS_RELOAD_ENABLED", "FALSE")
 	})
 
 	AfterEach(func() {
