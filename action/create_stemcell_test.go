@@ -24,8 +24,8 @@ var _ = Describe("CreateStemcell", func() {
 
 	Describe("Run", func() {
 		It("returns id for created stemcell from image path", func() {
-			stemcellFinder.FindFound, stemcellFinder.FindErr = true, nil
-			stemcellFinder.FindStemcell = fakestem.NewFakeStemcell(1234, "fake-stemcell-id", fakestem.FakeStemcellKind)
+			stemcellFinder.FindErr = nil
+			stemcellFinder.FindStemcell = fakestem.NewFakeStemcell(1234, "fake-stemcell-id")
 
 			id, err := action.Run("fake-path", CreateStemcellCloudProps{Uuid: "fake-stemcell-id"})
 			Expect(err).ToNot(HaveOccurred())
@@ -33,7 +33,7 @@ var _ = Describe("CreateStemcell", func() {
 		})
 
 		It("returns error if creating stemcell fails", func() {
-			stemcellFinder.FindFound, stemcellFinder.FindErr = false, errors.New("fake-add-err")
+			stemcellFinder.FindErr = errors.New("fake-add-err")
 
 			id, err := action.Run("fake-path", CreateStemcellCloudProps{Uuid: "fake-stemcell-id"})
 			Expect(err).To(HaveOccurred())

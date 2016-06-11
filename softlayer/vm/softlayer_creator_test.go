@@ -11,7 +11,6 @@ import (
 
 	testhelpers "github.com/cloudfoundry/bosh-softlayer-cpi/test_helpers"
 
-	fakestem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell/fakes"
 	fakevm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm/fakes"
 	fakesutil "github.com/cloudfoundry/bosh-softlayer-cpi/util/fakes"
 	fakesys "github.com/cloudfoundry/bosh-utils/system/fakes"
@@ -73,7 +72,7 @@ var _ = Describe("SoftLayerCreator", func() {
 		Context("valid arguments", func() {
 			BeforeEach(func() {
 				agentID = "fake-agent-id"
-				stemcell = bslcstem.NewSoftLayerStemcell(1234, "fake-stemcell-uuid", fakestem.FakeStemcellKind, softLayerClient, logger)
+				stemcell = bslcstem.NewSoftLayerStemcell(1234, "fake-stemcell-uuid", softLayerClient, logger)
 				networks = Networks{}
 				env = Environment{}
 			})
@@ -198,7 +197,7 @@ var _ = Describe("SoftLayerCreator", func() {
 			Context("missing correct VMProperties", func() {
 				BeforeEach(func() {
 					agentID = "fake-agent-id"
-					stemcell = bslcstem.NewSoftLayerStemcell(1234, "fake-stemcell-uuid", fakestem.FakeStemcellKind, softLayerClient, logger)
+					stemcell = bslcstem.NewSoftLayerStemcell(1234, "fake-stemcell-uuid", softLayerClient, logger)
 					networks = Networks{}
 					env = Environment{}
 

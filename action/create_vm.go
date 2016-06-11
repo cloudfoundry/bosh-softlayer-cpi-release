@@ -6,6 +6,7 @@ import (
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 
+	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
 	bslcvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
 
@@ -31,13 +32,12 @@ func NewCreateVM(stemcellFinder bslcstem.Finder, vmCreator bslcvm.Creator) Creat
 func (a CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps bslcvm.VMCloudProperties, networks Networks, diskIDs []DiskCID, env Environment) (string, error) {
 	a.UpdateCloudProperties(&cloudProps)
 
-	stemcell, found, err := a.stemcellFinder.FindById(int(stemcellCID))
+	bslcommon.TIMEOUT = 30 * time.Second
+	bslcommon.POLLING_INTERVAL = 5 * time.Second
+
+	stemcell, err := a.stemcellFinder.FindById(int(stemcellCID))
 	if err != nil {
 		return "0", bosherr.WrapErrorf(err, "Finding stemcell '%s'", stemcellCID)
-	}
-
-	if !found {
-		return "0", bosherr.Errorf("Expected to find stemcell '%s'", stemcellCID)
 	}
 
 	vmNetworks := networks.AsVMNetworks()
