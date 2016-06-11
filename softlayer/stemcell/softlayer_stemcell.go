@@ -56,9 +56,6 @@ func (s SoftLayerStemcell) Delete() error {
 		return bosherr.WrapError(err, fmt.Sprintf("Waiting for VirtualGuest `%d` to have no pending transactions", s.id))
 	}
 
-	bslcommon.TIMEOUT = 30 * time.Second
-	bslcommon.POLLING_INTERVAL = 5 * time.Second
-
 	_, err = s.softLayerFinder.FindById(s.id)
 	if err == nil {
 		return bosherr.WrapError(nil, fmt.Sprintf("Could not delete VirtualGuestBlockDeviceTemplateGroup with id `%d`", s.id))
