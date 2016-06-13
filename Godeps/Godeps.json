@@ -35,33 +35,33 @@
 		},
 		{
 			"ImportPath": "github.com/maximilien/softlayer-go/client",
-			"Comment": "v0.5.0-45-g65ee1ad",
-			"Rev": "65ee1ade8c311ac5faad64d4e8f50bd47d0bd5b2"
+			"Comment": "v0.5.0-46-ge42c331",
+			"Rev": "e42c331e8d9644a1dba1f18caba7347adf9454e8"
 		},
 		{
 			"ImportPath": "github.com/maximilien/softlayer-go/common",
-			"Comment": "v0.5.0-45-g65ee1ad",
-			"Rev": "65ee1ade8c311ac5faad64d4e8f50bd47d0bd5b2"
+			"Comment": "v0.5.0-46-ge42c331",
+			"Rev": "e42c331e8d9644a1dba1f18caba7347adf9454e8"
 		},
 		{
 			"ImportPath": "github.com/maximilien/softlayer-go/data_types",
-			"Comment": "v0.5.0-45-g65ee1ad",
-			"Rev": "65ee1ade8c311ac5faad64d4e8f50bd47d0bd5b2"
+			"Comment": "v0.5.0-46-ge42c331",
+			"Rev": "e42c331e8d9644a1dba1f18caba7347adf9454e8"
 		},
 		{
 			"ImportPath": "github.com/maximilien/softlayer-go/services",
-			"Comment": "v0.5.0-45-g65ee1ad",
-			"Rev": "65ee1ade8c311ac5faad64d4e8f50bd47d0bd5b2"
+			"Comment": "v0.5.0-46-ge42c331",
+			"Rev": "e42c331e8d9644a1dba1f18caba7347adf9454e8"
 		},
 		{
 			"ImportPath": "github.com/maximilien/softlayer-go/softlayer",
-			"Comment": "v0.5.0-45-g65ee1ad",
-			"Rev": "65ee1ade8c311ac5faad64d4e8f50bd47d0bd5b2"
+			"Comment": "v0.5.0-46-ge42c331",
+			"Rev": "e42c331e8d9644a1dba1f18caba7347adf9454e8"
 		},
 		{
 			"ImportPath": "github.com/maximilien/softlayer-go/test_helpers",
-			"Comment": "v0.5.0-45-g65ee1ad",
-			"Rev": "65ee1ade8c311ac5faad64d4e8f50bd47d0bd5b2"
+			"Comment": "v0.5.0-46-ge42c331",
+			"Rev": "e42c331e8d9644a1dba1f18caba7347adf9454e8"
 		},
 		{
 			"ImportPath": "github.com/nu7hatch/gouuid",
