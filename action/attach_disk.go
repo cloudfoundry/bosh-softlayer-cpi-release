@@ -7,10 +7,6 @@ import (
 	bslcvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
 )
 
-const (
-	Attach_Disk_Log_Tag = "AttachDisk"
-)
-
 type AttachDiskAction struct {
 	vmFinder   bslcvm.Finder
 	diskFinder bslcdisk.Finder
