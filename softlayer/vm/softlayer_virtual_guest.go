@@ -261,7 +261,7 @@ func (vm *softLayerVirtualGuest) DetachDisk(disk bslcdisk.Disk) error {
 		return bosherr.WrapError(err, fmt.Sprintf("Failed to get multipath information from virtual guest `%d`", vm.ID()))
 	}
 
-	err = vm.detachVolumeBasedOnShellScript(vm.virtualGuest, volume, hasMultiPath)
+	err = vm.detachVolumeBasedOnShellScript(volume, hasMultiPath)
 	if err != nil {
 		return bosherr.WrapErrorf(err, "Failed to detach volume with id %d from virtual guest with id: %d.", volume.Id, vm.ID())
 	}
@@ -646,9 +646,9 @@ func (vm *softLayerVirtualGuest) writeOpenIscsiConfBasedOnShellScript(volume dat
 	return true, nil
 }
 
-func (vm *softLayerVirtualGuest) detachVolumeBasedOnShellScript(virtualGuest datatypes.SoftLayer_Virtual_Guest, volume datatypes.SoftLayer_Network_Storage, hasMultiPath bool) error {
+func (vm *softLayerVirtualGuest) detachVolumeBasedOnShellScript(volume datatypes.SoftLayer_Network_Storage, hasMultiPath bool) error {
 	// umount /var/vcap/store in case read-only mount
-	isMounted, err := vm.isMountPoint(virtualGuest, "/var/vcap/store")
+	isMounted, err := vm.isMountPoint("/var/vcap/store")
 	if err != nil {
 		return bosherr.WrapError(err, "check mount point /var/vcap/store")
 	}
@@ -706,53 +706,6 @@ func (vm *softLayerVirtualGuest) detachVolumeBasedOnShellScript(virtualGuest dat
 	}
 
 	return nil
-}
-
-func (vm *softLayerVirtualGuest) findOpenIscsiTargetBasedOnShellScript(virtualGuest datatypes.SoftLayer_Virtual_Guest) ([]string, error) {
-	command := "sleep 5 ; iscsiadm -m session -P3 | awk '/Target: /{print $2}'"
-	output, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryIP(), command)
-	if err != nil {
-		return []string{}, err
-	}
-
-	targets := []string{}
-	lines := strings.Split(strings.Trim(output, "\n"), "\n")
-	for _, line := range lines {
-		targets = append(targets, strings.Split(line, ",")[0])
-	}
-
-	if len(targets) > 0 {
-		return targets, nil
-	}
-
-	return []string{}, errors.New(fmt.Sprintf("Cannot find matched iSCSI device"))
-}
-
-func (vm *softLayerVirtualGuest) findOpenIscsiPortalsBasedOnShellScript(virtualGuest datatypes.SoftLayer_Virtual_Guest, volume datatypes.SoftLayer_Network_Storage) ([]string, error) {
-	command := "sleep 5 ; iscsiadm -m session -P3 | awk 'BEGIN{ lel=0} { if($0 ~ /Current Portal: /){ portal = $3 ; lel=NR } else { if( NR==(lel+46) && $0 ~ /Attached scsi disk /) {print portal}}}'"
-	output, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryIP(), command)
-	if err != nil {
-		return []string{}, err
-	}
-
-	portals := []string{}
-	lines := strings.Split(strings.Trim(output, "\n"), "\n")
-	for _, line := range lines {
-		portals = append(portals, strings.Split(line, ",")[0])
-	}
-	return portals, nil
-}
-
-func (vm *softLayerVirtualGuest) getRootPassword(virtualGuest datatypes.SoftLayer_Virtual_Guest) string {
-	passwords := virtualGuest.OperatingSystem.Passwords
-
-	for _, password := range passwords {
-		if password.Username == ROOT_USER_NAME {
-			return password.Password
-		}
-	}
-
-	return ""
 }
 
 func (vm *softLayerVirtualGuest) postCheckActiveTransactionsForOSReload(softLayerClient sl.Client) error {
@@ -865,8 +818,8 @@ func (vm *softLayerVirtualGuest) postCheckActiveTransactionsForDeleteVM(softLaye
 	return nil
 }
 
-func (vm *softLayerVirtualGuest) isMountPoint(virtualGuest datatypes.SoftLayer_Virtual_Guest, path string) (bool, error) {
-	mounts, err := vm.searchMounts(virtualGuest)
+func (vm *softLayerVirtualGuest) isMountPoint(path string) (bool, error) {
+	mounts, err := vm.searchMounts()
 	if err != nil {
 		return false, bosherr.WrapError(err, "Searching mounts")
 	}
@@ -880,7 +833,7 @@ func (vm *softLayerVirtualGuest) isMountPoint(virtualGuest datatypes.SoftLayer_V
 	return false, nil
 }
 
-func (vm *softLayerVirtualGuest) searchMounts(virtualGuest datatypes.SoftLayer_Virtual_Guest) ([]Mount, error) {
+func (vm *softLayerVirtualGuest) searchMounts() ([]Mount, error) {
 	var mounts []Mount
 	stdout, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryIP(), "mount")
 	if err != nil {

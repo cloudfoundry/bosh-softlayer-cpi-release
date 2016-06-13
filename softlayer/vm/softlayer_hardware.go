@@ -64,6 +64,41 @@ func NewSoftLayerHardware(id int, softLayerClient sl.Client, baremetalClient bms
 
 func (vm *softLayerHardware) ID() int { return vm.id }
 
+func (vm *softLayerHardware) GetDataCenterId() int {
+	return vm.hardware.Datacenter.Id
+}
+
+func (vm *softLayerHardware) GetPrimaryIP() string {
+	return vm.hardware.PrimaryIpAddress
+}
+
+func (vm *softLayerHardware) GetPrimaryBackendIP() string {
+	return vm.hardware.PrimaryBackendIpAddress
+}
+
+func (vm *softLayerHardware) GetRootPassword() string {
+	passwords := vm.hardware.OperatingSystem.Passwords
+	for _, password := range passwords {
+		if password.Username == ROOT_USER_NAME {
+			return password.Password
+		}
+	}
+	return ""
+}
+
+func (vm *softLayerHardware) GetFullyQualifiedDomainName() string {
+	return vm.hardware.FullyQualifiedDomainName
+}
+
+func (vm *softLayerHardware) SetVcapPassword(encryptedPwd string) (err error) {
+	command := fmt.Sprintf("usermod -p '%s' vcap", encryptedPwd)
+	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryIP(), command)
+	if err != nil {
+		return bosherr.WrapError(err, "Shelling out to usermod vcap")
+	}
+	return
+}
+
 func (vm *softLayerHardware) Delete(agentID string) error {
 	updateStateResponse, err := vm.baremetalClient.UpdateState(strconv.Itoa(vm.ID()), "bm.state.deleted")
 	if err != nil || updateStateResponse.Status != 200 {
@@ -227,41 +262,6 @@ func (vm *softLayerHardware) DetachDisk(disk bslcdisk.Disk) error {
 	}
 
 	return nil
-}
-
-func (vm *softLayerHardware) GetDataCenterId() int {
-	return vm.hardware.Datacenter.Id
-}
-
-func (vm *softLayerHardware) GetPrimaryIP() string {
-	return vm.hardware.PrimaryIpAddress
-}
-
-func (vm *softLayerHardware) GetPrimaryBackendIP() string {
-	return vm.hardware.PrimaryBackendIpAddress
-}
-
-func (vm *softLayerHardware) GetRootPassword() string {
-	passwords := vm.hardware.OperatingSystem.Passwords
-	for _, password := range passwords {
-		if password.Username == ROOT_USER_NAME {
-			return password.Password
-		}
-	}
-	return ""
-}
-
-func (vm *softLayerHardware) GetFullyQualifiedDomainName() string {
-	return vm.hardware.FullyQualifiedDomainName
-}
-
-func (vm *softLayerHardware) SetVcapPassword(encryptedPwd string) (err error) {
-	command := fmt.Sprintf("usermod -p '%s' vcap", encryptedPwd)
-	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryIP(), command)
-	if err != nil {
-		return bosherr.WrapError(err, "Shelling out to usermod vcap")
-	}
-	return
 }
 
 // Private methods
