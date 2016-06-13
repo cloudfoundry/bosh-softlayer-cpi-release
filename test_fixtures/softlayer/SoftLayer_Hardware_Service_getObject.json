@@ -19,6 +19,14 @@
 			"description": "fake-description",
 			"id": 1
 		},
+	"operatingSystem": {
+		"passwords": [
+			{
+				"username": "fake-user",
+				"password": "fake-password"
+			}
+		]
+	},
 	"networkManagementIpAddress": "1.1.1.1",
 	"primaryBackendIpAddress": "1.1.1.1",
 	"primaryIpAddress": "1.1.1.1",

@@ -220,7 +220,7 @@ var _ = Describe("SoftLayer_Network_Storage", func() {
 		})
 	})
 
-	Context("#AttachIscsiVolume", func() {
+	Context("#AttachNetworkStorageToVirtualGuest", func() {
 		var virtualGuest datatypes.SoftLayer_Virtual_Guest
 
 		BeforeEach(func() {
@@ -276,7 +276,55 @@ var _ = Describe("SoftLayer_Network_Storage", func() {
 		})
 	})
 
-	Context("#DetachIscsiVolume", func() {
+	Context("#AttachNetworkStorageToHardware", func() {
+		var hardware datatypes.SoftLayer_Hardware
+
+		BeforeEach(func() {
+			hardware = datatypes.SoftLayer_Hardware{
+				Domain: "softlayer.com",
+				FullyQualifiedDomainName: "fake.softlayer.com",
+				Hostname:                 "fake-hostname",
+				Id:                       1234567,
+				GlobalIdentifier:         "fake-globalIdentifier",
+				PrimaryBackendIpAddress:  "fake-primary-backend-ip",
+				PrimaryIpAddress:         "fake-primary-ip",
+			}
+		})
+
+		It("Allow access to storage from hardware", func() {
+			fakeClient.FakeHttpClient.DoRawHttpRequestResponse = []byte("true")
+
+			resp, err := networkStorageService.AttachNetworkStorageToHardware(hardware, 123)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(resp).To(Equal(true))
+		})
+
+		Context("when HTTP client returns error codes 40x or 50x", func() {
+			It("fails for error code 40x", func() {
+				errorCodes := []int{400, 401, 499}
+				for _, errorCode := range errorCodes {
+					fakeClient.FakeHttpClient.DoRawHttpRequestInt = errorCode
+					fakeClient.FakeHttpClient.DoRawHttpRequestResponse = []byte("true")
+
+					_, err := networkStorageService.AttachNetworkStorageToHardware(hardware, 123)
+					Expect(err).To(HaveOccurred())
+				}
+			})
+
+			It("fails for error code 50x", func() {
+				errorCodes := []int{500, 501, 599}
+				for _, errorCode := range errorCodes {
+					fakeClient.FakeHttpClient.DoRawHttpRequestInt = errorCode
+					fakeClient.FakeHttpClient.DoRawHttpRequestResponse = []byte("true")
+
+					_, err := networkStorageService.AttachNetworkStorageToHardware(hardware, 123)
+					Expect(err).To(HaveOccurred())
+				}
+			})
+		})
+	})
+
+	Context("#DetachNetworkStorageFromVirtualGuest", func() {
 		var virtualGuest datatypes.SoftLayer_Virtual_Guest
 
 		BeforeEach(func() {
@@ -325,6 +373,53 @@ var _ = Describe("SoftLayer_Network_Storage", func() {
 					fakeClient.FakeHttpClient.DoRawHttpRequestResponse = []byte("true")
 
 					err = networkStorageService.DetachNetworkStorageFromVirtualGuest(virtualGuest, 1234567)
+					Expect(err).To(HaveOccurred())
+				}
+			})
+		})
+	})
+
+	Context("#DetachNetworkStorageFromHardware", func() {
+		var hardware datatypes.SoftLayer_Hardware
+
+		BeforeEach(func() {
+			hardware = datatypes.SoftLayer_Hardware{
+				Domain: "softlayer.com",
+				FullyQualifiedDomainName: "fake.softlayer.com",
+				Hostname:                 "fake-hostname",
+				Id:                       1234567,
+				GlobalIdentifier:         "fake-globalIdentifier",
+				PrimaryBackendIpAddress:  "fake-primary-backend-ip",
+				PrimaryIpAddress:         "fake-primary-ip",
+			}
+		})
+
+		It("Revoke access to storage from virtual guest", func() {
+			fakeClient.FakeHttpClient.DoRawHttpRequestResponse = []byte("true")
+
+			err = networkStorageService.DetachNetworkStorageFromHardware(hardware, 1234567)
+			Expect(err).ToNot(HaveOccurred())
+		})
+
+		Context("when HTTP client returns error codes 40x or 50x", func() {
+			It("fails for error code 40x", func() {
+				errorCodes := []int{400, 401, 499}
+				for _, errorCode := range errorCodes {
+					fakeClient.FakeHttpClient.DoRawHttpRequestInt = errorCode
+					fakeClient.FakeHttpClient.DoRawHttpRequestResponse = []byte("true")
+
+					err = networkStorageService.DetachNetworkStorageFromHardware(hardware, 1234567)
+					Expect(err).To(HaveOccurred())
+				}
+			})
+
+			It("fails for error code 50x", func() {
+				errorCodes := []int{500, 501, 599}
+				for _, errorCode := range errorCodes {
+					fakeClient.FakeHttpClient.DoRawHttpRequestInt = errorCode
+					fakeClient.FakeHttpClient.DoRawHttpRequestResponse = []byte("true")
+
+					err = networkStorageService.DetachNetworkStorageFromHardware(hardware, 1234567)
 					Expect(err).To(HaveOccurred())
 				}
 			})

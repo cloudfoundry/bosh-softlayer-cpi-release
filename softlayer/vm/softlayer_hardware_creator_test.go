@@ -45,7 +45,6 @@ var _ = Describe("SoftLayer_Hardware_Creator", func() {
 	BeforeEach(func() {
 		softLayerClient = fakeslclient.NewFakeSoftLayerClient("fake-username", "fake-api-key")
 		baremetalClient = fakebmsclient.NewFakeBmpClient("fake-username", "fake-api-key", "fake-url", "fake-config-path")
-
 		sshClient = &fakesutil.FakeSshClient{}
 		uuidGenerator = fakeuuid.NewFakeGenerator()
 		fs = fakesys.NewFakeFileSystem()

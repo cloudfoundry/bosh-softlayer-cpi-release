@@ -143,21 +143,27 @@ func (vm *softLayerHardware) AttachDisk(disk bslcdisk.Disk) error {
 		return bosherr.WrapError(err, fmt.Sprintf("Failed to fetch disk `%d`", disk.ID()))
 	}
 
-	allowed, err := bslcommon.IscsiHasAllowedHardware(vm.softLayerClient, disk.ID(), vm.ID())
+	networkStorageService, err := vm.softLayerClient.GetSoftLayer_Network_Storage_Service()
+	if err != nil {
+		return bosherr.WrapError(err, "Cannot get network storage service.")
+	}
+
+	allowed, err := networkStorageService.HasAllowedHardware(disk.ID(), vm.ID())
 
 	totalTime := time.Duration(0)
 	if err == nil && allowed == false {
 		for totalTime < bslcommon.TIMEOUT {
-			allowable, err := bslcommon.AttachHardwareIscsiVolume(vm.softLayerClient, vm.hardware, disk.ID())
+			allowable, err := networkStorageService.AttachNetworkStorageToHardware(vm.hardware, disk.ID())
 			if err != nil {
 				if !strings.Contains(err.Error(), "HTTP error code") {
-					return bosherr.WrapError(err, fmt.Sprintf("Granting volume access to hardware %d", vm.ID()))
+					return bosherr.WrapError(err, fmt.Sprintf("Granting volume access to vitrual guest %d", vm.ID()))
 				}
 			} else {
 				if allowable {
 					break
 				}
 			}
+
 			totalTime += bslcommon.POLLING_INTERVAL
 			time.Sleep(bslcommon.POLLING_INTERVAL)
 		}
@@ -218,7 +224,7 @@ func (vm *softLayerHardware) DetachDisk(disk bslcdisk.Disk) error {
 
 	allowed, err := networkStorageService.HasAllowedHardware(disk.ID(), vm.ID())
 	if err == nil && allowed == true {
-		err = networkStorageService.DetachNetworkStorageFromVirtualGuest(vm.hardware, disk.ID())
+		err = networkStorageService.DetachNetworkStorageFromHardware(vm.hardware, disk.ID())
 	}
 	if err != nil {
 		return bosherr.WrapError(err, fmt.Sprintf("Failed to revoke access of disk `%d` from hardware `%d`", disk.ID(), vm.ID()))
@@ -413,8 +419,15 @@ func (vm *softLayerHardware) fetchIscsiVolume(volumeId int) (datatypes.SoftLayer
 }
 
 func (vm *softLayerHardware) getAllowedHostCredential() (AllowedHostCredential, error) {
+	hardwareService, err := vm.softLayerClient.GetSoftLayer_Hardware_Service()
+	if err != nil {
+		return AllowedHostCredential{}, bosherr.WrapError(err, "Cannot get softlayer hardware service.")
+	}
 
-	allowedHost, err := bslcommon.GetHardwareAllowedHost(vm.softLayerClient, vm.ID())
+	allowedHost, err := hardwareService.GetAllowedHost(vm.ID())
+	if err != nil {
+		return AllowedHostCredential{}, bosherr.WrapErrorf(err, "Cannot get allowed host with instance id: %d", vm.ID())
+	}
 
 	if allowedHost.Id == 0 {
 		return AllowedHostCredential{}, bosherr.Errorf("Cannot get allowed host with instance id: %d", vm.ID())
