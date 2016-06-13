@@ -12,5 +12,4 @@ type Action interface {
 	// Run(...) (interface{}, error)
 	//
 	// See Runner for more details
-
 }
