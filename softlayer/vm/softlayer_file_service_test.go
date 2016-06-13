@@ -42,8 +42,8 @@ var _ = Describe("SoftlayerFileService", func() {
 	Describe("Upload", func() {
 		It("file contents into /var/vcap/file.ext", func() {
 			softlayerFileService = NewSoftlayerFileService(sshClient, logger, uuidGenerator, fs)
-		        softlayerFileService.SetVM(vm)
-			err := softlayerFileService.Upload("/var/vcap/file.ext", []byte("fake-contents"))7
+			softlayerFileService.SetVM(vm)
+			err := softlayerFileService.Upload("/var/vcap/file.ext", []byte("fake-contents"))
 			Expect(err).ToNot(HaveOccurred())
 		})
 	})
@@ -51,7 +51,7 @@ var _ = Describe("SoftlayerFileService", func() {
 	Describe("Download", func() {
 		It("copies agent env into temporary location", func() {
 			softlayerFileService = NewSoftlayerFileService(sshClient, logger, uuidGenerator, fs)
-		        softlayerFileService.SetVM(vm)
+			softlayerFileService.SetVM(vm)
 			_, err := softlayerFileService.Download("/fake-download-path/file.ext")
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("File not found"))

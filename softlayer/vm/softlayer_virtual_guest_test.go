@@ -25,7 +25,7 @@ import (
 	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
 )
 
-var _ = Describe("SoftLayerVM", func() {
+var _ = Describe("SoftLayerVirtualGuest", func() {
 	var (
 		fakeSoftLayerClient *fakeslclient.FakeSoftLayerClient
 		sshClient           *fakesutil.FakeSshClient

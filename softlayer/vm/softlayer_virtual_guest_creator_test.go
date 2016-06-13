@@ -40,7 +40,7 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 
 	BeforeEach(func() {
 		softLayerClient = fakeslclient.NewFakeSoftLayerClient("fake-username", "fake-api-key")
-		sshClient = fakesutil.NewFakeSshClient()
+		sshClient = &fakesutil.FakeSshClient{}
 		uuidGenerator = fakeuuid.NewFakeGenerator()
 		fs = fakesys.NewFakeFileSystem()
 		agentEnvServiceFactory = &fakevm.FakeAgentEnvServiceFactory{}
@@ -132,8 +132,10 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 						expectedCmdResults := []string{
 							"",
 						}
-						testhelpers.SetTestFixturesForFakeSSHClient(sshClient, expectedCmdResults, nil)
-						setFakeSoftLayerClientCreateObjectTestFixturesWithEphemeralDiskSize_OS_Reload(softLayerClient)
+						sshClient.ExecCommandStub = func(_, _, _, _ string) (string, error) {
+							return expectedCmdResults[sshClient.ExecCommandCallCount()-1], nil
+						}
+						setFakeSoftlayerClientCreateObjectTestFixturesWithEphemeralDiskSize_OS_Reload(softLayerClient)
 
 						vm, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
 						Expect(err).ToNot(HaveOccurred())
@@ -170,8 +172,10 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 						expectedCmdResults := []string{
 							"",
 						}
-						testhelpers.SetTestFixturesForFakeSSHClient(sshClient, expectedCmdResults, nil)
-						setFakeSoftLayerClientCreateObjectTestFixturesWithoutEphemeralDiskSize_OS_Reload(softLayerClient)
+						sshClient.ExecCommandStub = func(_, _, _, _ string) (string, error) {
+							return expectedCmdResults[sshClient.ExecCommandCallCount()-1], nil
+						}
+						setFakeSoflayerClientCreateObjectTestFixturesWithoutEphemeralDiskSize_OS_Reload(softLayerClient)
 						vm, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
 						Expect(err).ToNot(HaveOccurred())
 						Expect(vm.ID()).To(Equal(1234567))
@@ -207,8 +211,10 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 						expectedCmdResults := []string{
 							"",
 						}
-						testhelpers.SetTestFixturesForFakeSSHClient(sshClient, expectedCmdResults, nil)
-						setFakeSoftLayerClientCreateObjectTestFixturesWithoutBoshIP_OS_Reload(softLayerClient)
+						sshClient.ExecCommandStub = func(_, _, _, _ string) (string, error) {
+							return expectedCmdResults[sshClient.ExecCommandCallCount()-1], nil
+						}
+						setFakeSoftlayerClientCreateObjectTestFixturesWithoutBoshIP_OS_Reload(softLayerClient)
 						vm, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
 						Expect(err).ToNot(HaveOccurred())
 						Expect(vm.ID()).To(Equal(1234567))
@@ -267,8 +273,10 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 						expectedCmdResults := []string{
 							"",
 						}
-						testhelpers.SetTestFixturesForFakeSSHClient(sshClient, expectedCmdResults, nil)
-						setFakeSoftLayerClientCreateObjectTestFixturesWithEphemeralDiskSize(softLayerClient)
+						sshClient.ExecCommandStub = func(_, _, _, _ string) (string, error) {
+							return expectedCmdResults[sshClient.ExecCommandCallCount()-1], nil
+						}
+						setFakeSoftlayerClientCreateObjectTestFixturesWithEphemeralDiskSize(softLayerClient)
 
 						vm, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
 						Expect(err).ToNot(HaveOccurred())
@@ -304,8 +312,10 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 						expectedCmdResults := []string{
 							"",
 						}
-						testhelpers.SetTestFixturesForFakeSSHClient(sshClient, expectedCmdResults, nil)
-						setFakeSoftLayerClientCreateObjectTestFixturesWithoutEphemeralDiskSize(softLayerClient)
+						sshClient.ExecCommandStub = func(_, _, _, _ string) (string, error) {
+							return expectedCmdResults[sshClient.ExecCommandCallCount()-1], nil
+						}
+						setFakeSoftlayerClientCreateObjectTestFixturesWithoutEphemeralDiskSize(softLayerClient)
 						vm, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
 						Expect(err).ToNot(HaveOccurred())
 						Expect(vm.ID()).To(Equal(1234567))
@@ -341,8 +351,10 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 						expectedCmdResults := []string{
 							"",
 						}
-						testhelpers.SetTestFixturesForFakeSSHClient(sshClient, expectedCmdResults, nil)
-						setFakeSoftLayerClientCreateObjectTestFixturesWithoutBoshIP(softLayerClient)
+						sshClient.ExecCommandStub = func(_, _, _, _ string) (string, error) {
+							return expectedCmdResults[sshClient.ExecCommandCallCount()-1], nil
+						}
+						setFakeSoftlayerClientCreateObjectTestFixturesWithoutBoshIP(softLayerClient)
 						vm, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
 						Expect(err).ToNot(HaveOccurred())
 						Expect(vm.ID()).To(Equal(1234567))
@@ -377,7 +389,7 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 					vmFinder.FindVM = fakevm.NewFakeVM(1234567)
 					vmFinder.FindFound = false
 
-					setFakeSoftLayerClientCreateObjectTestFixturesWithEphemeralDiskSize(softLayerClient)
+					setFakeSoftlayerClientCreateObjectTestFixturesWithEphemeralDiskSize(softLayerClient)
 				})
 
 				It("fails when VMProperties is missing StartCpus", func() {
@@ -414,7 +426,7 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 	})
 })
 
-func setFakeBaremetalClientCreateObjectTestFixturesWithEphemeralDiskSize(fakeSoftLayerClient *fakeslclient.FakeSoftLayerClient) {
+func setFakeSoftlayerClientCreateObjectTestFixturesWithEphemeralDiskSize(fakeSoftLayerClient *fakeslclient.FakeSoftLayerClient) {
 	fileNames := []string{
 		"SoftLayer_Virtual_Guest_Service_createObject.json",
 
@@ -433,7 +445,7 @@ func setFakeBaremetalClientCreateObjectTestFixturesWithEphemeralDiskSize(fakeSof
 	testhelpers.SetTestFixturesForFakeSoftLayerClient(fakeSoftLayerClient, fileNames)
 }
 
-func setFakeBaremetalClientCreateObjectTestFixturesWithEphemeralDiskSize_OS_Reload(fakeSoftLayerClient *fakeslclient.FakeSoftLayerClient) {
+func setFakeSoftlayerClientCreateObjectTestFixturesWithEphemeralDiskSize_OS_Reload(fakeSoftLayerClient *fakeslclient.FakeSoftLayerClient) {
 	fileNames := []string{
 		"SoftLayer_Virtual_Guest_Service_getObjects.json",
 
@@ -452,7 +464,7 @@ func setFakeBaremetalClientCreateObjectTestFixturesWithEphemeralDiskSize_OS_Relo
 	testhelpers.SetTestFixturesForFakeSoftLayerClient(fakeSoftLayerClient, fileNames)
 }
 
-func setFakeBaremetalClientCreateObjectTestFixturesWithoutEphemeralDiskSize(fakeSoftLayerClient *fakeslclient.FakeSoftLayerClient) {
+func setFakeSoftlayerClientCreateObjectTestFixturesWithoutEphemeralDiskSize(fakeSoftLayerClient *fakeslclient.FakeSoftLayerClient) {
 	fileNames := []string{
 		"SoftLayer_Virtual_Guest_Service_createObject.json",
 
@@ -464,7 +476,7 @@ func setFakeBaremetalClientCreateObjectTestFixturesWithoutEphemeralDiskSize(fake
 	testhelpers.SetTestFixturesForFakeSoftLayerClient(fakeSoftLayerClient, fileNames)
 }
 
-func setFakeBaremetalClientCreateObjectTestFixturesWithoutEphemeralDiskSize_OS_Reload(fakeSoftLayerClient *fakeslclient.FakeSoftLayerClient) {
+func setFakeSoflayerClientCreateObjectTestFixturesWithoutEphemeralDiskSize_OS_Reload(fakeSoftLayerClient *fakeslclient.FakeSoftLayerClient) {
 	fileNames := []string{
 		"SoftLayer_Virtual_Guest_Service_getObjects.json",
 
@@ -476,7 +488,7 @@ func setFakeBaremetalClientCreateObjectTestFixturesWithoutEphemeralDiskSize_OS_R
 	testhelpers.SetTestFixturesForFakeSoftLayerClient(fakeSoftLayerClient, fileNames)
 }
 
-func setFakeBaremetalClientCreateObjectTestFixturesWithoutBoshIP(fakeSoftLayerClient *fakeslclient.FakeSoftLayerClient) {
+func setFakeSoftlayerClientCreateObjectTestFixturesWithoutBoshIP(fakeSoftLayerClient *fakeslclient.FakeSoftLayerClient) {
 	fileNames := []string{
 		"SoftLayer_Virtual_Guest_Service_createObject.json",
 		"SoftLayer_Virtual_Guest_Service_getLastTransaction.json",
@@ -494,7 +506,7 @@ func setFakeBaremetalClientCreateObjectTestFixturesWithoutBoshIP(fakeSoftLayerCl
 	testhelpers.SetTestFixturesForFakeSoftLayerClient(fakeSoftLayerClient, fileNames)
 }
 
-func setFakeBaremetalClientCreateObjectTestFixturesWithoutBoshIP_OS_Reload(fakeSoftLayerClient *fakeslclient.FakeSoftLayerClient) {
+func setFakeSoftlayerClientCreateObjectTestFixturesWithoutBoshIP_OS_Reload(fakeSoftLayerClient *fakeslclient.FakeSoftLayerClient) {
 	fileNames := []string{
 		"SoftLayer_Virtual_Guest_Service_getObjects.json",
 
