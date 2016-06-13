@@ -216,9 +216,9 @@ func (vm *softLayerHardware) DetachDisk(disk bslcdisk.Disk) error {
 		return bosherr.WrapError(err, "Cannot get network storage service.")
 	}
 
-	allowed, err := networkStorageService.HasAllowedVirtualGuest(disk.ID(), vm.ID())
+	allowed, err := networkStorageService.HasAllowedHardware(disk.ID(), vm.ID())
 	if err == nil && allowed == true {
-		//err = networkStorageService.DetachIscsiVolume(vm.hardware, disk.ID())
+		err = networkStorageService.DetachNetworkStorageFromVirtualGuest(vm.hardware, disk.ID())
 	}
 	if err != nil {
 		return bosherr.WrapError(err, fmt.Sprintf("Failed to revoke access of disk `%d` from hardware `%d`", disk.ID(), vm.ID()))
@@ -404,7 +404,7 @@ func (vm *softLayerHardware) fetchIscsiVolume(volumeId int) (datatypes.SoftLayer
 		return datatypes.SoftLayer_Network_Storage{}, bosherr.WrapError(err, "Cannot get network storage service.")
 	}
 
-	volume, err := networkStorageService.GetIscsiVolume(volumeId)
+	volume, err := networkStorageService.GetNetworkStorage(volumeId)
 	if err != nil {
 		return datatypes.SoftLayer_Network_Storage{}, bosherr.WrapErrorf(err, "Cannot get iSCSI volume with id: %d", volumeId)
 	}

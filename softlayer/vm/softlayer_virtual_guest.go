@@ -202,7 +202,7 @@ func (vm *softLayerVirtualGuest) AttachDisk(disk bslcdisk.Disk) error {
 	totalTime := time.Duration(0)
 	if err == nil && allowed == false {
 		for totalTime < bslcommon.TIMEOUT {
-			allowable, err := networkStorageService.AttachIscsiVolume(vm.virtualGuest, disk.ID())
+			allowable, err := networkStorageService.AttachNetworkStorageToVirtualGuest(vm.virtualGuest, disk.ID())
 			if err != nil {
 				if !strings.Contains(err.Error(), "HTTP error code") {
 					return bosherr.WrapError(err, fmt.Sprintf("Granting volume access to vitrual guest %d", vm.ID()))
@@ -273,7 +273,7 @@ func (vm *softLayerVirtualGuest) DetachDisk(disk bslcdisk.Disk) error {
 
 	allowed, err := networkStorageService.HasAllowedVirtualGuest(disk.ID(), vm.ID())
 	if err == nil && allowed == true {
-		err = networkStorageService.DetachIscsiVolume(vm.virtualGuest, disk.ID())
+		err = networkStorageService.DetachNetworkStorageFromVirtualGuest(vm.virtualGuest, disk.ID())
 	}
 	if err != nil {
 		return bosherr.WrapError(err, fmt.Sprintf("Failed to revoke access of disk `%d` from virtual gusest `%d`", disk.ID(), vm.ID()))
@@ -521,7 +521,7 @@ func (vm *softLayerVirtualGuest) fetchIscsiVolume(volumeId int) (datatypes.SoftL
 		return datatypes.SoftLayer_Network_Storage{}, bosherr.WrapError(err, "Cannot get network storage service.")
 	}
 
-	volume, err := networkStorageService.GetIscsiVolume(volumeId)
+	volume, err := networkStorageService.GetNetworkStorage(volumeId)
 	if err != nil {
 		return datatypes.SoftLayer_Network_Storage{}, bosherr.WrapErrorf(err, "Cannot get iSCSI volume with id: %d", volumeId)
 	}

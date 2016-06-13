@@ -55,7 +55,7 @@ var _ = Describe("SoftLayer_Network_Storage", func() {
 		})
 
 		It("fails with error if the volume size is negative", func() {
-			volume, err = networkStorageService.CreateIscsiVolume(-1, "fake-location")
+			volume, err = networkStorageService.CreateNetworkStorage(-1, "fake-location")
 			Expect(err).To(HaveOccurred())
 		})
 
@@ -65,7 +65,7 @@ var _ = Describe("SoftLayer_Network_Storage", func() {
 				for _, errorCode := range errorCodes {
 					fakeClient.FakeHttpClient.DoRawHttpRequestInt = errorCode
 
-					_, err = networkStorageService.CreateIscsiVolume(-1, "fake-location")
+					_, err = networkStorageService.CreateNetworkStorage(-1, "fake-location")
 					Expect(err).To(HaveOccurred())
 				}
 			})
@@ -75,7 +75,7 @@ var _ = Describe("SoftLayer_Network_Storage", func() {
 				for _, errorCode := range errorCodes {
 					fakeClient.FakeHttpClient.DoRawHttpRequestInt = errorCode
 
-					_, err = networkStorageService.CreateIscsiVolume(-1, "fake-location")
+					_, err = networkStorageService.CreateNetworkStorage(-1, "fake-location")
 					Expect(err).To(HaveOccurred())
 				}
 			})
@@ -89,7 +89,7 @@ var _ = Describe("SoftLayer_Network_Storage", func() {
 		})
 
 		It("returns the iSCSI volume object based on volume id", func() {
-			volume, err = networkStorageService.GetIscsiVolume(1)
+			volume, err = networkStorageService.GetNetworkStorage(1)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(volume.Id).To(Equal(1))
 			Expect(volume.Username).To(Equal("test_username"))
@@ -104,7 +104,7 @@ var _ = Describe("SoftLayer_Network_Storage", func() {
 				for _, errorCode := range errorCodes {
 					fakeClient.FakeHttpClient.DoRawHttpRequestInt = errorCode
 
-					_, err = networkStorageService.GetIscsiVolume(1)
+					_, err = networkStorageService.GetNetworkStorage(1)
 					Expect(err).To(HaveOccurred())
 				}
 			})
@@ -114,7 +114,7 @@ var _ = Describe("SoftLayer_Network_Storage", func() {
 				for _, errorCode := range errorCodes {
 					fakeClient.FakeHttpClient.DoRawHttpRequestInt = errorCode
 
-					_, err = networkStorageService.GetIscsiVolume(1)
+					_, err = networkStorageService.GetNetworkStorage(1)
 					Expect(err).To(HaveOccurred())
 				}
 			})
@@ -188,6 +188,38 @@ var _ = Describe("SoftLayer_Network_Storage", func() {
 		})
 	})
 
+	Context("#HasAllowedHardware", func() {
+		It("hardware allows to access volume", func() {
+			fakeClient.FakeHttpClient.DoRawHttpRequestResponse, err = testhelpers.ReadJsonTestFixtures("services", "SoftLayer_Network_Storage_Service_getAllowedHardware.json")
+			Expect(err).ToNot(HaveOccurred())
+
+			_, err := networkStorageService.HasAllowedHardware(123, 456)
+			Expect(err).ToNot(HaveOccurred())
+		})
+
+		Context("when HTTP client returns error codes 40x or 50x", func() {
+			It("fails for error code 40x", func() {
+				errorCodes := []int{400, 401, 499}
+				for _, errorCode := range errorCodes {
+					fakeClient.FakeHttpClient.DoRawHttpRequestInt = errorCode
+
+					_, err := networkStorageService.HasAllowedHardware(123, 456)
+					Expect(err).To(HaveOccurred())
+				}
+			})
+
+			It("fails for error code 50x", func() {
+				errorCodes := []int{500, 501, 599}
+				for _, errorCode := range errorCodes {
+					fakeClient.FakeHttpClient.DoRawHttpRequestInt = errorCode
+
+					_, err := networkStorageService.HasAllowedHardware(123, 456)
+					Expect(err).To(HaveOccurred())
+				}
+			})
+		})
+	})
+
 	Context("#AttachIscsiVolume", func() {
 		var virtualGuest datatypes.SoftLayer_Virtual_Guest
 
@@ -214,7 +246,7 @@ var _ = Describe("SoftLayer_Network_Storage", func() {
 		It("Allow access to storage from virutal guest", func() {
 			fakeClient.FakeHttpClient.DoRawHttpRequestResponse = []byte("true")
 
-			resp, err := networkStorageService.AttachIscsiVolume(virtualGuest, 123)
+			resp, err := networkStorageService.AttachNetworkStorageToVirtualGuest(virtualGuest, 123)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(resp).To(Equal(true))
 		})
@@ -226,7 +258,7 @@ var _ = Describe("SoftLayer_Network_Storage", func() {
 					fakeClient.FakeHttpClient.DoRawHttpRequestInt = errorCode
 					fakeClient.FakeHttpClient.DoRawHttpRequestResponse = []byte("true")
 
-					_, err := networkStorageService.AttachIscsiVolume(virtualGuest, 123)
+					_, err := networkStorageService.AttachNetworkStorageToVirtualGuest(virtualGuest, 123)
 					Expect(err).To(HaveOccurred())
 				}
 			})
@@ -237,7 +269,7 @@ var _ = Describe("SoftLayer_Network_Storage", func() {
 					fakeClient.FakeHttpClient.DoRawHttpRequestInt = errorCode
 					fakeClient.FakeHttpClient.DoRawHttpRequestResponse = []byte("true")
 
-					_, err := networkStorageService.AttachIscsiVolume(virtualGuest, 123)
+					_, err := networkStorageService.AttachNetworkStorageToVirtualGuest(virtualGuest, 123)
 					Expect(err).To(HaveOccurred())
 				}
 			})
@@ -270,7 +302,7 @@ var _ = Describe("SoftLayer_Network_Storage", func() {
 		It("Revoke access to storage from virtual guest", func() {
 			fakeClient.FakeHttpClient.DoRawHttpRequestResponse = []byte("true")
 
-			err = networkStorageService.DetachIscsiVolume(virtualGuest, 1234567)
+			err = networkStorageService.DetachNetworkStorageFromVirtualGuest(virtualGuest, 1234567)
 			Expect(err).ToNot(HaveOccurred())
 		})
 
@@ -281,7 +313,7 @@ var _ = Describe("SoftLayer_Network_Storage", func() {
 					fakeClient.FakeHttpClient.DoRawHttpRequestInt = errorCode
 					fakeClient.FakeHttpClient.DoRawHttpRequestResponse = []byte("true")
 
-					err = networkStorageService.DetachIscsiVolume(virtualGuest, 1234567)
+					err = networkStorageService.DetachNetworkStorageFromVirtualGuest(virtualGuest, 1234567)
 					Expect(err).To(HaveOccurred())
 				}
 			})
@@ -292,7 +324,7 @@ var _ = Describe("SoftLayer_Network_Storage", func() {
 					fakeClient.FakeHttpClient.DoRawHttpRequestInt = errorCode
 					fakeClient.FakeHttpClient.DoRawHttpRequestResponse = []byte("true")
 
-					err = networkStorageService.DetachIscsiVolume(virtualGuest, 1234567)
+					err = networkStorageService.DetachNetworkStorageFromVirtualGuest(virtualGuest, 1234567)
 					Expect(err).To(HaveOccurred())
 				}
 			})

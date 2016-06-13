@@ -447,7 +447,7 @@ func GetObjectDetailsOnStorage(softLayerClient sl.Client, volumeId int) (datatyp
 		return datatypes.SoftLayer_Network_Storage{}, bosherr.WrapError(err, "Cannot get network storage service.")
 	}
 
-	volume, err := networkStorageService.GetIscsiVolume(volumeId)
+	volume, err := networkStorageService.GetNetworkStorage(volumeId)
 	if err != nil {
 		return datatypes.SoftLayer_Network_Storage{}, bosherr.WrapErrorf(err, "Cannot get iSCSI volume with id: %d", volumeId)
 	}
