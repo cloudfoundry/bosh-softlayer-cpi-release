@@ -23,16 +23,10 @@ var _ = Describe("HasVM", func() {
 	})
 
 	Describe("Run", func() {
-		It("tries to find VM with given VM CID", func() {
-			_, err := action.Run(1234)
-			Expect(err).ToNot(HaveOccurred())
-
-			Expect(vmFinder.FindID).To(Equal(1234))
-		})
-
 		Context("when VM is found with given CID", func() {
 			It("returns true without error", func() {
 				vmFinder.FindFound = true
+				vmFinder.FindVM = fakevm.NewFakeVM(1234)
 
 				found, err := action.Run(1234)
 				Expect(err).ToNot(HaveOccurred())
@@ -42,6 +36,8 @@ var _ = Describe("HasVM", func() {
 
 		Context("when VM is not found with given CID", func() {
 			It("returns false without error", func() {
+				vmFinder.FindFound = false
+
 				found, err := action.Run(1234)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(found).To(BeFalse())
@@ -50,6 +46,7 @@ var _ = Describe("HasVM", func() {
 
 		Context("when VM finding fails", func() {
 			It("returns error", func() {
+				vmFinder.FindFound = false
 				vmFinder.FindErr = errors.New("fake-find-err")
 
 				found, err := action.Run(1234)
