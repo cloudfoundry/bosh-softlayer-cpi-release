@@ -4,12 +4,9 @@ import (
 	bmscl "github.com/cloudfoundry-community/bosh-softlayer-tools/clients"
 	sl "github.com/maximilien/softlayer-go/softlayer"
 
+	bslcvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
 	bosherror "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
-	boshsys "github.com/cloudfoundry/bosh-utils/system"
-	boshuuid "github.com/cloudfoundry/bosh-utils/uuid"
-
-	bslcvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
 )
 
 type Provider interface {
@@ -20,7 +17,7 @@ type provider struct {
 	creators map[string]bslcvm.VMCreator
 }
 
-func NewProvider(softLayerClient sl.Client, baremetalClient bmscl.BmpClient, options ConcreteFactoryOptions, logger boshlog.Logger, uuidGenerator boshuuid.Generator, fs boshsys.FileSystem) Provider {
+func NewProvider(softLayerClient sl.Client, baremetalClient bmscl.BmpClient, options ConcreteFactoryOptions, logger boshlog.Logger) Provider {
 
 	agentEnvServiceFactory := bslcvm.NewSoftLayerAgentEnvServiceFactory(options.AgentEnvService, options.Registry, logger)
 
@@ -29,29 +26,23 @@ func NewProvider(softLayerClient sl.Client, baremetalClient bmscl.BmpClient, opt
 		baremetalClient,
 		agentEnvServiceFactory,
 		logger,
-		uuidGenerator,
-		fs,
 	)
 
 	virtualGuestCreator := bslcvm.NewSoftLayerCreator(
+		vmFinder,
 		softLayerClient,
 		agentEnvServiceFactory,
 		options.Agent,
 		logger,
-		uuidGenerator,
-		fs,
-		vmFinder,
 	)
 
 	baremetalCreator := bslcvm.NewBaremetalCreator(
+		vmFinder,
 		softLayerClient,
 		baremetalClient,
 		agentEnvServiceFactory,
 		options.Agent,
 		logger,
-		uuidGenerator,
-		fs,
-		vmFinder,
 	)
 
 	return provider{

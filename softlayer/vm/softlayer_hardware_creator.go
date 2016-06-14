@@ -1,13 +1,10 @@
 package vm
 
 import (
-	"strconv"
 	"time"
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
-	boshsys "github.com/cloudfoundry/bosh-utils/system"
-	boshuuid "github.com/cloudfoundry/bosh-utils/uuid"
 
 	bmslc "github.com/cloudfoundry-community/bosh-softlayer-tools/clients"
 	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
@@ -22,26 +19,22 @@ type baremetalCreator struct {
 	bmsClient              bmslc.BmpClient
 	agentEnvServiceFactory AgentEnvServiceFactory
 
-	agentOptions  AgentOptions
-	logger        boshlog.Logger
-	uuidGenerator boshuuid.Generator
-	fs            boshsys.FileSystem
-	vmFinder      Finder
+	agentOptions AgentOptions
+	logger       boshlog.Logger
+	vmFinder     Finder
 }
 
-func NewBaremetalCreator(softLayerClient sl.Client, bmsClient bmslc.BmpClient, agentEnvServiceFactory AgentEnvServiceFactory, agentOptions AgentOptions, logger boshlog.Logger, uuidGenerator boshuuid.Generator, fs boshsys.FileSystem, vmFinder Finder) VMCreator {
+func NewBaremetalCreator(vmFinder Finder, softLayerClient sl.Client, bmsClient bmslc.BmpClient, agentEnvServiceFactory AgentEnvServiceFactory, agentOptions AgentOptions, logger boshlog.Logger) VMCreator {
 	bslcommon.TIMEOUT = 15 * time.Minute
 	bslcommon.POLLING_INTERVAL = 5 * time.Second
 
 	return &baremetalCreator{
+		vmFinder:               vmFinder,
 		softLayerClient:        softLayerClient,
 		bmsClient:              bmsClient,
 		agentEnvServiceFactory: agentEnvServiceFactory,
 		agentOptions:           agentOptions,
 		logger:                 logger,
-		uuidGenerator:          uuidGenerator,
-		fs:                     fs,
-		vmFinder:               vmFinder,
 	}
 }
 
@@ -56,8 +49,8 @@ func (c *baremetalCreator) Create(agentID string, stemcell bslcstem.Stemcell, cl
 		return nil, bosherr.WrapErrorf(err, "Cannot find hardware with id: %d.", hardwareId)
 	}
 
-	softlayerFileService := NewSoftlayerFileService(util.GetSshClient(), c.logger, c.uuidGenerator, c.fs)
-	agentEnvService := c.agentEnvServiceFactory.New(softlayerFileService, strconv.Itoa(hardwareId))
+	softlayerFileService := NewSoftlayerFileService(util.GetSshClient(), c.logger)
+	agentEnvService := c.agentEnvServiceFactory.New(softlayerFileService)
 
 	// Update mbus url setting
 	mbus, err := ParseMbusURL(c.agentOptions.Mbus, cloudProps.BoshIp)

@@ -10,11 +10,8 @@ import (
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
-	fakevm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm/fakes"
-
 	fakebmsclient "github.com/cloudfoundry-community/bosh-softlayer-tools/clients/fakes"
-	fakesys "github.com/cloudfoundry/bosh-utils/system/fakes"
-	fakeuuid "github.com/cloudfoundry/bosh-utils/uuid/fakes"
+	fakevm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm/fakes"
 	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
 )
 
@@ -23,8 +20,6 @@ var _ = Describe("SoftLayerFinder", func() {
 		softLayerClient        *fakeslclient.FakeSoftLayerClient
 		baremetalClient        *fakebmsclient.FakeBmpClient
 		agentEnvServiceFactory *fakevm.FakeAgentEnvServiceFactory
-		fs                     *fakesys.FakeFileSystem
-		uuidGenerator          *fakeuuid.FakeGenerator
 		logger                 boshlog.Logger
 		finder                 Finder
 	)
@@ -32,8 +27,6 @@ var _ = Describe("SoftLayerFinder", func() {
 	BeforeEach(func() {
 		softLayerClient = fakeslclient.NewFakeSoftLayerClient("fake-username", "fake-api-key")
 		baremetalClient = fakebmsclient.NewFakeBmpClient("fake-username", "fake-api-key", "fake-url", "fake-configpath")
-		uuidGenerator = fakeuuid.NewFakeGenerator()
-		fs = fakesys.NewFakeFileSystem()
 		agentEnvServiceFactory = &fakevm.FakeAgentEnvServiceFactory{}
 		logger = boshlog.NewLogger(boshlog.LevelNone)
 
@@ -42,8 +35,6 @@ var _ = Describe("SoftLayerFinder", func() {
 			baremetalClient,
 			agentEnvServiceFactory,
 			logger,
-			uuidGenerator,
-			fs,
 		)
 	})
 

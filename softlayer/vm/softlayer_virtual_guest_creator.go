@@ -3,13 +3,10 @@ package vm
 import (
 	"fmt"
 	"net"
-	"strconv"
 	"time"
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
-	boshsys "github.com/cloudfoundry/bosh-utils/system"
-	boshuuid "github.com/cloudfoundry/bosh-utils/uuid"
 
 	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
@@ -26,25 +23,21 @@ type softLayerVirtualGuestCreator struct {
 	softLayerClient        sl.Client
 	agentEnvServiceFactory AgentEnvServiceFactory
 
-	agentOptions  AgentOptions
-	logger        boshlog.Logger
-	uuidGenerator boshuuid.Generator
-	fs            boshsys.FileSystem
-	vmFinder      Finder
+	agentOptions AgentOptions
+	logger       boshlog.Logger
+	vmFinder     Finder
 }
 
-func NewSoftLayerCreator(softLayerClient sl.Client, agentEnvServiceFactory AgentEnvServiceFactory, agentOptions AgentOptions, logger boshlog.Logger, uuidGenerator boshuuid.Generator, fs boshsys.FileSystem, vmFinder Finder) VMCreator {
+func NewSoftLayerCreator(vmFinder Finder, softLayerClient sl.Client, agentEnvServiceFactory AgentEnvServiceFactory, agentOptions AgentOptions, logger boshlog.Logger) VMCreator {
 	bslcommon.TIMEOUT = 120 * time.Minute
 	bslcommon.POLLING_INTERVAL = 5 * time.Second
 
 	return &softLayerVirtualGuestCreator{
+		vmFinder:               vmFinder,
 		softLayerClient:        softLayerClient,
 		agentEnvServiceFactory: agentEnvServiceFactory,
 		agentOptions:           agentOptions,
 		logger:                 logger,
-		uuidGenerator:          uuidGenerator,
-		fs:                     fs,
-		vmFinder:               vmFinder,
 	}
 }
 
@@ -103,8 +96,8 @@ func (c *softLayerVirtualGuestCreator) createBySoftlayer(agentID string, stemcel
 		return nil, bosherr.WrapErrorf(err, "Cannot find virtual guest with id: %d.", virtualGuest.Id)
 	}
 
-	softlayerFileService := NewSoftlayerFileService(util.GetSshClient(), c.logger, c.uuidGenerator, c.fs)
-	agentEnvService := c.agentEnvServiceFactory.New(softlayerFileService, strconv.Itoa(vm.ID()))
+	softlayerFileService := NewSoftlayerFileService(util.GetSshClient(), c.logger)
+	agentEnvService := c.agentEnvServiceFactory.New(softlayerFileService)
 
 	if len(cloudProps.BoshIp) == 0 {
 		// update /etc/hosts file of bosh-init vm
@@ -194,8 +187,8 @@ func (c *softLayerVirtualGuestCreator) createByOSReload(agentID string, stemcell
 		}
 	}
 
-	softlayerFileService := NewSoftlayerFileService(util.GetSshClient(), c.logger, c.uuidGenerator, c.fs)
-	agentEnvService := c.agentEnvServiceFactory.New(softlayerFileService, strconv.Itoa(vm.ID()))
+	softlayerFileService := NewSoftlayerFileService(util.GetSshClient(), c.logger)
+	agentEnvService := c.agentEnvServiceFactory.New(softlayerFileService)
 
 	if len(cloudProps.BoshIp) == 0 {
 		// update /etc/hosts file of bosh-init vm

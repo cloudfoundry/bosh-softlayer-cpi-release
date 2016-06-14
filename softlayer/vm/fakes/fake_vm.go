@@ -83,15 +83,15 @@ func (vm *FakeVM) GetDataCenterId() int {
 }
 
 func (vm *FakeVM) GetPrimaryIP() string {
-	return "fake-public-ip"
+	return "fake-primary-ip"
 }
 
 func (vm *FakeVM) GetPrimaryBackendIP() string {
-	return "fake-private-ip"
+	return "fake-backend-ip"
 }
 
 func (vm *FakeVM) GetRootPassword() string {
-	return "fake-password"
+	return "root-password"
 }
 
 func (vm *FakeVM) GetFullyQualifiedDomainName() string {

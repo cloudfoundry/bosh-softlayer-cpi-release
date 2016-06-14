@@ -10,13 +10,10 @@ import (
 
 	testhelpers "github.com/cloudfoundry/bosh-softlayer-cpi/test_helpers"
 
+	fakebmsclient "github.com/cloudfoundry-community/bosh-softlayer-tools/clients/fakes"
 	fakestem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell/fakes"
 	fakevm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm/fakes"
 	fakesutil "github.com/cloudfoundry/bosh-softlayer-cpi/util/fakes"
-	fakesys "github.com/cloudfoundry/bosh-utils/system/fakes"
-	fakeuuid "github.com/cloudfoundry/bosh-utils/uuid/fakes"
-
-	fakebmsclient "github.com/cloudfoundry-community/bosh-softlayer-tools/clients/fakes"
 	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
 
 	bmsclients "github.com/cloudfoundry-community/bosh-softlayer-tools/clients"
@@ -34,8 +31,6 @@ var _ = Describe("SoftLayer_Hardware_Creator", func() {
 		baremetalClient        *fakebmsclient.FakeBmpClient
 		sshClient              *fakesutil.FakeSshClient
 		agentEnvServiceFactory *fakevm.FakeAgentEnvServiceFactory
-		fs                     *fakesys.FakeFileSystem
-		uuidGenerator          *fakeuuid.FakeGenerator
 		vmFinder               *fakevm.FakeFinder
 		agentOptions           AgentOptions
 		logger                 boshlog.Logger
@@ -46,22 +41,18 @@ var _ = Describe("SoftLayer_Hardware_Creator", func() {
 		softLayerClient = fakeslclient.NewFakeSoftLayerClient("fake-username", "fake-api-key")
 		baremetalClient = fakebmsclient.NewFakeBmpClient("fake-username", "fake-api-key", "fake-url", "fake-config-path")
 		sshClient = &fakesutil.FakeSshClient{}
-		uuidGenerator = fakeuuid.NewFakeGenerator()
-		fs = fakesys.NewFakeFileSystem()
 		agentEnvServiceFactory = &fakevm.FakeAgentEnvServiceFactory{}
 		agentOptions = AgentOptions{Mbus: "fake-mbus"}
 		logger = boshlog.NewLogger(boshlog.LevelNone)
 		vmFinder = &fakevm.FakeFinder{}
 
 		creator = NewBaremetalCreator(
+			vmFinder,
 			softLayerClient,
 			baremetalClient,
 			agentEnvServiceFactory,
 			agentOptions,
 			logger,
-			uuidGenerator,
-			fs,
-			vmFinder,
 		)
 		bslcommon.TIMEOUT = 2 * time.Second
 		bslcommon.POLLING_INTERVAL = 1 * time.Second

@@ -3,9 +3,6 @@ package vm
 import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
-	boshsys "github.com/cloudfoundry/bosh-utils/system"
-	boshuuid "github.com/cloudfoundry/bosh-utils/uuid"
-	"strconv"
 
 	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 
@@ -19,24 +16,20 @@ type softLayerFinder struct {
 	baremetalClient        bmscl.BmpClient
 	agentEnvServiceFactory AgentEnvServiceFactory
 	logger                 boshlog.Logger
-	uuidGenerator          boshuuid.Generator
-	fs                     boshsys.FileSystem
 }
 
-func NewSoftLayerFinder(softLayerClient sl.Client, baremetalClient bmscl.BmpClient, agentEnvServiceFactory AgentEnvServiceFactory, logger boshlog.Logger, uuidGenerator boshuuid.Generator, fs boshsys.FileSystem) Finder {
+func NewSoftLayerFinder(softLayerClient sl.Client, baremetalClient bmscl.BmpClient, agentEnvServiceFactory AgentEnvServiceFactory, logger boshlog.Logger) Finder {
 	return &softLayerFinder{
 		softLayerClient:        softLayerClient,
 		baremetalClient:        baremetalClient,
 		agentEnvServiceFactory: agentEnvServiceFactory,
 		logger:                 logger,
-		uuidGenerator:          uuidGenerator,
-		fs:                     fs,
 	}
 }
 
 func (f *softLayerFinder) Find(vmID int) (VM, bool, error) {
-	softlayerFileService := NewSoftlayerFileService(util.GetSshClient(), f.logger, f.uuidGenerator, f.fs)
-	agentEnvService := f.agentEnvServiceFactory.New(softlayerFileService, strconv.Itoa(vmID))
+	softlayerFileService := NewSoftlayerFileService(util.GetSshClient(), f.logger)
+	agentEnvService := f.agentEnvServiceFactory.New(softlayerFileService)
 
 	_, err := bslcommon.GetObjectDetailsOnVirtualGuest(f.softLayerClient, vmID)
 	if err != nil {

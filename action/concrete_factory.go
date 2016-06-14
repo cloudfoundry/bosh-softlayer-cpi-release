@@ -3,8 +3,6 @@ package action
 import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
-	boshsys "github.com/cloudfoundry/bosh-utils/system"
-	boshuuid "github.com/cloudfoundry/bosh-utils/uuid"
 
 	bmsclient "github.com/cloudfoundry-community/bosh-softlayer-tools/clients"
 	slclient "github.com/maximilien/softlayer-go/client"
@@ -19,9 +17,6 @@ type concreteFactory struct {
 }
 
 func NewConcreteFactory(options ConcreteFactoryOptions, logger boshlog.Logger) concreteFactory {
-	fs := boshsys.NewOsFileSystem(logger)
-	uuidGenerator := boshuuid.NewGenerator()
-
 	softLayerClient := slclient.NewSoftLayerClient(options.Softlayer.Username, options.Softlayer.ApiKey)
 	baremetalClient := bmsclient.NewBmpClient(options.Baremetal.Username, options.Baremetal.Password, options.Baremetal.EndPoint, nil, "")
 
@@ -34,8 +29,6 @@ func NewConcreteFactory(options ConcreteFactoryOptions, logger boshlog.Logger) c
 		baremetalClient,
 		agentEnvServiceFactory,
 		logger,
-		uuidGenerator,
-		fs,
 	)
 
 	vmCreatorProvider := NewProvider(
@@ -43,8 +36,6 @@ func NewConcreteFactory(options ConcreteFactoryOptions, logger boshlog.Logger) c
 		baremetalClient,
 		options,
 		logger,
-		uuidGenerator,
-		fs,
 	)
 
 	diskCreator := bslcdisk.NewSoftLayerDiskCreator(

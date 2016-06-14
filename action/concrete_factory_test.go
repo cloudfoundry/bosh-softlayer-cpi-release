@@ -82,7 +82,6 @@ var _ = Describe("concreteFactory", func() {
 	})
 
 	Context("Disk methods", func() {
-
 		It("creates an iSCSI disk", func() {
 			action, err := factory.Create("create_disk")
 			Expect(action).ToNot(BeNil())
