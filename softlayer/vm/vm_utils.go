@@ -2,7 +2,6 @@ package vm
 
 import (
 	"bytes"
-	"encoding/base64"
 	"fmt"
 	"net"
 	"net/url"
@@ -74,21 +73,6 @@ func CreateAgentUserData(agentID string, cloudProps VMCloudProperties, networks 
 	disks := CreateDisksSpec(cloudProps.EphemeralDiskSize)
 	agentEnv := NewAgentEnvForVM(agentID, agentName, networks, disks, env, agentOptions)
 	return agentEnv
-}
-
-func AppendPowerDNSToNetworks(networks Networks, cloudProps VMCloudProperties) Networks {
-	powerdnsNetworks := make(map[string]Network)
-	for name, network := range networks {
-		network = network.AppendDNS(cloudProps.BoshIp)
-		powerdnsNetworks[name] = network
-	}
-
-	return powerdnsNetworks
-}
-
-func Base64EncodeData(unEncodedData string) string {
-	dataBytes := []byte(unEncodedData)
-	return base64.StdEncoding.EncodeToString(dataBytes)
 }
 
 func UpdateDavConfig(config *DavConfig, directorIP string) (err error) {

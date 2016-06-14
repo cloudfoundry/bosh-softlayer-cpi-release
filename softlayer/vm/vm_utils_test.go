@@ -32,63 +32,6 @@ var _ = Describe("VM Utils", func() {
 		logger = boshlog.NewLogger(boshlog.LevelNone)
 	})
 
-	Describe("#AppendPowerDNSToNetworks", func() {
-		var (
-			networks, expectedNetworks Networks
-			cloudProps                 VMCloudProperties
-		)
-
-		BeforeEach(func() {
-			networks = map[string]Network{
-				"fake-network0": Network{
-					Type:    "fake-type",
-					IP:      "fake-IP",
-					Netmask: "fake-Netmask",
-					Gateway: "fake-Gateway",
-					DNS: []string{
-						"fake-dns0",
-						"fake-dns1",
-					},
-					Default:         []string{},
-					CloudProperties: map[string]interface{}{},
-				},
-			}
-
-			expectedNetworks = map[string]Network{
-				"fake-network0": Network{
-					Type:    "fake-type",
-					IP:      "fake-IP",
-					Netmask: "fake-Netmask",
-					Gateway: "fake-Gateway",
-					DNS: []string{
-						"fake-dns0",
-						"fake-dns1",
-						"fake-powerdns",
-					},
-					Default:         []string{},
-					CloudProperties: map[string]interface{}{},
-				},
-			}
-
-			cloudProps = VMCloudProperties{
-				BoshIp: "fake-powerdns",
-			}
-		})
-
-		It("returns new networks with PowerDNS", func() {
-			pdnsNetworks := AppendPowerDNSToNetworks(networks, cloudProps)
-			Expect(pdnsNetworks).ToNot(Equal(Networks{}))
-			Expect(pdnsNetworks).To(Equal(expectedNetworks))
-		})
-	})
-
-	Describe("#Base64EncodeData", func() {
-		It("returns base64 encoded string for `fake-data`", func() {
-			encodedData := Base64EncodeData("fake-data")
-			Expect(encodedData).To(Equal("ZmFrZS1kYXRh"))
-		})
-	})
-
 	Describe("#CreateAgentMetadata", func() {
 		var (
 			agentID, agentName string
