@@ -1,52 +1,48 @@
 package vm
 
 import (
-	"strconv"
-	"strings"
-
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
-	util "github.com/cloudfoundry/bosh-softlayer-cpi/util"
+	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
+
+	bmscl "github.com/cloudfoundry-community/bosh-softlayer-tools/clients"
+	"github.com/cloudfoundry/bosh-softlayer-cpi/util"
 	sl "github.com/maximilien/softlayer-go/softlayer"
 )
 
-const SOFTLAYER_VM_FINDER_LOG_TAG = "SoftLayerVMFinder"
-
-type SoftLayerFinder struct {
+type softLayerFinder struct {
 	softLayerClient        sl.Client
+	baremetalClient        bmscl.BmpClient
 	agentEnvServiceFactory AgentEnvServiceFactory
 	logger                 boshlog.Logger
 }
 
-func NewSoftLayerFinder(softLayerClient sl.Client, agentEnvServiceFactory AgentEnvServiceFactory, logger boshlog.Logger) SoftLayerFinder {
-	return SoftLayerFinder{
+func NewSoftLayerFinder(softLayerClient sl.Client, baremetalClient bmscl.BmpClient, agentEnvServiceFactory AgentEnvServiceFactory, logger boshlog.Logger) Finder {
+	return &softLayerFinder{
 		softLayerClient:        softLayerClient,
+		baremetalClient:        baremetalClient,
 		agentEnvServiceFactory: agentEnvServiceFactory,
 		logger:                 logger,
 	}
 }
 
-func (f SoftLayerFinder) Find(vmID int) (VM, bool, error) {
-	virtualGuestService, err := f.softLayerClient.GetSoftLayer_Virtual_Guest_Service()
-	if err != nil {
-		return SoftLayerVM{}, false, bosherr.WrapError(err, "Creating SoftLayer Virtual Guest Service from client")
-	}
+func (f *softLayerFinder) Find(vmID int) (VM, bool, error) {
+	softlayerFileService := NewSoftlayerFileService(util.GetSshClient(), f.logger)
+	agentEnvService := f.agentEnvServiceFactory.New(softlayerFileService)
 
-	virtualGuest, err := virtualGuestService.GetObject(vmID)
+	_, err := bslcommon.GetObjectDetailsOnVirtualGuest(f.softLayerClient, vmID)
 	if err != nil {
-		if !strings.Contains(err.Error(), "HTTP error code") {
-			return SoftLayerVM{}, false, bosherr.WrapErrorf(err, "Finding SoftLayer Virtual Guest with id `%d`", vmID)
+		_, err := bslcommon.GetObjectDetailsOnHardware(f.softLayerClient, vmID)
+		if err != nil {
+			return nil, false, bosherr.Errorf("Failed to find VM or Baremetal %d", vmID)
 		}
+		vm := NewSoftLayerHardware(vmID, f.softLayerClient, f.baremetalClient, util.GetSshClient(), agentEnvService, f.logger)
+		softlayerFileService.SetVM(vm)
+		return vm, true, nil
 	}
 
-	vm, found := SoftLayerVM{}, true
-	if virtualGuest.Id == vmID {
-		softlayerFileService := NewSoftlayerFileService(util.GetSshClient(), virtualGuest, f.logger)
-		vm = NewSoftLayerVM(vmID, f.softLayerClient, util.GetSshClient(), f.agentEnvServiceFactory.New(softlayerFileService, strconv.Itoa(vmID)), f.logger)
-	} else {
-		found = false
-	}
-
-	return vm, found, nil
+	vm := NewSoftLayerVirtualGuest(vmID, f.softLayerClient, util.GetSshClient(), agentEnvService, f.logger)
+	softlayerFileService.SetVM(vm)
+	return vm, true, nil
 }

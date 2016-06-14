@@ -7,24 +7,11 @@ import (
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/action"
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
-
-	fakecmd "github.com/cloudfoundry/bosh-utils/fileutil/fakes"
-	fakesys "github.com/cloudfoundry/bosh-utils/system/fakes"
-
-	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
-
-	bslcdisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk"
-	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
-	bslcvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
 )
 
 var _ = Describe("concreteFactory", func() {
 	var (
-		softLayerClient *fakeslclient.FakeSoftLayerClient
-		fs              *fakesys.FakeFileSystem
-		cmdRunner       *fakesys.FakeCmdRunner
-		compressor      *fakecmd.FakeCompressor
-		logger          boshlog.Logger
+		logger boshlog.Logger
 
 		options = ConcreteFactoryOptions{
 			StemcellsDir: "/tmp/stemcells",
@@ -33,36 +20,11 @@ var _ = Describe("concreteFactory", func() {
 		factory Factory
 	)
 
-	var (
-		agentEnvServiceFactory bslcvm.AgentEnvServiceFactory
-
-		stemcellFinder bslcstem.Finder
-		vmFinder       bslcvm.Finder
-	)
-
 	BeforeEach(func() {
-		softLayerClient = fakeslclient.NewFakeSoftLayerClient("fake-username", "fake-api-key")
-		fs = fakesys.NewFakeFileSystem()
-		cmdRunner = fakesys.NewFakeCmdRunner()
-		compressor = fakecmd.NewFakeCompressor()
 		logger = boshlog.NewLogger(boshlog.LevelNone)
 
 		factory = NewConcreteFactory(
-			softLayerClient,
 			options,
-			logger,
-			fs,
-		)
-	})
-
-	BeforeEach(func() {
-		agentEnvServiceFactory = bslcvm.NewSoftLayerAgentEnvServiceFactory(options.AgentEnvService, options.Registry, logger)
-
-		stemcellFinder = bslcstem.NewSoftLayerFinder(softLayerClient, logger)
-
-		vmFinder = bslcvm.NewSoftLayerFinder(
-			softLayerClient,
-			agentEnvServiceFactory,
 			logger,
 		)
 	})
@@ -70,108 +32,78 @@ var _ = Describe("concreteFactory", func() {
 	Context("Stemcell methods", func() {
 		It("create_stemcell", func() {
 			action, err := factory.Create("create_stemcell")
+			Expect(action).ToNot(BeNil())
 			Expect(err).ToNot(HaveOccurred())
-			Expect(action).To(Equal(NewCreateStemcell(stemcellFinder)))
 		})
 
 		It("delete_stemcell", func() {
 			action, err := factory.Create("delete_stemcell")
+			Expect(action).ToNot(BeNil())
 			Expect(err).ToNot(HaveOccurred())
-			Expect(action).To(Equal(NewDeleteStemcell(stemcellFinder, logger)))
 		})
 	})
 
 	Context("VM methods", func() {
 		It("create_vm", func() {
-			vmCreator := bslcvm.NewSoftLayerCreator(
-				softLayerClient,
-				agentEnvServiceFactory,
-				options.Agent,
-				logger,
-				fs,
-			)
-
 			action, err := factory.Create("create_vm")
+			Expect(action).ToNot(BeNil())
 			Expect(err).ToNot(HaveOccurred())
-			Expect(action).To(Equal(NewCreateVM(stemcellFinder, vmCreator)))
 		})
 
 		It("delete_vm", func() {
 			action, err := factory.Create("delete_vm")
+			Expect(action).ToNot(BeNil())
 			Expect(err).ToNot(HaveOccurred())
-			Expect(action).To(Equal(NewDeleteVM(vmFinder)))
 		})
 
 		It("has_vm", func() {
 			action, err := factory.Create("has_vm")
+			Expect(action).ToNot(BeNil())
 			Expect(err).ToNot(HaveOccurred())
-			Expect(action).To(Equal(NewHasVM(vmFinder)))
 		})
 
 		It("reboot_vm", func() {
 			action, err := factory.Create("reboot_vm")
+			Expect(action).ToNot(BeNil())
 			Expect(err).ToNot(HaveOccurred())
-			Expect(action).To(Equal(NewRebootVM(vmFinder)))
 		})
 
 		It("set_vm_metadata", func() {
 			action, err := factory.Create("set_vm_metadata")
+			Expect(action).ToNot(BeNil())
 			Expect(err).ToNot(HaveOccurred())
-			Expect(action).To(Equal(NewSetVMMetadata(vmFinder)))
 		})
 
 		It("configure_networks", func() {
 			action, err := factory.Create("configure_networks")
+			Expect(action).ToNot(BeNil())
 			Expect(err).ToNot(HaveOccurred())
-			Expect(action).To(Equal(NewConfigureNetworks(vmFinder)))
 		})
 	})
 
 	Context("Disk methods", func() {
-		var (
-			vmFinder    bslcvm.Finder
-			diskFinder  bslcdisk.Finder
-			diskCreator bslcdisk.Creator
-		)
-
-		BeforeEach(func() {
-			vmFinder = bslcvm.NewSoftLayerFinder(
-				softLayerClient,
-				agentEnvServiceFactory,
-				logger,
-			)
-			diskFinder = bslcdisk.NewSoftLayerDiskFinder(
-				softLayerClient,
-				logger,
-			)
-			diskCreator = bslcdisk.NewSoftLayerDiskCreator(
-				softLayerClient,
-				logger,
-			)
-		})
-
 		It("creates an iSCSI disk", func() {
 			action, err := factory.Create("create_disk")
+			Expect(action).ToNot(BeNil())
 			Expect(err).ToNot(HaveOccurred())
-			Expect(action).To(Equal(NewCreateDisk(diskCreator)))
 		})
 
 		It("deletes the detached iSCSI disk", func() {
 			action, err := factory.Create("delete_disk")
+			Expect(action).ToNot(BeNil())
 			Expect(err).ToNot(HaveOccurred())
-			Expect(action).To(Equal(NewDeleteDisk(diskFinder)))
 		})
 
 		It("attaches an iSCSI disk to a virtual guest", func() {
 			action, err := factory.Create("attach_disk")
+			Expect(action).ToNot(BeNil())
 			Expect(err).ToNot(HaveOccurred())
-			Expect(action).To(Equal(NewAttachDisk(vmFinder, diskFinder)))
 		})
 
 		It("detaches the iSCSI disk from virtual guest", func() {
 			action, err := factory.Create("detach_disk")
+			Expect(action).ToNot(BeNil())
 			Expect(err).ToNot(HaveOccurred())
-			Expect(action).To(Equal(NewDetachDisk(vmFinder, diskFinder)))
 		})
 	})
 

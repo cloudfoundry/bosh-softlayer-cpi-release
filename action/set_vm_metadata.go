@@ -6,15 +6,18 @@ import (
 	bslcvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
 )
 
-type SetVMMetadata struct {
+type SetVMMetadataAction struct {
 	vmFinder bslcvm.Finder
 }
 
-func NewSetVMMetadata(vmFinder bslcvm.Finder) SetVMMetadata {
-	return SetVMMetadata{vmFinder: vmFinder}
+func NewSetVMMetadata(
+	vmFinder bslcvm.Finder,
+) (action SetVMMetadataAction) {
+	action.vmFinder = vmFinder
+	return
 }
 
-func (a SetVMMetadata) Run(vmCID VMCID, metadata bslcvm.VMMetadata) (interface{}, error) {
+func (a SetVMMetadataAction) Run(vmCID VMCID, metadata bslcvm.VMMetadata) (interface{}, error) {
 	vm, found, err := a.vmFinder.Find(int(vmCID))
 	if err != nil || !found {
 		return nil, bosherr.WrapErrorf(err, "Finding VM '%s'", vmCID)

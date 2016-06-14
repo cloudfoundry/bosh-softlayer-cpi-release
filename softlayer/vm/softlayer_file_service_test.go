@@ -9,8 +9,8 @@ import (
 	. "github.com/onsi/gomega"
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
-	datatypes "github.com/maximilien/softlayer-go/data_types"
 
+	fakevm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm/fakes"
 	fakesutil "github.com/cloudfoundry/bosh-softlayer-cpi/util/fakes"
 
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
@@ -20,25 +20,16 @@ var _ = Describe("SoftlayerFileService", func() {
 	var (
 		logger               boshlog.Logger
 		sshClient            *fakesutil.FakeSshClient
-		virtualGuest         datatypes.SoftLayer_Virtual_Guest
+		vm                   *fakevm.FakeVM
 		softlayerFileService SoftlayerFileService
 	)
 
 	BeforeEach(func() {
 		logger = boshlog.NewLogger(boshlog.LevelNone)
 		sshClient = &fakesutil.FakeSshClient{}
-
-		virtualGuest = datatypes.SoftLayer_Virtual_Guest{
-			PrimaryBackendIpAddress: "fake-backend-ip",
-			OperatingSystem: &datatypes.SoftLayer_Operating_System{
-				Passwords: []datatypes.SoftLayer_Password{{
-					Username: "root",
-					Password: "root-password",
-				}},
-			},
-		}
-
-		softlayerFileService = NewSoftlayerFileService(sshClient, virtualGuest, logger)
+		vm = fakevm.NewFakeVM(1234567)
+		softlayerFileService = NewSoftlayerFileService(sshClient, logger)
+		softlayerFileService.SetVM(vm)
 	})
 
 	Describe("Upload", func() {

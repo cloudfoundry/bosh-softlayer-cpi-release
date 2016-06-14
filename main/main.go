@@ -7,11 +7,11 @@ import (
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	boshsys "github.com/cloudfoundry/bosh-utils/system"
 
-	slclient "github.com/maximilien/softlayer-go/client"
-
 	bslcaction "github.com/cloudfoundry/bosh-softlayer-cpi/action"
 	bslcdisp "github.com/cloudfoundry/bosh-softlayer-cpi/api/dispatcher"
 	bslctrans "github.com/cloudfoundry/bosh-softlayer-cpi/api/transport"
+
+	"github.com/cloudfoundry/bosh-softlayer-cpi/config"
 )
 
 const mainLogTag = "main"
@@ -32,13 +32,13 @@ func main() {
 		os.Exit(0)
 	}
 
-	config, err := NewConfigFromPath(*configPathOpt, fs)
+	config, err := config.NewConfigFromPath(*configPathOpt, fs)
 	if err != nil {
 		logger.Error(mainLogTag, "Loading config %s", err.Error())
 		os.Exit(1)
 	}
 
-	dispatcher := buildDispatcher(config, logger, fs, cmdRunner)
+	dispatcher := buildDispatcher(config, logger, cmdRunner)
 
 	cli := bslctrans.NewCLI(os.Stdin, os.Stdout, dispatcher, logger)
 
@@ -59,14 +59,10 @@ func basicDeps() (boshlog.Logger, boshsys.FileSystem, boshsys.CmdRunner) {
 	return logger, fs, cmdRunner
 }
 
-func buildDispatcher(config Config, logger boshlog.Logger, fs boshsys.FileSystem, cmdRunner boshsys.CmdRunner) bslcdisp.Dispatcher {
-	softLayerClient := slclient.NewSoftLayerClient(config.Cloud.Properties.Softlayer.Username, config.Cloud.Properties.Softlayer.ApiKey)
-
+func buildDispatcher(config config.Config, logger boshlog.Logger, cmdRunner boshsys.CmdRunner) bslcdisp.Dispatcher {
 	actionFactory := bslcaction.NewConcreteFactory(
-		softLayerClient,
 		config.Cloud.Properties,
 		logger,
-		fs,
 	)
 
 	caller := bslcdisp.NewJSONCaller()

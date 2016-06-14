@@ -9,6 +9,8 @@ import (
 type ConcreteFactoryOptions struct {
 	Softlayer SoftLayerConfig `json:"softlayer"`
 
+	Baremetal BaremetalConfig `json:"baremetal,omitempty"`
+
 	StemcellsDir string `json:"stemcelldir,omitempty"`
 
 	Agent bslcvm.AgentOptions `json:"agent"`
@@ -35,6 +37,12 @@ func (o ConcreteFactoryOptions) Validate() error {
 type SoftLayerConfig struct {
 	Username string `json:"username"`
 	ApiKey   string `json:"apiKey"`
+}
+
+type BaremetalConfig struct {
+	Username string `json:"username,omitempty"`
+	Password string `json:"password,omitempty"`
+	EndPoint string `json:"endpoint,omitempty"`
 }
 
 func (c SoftLayerConfig) Validate() error {

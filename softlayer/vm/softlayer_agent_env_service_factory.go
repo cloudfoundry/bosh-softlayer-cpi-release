@@ -24,7 +24,6 @@ func NewSoftLayerAgentEnvServiceFactory(
 
 func (f SoftLayerAgentEnvServiceFactory) New(
 	softlayerFileService SoftlayerFileService,
-	instanceID string,
 ) AgentEnvService {
 	return NewFSAgentEnvService(softlayerFileService, f.logger)
 }
