@@ -21,7 +21,7 @@ func NewDetachDisk(
 	return
 }
 
-func (a *DetachDiskAction) Run(vmCID VMCID, diskCID DiskCID) (interface{}, error) {
+func (a DetachDiskAction) Run(vmCID VMCID, diskCID DiskCID) (interface{}, error) {
 	vm, found, err := a.vmFinder.Find(vmCID.Int())
 	if err != nil {
 		return nil, bosherr.WrapErrorf(err, "Finding VM '%s'", vmCID)
