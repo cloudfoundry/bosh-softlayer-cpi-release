@@ -9,6 +9,7 @@ type FakeAgentEnvServiceFactory struct {
 }
 
 func (f *FakeAgentEnvServiceFactory) New(
+	vm bslvm.VM,
 	softlayerFileService bslvm.SoftlayerFileService,
 ) bslvm.AgentEnvService {
 	if f.NewAgentEnvService == nil {

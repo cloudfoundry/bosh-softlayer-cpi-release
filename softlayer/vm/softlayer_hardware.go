@@ -39,24 +39,18 @@ type softLayerHardware struct {
 	logger boshlog.Logger
 }
 
-func NewSoftLayerHardware(id int, softLayerClient sl.Client, baremetalClient bmscl.BmpClient, sshClient util.SshClient, agentEnvService AgentEnvService, logger boshlog.Logger) VM {
+func NewSoftLayerHardware(hardware datatypes.SoftLayer_Hardware, softLayerClient sl.Client, baremetalClient bmscl.BmpClient, sshClient util.SshClient, logger boshlog.Logger) VM {
 	bslcommon.TIMEOUT = 60 * time.Minute
 	bslcommon.POLLING_INTERVAL = 10 * time.Second
 
-	hardware, err := bslcommon.GetObjectDetailsOnHardware(softLayerClient, id)
-	if err != nil {
-		return &softLayerHardware{}
-	}
-
 	return &softLayerHardware{
-		id:       id,
+		id: hardware.Id,
+
 		hardware: hardware,
 
 		softLayerClient: softLayerClient,
 		baremetalClient: baremetalClient,
 		sshClient:       sshClient,
-
-		agentEnvService: agentEnvService,
 
 		logger: logger,
 	}
@@ -88,6 +82,13 @@ func (vm *softLayerHardware) GetRootPassword() string {
 
 func (vm *softLayerHardware) GetFullyQualifiedDomainName() string {
 	return vm.hardware.FullyQualifiedDomainName
+}
+
+func (vm *softLayerHardware) SetAgentEnvService(agentEnvService AgentEnvService) error {
+	if agentEnvService != nil {
+		vm.agentEnvService = agentEnvService
+	}
+	return nil
 }
 
 func (vm *softLayerHardware) SetVcapPassword(encryptedPwd string) (err error) {
@@ -268,6 +269,10 @@ func (vm *softLayerHardware) DetachDisk(disk bslcdisk.Disk) error {
 	}
 
 	return nil
+}
+
+func (vm *softLayerHardware) UpdateAgentEnv(agentEnv AgentEnv) error {
+	return vm.agentEnvService.Update(agentEnv)
 }
 
 // Private methods

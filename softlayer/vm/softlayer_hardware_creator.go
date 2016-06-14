@@ -10,8 +10,6 @@ import (
 	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
 	sl "github.com/maximilien/softlayer-go/softlayer"
-
-	"github.com/cloudfoundry/bosh-softlayer-cpi/util"
 )
 
 type baremetalCreator struct {
@@ -24,17 +22,16 @@ type baremetalCreator struct {
 	vmFinder     Finder
 }
 
-func NewBaremetalCreator(vmFinder Finder, softLayerClient sl.Client, bmsClient bmslc.BmpClient, agentEnvServiceFactory AgentEnvServiceFactory, agentOptions AgentOptions, logger boshlog.Logger) VMCreator {
+func NewBaremetalCreator(vmFinder Finder, softLayerClient sl.Client, bmsClient bmslc.BmpClient, agentOptions AgentOptions, logger boshlog.Logger) VMCreator {
 	bslcommon.TIMEOUT = 15 * time.Minute
 	bslcommon.POLLING_INTERVAL = 5 * time.Second
 
 	return &baremetalCreator{
-		vmFinder:               vmFinder,
-		softLayerClient:        softLayerClient,
-		bmsClient:              bmsClient,
-		agentEnvServiceFactory: agentEnvServiceFactory,
-		agentOptions:           agentOptions,
-		logger:                 logger,
+		vmFinder:        vmFinder,
+		softLayerClient: softLayerClient,
+		bmsClient:       bmsClient,
+		agentOptions:    agentOptions,
+		logger:          logger,
 	}
 }
 
@@ -48,9 +45,6 @@ func (c *baremetalCreator) Create(agentID string, stemcell bslcstem.Stemcell, cl
 	if err != nil || !found {
 		return nil, bosherr.WrapErrorf(err, "Cannot find hardware with id: %d.", hardwareId)
 	}
-
-	softlayerFileService := NewSoftlayerFileService(util.GetSshClient(), c.logger)
-	agentEnvService := c.agentEnvServiceFactory.New(softlayerFileService)
 
 	// Update mbus url setting
 	mbus, err := ParseMbusURL(c.agentOptions.Mbus, cloudProps.BoshIp)
@@ -70,7 +64,7 @@ func (c *baremetalCreator) Create(agentID string, stemcell bslcstem.Stemcell, cl
 		return nil, bosherr.WrapErrorf(err, "Cannot agent env for virtual guest with id: %d.", hardwareId)
 	}
 
-	err = agentEnvService.Update(agentEnv)
+	err = hardware.UpdateAgentEnv(agentEnv)
 	if err != nil {
 		return nil, bosherr.WrapError(err, "Updating VM's agent env")
 	}

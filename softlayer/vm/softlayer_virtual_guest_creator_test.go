@@ -24,19 +24,17 @@ import (
 
 var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 	var (
-		softLayerClient        *fakeslclient.FakeSoftLayerClient
-		sshClient              *fakesutil.FakeSshClient
-		agentEnvServiceFactory *fakevm.FakeAgentEnvServiceFactory
-		vmFinder               *fakevm.FakeFinder
-		agentOptions           AgentOptions
-		logger                 boshlog.Logger
-		creator                VMCreator
+		softLayerClient *fakeslclient.FakeSoftLayerClient
+		sshClient       *fakesutil.FakeSshClient
+		vmFinder        *fakevm.FakeFinder
+		agentOptions    AgentOptions
+		logger          boshlog.Logger
+		creator         VMCreator
 	)
 
 	BeforeEach(func() {
 		softLayerClient = fakeslclient.NewFakeSoftLayerClient("fake-username", "fake-api-key")
 		sshClient = &fakesutil.FakeSshClient{}
-		agentEnvServiceFactory = &fakevm.FakeAgentEnvServiceFactory{}
 		agentOptions = AgentOptions{Mbus: "fake-mbus"}
 		logger = boshlog.NewLogger(boshlog.LevelNone)
 		vmFinder = &fakevm.FakeFinder{}
@@ -44,7 +42,6 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 		creator = NewSoftLayerCreator(
 			vmFinder,
 			softLayerClient,
-			agentEnvServiceFactory,
 			agentOptions,
 			logger,
 		)

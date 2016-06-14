@@ -73,6 +73,9 @@ type VM interface {
 
 	SetMetadata(VMMetadata) error
 	SetVcapPassword(string) error
+	SetAgentEnvService(AgentEnvService) error
+
+	UpdateAgentEnv(AgentEnv) error
 }
 
 type Environment map[string]interface{}

@@ -23,7 +23,8 @@ func NewSoftLayerAgentEnvServiceFactory(
 }
 
 func (f SoftLayerAgentEnvServiceFactory) New(
+	vm VM,
 	softlayerFileService SoftlayerFileService,
 ) AgentEnvService {
-	return NewFSAgentEnvService(softlayerFileService, f.logger)
+	return NewFSAgentEnvService(vm, softlayerFileService, f.logger)
 }

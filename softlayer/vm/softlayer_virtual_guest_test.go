@@ -23,6 +23,8 @@ import (
 	fakevm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm/fakes"
 	fakesutil "github.com/cloudfoundry/bosh-softlayer-cpi/util/fakes"
 	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
+
+	datatypes "github.com/maximilien/softlayer-go/data_types"
 )
 
 var _ = Describe("SoftLayerVirtualGuest", func() {
@@ -40,13 +42,41 @@ var _ = Describe("SoftLayerVirtualGuest", func() {
 		sshClient = &fakesutil.FakeSshClient{}
 		agentEnvService = &fakevm.FakeAgentEnvService{}
 		logger = boshlog.NewLogger(boshlog.LevelNone)
+
+		virtualGuest := datatypes.SoftLayer_Virtual_Guest{
+			AccountId:                    123456,
+			DedicatedAccountHostOnlyFlag: false,
+			Domain: "softlayer.com",
+			FullyQualifiedDomainName: "fake.softlayer.com",
+			Hostname:                 "fake-hostname",
+			Id:                       1234567,
+			MaxCpu:                   2,
+			MaxCpuUnits:              "CORE",
+			MaxMemory:                1024,
+			StartCpus:                2,
+			StatusId:                 1001,
+			Uuid:                     "fake-uuid",
+			GlobalIdentifier:         "fake-globalIdentifier",
+			PrimaryBackendIpAddress:  "fake-primary-backend-ip",
+			PrimaryIpAddress:         "fake-primary-ip",
+			OperatingSystem: &datatypes.SoftLayer_Operating_System{
+				Passwords: []datatypes.SoftLayer_Password{
+					datatypes.SoftLayer_Password{
+						Username: "fake-root-user",
+						Password: "fake-root-password",
+					},
+				},
+			},
+		}
+
+		vm = NewSoftLayerVirtualGuest(virtualGuest, fakeSoftLayerClient, sshClient, logger)
+		vm.SetAgentEnvService(agentEnvService)
 	})
 
 	Describe("Delete", func() {
 		Context("valid VM ID is used and averageDuration is normal", func() {
 			BeforeEach(func() {
 				fileNames := []string{
-					"SoftLayer_Virtual_Guest_Service_createObject.json",
 					"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
 					"SoftLayer_Virtual_Guest_Service_deleteObject_true.json",
 					"SoftLayer_Virtual_Guest_Service_getActiveTransactions.json",
@@ -58,7 +88,6 @@ var _ = Describe("SoftLayerVirtualGuest", func() {
 			})
 
 			It("deletes the VM successfully", func() {
-				vm = NewSoftLayerVirtualGuest(1234567, fakeSoftLayerClient, sshClient, agentEnvService, logger)
 				bslcommon.TIMEOUT = 2 * time.Second
 				bslcommon.POLLING_INTERVAL = 1 * time.Second
 
@@ -70,7 +99,6 @@ var _ = Describe("SoftLayerVirtualGuest", func() {
 		Context("valid VM ID is used and averageDuration is \"\"", func() {
 			BeforeEach(func() {
 				fileNames := []string{
-					"SoftLayer_Virtual_Guest_Service_createObject.json",
 					"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
 					"SoftLayer_Virtual_Guest_Service_deleteObject_true.json",
 					"SoftLayer_Virtual_Guest_Service_getActiveTransactions.json",
@@ -82,7 +110,6 @@ var _ = Describe("SoftLayerVirtualGuest", func() {
 			})
 
 			It("deletes the VM successfully", func() {
-				vm = NewSoftLayerVirtualGuest(1234567, fakeSoftLayerClient, sshClient, agentEnvService, logger)
 				bslcommon.TIMEOUT = 2 * time.Second
 				bslcommon.POLLING_INTERVAL = 1 * time.Second
 
@@ -94,7 +121,6 @@ var _ = Describe("SoftLayerVirtualGuest", func() {
 		Context("valid VM ID is used and averageDuration is invalid", func() {
 			BeforeEach(func() {
 				fileNames := []string{
-					"SoftLayer_Virtual_Guest_Service_createObject.json",
 					"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
 					"SoftLayer_Virtual_Guest_Service_deleteObject_true.json",
 					"SoftLayer_Virtual_Guest_Service_getActiveTransactions.json",
@@ -106,7 +132,6 @@ var _ = Describe("SoftLayerVirtualGuest", func() {
 			})
 
 			It("deletes the VM successfully", func() {
-				vm = NewSoftLayerVirtualGuest(1234567, fakeSoftLayerClient, sshClient, agentEnvService, logger)
 				bslcommon.TIMEOUT = 2 * time.Second
 				bslcommon.POLLING_INTERVAL = 1 * time.Second
 
@@ -118,7 +143,6 @@ var _ = Describe("SoftLayerVirtualGuest", func() {
 		Context("invalid VM ID is used", func() {
 			BeforeEach(func() {
 				fileNames := []string{
-					"SoftLayer_Virtual_Guest_Service_createObject.json",
 					"SoftLayer_Virtual_Guest_Service_getActiveTransactions.json",
 					"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
 					"SoftLayer_Virtual_Guest_Service_deleteObject_false.json",
@@ -128,7 +152,6 @@ var _ = Describe("SoftLayerVirtualGuest", func() {
 					"SoftLayer_Virtual_Guest_Service_getEmptyObject.json",
 				}
 				testhelpers.SetTestFixturesForFakeSoftLayerClient(fakeSoftLayerClient, fileNames)
-				vm = NewSoftLayerVirtualGuest(00000, fakeSoftLayerClient, sshClient, agentEnvService, logger)
 				bslcommon.TIMEOUT = 2 * time.Second
 				bslcommon.POLLING_INTERVAL = 1 * time.Second
 			})
@@ -144,11 +167,9 @@ var _ = Describe("SoftLayerVirtualGuest", func() {
 		Context("valid VM ID is used", func() {
 			BeforeEach(func() {
 				fileNames := []string{
-					"SoftLayer_Virtual_Guest_Service_createObject.json",
 					"SoftLayer_Virtual_Guest_Service_reboot.json",
 				}
 				testhelpers.SetTestFixturesForFakeSoftLayerClient(fakeSoftLayerClient, fileNames)
-				vm = NewSoftLayerVirtualGuest(1234567, fakeSoftLayerClient, sshClient, agentEnvService, logger)
 			})
 
 			It("reboots the VM successfully", func() {
@@ -160,11 +181,9 @@ var _ = Describe("SoftLayerVirtualGuest", func() {
 		Context("invalid VM ID is used", func() {
 			BeforeEach(func() {
 				fileNames := []string{
-					"SoftLayer_Virtual_Guest_Service_createObject.json",
 					"SoftLayer_Virtual_Guest_Service_reboot_fail.json",
 				}
 				testhelpers.SetTestFixturesForFakeSoftLayerClient(fakeSoftLayerClient, fileNames)
-				vm = NewSoftLayerVirtualGuest(00000, fakeSoftLayerClient, sshClient, agentEnvService, logger)
 			})
 
 			It("fails rebooting the VM", func() {
@@ -178,14 +197,12 @@ var _ = Describe("SoftLayerVirtualGuest", func() {
 		Context("valid VM ID is used", func() {
 			BeforeEach(func() {
 				fileNames := []string{
-					"SoftLayer_Virtual_Guest_Service_createObject.json",
 					"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
 					"SoftLayer_Virtual_Guest_Service_reloadOS.json",
 					"SoftLayer_Virtual_Guest_Service_getActiveTransactions.json",
 					"SoftLayer_Virtual_Guest_Service_getPowerState.json",
 				}
 				testhelpers.SetTestFixturesForFakeSoftLayerClient(fakeSoftLayerClient, fileNames)
-				vm = NewSoftLayerVirtualGuest(1234567, fakeSoftLayerClient, sshClient, agentEnvService, logger)
 				stemcell = fakestemcell.NewFakeStemcell(123456, "5b7bc66a-72c6-447a-94a1-967803fcd76b", "non-dea")
 			})
 
@@ -213,11 +230,9 @@ var _ = Describe("SoftLayerVirtualGuest", func() {
 				Expect(err).ToNot(HaveOccurred())
 
 				fileNames := []string{
-					"SoftLayer_Virtual_Guest_Service_createObject.json",
 					"SoftLayer_Virtual_Guest_Service_setMetadata.json",
 				}
 				testhelpers.SetTestFixturesForFakeSoftLayerClient(fakeSoftLayerClient, fileNames)
-				vm = NewSoftLayerVirtualGuest(1234567, fakeSoftLayerClient, sshClient, agentEnvService, logger)
 			})
 
 			It("does not set any tag values on the VM", func() {
@@ -229,11 +244,9 @@ var _ = Describe("SoftLayerVirtualGuest", func() {
 		Context("found tags in metadata", func() {
 			BeforeEach(func() {
 				fileNames := []string{
-					"SoftLayer_Virtual_Guest_Service_createObject.json",
 					"SoftLayer_Virtual_Guest_Service_setMetadata.json",
 				}
 				testhelpers.SetTestFixturesForFakeSoftLayerClient(fakeSoftLayerClient, fileNames)
-				vm = NewSoftLayerVirtualGuest(1234567, fakeSoftLayerClient, sshClient, agentEnvService, logger)
 			})
 
 			It("at least one tag found", func() {
@@ -273,12 +286,9 @@ var _ = Describe("SoftLayerVirtualGuest", func() {
 					CloudProperties: map[string]interface{}{},
 				},
 			}
-
-			testhelpers.SetTestFixtureForFakeSoftLayerClient(fakeSoftLayerClient, "SoftLayer_Virtual_Guest_Service_getObject.json")
 		})
 
 		It("returns the expected network", func() {
-			vm = NewSoftLayerVirtualGuest(1234567, fakeSoftLayerClient, sshClient, agentEnvService, logger)
 			err := vm.ConfigureNetworks(networks)
 			Expect(err).ToNot(HaveOccurred())
 		})
@@ -329,7 +339,6 @@ var _ = Describe("SoftLayerVirtualGuest", func() {
 		BeforeEach(func() {
 			disk = fakedisk.NewFakeDisk(1234)
 			fileNames := []string{
-				"SoftLayer_Virtual_Guest_Service_getObject.json",
 				"SoftLayer_Network_Storage_Service_getIscsiVolume.json",
 				"SoftLayer_Network_Storage_Service_getAllowedVirtualGuests_None.json",
 				"SoftLayer_Network_Storage_Service_allowAccessFromVirtualGuest.json",
@@ -354,7 +363,6 @@ var _ = Describe("SoftLayerVirtualGuest", func() {
 			sshClient.ExecCommandStub = func(_, _, _, _ string) (string, error) {
 				return expectedCmdResults[sshClient.ExecCommandCallCount()-1], nil
 			}
-			vm = NewSoftLayerVirtualGuest(1234567, fakeSoftLayerClient, sshClient, agentEnvService, logger)
 			bslcommon.TIMEOUT = 2 * time.Second
 			bslcommon.POLLING_INTERVAL = 1 * time.Second
 
@@ -376,7 +384,6 @@ var _ = Describe("SoftLayerVirtualGuest", func() {
 			sshClient.ExecCommandStub = func(_, _, _, _ string) (string, error) {
 				return expectedCmdResults[sshClient.ExecCommandCallCount()-1], nil
 			}
-			vm = NewSoftLayerVirtualGuest(1234567, fakeSoftLayerClient, sshClient, agentEnvService, logger)
 			bslcommon.TIMEOUT = 2 * time.Second
 			bslcommon.POLLING_INTERVAL = 1 * time.Second
 
@@ -399,7 +406,6 @@ var _ = Describe("SoftLayerVirtualGuest", func() {
 			sshClient.ExecCommandStub = func(_, _, _, _ string) (string, error) {
 				return expectedCmdResults[sshClient.ExecCommandCallCount()-1], nil
 			}
-			vm = NewSoftLayerVirtualGuest(1234567, fakeSoftLayerClient, sshClient, agentEnvService, logger)
 			bslcommon.TIMEOUT = 2 * time.Second
 			bslcommon.POLLING_INTERVAL = 1 * time.Second
 
@@ -410,7 +416,6 @@ var _ = Describe("SoftLayerVirtualGuest", func() {
 		It("reports error when failed to attach the iSCSI volume", func() {
 
 			sshClient.ExecCommandReturns("fake-result", errors.New("fake-error"))
-			vm = NewSoftLayerVirtualGuest(1234567, fakeSoftLayerClient, sshClient, agentEnvService, logger)
 			bslcommon.TIMEOUT = 2 * time.Second
 			bslcommon.POLLING_INTERVAL = 1 * time.Second
 
@@ -462,7 +467,6 @@ iscsiadm: No records found
 		BeforeEach(func() {
 			disk = fakedisk.NewFakeDisk(1234)
 			fileNames := []string{
-				"SoftLayer_Virtual_Guest_Service_getObject.json",
 				"SoftLayer_Network_Storage_Service_getIscsiVolume.json",
 				"SoftLayer_Network_Storage_Service_getAllowedVirtualGuests.json",
 				"SoftLayer_Network_Storage_Service_removeAccessFromVirtualGuest.json",
@@ -484,7 +488,6 @@ iscsiadm: No records found
 			sshClient.ExecCommandStub = func(_, _, _, _ string) (string, error) {
 				return expectedCmdResults[sshClient.ExecCommandCallCount()-1], nil
 			}
-			vm = NewSoftLayerVirtualGuest(1234567, fakeSoftLayerClient, sshClient, agentEnvService, logger)
 			bslcommon.TIMEOUT = 2 * time.Second
 			bslcommon.POLLING_INTERVAL = 1 * time.Second
 
@@ -506,7 +509,6 @@ iscsiadm: No records found
 			sshClient.ExecCommandStub = func(_, _, _, _ string) (string, error) {
 				return expectedCmdResults[sshClient.ExecCommandCallCount()-1], nil
 			}
-			vm = NewSoftLayerVirtualGuest(1234567, fakeSoftLayerClient, sshClient, agentEnvService, logger)
 			bslcommon.TIMEOUT = 2 * time.Second
 			bslcommon.POLLING_INTERVAL = 1 * time.Second
 
@@ -516,7 +518,6 @@ iscsiadm: No records found
 
 		It("reports error when failed to detach iSCSI volume", func() {
 			sshClient.ExecCommandReturns("fake-result", errors.New("fake-error"))
-			vm = NewSoftLayerVirtualGuest(1234567, fakeSoftLayerClient, sshClient, agentEnvService, logger)
 			bslcommon.TIMEOUT = 2 * time.Second
 			bslcommon.POLLING_INTERVAL = 1 * time.Second
 

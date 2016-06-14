@@ -16,13 +16,15 @@ import (
 var _ = Describe("SoftlayerAgentEnvService", func() {
 	var (
 		fakeSoftlayerFileService *fakebslvm.FakeSoftlayerFileService
+		fakevm                   *fakebslvm.FakeVM
 		agentEnvService          AgentEnvService
 	)
 
 	BeforeEach(func() {
 		fakeSoftlayerFileService = fakebslvm.NewFakeSoftlayerFileService()
+		fakevm = fakebslvm.NewFakeVM(1234567)
 		logger := boshlog.NewLogger(boshlog.LevelNone)
-		agentEnvService = NewFSAgentEnvService(fakeSoftlayerFileService, logger)
+		agentEnvService = NewFSAgentEnvService(fakevm, fakeSoftlayerFileService, logger)
 	})
 
 	Describe("Fetch", func() {

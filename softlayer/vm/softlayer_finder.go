@@ -28,21 +28,20 @@ func NewSoftLayerFinder(softLayerClient sl.Client, baremetalClient bmscl.BmpClie
 }
 
 func (f *softLayerFinder) Find(vmID int) (VM, bool, error) {
-	softlayerFileService := NewSoftlayerFileService(util.GetSshClient(), f.logger)
-	agentEnvService := f.agentEnvServiceFactory.New(softlayerFileService)
-
-	_, err := bslcommon.GetObjectDetailsOnVirtualGuest(f.softLayerClient, vmID)
+	var vm VM
+	virtualGuest, err := bslcommon.GetObjectDetailsOnVirtualGuest(f.softLayerClient, vmID)
 	if err != nil {
-		_, err := bslcommon.GetObjectDetailsOnHardware(f.softLayerClient, vmID)
+		hardware, err := bslcommon.GetObjectDetailsOnHardware(f.softLayerClient, vmID)
 		if err != nil {
 			return nil, false, bosherr.Errorf("Failed to find VM or Baremetal %d", vmID)
 		}
-		vm := NewSoftLayerHardware(vmID, f.softLayerClient, f.baremetalClient, util.GetSshClient(), agentEnvService, f.logger)
-		softlayerFileService.SetVM(vm)
-		return vm, true, nil
+		vm = NewSoftLayerHardware(hardware, f.softLayerClient, f.baremetalClient, util.GetSshClient(), f.logger)
+	} else {
+		vm = NewSoftLayerVirtualGuest(virtualGuest, f.softLayerClient, util.GetSshClient(), f.logger)
 	}
 
-	vm := NewSoftLayerVirtualGuest(vmID, f.softLayerClient, util.GetSshClient(), agentEnvService, f.logger)
-	softlayerFileService.SetVM(vm)
+	softlayerFileService := NewSoftlayerFileService(util.GetSshClient(), f.logger)
+	agentEnvService := f.agentEnvServiceFactory.New(vm, softlayerFileService)
+	vm.SetAgentEnvService(agentEnvService)
 	return vm, true, nil
 }

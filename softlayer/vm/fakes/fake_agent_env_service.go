@@ -5,6 +5,8 @@ import (
 )
 
 type FakeAgentEnvService struct {
+	fakeVM FakeVM
+
 	FetchCalled   bool
 	FetchAgentEnv bslcvm.AgentEnv
 	FetchErr      error

@@ -14,7 +14,6 @@ import (
 	sl "github.com/maximilien/softlayer-go/softlayer"
 
 	"github.com/cloudfoundry/bosh-softlayer-cpi/common"
-	"github.com/cloudfoundry/bosh-softlayer-cpi/util"
 )
 
 const SOFTLAYER_VM_CREATOR_LOG_TAG = "SoftLayerVMCreator"
@@ -28,16 +27,15 @@ type softLayerVirtualGuestCreator struct {
 	vmFinder     Finder
 }
 
-func NewSoftLayerCreator(vmFinder Finder, softLayerClient sl.Client, agentEnvServiceFactory AgentEnvServiceFactory, agentOptions AgentOptions, logger boshlog.Logger) VMCreator {
+func NewSoftLayerCreator(vmFinder Finder, softLayerClient sl.Client, agentOptions AgentOptions, logger boshlog.Logger) VMCreator {
 	bslcommon.TIMEOUT = 120 * time.Minute
 	bslcommon.POLLING_INTERVAL = 5 * time.Second
 
 	return &softLayerVirtualGuestCreator{
-		vmFinder:               vmFinder,
-		softLayerClient:        softLayerClient,
-		agentEnvServiceFactory: agentEnvServiceFactory,
-		agentOptions:           agentOptions,
-		logger:                 logger,
+		vmFinder:        vmFinder,
+		softLayerClient: softLayerClient,
+		agentOptions:    agentOptions,
+		logger:          logger,
 	}
 }
 
@@ -96,9 +94,6 @@ func (c *softLayerVirtualGuestCreator) createBySoftlayer(agentID string, stemcel
 		return nil, bosherr.WrapErrorf(err, "Cannot find virtual guest with id: %d.", virtualGuest.Id)
 	}
 
-	softlayerFileService := NewSoftlayerFileService(util.GetSshClient(), c.logger)
-	agentEnvService := c.agentEnvServiceFactory.New(softlayerFileService)
-
 	if len(cloudProps.BoshIp) == 0 {
 		// update /etc/hosts file of bosh-init vm
 		UpdateEtcHostsOfBoshInit(fmt.Sprintf("%s  %s", vm.GetPrimaryBackendIP(), vm.GetFullyQualifiedDomainName()))
@@ -128,7 +123,7 @@ func (c *softLayerVirtualGuestCreator) createBySoftlayer(agentID string, stemcel
 		return nil, bosherr.WrapErrorf(err, "Cannot agent env for virtual guest with id: %d.", vm.ID())
 	}
 
-	err = agentEnvService.Update(agentEnv)
+	err = vm.UpdateAgentEnv(agentEnv)
 	if err != nil {
 		return nil, bosherr.WrapError(err, "Updating VM's agent env")
 	}
@@ -187,9 +182,6 @@ func (c *softLayerVirtualGuestCreator) createByOSReload(agentID string, stemcell
 		}
 	}
 
-	softlayerFileService := NewSoftlayerFileService(util.GetSshClient(), c.logger)
-	agentEnvService := c.agentEnvServiceFactory.New(softlayerFileService)
-
 	if len(cloudProps.BoshIp) == 0 {
 		// update /etc/hosts file of bosh-init vm
 		UpdateEtcHostsOfBoshInit(fmt.Sprintf("%s  %s", vm.GetPrimaryBackendIP(), vm.GetFullyQualifiedDomainName()))
@@ -219,7 +211,7 @@ func (c *softLayerVirtualGuestCreator) createByOSReload(agentID string, stemcell
 		return nil, bosherr.WrapErrorf(err, "Cannot agent env for virtual guest with id: %d", vm.ID())
 	}
 
-	err = agentEnvService.Update(agentEnv)
+	err = vm.UpdateAgentEnv(agentEnv)
 	if err != nil {
 		return nil, bosherr.WrapError(err, "Updating VM's agent env")
 	}

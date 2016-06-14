@@ -10,7 +10,6 @@ import (
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
-	fakevm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm/fakes"
 	fakesutil "github.com/cloudfoundry/bosh-softlayer-cpi/util/fakes"
 
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
@@ -20,21 +19,18 @@ var _ = Describe("SoftlayerFileService", func() {
 	var (
 		logger               boshlog.Logger
 		sshClient            *fakesutil.FakeSshClient
-		vm                   *fakevm.FakeVM
 		softlayerFileService SoftlayerFileService
 	)
 
 	BeforeEach(func() {
 		logger = boshlog.NewLogger(boshlog.LevelNone)
 		sshClient = &fakesutil.FakeSshClient{}
-		vm = fakevm.NewFakeVM(1234567)
 		softlayerFileService = NewSoftlayerFileService(sshClient, logger)
-		softlayerFileService.SetVM(vm)
 	})
 
 	Describe("Upload", func() {
 		It("uploads file contents to the target", func() {
-			err := softlayerFileService.Upload("/target/file.ext", []byte("fake-contents"))
+			err := softlayerFileService.Upload("root", "root-password", "fake-backend-ip", "/target/file.ext", []byte("fake-contents"))
 			Expect(err).ToNot(HaveOccurred())
 			Expect(sshClient.UploadCallCount()).To(Equal(1))
 
@@ -55,7 +51,7 @@ var _ = Describe("SoftlayerFileService", func() {
 			})
 
 			It("returns an error", func() {
-				err := softlayerFileService.Upload("/target/file.ext", []byte("fake-contents"))
+				err := softlayerFileService.Upload("root", "root-password", "fake-backend-ip", "/target/file.ext", []byte("fake-contents"))
 				Expect(err).To(MatchError(`Upload to "/target/file.ext" failed: boom`))
 			})
 		})
@@ -68,7 +64,7 @@ var _ = Describe("SoftlayerFileService", func() {
 				return nil
 			}
 
-			contents, err := softlayerFileService.Download("/source/file.ext")
+			contents, err := softlayerFileService.Download("root", "root-password", "fake-backend-ip", "/source/file.ext")
 			Expect(err).NotTo(HaveOccurred())
 			Expect(contents).To(Equal([]byte("fake-contents")))
 
@@ -86,7 +82,7 @@ var _ = Describe("SoftlayerFileService", func() {
 			})
 
 			It("returns an error", func() {
-				_, err := softlayerFileService.Download("/source/file.ext")
+				_, err := softlayerFileService.Download("root", "root-password", "fake-backend-ip", "/source/file.ext")
 				Expect(err).To(MatchError(`Download of "/source/file.ext" failed: boom`))
 			})
 		})

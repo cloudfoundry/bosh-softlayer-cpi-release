@@ -33,6 +33,10 @@ type FakeVM struct {
 
 	ReloadOSStemcell bslcstemcell.Stemcell
 	ReloadOSErr      error
+
+	SetAgentEnvServiceErr error
+
+	UpdateAgentEnvErr error
 }
 
 func NewFakeVM(id int) *FakeVM {
@@ -100,4 +104,12 @@ func (vm *FakeVM) GetFullyQualifiedDomainName() string {
 
 func (vm *FakeVM) SetVcapPassword(encryptedPwd string) error {
 	return vm.SetVcapPasswordErr
+}
+
+func (vm *FakeVM) SetAgentEnvService(agentEnvService bslcvm.AgentEnvService) error {
+	return vm.SetAgentEnvServiceErr
+}
+
+func (vm *FakeVM) UpdateAgentEnv(agentEnv bslcvm.AgentEnv) error {
+	return vm.UpdateAgentEnvErr
 }

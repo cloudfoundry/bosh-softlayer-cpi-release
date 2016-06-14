@@ -1,5 +1,5 @@
 package vm
 
 type AgentEnvServiceFactory interface {
-	New(SoftlayerFileService) AgentEnvService
+	New(VM, SoftlayerFileService) AgentEnvService
 }

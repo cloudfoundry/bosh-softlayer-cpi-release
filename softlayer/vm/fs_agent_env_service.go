@@ -14,6 +14,7 @@ const (
 )
 
 type fsAgentEnvService struct {
+	vm                   VM
 	softlayerFileService SoftlayerFileService
 	settingsPath         string
 	logger               boshlog.Logger
@@ -21,10 +22,12 @@ type fsAgentEnvService struct {
 }
 
 func NewFSAgentEnvService(
+	vm VM,
 	softlayerFileService SoftlayerFileService,
 	logger boshlog.Logger,
 ) AgentEnvService {
-	return fsAgentEnvService{
+	return &fsAgentEnvService{
+		vm:                   vm,
 		softlayerFileService: softlayerFileService,
 		settingsPath:         "/var/vcap/bosh/user_data.json",
 		logger:               logger,
@@ -32,10 +35,10 @@ func NewFSAgentEnvService(
 	}
 }
 
-func (s fsAgentEnvService) Fetch() (AgentEnv, error) {
+func (s *fsAgentEnvService) Fetch() (AgentEnv, error) {
 	var agentEnv AgentEnv
 
-	contents, err := s.softlayerFileService.Download(s.settingsPath)
+	contents, err := s.softlayerFileService.Download(ROOT_USER_NAME, s.vm.GetRootPassword(), s.vm.GetPrimaryBackendIP(), s.settingsPath)
 	if err != nil {
 		return AgentEnv{}, bosherr.WrapError(err, "Downloading agent env from virtual guestr")
 	}
@@ -50,7 +53,7 @@ func (s fsAgentEnvService) Fetch() (AgentEnv, error) {
 	return agentEnv, nil
 }
 
-func (s fsAgentEnvService) Update(agentEnv AgentEnv) error {
+func (s *fsAgentEnvService) Update(agentEnv AgentEnv) error {
 	s.logger.Debug(s.logTag, "Updating agent env: %#v", agentEnv)
 
 	jsonBytes, err := json.Marshal(agentEnv)
@@ -60,7 +63,7 @@ func (s fsAgentEnvService) Update(agentEnv AgentEnv) error {
 
 	for i := 0; i < maxAttempts; i++ {
 		s.logger.Debug(s.logTag, "Updating Agent Env: Making attempt #%d", i)
-		err = s.softlayerFileService.Upload(s.settingsPath, jsonBytes)
+		err = s.softlayerFileService.Upload(ROOT_USER_NAME, s.vm.GetRootPassword(), s.vm.GetPrimaryBackendIP(), s.settingsPath, jsonBytes)
 		if err == nil {
 			return nil
 		}

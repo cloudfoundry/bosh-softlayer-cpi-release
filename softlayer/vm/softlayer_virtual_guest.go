@@ -32,37 +32,73 @@ type softLayerVirtualGuest struct {
 	virtualGuest datatypes.SoftLayer_Virtual_Guest
 
 	softLayerClient sl.Client
-	agentEnvService AgentEnvService
+	sshClient       util.SshClient
 
-	sshClient util.SshClient
+	agentEnvService AgentEnvService
 
 	logger boshlog.Logger
 }
 
-func NewSoftLayerVirtualGuest(id int, softLayerClient sl.Client, sshClient util.SshClient, agentEnvService AgentEnvService, logger boshlog.Logger) VM {
+func NewSoftLayerVirtualGuest(virtualGuest datatypes.SoftLayer_Virtual_Guest, softLayerClient sl.Client, sshClient util.SshClient, logger boshlog.Logger) VM {
 	bslcommon.TIMEOUT = 60 * time.Minute
 	bslcommon.POLLING_INTERVAL = 10 * time.Second
 
-	virtualGuest, err := bslcommon.GetObjectDetailsOnVirtualGuest(softLayerClient, id)
-	if err != nil {
-		return &softLayerVirtualGuest{}
-	}
-
 	return &softLayerVirtualGuest{
-		id: id,
+		id: virtualGuest.Id,
 
 		virtualGuest: virtualGuest,
 
 		softLayerClient: softLayerClient,
-		agentEnvService: agentEnvService,
-
-		sshClient: sshClient,
+		sshClient:       sshClient,
 
 		logger: logger,
 	}
 }
 
 func (vm *softLayerVirtualGuest) ID() int { return vm.id }
+
+func (vm *softLayerVirtualGuest) GetDataCenterId() int {
+	return vm.virtualGuest.Datacenter.Id
+}
+
+func (vm *softLayerVirtualGuest) GetPrimaryIP() string {
+	return vm.virtualGuest.PrimaryIpAddress
+}
+
+func (vm *softLayerVirtualGuest) GetPrimaryBackendIP() string {
+	return vm.virtualGuest.PrimaryBackendIpAddress
+}
+
+func (vm *softLayerVirtualGuest) GetRootPassword() string {
+	passwords := vm.virtualGuest.OperatingSystem.Passwords
+	for _, password := range passwords {
+		if password.Username == ROOT_USER_NAME {
+			return password.Password
+		}
+	}
+
+	return ""
+}
+
+func (vm *softLayerVirtualGuest) GetFullyQualifiedDomainName() string {
+	return vm.virtualGuest.FullyQualifiedDomainName
+}
+
+func (vm *softLayerVirtualGuest) SetVcapPassword(encryptedPwd string) (err error) {
+	command := fmt.Sprintf("usermod -p '%s' vcap", encryptedPwd)
+	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryIP(), command)
+	if err != nil {
+		return bosherr.WrapError(err, "Shelling out to usermod vcap")
+	}
+	return
+}
+
+func (vm *softLayerVirtualGuest) SetAgentEnvService(agentEnvService AgentEnvService) error {
+	if agentEnvService != nil {
+		vm.agentEnvService = agentEnvService
+	}
+	return nil
+}
 
 func (vm *softLayerVirtualGuest) Delete(agentID string) error {
 	return vm.DeleteVM()
@@ -319,40 +355,8 @@ func (vm *softLayerVirtualGuest) DetachDisk(disk bslcdisk.Disk) error {
 	return nil
 }
 
-func (vm *softLayerVirtualGuest) GetDataCenterId() int {
-	return vm.virtualGuest.Datacenter.Id
-}
-
-func (vm *softLayerVirtualGuest) GetPrimaryIP() string {
-	return vm.virtualGuest.PrimaryIpAddress
-}
-
-func (vm *softLayerVirtualGuest) GetPrimaryBackendIP() string {
-	return vm.virtualGuest.PrimaryBackendIpAddress
-}
-
-func (vm *softLayerVirtualGuest) GetRootPassword() string {
-	passwords := vm.virtualGuest.OperatingSystem.Passwords
-	for _, password := range passwords {
-		if password.Username == ROOT_USER_NAME {
-			return password.Password
-		}
-	}
-
-	return ""
-}
-
-func (vm *softLayerVirtualGuest) GetFullyQualifiedDomainName() string {
-	return vm.virtualGuest.FullyQualifiedDomainName
-}
-
-func (vm *softLayerVirtualGuest) SetVcapPassword(encryptedPwd string) (err error) {
-	command := fmt.Sprintf("usermod -p '%s' vcap", encryptedPwd)
-	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryIP(), command)
-	if err != nil {
-		return bosherr.WrapError(err, "Shelling out to usermod vcap")
-	}
-	return
+func (vm *softLayerVirtualGuest) UpdateAgentEnv(agentEnv AgentEnv) error {
+	return vm.agentEnvService.Update(agentEnv)
 }
 
 // Private methods

@@ -31,7 +31,6 @@ func NewProvider(softLayerClient sl.Client, baremetalClient bmscl.BmpClient, opt
 	virtualGuestCreator := bslcvm.NewSoftLayerCreator(
 		vmFinder,
 		softLayerClient,
-		agentEnvServiceFactory,
 		options.Agent,
 		logger,
 	)
@@ -40,7 +39,6 @@ func NewProvider(softLayerClient sl.Client, baremetalClient bmscl.BmpClient, opt
 		vmFinder,
 		softLayerClient,
 		baremetalClient,
-		agentEnvServiceFactory,
 		options.Agent,
 		logger,
 	)
