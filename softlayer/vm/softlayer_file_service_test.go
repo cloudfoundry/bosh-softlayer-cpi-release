@@ -1,18 +1,17 @@
 package vm_test
 
 import (
+	"bytes"
+	"errors"
+	"io"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
+	datatypes "github.com/maximilien/softlayer-go/data_types"
 
-	testhelpers "github.com/cloudfoundry/bosh-softlayer-cpi/test_helpers"
 	fakesutil "github.com/cloudfoundry/bosh-softlayer-cpi/util/fakes"
-	fakesys "github.com/cloudfoundry/bosh-utils/system/fakes"
-	fakeuuid "github.com/cloudfoundry/bosh-utils/uuid/fakes"
-	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
-
-	softlayer "github.com/maximilien/softlayer-go/softlayer"
 
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
 )
@@ -20,49 +19,85 @@ import (
 var _ = Describe("SoftlayerFileService", func() {
 	var (
 		logger               boshlog.Logger
-		softLayerClient      *fakeslclient.FakeSoftLayerClient
 		sshClient            *fakesutil.FakeSshClient
-		fs                   *fakesys.FakeFileSystem
-		uuidGenerator        *fakeuuid.FakeGenerator
+		virtualGuest         datatypes.SoftLayer_Virtual_Guest
 		softlayerFileService SoftlayerFileService
 	)
 
 	BeforeEach(func() {
 		logger = boshlog.NewLogger(boshlog.LevelNone)
-		softLayerClient = fakeslclient.NewFakeSoftLayerClient("fake-username", "fake-api-key")
 		sshClient = &fakesutil.FakeSshClient{}
-		uuidGenerator = fakeuuid.NewFakeGenerator()
-		fs = fakesys.NewFakeFileSystem()
 
-		testhelpers.SetTestFixtureForFakeSoftLayerClient(softLayerClient, "SoftLayer_Virtual_Guest_Service_getObject.json")
+		virtualGuest = datatypes.SoftLayer_Virtual_Guest{
+			PrimaryBackendIpAddress: "fake-backend-ip",
+			OperatingSystem: &datatypes.SoftLayer_Operating_System{
+				Passwords: []datatypes.SoftLayer_Password{{
+					Username: "root",
+					Password: "root-password",
+				}},
+			},
+		}
+
+		softlayerFileService = NewSoftlayerFileService(sshClient, virtualGuest, logger)
 	})
 
 	Describe("Upload", func() {
-		It("file contents into /var/vcap/file.ext", func() {
-			var virtualGuestService softlayer.SoftLayer_Virtual_Guest_Service
-			virtualGuestService, err := softLayerClient.GetSoftLayer_Virtual_Guest_Service()
+		It("uploads file contents to the target", func() {
+			err := softlayerFileService.Upload("/target/file.ext", []byte("fake-contents"))
 			Expect(err).ToNot(HaveOccurred())
-			virtualGuest, err := virtualGuestService.GetObject(1234567)
-			Expect(err).ToNot(HaveOccurred())
+			Expect(sshClient.UploadCallCount()).To(Equal(1))
 
-			softlayerFileService = NewSoftlayerFileService(sshClient, virtualGuest, logger, uuidGenerator, fs)
-			err = softlayerFileService.Upload("/var/vcap/file.ext", []byte("fake-contents"))
-			Expect(err).ToNot(HaveOccurred())
+			u, p, a, w, destPath := sshClient.UploadArgsForCall(0)
+			buf, ok := w.(*bytes.Buffer)
+			Expect(ok).To(BeTrue())
+
+			Expect(u).To(Equal("root"))
+			Expect(p).To(Equal("root-password"))
+			Expect(a).To(Equal("fake-backend-ip"))
+			Expect(destPath).To(Equal("/target/file.ext"))
+			Expect(buf.Bytes()).To(Equal([]byte("fake-contents")))
+		})
+
+		Context("when upload fails", func() {
+			BeforeEach(func() {
+				sshClient.UploadReturns(errors.New("boom"))
+			})
+
+			It("returns an error", func() {
+				err := softlayerFileService.Upload("/target/file.ext", []byte("fake-contents"))
+				Expect(err).To(MatchError(`Upload to "/target/file.ext" failed: boom`))
+			})
 		})
 	})
 
 	Describe("Download", func() {
-		It("copies agent env into temporary location", func() {
-			var virtualGuestService softlayer.SoftLayer_Virtual_Guest_Service
-			virtualGuestService, err := softLayerClient.GetSoftLayer_Virtual_Guest_Service()
-			Expect(err).ToNot(HaveOccurred())
-			virtualGuest, err := virtualGuestService.GetObject(1234567)
-			Expect(err).ToNot(HaveOccurred())
+		It("downloads the remote file", func() {
+			sshClient.DownloadStub = func(_, _, _, _ string, w io.Writer) error {
+				w.Write([]byte("fake-contents"))
+				return nil
+			}
 
-			softlayerFileService = NewSoftlayerFileService(sshClient, virtualGuest, logger, uuidGenerator, fs)
-			_, err = softlayerFileService.Download("/fake-download-path/file.ext")
-			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring("File not found"))
+			contents, err := softlayerFileService.Download("/source/file.ext")
+			Expect(err).NotTo(HaveOccurred())
+			Expect(contents).To(Equal([]byte("fake-contents")))
+
+			Expect(sshClient.DownloadCallCount()).To(Equal(1))
+			u, p, a, sourcePath, _ := sshClient.DownloadArgsForCall(0)
+			Expect(u).To(Equal("root"))
+			Expect(p).To(Equal("root-password"))
+			Expect(a).To(Equal("fake-backend-ip"))
+			Expect(sourcePath).To(Equal("/source/file.ext"))
+		})
+
+		Context("when download fails", func() {
+			BeforeEach(func() {
+				sshClient.DownloadReturns(errors.New("boom"))
+			})
+
+			It("returns an error", func() {
+				_, err := softlayerFileService.Download("/source/file.ext")
+				Expect(err).To(MatchError(`Download of "/source/file.ext" failed: boom`))
+			})
 		})
 	})
 })

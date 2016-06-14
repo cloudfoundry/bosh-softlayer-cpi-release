@@ -13,7 +13,6 @@ import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	boshsys "github.com/cloudfoundry/bosh-utils/system"
-	boshuuid "github.com/cloudfoundry/bosh-utils/uuid"
 
 	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
@@ -30,13 +29,12 @@ type SoftLayerCreator struct {
 	softLayerClient        sl.Client
 	agentEnvServiceFactory AgentEnvServiceFactory
 
-	agentOptions  AgentOptions
-	logger        boshlog.Logger
-	uuidGenerator boshuuid.Generator
-	fs            boshsys.FileSystem
+	agentOptions AgentOptions
+	logger       boshlog.Logger
+	fs           boshsys.FileSystem
 }
 
-func NewSoftLayerCreator(softLayerClient sl.Client, agentEnvServiceFactory AgentEnvServiceFactory, agentOptions AgentOptions, logger boshlog.Logger, uuidGenerator boshuuid.Generator, fs boshsys.FileSystem) SoftLayerCreator {
+func NewSoftLayerCreator(softLayerClient sl.Client, agentEnvServiceFactory AgentEnvServiceFactory, agentOptions AgentOptions, logger boshlog.Logger, fs boshsys.FileSystem) SoftLayerCreator {
 	bslcommon.TIMEOUT = 120 * time.Minute
 	bslcommon.POLLING_INTERVAL = 5 * time.Second
 
@@ -45,7 +43,6 @@ func NewSoftLayerCreator(softLayerClient sl.Client, agentEnvServiceFactory Agent
 		agentEnvServiceFactory: agentEnvServiceFactory,
 		agentOptions:           agentOptions,
 		logger:                 logger,
-		uuidGenerator:          uuidGenerator,
 		fs:                     fs,
 	}
 }
@@ -85,7 +82,7 @@ func (c SoftLayerCreator) CreateBySoftlayer(agentID string, stemcell bslcstem.St
 		return SoftLayerVM{}, bosherr.WrapErrorf(err, "Cannot get details from virtual guest with id: %d.", virtualGuest.Id)
 	}
 
-	softlayerFileService := NewSoftlayerFileService(util.GetSshClient(), virtualGuest, c.logger, c.uuidGenerator, c.fs)
+	softlayerFileService := NewSoftlayerFileService(util.GetSshClient(), virtualGuest, c.logger)
 	agentEnvService := c.agentEnvServiceFactory.New(softlayerFileService, strconv.Itoa(virtualGuest.Id))
 
 	if len(cloudProps.BoshIp) == 0 {
@@ -179,7 +176,7 @@ func (c SoftLayerCreator) CreateByOSReload(agentID string, stemcell bslcstem.Ste
 		return SoftLayerVM{}, bosherr.WrapErrorf(err, "Cannot get details from virtual guest with id: %d.", virtualGuest.Id)
 	}
 
-	softlayerFileService := NewSoftlayerFileService(util.GetSshClient(), virtualGuest, c.logger, c.uuidGenerator, c.fs)
+	softlayerFileService := NewSoftlayerFileService(util.GetSshClient(), virtualGuest, c.logger)
 	agentEnvService := c.agentEnvServiceFactory.New(softlayerFileService, strconv.Itoa(virtualGuest.Id))
 
 	if len(cloudProps.BoshIp) == 0 {

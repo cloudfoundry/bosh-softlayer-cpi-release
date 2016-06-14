@@ -6,7 +6,6 @@ import (
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	boshsys "github.com/cloudfoundry/bosh-utils/system"
-	boshuuid "github.com/cloudfoundry/bosh-utils/uuid"
 
 	slclient "github.com/maximilien/softlayer-go/client"
 
@@ -23,7 +22,7 @@ var (
 )
 
 func main() {
-	logger, fs, cmdRunner, uuidGenerator := basicDeps()
+	logger, fs, cmdRunner := basicDeps()
 
 	defer logger.HandlePanic("Main")
 
@@ -39,7 +38,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	dispatcher := buildDispatcher(config, logger, fs, cmdRunner, uuidGenerator)
+	dispatcher := buildDispatcher(config, logger, fs, cmdRunner)
 
 	cli := bslctrans.NewCLI(os.Stdin, os.Stdout, dispatcher, logger)
 
@@ -50,26 +49,23 @@ func main() {
 	}
 }
 
-func basicDeps() (boshlog.Logger, boshsys.FileSystem, boshsys.CmdRunner, boshuuid.Generator) {
+func basicDeps() (boshlog.Logger, boshsys.FileSystem, boshsys.CmdRunner) {
 	logger := boshlog.NewWriterLogger(boshlog.LevelDebug, os.Stderr, os.Stderr)
 
 	fs := boshsys.NewOsFileSystem(logger)
 
-	uuidGenerator := boshuuid.NewGenerator()
-
 	cmdRunner := boshsys.NewExecCmdRunner(logger)
 
-	return logger, fs, cmdRunner, uuidGenerator
+	return logger, fs, cmdRunner
 }
 
-func buildDispatcher(config Config, logger boshlog.Logger, fs boshsys.FileSystem, cmdRunner boshsys.CmdRunner, uuidGenerator boshuuid.Generator) bslcdisp.Dispatcher {
+func buildDispatcher(config Config, logger boshlog.Logger, fs boshsys.FileSystem, cmdRunner boshsys.CmdRunner) bslcdisp.Dispatcher {
 	softLayerClient := slclient.NewSoftLayerClient(config.Cloud.Properties.Softlayer.Username, config.Cloud.Properties.Softlayer.ApiKey)
 
 	actionFactory := bslcaction.NewConcreteFactory(
 		softLayerClient,
 		config.Cloud.Properties,
 		logger,
-		uuidGenerator,
 		fs,
 	)
 
