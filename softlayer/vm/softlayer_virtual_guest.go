@@ -321,7 +321,7 @@ func (vm *softLayerVirtualGuest) DetachDisk(disk bslcdisk.Disk) error {
 	}
 
 	newAgentEnv := oldAgentEnv.DetachPersistentDisk(strconv.Itoa(disk.ID()))
-	err = vm.agentEnvService.Update(newAgentEnv)
+	err = vm.UpdateAgentEnv(newAgentEnv)
 	if err != nil {
 		return bosherr.WrapError(err, fmt.Sprintf("Configuring userdata on VirtualGuest with id: `%d`", vm.ID()))
 	}

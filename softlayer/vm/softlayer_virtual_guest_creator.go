@@ -64,7 +64,7 @@ func (c *softLayerVirtualGuestCreator) Create(agentID string, stemcell bslcstem.
 func (c *softLayerVirtualGuestCreator) createBySoftlayer(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
 	virtualGuestTemplate, err := CreateVirtualGuestTemplate(stemcell, cloudProps)
 	if err != nil {
-		return nil, bosherr.WrapError(err, "Creating virtual guest template")
+		return nil, bosherr.WrapError(err, "Creating VirtualGuest template")
 	}
 
 	virtualGuestService, err := c.softLayerClient.GetSoftLayer_Virtual_Guest_Service()
@@ -91,7 +91,7 @@ func (c *softLayerVirtualGuestCreator) createBySoftlayer(agentID string, stemcel
 
 	vm, found, err := c.vmFinder.Find(virtualGuest.Id)
 	if err != nil || !found {
-		return nil, bosherr.WrapErrorf(err, "Cannot find virtual guest with id: %d.", virtualGuest.Id)
+		return nil, bosherr.WrapErrorf(err, "Cannot find VirtualGuest with id: %d.", virtualGuest.Id)
 	}
 
 	if len(cloudProps.BoshIp) == 0 {
@@ -120,7 +120,7 @@ func (c *softLayerVirtualGuestCreator) createBySoftlayer(agentID string, stemcel
 
 	agentEnv := CreateAgentUserData(agentID, cloudProps, networks, env, c.agentOptions)
 	if err != nil {
-		return nil, bosherr.WrapErrorf(err, "Cannot agent env for virtual guest with id: %d.", vm.ID())
+		return nil, bosherr.WrapErrorf(err, "Cannot agent env for VirtualGuest with id: %d.", vm.ID())
 	}
 
 	err = vm.UpdateAgentEnv(agentEnv)
@@ -154,14 +154,14 @@ func (c *softLayerVirtualGuestCreator) createByOSReload(agentID string, stemcell
 	}
 
 	if err != nil || virtualGuest.Id == 0 {
-		return nil, bosherr.WrapErrorf(err, "Could not find virtual guest by ip address: %s", networks.First().IP)
+		return nil, bosherr.WrapErrorf(err, "Could not find VirtualGuest by ip address: %s", networks.First().IP)
 	}
 
-	c.logger.Info(SOFTLAYER_VM_CREATOR_LOG_TAG, fmt.Sprintf("OS reload on the server id %d with stemcell %d", virtualGuest.Id, stemcell.ID()))
+	c.logger.Info(SOFTLAYER_VM_CREATOR_LOG_TAG, fmt.Sprintf("OS reload on VirtualGuest %d using stemcell %d", virtualGuest.Id, stemcell.ID()))
 
 	vm, found, err := c.vmFinder.Find(virtualGuest.Id)
 	if err != nil || !found {
-		return nil, bosherr.WrapErrorf(err, "Cannot find virtual guest with id: %d", virtualGuest.Id)
+		return nil, bosherr.WrapErrorf(err, "Cannot find VirtualGuest with id: %d", virtualGuest.Id)
 	}
 
 	bslcommon.TIMEOUT = 4 * time.Hour
@@ -204,6 +204,11 @@ func (c *softLayerVirtualGuestCreator) createByOSReload(agentID string, stemcell
 			davConf := DavConfig(c.agentOptions.Blobstore.Options)
 			UpdateDavConfig(&davConf, cloudProps.BoshIp)
 		}
+	}
+
+	vm, found, err = c.vmFinder.Find(virtualGuest.Id)
+	if err != nil || !found {
+		return nil, bosherr.WrapErrorf(err, "refresh VM with id: %d after os_reload", virtualGuest.Id)
 	}
 
 	agentEnv := CreateAgentUserData(agentID, cloudProps, networks, env, c.agentOptions)
