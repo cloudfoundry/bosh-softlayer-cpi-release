@@ -86,7 +86,7 @@ func (vm *softLayerVirtualGuest) GetFullyQualifiedDomainName() string {
 
 func (vm *softLayerVirtualGuest) SetVcapPassword(encryptedPwd string) (err error) {
 	command := fmt.Sprintf("usermod -p '%s' vcap", encryptedPwd)
-	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryIP(), command)
+	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryBackendIP(), command)
 	if err != nil {
 		return bosherr.WrapError(err, "Shelling out to usermod vcap")
 	}
@@ -345,7 +345,7 @@ func (vm *softLayerVirtualGuest) DetachDisk(disk bslcdisk.Disk) error {
 			}
 
 			command := fmt.Sprintf("sleep 5; mount %s-part1 /var/vcap/store", devicePath)
-			_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryIP(), command)
+			_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryBackendIP(), command)
 			if err != nil {
 				return bosherr.WrapError(err, "mount /var/vcap/store")
 			}
@@ -467,7 +467,7 @@ func (vm *softLayerVirtualGuest) waitForVolumeAttached(volume datatypes.SoftLaye
 
 func (vm *softLayerVirtualGuest) hasMulitPathToolBasedOnShellScript() (bool, error) {
 	command := fmt.Sprintf("echo `command -v multipath`")
-	output, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryIP(), command)
+	output, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryBackendIP(), command)
 	if err != nil {
 		return false, err
 	}
@@ -486,7 +486,7 @@ func (vm *softLayerVirtualGuest) getIscsiDeviceNamesBasedOnShellScript(hasMultiP
 	command2 := fmt.Sprintf("cat /proc/partitions")
 
 	if hasMultiPath {
-		result, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryIP(), command1)
+		result, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryBackendIP(), command1)
 		if err != nil {
 			return devices, err
 		}
@@ -501,7 +501,7 @@ func (vm *softLayerVirtualGuest) getIscsiDeviceNamesBasedOnShellScript(hasMultiP
 			}
 		}
 	} else {
-		result, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryIP(), command2)
+		result, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryBackendIP(), command2)
 		if err != nil {
 			return devices, err
 		}
@@ -570,7 +570,7 @@ func (vm *softLayerVirtualGuest) getAllowedHostCredential() (AllowedHostCredenti
 
 func (vm *softLayerVirtualGuest) backupOpenIscsiConfBasedOnShellScript() (bool, error) {
 	command := fmt.Sprintf("cp /etc/iscsi/iscsid.conf{,.save}")
-	_, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryIP(), command)
+	_, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryBackendIP(), command)
 	if err != nil {
 		return false, bosherr.WrapError(err, "backuping open iscsi conf")
 	}
@@ -580,7 +580,7 @@ func (vm *softLayerVirtualGuest) backupOpenIscsiConfBasedOnShellScript() (bool, 
 
 func (vm *softLayerVirtualGuest) restartOpenIscsiBasedOnShellScript() (bool, error) {
 	command := fmt.Sprintf("/etc/init.d/open-iscsi restart")
-	_, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryIP(), command)
+	_, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryBackendIP(), command)
 	if err != nil {
 		return false, bosherr.WrapError(err, "restarting open iscsi")
 	}
@@ -590,13 +590,13 @@ func (vm *softLayerVirtualGuest) restartOpenIscsiBasedOnShellScript() (bool, err
 
 func (vm *softLayerVirtualGuest) discoveryOpenIscsiTargetsBasedOnShellScript(volume datatypes.SoftLayer_Network_Storage) (bool, error) {
 	command := fmt.Sprintf("sleep 5; iscsiadm -m discovery -t sendtargets -p %s", volume.ServiceResourceBackendIpAddress)
-	_, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryIP(), command)
+	_, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryBackendIP(), command)
 	if err != nil {
 		return false, bosherr.WrapError(err, "discoverying open iscsi targets")
 	}
 
 	command = "sleep 5; echo `iscsiadm -m node -l`"
-	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryIP(), command)
+	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryBackendIP(), command)
 	if err != nil {
 		return false, bosherr.WrapError(err, "login iscsi targets")
 	}
@@ -607,7 +607,7 @@ func (vm *softLayerVirtualGuest) discoveryOpenIscsiTargetsBasedOnShellScript(vol
 func (vm *softLayerVirtualGuest) writeOpenIscsiInitiatornameBasedOnShellScript(credential AllowedHostCredential) (bool, error) {
 	if len(credential.Iqn) > 0 {
 		command := fmt.Sprintf("echo 'InitiatorName=%s' > /etc/iscsi/initiatorname.iscsi", credential.Iqn)
-		_, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryIP(), command)
+		_, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryBackendIP(), command)
 		if err != nil {
 			return false, bosherr.WrapError(err, "Writing to /etc/iscsi/initiatorname.iscsi")
 		}
@@ -659,7 +659,7 @@ func (vm *softLayerVirtualGuest) detachVolumeBasedOnShellScript(volume datatypes
 
 	if isMounted {
 		step00 := fmt.Sprintf("umount -l /var/vcap/store")
-		_, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryIP(), step00)
+		_, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryBackendIP(), step00)
 		if err != nil {
 			return bosherr.WrapError(err, "umount -l /var/vcap/store")
 		}
@@ -668,7 +668,7 @@ func (vm *softLayerVirtualGuest) detachVolumeBasedOnShellScript(volume datatypes
 
 	// stop open-iscsi
 	step1 := fmt.Sprintf("/etc/init.d/open-iscsi stop")
-	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryIP(), step1)
+	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryBackendIP(), step1)
 	if err != nil {
 		return bosherr.WrapError(err, "Restarting open iscsi")
 	}
@@ -676,7 +676,7 @@ func (vm *softLayerVirtualGuest) detachVolumeBasedOnShellScript(volume datatypes
 
 	// clean up /etc/iscsi/send_targets/
 	step2 := fmt.Sprintf("rm -rf /etc/iscsi/send_targets")
-	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryIP(), step2)
+	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryBackendIP(), step2)
 	if err != nil {
 		return bosherr.WrapError(err, "Removing /etc/iscsi/send_targets")
 	}
@@ -684,7 +684,7 @@ func (vm *softLayerVirtualGuest) detachVolumeBasedOnShellScript(volume datatypes
 
 	// clean up /etc/iscsi/nodes/
 	step3 := fmt.Sprintf("rm -rf /etc/iscsi/nodes")
-	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryIP(), step3)
+	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryBackendIP(), step3)
 	if err != nil {
 		return bosherr.WrapError(err, "Removing /etc/iscsi/nodes")
 	}
@@ -693,7 +693,7 @@ func (vm *softLayerVirtualGuest) detachVolumeBasedOnShellScript(volume datatypes
 
 	// start open-iscsi
 	step4 := fmt.Sprintf("/etc/init.d/open-iscsi start")
-	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryIP(), step4)
+	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryBackendIP(), step4)
 	if err != nil {
 		return bosherr.WrapError(err, "Restarting open iscsi")
 	}
@@ -702,7 +702,7 @@ func (vm *softLayerVirtualGuest) detachVolumeBasedOnShellScript(volume datatypes
 	if hasMultiPath {
 		// restart dm-multipath tool
 		step5 := fmt.Sprintf("service multipath-tools restart")
-		_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryIP(), step5)
+		_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryBackendIP(), step5)
 		if err != nil {
 			return bosherr.WrapError(err, "Restarting Multipath deamon")
 		}
@@ -839,7 +839,7 @@ func (vm *softLayerVirtualGuest) isMountPoint(path string) (bool, error) {
 
 func (vm *softLayerVirtualGuest) searchMounts() ([]Mount, error) {
 	var mounts []Mount
-	stdout, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryIP(), "mount")
+	stdout, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryBackendIP(), "mount")
 	if err != nil {
 		return mounts, bosherr.WrapError(err, "Running mount")
 	}

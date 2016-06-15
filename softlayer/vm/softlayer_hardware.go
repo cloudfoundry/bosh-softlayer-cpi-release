@@ -93,7 +93,7 @@ func (vm *softLayerHardware) SetAgentEnvService(agentEnvService AgentEnvService)
 
 func (vm *softLayerHardware) SetVcapPassword(encryptedPwd string) (err error) {
 	command := fmt.Sprintf("usermod -p '%s' vcap", encryptedPwd)
-	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryIP(), command)
+	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryBackendIP(), command)
 	if err != nil {
 		return bosherr.WrapError(err, "Shelling out to usermod vcap")
 	}
@@ -107,7 +107,7 @@ func (vm *softLayerHardware) Delete(agentID string) error {
 	}
 
 	command := "rm -f /var/vcap/bosh/*.json ; sv stop agent"
-	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryIP(), command)
+	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryBackendIP(), command)
 	return err
 }
 
@@ -261,7 +261,7 @@ func (vm *softLayerHardware) DetachDisk(disk bslcdisk.Disk) error {
 			}
 
 			command := fmt.Sprintf("sleep 5; mount %s-part1 /var/vcap/store", devicePath)
-			_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryIP(), command)
+			_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryBackendIP(), command)
 			if err != nil {
 				return bosherr.WrapError(err, "mount /var/vcap/store")
 			}
@@ -357,7 +357,7 @@ func (vm *softLayerHardware) waitForVolumeAttached(volume datatypes.SoftLayer_Ne
 
 func (vm *softLayerHardware) hasMulitPathToolBasedOnShellScript() (bool, error) {
 	command := fmt.Sprintf("echo `command -v multipath`")
-	output, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryIP(), command)
+	output, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryBackendIP(), command)
 	if err != nil {
 		return false, err
 	}
@@ -376,7 +376,7 @@ func (vm *softLayerHardware) getIscsiDeviceNamesBasedOnShellScript(hasMultiPath 
 	command2 := fmt.Sprintf("cat /proc/partitions")
 
 	if hasMultiPath {
-		result, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryIP(), command1)
+		result, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryBackendIP(), command1)
 		if err != nil {
 			return devices, err
 		}
@@ -391,7 +391,7 @@ func (vm *softLayerHardware) getIscsiDeviceNamesBasedOnShellScript(hasMultiPath 
 			}
 		}
 	} else {
-		result, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryIP(), command2)
+		result, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryBackendIP(), command2)
 		if err != nil {
 			return devices, err
 		}
@@ -457,7 +457,7 @@ func (vm *softLayerHardware) getAllowedHostCredential() (AllowedHostCredential, 
 
 func (vm *softLayerHardware) backupOpenIscsiConfBasedOnShellScript() (bool, error) {
 	command := fmt.Sprintf("cp /etc/iscsi/iscsid.conf{,.save}")
-	_, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryIP(), command)
+	_, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryBackendIP(), command)
 	if err != nil {
 		return false, bosherr.WrapError(err, "backuping open iscsi conf")
 	}
@@ -467,7 +467,7 @@ func (vm *softLayerHardware) backupOpenIscsiConfBasedOnShellScript() (bool, erro
 
 func (vm *softLayerHardware) restartOpenIscsiBasedOnShellScript() (bool, error) {
 	command := fmt.Sprintf("/etc/init.d/open-iscsi restart")
-	_, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryIP(), command)
+	_, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryBackendIP(), command)
 	if err != nil {
 		return false, bosherr.WrapError(err, "restarting open iscsi")
 	}
@@ -477,13 +477,13 @@ func (vm *softLayerHardware) restartOpenIscsiBasedOnShellScript() (bool, error) 
 
 func (vm *softLayerHardware) discoveryOpenIscsiTargetsBasedOnShellScript(volume datatypes.SoftLayer_Network_Storage) (bool, error) {
 	command := fmt.Sprintf("sleep 5; iscsiadm -m discovery -t sendtargets -p %s", volume.ServiceResourceBackendIpAddress)
-	_, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryIP(), command)
+	_, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryBackendIP(), command)
 	if err != nil {
 		return false, bosherr.WrapError(err, "discoverying open iscsi targets")
 	}
 
 	command = "sleep 5; echo `iscsiadm -m node -l`"
-	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryIP(), command)
+	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryBackendIP(), command)
 	if err != nil {
 		return false, bosherr.WrapError(err, "login iscsi targets")
 	}
@@ -494,7 +494,7 @@ func (vm *softLayerHardware) discoveryOpenIscsiTargetsBasedOnShellScript(volume 
 func (vm *softLayerHardware) writeOpenIscsiInitiatornameBasedOnShellScript(credential AllowedHostCredential) (bool, error) {
 	if len(credential.Iqn) > 0 {
 		command := fmt.Sprintf("echo 'InitiatorName=%s' > /etc/iscsi/initiatorname.iscsi", credential.Iqn)
-		_, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryIP(), command)
+		_, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryBackendIP(), command)
 		if err != nil {
 			return false, bosherr.WrapError(err, "Writing to /etc/iscsi/initiatorname.iscsi")
 		}
@@ -546,7 +546,7 @@ func (vm *softLayerHardware) detachVolumeBasedOnShellScript(hasMultiPath bool) e
 
 	if isMounted {
 		step00 := fmt.Sprintf("umount -l /var/vcap/store")
-		_, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryIP(), step00)
+		_, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryBackendIP(), step00)
 		if err != nil {
 			return bosherr.WrapError(err, "umount -l /var/vcap/store")
 		}
@@ -555,7 +555,7 @@ func (vm *softLayerHardware) detachVolumeBasedOnShellScript(hasMultiPath bool) e
 
 	// stop open-iscsi
 	step1 := fmt.Sprintf("/etc/init.d/open-iscsi stop")
-	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryIP(), step1)
+	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryBackendIP(), step1)
 	if err != nil {
 		return bosherr.WrapError(err, "Restarting open iscsi")
 	}
@@ -563,7 +563,7 @@ func (vm *softLayerHardware) detachVolumeBasedOnShellScript(hasMultiPath bool) e
 
 	// clean up /etc/iscsi/send_targets/
 	step2 := fmt.Sprintf("rm -rf /etc/iscsi/send_targets")
-	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryIP(), step2)
+	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryBackendIP(), step2)
 	if err != nil {
 		return bosherr.WrapError(err, "Removing /etc/iscsi/send_targets")
 	}
@@ -571,7 +571,7 @@ func (vm *softLayerHardware) detachVolumeBasedOnShellScript(hasMultiPath bool) e
 
 	// clean up /etc/iscsi/nodes/
 	step3 := fmt.Sprintf("rm -rf /etc/iscsi/nodes")
-	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryIP(), step3)
+	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryBackendIP(), step3)
 	if err != nil {
 		return bosherr.WrapError(err, "Removing /etc/iscsi/nodes")
 	}
@@ -580,7 +580,7 @@ func (vm *softLayerHardware) detachVolumeBasedOnShellScript(hasMultiPath bool) e
 
 	// start open-iscsi
 	step4 := fmt.Sprintf("/etc/init.d/open-iscsi start")
-	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryIP(), step4)
+	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryBackendIP(), step4)
 	if err != nil {
 		return bosherr.WrapError(err, "Restarting open iscsi")
 	}
@@ -589,7 +589,7 @@ func (vm *softLayerHardware) detachVolumeBasedOnShellScript(hasMultiPath bool) e
 	if hasMultiPath {
 		// restart dm-multipath tool
 		step5 := fmt.Sprintf("service multipath-tools restart")
-		_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryIP(), step5)
+		_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryBackendIP(), step5)
 		if err != nil {
 			return bosherr.WrapError(err, "Restarting Multipath deamon")
 		}
@@ -616,7 +616,7 @@ func (vm *softLayerHardware) isMountPoint(path string) (bool, error) {
 
 func (vm *softLayerHardware) searchMounts() ([]Mount, error) {
 	var mounts []Mount
-	stdout, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryIP(), "mount")
+	stdout, err := vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryBackendIP(), "mount")
 	if err != nil {
 		return mounts, bosherr.WrapError(err, "Running mount")
 	}
