@@ -120,7 +120,8 @@ func (vm *softLayerHardware) ReloadOS(stemcell bslcstem.Stemcell) error {
 }
 
 func (vm *softLayerHardware) SetMetadata(vmMetadata VMMetadata) error {
-	return NotSupportedError{}
+	vm.logger.Debug(SOFTLAYER_HARDWARE_LOG_TAG, "set_vm_metadata not support for baremetal")
+	return nil
 }
 
 func (vm *softLayerHardware) ConfigureNetworks(networks Networks) error {

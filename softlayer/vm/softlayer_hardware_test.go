@@ -134,7 +134,7 @@ var _ = Describe("SoftLayerHardware", func() {
 
 		It("returns unsupport error", func() {
 			err := vm.SetMetadata(metadata)
-			Expect(err).To(HaveOccurred())
+			Expect(err).ToNot(HaveOccurred())
 		})
 
 	})
