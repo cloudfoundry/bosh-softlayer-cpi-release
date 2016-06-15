@@ -26,10 +26,10 @@ var _ = Describe("SoftLayerStemcell", func() {
 
 		logger = boshlog.NewLogger(boshlog.LevelNone)
 
-		stemcell = NewSoftLayerStemcell(1234, "fake-stemcell-uuid", DefaultKind, fakeSoftLayerClient, logger)
+		stemcell = NewSoftLayerStemcell(1234, "fake-stemcell-uuid", fakeSoftLayerClient, logger)
 
-		bslcommon.TIMEOUT = 2 * time.Second
-		bslcommon.POLLING_INTERVAL = 1 * time.Second
+		bslcommon.TIMEOUT = 10 * time.Millisecond
+		bslcommon.POLLING_INTERVAL = 2 * time.Millisecond
 	})
 
 	Describe("#Delete", func() {
@@ -37,7 +37,14 @@ var _ = Describe("SoftLayerStemcell", func() {
 			fixturesFileNames := []string{"SoftLayer_Virtual_Guest_Block_Device_Template_Group_Service_Delete.json",
 				"SoftLayer_Virtual_Guest_Service_getActiveTransactions.json",
 				"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
-				"SoftLayer_Virtual_Guest_Block_Device_Template_Group_Service_GetObject_None.json"}
+				"SoftLayer_Virtual_Guest_Block_Device_Template_Group_Service_getObject_None.json",
+				"SoftLayer_Virtual_Guest_Block_Device_Template_Group_Service_getObject_None.json",
+				"SoftLayer_Virtual_Guest_Block_Device_Template_Group_Service_getObject_None.json",
+				"SoftLayer_Virtual_Guest_Block_Device_Template_Group_Service_getObject_None.json",
+				"SoftLayer_Virtual_Guest_Block_Device_Template_Group_Service_getObject_None.json",
+				"SoftLayer_Virtual_Guest_Block_Device_Template_Group_Service_getObject_None.json",
+				"SoftLayer_Virtual_Guest_Block_Device_Template_Group_Service_getObject_None.json",
+				"SoftLayer_Virtual_Guest_Block_Device_Template_Group_Service_getObject_None.json"}
 
 			testhelpers.SetTestFixturesForFakeSoftLayerClient(fakeSoftLayerClient, fixturesFileNames)
 		})
@@ -51,12 +58,12 @@ var _ = Describe("SoftLayerStemcell", func() {
 
 		Context("when stemcell does not exist", func() {
 			BeforeEach(func() {
-				fakeSoftLayerClient.FakeHttpClient.DoRawHttpRequestResponse = []byte("false")
+				fakeSoftLayerClient.FakeHttpClient.DoRawHttpRequestInt = 404
 			})
 
 			It("returns error if deleting stemcell does not exist", func() {
 				err := stemcell.Delete()
-				Expect(err).NotTo(HaveOccurred())
+				Expect(err).To(HaveOccurred())
 			})
 		})
 	})

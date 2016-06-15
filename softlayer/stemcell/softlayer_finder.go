@@ -4,8 +4,15 @@ import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
-	"fmt"
+	sl_datatypes "github.com/maximilien/softlayer-go/data_types"
 	sl "github.com/maximilien/softlayer-go/softlayer"
+
+	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
+	boshretry "github.com/cloudfoundry/bosh-utils/retrystrategy"
+
+	"fmt"
+	"github.com/pivotal-golang/clock"
+	"strings"
 )
 
 type SoftLayerFinder struct {
@@ -17,112 +24,29 @@ func NewSoftLayerFinder(client sl.Client, logger boshlog.Logger) SoftLayerFinder
 	return SoftLayerFinder{client: client, logger: logger}
 }
 
-func (f SoftLayerFinder) FindById(id int) (Stemcell, bool, error) {
-	accountService, err := f.client.GetSoftLayer_Account_Service()
+func (f SoftLayerFinder) FindById(id int) (Stemcell, error) {
+	vgbdtg := sl_datatypes.SoftLayer_Virtual_Guest_Block_Device_Template_Group{}
+	vgdtgService, err := f.client.GetSoftLayer_Virtual_Guest_Block_Device_Template_Group_Service()
+
+	execStmtRetryable := boshretry.NewRetryable(
+		func() (bool, error) {
+			vgbdtg, err = vgdtgService.GetObject(id)
+			if err != nil {
+				if strings.Contains(err.Error(), "404") {
+					return false, bosherr.Error(fmt.Sprintf("Failed to get VirtualGuestBlockDeviceTemplateGroup with id `%d`", id))
+				} else {
+					return true, bosherr.Error(fmt.Sprintf("The VirtualGuestBlockDeviceTemplateGroup with id `%d` does not exist", id))
+				}
+			}
+
+			return false, nil
+		})
+	timeService := clock.NewClock()
+	timeoutRetryStrategy := boshretry.NewTimeoutRetryStrategy(bslcommon.TIMEOUT, bslcommon.POLLING_INTERVAL, execStmtRetryable, timeService, boshlog.NewLogger(boshlog.LevelInfo))
+	err = timeoutRetryStrategy.Try()
 	if err != nil {
-		return nil, false, bosherr.WrapError(err, "Getting SoftLayer AccountService")
+		return SoftLayerStemcell{}, bosherr.Error(fmt.Sprintf("Can not find VirtualGuestBlockDeviceTemplateGroup with id `%d`", id))
 	}
 
-	stemcell, found, err := f.findByIdInVirtualDiskImages(id, accountService)
-	if err != nil {
-		return stemcell, found, err
-	}
-
-	if found {
-		return stemcell, found, nil
-	} else {
-		stemcell, found, err = f.findByIdInVirtualGuestDeviceTemplateGroups(id, accountService)
-		if err != nil {
-			return stemcell, found, err
-		}
-	}
-
-	return stemcell, found, nil
-}
-
-func (f SoftLayerFinder) Find(uuid string) (Stemcell, bool, error) {
-	accountService, err := f.client.GetSoftLayer_Account_Service()
-	if err != nil {
-		return nil, false, bosherr.WrapError(err, "Getting SoftLayer AccountService")
-	}
-
-	stemcell, found, err := f.findInVirtualDiskImages(uuid, accountService)
-	if err != nil {
-		return stemcell, found, err
-	}
-
-	if found {
-		return stemcell, found, nil
-	} else {
-		stemcell, found, err = f.findInVirtualGuestDeviceTemplateGroups(uuid, accountService)
-		if err != nil {
-			return stemcell, found, err
-		}
-	}
-
-	return stemcell, found, nil
-}
-
-func (f SoftLayerFinder) findInVirtualDiskImages(uuid string, accountService sl.SoftLayer_Account_Service) (Stemcell, bool, error) {
-	filters := fmt.Sprintf(`{"virtualDiskImages":{"uuid":{"operation":"%s"}}}`, uuid)
-	virtualDiskImages, err := accountService.GetVirtualDiskImagesWithFilter(filters)
-	if err != nil {
-		return nil, false, bosherr.WrapError(err, "Getting virtual disk images")
-	}
-
-	for _, vdImage := range virtualDiskImages {
-		if vdImage.Uuid == uuid {
-			return NewSoftLayerStemcell(vdImage.Id, vdImage.Uuid, VirtualDiskImageKind, f.client, f.logger), true, nil
-		}
-	}
-
-	return nil, false, nil
-}
-
-func (f SoftLayerFinder) findByIdInVirtualDiskImages(id int, accountService sl.SoftLayer_Account_Service) (Stemcell, bool, error) {
-	filters := fmt.Sprintf(`{"virtualDiskImages":{"id":{"operation":"%d"}}}`, id)
-	virtualDiskImages, err := accountService.GetVirtualDiskImagesWithFilter(filters)
-	if err != nil {
-		return nil, false, bosherr.WrapError(err, "Getting virtual disk images")
-	}
-
-	for _, vdImage := range virtualDiskImages {
-		if vdImage.Id == id {
-			return NewSoftLayerStemcell(vdImage.Id, vdImage.Uuid, VirtualDiskImageKind, f.client, f.logger), true, nil
-		}
-	}
-
-	return nil, false, nil
-}
-
-func (f SoftLayerFinder) findInVirtualGuestDeviceTemplateGroups(uuid string, accountService sl.SoftLayer_Account_Service) (Stemcell, bool, error) {
-	filters := fmt.Sprintf(`{"blockDeviceTemplateGroups":{"globalIdentifier":{"operation":"%s"}}}`, uuid)
-	vgdtgGroups, err := accountService.GetBlockDeviceTemplateGroupsWithFilter(filters)
-	if err != nil {
-		return nil, false, bosherr.WrapError(err, "Getting virtual guest device template groups")
-	}
-
-	for _, vgdtgGroup := range vgdtgGroups {
-		if vgdtgGroup.GlobalIdentifier == uuid {
-			return NewSoftLayerStemcell(vgdtgGroup.Id, vgdtgGroup.GlobalIdentifier, VirtualGuestDeviceTemplateGroupKind, f.client, f.logger), true, nil
-		}
-	}
-
-	return nil, false, nil
-}
-
-func (f SoftLayerFinder) findByIdInVirtualGuestDeviceTemplateGroups(id int, accountService sl.SoftLayer_Account_Service) (Stemcell, bool, error) {
-	filters := fmt.Sprintf(`{"blockDeviceTemplateGroups":{"id":{"operation":"%d"}}}`, id)
-	vgdtgGroups, err := accountService.GetBlockDeviceTemplateGroupsWithFilter(filters)
-	if err != nil {
-		return nil, false, bosherr.WrapError(err, "Getting virtual guest device template groups")
-	}
-
-	for _, vgdtgGroup := range vgdtgGroups {
-		if vgdtgGroup.Id == id {
-			return NewSoftLayerStemcell(vgdtgGroup.Id, vgdtgGroup.GlobalIdentifier, VirtualGuestDeviceTemplateGroupKind, f.client, f.logger), true, nil
-		}
-	}
-
-	return nil, false, nil
+	return NewSoftLayerStemcell(vgbdtg.Id, vgbdtg.GlobalIdentifier, f.client, f.logger), nil
 }

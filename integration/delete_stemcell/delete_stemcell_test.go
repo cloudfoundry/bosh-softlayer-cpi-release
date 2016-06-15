@@ -12,10 +12,12 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
 	testhelperscpi "github.com/cloudfoundry/bosh-softlayer-cpi/test_helpers"
+	"github.com/cloudfoundry/bosh-utils/logger"
 	slclient "github.com/maximilien/softlayer-go/client"
 	datatypes "github.com/maximilien/softlayer-go/data_types"
-	softlayer "github.com/maximilien/softlayer-go/softlayer"
+	"github.com/maximilien/softlayer-go/softlayer"
 	testhelpers "github.com/maximilien/softlayer-go/test_helpers"
 )
 
@@ -80,7 +82,7 @@ var _ = Describe("BOSH Director Level Integration for delete_stemcell", func() {
 				Name: "integration-test-vgbtg",
 				Note: "",
 				OperatingSystemReferenceCode: "UBUNTU_14_64",
-				Uri: "swift://" + swiftUsername + "@" + swiftCluster + "/stemcells/bosh-stemcell-3147-softlayer.vhd",
+				Uri: "swift://" + swiftUsername + "@" + swiftCluster + "/stemcells/bosh-stemcell-4-test.vhd",
 			}
 
 			vgbdtGroup, err := vgbdtgService.CreateFromExternalSource(configuration)
@@ -95,7 +97,8 @@ var _ = Describe("BOSH Director Level Integration for delete_stemcell", func() {
 		})
 
 		AfterEach(func() {
-			_, err := vgbdtgService.DeleteObject(virtual_disk_image_id)
+			stemcell := bslcstem.NewSoftLayerStemcell(virtual_disk_image_id, "", client, logger.NewLogger(logger.LevelInfo))
+			stemcell.Delete()
 			Expect(err).ToNot(HaveOccurred())
 		})
 
@@ -115,6 +118,8 @@ var _ = Describe("BOSH Director Level Integration for delete_stemcell", func() {
 			Expect(err).ToNot(HaveOccurred())
 			Expect(output["result"]).To(BeNil())
 			Expect(output["error"]).To(BeNil())
+
+			time.Sleep(60 * time.Second)
 		})
 	})
 

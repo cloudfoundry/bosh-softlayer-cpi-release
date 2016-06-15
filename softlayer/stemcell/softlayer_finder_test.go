@@ -8,9 +8,11 @@ import (
 
 	testhelpers "github.com/cloudfoundry/bosh-softlayer-cpi/test_helpers"
 
+	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
 	fakesslclient "github.com/maximilien/softlayer-go/client/fakes"
+	"time"
 )
 
 var _ = Describe("SoftLayerFinder", func() {
@@ -23,50 +25,35 @@ var _ = Describe("SoftLayerFinder", func() {
 
 	BeforeEach(func() {
 		softLayerClient = fakesslclient.NewFakeSoftLayerClient("fake-username", "fake-api-key")
-		testhelpers.SetTestFixtureForFakeSoftLayerClient(softLayerClient, "SoftLayer_Account_Service_getVirtualDiskImages.json")
 
+		bslcommon.TIMEOUT = 10 * time.Millisecond
+		bslcommon.POLLING_INTERVAL = 2 * time.Millisecond
 		logger = boshlog.NewLogger(boshlog.LevelNone)
-		finder = NewSoftLayerFinder(softLayerClient, logger)
 
-		expectedStemcell = NewSoftLayerStemcell(4868344, "8c7a8358-d9a9-4e4d-9345-6f637e10ccb7", VirtualDiskImageKind, softLayerClient, logger)
-	})
-
-	Describe("Find", func() {
-		Context("valid stemcell UUID pointing to a SL virtual disk image", func() {
-			It("returns stemcell and found as true if stemcell exists", func() {
-				stemcell, found, err := finder.Find("8c7a8358-d9a9-4e4d-9345-6f637e10ccb7")
-				Expect(err).ToNot(HaveOccurred())
-				Expect(found).To(BeTrue())
-				Expect(stemcell).To(Equal(expectedStemcell))
-			})
-		})
-
-		Context("valid stemcell UUID pointing to a SL virtual disk image", func() {
-			It("returns found as false if stemcell does not exist", func() {
-				stemcell, found, err := finder.Find("fake-stemcell-uuid")
-				Expect(err).ToNot(HaveOccurred())
-				Expect(found).To(BeFalse())
-				Expect(stemcell).To(BeNil())
-			})
-		})
+		expectedStemcell = NewSoftLayerStemcell(200150, "8071601b-5ee1-483e-a9e8-6e5582dcb9f7", softLayerClient, logger)
 	})
 
 	Describe("FindById", func() {
-		Context("valid stemcell ID pointing to a SL virtual disk image", func() {
-			It("returns stemcell and found as true if stemcell ", func() {
-				stemcell, found, err := finder.FindById(4868344)
+		Context("Success if http code 200 returns from SL", func() {
+			It("returns stemcell if stemcell exists", func() {
+				testhelpers.SetTestFixtureForFakeSoftLayerClient(softLayerClient, "SoftLayer_Virtual_Guest_Block_Device_Template_Group_Service_getObject.json")
+
+				softLayerClient.FakeHttpClient.DoRawHttpRequestInt = 200
+				finder = NewSoftLayerFinder(softLayerClient, logger)
+
+				stemcell, err := finder.FindById(200150)
 				Expect(err).ToNot(HaveOccurred())
-				Expect(found).To(BeTrue())
 				Expect(stemcell).To(Equal(expectedStemcell))
 			})
 		})
 
-		Context("valid stemcell ID pointing to a SL virtual disk image", func() {
-			It("returns found as false if stemcell does not exist", func() {
-				stemcell, found, err := finder.FindById(1111111)
-				Expect(err).ToNot(HaveOccurred())
-				Expect(found).To(BeFalse())
-				Expect(stemcell).To(BeNil())
+		Context("Failed if the stemcell does not exists, 404 error returned", func() {
+			It("returns error if stemcell does not exist", func() {
+				softLayerClient.FakeHttpClient.DoRawHttpRequestInt = 404
+				finder = NewSoftLayerFinder(softLayerClient, logger)
+
+				_, err := finder.FindById(200150)
+				Expect(err).To(HaveOccurred())
 			})
 		})
 	})
