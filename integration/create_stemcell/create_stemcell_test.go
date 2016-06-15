@@ -83,7 +83,7 @@ var _ = Describe("BOSH Director Level Integration for create_stemcell", func() {
 				Name: "integration-test-vgbtg",
 				Note: "",
 				OperatingSystemReferenceCode: "UBUNTU_14_64",
-				Uri: "swift://" + swiftUsername + "@" + swiftCluster + "/stemcells/bosh-stemcell-3178-softlayer.vhd",
+				Uri: "swift://" + swiftUsername + "@" + swiftCluster + "/stemcells/bosh-stemcell-4-test.vhd",
 			}
 
 			vgbdtGroup, err := vgbdtgService.CreateFromExternalSource(configuration)

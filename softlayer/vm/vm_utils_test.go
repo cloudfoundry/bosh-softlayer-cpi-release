@@ -10,7 +10,6 @@ import (
 
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
 
-	fakestem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell/fakes"
 	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
 
 	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
@@ -134,7 +133,7 @@ var _ = Describe("VM Utils", func() {
 
 		BeforeEach(func() {
 			agentID = "fake-agentID"
-			stemcell = bslcstem.NewSoftLayerStemcell(1234, "fake-stemcell-uuid", fakestem.FakeStemcellKind, softLayerClient, logger)
+			stemcell = bslcstem.NewSoftLayerStemcell(1234, "fake-stemcell-uuid", softLayerClient, logger)
 			cloudProps = VMCloudProperties{
 				StartCpus: 4,
 				MaxMemory: 2048,

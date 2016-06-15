@@ -1,9 +1,11 @@
 package action
 
 import (
+	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
+	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 
-	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
+	"time"
 )
 
 type CreateStemcellAction struct {
@@ -24,13 +26,12 @@ func NewCreateStemcell(
 }
 
 func (a CreateStemcellAction) Run(imagePath string, stemcellCloudProps CreateStemcellCloudProps) (string, error) {
-	stemcell, found, err := a.stemcellFinder.FindById(stemcellCloudProps.Id)
+	bslcommon.TIMEOUT = 30 * time.Second
+	bslcommon.POLLING_INTERVAL = 5 * time.Second
+
+	stemcell, err := a.stemcellFinder.FindById(stemcellCloudProps.Id)
 	if err != nil {
 		return "0", bosherr.WrapErrorf(err, "Finding stemcell with ID '%d'", stemcellCloudProps.Id)
-	}
-
-	if !found {
-		return "0", bosherr.Errorf("Did not find stemcell with ID '%d'", stemcellCloudProps.Id)
 	}
 
 	return StemcellCID(stemcell.ID()).String(), nil

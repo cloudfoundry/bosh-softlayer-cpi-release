@@ -41,9 +41,8 @@ var _ = Describe("DeleteStemcell", func() {
 			)
 
 			BeforeEach(func() {
-				stemcell = fakestem.NewFakeStemcell(1234, "fake-stemcell-id", fakestem.FakeStemcellKind)
+				stemcell = fakestem.NewFakeStemcell(1234, "fake-stemcell-id")
 				stemcellFinder.FindStemcell = stemcell
-				stemcellFinder.FindFound = true
 			})
 
 			It("does not delete stemcell", func() {
@@ -55,15 +54,6 @@ var _ = Describe("DeleteStemcell", func() {
 
 			It("logs instead of returning error if deleting stemcell fails", func() {
 				stemcell.DeleteErr = errors.New("fake-delete-err")
-
-				_, err := action.Run(1234)
-				Expect(err).ToNot(HaveOccurred())
-			})
-		})
-
-		Context("when stemcell is not found with given cid", func() {
-			It("does not return error", func() {
-				stemcellFinder.FindFound = false
 
 				_, err := action.Run(1234)
 				Expect(err).ToNot(HaveOccurred())

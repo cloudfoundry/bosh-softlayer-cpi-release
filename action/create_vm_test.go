@@ -56,8 +56,6 @@ var _ = Describe("CreateVM", func() {
 		})
 
 		It("tries to find stemcell with given stemcell cid", func() {
-			stemcellFinder.FindFound = true
-
 			_, err := action.Run("fake-agent-id", stemcellCID, vmCloudProp, networks, diskLocality, env)
 			Expect(err).ToNot(HaveOccurred())
 		})
@@ -68,9 +66,8 @@ var _ = Describe("CreateVM", func() {
 			)
 
 			BeforeEach(func() {
-				stemcell = fakestem.NewFakeStemcell(1234, "fake-stemcell-id", fakestem.FakeStemcellKind)
+				stemcell = fakestem.NewFakeStemcell(1234, "fake-stemcell-id")
 				stemcellFinder.FindStemcell = stemcell
-				stemcellFinder.FindFound = true
 			})
 
 			It("returns id for created VM", func() {
@@ -94,17 +91,6 @@ var _ = Describe("CreateVM", func() {
 
 				_, err := action.Run("fake-agent-id", stemcellCID, vmCloudProp2, networks, diskLocality, env)
 				Expect(err).ToNot(HaveOccurred())
-			})
-		})
-
-		Context("when stemcell is not found with given cid", func() {
-			It("returns error because VM cannot be created without a stemcell", func() {
-				stemcellFinder.FindFound = false
-
-				id, err := action.Run("fake-agent-id", stemcellCID, vmCloudProp, networks, diskLocality, env)
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("Expected to find stemcell"))
-				Expect(id).To(Equal(VMCID(0).String()))
 			})
 		})
 

@@ -11,7 +11,6 @@ import (
 	testhelpers "github.com/cloudfoundry/bosh-softlayer-cpi/test_helpers"
 
 	fakebmsclient "github.com/cloudfoundry-community/bosh-softlayer-tools/clients/fakes"
-	fakestem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell/fakes"
 	fakevm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm/fakes"
 	fakesutil "github.com/cloudfoundry/bosh-softlayer-cpi/util/fakes"
 	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
@@ -67,7 +66,7 @@ var _ = Describe("SoftLayer_Hardware_Creator", func() {
 		Context("valid arguments", func() {
 			BeforeEach(func() {
 				agentID = "fake-agent-id"
-				stemcell = bslcstem.NewSoftLayerStemcell(1234, "fake-stemcell-uuid", fakestem.FakeStemcellKind, softLayerClient, logger)
+				stemcell = bslcstem.NewSoftLayerStemcell(1234, "fake-stemcell-uuid", softLayerClient, logger)
 
 				env = Environment{}
 
@@ -250,7 +249,7 @@ var _ = Describe("SoftLayer_Hardware_Creator", func() {
 			Context("missing correct VMProperties", func() {
 				BeforeEach(func() {
 					agentID = "fake-agent-id"
-					stemcell = bslcstem.NewSoftLayerStemcell(1234, "fake-stemcell-uuid", fakestem.FakeStemcellKind, softLayerClient, logger)
+					stemcell = bslcstem.NewSoftLayerStemcell(1234, "fake-stemcell-uuid", softLayerClient, logger)
 					networks = Networks{}
 					env = Environment{}
 

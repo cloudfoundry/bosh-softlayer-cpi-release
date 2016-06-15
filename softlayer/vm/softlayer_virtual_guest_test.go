@@ -203,7 +203,7 @@ var _ = Describe("SoftLayerVirtualGuest", func() {
 					"SoftLayer_Virtual_Guest_Service_getPowerState.json",
 				}
 				testhelpers.SetTestFixturesForFakeSoftLayerClient(fakeSoftLayerClient, fileNames)
-				stemcell = fakestemcell.NewFakeStemcell(123456, "5b7bc66a-72c6-447a-94a1-967803fcd76b", "non-dea")
+				stemcell = fakestemcell.NewFakeStemcell(123456, "5b7bc66a-72c6-447a-94a1-967803fcd76b")
 			})
 
 			It("os reload on the VM successfully", func() {
