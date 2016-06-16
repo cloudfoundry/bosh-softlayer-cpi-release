@@ -406,17 +406,26 @@ func (slns *softLayer_Network_Storage_Service) getIscsiVolumeItemIdBasedOnSize(s
 		return 0, err
 	}
 
-	itemPrices, err := productPackageService.GetItemPricesBySize2(NETWORK_PERFORMANCE_STORAGE_PACKAGE_ID, size)
+	itemPrices, err := productPackageService.GetItemPricesBySize(NETWORK_PERFORMANCE_STORAGE_PACKAGE_ID, size)
 	if err != nil {
 		return 0, err
 	}
 
-	if len(itemPrices) > 0 {
-		return itemPrices[0].Id, nil
+	var currentItemId int
 
+	if len(itemPrices) > 0 {
+		for _, itemPrice := range itemPrices {
+			if itemPrice.LocationGroupId == 0 {
+				currentItemId = itemPrice.Id
+				break
+			}
+		}
 	}
 
-	return 0, nil
+	if currentItemId == 0 {
+		return 0, errors.New(fmt.Sprintf("No proper performance storage (iSCSI volume)for size %d", size))
+	}
+	return currentItemId, nil
 }
 
 func (slns *softLayer_Network_Storage_Service) getItemPriceIdBySizeAndIops(size int, capacity int) (int, error) {
@@ -430,11 +439,21 @@ func (slns *softLayer_Network_Storage_Service) getItemPriceIdBySizeAndIops(size 
 		return 0, err
 	}
 
+	var currentItemId int
+
 	if len(itemPrices) > 0 {
-		return itemPrices[0].Id, nil
+		for _, itemPrice := range itemPrices {
+			if itemPrice.LocationGroupId == 0 {
+				currentItemId = itemPrice.Id
+				break
+			}
+		}
 	}
 
-	return 0, nil
+	if currentItemId == 0 {
+		return 0, errors.New(fmt.Sprintf("No proper performance storage (iSCSI volume)for size %d", size))
+	}
+	return currentItemId, nil
 }
 
 func (slns *softLayer_Network_Storage_Service) selectMaximunIopsItemPriceIdOnSize(size int) (int, error) {
@@ -449,11 +468,18 @@ func (slns *softLayer_Network_Storage_Service) selectMaximunIopsItemPriceIdOnSiz
 	}
 
 	if len(itemPrices) > 0 {
-		sort.Sort(datatypes.SoftLayer_Product_Item_Price_Sorted_Data(itemPrices))
-		return itemPrices[len(itemPrices)-1].Id, nil
+		candidates := filter(itemPrices, func(itemPrice datatypes.SoftLayer_Product_Item_Price) bool {
+			return itemPrice.LocationGroupId == 0
+		})
+		if len(candidates) > 0 {
+			sort.Sort(datatypes.SoftLayer_Product_Item_Price_Sorted_Data(candidates))
+			return candidates[len(candidates)-1].Id, nil
+		} else {
+			return 0, errors.New(fmt.Sprintf("No proper performance storage (iSCSI volume)for size %d", size))
+		}
 	}
 
-	return 0, nil
+	return 0, errors.New(fmt.Sprintf("No proper performance storage (iSCSI volume)for size %d", size))
 }
 
 func (slns *softLayer_Network_Storage_Service) selectMediumIopsItemPriceIdOnSize(size int) (int, error) {
@@ -468,11 +494,18 @@ func (slns *softLayer_Network_Storage_Service) selectMediumIopsItemPriceIdOnSize
 	}
 
 	if len(itemPrices) > 0 {
-		sort.Sort(datatypes.SoftLayer_Product_Item_Price_Sorted_Data(itemPrices))
-		return itemPrices[len(itemPrices)/2].Id, nil
+		candidates := filter(itemPrices, func(itemPrice datatypes.SoftLayer_Product_Item_Price) bool {
+			return itemPrice.LocationGroupId == 0
+		})
+		if len(candidates) > 0 {
+			sort.Sort(datatypes.SoftLayer_Product_Item_Price_Sorted_Data(candidates))
+			return candidates[len(candidates)/2].Id, nil
+		} else {
+			return 0, errors.New(fmt.Sprintf("No proper performance storage (iSCSI volume)for size %d", size))
+		}
 	}
 
-	return 0, nil
+	return 0, errors.New(fmt.Sprintf("No proper performance storage (iSCSI volume)for size %d", size))
 }
 
 func (slns *softLayer_Network_Storage_Service) selectMinimumIopsItemPriceIdOnSize(size int) (int, error) {
@@ -487,9 +520,27 @@ func (slns *softLayer_Network_Storage_Service) selectMinimumIopsItemPriceIdOnSiz
 	}
 
 	if len(itemPrices) > 0 {
-		sort.Sort(datatypes.SoftLayer_Product_Item_Price_Sorted_Data(itemPrices))
-		return itemPrices[0].Id, nil
+		candidates := filter(itemPrices, func(itemPrice datatypes.SoftLayer_Product_Item_Price) bool {
+			return itemPrice.LocationGroupId == 0
+		})
+		if len(candidates) > 0 {
+			sort.Sort(datatypes.SoftLayer_Product_Item_Price_Sorted_Data(candidates))
+			return candidates[0].Id, nil
+		} else {
+			return 0, errors.New(fmt.Sprintf("No proper performance storage (iSCSI volume)for size %d", size))
+		}
 	}
 
-	return 0, nil
+	return 0, errors.New(fmt.Sprintf("No proper performance storage (iSCSI volume)for size %d", size))
+}
+
+func filter(vs []datatypes.SoftLayer_Product_Item_Price, f func(datatypes.SoftLayer_Product_Item_Price) bool) []datatypes.SoftLayer_Product_Item_Price {
+	vsf := make([]datatypes.SoftLayer_Product_Item_Price, 0)
+	for _, v := range vs {
+		if f(v) {
+			vsf = append(vsf, v)
+		}
+	}
+
+	return vsf
 }

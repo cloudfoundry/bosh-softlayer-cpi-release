@@ -1,11 +1,8 @@
 {
   "method": "create_disk",
   "arguments": [
-    512000,
-    {
-      "useHourlyPricing": true,
-      "iops": 3000
-    },
+    100000,
+    {},
     "21414337"
   ],
   "context": {
