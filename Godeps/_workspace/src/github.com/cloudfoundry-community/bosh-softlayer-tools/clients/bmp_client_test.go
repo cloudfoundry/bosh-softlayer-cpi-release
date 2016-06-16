@@ -63,7 +63,7 @@ var _ = Describe("BMP client", func() {
 		})
 	})
 
-	Describe("#bms", func() {
+	Describe("#Bms", func() {
 		BeforeEach(func() {
 			fakeHttpClient.DoRawHttpRequestResponse, err = common.ReadJsonTestFixtures("..", "bmp", "Bms.json")
 			Expect(err).ToNot(HaveOccurred())
@@ -132,7 +132,7 @@ var _ = Describe("BMP client", func() {
 		})
 	})
 
-	Describe("#stemcells", func() {
+	Describe("#Stemcells", func() {
 		BeforeEach(func() {
 			fakeHttpClient.DoRawHttpRequestResponse, err = common.ReadJsonTestFixtures("..", "bmp", "Stemcells.json")
 			Expect(err).ToNot(HaveOccurred())
@@ -201,7 +201,7 @@ var _ = Describe("BMP client", func() {
 		})
 	})
 
-	Describe("#tasks", func() {
+	Describe("#Tasks", func() {
 		BeforeEach(func() {
 			fakeHttpClient.DoRawHttpRequestResponse, err = common.ReadJsonTestFixtures("..", "bmp", "Tasks.json")
 			Expect(err).ToNot(HaveOccurred())
@@ -236,7 +236,7 @@ var _ = Describe("BMP client", func() {
 		})
 	})
 
-	Describe("#taskOutput", func() {
+	Describe("#TaskOutput", func() {
 		BeforeEach(func() {
 			fakeHttpClient.DoRawHttpRequestResponse, err = common.ReadJsonTestFixtures("..", "bmp", "TaskOutput.json")
 			Expect(err).ToNot(HaveOccurred())
@@ -284,7 +284,7 @@ var _ = Describe("BMP client", func() {
 		})
 	})
 
-	Describe("#updateState", func() {
+	Describe("#UpdateState", func() {
 		BeforeEach(func() {
 			fakeHttpClient.DoRawHttpRequestResponse, err = common.ReadJsonTestFixtures("..", "bmp", "UpdateState.json")
 
@@ -306,7 +306,7 @@ var _ = Describe("BMP client", func() {
 		})
 	})
 
-	Describe("#login", func() {
+	Describe("#Login", func() {
 		BeforeEach(func() {
 			fakeHttpClient.DoRawHttpRequestResponse, err = common.ReadJsonTestFixtures("..", "bmp", "Login.json")
 			Expect(err).ToNot(HaveOccurred())

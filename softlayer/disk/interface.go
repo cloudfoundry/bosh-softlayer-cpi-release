@@ -1,7 +1,8 @@
 package disk
 
 type DiskCloudProperties struct {
-	ConsistentPerformanceIscsi bool `json:"consistent_performance_iscsi,omitempty"`
+	Iops             int  `json:"iops,omitempty"`
+	UseHourlyPricing bool `json:"useHourlyPricing,omitempty"`
 }
 
 type Creator interface {

@@ -30,7 +30,7 @@ func (c SoftLayerCreator) Create(size int, cloudProps DiskCloudProperties, datac
 		return SoftLayerDisk{}, bosherr.WrapError(err, "Create SoftLayer Network Storage Service error.")
 	}
 
-	disk, err := storageService.CreateNetworkStorage(c.getSoftLayerDiskSize(size), strconv.Itoa(datacenter_id))
+	disk, err := storageService.CreateNetworkStorage(c.getSoftLayerDiskSize(size), cloudProps.Iops, strconv.Itoa(datacenter_id), cloudProps.UseHourlyPricing)
 	if err != nil {
 		return SoftLayerDisk{}, bosherr.WrapError(err, "Create SoftLayer iSCSI disk error.")
 	}

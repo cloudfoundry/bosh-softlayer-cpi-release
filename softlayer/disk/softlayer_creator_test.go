@@ -31,16 +31,39 @@ var _ = Describe("SoftLayerCreator", func() {
 			cloudProps DiskCloudProperties
 		)
 
-		Context("Creates disk successfully", func() {
+		Context("Creates disk successfully with cloud properties", func() {
 			BeforeEach(func() {
 				fileNames := []string{
 					"SoftLayer_Product_Order_Service_getItemPrices.json",
+					"SoftLayer_Product_Order_Service_getItemPricesBySizeAndIops.json",
 					"SoftLayer_Product_Order_Service_placeOrder.json",
 					"SoftLayer_Account_Service_getIscsiVolume.json",
 				}
 				cloudProps = DiskCloudProperties{
-					ConsistentPerformanceIscsi: true,
+					Iops:             1000,
+					UseHourlyPricing: true,
 				}
+				testhelpers.SetTestFixturesForFakeSoftLayerClient(fc, fileNames)
+			})
+
+			It("creates disk successfully and returns unique disk id", func() {
+				disk, err := creator.Create(20, cloudProps, 123)
+				Expect(err).ToNot(HaveOccurred())
+
+				expectedDisk := NewSoftLayerDisk(1234, fc, logger)
+				Expect(disk).To(Equal(expectedDisk))
+			})
+		})
+
+		Context("Creates disk successfully without cloud properties", func() {
+			BeforeEach(func() {
+				fileNames := []string{
+					"SoftLayer_Product_Order_Service_getItemPrices.json",
+					"SoftLayer_Product_Order_Service_getIopsItemPrices.json",
+					"SoftLayer_Product_Order_Service_placeOrder.json",
+					"SoftLayer_Account_Service_getIscsiVolume.json",
+				}
+				cloudProps = DiskCloudProperties{}
 				testhelpers.SetTestFixturesForFakeSoftLayerClient(fc, fileNames)
 			})
 
