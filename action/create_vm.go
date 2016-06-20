@@ -43,21 +43,25 @@ func (a CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps bslcvm
 	vmNetworks := networks.AsVMNetworks()
 	vmEnv := bslcvm.Environment(env)
 
-	if len(vmNetworks.First().IP) == 0 {
-
-		vm, err := a.vmCreator.CreateBySoftlayer(agentID, stemcell, cloudProps, vmNetworks, vmEnv)
-		if err != nil {
-			return "0", bosherr.WrapErrorf(err, "Creating VM with agent ID '%s'", agentID)
+	for _, nw := range vmNetworks {
+		if nw.Type == "manual" {
+			continue
 		}
-		return VMCID(vm.ID()).String(), nil
-
-	} else {
-		vm, err := a.vmCreator.CreateByOSReload(agentID, stemcell, cloudProps, vmNetworks, vmEnv)
-		if err != nil {
-			return "0", bosherr.WrapErrorf(err, "OS Reloading VM with agent ID '%s'", agentID)
+		if nw.IP == "" {
+			vm, err := a.vmCreator.CreateBySoftlayer(agentID, stemcell, cloudProps, vmNetworks, vmEnv)
+			if err != nil {
+				return "0", bosherr.WrapErrorf(err, "Creating VM with agent ID '%s'", agentID)
+			}
+			return VMCID(vm.ID()).String(), nil
+		} else {
+			vm, err := a.vmCreator.CreateByOSReload(agentID, stemcell, cloudProps, vmNetworks, vmEnv)
+			if err != nil {
+				return "0", bosherr.WrapErrorf(err, "OS Reloading VM with agent ID '%s'", agentID)
+			}
+			return VMCID(vm.ID()).String(), nil
 		}
-		return VMCID(vm.ID()).String(), nil
 	}
+	return "0", bosherr.WrapErrorf(err, "Finding dynamic network")
 }
 
 func (a CreateVM) UpdateCloudProperties(cloudProps *bslcvm.VMCloudProperties) {

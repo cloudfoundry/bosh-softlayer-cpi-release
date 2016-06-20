@@ -50,6 +50,7 @@ var _ = Describe("SoftLayerCreator", func() {
 			agentOptions,
 			logger,
 			fs,
+			sshClient,
 		)
 		bslcommon.TIMEOUT = 2 * time.Second
 		bslcommon.POLLING_INTERVAL = 1 * time.Second
@@ -69,7 +70,9 @@ var _ = Describe("SoftLayerCreator", func() {
 			BeforeEach(func() {
 				agentID = "fake-agent-id"
 				stemcell = bslcstem.NewSoftLayerStemcell(1234, "fake-stemcell-uuid", softLayerClient, logger)
-				networks = Networks{}
+				networks = Networks{
+					"default": Network{Type: "dynamic"},
+				}
 				env = Environment{}
 			})
 
@@ -247,6 +250,7 @@ func setFakeSoftLayerClientCreateObjectTestFixturesWithEphemeralDiskSize(fakeSof
 		"SoftLayer_Virtual_Guest_Service_getPowerState.json",
 
 		"SoftLayer_Virtual_Guest_Service_getObject.json",
+		"SoftLayer_Virtual_Guest_Service_getObject_customNetwork.json",
 	}
 	testhelpers.SetTestFixturesForFakeSoftLayerClient(fakeSoftLayerClient, fileNames)
 }
@@ -257,6 +261,7 @@ func setFakeSoftLayerClientCreateObjectTestFixturesWithoutEphemeralDiskSize(fake
 		"SoftLayer_Virtual_Guest_Service_getLastTransaction.json",
 
 		"SoftLayer_Virtual_Guest_Service_getObject.json",
+		"SoftLayer_Virtual_Guest_Service_getObject_customNetwork.json",
 	}
 	testhelpers.SetTestFixturesForFakeSoftLayerClient(fakeSoftLayerClient, fileNames)
 }
@@ -274,6 +279,7 @@ func setFakeSoftLayerClientCreateObjectTestFixturesWithoutBoshIP(fakeSoftLayerCl
 		"SoftLayer_Virtual_Guest_Service_getPowerState.json",
 
 		"SoftLayer_Virtual_Guest_Service_getObject.json",
+		"SoftLayer_Virtual_Guest_Service_getObject_customNetwork.json",
 	}
 	testhelpers.SetTestFixturesForFakeSoftLayerClient(fakeSoftLayerClient, fileNames)
 }

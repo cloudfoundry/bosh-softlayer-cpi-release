@@ -1,6 +1,8 @@
 package action_test
 
 import (
+	"bosh-softlayer-cpi/util"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -89,6 +91,7 @@ var _ = Describe("concreteFactory", func() {
 				options.Agent,
 				logger,
 				fs,
+				util.GetSshClient(),
 			)
 
 			action, err := factory.Create("create_vm")

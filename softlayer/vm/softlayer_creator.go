@@ -32,9 +32,10 @@ type SoftLayerCreator struct {
 	agentOptions AgentOptions
 	logger       boshlog.Logger
 	fs           boshsys.FileSystem
+	sshClient    util.SshClient
 }
 
-func NewSoftLayerCreator(softLayerClient sl.Client, agentEnvServiceFactory AgentEnvServiceFactory, agentOptions AgentOptions, logger boshlog.Logger, fs boshsys.FileSystem) SoftLayerCreator {
+func NewSoftLayerCreator(softLayerClient sl.Client, agentEnvServiceFactory AgentEnvServiceFactory, agentOptions AgentOptions, logger boshlog.Logger, fs boshsys.FileSystem, sshClient util.SshClient) SoftLayerCreator {
 	bslcommon.TIMEOUT = 120 * time.Minute
 	bslcommon.POLLING_INTERVAL = 5 * time.Second
 
@@ -44,7 +45,20 @@ func NewSoftLayerCreator(softLayerClient sl.Client, agentEnvServiceFactory Agent
 		agentOptions:           agentOptions,
 		logger:                 logger,
 		fs:                     fs,
+		sshClient:              sshClient,
 	}
+}
+
+type sshClientWrapper struct {
+	client   util.SshClient
+	ip       string
+	user     string
+	password string
+}
+
+func (s *sshClientWrapper) Output(command string) ([]byte, error) {
+	o, err := s.client.ExecCommand(s.user, s.password, s.ip, command)
+	return []byte(o), err
 }
 
 func (c SoftLayerCreator) CreateBySoftlayer(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
@@ -82,7 +96,7 @@ func (c SoftLayerCreator) CreateBySoftlayer(agentID string, stemcell bslcstem.St
 		return SoftLayerVM{}, bosherr.WrapErrorf(err, "Cannot get details from virtual guest with id: %d.", virtualGuest.Id)
 	}
 
-	softlayerFileService := NewSoftlayerFileService(util.GetSshClient(), virtualGuest, c.logger)
+	softlayerFileService := NewSoftlayerFileService(c.sshClient, virtualGuest, c.logger)
 	agentEnvService := c.agentEnvServiceFactory.New(softlayerFileService, strconv.Itoa(virtualGuest.Id))
 
 	if len(cloudProps.BoshIp) == 0 {
@@ -109,6 +123,24 @@ func (c SoftLayerCreator) CreateBySoftlayer(agentID string, stemcell bslcstem.St
 		}
 	}
 
+	vm := NewSoftLayerVM(virtualGuest.Id, c.softLayerClient, c.sshClient, agentEnvService, c.logger)
+
+	ubuntu := Ubuntu{
+		SoftLayerClient: c.softLayerClient.GetHttpClient(),
+		SSHClient: &sshClientWrapper{
+			client:   c.sshClient,
+			ip:       virtualGuest.PrimaryBackendIpAddress,
+			user:     ROOT_USER_NAME,
+			password: vm.getRootPassword(virtualGuest),
+		},
+		SoftLayerFileService: softlayerFileService,
+	}
+
+	err = ubuntu.ConfigureNetwork(networks, virtualGuest.Id)
+	if err != nil {
+		return SoftLayerVM{}, bosherr.WrapErrorf(err, "Failed to configure networking for virtual guest with id: %d.", virtualGuest.Id)
+	}
+
 	agentEnv := CreateAgentUserData(agentID, cloudProps, networks, env, c.agentOptions)
 	if err != nil {
 		return SoftLayerVM{}, bosherr.WrapErrorf(err, "Cannot agent env for virtual guest with id: %d.", virtualGuest.Id)
@@ -118,8 +150,6 @@ func (c SoftLayerCreator) CreateBySoftlayer(agentID string, stemcell bslcstem.St
 	if err != nil {
 		return SoftLayerVM{}, bosherr.WrapError(err, "Updating VM's agent env")
 	}
-
-	vm := NewSoftLayerVM(virtualGuest.Id, c.softLayerClient, util.GetSshClient(), agentEnvService, c.logger)
 
 	if len(c.agentOptions.VcapPassword) > 0 {
 		err = c.SetVcapPassword(vm, virtualGuest, c.agentOptions.VcapPassword)
@@ -151,7 +181,7 @@ func (c SoftLayerCreator) CreateByOSReload(agentID string, stemcell bslcstem.Ste
 
 	c.logger.Info(SOFTLAYER_VM_CREATOR_LOG_TAG, fmt.Sprintf("OS reload on the server id %d with stemcell %d", virtualGuest.Id, stemcell.ID()))
 
-	vm := NewSoftLayerVM(virtualGuest.Id, c.softLayerClient, util.GetSshClient(), nil, c.logger)
+	vm := NewSoftLayerVM(virtualGuest.Id, c.softLayerClient, c.sshClient, nil, c.logger)
 
 	bslcommon.TIMEOUT = 4 * time.Hour
 	err = vm.ReloadOS(stemcell)
@@ -176,7 +206,7 @@ func (c SoftLayerCreator) CreateByOSReload(agentID string, stemcell bslcstem.Ste
 		return SoftLayerVM{}, bosherr.WrapErrorf(err, "Cannot get details from virtual guest with id: %d.", virtualGuest.Id)
 	}
 
-	softlayerFileService := NewSoftlayerFileService(util.GetSshClient(), virtualGuest, c.logger)
+	softlayerFileService := NewSoftlayerFileService(c.sshClient, virtualGuest, c.logger)
 	agentEnvService := c.agentEnvServiceFactory.New(softlayerFileService, strconv.Itoa(virtualGuest.Id))
 
 	if len(cloudProps.BoshIp) == 0 {
@@ -201,6 +231,22 @@ func (c SoftLayerCreator) CreateByOSReload(agentID string, stemcell bslcstem.Ste
 			davConf := DavConfig(c.agentOptions.Blobstore.Options)
 			c.updateDavConfig(&davConf, cloudProps.BoshIp)
 		}
+	}
+
+	ubuntu := Ubuntu{
+		SoftLayerClient: c.softLayerClient.GetHttpClient(),
+		SSHClient: &sshClientWrapper{
+			client:   c.sshClient,
+			ip:       virtualGuest.PrimaryBackendIpAddress,
+			user:     ROOT_USER_NAME,
+			password: vm.getRootPassword(virtualGuest),
+		},
+		SoftLayerFileService: softlayerFileService,
+	}
+
+	err = ubuntu.ConfigureNetwork(networks, virtualGuest.Id)
+	if err != nil {
+		return SoftLayerVM{}, bosherr.WrapErrorf(err, "Failed to configure networking for virtual guest with id: %d.", virtualGuest.Id)
 	}
 
 	agentEnv := CreateAgentUserData(agentID, cloudProps, networks, env, c.agentOptions)

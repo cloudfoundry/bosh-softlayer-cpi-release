@@ -1,6 +1,8 @@
 package action
 
 import (
+	"bosh-softlayer-cpi/util"
+
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	boshsys "github.com/cloudfoundry/bosh-utils/system"
@@ -29,6 +31,7 @@ func NewConcreteFactory(softLayerClient sl.Client, options ConcreteFactoryOption
 		options.Agent,
 		logger,
 		fs,
+		util.GetSshClient(),
 	)
 
 	vmFinder := bslcvm.NewSoftLayerFinder(
