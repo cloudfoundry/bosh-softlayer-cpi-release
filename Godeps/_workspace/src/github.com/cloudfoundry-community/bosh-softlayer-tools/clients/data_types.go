@@ -133,24 +133,33 @@ type CreateBaremetalsResponse struct {
 }
 
 type ServerSpec struct {
-	Package       string `yaml:"package"`
-	Server        string `yaml:"server"`
-	Ram           string `yaml:"ram"`
-	Disk0         string `yaml:"disk0"`
-	PortSpeed     string `yaml:"port_speed"`
-	PublicVlanId  string `yaml:"public_vlan_id"`
-	PrivateVlanId string `yaml:"private_vlan_id"`
-	Hourly        bool   `yaml:"hourly"`
+	Package          int  `yaml:"package" json:"package,omitempty"`
+	Server           int  `yaml:"server" json:"server,omitempty"`
+	Ram              int  `yaml:"ram" json:"ram,omitempty"`
+	Disk0            int  `yaml:"disk0" json:"disk0,omitempty"`
+	PortSpeed        int  `yaml:"port_speed" json:"port_speed,omitempty"`
+	PublicVlanId     int  `yaml:"public_vlan_id" json:"public_vlan_id,omitempty"`
+	PrivateVlanId    int  `yaml:"private_vlan_id" json:"private_vlan_id,omitempty"`
+	Hourly           bool `yaml:"hourly" json:"hourly,omitempty"`
+	Os               int  `yaml:"os,omitempty" json:"os,omitempty"`
+	DiskController   int  `yaml:"disk_controller" json:"disk_controller,omitempty"`
+	Bandwidth        int  `yaml:"bandwidth" json:"bandwidth,omitempty"`
+	RemoteManagement int  `yaml:"remote_management" json:"remote_management,omitempty"`
+	PriIpAddresses   int  `yaml:"pri_ip_addresses" json:"pri_ip_addresses,omitempty"`
+	Monitoring       int  `yaml:"monitoring" json:"monitoring,omitempty"`
+	Notification     int  `yaml:"notification" json:"notification,omitempty"`
+	Response         int  `yaml:"response" json:"response,omitempty"`
 }
 
 type CloudProperty struct {
-	BoshIP         string     `yaml:"bosh_ip"`
-	Datacenter     string     `yaml:"Datacenter"`
-	ServerSpec     ServerSpec `yaml:"server_spec"`
-	VmNamePrefix   string     `yaml:"VmNamePrefix"`
-	Baremetal      bool       `yaml:"baremetal"`
-	BmStemcell     string     `yaml:"bm_stemcell"`
-	BmNetbootImage string     `yaml:"bm_netboot_image"`
+	BoshIP         string     `yaml:"bosh_ip" json:"bosh_ip"`
+	Datacenter     string     `yaml:"datacenter" json:"datacenter"`
+	NamePrefix     string     `yaml:"name_prefix" json:"name_prefix"`
+	ServerSpec     ServerSpec `yaml:"server_spec" json:"server_spec"`
+	Baremetal      bool       `yaml:"baremetal" json:"baremetal"`
+	BmStemcell     string     `yaml:"bm_stemcell" json:"bm_stemcell"`
+	BmNetbootImage string     `yaml:"bm_netboot_image" json:"bm_netboot_image"`
+	Size           int        `yaml:"size" json:"size"`
 }
 
 type CreateBaremetalsParameters struct {

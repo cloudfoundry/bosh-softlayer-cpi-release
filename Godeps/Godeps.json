@@ -7,7 +7,7 @@
 	"Deps": [
 		{
 			"ImportPath": "github.com/cloudfoundry-community/bosh-softlayer-tools/clients",
-			"Rev": "44011022c1e74a16335ffdf39f9cc2d8794ab87c"
+			"Rev": "6fff1d5039e47231c75fe97e6739942f4f7ea103"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/bosh-utils/errors",
@@ -35,33 +35,33 @@
 		},
 		{
 			"ImportPath": "github.com/maximilien/softlayer-go/client",
-			"Comment": "v0.5.0-58-g206decf",
-			"Rev": "206decf6f7a9a43eff402407e8ad3a62784544b6"
+			"Comment": "v0.5.0-59-gebb84b6",
+			"Rev": "ebb84b6560170de43a5a7365aaf373e6a045a860"
 		},
 		{
 			"ImportPath": "github.com/maximilien/softlayer-go/common",
-			"Comment": "v0.5.0-58-g206decf",
-			"Rev": "206decf6f7a9a43eff402407e8ad3a62784544b6"
+			"Comment": "v0.5.0-59-gebb84b6",
+			"Rev": "ebb84b6560170de43a5a7365aaf373e6a045a860"
 		},
 		{
 			"ImportPath": "github.com/maximilien/softlayer-go/data_types",
-			"Comment": "v0.5.0-58-g206decf",
-			"Rev": "206decf6f7a9a43eff402407e8ad3a62784544b6"
+			"Comment": "v0.5.0-59-gebb84b6",
+			"Rev": "ebb84b6560170de43a5a7365aaf373e6a045a860"
 		},
 		{
 			"ImportPath": "github.com/maximilien/softlayer-go/services",
-			"Comment": "v0.5.0-58-g206decf",
-			"Rev": "206decf6f7a9a43eff402407e8ad3a62784544b6"
+			"Comment": "v0.5.0-59-gebb84b6",
+			"Rev": "ebb84b6560170de43a5a7365aaf373e6a045a860"
 		},
 		{
 			"ImportPath": "github.com/maximilien/softlayer-go/softlayer",
-			"Comment": "v0.5.0-58-g206decf",
-			"Rev": "206decf6f7a9a43eff402407e8ad3a62784544b6"
+			"Comment": "v0.5.0-59-gebb84b6",
+			"Rev": "ebb84b6560170de43a5a7365aaf373e6a045a860"
 		},
 		{
 			"ImportPath": "github.com/maximilien/softlayer-go/test_helpers",
-			"Comment": "v0.5.0-58-g206decf",
-			"Rev": "206decf6f7a9a43eff402407e8ad3a62784544b6"
+			"Comment": "v0.5.0-59-gebb84b6",
+			"Rev": "ebb84b6560170de43a5a7365aaf373e6a045a860"
 		},
 		{
 			"ImportPath": "github.com/nu7hatch/gouuid",

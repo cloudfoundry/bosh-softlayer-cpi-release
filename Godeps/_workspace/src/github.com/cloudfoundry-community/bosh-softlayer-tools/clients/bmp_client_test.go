@@ -333,22 +333,26 @@ var _ = Describe("BMP client", func() {
 			Expect(err).ToNot(HaveOccurred())
 
 			fakeServerSpec = clients.ServerSpec{
-				Package:       "fake-package",
-				Server:        "fake-server",
-				Ram:           "fake-ram",
-				Disk0:         "fake-disk0",
-				PortSpeed:     "fake-portSpeed",
-				PublicVlanId:  "fake-publicvlanid",
-				PrivateVlanId: "fake-privatevlanid",
+				Package:       123,
+				Server:        123,
+				Ram:           123,
+				Disk0:         12345,
+				PortSpeed:     12345,
+				PublicVlanId:  123456,
+				PrivateVlanId: 123456,
 				Hourly:        true,
 			}
 
 			fakeCloudProperty = []clients.CloudProperty{
 				clients.CloudProperty{
-					BoshIP:     "fake-boship",
-					Datacenter: "fake-datacenter",
-					Baremetal:  true,
-					ServerSpec: fakeServerSpec,
+					BoshIP:         "fake-boship",
+					Datacenter:     "fake-datacenter",
+					NamePrefix:     "fake-name-prefix",
+					Baremetal:      true,
+					ServerSpec:     fakeServerSpec,
+					BmStemcell:     "fake-stemcell",
+					BmNetbootImage: "fake-netbootImage",
+					Size:           1,
 				}}
 
 			fakeCreateBaremetalsInfo = clients.CreateBaremetalsInfo{
