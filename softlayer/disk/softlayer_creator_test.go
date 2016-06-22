@@ -34,6 +34,7 @@ var _ = Describe("SoftLayerCreator", func() {
 		Context("Creates disk successfully with cloud properties", func() {
 			BeforeEach(func() {
 				fileNames := []string{
+					"SoftLayer_Product_Order_Service_getItems.json",
 					"SoftLayer_Product_Order_Service_getItemPrices.json",
 					"SoftLayer_Product_Order_Service_getItemPricesBySizeAndIops.json",
 					"SoftLayer_Product_Order_Service_placeOrder.json",
@@ -58,6 +59,7 @@ var _ = Describe("SoftLayerCreator", func() {
 		Context("Creates disk successfully without cloud properties", func() {
 			BeforeEach(func() {
 				fileNames := []string{
+					"SoftLayer_Product_Order_Service_getItems.json",
 					"SoftLayer_Product_Order_Service_getItemPrices.json",
 					"SoftLayer_Product_Order_Service_getIopsItemPrices.json",
 					"SoftLayer_Product_Order_Service_placeOrder.json",

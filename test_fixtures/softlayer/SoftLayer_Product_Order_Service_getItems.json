@@ -1,0 +1,40 @@
+[
+	{
+		"capacity": "0",
+		"description": "Block Storage (Performance)",
+		"id": 5128,
+		"itemTaxCategoryId": 166,
+		"keyName": "BLOCK_STORAGE_PERFORMANCE_ISCSI",
+		"softwareDescriptionId": null,
+		"units": "N/A",
+		"upgradeItemId": null,
+		"itemCategory": {
+			"categoryCode": "performance_storage_iscsi",
+			"id": 380,
+			"name": "Performance Storage iSCSI",
+			"quantityLimit": 0
+		},
+		"prices": [
+			{
+				"currentPriceFlag": null,
+				"id": 40678,
+				"itemId": 5128,
+				"laborFee": "0",
+				"locationGroupId": null,
+				"onSaleFlag": null,
+				"oneTimeFee": "0",
+				"quantity": null,
+				"recurringFee": "0",
+				"setupFee": "0",
+				"sort": 10,
+				"packageReferences": [
+					{
+						"id": 361808,
+						"itemPriceId": 40678,
+						"packageId": 222
+					}
+				]
+			}
+		]
+	}
+]
