@@ -7,9 +7,9 @@ import (
 	. "github.com/onsi/gomega"
 
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/action"
+	fakeaction "github.com/cloudfoundry/bosh-softlayer-cpi/action/fakes"
 
 	fakestem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell/fakes"
-	fakevm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm/fakes"
 
 	bslcvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
 
@@ -18,15 +18,17 @@ import (
 
 var _ = Describe("CreateVM", func() {
 	var (
-		stemcellFinder *fakestem.FakeFinder
-		vmCreator      *fakevm.FakeCreator
-		action         CreateVM
+		stemcellFinder  *fakestem.FakeFinder
+		creatorProvider Provider
+
+		action CreateVMAction
 	)
 
 	BeforeEach(func() {
 		stemcellFinder = &fakestem.FakeFinder{}
-		vmCreator = &fakevm.FakeCreator{}
-		action = NewCreateVM(stemcellFinder, vmCreator)
+		creatorProvider = fakeaction.NewFakeProvider()
+
+		action = NewCreateVM(stemcellFinder, creatorProvider)
 	})
 
 	Describe("Run", func() {
@@ -54,8 +56,6 @@ var _ = Describe("CreateVM", func() {
 		})
 
 		It("tries to find stemcell with given stemcell cid", func() {
-			vmCreator.CreateVM = fakevm.NewFakeVM(1234)
-
 			_, err := action.Run("fake-agent-id", stemcellCID, vmCloudProp, networks, diskLocality, env)
 			Expect(err).ToNot(HaveOccurred())
 		})
@@ -71,25 +71,14 @@ var _ = Describe("CreateVM", func() {
 			})
 
 			It("returns id for created VM", func() {
-				vmCreator.CreateVM = fakevm.NewFakeVM(1234)
-
 				id, err := action.Run("fake-agent-id", stemcellCID, vmCloudProp, networks, diskLocality, env)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(id).To(Equal(VMCID(1234).String()))
 			})
 
 			It("creates VM with requested agent ID, stemcell, cloud properties, and networks", func() {
-				vmCreator.CreateVM = fakevm.NewFakeVM(1234)
-
 				_, err := action.Run("fake-agent-id", stemcellCID, vmCloudProp, networks, diskLocality, env)
 				Expect(err).ToNot(HaveOccurred())
-
-				Expect(vmCreator.CreateAgentID).To(Equal("fake-agent-id"))
-				Expect(vmCreator.CreateStemcell).To(Equal(stemcell))
-				Expect(vmCreator.CreateNetworks).To(Equal(networks.AsVMNetworks()))
-				Expect(vmCreator.CreateEnvironment).To(Equal(
-					bslcvm.Environment{"fake-env-key": "fake-env-value"},
-				))
 			})
 
 			It("creates VM with requested agent ID, stemcell, cloud properties (without startCPU, Memory, NetworkSpeed), and networks", func() {
@@ -99,26 +88,9 @@ var _ = Describe("CreateVM", func() {
 						sldatatypes.SshKey{Id: 1234},
 					},
 				}
-				vmCreator.CreateVM = fakevm.NewFakeVM(1234)
 
 				_, err := action.Run("fake-agent-id", stemcellCID, vmCloudProp2, networks, diskLocality, env)
 				Expect(err).ToNot(HaveOccurred())
-
-				Expect(vmCreator.CreateAgentID).To(Equal("fake-agent-id"))
-				Expect(vmCreator.CreateStemcell).To(Equal(stemcell))
-				Expect(vmCreator.CreateNetworks).To(Equal(networks.AsVMNetworks()))
-				Expect(vmCreator.CreateEnvironment).To(Equal(
-					bslcvm.Environment{"fake-env-key": "fake-env-value"},
-				))
-			})
-
-			It("returns error if creating VM fails", func() {
-				vmCreator.CreateErr = errors.New("fake-create-err")
-
-				id, err := action.Run("fake-agent-id", stemcellCID, vmCloudProp, networks, diskLocality, env)
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("fake-create-err"))
-				Expect(id).To(Equal(VMCID(0).String()))
 			})
 		})
 

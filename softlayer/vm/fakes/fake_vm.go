@@ -19,6 +19,8 @@ type FakeVM struct {
 	SetMetadataErr    error
 	VMMetadata        bslcvm.VMMetadata
 
+	SetVcapPasswordErr error
+
 	ConfigureNetworksCalled bool
 	ConfigureNetworksErr    error
 	Networks                bslcvm.Networks
@@ -31,13 +33,17 @@ type FakeVM struct {
 
 	ReloadOSStemcell bslcstemcell.Stemcell
 	ReloadOSErr      error
+
+	SetAgentEnvServiceErr error
+
+	UpdateAgentEnvErr error
 }
 
 func NewFakeVM(id int) *FakeVM {
 	return &FakeVM{id: id}
 }
 
-func (vm FakeVM) ID() int { return vm.id }
+func (vm *FakeVM) ID() int { return vm.id }
 
 func (vm *FakeVM) Delete(agentID string) error {
 	vm.DeleteCalled = true
@@ -74,4 +80,36 @@ func (vm *FakeVM) DetachDisk(disk bslcdisk.Disk) error {
 func (vm *FakeVM) ReloadOS(stemcell bslcstemcell.Stemcell) error {
 	vm.ReloadOSStemcell = stemcell
 	return vm.ReloadOSErr
+}
+
+func (vm *FakeVM) GetDataCenterId() int {
+	return 1234567
+}
+
+func (vm *FakeVM) GetPrimaryIP() string {
+	return "fake-primary-ip"
+}
+
+func (vm *FakeVM) GetPrimaryBackendIP() string {
+	return "fake-backend-ip"
+}
+
+func (vm *FakeVM) GetRootPassword() string {
+	return "root-password"
+}
+
+func (vm *FakeVM) GetFullyQualifiedDomainName() string {
+	return "fake-fullyQualifiedDomainName"
+}
+
+func (vm *FakeVM) SetVcapPassword(encryptedPwd string) error {
+	return vm.SetVcapPasswordErr
+}
+
+func (vm *FakeVM) SetAgentEnvService(agentEnvService bslcvm.AgentEnvService) error {
+	return vm.SetAgentEnvServiceErr
+}
+
+func (vm *FakeVM) UpdateAgentEnv(agentEnv bslcvm.AgentEnv) error {
+	return vm.UpdateAgentEnvErr
 }

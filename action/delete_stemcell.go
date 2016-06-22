@@ -12,16 +12,21 @@ const (
 	deleteStemcellLogTag = "DeleteStemcell"
 )
 
-type DeleteStemcell struct {
+type DeleteStemcellAction struct {
 	stemcellFinder bslcstem.Finder
 	logger         boshlog.Logger
 }
 
-func NewDeleteStemcell(stemcellFinder bslcstem.Finder, logger boshlog.Logger) DeleteStemcell {
-	return DeleteStemcell{stemcellFinder: stemcellFinder, logger: logger}
+func NewDeleteStemcell(
+	stemcellFinder bslcstem.Finder,
+	logger boshlog.Logger,
+) (action DeleteStemcellAction) {
+	action.stemcellFinder = stemcellFinder
+	action.logger = logger
+	return
 }
 
-func (a DeleteStemcell) Run(stemcellCID StemcellCID) (interface{}, error) {
+func (a DeleteStemcellAction) Run(stemcellCID StemcellCID) (interface{}, error) {
 	bslcommon.TIMEOUT = 30 * time.Second
 	bslcommon.POLLING_INTERVAL = 5 * time.Second
 
@@ -29,6 +34,5 @@ func (a DeleteStemcell) Run(stemcellCID StemcellCID) (interface{}, error) {
 	if err != nil {
 		a.logger.Info(deleteStemcellLogTag, "Stemcell '%s' not found: %s", stemcellCID, err)
 	}
-
 	return nil, nil
 }

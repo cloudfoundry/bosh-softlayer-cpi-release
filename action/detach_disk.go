@@ -7,19 +7,21 @@ import (
 	bslcvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
 )
 
-type DetachDisk struct {
+type DetachDiskAction struct {
 	vmFinder   bslcvm.Finder
 	diskFinder bslcdisk.Finder
 }
 
-func NewDetachDisk(vmFinder bslcvm.Finder, diskFinder bslcdisk.Finder) DetachDisk {
-	return DetachDisk{
-		vmFinder:   vmFinder,
-		diskFinder: diskFinder,
-	}
+func NewDetachDisk(
+	vmFinder bslcvm.Finder,
+	diskFinder bslcdisk.Finder,
+) (action DetachDiskAction) {
+	action.vmFinder = vmFinder
+	action.diskFinder = diskFinder
+	return
 }
 
-func (a DetachDisk) Run(vmCID VMCID, diskCID DiskCID) (interface{}, error) {
+func (a DetachDiskAction) Run(vmCID VMCID, diskCID DiskCID) (interface{}, error) {
 	vm, found, err := a.vmFinder.Find(vmCID.Int())
 	if err != nil {
 		return nil, bosherr.WrapErrorf(err, "Finding VM '%s'", vmCID)

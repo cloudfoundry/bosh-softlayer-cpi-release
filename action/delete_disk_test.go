@@ -14,7 +14,7 @@ import (
 var _ = Describe("DeleteDisk", func() {
 	var (
 		diskFinder *fakedisk.FakeFinder
-		action     DeleteDisk
+		action     DeleteDiskAction
 	)
 
 	BeforeEach(func() {

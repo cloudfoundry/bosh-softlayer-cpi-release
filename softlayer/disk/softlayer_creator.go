@@ -1,7 +1,6 @@
 package disk
 
 import (
-	"fmt"
 	"strconv"
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
@@ -23,25 +22,15 @@ func NewSoftLayerDiskCreator(client sl.Client, logger boshlog.Logger) SoftLayerC
 	}
 }
 
-func (c SoftLayerCreator) Create(size int, cloudProps DiskCloudProperties, virtualGuestId int) (Disk, error) {
+func (c SoftLayerCreator) Create(size int, cloudProps DiskCloudProperties, datacenter_id int) (Disk, error) {
 	c.logger.Debug(SOFTLAYER_DISK_CREATOR_LOG_TAG, "Creating disk of size '%d'", size)
-
-	vmService, err := c.softLayerClient.GetSoftLayer_Virtual_Guest_Service()
-	if err != nil {
-		return SoftLayerDisk{}, bosherr.WrapError(err, "Create SoftLayer Virtual Guest Service error.")
-	}
-
-	vm, err := vmService.GetObject(virtualGuestId)
-	if err != nil || vm.Id == 0 {
-		return SoftLayerDisk{}, bosherr.WrapError(err, fmt.Sprintf("Cannot retrieve vitual guest with id: %d.", virtualGuestId))
-	}
 
 	storageService, err := c.softLayerClient.GetSoftLayer_Network_Storage_Service()
 	if err != nil {
 		return SoftLayerDisk{}, bosherr.WrapError(err, "Create SoftLayer Network Storage Service error.")
 	}
 
-	disk, err := storageService.CreateIscsiVolume(c.getSoftLayerDiskSize(size), strconv.Itoa(vm.Datacenter.Id))
+	disk, err := storageService.CreateNetworkStorage(c.getSoftLayerDiskSize(size), strconv.Itoa(datacenter_id))
 	if err != nil {
 		return SoftLayerDisk{}, bosherr.WrapError(err, "Create SoftLayer iSCSI disk error.")
 	}

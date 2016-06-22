@@ -1,7 +1,6 @@
 package action
 
 import (
-	"strconv"
 	"time"
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
@@ -13,23 +12,29 @@ import (
 	sldatatypes "github.com/maximilien/softlayer-go/data_types"
 )
 
-type CreateVM struct {
+type CreateVMAction struct {
 	stemcellFinder    bslcstem.Finder
-	vmCreator         bslcvm.Creator
+	vmCreatorProvider Provider
+	vmCreator         bslcvm.VMCreator
 	vmCloudProperties *bslcvm.VMCloudProperties
 }
 
 type Environment map[string]interface{}
 
-func NewCreateVM(stemcellFinder bslcstem.Finder, vmCreator bslcvm.Creator) CreateVM {
-	return CreateVM{
-		stemcellFinder:    stemcellFinder,
-		vmCreator:         vmCreator,
-		vmCloudProperties: &bslcvm.VMCloudProperties{},
-	}
+func NewCreateVM(
+	stemcellFinder bslcstem.Finder,
+	vmCreatorProvider Provider,
+) (action CreateVMAction) {
+	action.stemcellFinder = stemcellFinder
+	action.vmCreatorProvider = vmCreatorProvider
+	action.vmCloudProperties = &bslcvm.VMCloudProperties{}
+	return
 }
 
-func (a CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps bslcvm.VMCloudProperties, networks Networks, diskIDs []DiskCID, env Environment) (string, error) {
+func (a CreateVMAction) Run(agentID string, stemcellCID StemcellCID, cloudProps bslcvm.VMCloudProperties, networks Networks, diskIDs []DiskCID, env Environment) (string, error) {
+	vmNetworks := networks.AsVMNetworks()
+	vmEnv := bslcvm.Environment(env)
+
 	a.UpdateCloudProperties(&cloudProps)
 
 	bslcommon.TIMEOUT = 30 * time.Second
@@ -40,34 +45,38 @@ func (a CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps bslcvm
 		return "0", bosherr.WrapErrorf(err, "Finding stemcell '%s'", stemcellCID)
 	}
 
-	vmNetworks := networks.AsVMNetworks()
-	vmEnv := bslcvm.Environment(env)
-
-	if len(vmNetworks.First().IP) == 0 {
-
-		vm, err := a.vmCreator.CreateBySoftlayer(agentID, stemcell, cloudProps, vmNetworks, vmEnv)
+	if cloudProps.Baremetal {
+		a.vmCreator, err = a.vmCreatorProvider.Get("baremetal")
 		if err != nil {
-			return "0", bosherr.WrapErrorf(err, "Creating VM with agent ID '%s'", agentID)
+			return "0", bosherr.WrapError(err, "Failed to get baremetal creator'")
+		}
+
+		vm, err := a.vmCreator.Create(agentID, stemcell, cloudProps, vmNetworks, vmEnv)
+		if err != nil {
+			return "0", bosherr.WrapErrorf(err, "Creating Baremetal with agent ID '%s'", agentID)
 		}
 		return VMCID(vm.ID()).String(), nil
-
 	} else {
-		vm, err := a.vmCreator.CreateByOSReload(agentID, stemcell, cloudProps, vmNetworks, vmEnv)
+		a.vmCreator, err = a.vmCreatorProvider.Get("virtualguest")
 		if err != nil {
-			return "0", bosherr.WrapErrorf(err, "OS Reloading VM with agent ID '%s'", agentID)
+			return "0", bosherr.WrapError(err, "Failed to get virtual_guest creator'")
+		}
+
+		vm, err := a.vmCreator.Create(agentID, stemcell, cloudProps, vmNetworks, vmEnv)
+		if err != nil {
+			return "0", bosherr.WrapErrorf(err, "Creating Virtual_Guest with agent ID '%s'", agentID)
 		}
 		return VMCID(vm.ID()).String(), nil
 	}
 }
 
-func (a CreateVM) UpdateCloudProperties(cloudProps *bslcvm.VMCloudProperties) {
-
+func (a CreateVMAction) UpdateCloudProperties(cloudProps *bslcvm.VMCloudProperties) {
 	a.vmCloudProperties = cloudProps
 
-	if len(cloudProps.BoshIp) == 0 {
+	if len(cloudProps.BoshIp) == 0 || cloudProps.Baremetal {
 		a.vmCloudProperties.VmNamePrefix = cloudProps.VmNamePrefix
 	} else {
-		a.vmCloudProperties.VmNamePrefix = cloudProps.VmNamePrefix + timeStampForTime(time.Now().UTC())
+		a.vmCloudProperties.VmNamePrefix = cloudProps.VmNamePrefix + bslcvm.TimeStampForTime(time.Now().UTC())
 	}
 
 	if cloudProps.StartCpus == 0 {
@@ -84,9 +93,4 @@ func (a CreateVM) UpdateCloudProperties(cloudProps *bslcvm.VMCloudProperties) {
 	if len(cloudProps.NetworkComponents) == 0 {
 		a.vmCloudProperties.NetworkComponents = []sldatatypes.NetworkComponents{{MaxSpeed: 1000}}
 	}
-}
-
-func timeStampForTime(now time.Time) string {
-	//utilize the constants list in the http://golang.org/src/time/format.go file to get the expect time formats
-	return now.Format("20060102-030405-") + strconv.Itoa(int(now.UnixNano()/1e6-now.Unix()*1e3))
 }

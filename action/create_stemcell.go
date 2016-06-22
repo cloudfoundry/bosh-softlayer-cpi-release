@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-type CreateStemcell struct {
+type CreateStemcellAction struct {
 	stemcellFinder bslcstem.Finder
 }
 
@@ -18,11 +18,14 @@ type CreateStemcellCloudProps struct {
 	DatacenterName string `json:"datacenter-name"`
 }
 
-func NewCreateStemcell(stemcellFinder bslcstem.Finder) CreateStemcell {
-	return CreateStemcell{stemcellFinder: stemcellFinder}
+func NewCreateStemcell(
+	stemcellFinder bslcstem.Finder,
+) (action CreateStemcellAction) {
+	action.stemcellFinder = stemcellFinder
+	return
 }
 
-func (a CreateStemcell) Run(imagePath string, stemcellCloudProps CreateStemcellCloudProps) (string, error) {
+func (a CreateStemcellAction) Run(imagePath string, stemcellCloudProps CreateStemcellCloudProps) (string, error) {
 	bslcommon.TIMEOUT = 30 * time.Second
 	bslcommon.POLLING_INTERVAL = 5 * time.Second
 

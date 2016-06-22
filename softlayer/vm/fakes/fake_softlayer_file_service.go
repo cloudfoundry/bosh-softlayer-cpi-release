@@ -20,7 +20,7 @@ func NewFakeSoftlayerFileService() *FakeSoftlayerFileService {
 	}
 }
 
-func (s *FakeSoftlayerFileService) Upload(destinationPath string, contents []byte) error {
+func (s *FakeSoftlayerFileService) Upload(user string, password string, target string, destinationPath string, contents []byte) error {
 	s.UploadInputs = append(s.UploadInputs, UploadInput{
 		DestinationPath: destinationPath,
 		Contents:        contents,
@@ -29,7 +29,7 @@ func (s *FakeSoftlayerFileService) Upload(destinationPath string, contents []byt
 	return s.UploadErr
 }
 
-func (s *FakeSoftlayerFileService) Download(sourcePath string) ([]byte, error) {
+func (s *FakeSoftlayerFileService) Download(user string, password string, target string, sourcePath string) ([]byte, error) {
 	s.DownloadSourcePath = sourcePath
 
 	return s.DownloadContents, s.DownloadErr

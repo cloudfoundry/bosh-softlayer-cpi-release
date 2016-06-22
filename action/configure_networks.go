@@ -6,17 +6,18 @@ import (
 	bslcvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
 )
 
-type ConfigureNetworks struct {
+type ConfigureNetworksAction struct {
 	vmFinder bslcvm.Finder
 }
 
-func NewConfigureNetworks(vmFinder bslcvm.Finder) ConfigureNetworks {
-	return ConfigureNetworks{
-		vmFinder: vmFinder,
-	}
+func NewConfigureNetworks(
+	vmFinder bslcvm.Finder,
+) (action ConfigureNetworksAction) {
+	action.vmFinder = vmFinder
+	return
 }
 
-func (a ConfigureNetworks) Run(vmCID VMCID, networks Networks) (interface{}, error) {
+func (a ConfigureNetworksAction) Run(vmCID VMCID, networks Networks) (interface{}, error) {
 	vm, found, err := a.vmFinder.Find(int(vmCID))
 	if err != nil {
 		return nil, bosherr.WrapErrorf(err, "Finding vm '%s'", vmCID)

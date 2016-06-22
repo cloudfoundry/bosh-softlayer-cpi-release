@@ -6,18 +6,21 @@ import (
 	bslcvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
 )
 
-type HasVM struct {
+type HasVMAction struct {
 	vmFinder bslcvm.Finder
 }
 
-func NewHasVM(vmFinder bslcvm.Finder) HasVM {
-	return HasVM{vmFinder: vmFinder}
+func NewHasVM(
+	vmFinder bslcvm.Finder,
+) (action HasVMAction) {
+	action.vmFinder = vmFinder
+	return
 }
 
-func (a HasVM) Run(vmCID VMCID) (bool, error) {
+func (a HasVMAction) Run(vmCID VMCID) (bool, error) {
 	_, found, err := a.vmFinder.Find(int(vmCID))
 	if err != nil {
-		return false, bosherr.WrapErrorf(err, "Finding VM '%s'", vmCID)
+		return false, bosherr.WrapErrorf(err, "Finding VM '%d'", vmCID)
 	}
 
 	return found, nil
