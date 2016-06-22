@@ -8,6 +8,7 @@ import (
 	"html/template"
 	"net"
 	"net/http"
+	"time"
 )
 
 type Route struct {
@@ -115,7 +116,20 @@ func (u *Ubuntu) ConfigureNetwork(networks Networks, virtualGuestId int) error {
 		return err
 	}
 
-	err = u.SoftLayerFileService.Upload("/etc/network/interfaces.bosh", config)
+	timeout := 5 * time.Minute
+	pollingInterval := 15 * time.Second
+
+	totalTime := time.Duration(0)
+	for totalTime < timeout {
+		err = u.SoftLayerFileService.Upload("/etc/network/interfaces.bosh", config)
+		if err == nil {
+			break
+		}
+
+		totalTime += pollingInterval
+		time.Sleep(pollingInterval)
+	}
+
 	if err != nil {
 		return err
 	}
@@ -170,7 +184,7 @@ func categorizeNetworks(networks Networks) (Networks, Networks, error) {
 		switch nw.Type {
 		case "dynamic":
 			dynamic[name] = nw
-		case "manual":
+		case "manual", "":
 			manual[name] = nw
 		default:
 			return nil, nil, fmt.Errorf("unexpected network type: %s", nw.Type)

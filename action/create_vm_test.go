@@ -48,7 +48,7 @@ var _ = Describe("CreateVM", func() {
 					sldatatypes.SshKey{Id: 1234},
 				},
 			}
-			networks = Networks{"fake-net-name": Network{IP: "fake-ip"}}
+			networks = Networks{"fake-net-name": Network{Type: "dynamic", IP: "fake-ip"}}
 			diskLocality = []DiskCID{1234}
 			env = Environment{"fake-env-key": "fake-env-value"}
 		})

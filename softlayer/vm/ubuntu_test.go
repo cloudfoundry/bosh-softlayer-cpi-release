@@ -212,7 +212,7 @@ var _ = Describe("UbuntuNetwork", func() {
 							Default: []string{"gateway"},
 						},
 						"private-manual": vm.Network{
-							Type:    "manual",
+							Type:    "",
 							IP:      "10.155.198.2",
 							Netmask: "255.255.255.192",
 							Gateway: "10.155.198.1",
@@ -230,7 +230,7 @@ var _ = Describe("UbuntuNetwork", func() {
 							Gateway: "169.45.188.209",
 						},
 						"public-another-manual": vm.Network{
-							Type:    "manual",
+							Type:    "",
 							IP:      "169.45.188.211",
 							Netmask: "255.255.255.240",
 							Gateway: "169.45.188.209",
@@ -361,7 +361,7 @@ var _ = Describe("UbuntuNetwork", func() {
 							Type: "dynamic",
 						},
 						"private-manual": vm.Network{
-							Type:    "manual",
+							Type:    "",
 							IP:      "10.155.198.2",
 							Netmask: "255.255.255.192",
 							Gateway: "10.155.198.1",

@@ -1,7 +1,7 @@
 package action
 
 import (
-	"bosh-softlayer-cpi/util"
+	"github.com/cloudfoundry/bosh-softlayer-cpi/util"
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"

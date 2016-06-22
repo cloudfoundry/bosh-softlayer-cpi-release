@@ -44,7 +44,7 @@ func (a CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps bslcvm
 	vmEnv := bslcvm.Environment(env)
 
 	for _, nw := range vmNetworks {
-		if nw.Type == "manual" {
+		if nw.Type != "dynamic" {
 			continue
 		}
 		if nw.IP == "" {

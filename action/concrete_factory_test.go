@@ -1,7 +1,7 @@
 package action_test
 
 import (
-	"bosh-softlayer-cpi/util"
+	"github.com/cloudfoundry/bosh-softlayer-cpi/util"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
