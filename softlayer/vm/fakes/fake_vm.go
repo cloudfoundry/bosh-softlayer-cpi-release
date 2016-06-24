@@ -67,6 +67,12 @@ func (vm *FakeVM) ConfigureNetworks(networks bslcvm.Networks) error {
 	return vm.ConfigureNetworksErr
 }
 
+func (vm *FakeVM) ConfigureNetworks2(networks bslcvm.Networks) error {
+	vm.ConfigureNetworksCalled = true
+	vm.Networks = networks
+	return vm.ConfigureNetworksErr
+}
+
 func (vm *FakeVM) AttachDisk(disk bslcdisk.Disk) error {
 	vm.AttachDiskDisk = disk
 	return vm.AttachDiskErr
