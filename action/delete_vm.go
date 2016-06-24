@@ -18,12 +18,7 @@ func NewDeleteVM(
 }
 
 func (a DeleteVMAction) Run(vmCID VMCID) (interface{}, error) {
-	vm, found, err := a.vmFinder.Find(int(vmCID))
-
-	if err != nil {
-		return nil, bosherr.WrapErrorf(err, "Finding vm '%s'", vmCID)
-	}
-
+	vm, found, _ := a.vmFinder.Find(int(vmCID))
 	if found {
 		err := vm.Delete("")
 		if err != nil {

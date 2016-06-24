@@ -144,15 +144,15 @@ func (bc *bmpClient) Stemcells() (StemcellsResponse, error) {
 }
 
 func (bc *bmpClient) SlPackageOptions(packageId string) (SlPackageOptionsResponse, error) {
-	path := fmt.Sprintf("sl/packages/%s/options", packageId)
+	path := fmt.Sprintf("sl/package/%s/options", packageId)
 	responseBytes, errorCode, err := bc.httpClient.DoRawHttpRequest(path, "GET", &bytes.Buffer{})
 	if err != nil {
-		errorMessage := fmt.Sprintf("bmp: could not calls /sl/packages/%s/options on BMP server, error message %s", packageId, err.Error())
+		errorMessage := fmt.Sprintf("bmp: could not calls /sl/package/%s/options on BMP server, error message %s", packageId, err.Error())
 		return SlPackageOptionsResponse{}, errors.New(errorMessage)
 	}
 
 	if slcommon.IsHttpErrorCode(errorCode) {
-		errorMessage := fmt.Sprintf("bmp: could not call /sl/packages/%s/options on BMP server, HTTP error code: %d", packageId, errorCode)
+		errorMessage := fmt.Sprintf("bmp: could not call /sl/package/%s/options on BMP server, HTTP error code: %d", packageId, errorCode)
 		return SlPackageOptionsResponse{}, errors.New(errorMessage)
 	}
 
@@ -282,11 +282,7 @@ func (bc *bmpClient) Login(username string, password string) (LoginResponse, err
 }
 
 func (bc *bmpClient) CreateBaremetals(createBaremetalsInfo CreateBaremetalsInfo, dryRun bool) (CreateBaremetalsResponse, error) {
-	createBaremetalsParameters := CreateBaremetalsParameters{
-		Parameters: createBaremetalsInfo,
-	}
-
-	requestBody, err := json.Marshal(createBaremetalsParameters)
+	requestBody, err := json.Marshal(createBaremetalsInfo)
 	if err != nil {
 		errorMessage := fmt.Sprintf("bmp: failed to encode Json File, error message '%s'", err.Error())
 		return CreateBaremetalsResponse{}, errors.New(errorMessage)

@@ -3,7 +3,8 @@
   "arguments": [
     1024,
     {
-      "consistent_performance_iscsi": true
+      "useHourlyPricing": true,
+      "iops": 1000
     },
     "{{.ID}}"
   ],
