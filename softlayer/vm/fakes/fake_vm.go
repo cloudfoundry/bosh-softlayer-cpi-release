@@ -82,6 +82,10 @@ func (vm *FakeVM) ReloadOS(stemcell bslcstemcell.Stemcell) error {
 	return vm.ReloadOSErr
 }
 
+func (vm *FakeVM) ReloadOSForBaremetal(string, string) error {
+	return vm.ReloadOSErr
+}
+
 func (vm *FakeVM) GetDataCenterId() int {
 	return 1234567
 }
