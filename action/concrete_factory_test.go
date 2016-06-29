@@ -9,7 +9,7 @@ import (
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 )
 
-var _ = Describe("concreteFactory", func() {
+var _ = Describe("ConcreteFactory", func() {
 	var (
 		logger boshlog.Logger
 
