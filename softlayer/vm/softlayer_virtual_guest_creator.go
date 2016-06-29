@@ -120,7 +120,7 @@ func (c *softLayerVirtualGuestCreator) createBySoftlayer(agentID string, stemcel
 
 	agentEnv := CreateAgentUserData(agentID, cloudProps, networks, env, c.agentOptions)
 	if err != nil {
-		return nil, bosherr.WrapErrorf(err, "Cannot agent env for VirtualGuest with id: %d.", vm.ID())
+		return nil, bosherr.WrapErrorf(err, "Cannot create agent env for VirtualGuest with id: %d.", vm.ID())
 	}
 
 	err = vm.UpdateAgentEnv(agentEnv)
@@ -161,7 +161,7 @@ func (c *softLayerVirtualGuestCreator) createByOSReload(agentID string, stemcell
 
 	vm, found, err := c.vmFinder.Find(virtualGuest.Id)
 	if err != nil || !found {
-		return nil, bosherr.WrapErrorf(err, "Cannot find VirtualGuest with id: %d", virtualGuest.Id)
+		return nil, bosherr.WrapErrorf(err, "Cannot find virtualGuest with id: %d", virtualGuest.Id)
 	}
 
 	bslcommon.TIMEOUT = 4 * time.Hour
@@ -213,7 +213,7 @@ func (c *softLayerVirtualGuestCreator) createByOSReload(agentID string, stemcell
 
 	agentEnv := CreateAgentUserData(agentID, cloudProps, networks, env, c.agentOptions)
 	if err != nil {
-		return nil, bosherr.WrapErrorf(err, "Cannot agent env for virtual guest with id: %d", vm.ID())
+		return nil, bosherr.WrapErrorf(err, "Cannot create agent env for virtual guest with id: %d", vm.ID())
 	}
 
 	err = vm.UpdateAgentEnv(agentEnv)

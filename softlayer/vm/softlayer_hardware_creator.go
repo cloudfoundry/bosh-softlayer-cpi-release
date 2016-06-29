@@ -83,7 +83,7 @@ func (c *baremetalCreator) createByBaremetal(agentID string, stemcell bslcstem.S
 
 	agentEnv := CreateAgentUserData(agentID, cloudProps, networks, env, c.agentOptions)
 	if err != nil {
-		return nil, bosherr.WrapErrorf(err, "Cannot agent env for virtual guest with id: %d.", hardwareId)
+		return nil, bosherr.WrapErrorf(err, "Cannot create agent env for baremetal with id: %d.", hardwareId)
 	}
 
 	err = hardware.UpdateAgentEnv(agentEnv)
@@ -113,14 +113,14 @@ func (c *baremetalCreator) createByOSReload(agentID string, stemcell bslcstem.St
 
 	hardware, err := hardwareService.FindByIpAddress(networks.First().IP)
 	if err != nil || hardware.Id == 0 {
-		return nil, bosherr.WrapErrorf(err, "Could not find Hardware by ip address: %s", networks.First().IP)
+		return nil, bosherr.WrapErrorf(err, "Could not find hardware by ip address: %s", networks.First().IP)
 	}
 
 	c.logger.Info(SOFTLAYER_VM_CREATOR_LOG_TAG, fmt.Sprintf("OS reload on Hardware %d using stemcell %d", hardware.Id, stemcell.ID()))
 
 	vm, found, err := c.vmFinder.Find(hardware.Id)
 	if err != nil || !found {
-		return nil, bosherr.WrapErrorf(err, "Cannot find Hardware with id: %d", hardware.Id)
+		return nil, bosherr.WrapErrorf(err, "Cannot find hardware with id: %d", hardware.Id)
 	}
 
 	err = vm.ReloadOSForBaremetal(cloudProps.BaremetalStemcell, cloudProps.BaremetalNetbootImage)
@@ -148,7 +148,7 @@ func (c *baremetalCreator) createByOSReload(agentID string, stemcell bslcstem.St
 
 	agentEnv := CreateAgentUserData(agentID, cloudProps, networks, env, c.agentOptions)
 	if err != nil {
-		return nil, bosherr.WrapErrorf(err, "Cannot agent env for virtual guest with id: %d.", vm.ID())
+		return nil, bosherr.WrapErrorf(err, "Cannot create agent env for baremetal with id: %d.", vm.ID())
 	}
 
 	err = vm.UpdateAgentEnv(agentEnv)
