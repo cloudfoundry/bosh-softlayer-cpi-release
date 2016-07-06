@@ -4,7 +4,6 @@ import (
 	bslcdisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk"
 	bslcstemcell "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
 	bslcvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
-	"github.com/maximilien/softlayer-go/data_types"
 )
 
 type FakeVM struct {
@@ -35,7 +34,7 @@ type FakeVM struct {
 	ReloadOSStemcell bslcstemcell.Stemcell
 	ReloadOSErr      error
 
-	ReloadBaremetalStemcell string
+	ReloadBaremetalStemcell     string
 	ReloadBaremetalNetBootImage string
 
 	SetAgentEnvServiceErr error
