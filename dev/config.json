@@ -4,7 +4,7 @@
     "properties": {
       "softlayer": {
         "username": "fake-username",
-        "apiKey": "fake-apikey"
+        "apiKey": "fake-api-key"
       },
       "agent": {
         "ntp": [],

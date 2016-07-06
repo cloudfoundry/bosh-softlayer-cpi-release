@@ -51,6 +51,7 @@ var _ = Describe("HasVM", func() {
 
 				found, err := action.Run(1234)
 				Expect(err).ToNot(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("fake-find-err"))
 				Expect(found).To(BeFalse())
 			})
 		})
