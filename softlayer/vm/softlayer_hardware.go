@@ -670,10 +670,9 @@ func (vm *softLayerHardware) provisionBaremetal(server_id string, stemcell strin
 	}
 
 	task_id := createBaremetalResponse.Data.TaskId
-	bslcommon.TIMEOUT = 120 * time.Minute
+	bslcommon.TIMEOUT = 10 * time.Minute
 	totalTime := time.Duration(0)
 	for totalTime < bslcommon.TIMEOUT {
-
 		taskOutput, err := vm.baremetalClient.TaskJsonOutput(task_id, "task")
 		if err != nil {
 			return 0, bosherr.WrapErrorf(err, "Failed to get state with task_id: %d", task_id)

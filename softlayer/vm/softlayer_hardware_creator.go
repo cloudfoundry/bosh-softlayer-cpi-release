@@ -46,7 +46,7 @@ func (c *baremetalCreator) Create(agentID string, stemcell bslcstem.Stemcell, cl
 				return c.createByOSReload(agentID, stemcell, cloudProps, networks, env)
 			}
 		case "manual":
-			return nil, bosherr.Error("Support manual netowrk soon...")
+			return nil, bosherr.Error("Manual networking is not currently supported")
 		case "vip":
 			return nil, bosherr.Error("SoftLayer Not Support VIP netowrk")
 		default:
@@ -68,13 +68,12 @@ func (c *baremetalCreator) createByBaremetal(agentID string, stemcell bslcstem.S
 		return nil, bosherr.WrapErrorf(err, "Cannot find hardware with id: %d.", hardwareId)
 	}
 
-	// Update mbus url setting
 	mbus, err := ParseMbusURL(c.agentOptions.Mbus, cloudProps.BoshIp)
 	if err != nil {
 		return nil, bosherr.WrapErrorf(err, "Cannot construct mbus url.")
 	}
 	c.agentOptions.Mbus = mbus
-	// Update blobstore setting
+
 	switch c.agentOptions.Blobstore.Provider {
 	case BlobstoreTypeDav:
 		davConf := DavConfig(c.agentOptions.Blobstore.Options)
@@ -82,9 +81,6 @@ func (c *baremetalCreator) createByBaremetal(agentID string, stemcell bslcstem.S
 	}
 
 	agentEnv := CreateAgentUserData(agentID, cloudProps, networks, env, c.agentOptions)
-	if err != nil {
-		return nil, bosherr.WrapErrorf(err, "Cannot create agent env for baremetal with id: %d.", hardwareId)
-	}
 
 	err = hardware.UpdateAgentEnv(agentEnv)
 	if err != nil {
