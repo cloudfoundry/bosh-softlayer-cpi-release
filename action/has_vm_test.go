@@ -45,7 +45,7 @@ var _ = Describe("HasVM", func() {
 		})
 
 		Context("when VM finding fails", func() {
-			It("returns error", func() {
+			It("returns false without error", func() {
 				vmFinder.FindFound = false
 				vmFinder.FindErr = errors.New("fake-find-err")
 
