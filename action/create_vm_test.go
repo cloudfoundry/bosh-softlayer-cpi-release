@@ -91,6 +91,11 @@ var _ = Describe("CreateVM", func() {
 
 				_, err := action.Run("fake-agent-id", stemcellCID, vmCloudProp2, networks, diskLocality, env)
 				Expect(err).ToNot(HaveOccurred())
+
+				action.UpdateCloudProperties(&vmCloudProp2)
+				t := new(bool)
+				*t = true
+				Expect(vmCloudProp2.LocalDiskFlag).To(Equal(t))
 			})
 		})
 

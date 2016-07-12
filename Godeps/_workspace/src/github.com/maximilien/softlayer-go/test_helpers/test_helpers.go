@@ -373,6 +373,8 @@ func CreateVirtualGuestAndMarkItTest(securitySshKeys []datatypes.SoftLayer_Secur
 	for i, securitySshKey := range securitySshKeys {
 		sshKeys[i] = datatypes.SshKey{Id: securitySshKey.Id}
 	}
+	t := new(bool)
+	*t = true
 
 	virtualGuestTemplate := datatypes.SoftLayer_Virtual_Guest_Template{
 		Hostname:  "test",
@@ -384,7 +386,7 @@ func CreateVirtualGuestAndMarkItTest(securitySshKeys []datatypes.SoftLayer_Secur
 		},
 		SshKeys:                      sshKeys,
 		HourlyBillingFlag:            true,
-		LocalDiskFlag:                true,
+		LocalDiskFlag:                t,
 		OperatingSystemReferenceCode: "UBUNTU_LATEST",
 	}
 

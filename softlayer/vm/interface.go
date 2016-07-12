@@ -19,7 +19,7 @@ type VMCloudProperties struct {
 	EphemeralDiskSize        int                                  `json:"ephemeralDiskSize,omitempty"`
 
 	HourlyBillingFlag              bool                                       `json:"hourlyBillingFlag,omitempty"`
-	LocalDiskFlag                  bool                                       `json:"localDiskFlag,omitempty"`
+	LocalDiskFlag                  *bool                                      `json:"localDiskFlag,omitempty"`
 	DedicatedAccountHostOnlyFlag   bool                                       `json:"dedicatedAccountHostOnlyFlag,omitempty"`
 	NetworkComponents              []sldatatypes.NetworkComponents            `json:"networkComponents,omitempty"`
 	PrivateNetworkOnlyFlag         bool                                       `json:"privateNetworkOnlyFlag,omitempty"`

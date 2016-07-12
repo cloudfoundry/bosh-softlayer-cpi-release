@@ -12,6 +12,7 @@ import (
 
 	"log"
 
+	"fmt"
 	testhelperscpi "github.com/cloudfoundry/bosh-softlayer-cpi/test_helpers"
 	slclient "github.com/maximilien/softlayer-go/client"
 	softlayer "github.com/maximilien/softlayer-go/softlayer"
@@ -39,9 +40,11 @@ var _ = Describe("BOSH Director Level Integration for create_vm", func() {
 
 	BeforeEach(func() {
 		username = os.Getenv("SL_USERNAME")
+		fmt.Println(username)
 		Expect(username).ToNot(Equal(""), "username cannot be empty, set SL_USERNAME")
 
 		apiKey = os.Getenv("SL_API_KEY")
+		fmt.Println(apiKey)
 		Expect(apiKey).ToNot(Equal(""), "apiKey cannot be empty, set SL_API_KEY")
 
 		client = slclient.NewSoftLayerClient(username, apiKey)
