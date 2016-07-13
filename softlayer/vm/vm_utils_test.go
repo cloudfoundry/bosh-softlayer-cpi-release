@@ -24,6 +24,8 @@ var _ = Describe("VM Utils", func() {
 		softLayerClient *fakeslclient.FakeSoftLayerClient
 		logger          boshlog.Logger
 	)
+	t := new(bool)
+	*t = true
 
 	BeforeEach(func() {
 		softLayerClient = fakeslclient.NewFakeSoftLayerClient("fake-username", "fake-api-key")
@@ -145,7 +147,7 @@ var _ = Describe("VM Utils", func() {
 				EphemeralDiskSize:            25,
 				Datacenter:                   sldatatypes.Datacenter{Name: "fake-datacenter"},
 				HourlyBillingFlag:            true,
-				LocalDiskFlag:                true,
+				LocalDiskFlag:                t,
 				VmNamePrefix:                 "bosh-",
 				PostInstallScriptUri:         "",
 				DedicatedAccountHostOnlyFlag: true,
@@ -176,7 +178,7 @@ var _ = Describe("VM Utils", func() {
 				},
 
 				HourlyBillingFlag:            true,
-				LocalDiskFlag:                true,
+				LocalDiskFlag:                t,
 				OperatingSystemReferenceCode: "",
 
 				BlockDeviceTemplateGroup: &sldatatypes.BlockDeviceTemplateGroup{

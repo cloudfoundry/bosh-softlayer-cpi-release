@@ -62,6 +62,8 @@ var _ = Describe("SoftLayer_Hardware_Creator", func() {
 			networks   Networks
 			env        Environment
 		)
+		t := new(bool)
+		*t = true
 
 		Context("valid arguments", func() {
 			BeforeEach(func() {
@@ -106,7 +108,7 @@ var _ = Describe("SoftLayer_Hardware_Creator", func() {
 							BoshIp:                       "10.0.0.1",
 							Datacenter:                   sldatatypes.Datacenter{Name: "fake-datacenter"},
 							HourlyBillingFlag:            true,
-							LocalDiskFlag:                true,
+							LocalDiskFlag:                t,
 							VmNamePrefix:                 "bosh-test",
 							PostInstallScriptUri:         "",
 							DedicatedAccountHostOnlyFlag: true,
@@ -180,7 +182,7 @@ var _ = Describe("SoftLayer_Hardware_Creator", func() {
 							EphemeralDiskSize:            25,
 							Datacenter:                   sldatatypes.Datacenter{Name: "fake-datacenter"},
 							HourlyBillingFlag:            true,
-							LocalDiskFlag:                true,
+							LocalDiskFlag:                t,
 							VmNamePrefix:                 "bosh-",
 							PostInstallScriptUri:         "",
 							DedicatedAccountHostOnlyFlag: true,

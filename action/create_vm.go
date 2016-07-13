@@ -93,4 +93,8 @@ func (a CreateVMAction) UpdateCloudProperties(cloudProps *bslcvm.VMCloudProperti
 	if len(cloudProps.NetworkComponents) == 0 {
 		a.vmCloudProperties.NetworkComponents = []sldatatypes.NetworkComponents{{MaxSpeed: 1000}}
 	}
+	if cloudProps.LocalDiskFlag == nil {
+		a.vmCloudProperties.LocalDiskFlag = new(bool)
+		*a.vmCloudProperties.LocalDiskFlag = true
+	}
 }
