@@ -49,7 +49,7 @@ func (c *softLayerVirtualGuestCreator) Create(agentID string, stemcell bslcstem.
 				return c.createByOSReload(agentID, stemcell, cloudProps, networks, env)
 			}
 		case "manual":
-			return nil, bosherr.Error("Support manual netowrk soon...")
+			return nil, bosherr.Error("Manual networking is not currently supported")
 		case "vip":
 			return nil, bosherr.Error("SoftLayer Not Support VIP netowrk")
 		default:
@@ -95,22 +95,19 @@ func (c *softLayerVirtualGuestCreator) createBySoftlayer(agentID string, stemcel
 	}
 
 	if len(cloudProps.BoshIp) == 0 {
-		// update /etc/hosts file of bosh-init vm
 		UpdateEtcHostsOfBoshInit(fmt.Sprintf("%s  %s", vm.GetPrimaryBackendIP(), vm.GetFullyQualifiedDomainName()))
-		// Update mbus url setting for bosh director: construct mbus url with new director ip
 		mbus, err := ParseMbusURL(c.agentOptions.Mbus, vm.GetPrimaryBackendIP())
 		if err != nil {
 			return nil, bosherr.WrapErrorf(err, "Cannot construct mbus url.")
 		}
 		c.agentOptions.Mbus = mbus
 	} else {
-		// Update mbus url setting
 		mbus, err := ParseMbusURL(c.agentOptions.Mbus, cloudProps.BoshIp)
 		if err != nil {
 			return nil, bosherr.WrapErrorf(err, "Cannot construct mbus url.")
 		}
 		c.agentOptions.Mbus = mbus
-		// Update blobstore setting
+
 		switch c.agentOptions.Blobstore.Provider {
 		case BlobstoreTypeDav:
 			davConf := DavConfig(c.agentOptions.Blobstore.Options)
@@ -119,9 +116,6 @@ func (c *softLayerVirtualGuestCreator) createBySoftlayer(agentID string, stemcel
 	}
 
 	agentEnv := CreateAgentUserData(agentID, cloudProps, networks, env, c.agentOptions)
-	if err != nil {
-		return nil, bosherr.WrapErrorf(err, "Cannot agent env for VirtualGuest with id: %d.", vm.ID())
-	}
 
 	err = vm.UpdateAgentEnv(agentEnv)
 	if err != nil {
@@ -161,7 +155,7 @@ func (c *softLayerVirtualGuestCreator) createByOSReload(agentID string, stemcell
 
 	vm, found, err := c.vmFinder.Find(virtualGuest.Id)
 	if err != nil || !found {
-		return nil, bosherr.WrapErrorf(err, "Cannot find VirtualGuest with id: %d", virtualGuest.Id)
+		return nil, bosherr.WrapErrorf(err, "Cannot find virtualGuest with id: %d", virtualGuest.Id)
 	}
 
 	bslcommon.TIMEOUT = 4 * time.Hour
@@ -183,22 +177,19 @@ func (c *softLayerVirtualGuestCreator) createByOSReload(agentID string, stemcell
 	}
 
 	if len(cloudProps.BoshIp) == 0 {
-		// update /etc/hosts file of bosh-init vm
 		UpdateEtcHostsOfBoshInit(fmt.Sprintf("%s  %s", vm.GetPrimaryBackendIP(), vm.GetFullyQualifiedDomainName()))
-		// Update mbus url setting for bosh director: construct mbus url with new director ip
 		mbus, err := ParseMbusURL(c.agentOptions.Mbus, vm.GetPrimaryBackendIP())
 		if err != nil {
 			return nil, bosherr.WrapErrorf(err, "Cannot construct mbus url.")
 		}
 		c.agentOptions.Mbus = mbus
 	} else {
-		// Update mbus url setting
 		mbus, err := ParseMbusURL(c.agentOptions.Mbus, cloudProps.BoshIp)
 		if err != nil {
 			return nil, bosherr.WrapErrorf(err, "Cannot construct mbus url.")
 		}
 		c.agentOptions.Mbus = mbus
-		// Update blobstore setting
+
 		switch c.agentOptions.Blobstore.Provider {
 		case BlobstoreTypeDav:
 			davConf := DavConfig(c.agentOptions.Blobstore.Options)
@@ -213,7 +204,7 @@ func (c *softLayerVirtualGuestCreator) createByOSReload(agentID string, stemcell
 
 	agentEnv := CreateAgentUserData(agentID, cloudProps, networks, env, c.agentOptions)
 	if err != nil {
-		return nil, bosherr.WrapErrorf(err, "Cannot agent env for virtual guest with id: %d", vm.ID())
+		return nil, bosherr.WrapErrorf(err, "Cannot create agent env for virtual guest with id: %d", vm.ID())
 	}
 
 	err = vm.UpdateAgentEnv(agentEnv)

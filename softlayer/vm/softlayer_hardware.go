@@ -119,6 +119,24 @@ func (vm *softLayerHardware) ReloadOS(stemcell bslcstem.Stemcell) error {
 	return NotSupportedError{}
 }
 
+func (vm *softLayerHardware) ReloadOSForBaremetal(stemcell string, netbootImage string) error {
+	updateStateResponse, err := vm.baremetalClient.UpdateState(strconv.Itoa(vm.ID()), "bm.state.new")
+	if err != nil || updateStateResponse.Status != 200 {
+		return bosherr.WrapError(err, "Failed to call bms to update state of baremetal")
+	}
+
+	hardwareId, err := vm.provisionBaremetal(strconv.Itoa(vm.ID()), stemcell, netbootImage)
+	if err != nil {
+		return bosherr.WrapError(err, "Provision baremetal error")
+	}
+
+	if hardwareId == vm.ID() {
+		return nil
+	}
+
+	return bosherr.Errorf("Failed to do os_reload against baremetal with id: %d", vm.ID())
+}
+
 func (vm *softLayerHardware) SetMetadata(vmMetadata VMMetadata) error {
 	vm.logger.Debug(SOFTLAYER_HARDWARE_LOG_TAG, "set_vm_metadata not support for baremetal")
 	return nil
@@ -638,4 +656,45 @@ func (vm *softLayerHardware) searchMounts() ([]Mount, error) {
 	}
 
 	return mounts, nil
+}
+
+func (vm *softLayerHardware) provisionBaremetal(server_id string, stemcell string, netboot_image string) (int, error) {
+	provisioningBaremetalInfo := bmscl.ProvisioningBaremetalInfo{
+		VmNamePrefix:     server_id,
+		Bm_stemcell:      stemcell,
+		Bm_netboot_image: netboot_image,
+	}
+	createBaremetalResponse, err := vm.baremetalClient.ProvisioningBaremetal(provisioningBaremetalInfo)
+	if err != nil || createBaremetalResponse.Status != 200 || createBaremetalResponse.Data.TaskId == 0 {
+		return 0, bosherr.WrapErrorf(err, "Failed to provisioning baremetal")
+	}
+
+	task_id := createBaremetalResponse.Data.TaskId
+	bslcommon.TIMEOUT = 10 * time.Minute
+	totalTime := time.Duration(0)
+	for totalTime < bslcommon.TIMEOUT {
+		taskOutput, err := vm.baremetalClient.TaskJsonOutput(task_id, "task")
+		if err != nil {
+			return 0, bosherr.WrapErrorf(err, "Failed to get state with task_id: %d", task_id)
+		}
+
+		info := taskOutput.Data["info"].(map[string]interface{})
+		switch info["status"].(string) {
+		case "failed":
+			return 0, bosherr.Errorf("Failed to install the stemcell: %v", taskOutput)
+
+		case "completed":
+			serverOutput, err := vm.baremetalClient.TaskJsonOutput(task_id, "server")
+			if err != nil {
+				return 0, bosherr.WrapErrorf(err, "Failed to get server_id with task_id: %d", task_id)
+			}
+			info = serverOutput.Data["info"].(map[string]interface{})
+			return int(info["id"].(float64)), nil
+		default:
+			totalTime += bslcommon.POLLING_INTERVAL
+			time.Sleep(bslcommon.POLLING_INTERVAL)
+		}
+	}
+
+	return 0, bosherr.Error("Provisioning baremetal timeout")
 }
