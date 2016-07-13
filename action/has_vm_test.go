@@ -45,13 +45,12 @@ var _ = Describe("HasVM", func() {
 		})
 
 		Context("when VM finding fails", func() {
-			It("returns error", func() {
+			It("returns false without error", func() {
 				vmFinder.FindFound = false
 				vmFinder.FindErr = errors.New("fake-find-err")
 
 				found, err := action.Run(1234)
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("fake-find-err"))
+				Expect(err).ToNot(HaveOccurred())
 				Expect(found).To(BeFalse())
 			})
 		})

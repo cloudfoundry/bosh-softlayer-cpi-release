@@ -2,6 +2,7 @@ package vm
 
 import (
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
+	"strconv"
 )
 
 type SoftLayerAgentEnvServiceFactory struct {
@@ -26,5 +27,8 @@ func (f SoftLayerAgentEnvServiceFactory) New(
 	vm VM,
 	softlayerFileService SoftlayerFileService,
 ) AgentEnvService {
+	if f.agentEnvService == "registry" {
+		return NewRegistryAgentEnvService(f.registryOptions, strconv.Itoa(vm.ID()), f.logger)
+	}
 	return NewFSAgentEnvService(vm, softlayerFileService, f.logger)
 }

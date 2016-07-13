@@ -64,8 +64,7 @@ var _ = Describe("DeleteVM", func() {
 				vmFinder.FindErr = errors.New("fake-find-err")
 
 				_, err := action.Run(1234)
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("fake-find-err"))
+				Expect(err).ToNot(HaveOccurred())
 			})
 		})
 	})
