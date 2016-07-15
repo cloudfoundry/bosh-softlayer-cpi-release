@@ -8,6 +8,9 @@ import (
 
 	bslcaction "github.com/cloudfoundry/bosh-softlayer-cpi/action"
 	bslcapi "github.com/cloudfoundry/bosh-softlayer-cpi/api"
+	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
+	"fmt"
+	"strings"
 )
 
 const (
@@ -68,6 +71,12 @@ func (c JSON) Dispatch(reqBytes []byte) []byte {
 	}
 
 	c.logger.DebugWithDetails(jsonLogTag, "Deserialized request", req)
+
+	if strings.Contains(strings.ToUpper(fmt.Sprintf("%s", req)), strings.ToUpper("localDiskFlag")) {
+		bslcommon.LocalDiskFlagNotSet = false
+	} else {
+		bslcommon.LocalDiskFlagNotSet = true
+	}
 
 	if req.Method == "" {
 		return c.buildCpiError("Must provide method key")
