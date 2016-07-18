@@ -6,10 +6,10 @@ import (
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
+	"fmt"
 	bslcaction "github.com/cloudfoundry/bosh-softlayer-cpi/action"
 	bslcapi "github.com/cloudfoundry/bosh-softlayer-cpi/api"
 	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
-	"fmt"
 	"strings"
 )
 
@@ -72,11 +72,8 @@ func (c JSON) Dispatch(reqBytes []byte) []byte {
 
 	c.logger.DebugWithDetails(jsonLogTag, "Deserialized request", req)
 
-	if strings.Contains(strings.ToUpper(fmt.Sprintf("%s", req)), strings.ToUpper("localDiskFlag")) {
-		bslcommon.LocalDiskFlagNotSet = false
-	} else {
-		bslcommon.LocalDiskFlagNotSet = true
-	}
+	// Will remove this line after
+	c.localDiskFlagNotSet(fmt.Sprintf("%s", req))
 
 	if req.Method == "" {
 		return c.buildCpiError("Must provide method key")
@@ -173,4 +170,15 @@ func (c JSON) buildNotImplementedError() []byte {
 	c.logger.DebugWithDetails(jsonLogTag, "NotImplementedError response bytes", string(respErrBytes))
 
 	return respErrBytes
+}
+
+// This function is used to set the default value of localDiskFlag to true if it is not specified in the input json file.
+// This function will be removed if we can ensure LocalDiskFlag property is set in place in all deployment manifest
+func (c JSON) localDiskFlagNotSet(reqString string) {
+	if strings.Contains(strings.ToUpper(reqString), strings.ToUpper("localDiskFlag")) {
+		bslcommon.LocalDiskFlagNotSet = false
+	} else {
+		bslcommon.LocalDiskFlagNotSet = true
+		c.logger.DebugWithDetails(jsonLogTag, "localDiskFlag is not specified in the input json, will set true as the default value")
+	}
 }
