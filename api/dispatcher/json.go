@@ -4,12 +4,12 @@ import (
 	"bytes"
 	"encoding/json"
 
-	boshlog "github.com/cloudfoundry/bosh-utils/logger"
-
-	"fmt"
 	bslcaction "github.com/cloudfoundry/bosh-softlayer-cpi/action"
 	bslcapi "github.com/cloudfoundry/bosh-softlayer-cpi/api"
 	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
+	boshlog "github.com/cloudfoundry/bosh-utils/logger"
+
+	"fmt"
 	"strings"
 )
 

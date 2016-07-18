@@ -82,15 +82,12 @@ var _ = Describe("JSON", func() {
             }`))
 					})
 				})
-				Context("when localDiskFlag is not set", func() {
-					It("LocalDiskFlagNotSet should be set to true", func() {
+				Context("verify if localDiskFlagNotSet is set properly", func() {
+					It("localDiskFlagNotSet is set to true if LocalDiskFlag is not set, and false if LocalDiskFlag is set to false", func() {
 						_ = dispatcher.Dispatch([]byte(`{"method":"fake-action","arguments":["fake-arg"]}`))
 						Expect(bslcommon.LocalDiskFlagNotSet).To(Equal(true))
-					})
-				})
-				Context("when localDiskFlag is set to false", func() {
-					It("LocalDiskFlagNotSet should be set to false", func() {
-						_ = dispatcher.Dispatch([]byte(`{"method":"fake-action","arguments":["fake-arg", "localDiskFlag":false]}`))
+
+						_ = dispatcher.Dispatch([]byte(`{"method":"fake-action","arguments":["fake-arg", "localDiskFlag:false"]}`))
 						Expect(bslcommon.LocalDiskFlagNotSet).To(Equal(false))
 					})
 				})
