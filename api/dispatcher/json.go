@@ -72,7 +72,7 @@ func (c JSON) Dispatch(reqBytes []byte) []byte {
 
 	c.logger.DebugWithDetails(jsonLogTag, "Deserialized request", req)
 
-	// Will remove this line after
+	// Will remove this line of code after we make sure LocalDiskFlag is defined properly in all deployment manifest files
 	c.localDiskFlagNotSet(fmt.Sprintf("%s", req))
 
 	if req.Method == "" {
