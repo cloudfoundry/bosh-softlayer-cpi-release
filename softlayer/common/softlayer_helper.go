@@ -14,8 +14,9 @@ import (
 )
 
 var (
-	TIMEOUT          time.Duration
-	POLLING_INTERVAL time.Duration
+	TIMEOUT             time.Duration
+	POLLING_INTERVAL    time.Duration
+	LocalDiskFlagNotSet bool
 )
 
 type SoftLayer_Hardware_Parameters struct {
