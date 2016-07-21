@@ -184,6 +184,10 @@ func (vm *softLayerVirtualGuest) ReloadOS(stemcell bslcstem.Stemcell) error {
 	return nil
 }
 
+func (vm *softLayerVirtualGuest) ReloadOSForBaremetal(string, string) error {
+	return NotSupportedError{}
+}
+
 func (vm *softLayerVirtualGuest) SetMetadata(vmMetadata VMMetadata) error {
 	tags, err := vm.extractTagsFromVMMetadata(vmMetadata)
 	if err != nil {

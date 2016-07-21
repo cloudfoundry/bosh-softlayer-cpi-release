@@ -73,6 +73,7 @@ type VM interface {
 
 	Reboot() error
 	ReloadOS(bslcstem.Stemcell) error
+	ReloadOSForBaremetal(string, string) error
 
 	SetMetadata(VMMetadata) error
 	SetVcapPassword(string) error

@@ -34,6 +34,9 @@ type FakeVM struct {
 	ReloadOSStemcell bslcstemcell.Stemcell
 	ReloadOSErr      error
 
+	ReloadBaremetalStemcell     string
+	ReloadBaremetalNetBootImage string
+
 	SetAgentEnvServiceErr error
 
 	UpdateAgentEnvErr error
@@ -85,6 +88,12 @@ func (vm *FakeVM) DetachDisk(disk bslcdisk.Disk) error {
 
 func (vm *FakeVM) ReloadOS(stemcell bslcstemcell.Stemcell) error {
 	vm.ReloadOSStemcell = stemcell
+	return vm.ReloadOSErr
+}
+
+func (vm *FakeVM) ReloadOSForBaremetal(stemcell string, netbootImage string) error {
+	vm.ReloadBaremetalStemcell = stemcell
+	vm.ReloadBaremetalNetBootImage = netbootImage
 	return vm.ReloadOSErr
 }
 

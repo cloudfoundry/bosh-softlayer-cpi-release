@@ -1,6 +1,7 @@
 package vm
 
 import (
+	"fmt"
 	"time"
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
@@ -36,7 +37,28 @@ func NewBaremetalCreator(vmFinder Finder, softLayerClient sl.Client, bmsClient b
 }
 
 func (c *baremetalCreator) Create(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
-	hardwareId, err := c.createBaremetal(cloudProps.VmNamePrefix, cloudProps.BaremetalStemcell, cloudProps.BaremetalNetbootImage)
+	for _, network := range networks {
+		switch network.Type {
+		case "dynamic":
+			if len(network.IP) == 0 {
+				return c.createByBaremetal(agentID, stemcell, cloudProps, networks, env)
+			} else {
+				return c.createByOSReload(agentID, stemcell, cloudProps, networks, env)
+			}
+		case "manual":
+			return nil, bosherr.Error("Manual networking is not currently supported")
+		case "vip":
+			return nil, bosherr.Error("SoftLayer Not Support VIP netowrk")
+		default:
+			return nil, bosherr.Errorf("Softlayer Not Support This Kind Of Network: %s", network.Type)
+		}
+	}
+
+	return nil, nil
+}
+
+func (c *baremetalCreator) createByBaremetal(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
+	hardwareId, err := c.provisionBaremetal(cloudProps.VmNamePrefix, cloudProps.BaremetalStemcell, cloudProps.BaremetalNetbootImage)
 	if err != nil {
 		return nil, bosherr.WrapError(err, "Create baremetal error")
 	}
@@ -44,6 +66,67 @@ func (c *baremetalCreator) Create(agentID string, stemcell bslcstem.Stemcell, cl
 	hardware, found, err := c.vmFinder.Find(hardwareId)
 	if err != nil || !found {
 		return nil, bosherr.WrapErrorf(err, "Cannot find hardware with id: %d.", hardwareId)
+	}
+
+	mbus, err := ParseMbusURL(c.agentOptions.Mbus, cloudProps.BoshIp)
+	if err != nil {
+		return nil, bosherr.WrapErrorf(err, "Cannot construct mbus url.")
+	}
+	c.agentOptions.Mbus = mbus
+
+	switch c.agentOptions.Blobstore.Provider {
+	case BlobstoreTypeDav:
+		davConf := DavConfig(c.agentOptions.Blobstore.Options)
+		UpdateDavConfig(&davConf, cloudProps.BoshIp)
+	}
+
+	agentEnv := CreateAgentUserData(agentID, cloudProps, networks, env, c.agentOptions)
+
+	err = hardware.UpdateAgentEnv(agentEnv)
+	if err != nil {
+		return nil, bosherr.WrapError(err, "Updating VM's agent env")
+	}
+
+	if len(c.agentOptions.VcapPassword) > 0 {
+		err = hardware.SetVcapPassword(c.agentOptions.VcapPassword)
+		if err != nil {
+			return nil, bosherr.WrapError(err, "Updating VM's vcap password")
+		}
+	}
+
+	return hardware, nil
+}
+
+func (c *baremetalCreator) createByOSReload(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
+	if len(cloudProps.BaremetalStemcell) == 0 {
+		return nil, bosherr.Error("No stemcell provided to do os_reload.")
+	}
+
+	hardwareService, err := c.softLayerClient.GetSoftLayer_Hardware_Service()
+	if err != nil {
+		return nil, bosherr.WrapError(err, "Creating HardwareService from SoftLayer client")
+	}
+
+	hardware, err := hardwareService.FindByIpAddress(networks.First().IP)
+	if err != nil || hardware.Id == 0 {
+		return nil, bosherr.WrapErrorf(err, "Could not find hardware by ip address: %s", networks.First().IP)
+	}
+
+	c.logger.Info(SOFTLAYER_VM_CREATOR_LOG_TAG, fmt.Sprintf("OS reload on Hardware %d using stemcell %d", hardware.Id, stemcell.ID()))
+
+	vm, found, err := c.vmFinder.Find(hardware.Id)
+	if err != nil || !found {
+		return nil, bosherr.WrapErrorf(err, "Cannot find hardware with id: %d", hardware.Id)
+	}
+
+	err = vm.ReloadOSForBaremetal(cloudProps.BaremetalStemcell, cloudProps.BaremetalNetbootImage)
+	if err != nil {
+		return nil, bosherr.WrapError(err, "Failed to reload OS")
+	}
+
+	vm, found, err = c.vmFinder.Find(hardware.Id)
+	if err != nil || !found {
+		return nil, bosherr.WrapErrorf(err, "Cannot find hardware with id: %d.", vm.ID())
 	}
 
 	// Update mbus url setting
@@ -61,26 +144,26 @@ func (c *baremetalCreator) Create(agentID string, stemcell bslcstem.Stemcell, cl
 
 	agentEnv := CreateAgentUserData(agentID, cloudProps, networks, env, c.agentOptions)
 	if err != nil {
-		return nil, bosherr.WrapErrorf(err, "Cannot agent env for virtual guest with id: %d.", hardwareId)
+		return nil, bosherr.WrapErrorf(err, "Cannot create agent env for baremetal with id: %d.", vm.ID())
 	}
 
-	err = hardware.UpdateAgentEnv(agentEnv)
+	err = vm.UpdateAgentEnv(agentEnv)
 	if err != nil {
 		return nil, bosherr.WrapError(err, "Updating VM's agent env")
 	}
 
 	if len(c.agentOptions.VcapPassword) > 0 {
-		err = hardware.SetVcapPassword(c.agentOptions.VcapPassword)
+		err = vm.SetVcapPassword(c.agentOptions.VcapPassword)
 		if err != nil {
 			return nil, bosherr.WrapError(err, "Updating VM's vcap password")
 		}
 	}
 
-	return hardware, nil
+	return vm, nil
 }
 
 // Private methods
-func (c *baremetalCreator) createBaremetal(server_name string, stemcell string, netboot_image string) (int, error) {
+func (c *baremetalCreator) provisionBaremetal(server_name string, stemcell string, netboot_image string) (int, error) {
 	provisioningBaremetalInfo := bmslc.ProvisioningBaremetalInfo{
 		VmNamePrefix:     server_name,
 		Bm_stemcell:      stemcell,
