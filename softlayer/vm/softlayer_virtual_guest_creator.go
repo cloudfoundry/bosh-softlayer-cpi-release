@@ -49,7 +49,7 @@ func (c *softLayerVirtualGuestCreator) Create(agentID string, stemcell bslcstem.
 				return c.createByOSReload(agentID, stemcell, cloudProps, networks, env)
 			}
 		case "manual":
-			return nil, bosherr.Error("Manual networking is not currently supported")
+			continue
 		case "vip":
 			return nil, bosherr.Error("SoftLayer Not Support VIP netowrk")
 		default:
@@ -114,6 +114,8 @@ func (c *softLayerVirtualGuestCreator) createBySoftlayer(agentID string, stemcel
 			UpdateDavConfig(&davConf, cloudProps.BoshIp)
 		}
 	}
+
+	vm.ConfigureNetworks2(networks)
 
 	agentEnv := CreateAgentUserData(agentID, cloudProps, networks, env, c.agentOptions)
 
@@ -201,6 +203,8 @@ func (c *softLayerVirtualGuestCreator) createByOSReload(agentID string, stemcell
 	if err != nil || !found {
 		return nil, bosherr.WrapErrorf(err, "refresh VM with id: %d after os_reload", virtualGuest.Id)
 	}
+
+	vm.ConfigureNetworks2(networks)
 
 	agentEnv := CreateAgentUserData(agentID, cloudProps, networks, env, c.agentOptions)
 	if err != nil {

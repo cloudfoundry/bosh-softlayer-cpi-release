@@ -157,6 +157,10 @@ func (vm *softLayerHardware) ConfigureNetworks(networks Networks) error {
 	return nil
 }
 
+func (vm *softLayerHardware) ConfigureNetworks2(networks Networks) error {
+	return NotSupportedError{}
+}
+
 func (vm *softLayerHardware) AttachDisk(disk bslcdisk.Disk) error {
 	volume, err := vm.fetchIscsiVolume(disk.ID())
 	if err != nil {
