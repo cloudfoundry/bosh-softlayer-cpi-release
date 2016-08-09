@@ -48,12 +48,10 @@ func (c *softLayerVirtualGuestCreator) Create(agentID string, stemcell bslcstem.
 			} else {
 				return c.createByOSReload(agentID, stemcell, cloudProps, networks, env)
 			}
-		case "static":
-			continue
 		case "vip":
 			return nil, bosherr.Error("SoftLayer Not Support VIP netowrk")
 		default:
-			return nil, bosherr.Errorf("Softlayer Not Support This Kind Of Network: %s", network.Type)
+			continue
 		}
 	}
 
