@@ -149,6 +149,8 @@ func (vm *softLayerHardware) ConfigureNetworks(networks Networks) error {
 	}
 
 	oldAgentEnv.Networks = networks
+	bslcommon.RETRY_COUNT = 30
+	bslcommon.WAIT_TIME = 5 * time.Second
 	err = vm.agentEnvService.Update(oldAgentEnv)
 	if err != nil {
 		return bosherr.WrapError(err, fmt.Sprintf("Configuring network setting on hardware with id: `%d`", vm.ID()))
@@ -214,6 +216,8 @@ func (vm *softLayerHardware) AttachDisk(disk bslcdisk.Disk) error {
 	}
 
 	err = vm.agentEnvService.Update(newAgentEnv)
+	bslcommon.RETRY_COUNT = 30
+	bslcommon.WAIT_TIME = 5 * time.Second
 	if err != nil {
 		return bosherr.WrapError(err, fmt.Sprintf("Configuring userdata on hardware with id: `%d`", vm.ID()))
 	}
@@ -256,6 +260,8 @@ func (vm *softLayerHardware) DetachDisk(disk bslcdisk.Disk) error {
 	}
 
 	newAgentEnv := oldAgentEnv.DetachPersistentDisk(strconv.Itoa(disk.ID()))
+	bslcommon.RETRY_COUNT = 30
+	bslcommon.WAIT_TIME = 5 * time.Second
 	err = vm.agentEnvService.Update(newAgentEnv)
 	if err != nil {
 		return bosherr.WrapError(err, fmt.Sprintf("Configuring userdata on hardware with id: `%d`", vm.ID()))
@@ -291,6 +297,8 @@ func (vm *softLayerHardware) DetachDisk(disk bslcdisk.Disk) error {
 }
 
 func (vm *softLayerHardware) UpdateAgentEnv(agentEnv AgentEnv) error {
+	bslcommon.RETRY_COUNT = 30
+	bslcommon.WAIT_TIME = 5 * time.Second
 	return vm.agentEnvService.Update(agentEnv)
 }
 

@@ -218,6 +218,8 @@ func (vm *softLayerVirtualGuest) ConfigureNetworks(networks Networks) error {
 	}
 
 	oldAgentEnv.Networks = networks
+	bslcommon.RETRY_COUNT = 30
+	bslcommon.WAIT_TIME = 5 * time.Second
 	err = vm.agentEnvService.Update(oldAgentEnv)
 	if err != nil {
 		return bosherr.WrapError(err, fmt.Sprintf("Configuring network setting on VirtualGuest with id: `%d`", vm.ID()))
@@ -282,6 +284,8 @@ func (vm *softLayerVirtualGuest) AttachDisk(disk bslcdisk.Disk) error {
 		newAgentEnv = oldAgentEnv.AttachPersistentDisk(strconv.Itoa(disk.ID()), "/dev/"+deviceName)
 	}
 
+	bslcommon.RETRY_COUNT = 30
+	bslcommon.WAIT_TIME = 5 * time.Second
 	err = vm.agentEnvService.Update(newAgentEnv)
 	if err != nil {
 		return bosherr.WrapError(err, fmt.Sprintf("Configuring userdata on VirtualGuest with id: `%d`", vm.ID()))
@@ -360,6 +364,8 @@ func (vm *softLayerVirtualGuest) DetachDisk(disk bslcdisk.Disk) error {
 }
 
 func (vm *softLayerVirtualGuest) UpdateAgentEnv(agentEnv AgentEnv) error {
+	bslcommon.RETRY_COUNT = 30
+	bslcommon.WAIT_TIME = 5 * time.Second
 	return vm.agentEnvService.Update(agentEnv)
 }
 

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 
+	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 	fakebslvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm/fakes"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
@@ -11,6 +12,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
+	"time"
 )
 
 var _ = Describe("SoftlayerAgentEnvService", func() {
@@ -25,6 +27,8 @@ var _ = Describe("SoftlayerAgentEnvService", func() {
 		fakevm = fakebslvm.NewFakeVM(1234567)
 		logger := boshlog.NewLogger(boshlog.LevelNone)
 		agentEnvService = NewFSAgentEnvService(fakevm, fakeSoftlayerFileService, logger)
+		bslcommon.RETRY_COUNT = 3
+		bslcommon.WAIT_TIME = 5 * time.Millisecond
 	})
 
 	Describe("Fetch", func() {
@@ -92,5 +96,17 @@ var _ = Describe("SoftlayerAgentEnvService", func() {
 			Expect(fakeSoftlayerFileService.UploadInputs[0].Contents).To(Equal(expectedAgentEnvBytes))
 		})
 
+		Context("when the length of hostname is greater than 64 chars", func() {
+			BeforeEach(func() {
+				bslcommon.LengthOfHostName = 65
+				fakeSoftlayerFileService.UploadErr = errors.New("A fake error occurred")
+			})
+
+			It("returns error with specific error message", func() {
+				err := agentEnvService.Update(newAgentEnv)
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("the length of device hostname is greater than 64 characters"))
+			})
+		})
 	})
 })

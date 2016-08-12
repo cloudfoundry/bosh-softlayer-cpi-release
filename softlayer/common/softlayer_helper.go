@@ -17,6 +17,9 @@ var (
 	TIMEOUT             time.Duration
 	POLLING_INTERVAL    time.Duration
 	LocalDiskFlagNotSet bool
+	LengthOfHostName    int
+	RETRY_COUNT         int
+	WAIT_TIME           time.Duration
 )
 
 type SoftLayer_Hardware_Parameters struct {

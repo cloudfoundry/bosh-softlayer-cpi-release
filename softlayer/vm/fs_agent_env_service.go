@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"time"
 
+	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 )
@@ -61,13 +62,19 @@ func (s *fsAgentEnvService) Update(agentEnv AgentEnv) error {
 		return bosherr.WrapError(err, "Marshalling agent env")
 	}
 
-	for i := 0; i < maxAttempts; i++ {
+	for i := 0; i < bslcommon.RETRY_COUNT; i++ {
 		s.logger.Debug(s.logTag, "Updating Agent Env: Making attempt #%d", i)
 		err = s.softlayerFileService.Upload(ROOT_USER_NAME, s.vm.GetRootPassword(), s.vm.GetPrimaryBackendIP(), s.settingsPath, jsonBytes)
 		if err == nil {
 			return nil
 		}
-		time.Sleep(delay * time.Second)
+		time.Sleep(bslcommon.WAIT_TIME)
 	}
-	return bosherr.WrapError(err, "Updating Agent Env timeout")
+
+	// Add this warning message due to bosh-softlayer-cpi issues #129, may remove this piece of code when we identify the real root cause
+	var longHostNameWarningMsg = ""
+	if bslcommon.LengthOfHostName > 64 {
+		longHostNameWarningMsg = "Notice that the length of device hostname is greater than 64 characters, which might cause SSH service setup improperly by SoftLayer, please confirm with SoftLayer or consider to shorten the hostname"
+	}
+	return bosherr.WrapError(err, "Updating Agent Env timeout. "+longHostNameWarningMsg)
 }
