@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 
+	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 	fakebslvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm/fakes"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
@@ -11,6 +12,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
+	"time"
 )
 
 var _ = Describe("SoftlayerAgentEnvService", func() {
@@ -84,12 +86,25 @@ var _ = Describe("SoftlayerAgentEnvService", func() {
 			var err error
 			expectedAgentEnvBytes, err = json.Marshal(newAgentEnv)
 			Expect(err).ToNot(HaveOccurred())
+			bslcommon.RETRY_COUNT = 3
+			bslcommon.WAIT_TIME = 5 * time.Millisecond
 		})
 
 		It("uploads file contents to the warden container", func() {
 			err := agentEnvService.Update(newAgentEnv)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(fakeSoftlayerFileService.UploadInputs[0].Contents).To(Equal(expectedAgentEnvBytes))
+		})
+
+		Context("when it fails to upload agent env file", func() {
+			BeforeEach(func() {
+				fakeSoftlayerFileService.UploadErr = errors.New("A fake error occurred")
+			})
+
+			It("returns error with specific error message", func() {
+				err := agentEnvService.Update(newAgentEnv)
+				Expect(err).To(HaveOccurred())
+			})
 		})
 
 	})
