@@ -60,7 +60,7 @@ func (c *softLayerVirtualGuestCreator) Create(agentID string, stemcell bslcstem.
 
 // Private methods
 func (c *softLayerVirtualGuestCreator) createBySoftlayer(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
-	virtualGuestTemplate, err := CreateVirtualGuestTemplate(stemcell, cloudProps)
+	virtualGuestTemplate, err := CreateVirtualGuestTemplate(stemcell, cloudProps, networks)
 	if err != nil {
 		return nil, bosherr.WrapError(err, "Creating VirtualGuest template")
 	}
