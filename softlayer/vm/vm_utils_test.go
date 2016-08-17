@@ -219,13 +219,12 @@ var _ = Describe("VM Utils", func() {
 		})
 
 		It("returns a correct virtual guest template", func() {
-			vgt, err := CreateVirtualGuestTemplate(stemcell, cloudProps)
+			vgt, err := CreateVirtualGuestTemplate(stemcell, cloudProps, networks)
 			Expect(err).ToNot(HaveOccurred())
 
 			//Since VGT.Hostname use timestamp we need to fix it here
 			expectedVgt.Hostname = vgt.Hostname
 			Expect(vgt).To(Equal(expectedVgt))
 		})
-
 	})
 })

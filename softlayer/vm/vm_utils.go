@@ -46,8 +46,8 @@ func CreateVirtualGuestTemplate(stemcell bslcstem.Stemcell, cloudProps VMCloudPr
 				if value1, ok := networkComponent["NetworkVlan"]; ok {
 					networkValn := value1.(map[string]interface{})
 					if value2, ok := networkValn["Id"]; ok {
-						cloudProps.PrimaryNetworkComponent =  sldatatypes.PrimaryNetworkComponent{
-							NetworkVlan:  sldatatypes.NetworkVlan{
+						cloudProps.PrimaryNetworkComponent = sldatatypes.PrimaryNetworkComponent{
+							NetworkVlan: sldatatypes.NetworkVlan{
 								Id: int(value2.(float64)),
 							},
 						}
@@ -59,8 +59,8 @@ func CreateVirtualGuestTemplate(stemcell bslcstem.Stemcell, cloudProps VMCloudPr
 				if value1, ok := networkComponent["NetworkVlan"]; ok {
 					networkValn := value1.(map[string]interface{})
 					if value2, ok := networkValn["Id"]; ok {
-						cloudProps.PrimaryBackendNetworkComponent =  sldatatypes.PrimaryBackendNetworkComponent{
-							NetworkVlan:  sldatatypes.NetworkVlan{
+						cloudProps.PrimaryBackendNetworkComponent = sldatatypes.PrimaryBackendNetworkComponent{
+							NetworkVlan: sldatatypes.NetworkVlan{
 								Id: int(value2.(float64)),
 							},
 						}
