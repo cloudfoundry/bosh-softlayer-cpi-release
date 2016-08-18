@@ -67,6 +67,10 @@ func CreateVirtualGuestTemplate(stemcell bslcstem.Stemcell, cloudProps VMCloudPr
 					}
 				}
 			}
+			if value, ok := network.CloudProperties["PrivateNetworkOnlyFlag"]; ok {
+				privateOnly := value.(bool)
+				cloudProps.PrivateNetworkOnlyFlag = privateOnly
+			}
 		default:
 			continue
 		}
