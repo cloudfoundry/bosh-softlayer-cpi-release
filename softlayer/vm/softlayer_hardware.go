@@ -148,8 +148,6 @@ func (vm *softLayerHardware) ConfigureNetworks(networks Networks) error {
 		return bosherr.WrapErrorf(err, "Failed to unmarshal userdata from hardware with id: %d.", vm.ID())
 	}
 
-	bslcommon.RETRY_COUNT = 30
-	bslcommon.WAIT_TIME = 5 * time.Second
 	oldAgentEnv.Networks = networks
 	err = vm.agentEnvService.Update(oldAgentEnv)
 	if err != nil {
@@ -215,8 +213,6 @@ func (vm *softLayerHardware) AttachDisk(disk bslcdisk.Disk) error {
 		newAgentEnv = oldAgentEnv.AttachPersistentDisk(strconv.Itoa(disk.ID()), "/dev/"+deviceName)
 	}
 
-	bslcommon.RETRY_COUNT = 30
-	bslcommon.WAIT_TIME = 5 * time.Second
 	err = vm.agentEnvService.Update(newAgentEnv)
 	if err != nil {
 		return bosherr.WrapError(err, fmt.Sprintf("Configuring userdata on hardware with id: `%d`", vm.ID()))
@@ -259,8 +255,6 @@ func (vm *softLayerHardware) DetachDisk(disk bslcdisk.Disk) error {
 		return bosherr.WrapErrorf(err, "Failed to unmarshal userdata from hardware with id: %d.", vm.ID())
 	}
 
-	bslcommon.RETRY_COUNT = 30
-	bslcommon.WAIT_TIME = 5 * time.Second
 	newAgentEnv := oldAgentEnv.DetachPersistentDisk(strconv.Itoa(disk.ID()))
 	err = vm.agentEnvService.Update(newAgentEnv)
 	if err != nil {
@@ -297,8 +291,6 @@ func (vm *softLayerHardware) DetachDisk(disk bslcdisk.Disk) error {
 }
 
 func (vm *softLayerHardware) UpdateAgentEnv(agentEnv AgentEnv) error {
-	bslcommon.RETRY_COUNT = 30
-	bslcommon.WAIT_TIME = 5 * time.Second
 	return vm.agentEnvService.Update(agentEnv)
 }
 
