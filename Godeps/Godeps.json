@@ -61,8 +61,8 @@
 		},
 		{
 			"ImportPath": "github.com/maximilien/softlayer-go/test_helpers",
-			"Comment": "v0.5.0-65-g1217fcf",
-			"Rev": "1217fcfa9e5c841c876518103d1e78fbc48c019a"
+			"Comment": "v0.6.0-60-g0d7495d",
+			"Rev": "0d7495db46b28ca4c0bc248cc0fa6bca30687067"
 		},
 		{
 			"ImportPath": "github.com/nu7hatch/gouuid",
@@ -89,6 +89,11 @@
 		{
 			"ImportPath": "golang.org/x/crypto/ssh",
 			"Rev": "60052bd85f2d91293457e8811b0cf26b773de469"
+		},
+		{
+			"ImportPath": "github.com/maximilien/softlayer-go/client/fakes",
+			"Comment": "v0.6.0-60-g0d7495d",
+			"Rev": "0d7495db46b28ca4c0bc248cc0fa6bca30687067"
 		}
 	]
 }
