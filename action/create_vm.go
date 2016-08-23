@@ -90,9 +90,12 @@ func (a CreateVMAction) UpdateCloudProperties(cloudProps *bslcvm.VMCloudProperti
 	if len(cloudProps.Domain) == 0 {
 		a.vmCloudProperties.Domain = "softlayer.com"
 	}
+	bslcommon.LengthOfHostName = len(a.vmCloudProperties.VmNamePrefix + "." + a.vmCloudProperties.Domain)
+
 	if len(cloudProps.NetworkComponents) == 0 {
 		a.vmCloudProperties.NetworkComponents = []sldatatypes.NetworkComponents{{MaxSpeed: 1000}}
 	}
+
 	if bslcommon.LocalDiskFlagNotSet == true {
 		a.vmCloudProperties.LocalDiskFlag = true
 	}
