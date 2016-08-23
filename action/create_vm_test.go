@@ -48,7 +48,7 @@ var _ = Describe("CreateVM", func() {
 				Datacenter:   sldatatypes.Datacenter{Name: "fake-datacenter"},
 				VmNamePrefix: "fake-hostname",
 				Baremetal:    false,
-				BoshIp:       "10.0.0.0.0",
+				BoshIp:       "10.0.0.0",
 				SshKeys: []sldatatypes.SshKey{
 					sldatatypes.SshKey{Id: 1234},
 				},
