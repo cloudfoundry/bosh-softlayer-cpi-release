@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 
+	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 )
@@ -80,5 +81,12 @@ func (s *fsAgentEnvService) Update(agentEnv AgentEnv) error {
 		}
 		time.Sleep(time.Duration(SL_CPI_WAIT_TIME_UPDATE_AGENT_ENV) * time.Second)
 	}
-	return bosherr.WrapError(err, "Updating Agent Env timeout")
+
+	// Add this warning message due to bosh-softlayer-cpi issues #129, may remove this piece of code when we identify the real root cause
+	var longHostNameWarningMsg string
+	if bslcommon.LengthOfHostName > 63 {
+		longHostNameWarningMsg = "Notice that the length of device hostname is greater than 63 characters, which might cause SSH service setup improperly by SoftLayer, please confirm with SoftLayer or consider to shorten the hostname"
+	}
+
+	return bosherr.WrapError(err, "Updating Agent Env timeout. "+longHostNameWarningMsg)
 }
