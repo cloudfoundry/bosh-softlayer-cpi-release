@@ -109,7 +109,7 @@ func WaitForVirtualGuestToHaveRunningTransaction(softLayerClient sl.Client, virt
 	for totalTime < TIMEOUT {
 		activeTransactions, err := virtualGuestService.GetActiveTransactions(virtualGuestId)
 		if err != nil {
-			return bosherr.WrapErrorf(err, "Getting active transaction against vitrual guest %d", virtualGuestId)
+			return bosherr.WrapErrorf(err, "Getting active transaction against virtual guest %d", virtualGuestId)
 		}
 
 		if len(activeTransactions) > 0 {
@@ -134,7 +134,7 @@ func WaitForVirtualGuestToHaveNoRunningTransaction(softLayerClient sl.Client, vi
 	for totalTime < TIMEOUT {
 		activeTransactions, err := virtualGuestService.GetActiveTransactions(virtualGuestId)
 		if err != nil {
-			return bosherr.WrapErrorf(err, "Getting active transaction against vitrual guest %d", virtualGuestId)
+			return bosherr.WrapErrorf(err, "Getting active transaction against virtual guest %d", virtualGuestId)
 		}
 
 		if len(activeTransactions) == 0 {
@@ -207,10 +207,10 @@ func WaitForVirtualGuestIsNotPingable(softLayerClient sl.Client, virtualGuestId 
 		func() (bool, error) {
 			state, err := virtualGuestService.IsPingable(virtualGuestId)
 			if err != nil {
-				return false, bosherr.WrapErrorf(err, "Checking pingable against vitrual guest %d", virtualGuestId)
+				return false, bosherr.WrapErrorf(err, "Checking pingable against virtual guest %d", virtualGuestId)
 			} else {
 				if state {
-					return true, bosherr.Errorf("vitrual guest %d is pingable", virtualGuestId)
+					return true, bosherr.Errorf("virtual guest %d is pingable", virtualGuestId)
 				} else {
 					return false, nil
 				}
@@ -237,12 +237,12 @@ func WaitForVirtualGuestIsPingable(softLayerClient sl.Client, virtualGuestId int
 		func() (bool, error) {
 			state, err := virtualGuestService.IsPingable(virtualGuestId)
 			if err != nil {
-				return false, bosherr.WrapErrorf(err, "Checking pingable against vitrual guest %d", virtualGuestId)
+				return false, bosherr.WrapErrorf(err, "Checking pingable against virtual guest %d", virtualGuestId)
 			} else {
 				if state {
 					return false, nil
 				} else {
-					return true, bosherr.Errorf("vitrual guest %d is not pingable", virtualGuestId)
+					return true, bosherr.Errorf("virtual guest %d is not pingable", virtualGuestId)
 				}
 			}
 		})
@@ -294,12 +294,12 @@ func WaitForVirtualGuestToTargetState(softLayerClient sl.Client, virtualGuestId 
 		func() (bool, error) {
 			vgPowerState, err := virtualGuestService.GetPowerState(virtualGuestId)
 			if err != nil {
-				return false, bosherr.WrapErrorf(err, "Getting PowerState from vitrual guest %d", virtualGuestId)
+				return false, bosherr.WrapErrorf(err, "Getting PowerState from virtual guest %d", virtualGuestId)
 			} else {
 				if strings.Contains(vgPowerState.KeyName, targetState) {
 					return false, nil
 				}
-				return true, bosherr.Errorf("The PowerState of vitrual guest %d is not targetState %s", virtualGuestId, targetState)
+				return true, bosherr.Errorf("The PowerState of virtual guest %d is not targetState %s", virtualGuestId, targetState)
 			}
 		})
 

@@ -245,7 +245,7 @@ func (vm *softLayerVirtualGuest) AttachDisk(disk bslcdisk.Disk) error {
 			allowable, err := networkStorageService.AttachNetworkStorageToVirtualGuest(vm.virtualGuest, disk.ID())
 			if err != nil {
 				if !strings.Contains(err.Error(), "HTTP error code") {
-					return bosherr.WrapError(err, fmt.Sprintf("Granting volume access to vitrual guest %d", vm.ID()))
+					return bosherr.WrapError(err, fmt.Sprintf("Granting volume access to virtual guest %d", vm.ID()))
 				}
 			} else {
 				if allowable {
