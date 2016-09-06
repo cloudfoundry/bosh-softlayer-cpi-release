@@ -77,7 +77,7 @@ var _ = Describe("CreateVM", func() {
 				id, err := action.Run("fake-agent-id", stemcellCID, vmCloudProp, networks, diskLocality, env)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(id).To(Equal(VMCID(1234).String()))
-				Expect(bslcommon.LengthOfHostName).To(Equal(46))
+				Expect(bslcommon.LengthOfHostName).To(BeNumerically("<", 63))
 			})
 
 			It("creates VM with requested agent ID, stemcell, cloud properties, and networks", func() {

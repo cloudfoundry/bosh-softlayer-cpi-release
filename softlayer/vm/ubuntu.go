@@ -39,7 +39,7 @@ type Subnet struct {
 	Netmask           string `json:"netmask"`
 }
 
-func (s Subnet) Contains(address string) bool {
+func (s Subnet) contains(address string) bool {
 	ipNet := net.IPNet{
 		IP:   net.ParseIP(s.NetworkIdentifier),
 		Mask: net.IPMask(net.ParseIP(s.Netmask)),
@@ -50,9 +50,9 @@ func (s Subnet) Contains(address string) bool {
 
 type Subnets []Subnet
 
-func (s Subnets) Containing(address string) (Subnet, error) {
+func (s Subnets) containing(address string) (Subnet, error) {
 	for _, subnet := range s {
-		if subnet.Contains(address) {
+		if subnet.contains(address) {
 			return subnet, nil
 		}
 	}
@@ -203,7 +203,7 @@ func (u *Ubuntu) dynamicInterfaces(networkComponents VirtualGuestNetworkComponen
 	privateComponent := networkComponents.PrimaryBackendNetworkComponent
 	publicComponent := networkComponents.PrimaryNetworkComponent
 
-	subnet, err := privateComponent.NetworkVLAN.Subnets.Containing(privateComponent.PrimaryIPAddress)
+	subnet, err := privateComponent.NetworkVLAN.Subnets.containing(privateComponent.PrimaryIPAddress)
 	if err != nil {
 		err = fmt.Errorf("%s: privateComponent: %#v", err, privateComponent)
 		return nil, err
@@ -223,7 +223,7 @@ func (u *Ubuntu) dynamicInterfaces(networkComponents VirtualGuestNetworkComponen
 
 	if publicComponent.PrimaryIPAddress != "" {
 		for _, s := range publicComponent.NetworkVLAN.Subnets {
-			if s.Contains(publicComponent.PrimaryIPAddress) {
+			if s.contains(publicComponent.PrimaryIPAddress) {
 				subnet = s
 				break
 			}
@@ -249,7 +249,7 @@ func (u *Ubuntu) manualInterfaces(networkComponents VirtualGuestNetworkComponent
 
 	interfaces := []Interface{}
 	for networkName, nw := range networks {
-		if subnet, err := privateComponent.NetworkVLAN.Subnets.Containing(nw.IP); err == nil {
+		if subnet, err := privateComponent.NetworkVLAN.Subnets.containing(nw.IP); err == nil {
 			intf := Interface{
 				Name:           fmt.Sprintf("%s%d:%s", privateComponent.Name, privateComponent.Port, networkName),
 				Auto:           true,
@@ -265,7 +265,7 @@ func (u *Ubuntu) manualInterfaces(networkComponents VirtualGuestNetworkComponent
 			continue
 		}
 
-		if subnet, err := publicComponent.NetworkVLAN.Subnets.Containing(nw.IP); err == nil {
+		if subnet, err := publicComponent.NetworkVLAN.Subnets.containing(nw.IP); err == nil {
 			intf := Interface{
 				Name:           fmt.Sprintf("%s%d:%s", publicComponent.Name, publicComponent.Port, networkName),
 				Auto:           true,
