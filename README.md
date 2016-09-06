@@ -31,7 +31,7 @@ $ export SL_API_KEY=your-softlayer-api-key
 $ ./bin/test-integration
 ```
 
-NOTE: if you get any dependency errors, then use `go get path/to/dependency` to get it, e.g., `go get github.com/onsi/ginkgo` and `go get github.com/onsi/gomega`
+NOTE: if you get any dependency errors, then use `go get path/to/dependency` to get it, e.g., `go get github.com/onsi/ginkgo/ginkgo` and `go get github.com/onsi/gomega`
 
 The executable output should now be located in: `out/cpi`. You will need to package this into a BOSH release. The easiest way is to use the [bosh-softlayer-cpi-release](https://github.com/cloudfoundry-incubator/bosh-softlayer-cpi-release) project.
 

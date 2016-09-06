@@ -2,8 +2,11 @@ package vm
 
 import (
 	"encoding/json"
+	"os"
+	"strconv"
 	"time"
 
+	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 )
@@ -61,13 +64,29 @@ func (s *fsAgentEnvService) Update(agentEnv AgentEnv) error {
 		return bosherr.WrapError(err, "Marshalling agent env")
 	}
 
-	for i := 0; i < maxAttempts; i++ {
+	SL_CPI_WAIT_TIME_UPDATE_AGENT_ENV, err := strconv.Atoi(os.Getenv("SL_CPI_WAIT_TIME_UPDATE_AGENT_ENV"))
+	if err != nil || SL_CPI_WAIT_TIME_UPDATE_AGENT_ENV == 0 {
+		SL_CPI_WAIT_TIME_UPDATE_AGENT_ENV = 5
+	}
+	SL_CPI_RETRY_COUNT_UPDATE_AGENT_ENV, err := strconv.Atoi(os.Getenv("SL_CPI_RETRY_COUNT_UPDATE_AGENT_ENV"))
+	if err != nil || SL_CPI_RETRY_COUNT_UPDATE_AGENT_ENV == 0 {
+		SL_CPI_RETRY_COUNT_UPDATE_AGENT_ENV = 5
+	}
+
+	for i := 0; i < SL_CPI_RETRY_COUNT_UPDATE_AGENT_ENV; i++ {
 		s.logger.Debug(s.logTag, "Updating Agent Env: Making attempt #%d", i)
 		err = s.softlayerFileService.Upload(ROOT_USER_NAME, s.vm.GetRootPassword(), s.vm.GetPrimaryBackendIP(), s.settingsPath, jsonBytes)
 		if err == nil {
 			return nil
 		}
-		time.Sleep(delay * time.Second)
+		time.Sleep(time.Duration(SL_CPI_WAIT_TIME_UPDATE_AGENT_ENV) * time.Second)
 	}
-	return bosherr.WrapError(err, "Updating Agent Env timeout")
+
+	// Add this warning message due to bosh-softlayer-cpi issues #129, may remove this piece of code when we identify the real root cause
+	var longHostNameWarningMsg string
+	if bslcommon.LengthOfHostName > 63 {
+		longHostNameWarningMsg = "Notice that the length of device hostname is greater than 63 characters, which might cause SSH service setup improperly by SoftLayer, please confirm with SoftLayer or consider to shorten the hostname"
+	}
+
+	return bosherr.WrapError(err, "Updating Agent Env timeout. "+longHostNameWarningMsg)
 }

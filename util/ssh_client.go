@@ -34,6 +34,7 @@ func (c *sshClientImpl) ExecCommand(username string, password string, ip string,
 	if err != nil {
 		return "", err
 	}
+	defer client.Close()
 
 	session, err := client.NewSession()
 	if err != nil {
