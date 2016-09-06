@@ -27,7 +27,7 @@ func (ns Networks) First() Network {
 	return Network{}
 }
 
-func (n Network) IsDefaultGateway() bool {
+func (n Network) HasDefaultGateway() bool {
 	for _, val := range n.Default {
 		if val == "gateway" {
 			return true

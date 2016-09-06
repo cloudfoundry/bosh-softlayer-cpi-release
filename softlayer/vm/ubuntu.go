@@ -216,7 +216,7 @@ func (u *Ubuntu) dynamicInterfaces(networkComponents VirtualGuestNetworkComponen
 		Address:        privateComponent.PrimaryIPAddress,
 		Netmask:        subnet.Netmask,
 		Gateway:        subnet.Gateway,
-		DefaultGateway: (publicComponent.PrimaryIPAddress == "" && nw.IsDefaultGateway()),
+		DefaultGateway: (publicComponent.PrimaryIPAddress == "" && nw.HasDefaultGateway()),
 		Routes:         SoftlayerPrivateRoutes(subnet.Gateway),
 	}
 	interfaces := []Interface{privateInterface}
@@ -235,7 +235,7 @@ func (u *Ubuntu) dynamicInterfaces(networkComponents VirtualGuestNetworkComponen
 			Address:        publicComponent.PrimaryIPAddress,
 			Netmask:        subnet.Netmask,
 			Gateway:        subnet.Gateway,
-			DefaultGateway: nw.IsDefaultGateway(),
+			DefaultGateway: nw.HasDefaultGateway(),
 		}
 		interfaces = append(interfaces, publicInterface)
 	}
@@ -257,7 +257,7 @@ func (u *Ubuntu) manualInterfaces(networkComponents VirtualGuestNetworkComponent
 				Address:        nw.IP,
 				Netmask:        subnet.Netmask,
 				Gateway:        subnet.Gateway,
-				DefaultGateway: nw.IsDefaultGateway(),
+				DefaultGateway: nw.HasDefaultGateway(),
 				Routes:         SoftlayerPrivateRoutes(subnet.Gateway),
 			}
 
@@ -273,7 +273,7 @@ func (u *Ubuntu) manualInterfaces(networkComponents VirtualGuestNetworkComponent
 				Address:        nw.IP,
 				Netmask:        subnet.Netmask,
 				Gateway:        subnet.Gateway,
-				DefaultGateway: nw.IsDefaultGateway(),
+				DefaultGateway: nw.HasDefaultGateway(),
 			}
 
 			interfaces = append(interfaces, intf)
