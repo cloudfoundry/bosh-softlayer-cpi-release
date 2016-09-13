@@ -27,6 +27,15 @@ func (ns Networks) First() Network {
 	return Network{}
 }
 
+func (n Network) HasDefaultGateway() bool {
+	for _, val := range n.Default {
+		if val == "gateway" {
+			return true
+		}
+	}
+	return false
+}
+
 func (n Network) IsDynamic() bool { return n.Type == "dynamic" }
 
 func (n Network) AppendDNS(dns string) Network {

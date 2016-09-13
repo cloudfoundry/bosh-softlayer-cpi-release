@@ -9,9 +9,10 @@ import (
 
 var _ = Describe("Network", func() {
 	var (
-		networks, emptyNetworks                  Networks
-		dynamicNetwork, emptyNetwork, dnsNetwork Network
-		expectedNetwork                          Network
+		networks, emptyNetworks                                 Networks
+		dynamicNetwork, emptyNetwork, dnsNetwork                Network
+		expectedNetwork                                         Network
+		networkWithDefaultGateway, networkWithOutDefaultGateway Network
 	)
 
 	Describe("#First", func() {
@@ -87,6 +88,55 @@ var _ = Describe("Network", func() {
 
 		It("return false for an empty network", func() {
 			result := emptyNetwork.IsDynamic()
+			Expect(result).To(BeFalse())
+		})
+	})
+
+	Describe("#HasDefaultGateway", func() {
+		BeforeEach(func() {
+			networkWithDefaultGateway = Network{
+				Type:    "dynamic",
+				IP:      "fake-IP",
+				Netmask: "fake-Netmask",
+				Gateway: "fake-Gateway",
+				DNS: []string{
+					"fake-dns0",
+					"fake-dns1",
+				},
+				Default:         []string{"dns", "gateway"},
+				Preconfigured:   true,
+				CloudProperties: map[string]interface{}{},
+			}
+
+			networkWithOutDefaultGateway = Network{
+				Type:    "dynamic",
+				IP:      "fake-IP",
+				Netmask: "fake-Netmask",
+				Gateway: "fake-Gateway",
+				DNS: []string{
+					"fake-dns0",
+					"fake-dns1",
+				},
+				Default:         []string{},
+				Preconfigured:   true,
+				CloudProperties: map[string]interface{}{},
+			}
+
+			emptyNetwork = Network{}
+		})
+
+		It("return true for a network with default gateway", func() {
+			result := networkWithDefaultGateway.HasDefaultGateway()
+			Expect(result).To(BeTrue())
+		})
+
+		It("return false for a network without default gateway", func() {
+			result := networkWithOutDefaultGateway.HasDefaultGateway()
+			Expect(result).To(BeFalse())
+		})
+
+		It("return false for an empty network", func() {
+			result := emptyNetwork.HasDefaultGateway()
 			Expect(result).To(BeFalse())
 		})
 	})

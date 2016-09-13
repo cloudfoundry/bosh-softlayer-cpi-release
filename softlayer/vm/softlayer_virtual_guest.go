@@ -226,6 +226,38 @@ func (vm *softLayerVirtualGuest) ConfigureNetworks(networks Networks) error {
 	return nil
 }
 
+type sshClientWrapper struct {
+	client   util.SshClient
+	ip       string
+	user     string
+	password string
+}
+
+func (s *sshClientWrapper) Output(command string) ([]byte, error) {
+	o, err := s.client.ExecCommand(s.user, s.password, s.ip, command)
+	return []byte(o), err
+}
+
+func (vm *softLayerVirtualGuest) ConfigureNetworks2(networks Networks) error {
+	ubuntu := Ubuntu{
+		SoftLayerClient: vm.softLayerClient.GetHttpClient(),
+		SSHClient: &sshClientWrapper{
+			client:   vm.sshClient,
+			ip:       vm.GetPrimaryBackendIP(),
+			user:     ROOT_USER_NAME,
+			password: vm.GetRootPassword(),
+		},
+		SoftLayerFileService: NewSoftlayerFileService(util.GetSshClient(), vm.logger),
+	}
+
+	err := ubuntu.ConfigureNetwork(networks, vm)
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Failed to configure networking for virtual guest with id: %d.", vm.ID())
+	}
+
+	return nil
+}
+
 func (vm *softLayerVirtualGuest) AttachDisk(disk bslcdisk.Disk) error {
 	volume, err := vm.fetchIscsiVolume(disk.ID())
 	if err != nil {

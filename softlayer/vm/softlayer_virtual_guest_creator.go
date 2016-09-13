@@ -48,12 +48,10 @@ func (c *softLayerVirtualGuestCreator) Create(agentID string, stemcell bslcstem.
 			} else {
 				return c.createByOSReload(agentID, stemcell, cloudProps, networks, env)
 			}
-		case "manual":
-			return nil, bosherr.Error("Manual networking is not currently supported")
 		case "vip":
 			return nil, bosherr.Error("SoftLayer Not Support VIP netowrk")
 		default:
-			return nil, bosherr.Errorf("Softlayer Not Support This Kind Of Network: %s", network.Type)
+			continue
 		}
 	}
 
@@ -62,7 +60,7 @@ func (c *softLayerVirtualGuestCreator) Create(agentID string, stemcell bslcstem.
 
 // Private methods
 func (c *softLayerVirtualGuestCreator) createBySoftlayer(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
-	virtualGuestTemplate, err := CreateVirtualGuestTemplate(stemcell, cloudProps)
+	virtualGuestTemplate, err := CreateVirtualGuestTemplate(stemcell, cloudProps, networks)
 	if err != nil {
 		return nil, bosherr.WrapError(err, "Creating VirtualGuest template")
 	}
@@ -115,6 +113,8 @@ func (c *softLayerVirtualGuestCreator) createBySoftlayer(agentID string, stemcel
 		}
 	}
 
+	vm.ConfigureNetworks2(networks)
+
 	agentEnv := CreateAgentUserData(agentID, cloudProps, networks, env, c.agentOptions)
 
 	err = vm.UpdateAgentEnv(agentEnv)
@@ -140,15 +140,22 @@ func (c *softLayerVirtualGuestCreator) createByOSReload(agentID string, stemcell
 
 	var virtualGuest datatypes.SoftLayer_Virtual_Guest
 
-	if common.IsPrivateSubnet(net.ParseIP(networks.First().IP)) {
-		virtualGuest, err = virtualGuestService.GetObjectByPrimaryBackendIpAddress(networks.First().IP)
-		c.logger.Info(SOFTLAYER_VM_CREATOR_LOG_TAG, fmt.Sprintf("OS reload on the server id %d with stemcell %d", virtualGuest.Id, stemcell.ID()))
-	} else {
-		virtualGuest, err = virtualGuestService.GetObjectByPrimaryIpAddress(networks.First().IP)
-	}
-
-	if err != nil || virtualGuest.Id == 0 {
-		return nil, bosherr.WrapErrorf(err, "Could not find VirtualGuest by ip address: %s", networks.First().IP)
+	for _, network := range networks {
+		switch network.Type {
+		case "dynamic":
+			if common.IsPrivateSubnet(net.ParseIP(network.IP)) {
+				virtualGuest, err = virtualGuestService.GetObjectByPrimaryBackendIpAddress(network.IP)
+			} else {
+				virtualGuest, err = virtualGuestService.GetObjectByPrimaryIpAddress(network.IP)
+			}
+			if err != nil || virtualGuest.Id == 0 {
+				return nil, bosherr.WrapErrorf(err, "Could not find VirtualGuest by ip address: %s", network.IP)
+			}
+		case "manual", "":
+			continue
+		default:
+			return nil, bosherr.Errorf("unexpected network type: %s", network.Type)
+		}
 	}
 
 	c.logger.Info(SOFTLAYER_VM_CREATOR_LOG_TAG, fmt.Sprintf("OS reload on VirtualGuest %d using stemcell %d", virtualGuest.Id, stemcell.ID()))
@@ -201,6 +208,8 @@ func (c *softLayerVirtualGuestCreator) createByOSReload(agentID string, stemcell
 	if err != nil || !found {
 		return nil, bosherr.WrapErrorf(err, "refresh VM with id: %d after os_reload", virtualGuest.Id)
 	}
+
+	vm.ConfigureNetworks2(networks)
 
 	agentEnv := CreateAgentUserData(agentID, cloudProps, networks, env, c.agentOptions)
 	if err != nil {

@@ -57,6 +57,9 @@ type VM interface {
 
 	ConfigureNetworks(Networks) error
 
+	//dedicated for setup network by modify /etc/network/interfaces
+	ConfigureNetworks2(Networks) error
+
 	DetachDisk(bslcdisk.Disk) error
 	Delete(agentId string) error
 

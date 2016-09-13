@@ -37,7 +37,45 @@ func TimeStampForTime(now time.Time) string {
 	return now.Format("20060102-030405-") + strconv.Itoa(int(now.UnixNano()/1e6-now.Unix()*1e3))
 }
 
-func CreateVirtualGuestTemplate(stemcell bslcstem.Stemcell, cloudProps VMCloudProperties) (sldatatypes.SoftLayer_Virtual_Guest_Template, error) {
+func CreateVirtualGuestTemplate(stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks) (sldatatypes.SoftLayer_Virtual_Guest_Template, error) {
+	for _, network := range networks {
+		switch network.Type {
+		case "dynamic":
+			if value, ok := network.CloudProperties["PrimaryNetworkComponent"]; ok {
+				networkComponent := value.(map[string]interface{})
+				if value1, ok := networkComponent["NetworkVlan"]; ok {
+					networkValn := value1.(map[string]interface{})
+					if value2, ok := networkValn["Id"]; ok {
+						cloudProps.PrimaryNetworkComponent = sldatatypes.PrimaryNetworkComponent{
+							NetworkVlan: sldatatypes.NetworkVlan{
+								Id: int(value2.(float64)),
+							},
+						}
+					}
+				}
+			}
+			if value, ok := network.CloudProperties["PrimaryBackendNetworkComponent"]; ok {
+				networkComponent := value.(map[string]interface{})
+				if value1, ok := networkComponent["NetworkVlan"]; ok {
+					networkValn := value1.(map[string]interface{})
+					if value2, ok := networkValn["Id"]; ok {
+						cloudProps.PrimaryBackendNetworkComponent = sldatatypes.PrimaryBackendNetworkComponent{
+							NetworkVlan: sldatatypes.NetworkVlan{
+								Id: int(value2.(float64)),
+							},
+						}
+					}
+				}
+			}
+			if value, ok := network.CloudProperties["PrivateNetworkOnlyFlag"]; ok {
+				privateOnly := value.(bool)
+				cloudProps.PrivateNetworkOnlyFlag = privateOnly
+			}
+		default:
+			continue
+		}
+	}
+
 	virtualGuestTemplate := sldatatypes.SoftLayer_Virtual_Guest_Template{
 		Hostname:  cloudProps.VmNamePrefix,
 		Domain:    cloudProps.Domain,
