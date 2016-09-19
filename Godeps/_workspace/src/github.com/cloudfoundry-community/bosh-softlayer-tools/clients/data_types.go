@@ -14,14 +14,14 @@ type InfoResponse struct {
 
 // /bms
 type BaremetalInfo struct {
-	Id                 int    `json:"id"`
-	Hostname           string `json:"hostname"`
-	Private_ip_address string `json:"private_ip_address"`
-	Public_ip_address  string `json:"public_ip_address"`
-	Hardware_status    string `json:"hardware_status"`
-	Memory             int    `json:"memory"`
-	Cpu                int    `json:"cpu"`
-	Provision_date     string `json:"provision_date"`
+	Id                 int      `json:"id"`
+	Hostname           string   `json:"hostname"`
+	Private_ip_address string   `json:"private_ip_address"`
+	Public_ip_address  string   `json:"public_ip_address"`
+	Tags               []string `json:"tags"`
+	Memory             int      `json:"memory"`
+	Cpu                int      `json:"cpu"`
+	Provision_date     string   `json:"provision_date"`
 }
 
 // /baremetal/spec/${server_name}/${stemcell}/${netboot_image}
@@ -133,32 +133,23 @@ type CreateBaremetalsResponse struct {
 }
 
 type ServerSpec struct {
-	Package          int  `yaml:"package" json:"package,omitempty"`
-	Server           int  `yaml:"server" json:"server,omitempty"`
-	Ram              int  `yaml:"ram" json:"ram,omitempty"`
-	Disk0            int  `yaml:"disk0" json:"disk0,omitempty"`
-	PortSpeed        int  `yaml:"port_speed" json:"port_speed,omitempty"`
-	PublicVlanId     int  `yaml:"public_vlan_id" json:"public_vlan_id,omitempty"`
-	PrivateVlanId    int  `yaml:"private_vlan_id" json:"private_vlan_id,omitempty"`
-	Hourly           bool `yaml:"hourly" json:"hourly,omitempty"`
-	Os               int  `yaml:"os,omitempty" json:"os,omitempty"`
-	DiskController   int  `yaml:"disk_controller" json:"disk_controller,omitempty"`
-	Bandwidth        int  `yaml:"bandwidth" json:"bandwidth,omitempty"`
-	RemoteManagement int  `yaml:"remote_management" json:"remote_management,omitempty"`
-	PriIpAddresses   int  `yaml:"pri_ip_addresses" json:"pri_ip_addresses,omitempty"`
-	Monitoring       int  `yaml:"monitoring" json:"monitoring,omitempty"`
-	Notification     int  `yaml:"notification" json:"notification,omitempty"`
-	Response         int  `yaml:"response" json:"response,omitempty"`
+	Cores         int  `yaml:"cores" json:"cores,omitempty"`
+	Memory        int  `yaml:"memory" json:"memory,omitempty"`
+	MaxPortSpeed  int  `yaml:"max_port_speed" json:"max_port_speed,omitempty"`
+	PublicVlanId  int  `yaml:"public_vlan_id" json:"public_vlan_id,omitempty"`
+	PrivateVlanId int  `yaml:"private_vlan_id" json:"private_vlan_id,omitempty"`
+	Hourly        bool `yaml:"hourly" json:"hourly"`
 }
 
 type CloudProperty struct {
 	BoshIP         string     `yaml:"bosh_ip" json:"bosh_ip"`
 	Datacenter     string     `yaml:"datacenter" json:"datacenter"`
+	Domain         string     `yaml:"domain" json:"domain"`
 	NamePrefix     string     `yaml:"name_prefix" json:"name_prefix"`
 	ServerSpec     ServerSpec `yaml:"server_spec" json:"server_spec"`
 	Baremetal      bool       `yaml:"baremetal" json:"baremetal"`
-	BmStemcell     string     `yaml:"bm_stemcell" json:"bm_stemcell"`
-	BmNetbootImage string     `yaml:"bm_netboot_image" json:"bm_netboot_image"`
+	BmStemcell     string     `yaml:"bm_stemcell" json:"bm_stemcell,omitempty"`
+	BmNetbootImage string     `yaml:"bm_netboot_image" json:"bm_netboot_image,omitempty"`
 	Size           int        `yaml:"size" json:"size"`
 }
 
