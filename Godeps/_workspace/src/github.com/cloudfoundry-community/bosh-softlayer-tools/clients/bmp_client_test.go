@@ -80,7 +80,7 @@ var _ = Describe("BMP client", func() {
 				Hostname:           "hostname0",
 				Private_ip_address: "private_ip_address0",
 				Public_ip_address:  "public_ip_address0",
-				Hardware_status:    "hardware_status0",
+				Tags:               []string{"bm.state.new", "bm.bps"},
 				Memory:             0,
 				Cpu:                0,
 				Provision_date:     "2016-01-01T00:00:00-00:00"}))
@@ -90,7 +90,7 @@ var _ = Describe("BMP client", func() {
 				Hostname:           "hostname1",
 				Private_ip_address: "private_ip_address1",
 				Public_ip_address:  "public_ip_address1",
-				Hardware_status:    "hardware_status1",
+				Tags:               []string{"bm.state.new", "bm.bps"},
 				Memory:             1,
 				Cpu:                1,
 				Provision_date:     "2016-01-01T00:00:00-00:00"}))
@@ -333,11 +333,9 @@ var _ = Describe("BMP client", func() {
 			Expect(err).ToNot(HaveOccurred())
 
 			fakeServerSpec = clients.ServerSpec{
-				Package:       123,
-				Server:        123,
-				Ram:           123,
-				Disk0:         12345,
-				PortSpeed:     12345,
+				Cores:         4,
+				Memory:        4,
+				MaxPortSpeed:  100,
 				PublicVlanId:  123456,
 				PrivateVlanId: 123456,
 				Hourly:        true,
