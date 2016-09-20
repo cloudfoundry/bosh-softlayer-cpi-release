@@ -11,23 +11,23 @@
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/bosh-utils/errors",
-			"Rev": "67f99ed9a1c4eab0f7b7db3a7cdcb8e019710d61"
+			"Rev": "10859874f8970516e7891f49fc285829d07d9722"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/bosh-utils/logger",
-			"Rev": "67f99ed9a1c4eab0f7b7db3a7cdcb8e019710d61"
+			"Rev": "10859874f8970516e7891f49fc285829d07d9722"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/bosh-utils/retrystrategy",
-			"Rev": "67f99ed9a1c4eab0f7b7db3a7cdcb8e019710d61"
+			"Rev": "10859874f8970516e7891f49fc285829d07d9722"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/bosh-utils/system",
-			"Rev": "67f99ed9a1c4eab0f7b7db3a7cdcb8e019710d61"
+			"Rev": "10859874f8970516e7891f49fc285829d07d9722"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/bosh-utils/uuid",
-			"Rev": "67f99ed9a1c4eab0f7b7db3a7cdcb8e019710d61"
+			"Rev": "10859874f8970516e7891f49fc285829d07d9722"
 		},
 		{
 			"ImportPath": "github.com/kr/fs",
@@ -35,33 +35,33 @@
 		},
 		{
 			"ImportPath": "github.com/maximilien/softlayer-go/client",
-			"Comment": "v0.5.0-102-g9844044",
-			"Rev": "9844044a75c729b725cac55e7f5079df49402365"
+			"Comment": "v0.6.0-82-gce5ad9d",
+			"Rev": "ce5ad9d7e1ba6328769c75a9c5aa17d8eb0dd88f"
 		},
 		{
 			"ImportPath": "github.com/maximilien/softlayer-go/common",
-			"Comment": "v0.5.0-102-g9844044",
-			"Rev": "9844044a75c729b725cac55e7f5079df49402365"
+			"Comment": "v0.6.0-82-gce5ad9d",
+			"Rev": "ce5ad9d7e1ba6328769c75a9c5aa17d8eb0dd88f"
 		},
 		{
 			"ImportPath": "github.com/maximilien/softlayer-go/data_types",
-			"Comment": "v0.5.0-102-g9844044",
-			"Rev": "9844044a75c729b725cac55e7f5079df49402365"
+			"Comment": "v0.6.0-82-gce5ad9d",
+			"Rev": "ce5ad9d7e1ba6328769c75a9c5aa17d8eb0dd88f"
 		},
 		{
 			"ImportPath": "github.com/maximilien/softlayer-go/services",
-			"Comment": "v0.5.0-102-g9844044",
-			"Rev": "9844044a75c729b725cac55e7f5079df49402365"
+			"Comment": "v0.6.0-82-gce5ad9d",
+			"Rev": "ce5ad9d7e1ba6328769c75a9c5aa17d8eb0dd88f"
 		},
 		{
 			"ImportPath": "github.com/maximilien/softlayer-go/softlayer",
-			"Comment": "v0.5.0-102-g9844044",
-			"Rev": "9844044a75c729b725cac55e7f5079df49402365"
+			"Comment": "v0.6.0-82-gce5ad9d",
+			"Rev": "ce5ad9d7e1ba6328769c75a9c5aa17d8eb0dd88f"
 		},
 		{
 			"ImportPath": "github.com/maximilien/softlayer-go/test_helpers",
-			"Comment": "v0.5.0-102-g9844044",
-			"Rev": "9844044a75c729b725cac55e7f5079df49402365"
+			"Comment": "v0.6.0-82-gce5ad9d",
+			"Rev": "ce5ad9d7e1ba6328769c75a9c5aa17d8eb0dd88f"
 		},
 		{
 			"ImportPath": "github.com/nu7hatch/gouuid",
@@ -69,8 +69,8 @@
 		},
 		{
 			"ImportPath": "github.com/onsi/ginkgo",
-			"Comment": "v1.2.0-46-gc3a655f",
-			"Rev": "c3a655f9b37a2207fa39721b078b3173ee9218d6"
+			"Comment": "v1.2.0-6-gd981d36",
+			"Rev": "d981d36e9884231afa909627b9c275e4ba678f90"
 		},
 		{
 			"ImportPath": "github.com/onsi/gomega",
