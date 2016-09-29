@@ -25,9 +25,11 @@ type softLayerVirtualGuestCreator struct {
 	agentOptions AgentOptions
 	logger       boshlog.Logger
 	vmFinder     Finder
+
+	disableOsReload bool
 }
 
-func NewSoftLayerCreator(vmFinder Finder, softLayerClient sl.Client, agentOptions AgentOptions, logger boshlog.Logger) VMCreator {
+func NewSoftLayerCreator(vmFinder Finder, softLayerClient sl.Client, agentOptions AgentOptions, logger boshlog.Logger, disableOsReload bool) VMCreator {
 	bslcommon.TIMEOUT = 120 * time.Minute
 	bslcommon.POLLING_INTERVAL = 5 * time.Second
 
@@ -36,6 +38,7 @@ func NewSoftLayerCreator(vmFinder Finder, softLayerClient sl.Client, agentOption
 		softLayerClient: softLayerClient,
 		agentOptions:    agentOptions,
 		logger:          logger,
+		disableOsReload: disableOsReload,
 	}
 }
 
@@ -43,10 +46,15 @@ func (c *softLayerVirtualGuestCreator) Create(agentID string, stemcell bslcstem.
 	for _, network := range networks {
 		switch network.Type {
 		case "dynamic":
-			if len(network.IP) == 0 {
+			if cloudProps.DisableOsReload || c.disableOsReload {
 				return c.createBySoftlayer(agentID, stemcell, cloudProps, networks, env)
 			} else {
-				return c.createByOSReload(agentID, stemcell, cloudProps, networks, env)
+				if len(network.IP) == 0 {
+					return c.createBySoftlayer(agentID, stemcell, cloudProps, networks, env)
+				} else {
+					return c.createByOSReload(agentID, stemcell, cloudProps, networks, env)
+				}
+
 			}
 		case "vip":
 			return nil, bosherr.Error("SoftLayer Not Support VIP netowrk")

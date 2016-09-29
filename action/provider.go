@@ -33,6 +33,7 @@ func NewProvider(softLayerClient sl.Client, baremetalClient bmscl.BmpClient, opt
 		softLayerClient,
 		options.Agent,
 		logger,
+		options.DisableOsReload,
 	)
 
 	baremetalCreator := bslcvm.NewBaremetalCreator(

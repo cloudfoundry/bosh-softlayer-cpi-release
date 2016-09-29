@@ -43,6 +43,7 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 			softLayerClient,
 			agentOptions,
 			logger,
+			false,
 		)
 		bslcommon.TIMEOUT = 2 * time.Second
 		bslcommon.POLLING_INTERVAL = 1 * time.Second

@@ -18,6 +18,8 @@ type ConcreteFactoryOptions struct {
 	AgentEnvService string `json:"agentenvservice,omitempty"`
 
 	Registry bslcvm.RegistryOptions `json:"registry,omitempty"`
+
+	DisableOsReload bool `json:"disableOsReload,omitempty"`
 }
 
 func (o ConcreteFactoryOptions) Validate() error {

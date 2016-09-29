@@ -34,6 +34,8 @@ type VMCloudProperties struct {
 	Baremetal             bool   `json:"baremetal,omitempty"`
 	BaremetalStemcell     string `json:"bm_stemcell,omitempty"`
 	BaremetalNetbootImage string `json:"bm_netboot_image,omitempty"`
+
+	DisableOsReload bool `json:"disableOsReload,omitempty"`
 }
 
 type AllowedHostCredential struct {
