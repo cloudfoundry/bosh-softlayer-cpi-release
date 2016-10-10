@@ -1,6 +1,8 @@
 package action_test
 
 import (
+	"os"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -22,6 +24,11 @@ var _ = Describe("ConcreteFactoryOptions", func() {
 					Provider: "fake-blobstore-type",
 				},
 			},
+			Softlayer: SoftLayerConfig{
+				Username:    "fake-username",
+				ApiKey:      "fke-apikey",
+				ApiEndpoint: "fake-api-endpoint",
+			},
 		}
 	)
 
@@ -36,6 +43,20 @@ var _ = Describe("ConcreteFactoryOptions", func() {
 			err := options.Validate()
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("Validating Agent configuration"))
+		})
+
+		It("sets the environment variable correctly if it is specified", func() {
+			err := options.Validate()
+			Expect(err).ToNot(HaveOccurred())
+
+			Expect(os.Getenv("SL_API_ENDPOINT")).To(Equal("fake-api-endpoint"))
+		})
+
+		It("sets an empty string to the environment variable if it is not specified", func() {
+			err := options.Validate()
+			Expect(err).ToNot(HaveOccurred())
+
+			Expect(os.Getenv("SL_CREATE_ISCSI_VOLUME_TIMEOUT")).To(Equal(""))
 		})
 	})
 })

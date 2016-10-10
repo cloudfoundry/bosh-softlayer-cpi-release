@@ -1,9 +1,10 @@
 package action
 
 import (
-	bosherr "github.com/cloudfoundry/bosh-utils/errors"
+	"os"
 
 	bslcvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
+	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 )
 
 type ConcreteFactoryOptions struct {
@@ -35,8 +36,13 @@ func (o ConcreteFactoryOptions) Validate() error {
 }
 
 type SoftLayerConfig struct {
-	Username string `json:"username"`
-	ApiKey   string `json:"apiKey"`
+	Username                         string `json:"username"`
+	ApiKey                           string `json:"apiKey"`
+	ApiEndpoint                      string `json:"apiEndpoint,omitempty"`
+	ApiWaitTime                      string `json:"apiWaitTime,omitempty"`
+	ApiRetryCount                    string `json:"apiRetryCount,omitempty"`
+	CreateISCSIVolumeTimeout         string `json:"createIscsiVolumeTimeout,omitempty"`
+	CreateISCSIVolumePollingIntreval string `json:"createIscsiVolumePollingIntertval,omitempty"`
 }
 
 type BaremetalConfig struct {
@@ -52,6 +58,31 @@ func (c SoftLayerConfig) Validate() error {
 
 	if c.ApiKey == "" {
 		return bosherr.Error("Must provide non-empty ApiKey")
+	}
+
+	err := os.Setenv("SL_API_WAIT_TIME", c.ApiWaitTime)
+	if err != nil {
+		return bosherr.WrapError(err, "Setting Environment Variable")
+	}
+
+	err = os.Setenv("SL_API_RETRY_COUNT", c.ApiRetryCount)
+	if err != nil {
+		return bosherr.WrapError(err, "Setting Environment Variable")
+	}
+
+	err = os.Setenv("SL_API_ENDPOINT", c.ApiEndpoint)
+	if err != nil {
+		return bosherr.WrapError(err, "Setting Environment Variable")
+	}
+
+	err = os.Setenv("SL_CREATE_ISCSI_VOLUME_TIMEOUT", c.CreateISCSIVolumeTimeout)
+	if err != nil {
+		return bosherr.WrapError(err, "Setting Environment Variable")
+	}
+
+	err = os.Setenv("SL_CREATE_ISCSI_VOLUME_POLLING_INTERVAL", c.CreateISCSIVolumePollingIntreval)
+	if err != nil {
+		return bosherr.WrapError(err, "Setting Environment Variable")
 	}
 
 	return nil
