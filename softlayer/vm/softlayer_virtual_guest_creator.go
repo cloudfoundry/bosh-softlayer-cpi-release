@@ -55,7 +55,7 @@ func (c *softLayerVirtualGuestCreator) Create(agentID string, stemcell bslcstem.
 		}
 	}
 
-	return nil, nil
+	return nil, bosherr.Error("virtual guests must have exactly one dynamic network")
 }
 
 // Private methods
