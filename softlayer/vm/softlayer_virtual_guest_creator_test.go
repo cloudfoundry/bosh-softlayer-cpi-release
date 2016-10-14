@@ -16,6 +16,7 @@ import (
 	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
 
+	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
 	sldatatypes "github.com/maximilien/softlayer-go/data_types"
@@ -211,6 +212,30 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 			})
 
 			Context("creating vm in softlayer", func() {
+				Context("without dynamic networking", func() {
+					It("returns error", func() {
+						networks = map[string]Network{
+							"fake-network0": Network{
+								Type:    "manual",
+								IP:      "fake-IP",
+								Netmask: "fake-Netmask",
+								Gateway: "fake-Gateway",
+								DNS: []string{
+									"fake-dns0",
+									"fake-dns1",
+								},
+								Default:         []string{},
+								Preconfigured:   true,
+								CloudProperties: map[string]interface{}{},
+							},
+						}
+
+						vm, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
+						Expect(vm).To(BeNil())
+						Expect(err).To(Equal(bosherr.Error("virtual guests must have exactly one dynamic network")))
+					})
+				})
+
 				Context("with dynamic networking", func() {
 					BeforeEach(func() {
 						networks = map[string]Network{
