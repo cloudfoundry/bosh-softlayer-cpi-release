@@ -18,8 +18,6 @@ type ConcreteFactoryOptions struct {
 	AgentEnvService string `json:"agentenvservice,omitempty"`
 
 	Registry bslcvm.RegistryOptions `json:"registry,omitempty"`
-
-	DisableOsReload bool `json:"disableOsReload,omitempty"`
 }
 
 func (o ConcreteFactoryOptions) Validate() error {
@@ -37,8 +35,9 @@ func (o ConcreteFactoryOptions) Validate() error {
 }
 
 type SoftLayerConfig struct {
-	Username string `json:"username"`
-	ApiKey   string `json:"apiKey"`
+	Username        string `json:"username"`
+	ApiKey          string `json:"apiKey"`
+	DisableOsReload bool   `json:"disableOsReload,omitempty"`
 }
 
 type BaremetalConfig struct {
