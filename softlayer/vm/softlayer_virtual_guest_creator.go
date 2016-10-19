@@ -26,10 +26,10 @@ type softLayerVirtualGuestCreator struct {
 	logger       boshlog.Logger
 	vmFinder     Finder
 
-	disableOsReload bool
+	featureOptions FeatureOptions
 }
 
-func NewSoftLayerCreator(vmFinder Finder, softLayerClient sl.Client, agentOptions AgentOptions, logger boshlog.Logger, disableOsReload bool) VMCreator {
+func NewSoftLayerCreator(vmFinder Finder, softLayerClient sl.Client, agentOptions AgentOptions, logger boshlog.Logger, featureOptions FeatureOptions) VMCreator {
 	bslcommon.TIMEOUT = 120 * time.Minute
 	bslcommon.POLLING_INTERVAL = 5 * time.Second
 
@@ -38,7 +38,7 @@ func NewSoftLayerCreator(vmFinder Finder, softLayerClient sl.Client, agentOption
 		softLayerClient: softLayerClient,
 		agentOptions:    agentOptions,
 		logger:          logger,
-		disableOsReload: disableOsReload,
+		featureOptions:  featureOptions,
 	}
 }
 
@@ -46,7 +46,7 @@ func (c *softLayerVirtualGuestCreator) Create(agentID string, stemcell bslcstem.
 	for _, network := range networks {
 		switch network.Type {
 		case "dynamic":
-			if cloudProps.DisableOsReload || c.disableOsReload {
+			if cloudProps.DisableOsReload || c.featureOptions.DisableOsReload {
 				return c.createBySoftlayer(agentID, stemcell, cloudProps, networks, env)
 			} else {
 				if len(network.IP) == 0 {

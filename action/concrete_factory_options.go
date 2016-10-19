@@ -35,9 +35,9 @@ func (o ConcreteFactoryOptions) Validate() error {
 }
 
 type SoftLayerConfig struct {
-	Username        string `json:"username"`
-	ApiKey          string `json:"apiKey"`
-	DisableOsReload bool   `json:"disableOsReload,omitempty"`
+	Username       string                `json:"username"`
+	ApiKey         string                `json:"apiKey"`
+	FeatureOptions bslcvm.FeatureOptions `json:"featureOptions"`
 }
 
 type BaremetalConfig struct {

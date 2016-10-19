@@ -29,6 +29,7 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 		agentOptions    AgentOptions
 		logger          boshlog.Logger
 		creator         VMCreator
+		featureOptions  FeatureOptions
 	)
 
 	BeforeEach(func() {
@@ -55,19 +56,21 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 			BeforeEach(func() {
 				agentID = "fake-agent-id"
 				stemcell = bslcstem.NewSoftLayerStemcell(1234, "fake-stemcell-uuid", softLayerClient, logger)
+
+				env = Environment{}
+				featureOptions = FeatureOptions{DisableOsReload: false}
+
+				vmFinder.FindVM = fakevm.NewFakeVM(1234567)
+				vmFinder.FindFound = true
+				vmFinder.FindErr = nil
+
 				creator = NewSoftLayerCreator(
 					vmFinder,
 					softLayerClient,
 					agentOptions,
 					logger,
-					false,
+					featureOptions,
 				)
-
-				env = Environment{}
-
-				vmFinder.FindVM = fakevm.NewFakeVM(1234567)
-				vmFinder.FindFound = true
-				vmFinder.FindErr = nil
 			})
 			Context("creating vm by os_reload", func() {
 				Context("with dynamic networking", func() {
@@ -417,6 +420,8 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 
 				env = Environment{}
 
+				featureOptions = FeatureOptions{DisableOsReload: true}
+
 				vmFinder.FindVM = fakevm.NewFakeVM(1234567)
 				vmFinder.FindFound = true
 				vmFinder.FindErr = nil
@@ -426,7 +431,7 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 					softLayerClient,
 					agentOptions,
 					logger,
-					true,
+					featureOptions,
 				)
 			})
 
