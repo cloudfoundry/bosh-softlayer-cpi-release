@@ -7,6 +7,10 @@ import (
 	sldatatypes "github.com/maximilien/softlayer-go/data_types"
 )
 
+type FeatureOptions struct {
+	DisableOsReload bool `json:"disableOsReload"`
+}
+
 type VMCloudProperties struct {
 	VmNamePrefix             string                               `json:"vmNamePrefix,omitempty"`
 	Domain                   string                               `json:"domain,omitempty"`
@@ -34,6 +38,8 @@ type VMCloudProperties struct {
 	Baremetal             bool   `json:"baremetal,omitempty"`
 	BaremetalStemcell     string `json:"bm_stemcell,omitempty"`
 	BaremetalNetbootImage string `json:"bm_netboot_image,omitempty"`
+
+	DisableOsReload bool `json:"disableOsReload,omitempty"`
 }
 
 type AllowedHostCredential struct {

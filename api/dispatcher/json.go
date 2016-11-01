@@ -179,6 +179,5 @@ func (c JSON) localDiskFlagNotSet(reqString string) {
 		bslcommon.LocalDiskFlagNotSet = false
 	} else {
 		bslcommon.LocalDiskFlagNotSet = true
-	//	c.logger.DebugWithDetails(jsonLogTag, "localDiskFlag is not specified in the input json, will set true as the default value", "")
 	}
 }
