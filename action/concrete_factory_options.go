@@ -2,6 +2,7 @@ package action
 
 import (
 	"os"
+	"strconv"
 
 	bslcvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
@@ -36,13 +37,9 @@ func (o ConcreteFactoryOptions) Validate() error {
 }
 
 type SoftLayerConfig struct {
-	Username                         string `json:"username"`
-	ApiKey                           string `json:"apiKey"`
-	ApiEndpoint                      string `json:"apiEndpoint,omitempty"`
-	ApiWaitTime                      string `json:"apiWaitTime,omitempty"`
-	ApiRetryCount                    string `json:"apiRetryCount,omitempty"`
-	CreateISCSIVolumeTimeout         string `json:"createIscsiVolumeTimeout,omitempty"`
-	CreateISCSIVolumePollingIntreval string `json:"createIscsiVolumePollingIntertval,omitempty"`
+	Username       string                `json:"username"`
+	ApiKey         string                `json:"apiKey"`
+	FeatureOptions bslcvm.FeatureOptions `json:"featureOptions"`
 }
 
 type BaremetalConfig struct {
@@ -60,27 +57,27 @@ func (c SoftLayerConfig) Validate() error {
 		return bosherr.Error("Must provide non-empty ApiKey")
 	}
 
-	err := os.Setenv("SL_API_WAIT_TIME", c.ApiWaitTime)
+	err := os.Setenv("SL_API_WAIT_TIME", strconv.Itoa(c.FeatureOptions.ApiWaitTime))
 	if err != nil {
 		return bosherr.WrapError(err, "Setting Environment Variable")
 	}
 
-	err = os.Setenv("SL_API_RETRY_COUNT", c.ApiRetryCount)
+	err = os.Setenv("SL_API_RETRY_COUNT", strconv.Itoa(c.FeatureOptions.ApiRetryCount))
 	if err != nil {
 		return bosherr.WrapError(err, "Setting Environment Variable")
 	}
 
-	err = os.Setenv("SL_API_ENDPOINT", c.ApiEndpoint)
+	err = os.Setenv("SL_API_ENDPOINT", c.FeatureOptions.ApiEndpoint)
 	if err != nil {
 		return bosherr.WrapError(err, "Setting Environment Variable")
 	}
 
-	err = os.Setenv("SL_CREATE_ISCSI_VOLUME_TIMEOUT", c.CreateISCSIVolumeTimeout)
+	err = os.Setenv("SL_CREATE_ISCSI_VOLUME_TIMEOUT", strconv.Itoa(c.FeatureOptions.CreateISCSIVolumeTimeout))
 	if err != nil {
 		return bosherr.WrapError(err, "Setting Environment Variable")
 	}
 
-	err = os.Setenv("SL_CREATE_ISCSI_VOLUME_POLLING_INTERVAL", c.CreateISCSIVolumePollingIntreval)
+	err = os.Setenv("SL_CREATE_ISCSI_VOLUME_POLLING_INTERVAL", strconv.Itoa(c.FeatureOptions.CreateISCSIVolumePollingInterval))
 	if err != nil {
 		return bosherr.WrapError(err, "Setting Environment Variable")
 	}

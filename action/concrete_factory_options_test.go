@@ -25,9 +25,14 @@ var _ = Describe("ConcreteFactoryOptions", func() {
 				},
 			},
 			Softlayer: SoftLayerConfig{
-				Username:    "fake-username",
-				ApiKey:      "fke-apikey",
-				ApiEndpoint: "fake-api-endpoint",
+				Username: "fake-username",
+				ApiKey:   "fke-apikey",
+				FeatureOptions: bslcvm.FeatureOptions{
+					ApiEndpoint:                      "fake-api-endpoint",
+					ApiWaitTime:                      3,
+					ApiRetryCount:                    5,
+					CreateISCSIVolumePollingInterval: 1,
+				},
 			},
 		}
 	)
@@ -50,13 +55,16 @@ var _ = Describe("ConcreteFactoryOptions", func() {
 			Expect(err).ToNot(HaveOccurred())
 
 			Expect(os.Getenv("SL_API_ENDPOINT")).To(Equal("fake-api-endpoint"))
+			Expect(os.Getenv("SL_API_WAIT_TIME")).To(Equal("3"))
+			Expect(os.Getenv("SL_API_RETRY_COUNT")).To(Equal("5"))
+			Expect(os.Getenv("SL_CREATE_ISCSI_VOLUME_POLLING_INTERVAL")).To(Equal("1"))
 		})
 
 		It("sets an empty string to the environment variable if it is not specified", func() {
 			err := options.Validate()
 			Expect(err).ToNot(HaveOccurred())
 
-			Expect(os.Getenv("SL_CREATE_ISCSI_VOLUME_TIMEOUT")).To(Equal(""))
+			Expect(os.Getenv("SL_CREATE_ISCSI_VOLUME_TIMEOUT")).To(Equal("0"))
 		})
 	})
 })

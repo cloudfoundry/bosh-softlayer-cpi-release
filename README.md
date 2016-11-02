@@ -117,6 +117,8 @@ SWEET SUITE SUCCESS
 * To update an existing dependency, you can use `godep update foo/bar` or `godep update foo/...` (where `...` is a wildcard)
 * The godep project [readme](https://github.com/tools/godep/README.md) is a pretty good resource: [https://github.com/tools/godep](https://github.com/tools/godep)
 
+* Since GO1.5, dependencies can be managed via [Govendor](https://github.com/kardianos/govendor). See [vendor](https://github.com/cloudfoundry/bosh-softlayer-cpi/tree/master/vendor) directory.
+
 ### Current conventions
 -----------------------
 
