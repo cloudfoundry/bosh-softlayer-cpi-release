@@ -28,7 +28,6 @@ var _ = Describe("ConcreteFactoryOptions", func() {
 				Username: "fake-username",
 				ApiKey:   "fke-apikey",
 				FeatureOptions: bslcvm.FeatureOptions{
-					ApiEndpoint:                      "fake-api-endpoint",
 					ApiWaitTime:                      3,
 					ApiRetryCount:                    5,
 					CreateISCSIVolumePollingInterval: 1,
@@ -54,7 +53,6 @@ var _ = Describe("ConcreteFactoryOptions", func() {
 			err := options.Validate()
 			Expect(err).ToNot(HaveOccurred())
 
-			Expect(os.Getenv("SL_API_ENDPOINT")).To(Equal("fake-api-endpoint"))
 			Expect(os.Getenv("SL_API_WAIT_TIME")).To(Equal("3"))
 			Expect(os.Getenv("SL_API_RETRY_COUNT")).To(Equal("5"))
 			Expect(os.Getenv("SL_CREATE_ISCSI_VOLUME_POLLING_INTERVAL")).To(Equal("1"))
@@ -64,7 +62,8 @@ var _ = Describe("ConcreteFactoryOptions", func() {
 			err := options.Validate()
 			Expect(err).ToNot(HaveOccurred())
 
-			Expect(os.Getenv("SL_CREATE_ISCSI_VOLUME_TIMEOUT")).To(Equal("0"))
+			Expect(os.Getenv("SL_API_ENDPOINT")).To(Equal("api.softlayer.com"))
+			Expect(os.Getenv("SL_CREATE_ISCSI_VOLUME_TIMEOUT")).To(Equal("600"))
 		})
 	})
 })

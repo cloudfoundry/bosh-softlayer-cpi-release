@@ -9,11 +9,11 @@ import (
 
 type FeatureOptions struct {
 	DisableOsReload                  bool   `json:"disableOsReload"`
-	ApiEndpoint                      string `json:"apiEndpoint,omitempty"`
-	ApiWaitTime                      int    `json:"apiWaitTime,omitempty"`
-	ApiRetryCount                    int    `json:"apiRetryCount,omitempty"`
-	CreateISCSIVolumeTimeout         int    `json:"createIscsiVolumeTimeout,omitempty"`
-	CreateISCSIVolumePollingInterval int    `json:"createIscsiVolumePollingInterval,omitempty"`
+	ApiEndpoint                      string `json:"apiEndpoint"`
+	ApiWaitTime                      int    `json:"apiWaitTime"`
+	ApiRetryCount                    int    `json:"apiRetryCount"`
+	CreateISCSIVolumeTimeout         int    `json:"createIscsiVolumeTimeout"`
+	CreateISCSIVolumePollingInterval int    `json:"createIscsiVolumePollingInterval"`
 }
 
 type VMCloudProperties struct {
