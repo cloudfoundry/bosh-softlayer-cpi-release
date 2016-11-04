@@ -14,10 +14,11 @@ import (
 )
 
 var (
-	TIMEOUT             time.Duration
-	POLLING_INTERVAL    time.Duration
-	LocalDiskFlagNotSet bool
-	LengthOfHostName    int
+	TIMEOUT                   time.Duration
+	POLLING_INTERVAL          time.Duration
+	LocalDiskFlagNotSet       bool
+	LengthOfHostName          int
+	LocalDNSConfigurationFile string
 )
 
 type SoftLayer_Hardware_Parameters struct {

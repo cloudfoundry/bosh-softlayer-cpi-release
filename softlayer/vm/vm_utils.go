@@ -142,7 +142,7 @@ func ParseMbusURL(mbusURL string, primaryBackendIpAddress string) (string, error
 	return fmt.Sprintf("%s://%s:%s", parsedURL.Scheme, primaryBackendIpAddress, port), nil
 }
 
-func UpdateEtcHostsOfBoshInit(record string) (err error) {
+func UpdateEtcHostsOfBoshInit(fileName string, record string) (err error) {
 	buffer := bytes.NewBuffer([]byte{})
 	t := template.Must(template.New("etc-hosts").Parse(ETC_HOSTS_TEMPLATE))
 
@@ -154,7 +154,7 @@ func UpdateEtcHostsOfBoshInit(record string) (err error) {
 	logger := boshlog.NewWriterLogger(boshlog.LevelError, os.Stderr, os.Stderr)
 	fs := boshsys.NewOsFileSystem(logger)
 
-	err = fs.WriteFile("/etc/hosts", buffer.Bytes())
+	err = fs.WriteFile(fileName, buffer.Bytes())
 	if err != nil {
 		return bosherr.WrapError(err, "Writing to /etc/hosts")
 	}
