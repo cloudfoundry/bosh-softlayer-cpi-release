@@ -25,19 +25,40 @@ var _ = Describe("ConcreteFactoryOptions", func() {
 				},
 			},
 			Softlayer: SoftLayerConfig{
-				Username: "fake-username",
-				ApiKey:   "fke-apikey",
-				FeatureOptions: bslcvm.FeatureOptions{
-					ApiWaitTime:                      3,
-					ApiRetryCount:                    5,
-					CreateISCSIVolumePollingInterval: 1,
-				},
+				Username:       "fake-username",
+				ApiKey:         "fke-apikey",
+				FeatureOptions: bslcvm.FeatureOptions{},
 			},
 		}
 	)
 
-	Describe("Validate", func() {
+	Context("when the option values are specified", func() {
 		BeforeEach(func() {
+			validOptions.Softlayer.FeatureOptions = bslcvm.FeatureOptions{
+				ApiEndpoint:                      "api.service.softlayer.com",
+				ApiWaitTime:                      3,
+				ApiRetryCount:                    5,
+				CreateISCSIVolumeTimeout:         1200,
+				CreateISCSIVolumePollingInterval: 20,
+			}
+			options = validOptions
+		})
+
+		It("sets environment variables correctly if specified", func() {
+			err := options.Validate()
+			Expect(err).ToNot(HaveOccurred())
+
+			Expect(os.Getenv("SL_API_ENDPOINT")).To(Equal("api.service.softlayer.com"))
+			Expect(os.Getenv("SL_API_WAIT_TIME")).To(Equal("3"))
+			Expect(os.Getenv("SL_API_RETRY_COUNT")).To(Equal("5"))
+			Expect(os.Getenv("SL_CREATE_ISCSI_VOLUME_TIMEOUT")).To(Equal("1200"))
+			Expect(os.Getenv("SL_CREATE_ISCSI_VOLUME_POLLING_INTERVAL")).To(Equal("20"))
+		})
+	})
+
+	Context("when the option values are not specified", func() {
+		BeforeEach(func() {
+			validOptions.Softlayer.FeatureOptions = bslcvm.FeatureOptions{}
 			options = validOptions
 		})
 
@@ -49,21 +70,15 @@ var _ = Describe("ConcreteFactoryOptions", func() {
 			Expect(err.Error()).To(ContainSubstring("Validating Agent configuration"))
 		})
 
-		It("sets the environment variable correctly if it is specified", func() {
-			err := options.Validate()
-			Expect(err).ToNot(HaveOccurred())
-
-			Expect(os.Getenv("SL_API_WAIT_TIME")).To(Equal("3"))
-			Expect(os.Getenv("SL_API_RETRY_COUNT")).To(Equal("5"))
-			Expect(os.Getenv("SL_CREATE_ISCSI_VOLUME_POLLING_INTERVAL")).To(Equal("1"))
-		})
-
-		It("sets an empty string to the environment variable if it is not specified", func() {
+		It("sets the default values to the environment variables if not specified", func() {
 			err := options.Validate()
 			Expect(err).ToNot(HaveOccurred())
 
 			Expect(os.Getenv("SL_API_ENDPOINT")).To(Equal("api.softlayer.com"))
+			Expect(os.Getenv("SL_API_WAIT_TIME")).To(Equal("0"))
+			Expect(os.Getenv("SL_API_RETRY_COUNT")).To(Equal("1"))
 			Expect(os.Getenv("SL_CREATE_ISCSI_VOLUME_TIMEOUT")).To(Equal("600"))
+			Expect(os.Getenv("SL_CREATE_ISCSI_VOLUME_POLLING_INTERVAL")).To(Equal("10"))
 		})
 	})
 })

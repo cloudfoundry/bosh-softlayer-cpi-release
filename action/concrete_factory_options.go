@@ -58,7 +58,7 @@ func (c SoftLayerConfig) Validate() error {
 	}
 
 	if c.FeatureOptions.ApiWaitTime == 0 {
-		c.FeatureOptions.ApiWaitTime = 1
+		c.FeatureOptions.ApiWaitTime = 0
 	}
 	err := os.Setenv("SL_API_WAIT_TIME", strconv.Itoa(c.FeatureOptions.ApiWaitTime))
 	if err != nil {
