@@ -14,7 +14,7 @@ import (
 
 type CreateVMAction struct {
 	stemcellFinder    bslcstem.Finder
-	vmCreatorProvider Provider
+	vmCreatorProvider CreatorProvider
 	vmCreator         bslcvm.VMCreator
 	vmCloudProperties *bslcvm.VMCloudProperties
 }
@@ -23,7 +23,7 @@ type Environment map[string]interface{}
 
 func NewCreateVM(
 	stemcellFinder bslcstem.Finder,
-	vmCreatorProvider Provider,
+	vmCreatorProvider CreatorProvider,
 ) (action CreateVMAction) {
 	action.stemcellFinder = stemcellFinder
 	action.vmCreatorProvider = vmCreatorProvider

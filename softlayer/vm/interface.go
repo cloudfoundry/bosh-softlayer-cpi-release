@@ -9,6 +9,7 @@ import (
 
 type FeatureOptions struct {
 	DisableOsReload bool `json:"disableOsReload"`
+	EnablePool      bool `json:"enablePool"`
 }
 
 type VMCloudProperties struct {
@@ -52,6 +53,10 @@ type VMMetadata map[string]interface{}
 
 type VMCreator interface {
 	Create(string, bslcstem.Stemcell, VMCloudProperties, Networks, Environment) (VM, error)
+}
+
+type VMDeleter interface {
+	Delete(cid int) error
 }
 
 type Finder interface {

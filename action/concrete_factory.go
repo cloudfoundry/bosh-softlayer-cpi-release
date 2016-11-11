@@ -10,6 +10,11 @@ import (
 	bslcdisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk"
 	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
 	bslcvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
+
+	httptransport "github.com/go-openapi/runtime/client"
+	apiclient "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/pool/client"
+
+	"github.com/go-openapi/strfmt"
 )
 
 type concreteFactory struct {
@@ -19,6 +24,7 @@ type concreteFactory struct {
 func NewConcreteFactory(options ConcreteFactoryOptions, logger boshlog.Logger) concreteFactory {
 	softLayerClient := slclient.NewSoftLayerClient(options.Softlayer.Username, options.Softlayer.ApiKey)
 	baremetalClient := bmsclient.NewBmpClient(options.Baremetal.Username, options.Baremetal.Password, options.Baremetal.EndPoint, nil, "")
+	poolClient := apiclient.New(httptransport.New(options.Baremetal.EndPoint, "v2", nil), strfmt.Default)
 
 	stemcellFinder := bslcstem.NewSoftLayerFinder(softLayerClient, logger)
 
@@ -31,10 +37,17 @@ func NewConcreteFactory(options ConcreteFactoryOptions, logger boshlog.Logger) c
 		logger,
 	)
 
-	vmCreatorProvider := NewProvider(
+	vmCreatorProvider := NewCreatorProvider(
 		softLayerClient,
 		baremetalClient,
+		poolClient,
 		options,
+		logger,
+	)
+
+	vmDeleterProvider := NewDeleterProvider(
+		softLayerClient,
+		poolClient,
 		logger,
 	)
 
@@ -56,7 +69,7 @@ func NewConcreteFactory(options ConcreteFactoryOptions, logger boshlog.Logger) c
 
 			// VM management
 			"create_vm":          NewCreateVM(stemcellFinder, vmCreatorProvider),
-			"delete_vm":          NewDeleteVM(vmFinder),
+			"delete_vm":          NewDeleteVM(vmDeleterProvider, options),
 			"has_vm":             NewHasVM(vmFinder),
 			"reboot_vm":          NewRebootVM(vmFinder),
 			"set_vm_metadata":    NewSetVMMetadata(vmFinder),

@@ -19,7 +19,7 @@ import (
 var _ = Describe("CreateVM", func() {
 	var (
 		stemcellFinder  *fakestem.FakeFinder
-		creatorProvider Provider
+		creatorProvider CreatorProvider
 
 		action CreateVMAction
 	)

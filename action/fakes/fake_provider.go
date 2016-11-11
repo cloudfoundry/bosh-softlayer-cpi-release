@@ -13,7 +13,7 @@ type fakeProvider struct {
 	fakeCreators map[string]bslcvm.VMCreator
 }
 
-func NewFakeProvider() Provider {
+func NewFakeProvider() CreatorProvider {
 
 	fakeSoftlayerCreator := &fakevm.FakeCreator{}
 	fakeSoftlayerCreator.CreateVM = fakevm.NewFakeVM(1234)
