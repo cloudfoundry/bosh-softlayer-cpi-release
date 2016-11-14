@@ -15,6 +15,7 @@ import (
 	apiclient "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/pool/client"
 
 	"github.com/go-openapi/strfmt"
+	"fmt"
 )
 
 type concreteFactory struct {
@@ -24,7 +25,7 @@ type concreteFactory struct {
 func NewConcreteFactory(options ConcreteFactoryOptions, logger boshlog.Logger) concreteFactory {
 	softLayerClient := slclient.NewSoftLayerClient(options.Softlayer.Username, options.Softlayer.ApiKey)
 	baremetalClient := bmsclient.NewBmpClient(options.Baremetal.Username, options.Baremetal.Password, options.Baremetal.EndPoint, nil, "")
-	poolClient := apiclient.New(httptransport.New(options.Baremetal.EndPoint, "v2", nil), strfmt.Default)
+	poolClient := apiclient.New(httptransport.New(fmt.Sprintf("%s:%s",options.Pool.Host,options.Pool.Port), "v2", nil), strfmt.Default)
 
 	stemcellFinder := bslcstem.NewSoftLayerFinder(softLayerClient, logger)
 
@@ -68,7 +69,7 @@ func NewConcreteFactory(options ConcreteFactoryOptions, logger boshlog.Logger) c
 			"delete_stemcell": NewDeleteStemcell(stemcellFinder, logger),
 
 			// VM management
-			"create_vm":          NewCreateVM(stemcellFinder, vmCreatorProvider),
+			"create_vm":          NewCreateVM(stemcellFinder, vmCreatorProvider, options),
 			"delete_vm":          NewDeleteVM(vmDeleterProvider, options),
 			"has_vm":             NewHasVM(vmFinder),
 			"reboot_vm":          NewRebootVM(vmFinder),

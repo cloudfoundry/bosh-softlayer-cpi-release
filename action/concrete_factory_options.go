@@ -11,6 +11,8 @@ type ConcreteFactoryOptions struct {
 
 	Baremetal BaremetalConfig `json:"baremetal,omitempty"`
 
+	Pool  PoolConfig `json:"pool,omitempty"`
+
 	StemcellsDir string `json:"stemcelldir,omitempty"`
 
 	Agent bslcvm.AgentOptions `json:"agent"`
@@ -44,6 +46,11 @@ type BaremetalConfig struct {
 	Username string `json:"username,omitempty"`
 	Password string `json:"password,omitempty"`
 	EndPoint string `json:"endpoint,omitempty"`
+}
+
+type PoolConfig struct {
+	Host string `json:"host,omitempty"`
+	Port string `json:"port,omitempty"`
 }
 
 func (c SoftLayerConfig) Validate() error {

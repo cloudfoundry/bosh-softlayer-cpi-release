@@ -17,6 +17,7 @@ type CreateVMAction struct {
 	vmCreatorProvider CreatorProvider
 	vmCreator         bslcvm.VMCreator
 	vmCloudProperties *bslcvm.VMCloudProperties
+	options ConcreteFactoryOptions
 }
 
 type Environment map[string]interface{}
@@ -24,7 +25,9 @@ type Environment map[string]interface{}
 func NewCreateVM(
 	stemcellFinder bslcstem.Finder,
 	vmCreatorProvider CreatorProvider,
+         options ConcreteFactoryOptions,
 ) (action CreateVMAction) {
+	action.options = options
 	action.stemcellFinder = stemcellFinder
 	action.vmCreatorProvider = vmCreatorProvider
 	action.vmCloudProperties = &bslcvm.VMCloudProperties{}
@@ -43,6 +46,19 @@ func (a CreateVMAction) Run(agentID string, stemcellCID StemcellCID, cloudProps 
 	stemcell, err := a.stemcellFinder.FindById(int(stemcellCID))
 	if err != nil {
 		return "0", bosherr.WrapErrorf(err, "Finding stemcell '%s'", stemcellCID)
+	}
+
+	if a.options.Softlayer.FeatureOptions.EnablePool {
+		a.vmCreator, err = a.vmCreatorProvider.Get("pool")
+		if err != nil {
+			return "0", bosherr.WrapError(err, "Failed to get pool creator'")
+		}
+
+		vm, err := a.vmCreator.Create(agentID, stemcell, cloudProps, vmNetworks, vmEnv)
+		if err != nil {
+			return "0", bosherr.WrapErrorf(err, "Creating vm with agent ID '%s'", agentID)
+		}
+		return VMCID(vm.ID()).String(), nil
 	}
 
 	if cloudProps.Baremetal {
