@@ -25,7 +25,7 @@ type concreteFactory struct {
 func NewConcreteFactory(options ConcreteFactoryOptions, logger boshlog.Logger) concreteFactory {
 	softLayerClient := slclient.NewSoftLayerClient(options.Softlayer.Username, options.Softlayer.ApiKey)
 	baremetalClient := bmsclient.NewBmpClient(options.Baremetal.Username, options.Baremetal.Password, options.Baremetal.EndPoint, nil, "")
-	poolClient := apiclient.New(httptransport.New(fmt.Sprintf("%s:%s",options.Pool.Host,options.Pool.Port), "v2", nil), strfmt.Default)
+	poolClient := apiclient.New(httptransport.New(fmt.Sprintf("%s:%d",options.Pool.Host,options.Pool.Port), "v2", nil), strfmt.Default)
 
 	stemcellFinder := bslcstem.NewSoftLayerFinder(softLayerClient, logger)
 

@@ -50,7 +50,7 @@ type BaremetalConfig struct {
 
 type PoolConfig struct {
 	Host string `json:"host,omitempty"`
-	Port string `json:"port,omitempty"`
+	Port int `json:"port,omitempty"`
 }
 
 func (c SoftLayerConfig) Validate() error {
