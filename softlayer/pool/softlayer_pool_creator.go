@@ -75,12 +75,12 @@ func (c *softLayerPoolCreator) Create(agentID string, stemcell bslcstem.Stemcell
 // Private methods
 func (c *softLayerPoolCreator) createFromVMPool(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
 	var err error
-
+	virtualGuestTemplate, err := CreateVirtualGuestTemplate(stemcell, cloudProps, networks)
 	filter := &models.VMFilter{
-		CPU:         int32(cloudProps.StartCpus),
-		MemoryMb:    int32(cloudProps.MaxMemory),
-		PrivateVlan: int32(cloudProps.PrimaryBackendNetworkComponent.NetworkVlan.Id),
-		PublicVlan:  int32(cloudProps.PrimaryNetworkComponent.NetworkVlan.Id),
+		CPU:         int32(virtualGuestTemplate.StartCpus),
+		MemoryMb:    int32(virtualGuestTemplate.MaxMemory),
+		PrivateVlan: int32(virtualGuestTemplate.PrimaryBackendNetworkComponent.NetworkVlan.Id),
+		PublicVlan:  int32(virtualGuestTemplate.PrimaryNetworkComponent.NetworkVlan.Id),
 		State: models.StateFree,
 	}
 	findVMsResp, err := c.softLayerVmPoolClient.VM.FindVmsByFilters(operations.NewFindVmsByFiltersParams().WithBody(filter))
@@ -96,12 +96,12 @@ func (c *softLayerPoolCreator) createFromVMPool(agentID string, stemcell bslcste
 
 		slPoolVm := &models.VM{
 			Cid: int32(sl_vm.ID()),
-			CPU: int32(cloudProps.StartCpus),
-			MemoryMb: int32(cloudProps.MaxMemory),
+			CPU: int32(virtualGuestTemplate.StartCpus),
+			MemoryMb: int32(virtualGuestTemplate.MaxMemory),
 			IP:  strfmt.IPv4(sl_vm.GetPrimaryBackendIP()),
 			Hostname: sl_vm.GetFullyQualifiedDomainName(),
-			PrivateVlan: int32(cloudProps.PrimaryNetworkComponent.NetworkVlan.Id),
-			PublicVlan: int32(cloudProps.PrimaryNetworkComponent.NetworkVlan.Id),
+			PrivateVlan: int32(virtualGuestTemplate.PrimaryBackendNetworkComponent.NetworkVlan.Id),
+			PublicVlan: int32(virtualGuestTemplate.PrimaryNetworkComponent.NetworkVlan.Id),
 			State: models.StateUsing,
 		}
 		_, err = c.softLayerVmPoolClient.VM.AddVM(operations.NewAddVMParams().WithBody(slPoolVm))
