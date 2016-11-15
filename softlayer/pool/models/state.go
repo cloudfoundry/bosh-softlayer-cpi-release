@@ -20,6 +20,7 @@ const (
 	StateFree         State = "free"
 	StateProvisioning State = "provisioning"
 	StateUsing        State = "using"
+	StateUnknown      State = "unknown"
 )
 
 // for schema
@@ -27,7 +28,7 @@ var stateEnum []interface{}
 
 func init() {
 	var res []State
-	if err := json.Unmarshal([]byte(`["free","provisioning","using"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["free","provisioning","using","unknown"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {

@@ -174,6 +174,50 @@
                 }
             }
         },
+        "/vms/order": {
+            "post": {
+                "tags": [
+                    "vm"
+                ],
+                "summary": "Order a free vm by filters (cpu, memory, private_vlan, public_vlan, state)",
+                "description": "",
+                "operationId": "orderVmByFilter",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "vm filter to order",
+                        "required": false,
+                        "schema": {
+                            "$ref": "#/definitions/VmFilter"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/VmResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "vm not found"
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
         "/vms/findByDeployment": {
             "get": {
                 "tags": [
@@ -396,7 +440,8 @@
             "enum": [
                 "free",
                 "provisioning",
-                "using"
+                "using",
+                "unknown"
             ]
         },
         "VmState": {

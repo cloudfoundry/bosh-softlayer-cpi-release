@@ -83,12 +83,12 @@ func (c *softLayerPoolCreator) createFromVMPool(agentID string, stemcell bslcste
 		PublicVlan:  int32(virtualGuestTemplate.PrimaryNetworkComponent.NetworkVlan.Id),
 		State: models.StateFree,
 	}
-	findVMsResp, err := c.softLayerVmPoolClient.VM.FindVmsByFilters(operations.NewFindVmsByFiltersParams().WithBody(filter))
+	orderVmResp, err := c.softLayerVmPoolClient.VM.OrderVMByFilter(operations.NewOrderVMByFilterParams().WithBody(filter))
 	if err != nil {
 		return nil, bosherr.WrapError(err, "Finding vms from pool")
 	}
 
-	if len (findVMsResp.Payload.Vms) == 0 {
+	if orderVmResp.Payload.VM == nil {
 	        sl_vm, err := c.createBySoftlayer(agentID, stemcell, cloudProps, networks, env)
 		if err != nil {
 			return nil, bosherr.WrapError(err, "Creating vm in SoftLayer")
@@ -106,7 +106,7 @@ func (c *softLayerPoolCreator) createFromVMPool(agentID string, stemcell bslcste
 		}
 		_, err = c.softLayerVmPoolClient.VM.AddVM(operations.NewAddVMParams().WithBody(slPoolVm))
 		if err != nil {
-			return nil, bosherr.WrapError(err, "Adding vms from pool")
+			return nil, bosherr.WrapError(err, "Adding vms into pool")
 		}
 		c.logger.Info(SOFTLAYER_POOL_CREATOR_LOG_TAG, fmt.Sprintf("Added vm %d to pool successfully", sl_vm.ID()))
 
@@ -115,19 +115,8 @@ func (c *softLayerPoolCreator) createFromVMPool(agentID string, stemcell bslcste
 		var vm *models.VM
 		var virtualGuestId int
 
-		vm = findVMsResp.Payload.Vms[0]
-		virtualGuestId = int(vm.Cid)
-
-		provision := &models.VMState{
-			State: models.StateProvisioning,
-		}
-
-		c.logger.Info(SOFTLAYER_POOL_CREATOR_LOG_TAG, fmt.Sprintf("Picking up the first vm %d from result set using stemcell %d to do os reload", vm.Cid, stemcell.ID()))
-
-		_, err = c.softLayerVmPoolClient.VM.UpdateVMWithState(operations.NewUpdateVMWithStateParams().WithBody(provision).WithCid(vm.Cid))
-		if err != nil {
-			return nil, bosherr.WrapErrorf(err, "Updating state of vm %d in pool to provisioning", virtualGuestId)
-		}
+		vm = orderVmResp.Payload.VM
+		virtualGuestId = int((*vm).Cid)
 
 		c.logger.Info(SOFTLAYER_POOL_CREATOR_LOG_TAG, fmt.Sprintf("OS reload on VirtualGuest %d using stemcell %d", virtualGuestId, stemcell.ID()))
 
@@ -136,7 +125,7 @@ func (c *softLayerPoolCreator) createFromVMPool(agentID string, stemcell bslcste
 			free := &models.VMState{
 				State: models.StateFree,
 			}
-			_, err = c.softLayerVmPoolClient.VM.UpdateVMWithState(operations.NewUpdateVMWithStateParams().WithBody(free).WithCid(vm.Cid))
+			_, err = c.softLayerVmPoolClient.VM.UpdateVMWithState(operations.NewUpdateVMWithStateParams().WithBody(free).WithCid(int32(virtualGuestId)))
 			if err != nil {
 				return nil, bosherr.WrapErrorf(err, "Updating state of vm %d in pool to free", virtualGuestId)
 			}
@@ -147,12 +136,12 @@ func (c *softLayerPoolCreator) createFromVMPool(agentID string, stemcell bslcste
 		using := &models.VMState{
 			State: models.StateUsing,
 		}
-		_, err = c.softLayerVmPoolClient.VM.UpdateVMWithState(operations.NewUpdateVMWithStateParams().WithBody(using).WithCid(vm.Cid))
+		_, err = c.softLayerVmPoolClient.VM.UpdateVMWithState(operations.NewUpdateVMWithStateParams().WithBody(using).WithCid(int32(virtualGuestId)))
 		if err != nil {
 			return nil, bosherr.WrapErrorf(err, "Updating state of vm %d in pool to using", virtualGuestId)
 		}
 
-		c.logger.Info(SOFTLAYER_POOL_CREATOR_LOG_TAG, fmt.Sprintf("vm %d using stemcell %d os reload completed", vm.Cid, stemcell.ID()))
+		c.logger.Info(SOFTLAYER_POOL_CREATOR_LOG_TAG, fmt.Sprintf("vm %d using stemcell %d os reload completed", virtualGuestId, stemcell.ID()))
 
 		return sl_vm_os, nil
 	}

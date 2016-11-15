@@ -216,6 +216,33 @@ func (a *Client) ListVM(params *ListVMParams) (*ListVMOK, error) {
 }
 
 /*
+OrderVMByFilter orders a free vm by filters cpu memory private vlan public vlan state
+*/
+func (a *Client) OrderVMByFilter(params *OrderVMByFilterParams) (*OrderVMByFilterOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewOrderVMByFilterParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "orderVmByFilter",
+		Method:             "POST",
+		PathPattern:        "/vms/order",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &OrderVMByFilterReader{formats: a.formats},
+		Context:            params.Context,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*OrderVMByFilterOK), nil
+
+}
+
+/*
 UpdateVM updates an existing vm
 */
 func (a *Client) UpdateVM(params *UpdateVMParams) (*UpdateVMOK, error) {
