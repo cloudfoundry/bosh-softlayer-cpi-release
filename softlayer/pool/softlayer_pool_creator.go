@@ -85,67 +85,65 @@ func (c *softLayerPoolCreator) createFromVMPool(agentID string, stemcell bslcste
 	}
 	orderVmResp, err := c.softLayerVmPoolClient.VM.OrderVMByFilter(operations.NewOrderVMByFilterParams().WithBody(filter))
 	if err != nil {
-		return nil, bosherr.WrapError(err, "Finding vms from pool")
-	}
-
-	if orderVmResp.Payload.VM == nil {
-	        sl_vm, err := c.createBySoftlayer(agentID, stemcell, cloudProps, networks, env)
-		if err != nil {
-			return nil, bosherr.WrapError(err, "Creating vm in SoftLayer")
-		}
-
-		slPoolVm := &models.VM{
-			Cid: int32(sl_vm.ID()),
-			CPU: int32(virtualGuestTemplate.StartCpus),
-			MemoryMb: int32(virtualGuestTemplate.MaxMemory),
-			IP:  strfmt.IPv4(sl_vm.GetPrimaryBackendIP()),
-			Hostname: sl_vm.GetFullyQualifiedDomainName(),
-			PrivateVlan: int32(virtualGuestTemplate.PrimaryBackendNetworkComponent.NetworkVlan.Id),
-			PublicVlan: int32(virtualGuestTemplate.PrimaryNetworkComponent.NetworkVlan.Id),
-			State: models.StateUsing,
-		}
-		_, err = c.softLayerVmPoolClient.VM.AddVM(operations.NewAddVMParams().WithBody(slPoolVm))
-		if err != nil {
-			return nil, bosherr.WrapError(err, "Adding vms into pool")
-		}
-		c.logger.Info(SOFTLAYER_POOL_CREATOR_LOG_TAG, fmt.Sprintf("Added vm %d to pool successfully", sl_vm.ID()))
-
-		return sl_vm, nil
-	} else {
-		var vm *models.VM
-		var virtualGuestId int
-
-		vm = orderVmResp.Payload.VM
-		virtualGuestId = int((*vm).Cid)
-
-		c.logger.Info(SOFTLAYER_POOL_CREATOR_LOG_TAG, fmt.Sprintf("OS reload on VirtualGuest %d using stemcell %d", virtualGuestId, stemcell.ID()))
-
-		sl_vm_os, err := c.oSReloadVMInPool(virtualGuestId, agentID, stemcell, cloudProps, networks, env)
-		if err != nil {
-			free := &models.VMState{
-				State: models.StateFree,
-			}
-			_, err = c.softLayerVmPoolClient.VM.UpdateVMWithState(operations.NewUpdateVMWithStateParams().WithBody(free).WithCid(int32(virtualGuestId)))
+		_, ok := err.(*operations.OrderVMByFilterNotFound)
+		if !ok {
+			return nil, bosherr.WrapError(err, "Ordering vm from pool")
+		} else {
+			sl_vm, err := c.createBySoftlayer(agentID, stemcell, cloudProps, networks, env)
 			if err != nil {
-				return nil, bosherr.WrapErrorf(err, "Updating state of vm %d in pool to free", virtualGuestId)
+				return nil, bosherr.WrapError(err, "Creating vm in SoftLayer")
 			}
+			slPoolVm := &models.VM{
+				Cid: int32(sl_vm.ID()),
+				CPU: int32(virtualGuestTemplate.StartCpus),
+				MemoryMb: int32(virtualGuestTemplate.MaxMemory),
+				IP:  strfmt.IPv4(sl_vm.GetPrimaryBackendIP()),
+				Hostname: sl_vm.GetFullyQualifiedDomainName(),
+				PrivateVlan: int32(virtualGuestTemplate.PrimaryBackendNetworkComponent.NetworkVlan.Id),
+				PublicVlan: int32(virtualGuestTemplate.PrimaryNetworkComponent.NetworkVlan.Id),
+				State: models.StateUsing,
+			}
+			_, err = c.softLayerVmPoolClient.VM.AddVM(operations.NewAddVMParams().WithBody(slPoolVm))
+			if err != nil {
+				return nil, bosherr.WrapError(err, "Adding vm into pool")
+			}
+			c.logger.Info(SOFTLAYER_POOL_CREATOR_LOG_TAG, fmt.Sprintf("Added vm %d to pool successfully", sl_vm.ID()))
 
-			return nil, bosherr.WrapError(err, "Os reloading vm in SoftLayer")
+			return sl_vm, nil
 		}
-
-		using := &models.VMState{
-			State: models.StateUsing,
-		}
-		_, err = c.softLayerVmPoolClient.VM.UpdateVMWithState(operations.NewUpdateVMWithStateParams().WithBody(using).WithCid(int32(virtualGuestId)))
-		if err != nil {
-			return nil, bosherr.WrapErrorf(err, "Updating state of vm %d in pool to using", virtualGuestId)
-		}
-
-		c.logger.Info(SOFTLAYER_POOL_CREATOR_LOG_TAG, fmt.Sprintf("vm %d using stemcell %d os reload completed", virtualGuestId, stemcell.ID()))
-
-		return sl_vm_os, nil
 	}
-	return nil, nil
+	var vm *models.VM
+	var virtualGuestId int
+
+	vm = orderVmResp.Payload.VM
+	virtualGuestId = int((*vm).Cid)
+
+	c.logger.Info(SOFTLAYER_POOL_CREATOR_LOG_TAG, fmt.Sprintf("OS reload on VirtualGuest %d using stemcell %d", virtualGuestId, stemcell.ID()))
+
+	sl_vm_os, err := c.oSReloadVMInPool(virtualGuestId, agentID, stemcell, cloudProps, networks, env)
+	if err != nil {
+		free := &models.VMState{
+			State: models.StateFree,
+		}
+		_, err = c.softLayerVmPoolClient.VM.UpdateVMWithState(operations.NewUpdateVMWithStateParams().WithBody(free).WithCid(int32(virtualGuestId)))
+		if err != nil {
+			return nil, bosherr.WrapErrorf(err, "Updating state of vm %d in pool to free", virtualGuestId)
+		}
+
+		return nil, bosherr.WrapError(err, "Os reloading vm in SoftLayer")
+	}
+
+	using := &models.VMState{
+		State: models.StateUsing,
+	}
+	_, err = c.softLayerVmPoolClient.VM.UpdateVMWithState(operations.NewUpdateVMWithStateParams().WithBody(using).WithCid(int32(virtualGuestId)))
+	if err != nil {
+		return nil, bosherr.WrapErrorf(err, "Updating state of vm %d in pool to using", virtualGuestId)
+	}
+
+	c.logger.Info(SOFTLAYER_POOL_CREATOR_LOG_TAG, fmt.Sprintf("vm %d using stemcell %d os reload completed", virtualGuestId, stemcell.ID()))
+
+	return sl_vm_os, nil
 }
 
 func (c *softLayerPoolCreator) createBySoftlayer(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
