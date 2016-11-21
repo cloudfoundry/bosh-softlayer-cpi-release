@@ -318,7 +318,7 @@ func (c *softLayerPoolCreator) oSReloadVMInPool (cid int, agentID string , stemc
 	bslcommon.TIMEOUT = 4 * time.Hour
 	err = vm.ReloadOS(stemcell)
 	if err != nil {
-		return nil, bosherr.WrapError(err, "Failed to reload OS")
+		return nil, bosherr.WrapErrorf(err, "Failed to do os_reload against %d", cid)
 	}
 
 	if cloudProps.EphemeralDiskSize == 0 {
