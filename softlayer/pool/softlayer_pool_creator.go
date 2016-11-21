@@ -237,7 +237,7 @@ func (c *softLayerPoolCreator) createByOSReload(agentID string , stemcell bslcst
 		}
 	}
 
-	c.logger.Info(SOFTLAYER_VM_CREATOR_LOG_TAG, fmt.Sprintf("OS reload on VirtualGuest %d using stemcell %d", virtualGuest.Id, stemcell.ID()))
+	c.logger.Info(SOFTLAYER_POOL_CREATOR_LOG_TAG, fmt.Sprintf("OS reload on VirtualGuest %d using stemcell %d", virtualGuest.Id, stemcell.ID()))
 
 	vm, found, err := c.vmFinder.Find(virtualGuest.Id)
 	if err != nil || !found {
@@ -310,8 +310,6 @@ func (c *softLayerPoolCreator) createByOSReload(agentID string , stemcell bslcst
 }
 
 func (c *softLayerPoolCreator) oSReloadVMInPool (cid int, agentID string , stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
-	c.logger.Info(SOFTLAYER_POOL_CREATOR_LOG_TAG, fmt.Sprintf("OS reload on VirtualGuest %d using stemcell %d", cid, stemcell.ID()))
-
 	vm, found, err := c.vmFinder.Find(cid)
 	if err != nil || !found {
 		return nil, bosherr.WrapErrorf(err, "Cannot find virtualGuest with id: %d", cid)
