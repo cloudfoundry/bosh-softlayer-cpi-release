@@ -122,14 +122,6 @@ func (c *softLayerPoolCreator) createFromVMPool(agentID string, stemcell bslcste
 
 	sl_vm_os, err := c.oSReloadVMInPool(virtualGuestId, agentID, stemcell, cloudProps, networks, env)
 	if err != nil {
-		free := &models.VMState{
-			State: models.StateFree,
-		}
-		_, err = c.softLayerVmPoolClient.VM.UpdateVMWithState(operations.NewUpdateVMWithStateParams().WithBody(free).WithCid(int32(virtualGuestId)))
-		if err != nil {
-			return nil, bosherr.WrapErrorf(err, "Updating state of vm %d in pool to free", virtualGuestId)
-		}
-
 		return nil, bosherr.WrapError(err, "Os reloading vm in SoftLayer")
 	}
 
@@ -318,7 +310,7 @@ func (c *softLayerPoolCreator) createByOSReload(agentID string , stemcell bslcst
 }
 
 func (c *softLayerPoolCreator) oSReloadVMInPool (cid int, agentID string , stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
-	c.logger.Info(SOFTLAYER_VM_CREATOR_LOG_TAG, fmt.Sprintf("OS reload on VirtualGuest %d using stemcell %d", cid, stemcell.ID()))
+	c.logger.Info(SOFTLAYER_POOL_CREATOR_LOG_TAG, fmt.Sprintf("OS reload on VirtualGuest %d using stemcell %d", cid, stemcell.ID()))
 
 	vm, found, err := c.vmFinder.Find(cid)
 	if err != nil || !found {
