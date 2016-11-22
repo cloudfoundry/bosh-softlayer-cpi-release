@@ -17,6 +17,11 @@ type Mount struct {
 type FeatureOptions struct {
 	DisableOsReload bool `json:"disableOsReload"`
 	EnablePool      bool `json:"enablePool"`
+	ApiEndpoint                      string `json:"apiEndpoint"`
+	ApiWaitTime                      int    `json:"apiWaitTime"`
+	ApiRetryCount                    int    `json:"apiRetryCount"`
+	CreateISCSIVolumeTimeout         int    `json:"createIscsiVolumeTimeout"`
+	CreateISCSIVolumePollingInterval int    `json:"createIscsiVolumePollingInterval"`
 }
 
 type VMCloudProperties struct {
