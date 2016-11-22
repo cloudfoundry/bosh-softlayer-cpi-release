@@ -16,6 +16,7 @@ import (
 
 	bmscl "github.com/cloudfoundry-community/bosh-softlayer-tools/clients"
 	sl "github.com/maximilien/softlayer-go/softlayer"
+	slh "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/utils"
 
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 	"github.com/cloudfoundry/bosh-softlayer-cpi/util"
@@ -23,8 +24,6 @@ import (
 
 	bslcdisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk"
 	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
-
-
 	datatypes "github.com/maximilien/softlayer-go/data_types"
 )
 
@@ -43,8 +42,8 @@ type softLayerHardware struct {
 }
 
 func NewSoftLayerHardware(hardware datatypes.SoftLayer_Hardware, softLayerClient sl.Client, baremetalClient bmscl.BmpClient, sshClient util.SshClient, logger boshlog.Logger) VM {
-	TIMEOUT = 60 * time.Minute
-	POLLING_INTERVAL = 10 * time.Second
+	slh.TIMEOUT = 60 * time.Minute
+	slh.POLLING_INTERVAL = 10 * time.Second
 
 	return &softLayerHardware{
 		id: hardware.Id,
@@ -179,7 +178,7 @@ func (vm *softLayerHardware) AttachDisk(disk bslcdisk.Disk) error {
 
 	totalTime := time.Duration(0)
 	if err == nil && allowed == false {
-		for totalTime < TIMEOUT {
+		for totalTime < slh.TIMEOUT {
 			allowable, err := networkStorageService.AttachNetworkStorageToHardware(vm.hardware, disk.ID())
 			if err != nil {
 				if !strings.Contains(err.Error(), "HTTP error code") {
@@ -191,11 +190,11 @@ func (vm *softLayerHardware) AttachDisk(disk bslcdisk.Disk) error {
 				}
 			}
 
-			totalTime += POLLING_INTERVAL
-			time.Sleep(POLLING_INTERVAL)
+			totalTime += slh.POLLING_INTERVAL
+			time.Sleep(slh.POLLING_INTERVAL)
 		}
 	}
-	if totalTime >= TIMEOUT {
+	if totalTime >= slh.TIMEOUT {
 		return bosherr.Error("Waiting for grantting access to hardware TIME OUT!")
 	}
 
@@ -344,7 +343,7 @@ func (vm *softLayerHardware) waitForVolumeAttached(volume datatypes.SoftLayer_Ne
 
 	var deviceName string
 	totalTime := time.Duration(0)
-	for totalTime < TIMEOUT {
+	for totalTime < slh.TIMEOUT {
 		newDisks, err := vm.getIscsiDeviceNamesBasedOnShellScript(hasMultiPath)
 		if err != nil {
 			return "", bosherr.WrapError(err, fmt.Sprintf("Failed to get devices names from hardware `%d`", vm.ID()))
@@ -374,8 +373,8 @@ func (vm *softLayerHardware) waitForVolumeAttached(volume datatypes.SoftLayer_Ne
 			return deviceName, nil
 		}
 
-		totalTime += POLLING_INTERVAL
-		time.Sleep(POLLING_INTERVAL)
+		totalTime += slh.POLLING_INTERVAL
+		time.Sleep(slh.POLLING_INTERVAL)
 	}
 
 	return "", bosherr.Errorf("Failed to attach disk '%d' to hardware '%d'", volume.Id, vm.ID())
@@ -677,9 +676,9 @@ func (vm *softLayerHardware) provisionBaremetal(server_id string, stemcell strin
 	}
 
 	task_id := createBaremetalResponse.Data.TaskId
-	TIMEOUT = 10 * time.Minute
+	slh.TIMEOUT = 10 * time.Minute
 	totalTime := time.Duration(0)
-	for totalTime < TIMEOUT {
+	for totalTime < slh.TIMEOUT {
 		taskOutput, err := vm.baremetalClient.TaskJsonOutput(task_id, "task")
 		if err != nil {
 			return 0, bosherr.WrapErrorf(err, "Failed to get state with task_id: %d", task_id)
@@ -698,8 +697,8 @@ func (vm *softLayerHardware) provisionBaremetal(server_id string, stemcell strin
 			info = serverOutput.Data["info"].(map[string]interface{})
 			return int(info["id"].(float64)), nil
 		default:
-			totalTime += POLLING_INTERVAL
-			time.Sleep(POLLING_INTERVAL)
+			totalTime += slh.POLLING_INTERVAL
+			time.Sleep(slh.POLLING_INTERVAL)
 		}
 	}
 

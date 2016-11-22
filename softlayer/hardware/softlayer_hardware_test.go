@@ -8,8 +8,6 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
-
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
 	testhelpers "github.com/cloudfoundry/bosh-softlayer-cpi/test_helpers"
@@ -17,16 +15,17 @@ import (
 	bmsclients "github.com/cloudfoundry-community/bosh-softlayer-tools/clients"
 	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 	bsldisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk"
-	bslvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
 
 	fakebmsclient "github.com/cloudfoundry-community/bosh-softlayer-tools/clients/fakes"
 	fakedisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk/fakes"
 	fakestemcell "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell/fakes"
-	fakevm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm/fakes"
+	fakevm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/fakes"
 	fakesutil "github.com/cloudfoundry/bosh-softlayer-cpi/util/fakes"
 	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
 
 	datatypes "github.com/maximilien/softlayer-go/data_types"
+	"github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/hardware"
+	slh "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/utils"
 )
 
 var _ = Describe("SoftLayerHardware", func() {
@@ -36,7 +35,7 @@ var _ = Describe("SoftLayerHardware", func() {
 		sshClient           *fakesutil.FakeSshClient
 		agentEnvService     *fakevm.FakeAgentEnvService
 		logger              boshlog.Logger
-		vm                  VM
+		vm                  bslcommon.VM
 		stemcell            *fakestemcell.FakeStemcell
 	)
 
@@ -47,7 +46,7 @@ var _ = Describe("SoftLayerHardware", func() {
 		agentEnvService = &fakevm.FakeAgentEnvService{}
 		logger = boshlog.NewLogger(boshlog.LevelNone)
 
-		hardware := datatypes.SoftLayer_Hardware{
+		hw := datatypes.SoftLayer_Hardware{
 			BareMetalInstanceFlag: 1,
 			Domain:                "fake-domain.com",
 			Hostname:              "fake-hostname",
@@ -67,14 +66,14 @@ var _ = Describe("SoftLayerHardware", func() {
 			},
 		}
 
-		vm = NewSoftLayerHardware(hardware, fakeSoftLayerClient, fakeBaremetalClient, sshClient, logger)
+		vm = hardware.NewSoftLayerHardware(hw, fakeSoftLayerClient, fakeBaremetalClient, sshClient, logger)
 		vm.SetAgentEnvService(agentEnvService)
 	})
 
 	Describe("Delete", func() {
 		It("deletes the VM successfully", func() {
-			bslcommon.TIMEOUT = 2 * time.Second
-			bslcommon.POLLING_INTERVAL = 1 * time.Second
+			slh.TIMEOUT = 2 * time.Second
+			slh.POLLING_INTERVAL = 1 * time.Second
 
 			expectedCmdResults := []string{
 				"",
@@ -95,8 +94,8 @@ var _ = Describe("SoftLayerHardware", func() {
 
 	Describe("Reboot", func() {
 		It("returns unsupport error", func() {
-			bslcommon.TIMEOUT = 2 * time.Second
-			bslcommon.POLLING_INTERVAL = 1 * time.Second
+			slh.TIMEOUT = 2 * time.Second
+			slh.POLLING_INTERVAL = 1 * time.Second
 
 			err := vm.Reboot()
 			Expect(err).To(HaveOccurred())
@@ -118,7 +117,7 @@ var _ = Describe("SoftLayerHardware", func() {
 
 	Describe("SetMetadata", func() {
 		var (
-			metadata VMMetadata
+			metadata bslcommon.VMMetadata
 		)
 
 		BeforeEach(func() {
@@ -127,7 +126,7 @@ var _ = Describe("SoftLayerHardware", func() {
 				  	"name": "fake-director"
 			}`)
 
-			metadata = bslvm.VMMetadata{}
+			metadata = bslcommon.VMMetadata{}
 			err := json.Unmarshal(metadataBytes, &metadata)
 			Expect(err).ToNot(HaveOccurred())
 		})
@@ -141,12 +140,12 @@ var _ = Describe("SoftLayerHardware", func() {
 
 	Describe("ConfigureNetworks", func() {
 		var (
-			networks Networks
+			networks bslcommon.Networks
 		)
 
 		BeforeEach(func() {
-			networks = map[string]Network{
-				"fake-network0": Network{
+			networks = map[string]bslcommon.Network{
+				"fake-network0": bslcommon.Network{
 					Type:    "fake-type",
 					IP:      "fake-IP",
 					Netmask: "fake-Netmask",
@@ -210,7 +209,7 @@ var _ = Describe("SoftLayerHardware", func() {
 `
 
 		BeforeEach(func() {
-			disk = fakedisk.NewFakeDisk(1234)
+			disk = fakedisk.FakeDisk{}
 			fileNames := []string{
 				"SoftLayer_Network_Storage_Service_getIscsiVolume.json",
 				"SoftLayer_Network_Storage_Service_getAllowedVirtualGuests_None.json",
@@ -236,8 +235,8 @@ var _ = Describe("SoftLayerHardware", func() {
 			sshClient.ExecCommandStub = func(_, _, _, _ string) (string, error) {
 				return expectedCmdResults[sshClient.ExecCommandCallCount()-1], nil
 			}
-			bslcommon.TIMEOUT = 2 * time.Second
-			bslcommon.POLLING_INTERVAL = 1 * time.Second
+			slh.TIMEOUT = 2 * time.Second
+			slh.POLLING_INTERVAL = 1 * time.Second
 
 			err := vm.AttachDisk(disk)
 			Expect(err).ToNot(HaveOccurred())
@@ -257,8 +256,8 @@ var _ = Describe("SoftLayerHardware", func() {
 			sshClient.ExecCommandStub = func(_, _, _, _ string) (string, error) {
 				return expectedCmdResults[sshClient.ExecCommandCallCount()-1], nil
 			}
-			bslcommon.TIMEOUT = 2 * time.Second
-			bslcommon.POLLING_INTERVAL = 1 * time.Second
+			slh.TIMEOUT = 2 * time.Second
+			slh.POLLING_INTERVAL = 1 * time.Second
 
 			err := vm.AttachDisk(disk)
 			Expect(err).ToNot(HaveOccurred())
@@ -279,8 +278,8 @@ var _ = Describe("SoftLayerHardware", func() {
 			sshClient.ExecCommandStub = func(_, _, _, _ string) (string, error) {
 				return expectedCmdResults[sshClient.ExecCommandCallCount()-1], nil
 			}
-			bslcommon.TIMEOUT = 2 * time.Second
-			bslcommon.POLLING_INTERVAL = 1 * time.Second
+			slh.TIMEOUT = 2 * time.Second
+			slh.POLLING_INTERVAL = 1 * time.Second
 
 			err := vm.AttachDisk(disk)
 			Expect(err).ToNot(HaveOccurred())
@@ -289,8 +288,8 @@ var _ = Describe("SoftLayerHardware", func() {
 		It("reports error when failed to attach the iSCSI volume", func() {
 
 			sshClient.ExecCommandReturns("fake-result", errors.New("fake-error"))
-			bslcommon.TIMEOUT = 2 * time.Second
-			bslcommon.POLLING_INTERVAL = 1 * time.Second
+			slh.TIMEOUT = 2 * time.Second
+			slh.POLLING_INTERVAL = 1 * time.Second
 
 			err := vm.AttachDisk(disk)
 			Expect(err).To(HaveOccurred())
@@ -338,7 +337,7 @@ iscsiadm: No records found
  * Starting multipath daemon multipathd
  `
 		BeforeEach(func() {
-			disk = fakedisk.NewFakeDisk(1234)
+			disk = fakedisk.FakeDisk{}
 			fileNames := []string{
 				"SoftLayer_Network_Storage_Service_getIscsiVolume.json",
 				"SoftLayer_Network_Storage_Service_getAllowedVirtualGuests.json",
@@ -361,8 +360,8 @@ iscsiadm: No records found
 			sshClient.ExecCommandStub = func(_, _, _, _ string) (string, error) {
 				return expectedCmdResults[sshClient.ExecCommandCallCount()-1], nil
 			}
-			bslcommon.TIMEOUT = 2 * time.Second
-			bslcommon.POLLING_INTERVAL = 1 * time.Second
+			slh.TIMEOUT = 2 * time.Second
+			slh.POLLING_INTERVAL = 1 * time.Second
 
 			err := vm.DetachDisk(disk)
 			Expect(err).ToNot(HaveOccurred())
@@ -382,8 +381,8 @@ iscsiadm: No records found
 			sshClient.ExecCommandStub = func(_, _, _, _ string) (string, error) {
 				return expectedCmdResults[sshClient.ExecCommandCallCount()-1], nil
 			}
-			bslcommon.TIMEOUT = 2 * time.Second
-			bslcommon.POLLING_INTERVAL = 1 * time.Second
+			slh.TIMEOUT = 2 * time.Second
+			slh.POLLING_INTERVAL = 1 * time.Second
 
 			err := vm.DetachDisk(disk)
 			Expect(err).ToNot(HaveOccurred())
@@ -391,8 +390,8 @@ iscsiadm: No records found
 
 		It("reports error when failed to detach iSCSI volume", func() {
 			sshClient.ExecCommandReturns("fake-result", errors.New("fake-error"))
-			bslcommon.TIMEOUT = 2 * time.Second
-			bslcommon.POLLING_INTERVAL = 1 * time.Second
+			slh.TIMEOUT = 2 * time.Second
+			slh.POLLING_INTERVAL = 1 * time.Second
 
 			err := vm.DetachDisk(disk)
 			Expect(err).To(HaveOccurred())
