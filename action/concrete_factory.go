@@ -14,6 +14,7 @@ import (
 	httptransport "github.com/go-openapi/runtime/client"
 	apiclient "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/pool/client"
 
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 	"github.com/go-openapi/strfmt"
 	"fmt"
 )
@@ -29,7 +30,7 @@ func NewConcreteFactory(options ConcreteFactoryOptions, logger boshlog.Logger) c
 
 	stemcellFinder := bslcstem.NewSoftLayerFinder(softLayerClient, logger)
 
-	agentEnvServiceFactory := bslcvm.NewSoftLayerAgentEnvServiceFactory(options.AgentEnvService, options.Registry, logger)
+	agentEnvServiceFactory := NewSoftLayerAgentEnvServiceFactory(options.AgentEnvService, options.Registry, logger)
 
 	vmFinder := bslcvm.NewSoftLayerFinder(
 		softLayerClient,

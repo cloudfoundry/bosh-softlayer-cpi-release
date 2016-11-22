@@ -7,7 +7,7 @@ import (
 	"github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk"
 )
 
-type FakeFinder struct {
+type FakeDiskFinder struct {
 	FindStub        func(id int) (disk.Disk, bool, error)
 	findMutex       sync.RWMutex
 	findArgsForCall []struct {
@@ -22,7 +22,7 @@ type FakeFinder struct {
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *FakeFinder) Find(id int) (disk.Disk, bool, error) {
+func (fake *FakeDiskFinder) Find(id int) (disk.Disk, bool, error) {
 	fake.findMutex.Lock()
 	fake.findArgsForCall = append(fake.findArgsForCall, struct {
 		id int
@@ -36,19 +36,19 @@ func (fake *FakeFinder) Find(id int) (disk.Disk, bool, error) {
 	}
 }
 
-func (fake *FakeFinder) FindCallCount() int {
+func (fake *FakeDiskFinder) FindCallCount() int {
 	fake.findMutex.RLock()
 	defer fake.findMutex.RUnlock()
 	return len(fake.findArgsForCall)
 }
 
-func (fake *FakeFinder) FindArgsForCall(i int) int {
+func (fake *FakeDiskFinder) FindArgsForCall(i int) int {
 	fake.findMutex.RLock()
 	defer fake.findMutex.RUnlock()
 	return fake.findArgsForCall[i].id
 }
 
-func (fake *FakeFinder) FindReturns(result1 disk.Disk, result2 bool, result3 error) {
+func (fake *FakeDiskFinder) FindReturns(result1 disk.Disk, result2 bool, result3 error) {
 	fake.FindStub = nil
 	fake.findReturns = struct {
 		result1 disk.Disk
@@ -57,7 +57,7 @@ func (fake *FakeFinder) FindReturns(result1 disk.Disk, result2 bool, result3 err
 	}{result1, result2, result3}
 }
 
-func (fake *FakeFinder) Invocations() map[string][][]interface{} {
+func (fake *FakeDiskFinder) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
 	fake.findMutex.RLock()
@@ -65,7 +65,7 @@ func (fake *FakeFinder) Invocations() map[string][][]interface{} {
 	return fake.invocations
 }
 
-func (fake *FakeFinder) recordInvocation(key string, args []interface{}) {
+func (fake *FakeDiskFinder) recordInvocation(key string, args []interface{}) {
 	fake.invocationsMutex.Lock()
 	defer fake.invocationsMutex.Unlock()
 	if fake.invocations == nil {
@@ -77,4 +77,4 @@ func (fake *FakeFinder) recordInvocation(key string, args []interface{}) {
 	fake.invocations[key] = append(fake.invocations[key], args)
 }
 
-var _ disk.Finder = new(FakeFinder)
+var _ disk.DiskFinder = new(FakeDiskFinder)

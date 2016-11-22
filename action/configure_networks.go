@@ -3,15 +3,15 @@ package action
 import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 
-	bslcvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 )
 
 type ConfigureNetworksAction struct {
-	vmFinder bslcvm.Finder
+	vmFinder VMFinder
 }
 
 func NewConfigureNetworks(
-	vmFinder bslcvm.Finder,
+	vmFinder VMFinder,
 ) (action ConfigureNetworksAction) {
 	action.vmFinder = vmFinder
 	return

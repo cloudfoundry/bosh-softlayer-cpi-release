@@ -16,8 +16,6 @@ import (
 	"github.com/cloudfoundry/bosh-softlayer-cpi/common"
 )
 
-const SOFTLAYER_VM_CREATOR_LOG_TAG = "SoftLayerVMCreator"
-
 type softLayerVirtualGuestCreator struct {
 	softLayerClient        sl.Client
 	agentEnvServiceFactory AgentEnvServiceFactory

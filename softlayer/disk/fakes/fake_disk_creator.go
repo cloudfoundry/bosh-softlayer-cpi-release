@@ -7,7 +7,7 @@ import (
 	"github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk"
 )
 
-type FakeCreator struct {
+type FakeDiskCreator struct {
 	CreateStub        func(size int, cloudProp disk.DiskCloudProperties, datacenter_id int) (disk.Disk, error)
 	createMutex       sync.RWMutex
 	createArgsForCall []struct {
@@ -23,7 +23,7 @@ type FakeCreator struct {
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *FakeCreator) Create(size int, cloudProp disk.DiskCloudProperties, datacenter_id int) (disk.Disk, error) {
+func (fake *FakeDiskCreator) Create(size int, cloudProp disk.DiskCloudProperties, datacenter_id int) (disk.Disk, error) {
 	fake.createMutex.Lock()
 	fake.createArgsForCall = append(fake.createArgsForCall, struct {
 		size          int
@@ -39,19 +39,19 @@ func (fake *FakeCreator) Create(size int, cloudProp disk.DiskCloudProperties, da
 	}
 }
 
-func (fake *FakeCreator) CreateCallCount() int {
+func (fake *FakeDiskCreator) CreateCallCount() int {
 	fake.createMutex.RLock()
 	defer fake.createMutex.RUnlock()
 	return len(fake.createArgsForCall)
 }
 
-func (fake *FakeCreator) CreateArgsForCall(i int) (int, disk.DiskCloudProperties, int) {
+func (fake *FakeDiskCreator) CreateArgsForCall(i int) (int, disk.DiskCloudProperties, int) {
 	fake.createMutex.RLock()
 	defer fake.createMutex.RUnlock()
 	return fake.createArgsForCall[i].size, fake.createArgsForCall[i].cloudProp, fake.createArgsForCall[i].datacenter_id
 }
 
-func (fake *FakeCreator) CreateReturns(result1 disk.Disk, result2 error) {
+func (fake *FakeDiskCreator) CreateReturns(result1 disk.Disk, result2 error) {
 	fake.CreateStub = nil
 	fake.createReturns = struct {
 		result1 disk.Disk
@@ -59,7 +59,7 @@ func (fake *FakeCreator) CreateReturns(result1 disk.Disk, result2 error) {
 	}{result1, result2}
 }
 
-func (fake *FakeCreator) Invocations() map[string][][]interface{} {
+func (fake *FakeDiskCreator) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
 	fake.createMutex.RLock()
@@ -67,7 +67,7 @@ func (fake *FakeCreator) Invocations() map[string][][]interface{} {
 	return fake.invocations
 }
 
-func (fake *FakeCreator) recordInvocation(key string, args []interface{}) {
+func (fake *FakeDiskCreator) recordInvocation(key string, args []interface{}) {
 	fake.invocationsMutex.Lock()
 	defer fake.invocationsMutex.Unlock()
 	if fake.invocations == nil {
@@ -79,4 +79,4 @@ func (fake *FakeCreator) recordInvocation(key string, args []interface{}) {
 	fake.invocations[key] = append(fake.invocations[key], args)
 }
 
-var _ disk.Creator = new(FakeCreator)
+var _ disk.DiskCreator = new(FakeDiskCreator)

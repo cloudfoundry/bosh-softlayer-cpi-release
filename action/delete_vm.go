@@ -3,7 +3,7 @@ package action
 import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 
-	bslcvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 	"fmt"
 )
 
@@ -22,7 +22,7 @@ func NewDeleteVM(
 }
 
 func (a DeleteVMAction) Run(vmCID VMCID) (interface{}, error) {
-	var vmDeleter bslcvm.VMDeleter
+	var vmDeleter VMDeleter
 	var err error
 	if a.options.Softlayer.FeatureOptions.EnablePool {
 		vmDeleter, err = a.vmDeleterProvider.Get("pool")

@@ -6,7 +6,7 @@ import (
 
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/action"
 
-	bslcvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
+	bslcvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 )
 
 var _ = Describe("Networks", func() {

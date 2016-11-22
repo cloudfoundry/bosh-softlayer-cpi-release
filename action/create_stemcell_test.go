@@ -13,12 +13,12 @@ import (
 
 var _ = Describe("CreateStemcell", func() {
 	var (
-		stemcellFinder *fakestem.FakeFinder
+		stemcellFinder *fakestem.FakeStemcellFinder
 		action         CreateStemcellAction
 	)
 
 	BeforeEach(func() {
-		stemcellFinder = &fakestem.FakeFinder{}
+		stemcellFinder = &fakestem.FakeStemcellFinder{}
 		action = NewCreateStemcell(stemcellFinder)
 	})
 

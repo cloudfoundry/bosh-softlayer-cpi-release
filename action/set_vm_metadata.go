@@ -3,21 +3,21 @@ package action
 import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 
-	bslcvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 )
 
 type SetVMMetadataAction struct {
-	vmFinder bslcvm.Finder
+	vmFinder VMFinder
 }
 
 func NewSetVMMetadata(
-	vmFinder bslcvm.Finder,
+	vmFinder VMFinder,
 ) (action SetVMMetadataAction) {
 	action.vmFinder = vmFinder
 	return
 }
 
-func (a SetVMMetadataAction) Run(vmCID VMCID, metadata bslcvm.VMMetadata) (interface{}, error) {
+func (a SetVMMetadataAction) Run(vmCID VMCID, metadata VMMetadata) (interface{}, error) {
 	vm, found, err := a.vmFinder.Find(int(vmCID))
 	if err != nil || !found {
 		return nil, bosherr.WrapErrorf(err, "Finding VM '%s'", vmCID)

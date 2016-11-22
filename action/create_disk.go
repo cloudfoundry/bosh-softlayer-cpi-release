@@ -4,17 +4,17 @@ import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 
 	bslcdisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk"
-	bslcvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 )
 
 type CreateDiskAction struct {
-	diskCreator bslcdisk.Creator
-	vmFinder    bslcvm.Finder
+	diskCreator bslcdisk.DiskCreator
+	vmFinder    VMFinder
 }
 
 func NewCreateDisk(
-	vmFinder bslcvm.Finder,
-	diskCreator bslcdisk.Creator,
+	vmFinder VMFinder,
+	diskCreator bslcdisk.DiskCreator,
 ) (action CreateDiskAction) {
 	action.diskCreator = diskCreator
 	action.vmFinder = vmFinder
@@ -23,7 +23,6 @@ func NewCreateDisk(
 
 func (a CreateDiskAction) Run(size int, cloudProps bslcdisk.DiskCloudProperties, instanceId VMCID) (string, error) {
 	vm, found, err := a.vmFinder.Find(int(instanceId))
-
 	if err != nil || !found {
 		return "0", bosherr.WrapErrorf(err, "Not Finding vm '%s'", instanceId)
 	}

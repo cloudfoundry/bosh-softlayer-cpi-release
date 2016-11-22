@@ -4,41 +4,45 @@ import (
 	bmscl "github.com/cloudfoundry-community/bosh-softlayer-tools/clients"
 	sl "github.com/maximilien/softlayer-go/softlayer"
 
-	bslcvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
+	slvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
+	slhw "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/hardware"
 	slpool "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/pool"
-	slvmpool "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/pool/client"
+	slpoolclient "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/pool/client"
 	bosherror "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 )
 
+//go:generate counterfeiter -o fakes/fake_creator_provider.go . CreatorProvider
 type CreatorProvider interface {
-	Get(name string) (bslcvm.VMCreator, error)
+	Get(name string) VMCreator
 }
 
+//go:generate counterfeiter -o fakes/fake_deleter_provider.go . DeleterProvider
 type DeleterProvider interface {
-	Get(name string) (bslcvm.VMDeleter, error)
+	Get(name string) VMDeleter
 }
 
 type creatorProvider struct {
-	creators map[string]bslcvm.VMCreator
+	creators map[string]VMCreator
 }
 
 type deleterProvider struct {
-	deleters map[string]bslcvm.VMDeleter
+	deleters map[string]VMDeleter
 }
 
-func NewCreatorProvider(softLayerClient sl.Client, baremetalClient bmscl.BmpClient, softLayerPoolClient *slvmpool.SoftLayerVMPool ,options ConcreteFactoryOptions, logger boshlog.Logger) CreatorProvider {
+func NewCreatorProvider(softLayerClient sl.Client, baremetalClient bmscl.BmpClient, softLayerPoolClient *slpoolclient.SoftLayerVMPool ,options ConcreteFactoryOptions, logger boshlog.Logger) CreatorProvider {
 
-	agentEnvServiceFactory := bslcvm.NewSoftLayerAgentEnvServiceFactory(options.AgentEnvService, options.Registry, logger)
+	agentEnvServiceFactory := NewSoftLayerAgentEnvServiceFactory(options.AgentEnvService, options.Registry, logger)
 
-	vmFinder := bslcvm.NewSoftLayerFinder(
+	vmFinder := slvm.NewSoftLayerFinder(
 		softLayerClient,
 		baremetalClient,
 		agentEnvServiceFactory,
 		logger,
 	)
 
-	virtualGuestCreator := bslcvm.NewSoftLayerCreator(
+	virtualGuestCreator := slvm.NewSoftLayerCreator(
 		vmFinder,
 		softLayerClient,
 		options.Agent,
@@ -46,7 +50,7 @@ func NewCreatorProvider(softLayerClient sl.Client, baremetalClient bmscl.BmpClie
 		options.Softlayer.FeatureOptions,
 	)
 
-	baremetalCreator := bslcvm.NewBaremetalCreator(
+	baremetalCreator := slhw.NewBaremetalCreator(
 		vmFinder,
 		softLayerClient,
 		baremetalClient,
@@ -64,7 +68,7 @@ func NewCreatorProvider(softLayerClient sl.Client, baremetalClient bmscl.BmpClie
 	)
 
 	return creatorProvider{
-		creators: map[string]bslcvm.VMCreator{
+		creators: map[string]VMCreator{
 			"virtualguest": virtualGuestCreator,
 			"baremetal":    baremetalCreator,
 			"pool":		poolCreator,
@@ -72,16 +76,12 @@ func NewCreatorProvider(softLayerClient sl.Client, baremetalClient bmscl.BmpClie
 	}
 }
 
-func (p creatorProvider) Get(name string) (bslcvm.VMCreator, error) {
-	creator, found := p.creators[name]
-	if !found {
-		return nil, bosherror.Errorf("Creator %s could not be found", name)
-	}
-	return creator, nil
+func (p creatorProvider) Get(name string) VMCreator {
+	return p.creators[name]
 }
 
-func NewDeleterProvider(softLayerClient sl.Client, softLayerPoolClient *slvmpool.SoftLayerVMPool, logger boshlog.Logger) DeleterProvider {
-	virtualGuestDeleter := bslcvm.NewSoftLayerVMDeleter(
+func NewDeleterProvider(softLayerClient sl.Client, softLayerPoolClient *slpoolclient.SoftLayerVMPool, logger boshlog.Logger) DeleterProvider {
+	virtualGuestDeleter := slvm.NewSoftLayerVMDeleter(
 		softLayerClient,
 		logger,
 	)
@@ -93,17 +93,13 @@ func NewDeleterProvider(softLayerClient sl.Client, softLayerPoolClient *slvmpool
 	)
 
 	return deleterProvider{
-		deleters: map[string]bslcvm.VMDeleter{
+		deleters: map[string]VMDeleter{
 			"virtualguest": virtualGuestDeleter,
 			"pool":                poolDeleter,
 		},
 	}
 }
 
-func (p deleterProvider) Get(name string) (bslcvm.VMDeleter, error) {
-	deleter, found := p.deleters[name]
-	if !found {
-		return nil, bosherror.Errorf("Deleter %s could not be found", name)
-	}
-	return deleter, nil
+func (p deleterProvider) Get(name string) VMDeleter {
+	return p.deleters[name]
 }
