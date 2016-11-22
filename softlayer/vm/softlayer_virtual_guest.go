@@ -17,7 +17,7 @@ import (
 
 	sl "github.com/maximilien/softlayer-go/softlayer"
 
-	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 	bslcdisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk"
 	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
 
@@ -654,7 +654,7 @@ func (vm *softLayerVirtualGuest) writeOpenIscsiInitiatornameBasedOnShellScript(c
 
 func (vm *softLayerVirtualGuest) writeOpenIscsiConfBasedOnShellScript(volume datatypes.SoftLayer_Network_Storage, credential AllowedHostCredential) (bool, error) {
 	buffer := bytes.NewBuffer([]byte{})
-	t := template.Must(template.New("open_iscsid_conf").Parse(etcIscsidConfTemplate))
+	t := template.Must(template.New("open_iscsid_conf").Parse(EtcIscsidConfTemplate))
 	if len(credential.Password) == 0 {
 		err := t.Execute(buffer, volume)
 		if err != nil {

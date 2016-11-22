@@ -24,12 +24,12 @@ type softLayerVirtualGuestCreator struct {
 
 	agentOptions AgentOptions
 	logger       boshlog.Logger
-	vmFinder     Finder
+	vmFinder     VMFinder
 
 	featureOptions FeatureOptions
 }
 
-func NewSoftLayerCreator(vmFinder Finder, softLayerClient sl.Client, agentOptions AgentOptions, logger boshlog.Logger, featureOptions FeatureOptions) VMCreator {
+func NewSoftLayerCreator(vmFinder VMFinder, softLayerClient sl.Client, agentOptions AgentOptions, logger boshlog.Logger, featureOptions FeatureOptions) VMCreator {
 	bslcommon.TIMEOUT = 120 * time.Minute
 	bslcommon.POLLING_INTERVAL = 5 * time.Second
 
