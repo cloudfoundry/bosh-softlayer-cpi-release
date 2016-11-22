@@ -5,11 +5,12 @@ import (
 	. "github.com/onsi/gomega"
 	"time"
 
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
 
 	testhelpers "github.com/cloudfoundry/bosh-softlayer-cpi/test_helpers"
 
-	fakevm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm/fakes"
+	fakescommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/fakes"
 	fakesutil "github.com/cloudfoundry/bosh-softlayer-cpi/util/fakes"
 	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
 
@@ -26,7 +27,8 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 	var (
 		softLayerClient *fakeslclient.FakeSoftLayerClient
 		sshClient       *fakesutil.FakeSshClient
-		vmFinder        *fakevm.FakeFinder
+		vmFinder        *fakescommon.FakeVMFinder
+		vm 		*fakescommon.FakeVM
 		agentOptions    AgentOptions
 		logger          boshlog.Logger
 		creator         VMCreator
@@ -38,7 +40,8 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 		sshClient = &fakesutil.FakeSshClient{}
 		agentOptions = AgentOptions{Mbus: "fake-mbus"}
 		logger = boshlog.NewLogger(boshlog.LevelNone)
-		vmFinder = &fakevm.FakeFinder{}
+		vmFinder = &fakescommon.FakeVMFinder{}
+		vm = &fakescommon.FakeVM{}
 
 		bslcommon.TIMEOUT = 2 * time.Second
 		bslcommon.POLLING_INTERVAL = 1 * time.Second
@@ -61,9 +64,8 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 				env = Environment{}
 				featureOptions = FeatureOptions{DisableOsReload: false}
 
-				vmFinder.FindVM = fakevm.NewFakeVM(1234567)
-				vmFinder.FindFound = true
-				vmFinder.FindErr = nil
+
+				vmFinder.FindReturns(vm, true, nil)
 
 				creator = NewSoftLayerCreator(
 					vmFinder,
@@ -447,9 +449,7 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 
 				featureOptions = FeatureOptions{DisableOsReload: true}
 
-				vmFinder.FindVM = fakevm.NewFakeVM(1234567)
-				vmFinder.FindFound = true
-				vmFinder.FindErr = nil
+				vmFinder.FindReturns(vm, true, nil)
 
 				creator = NewSoftLayerCreator(
 					vmFinder,
@@ -624,8 +624,7 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 						},
 					}
 
-					vmFinder.FindVM = fakevm.NewFakeVM(1234567)
-					vmFinder.FindFound = false
+					vmFinder.FindReturns(vm, false, nil)
 
 					setFakeSoftlayerClientCreateObjectTestFixturesWithEphemeralDiskSize(softLayerClient)
 				})
