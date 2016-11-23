@@ -106,7 +106,6 @@ var _ = Describe("SoftLayerHardware", func() {
 		Context("valid VM ID is used", func() {
 			BeforeEach(func() {
 				stemcell = &fakestemcell.FakeStemcell{}
-
 			})
 
 			It("returns unsupport error", func() {
