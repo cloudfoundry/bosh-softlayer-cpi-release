@@ -2,6 +2,7 @@ package action_test
 
 import (
 	"errors"
+	"fmt"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -9,121 +10,127 @@ import (
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/action"
 
 	fakedisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk/fakes"
-	fakevm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm/fakes"
+	fakescommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/fakes"
 )
 
 var _ = Describe("DetachDisk", func() {
 	var (
-		vmFinder   *fakevm.FakeFinder
-		diskFinder *fakedisk.FakeFinder
-		action     DetachDiskAction
+		fakeVmFinder   *fakescommon.FakeVMFinder
+		fakeVm         *fakescommon.FakeVM
+		fakeDiskFinder *fakedisk.FakeDiskFinder
+		fakeDisk       *fakedisk.FakeDisk
+		action DetachDiskAction
 	)
 
 	BeforeEach(func() {
-		vmFinder = &fakevm.FakeFinder{}
-		diskFinder = &fakedisk.FakeFinder{}
-		action = NewDetachDisk(vmFinder, diskFinder)
+		fakeVmFinder = &fakescommon.FakeVMFinder{}
+		fakeVm = &fakescommon.FakeVM{}
+		fakeDiskFinder = &fakedisk.FakeDiskFinder{}
+		fakeDisk = &fakedisk.FakeDisk{}
+		action = NewDetachDisk(fakeVmFinder, fakeDiskFinder)
+
 	})
 
 	Describe("Run", func() {
-		It("tries to find VM with given VM cid", func() {
-			vmFinder.FindFound = true
-			vmFinder.FindVM = fakevm.NewFakeVM(1234)
+		var (
+			vmCid VMCID
+			diskCID DiskCID
 
-			diskFinder.FindFound = true
-			diskFinder.FindDisk = fakedisk.NewFakeDisk(1234)
+			err error
+		)
 
-			_, err := action.Run(1234, 1234)
-			Expect(err).ToNot(HaveOccurred())
-
-			Expect(vmFinder.FindID).To(Equal(1234))
+		BeforeEach(func() {
+			vmCid = VMCID(123456)
+			diskCID = DiskCID(123456)
 		})
 
-		Context("when VM is found with given VM cid", func() {
-			var (
-				vm *fakevm.FakeVM
-			)
+		JustBeforeEach(func() {
+			_, err = action.Run(vmCid, diskCID)
+		})
 
+		Context("when detach disk succeeds", func() {
 			BeforeEach(func() {
-				vm = fakevm.NewFakeVM(1234)
-				vmFinder.FindVM = vm
-				vmFinder.FindFound = true
+				fakeVmFinder.FindReturns(fakeVm, true, nil)
+				fakeDiskFinder.FindReturns(fakeDisk, true, nil)
+
+				fakeVm.DetachDiskReturns(nil)
 			})
 
-			It("tries to find disk with given disk cid", func() {
-				diskFinder.FindFound = true
-
-				_, err := action.Run(1234, 1234)
-				Expect(err).ToNot(HaveOccurred())
-
-				Expect(diskFinder.FindID).To(Equal(1234))
+			It("fetches vm by cid", func() {
+				Expect(fakeVmFinder.FindCallCount()).To(Equal(1))
+				actualCid := fakeVmFinder.FindArgsForCall(0)
+				Expect(actualCid).To(Equal(123456))
 			})
 
-			Context("when disk is found with given disk cid", func() {
-				var (
-					disk *fakedisk.FakeDisk
-				)
-
-				BeforeEach(func() {
-					disk = fakedisk.NewFakeDisk(1234)
-					diskFinder.FindDisk = disk
-					diskFinder.FindFound = true
-				})
-
-				It("does not return error when detaching found disk from found VM succeeds", func() {
-					_, err := action.Run(1234, 1234)
-					Expect(err).ToNot(HaveOccurred())
-
-					Expect(vm.DetachDiskDisk).To(Equal(disk))
-				})
-
-				It("returns error if detaching disk fails", func() {
-					vm.DetachDiskErr = errors.New("fake-detach-disk-err")
-
-					_, err := action.Run(1234, 1234)
-					Expect(err).To(HaveOccurred())
-					Expect(err.Error()).To(ContainSubstring("fake-detach-disk-err"))
-				})
+			It("fetches disk by cid", func() {
+				Expect(fakeDiskFinder.FindCallCount()).To(Equal(1))
+				actualCid := fakeDiskFinder.FindArgsForCall(0)
+				Expect(actualCid).To(Equal(123456))
 			})
 
-			Context("when disk is not found with given cid", func() {
-				It("returns error", func() {
-					diskFinder.FindFound = false
-
-					_, err := action.Run(1234, 1234)
-					Expect(err).To(HaveOccurred())
-					Expect(err.Error()).To(ContainSubstring("Expected to find disk"))
-				})
-			})
-
-			Context("when disk finding fails", func() {
-				It("returns error", func() {
-					diskFinder.FindErr = errors.New("fake-find-err")
-
-					_, err := action.Run(1234, 1234)
-					Expect(err).To(HaveOccurred())
-					Expect(err.Error()).To(ContainSubstring("fake-find-err"))
-				})
+			It("no error return", func() {
+				Expect(fakeVm.DetachDiskCallCount()).To(Equal(1))
+				actualDisk := fakeVm.DetachDiskArgsForCall(0)
+				Expect(actualDisk).To(Equal(fakeDisk))
+				Expect(err).NotTo(HaveOccurred())
 			})
 		})
 
-		Context("when VM is not found with given cid", func() {
-			It("returns error because disk can only be detached from an existing VM", func() {
-				vmFinder.FindFound = false
+		Context("when find vm error out", func() {
+			BeforeEach(func() {
+				fakeVmFinder.FindReturns(nil, false, errors.New("kaboom"))
+			})
 
-				_, err := action.Run(1234, 1234)
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("Expected to find VM"))
+			It("provides relevant error information", func() {
+				Expect(err.Error()).To(ContainSubstring("kaboom"))
 			})
 		})
 
-		Context("when VM finding fails", func() {
-			It("returns error because disk can only be detached from an existing VM", func() {
-				vmFinder.FindErr = errors.New("fake-find-err")
+		Context("when find vm return false", func() {
+			BeforeEach(func() {
+				fakeVmFinder.FindReturns(nil, false, nil)
+			})
 
-				_, err := action.Run(1234, 1234)
+			It("provides relevant error information", func() {
 				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("fake-find-err"))
+				Expect(err).To(MatchError(fmt.Sprintf("Expected to find VM '%s'", vmCid)))
+			})
+		})
+
+		Context("when find disk error out", func() {
+			BeforeEach(func() {
+				fakeVmFinder.FindReturns(fakeVm, true, nil)
+				fakeDiskFinder.FindReturns(nil, false, errors.New("kaboom"))
+			})
+
+			It("provides relevant error information", func() {
+				Expect(err.Error()).To(ContainSubstring("kaboom"))
+			})
+		})
+
+		Context("when find disk return false", func() {
+			BeforeEach(func() {
+				fakeVmFinder.FindReturns(fakeVm, true, nil)
+				fakeDiskFinder.FindReturns(nil, false, nil)
+			})
+
+			It("provides relevant error information", func() {
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring(fmt.Sprintf("Expected to find disk '%s'", diskCID)))
+			})
+		})
+
+		Context("when detach disk error out", func() {
+			BeforeEach(func() {
+				fakeVmFinder.FindReturns(fakeVm, true, nil)
+				fakeDiskFinder.FindReturns(fakeDisk, true, nil)
+
+				fakeVm.DetachDiskReturns(errors.New("kaboom"))
+			})
+
+			It("provides relevant error information", func() {
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("kaboom"))
 			})
 		})
 	})

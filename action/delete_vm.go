@@ -3,26 +3,39 @@ package action
 import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 
-	bslcvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
+	"fmt"
 )
 
 type DeleteVMAction struct {
-	vmFinder bslcvm.Finder
+	vmDeleterProvider DeleterProvider
+	options ConcreteFactoryOptions
 }
 
 func NewDeleteVM(
-	vmFinder bslcvm.Finder,
+	vmDeleterProvider DeleterProvider,
+        options ConcreteFactoryOptions,
 ) (action DeleteVMAction) {
-	action.vmFinder = vmFinder
+	action.vmDeleterProvider = vmDeleterProvider
+	action.options = options
 	return
 }
 
 func (a DeleteVMAction) Run(vmCID VMCID) (interface{}, error) {
-	vm, found, _ := a.vmFinder.Find(int(vmCID))
-	if found {
-		err := vm.Delete("")
+	var vmDeleter VMDeleter
+	if a.options.Softlayer.FeatureOptions.EnablePool {
+		vmDeleter = a.vmDeleterProvider.Get("pool")
+
+		err := vmDeleter.Delete(int(vmCID))
 		if err != nil {
-			return nil, bosherr.WrapErrorf(err, "Deleting vm '%s'", vmCID)
+			return nil, bosherr.WrapError(err, fmt.Sprintf("Update vm %d to free in pool", int(vmCID)))
+		}
+	} else {
+		vmDeleter = a.vmDeleterProvider.Get("virtualguest")
+
+		err := vmDeleter.Delete(int(vmCID))
+		if err != nil {
+			return nil, bosherr.WrapError(err, fmt.Sprintf("Deleting vm %d", int(vmCID)))
 		}
 	}
 

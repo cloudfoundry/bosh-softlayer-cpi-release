@@ -16,14 +16,16 @@ import (
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
 	sl "github.com/maximilien/softlayer-go/softlayer"
+	slh "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
 
-	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 	bslcdisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk"
 	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
 
 	"github.com/cloudfoundry/bosh-softlayer-cpi/util"
 	datatypes "github.com/maximilien/softlayer-go/data_types"
 	sldatatypes "github.com/maximilien/softlayer-go/data_types"
+	api "github.com/cloudfoundry/bosh-softlayer-cpi/api"
 )
 
 type softLayerVirtualGuest struct {
@@ -40,8 +42,8 @@ type softLayerVirtualGuest struct {
 }
 
 func NewSoftLayerVirtualGuest(virtualGuest datatypes.SoftLayer_Virtual_Guest, softLayerClient sl.Client, sshClient util.SshClient, logger boshlog.Logger) VM {
-	bslcommon.TIMEOUT = 60 * time.Minute
-	bslcommon.POLLING_INTERVAL = 10 * time.Second
+	slh.TIMEOUT = 60 * time.Minute
+	slh.POLLING_INTERVAL = 10 * time.Second
 
 	return &softLayerVirtualGuest{
 		id: virtualGuest.Id,
@@ -111,7 +113,7 @@ func (vm *softLayerVirtualGuest) DeleteVM() error {
 	}
 
 	vmCID := vm.ID()
-	err = bslcommon.WaitForVirtualGuestToHaveNoRunningTransactions(vm.softLayerClient, vmCID)
+	err = slh.WaitForVirtualGuestToHaveNoRunningTransactions(vm.softLayerClient, vmCID)
 	if err != nil {
 		if !strings.Contains(err.Error(), "HTTP error code") {
 			return bosherr.WrapError(err, fmt.Sprintf("Waiting for VirtualGuest `%d` to have no pending transactions before deleting vm", vmCID))
@@ -165,7 +167,7 @@ func (vm *softLayerVirtualGuest) ReloadOS(stemcell bslcstem.Stemcell) error {
 		return bosherr.WrapError(err, "Creating VirtualGuestService from SoftLayer client")
 	}
 
-	err = bslcommon.WaitForVirtualGuestToHaveNoRunningTransactions(vm.softLayerClient, vm.ID())
+	err = slh.WaitForVirtualGuestToHaveNoRunningTransactions(vm.softLayerClient, vm.ID())
 	if err != nil {
 		return bosherr.WrapError(err, fmt.Sprintf("Waiting for VirtualGuest %d to have no pending transactions before os reload", vm.ID()))
 	}
@@ -185,7 +187,7 @@ func (vm *softLayerVirtualGuest) ReloadOS(stemcell bslcstem.Stemcell) error {
 }
 
 func (vm *softLayerVirtualGuest) ReloadOSForBaremetal(string, string) error {
-	return NotSupportedError{}
+	return api.NotSupportedError{}
 }
 
 func (vm *softLayerVirtualGuest) SetMetadata(vmMetadata VMMetadata) error {
@@ -273,7 +275,7 @@ func (vm *softLayerVirtualGuest) AttachDisk(disk bslcdisk.Disk) error {
 
 	totalTime := time.Duration(0)
 	if err == nil && allowed == false {
-		for totalTime < bslcommon.TIMEOUT {
+		for totalTime < slh.TIMEOUT {
 			allowable, err := networkStorageService.AttachNetworkStorageToVirtualGuest(vm.virtualGuest, disk.ID())
 			if err != nil {
 				if !strings.Contains(err.Error(), "HTTP error code") {
@@ -285,11 +287,11 @@ func (vm *softLayerVirtualGuest) AttachDisk(disk bslcdisk.Disk) error {
 				}
 			}
 
-			totalTime += bslcommon.POLLING_INTERVAL
-			time.Sleep(bslcommon.POLLING_INTERVAL)
+			totalTime += slh.POLLING_INTERVAL
+			time.Sleep(slh.POLLING_INTERVAL)
 		}
 	}
-	if totalTime >= bslcommon.TIMEOUT {
+	if totalTime >= slh.TIMEOUT {
 		return bosherr.Error("Waiting for grantting access to virutal guest TIME OUT!")
 	}
 
@@ -464,7 +466,7 @@ func (vm *softLayerVirtualGuest) waitForVolumeAttached(volume datatypes.SoftLaye
 
 	var deviceName string
 	totalTime := time.Duration(0)
-	for totalTime < bslcommon.TIMEOUT {
+	for totalTime < slh.TIMEOUT {
 		newDisks, err := vm.getIscsiDeviceNamesBasedOnShellScript(hasMultiPath)
 		if err != nil {
 			return "", bosherr.WrapError(err, fmt.Sprintf("Failed to get devices names from virtual guest `%d`", vm.ID()))
@@ -494,8 +496,8 @@ func (vm *softLayerVirtualGuest) waitForVolumeAttached(volume datatypes.SoftLaye
 			return deviceName, nil
 		}
 
-		totalTime += bslcommon.POLLING_INTERVAL
-		time.Sleep(bslcommon.POLLING_INTERVAL)
+		totalTime += slh.POLLING_INTERVAL
+		time.Sleep(slh.POLLING_INTERVAL)
 	}
 
 	return "", bosherr.Errorf("Failed to attach disk '%d' to virtual guest '%d'", volume.Id, vm.ID())
@@ -654,7 +656,7 @@ func (vm *softLayerVirtualGuest) writeOpenIscsiInitiatornameBasedOnShellScript(c
 
 func (vm *softLayerVirtualGuest) writeOpenIscsiConfBasedOnShellScript(volume datatypes.SoftLayer_Network_Storage, credential AllowedHostCredential) (bool, error) {
 	buffer := bytes.NewBuffer([]byte{})
-	t := template.Must(template.New("open_iscsid_conf").Parse(etcIscsidConfTemplate))
+	t := template.Must(template.New("open_iscsid_conf").Parse(EtcIscsidConfTemplate))
 	if len(credential.Password) == 0 {
 		err := t.Execute(buffer, volume)
 		if err != nil {
@@ -755,7 +757,7 @@ func (vm *softLayerVirtualGuest) postCheckActiveTransactionsForOSReload(softLaye
 	}
 
 	totalTime := time.Duration(0)
-	for totalTime < bslcommon.TIMEOUT {
+	for totalTime < slh.TIMEOUT {
 		activeTransactions, err := virtualGuestService.GetActiveTransactions(vm.ID())
 		if err != nil {
 			if !strings.Contains(err.Error(), "HTTP error code") {
@@ -768,15 +770,15 @@ func (vm *softLayerVirtualGuest) postCheckActiveTransactionsForOSReload(softLaye
 			break
 		}
 
-		totalTime += bslcommon.POLLING_INTERVAL
-		time.Sleep(bslcommon.POLLING_INTERVAL)
+		totalTime += slh.POLLING_INTERVAL
+		time.Sleep(slh.POLLING_INTERVAL)
 	}
 
-	if totalTime >= bslcommon.TIMEOUT {
+	if totalTime >= slh.TIMEOUT {
 		return errors.New(fmt.Sprintf("Waiting for OS Reload transaction to start TIME OUT!"))
 	}
 
-	err = bslcommon.WaitForVirtualGuest(vm.softLayerClient, vm.ID(), "RUNNING")
+	err = slh.WaitForVirtualGuest(vm.softLayerClient, vm.ID(), "RUNNING")
 	if err != nil {
 		if !strings.Contains(err.Error(), "HTTP error code") {
 			return bosherr.WrapError(err, fmt.Sprintf("PowerOn failed with VirtualGuest id %d", vm.ID()))
@@ -795,7 +797,7 @@ func (vm *softLayerVirtualGuest) postCheckActiveTransactionsForDeleteVM(softLaye
 	}
 
 	totalTime := time.Duration(0)
-	for totalTime < bslcommon.TIMEOUT {
+	for totalTime < slh.TIMEOUT {
 		activeTransactions, err := virtualGuestService.GetActiveTransactions(virtualGuestId)
 		if err != nil {
 			if !strings.Contains(err.Error(), "HTTP error code") {
@@ -808,16 +810,16 @@ func (vm *softLayerVirtualGuest) postCheckActiveTransactionsForDeleteVM(softLaye
 			break
 		}
 
-		totalTime += bslcommon.POLLING_INTERVAL
-		time.Sleep(bslcommon.POLLING_INTERVAL)
+		totalTime += slh.POLLING_INTERVAL
+		time.Sleep(slh.POLLING_INTERVAL)
 	}
 
-	if totalTime >= bslcommon.TIMEOUT {
+	if totalTime >= slh.TIMEOUT {
 		return errors.New(fmt.Sprintf("Waiting for DeleteVM transaction to start TIME OUT!"))
 	}
 
 	totalTime = time.Duration(0)
-	for totalTime < bslcommon.TIMEOUT {
+	for totalTime < slh.TIMEOUT {
 		vm1, err := virtualGuestService.GetObject(virtualGuestId)
 		if err != nil || vm1.Id == 0 {
 			vm.logger.Info(SOFTLAYER_VM_LOG_TAG, "VM doesn't exist. Delete done", nil)
@@ -847,11 +849,11 @@ func (vm *softLayerVirtualGuest) postCheckActiveTransactionsForDeleteVM(softLaye
 		}
 
 		vm.logger.Info(SOFTLAYER_VM_LOG_TAG, "This is a short transaction, waiting for all active transactions to complete", nil)
-		totalTime += bslcommon.POLLING_INTERVAL
-		time.Sleep(bslcommon.POLLING_INTERVAL)
+		totalTime += slh.POLLING_INTERVAL
+		time.Sleep(slh.POLLING_INTERVAL)
 	}
 
-	if totalTime >= bslcommon.TIMEOUT {
+	if totalTime >= slh.TIMEOUT {
 		return errors.New(fmt.Sprintf("After deleting a vm, waiting for active transactions to complete TIME OUT!"))
 	}
 

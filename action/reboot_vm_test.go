@@ -8,71 +8,82 @@ import (
 
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/action"
 
-	fakevm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm/fakes"
+	fakescommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/fakes"
 )
 
 var _ = Describe("RebootVM", func() {
 	var (
-		vmFinder *fakevm.FakeFinder
+		fakeVmFinder *fakescommon.FakeVMFinder
+		fakeVm *fakescommon.FakeVM
+
 		action   RebootVMAction
 	)
 
 	BeforeEach(func() {
-		vmFinder = &fakevm.FakeFinder{}
-		action = NewRebootVM(vmFinder)
+		fakeVmFinder = &fakescommon.FakeVMFinder{}
+		fakeVm = &fakescommon.FakeVM{}
+		action = NewRebootVM(fakeVmFinder)
 	})
 
 	Describe("Run", func() {
-		It("tries to find vm with given vm cid", func() {
-			_, err := action.Run(1234)
-			Expect(err).ToNot(HaveOccurred())
+		var (
+			vmCid VMCID
+			err error
+		)
 
-			Expect(vmFinder.FindID).To(Equal(1234))
+		BeforeEach(func() {
+			vmCid = VMCID(123456)
 		})
 
-		Context("when vm is found with given vm cid", func() {
-			var (
-				vm *fakevm.FakeVM
-			)
+		JustBeforeEach(func() {
+			_, err = action.Run(vmCid)
+		})
 
+
+		Context("when reboot vm succeeds", func() {
 			BeforeEach(func() {
-				vm = fakevm.NewFakeVM(1234)
-				vmFinder.FindVM = vm
-				vmFinder.FindFound = true
+				fakeVmFinder.FindReturns(fakeVm, true, nil)
 			})
 
-			It("reboots vm", func() {
-				_, err := action.Run(1234)
-				Expect(err).ToNot(HaveOccurred())
-
-				Expect(vm.RebootCalled).To(BeTrue())
+			It("fetches vm by cid", func() {
+				Expect(fakeVmFinder.FindCallCount()).To(Equal(1))
+				actualCid := fakeVmFinder.FindArgsForCall(0)
+				Expect(actualCid).To(Equal(123456))
 			})
 
-			It("returns error if rebooting vm fails", func() {
-				vm.RebootErr = errors.New("fake-reboot-err")
-
-				_, err := action.Run(1234)
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("fake-reboot-err"))
+			It("no error return", func() {
+				Expect(err).NotTo(HaveOccurred())
 			})
 		})
 
-		Context("when vm is not found with given cid", func() {
-			It("does vmFinder return error", func() {
-				vmFinder.FindFound = false
+		Context("when find vm error out", func() {
+			BeforeEach(func() {
+				fakeVmFinder.FindReturns(nil, false, errors.New("kaboom"))
+			})
 
-				_, err := action.Run(1234)
-				Expect(err).ToNot(HaveOccurred())
+			It("provides relevant error information", func() {
+				Expect(err.Error()).To(ContainSubstring("kaboom"))
 			})
 		})
 
-		Context("when vm finding fails", func() {
-			It("does not return error", func() {
-				vmFinder.FindErr = errors.New("fake-find-err")
+		Context("when find vm return false", func() {
+			BeforeEach(func() {
+				fakeVmFinder.FindReturns(nil, false, nil)
+			})
 
-				_, err := action.Run(1234)
+			It("no error return", func() {
+				Expect(err).NotTo(HaveOccurred())
+			})
+		})
+
+		Context("when reboot vm error out", func() {
+			BeforeEach(func() {
+				fakeVmFinder.FindReturns(fakeVm, true, nil)
+				fakeVm.RebootReturns(errors.New("kaboom"))
+			})
+			It("provides relevant error information", func() {
 				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("fake-find-err"))
+				Expect(err.Error()).To(ContainSubstring("kaboom"))
 			})
 		})
 	})

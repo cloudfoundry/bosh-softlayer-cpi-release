@@ -8,48 +8,48 @@ import (
 
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/action"
 
-	fakevm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm/fakes"
+	fakescommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/fakes"
 )
 
 var _ = Describe("HasVM", func() {
 	var (
-		vmFinder *fakevm.FakeFinder
+		fakeVmFinder *fakescommon.FakeVMFinder
 		action   HasVMAction
 	)
 
 	BeforeEach(func() {
-		vmFinder = &fakevm.FakeFinder{}
-		action = NewHasVM(vmFinder)
+		fakeVmFinder = &fakescommon.FakeVMFinder{}
+		action = NewHasVM(fakeVmFinder)
 	})
 
 	Describe("Run", func() {
-		Context("when VM is found with given CID", func() {
-			It("returns true without error", func() {
-				vmFinder.FindFound = true
-				vmFinder.FindVM = fakevm.NewFakeVM(1234)
+		var (
+			vmCid VMCID
+			found bool
+			err error
+		)
+		BeforeEach(func() {
+			vmCid = VMCID(123456)
+		})
 
-				found, err := action.Run(1234)
+		JustBeforeEach(func() {
+			found, err = action.Run(vmCid)
+		})
+		Context("when has vm succeeds", func() {
+			BeforeEach(func() {
+				fakeVmFinder.FindReturns(nil, true, nil)
+			})
+			It("no error return", func() {
 				Expect(err).ToNot(HaveOccurred())
 				Expect(found).To(BeTrue())
 			})
 		})
 
-		Context("when VM is not found with given CID", func() {
-			It("returns false without error", func() {
-				vmFinder.FindFound = false
-
-				found, err := action.Run(1234)
-				Expect(err).ToNot(HaveOccurred())
-				Expect(found).To(BeFalse())
+		Context("when has vm fails", func() {
+			BeforeEach(func() {
+				fakeVmFinder.FindReturns(nil, false, errors.New("kaboom"))
 			})
-		})
-
-		Context("when VM finding fails", func() {
-			It("returns false without error", func() {
-				vmFinder.FindFound = false
-				vmFinder.FindErr = errors.New("fake-find-err")
-
-				found, err := action.Run(1234)
+			It("no error return", func() {
 				Expect(err).ToNot(HaveOccurred())
 				Expect(found).To(BeFalse())
 			})

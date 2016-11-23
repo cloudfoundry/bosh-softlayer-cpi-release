@@ -1,8 +1,6 @@
 package action_test
 
 import (
-	"errors"
-
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -15,57 +13,35 @@ import (
 
 var _ = Describe("DeleteStemcell", func() {
 	var (
-		stemcellFinder *fakestem.FakeFinder
+		stemcellFinder *fakestem.FakeStemcellFinder
 		action         DeleteStemcellAction
 		logger         boshlog.Logger
 	)
 
 	BeforeEach(func() {
-		stemcellFinder = &fakestem.FakeFinder{}
+		stemcellFinder = &fakestem.FakeStemcellFinder{}
 
 		logger = boshlog.NewLogger(boshlog.LevelNone)
 		action = NewDeleteStemcell(stemcellFinder, logger)
 	})
 
 	Describe("Run", func() {
-		It("tries to find stemcell with given stemcell cid", func() {
-			_, err := action.Run(1234)
-			Expect(err).ToNot(HaveOccurred())
+		var (
+			stemcellCid StemcellCID
+			err error
+		)
 
-			Expect(stemcellFinder.FindID).To(Equal(1234))
+		BeforeEach(func() {
+			stemcellCid = StemcellCID(1234567)
 		})
 
-		Context("when stemcell is found with given stemcell cid", func() {
-			var (
-				stemcell *fakestem.FakeStemcell
-			)
-
-			BeforeEach(func() {
-				stemcell = fakestem.NewFakeStemcell(1234, "fake-stemcell-id")
-				stemcellFinder.FindStemcell = stemcell
-			})
-
-			It("does not delete stemcell", func() {
-				_, err := action.Run(1234)
-				Expect(err).ToNot(HaveOccurred())
-
-				Expect(stemcell.DeleteCalled).To(BeFalse())
-			})
-
-			It("logs instead of returning error if deleting stemcell fails", func() {
-				stemcell.DeleteErr = errors.New("fake-delete-err")
-
-				_, err := action.Run(1234)
-				Expect(err).ToNot(HaveOccurred())
-			})
+		JustBeforeEach(func() {
+			_, err = action.Run(stemcellCid)
 		})
 
-		Context("when stemcell finding fails", func() {
-			It("logs instead of returning error", func() {
-				stemcellFinder.FindErr = errors.New("fake-find-err")
-
-				_, err := action.Run(1234)
-				Expect(err).ToNot(HaveOccurred())
+		Context("when delete stemcell always succeeds", func() {
+			It("no error return", func() {
+				Expect(err).NotTo(HaveOccurred())
 			})
 		})
 	})

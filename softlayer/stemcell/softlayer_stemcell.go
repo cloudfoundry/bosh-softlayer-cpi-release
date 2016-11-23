@@ -4,10 +4,9 @@ import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
-	slh "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
-	sl "github.com/maximilien/softlayer-go/softlayer"
+	slh "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
 
-	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
+	sl "github.com/maximilien/softlayer-go/softlayer"
 
 	"fmt"
 	"time"
@@ -21,8 +20,8 @@ type SoftLayerStemcell struct {
 }
 
 func NewSoftLayerStemcell(id int, uuid string, softLayerClient sl.Client, logger boshlog.Logger) SoftLayerStemcell {
-	bslcommon.TIMEOUT = 60 * time.Minute
-	bslcommon.POLLING_INTERVAL = 10 * time.Second
+	slh.TIMEOUT = 60 * time.Minute
+	slh.POLLING_INTERVAL = 10 * time.Second
 
 	softLayerFinder := SoftLayerFinder{
 		client: softLayerClient,

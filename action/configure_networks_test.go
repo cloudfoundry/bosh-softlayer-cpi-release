@@ -7,75 +7,87 @@ import (
 	. "github.com/onsi/gomega"
 
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/action"
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 
-	fakevm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm/fakes"
+	fakescommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/fakes"
 )
 
 var _ = Describe("ConfigureNetworks", func() {
 	var (
-		vmFinder *fakevm.FakeFinder
+		fakeVmFinder *fakescommon.FakeVMFinder
+		fakeVm       *fakescommon.FakeVM
 		action   ConfigureNetworksAction
 		networks Networks
+		vmCid      VMCID
+
+		err error
 	)
 
-	BeforeEach(func() {
-		vmFinder = &fakevm.FakeFinder{}
-		action = NewConfigureNetworks(vmFinder)
-		networks = Networks{}
-	})
-
 	Describe("Run", func() {
-		It("tries to find vm with given vm cid", func() {
-			_, err := action.Run(1234, networks)
-			Expect(err).ToNot(HaveOccurred())
+		BeforeEach(func() {
+			fakeVmFinder = &fakescommon.FakeVMFinder{}
+			fakeVm = &fakescommon.FakeVM{}
+			action = NewConfigureNetworks(fakeVmFinder)
+			networks = Networks{}
 
-			Expect(vmFinder.FindID).To(Equal(1234))
+			vmCid = VMCID(123456)
 		})
 
-		Context("when vm is found with given vm cid", func() {
-			var (
-				vm *fakevm.FakeVM
-			)
+		JustBeforeEach(func() {
+			_, err = action.Run(vmCid, networks)
+		})
 
+		Context("when configure network succeeds", func() {
 			BeforeEach(func() {
-				vm = fakevm.NewFakeVM(1234)
-				vmFinder.FindVM = vm
-				vmFinder.FindFound = true
+				fakeVm.IDReturns(vmCid.Int())
+				fakeVmFinder.FindReturns(fakeVm, true, nil)
+
+				fakeVm.ConfigureNetworksReturns(nil)
 			})
 
-			It("configures vm networks", func() {
-				_, err := action.Run(1234, networks)
-				Expect(err).ToNot(HaveOccurred())
-
-				Expect(vm.ConfigureNetworksCalled).To(BeTrue())
-				Expect(vm.Networks).To(Equal(networks.AsVMNetworks()))
+			It("fetches vm by cid", func() {
+				Expect(fakeVmFinder.FindCallCount()).To(Equal(1))
+				actualCid := fakeVmFinder.FindArgsForCall(0)
+				Expect(actualCid).To(Equal(123456))
 			})
 
-			It("returns error if configure networks fails", func() {
-				vm.ConfigureNetworksErr = errors.New("fake-configure-networks-err")
-
-				_, err := action.Run(1234, networks)
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("fake-configure-networks-err"))
+			It("no error return", func() {
+				Expect(fakeVm.ConfigureNetworksCallCount()).To(Equal(1))
+				actualNetworks := fakeVm.ConfigureNetworksArgsForCall(0)
+				Expect(actualNetworks).To(Equal(networks))
+				Expect(err).NotTo(HaveOccurred())
 			})
 		})
 
-		Context("when vm is not found with given cid", func() {
-			It("does vmFinder return error", func() {
-				vmFinder.FindFound = false
+		Context("when find vm error out", func() {
+			BeforeEach(func() {
+				fakeVmFinder.FindReturns(nil, false, errors.New("kaboom"))
+			})
 
-				_, err := action.Run(1234, networks)
-				Expect(err).ToNot(HaveOccurred())
+			It("provides relevant error information", func() {
+				Expect(err.Error()).To(ContainSubstring("kaboom"))
 			})
 		})
 
-		Context("when vm finding fails", func() {
-			It("does not return error", func() {
-				vmFinder.FindErr = errors.New("fake-find-err")
+		Context("when find vm return false", func() {
+			BeforeEach(func() {
+				fakeVmFinder.FindReturns(nil, false, nil)
+			})
 
-				_, err := action.Run(1234, networks)
+			It("provides relevant error information", func() {
+				Expect(err).NotTo(HaveOccurred())
+			})
+		})
+
+		Context("when configure network error out", func() {
+			BeforeEach(func() {
+				fakeVmFinder.FindReturns(fakeVm, true, nil)
+				fakeVm.ConfigureNetworksReturns(errors.New("kaboom"))
+			})
+
+			It("provides relevant error information", func() {
 				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("fake-find-err"))
+				Expect(err.Error()).To(ContainSubstring("kaboom"))
 			})
 		})
 	})
