@@ -105,7 +105,8 @@ var _ = Describe("SoftLayerHardware", func() {
 	Describe("ReloadOS", func() {
 		Context("valid VM ID is used", func() {
 			BeforeEach(func() {
-				stemcell = fakestemcell.NewFakeStemcell(123456, "5b7bc66a-72c6-447a-94a1-967803fcd76b")
+				stemcell = &fakestemcell.FakeStemcell{}
+
 			})
 
 			It("returns unsupport error", func() {
@@ -209,7 +210,7 @@ var _ = Describe("SoftLayerHardware", func() {
 `
 
 		BeforeEach(func() {
-			disk = fakedisk.FakeDisk{}
+			disk = &fakedisk.FakeDisk{}
 			fileNames := []string{
 				"SoftLayer_Network_Storage_Service_getIscsiVolume.json",
 				"SoftLayer_Network_Storage_Service_getAllowedVirtualGuests_None.json",
@@ -337,7 +338,7 @@ iscsiadm: No records found
  * Starting multipath daemon multipathd
  `
 		BeforeEach(func() {
-			disk = fakedisk.FakeDisk{}
+			disk = &fakedisk.FakeDisk{}
 			fileNames := []string{
 				"SoftLayer_Network_Storage_Service_getIscsiVolume.json",
 				"SoftLayer_Network_Storage_Service_getAllowedVirtualGuests.json",

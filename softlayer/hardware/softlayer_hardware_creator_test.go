@@ -10,7 +10,7 @@ import (
 	testhelpers "github.com/cloudfoundry/bosh-softlayer-cpi/test_helpers"
 
 	fakebmsclient "github.com/cloudfoundry-community/bosh-softlayer-tools/clients/fakes"
-	fakevm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/fakes"
+	fakescommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/fakes"
 	fakesutil "github.com/cloudfoundry/bosh-softlayer-cpi/util/fakes"
 	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
 
@@ -29,7 +29,7 @@ var _ = Describe("SoftLayer_Hardware_Creator", func() {
 		softLayerClient *fakeslclient.FakeSoftLayerClient
 		baremetalClient *fakebmsclient.FakeBmpClient
 		sshClient       *fakesutil.FakeSshClient
-		vmFinder        *fakevm.FakeVMFinder
+		vmFinder *fakescommon.FakeVMFinder
 		agentOptions    bslcommon.AgentOptions
 		logger          boshlog.Logger
 		creator         bslcommon.VMCreator
@@ -41,7 +41,7 @@ var _ = Describe("SoftLayer_Hardware_Creator", func() {
 		sshClient = &fakesutil.FakeSshClient{}
 		agentOptions = bslcommon.AgentOptions{Mbus: "fake-mbus"}
 		logger = boshlog.NewLogger(boshlog.LevelNone)
-		vmFinder = &fakevm.FakeVMFinder{}
+		vmFinder = &fakescommon.FakeVMFinder{}
 
 		creator = NewBaremetalCreator(
 			vmFinder,
@@ -70,10 +70,11 @@ var _ = Describe("SoftLayer_Hardware_Creator", func() {
 
 				env = bslcommon.Environment{}
 
-				vmFinder.find = fakevm.FakeVMFinder{}
+				vmFinder = &fakescommon.FakeVMFinder{}
 
-				vmFinder.FindFound = true
-				vmFinder.FindErr = nil
+				fakeVm := &fakescommon.FakeVM{}
+				fakeVm.IDReturns(1234567)
+				vmFinder.FindReturns(fakeVm, true, nil)
 			})
 
 			Context("provisioning vm in baremetal server", func() {
@@ -269,8 +270,8 @@ var _ = Describe("SoftLayer_Hardware_Creator", func() {
 						},
 					}
 
-					vmFinder.FindVM = fakevm.NewFakeVM(1234567)
-					vmFinder.FindFound = false
+					vm := &fakescommon.FakeVM{}
+					vmFinder.FindReturns(vm, false, nil)
 				})
 
 				It("fails when VMProperties is missing StartCpus", func() {
