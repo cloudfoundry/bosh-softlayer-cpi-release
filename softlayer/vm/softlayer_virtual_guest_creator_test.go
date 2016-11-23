@@ -14,13 +14,13 @@ import (
 	fakesutil "github.com/cloudfoundry/bosh-softlayer-cpi/util/fakes"
 	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
 
-	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
 	sldatatypes "github.com/maximilien/softlayer-go/data_types"
+	slh "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
 )
 
 var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
@@ -43,8 +43,8 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 		vmFinder = &fakescommon.FakeVMFinder{}
 		vm = &fakescommon.FakeVM{}
 
-		bslcommon.TIMEOUT = 2 * time.Second
-		bslcommon.POLLING_INTERVAL = 1 * time.Second
+		slh.TIMEOUT = 2 * time.Second
+		slh.POLLING_INTERVAL = 1 * time.Second
 	})
 
 	Describe("#Create", func() {

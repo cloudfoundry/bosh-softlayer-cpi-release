@@ -8,6 +8,7 @@ import (
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
+	slh "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
 )
 
 const (
@@ -83,7 +84,7 @@ func (s *fsAgentEnvService) Update(agentEnv AgentEnv) error {
 
 	// Add this warning message due to bosh-softlayer-cpi issues #129, may remove this piece of code when we identify the real root cause
 	var longHostNameWarningMsg string
-	if LengthOfHostName > 63 {
+	if slh.LengthOfHostName > 63 {
 		longHostNameWarningMsg = "Notice that the length of device hostname is greater than 63 characters, which might cause SSH service setup improperly by SoftLayer, please confirm with SoftLayer or consider to shorten the hostname"
 	}
 
