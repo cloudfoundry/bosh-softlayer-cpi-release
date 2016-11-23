@@ -23,7 +23,7 @@ var _ = Describe("CreateVM", func() {
 		fakeVmCreator     *fakescommon.FakeVMCreator
 		fakeVm            *fakescommon.FakeVM
 		fakeCreatorProvider *fakeaction.FakeCreatorProvider
-	        fakeOptions ConcreteFactoryOptions
+	        fakeOptions *ConcreteFactoryOptions
 		action CreateVMAction
 
 		stemcellCID               StemcellCID
@@ -33,25 +33,26 @@ var _ = Describe("CreateVM", func() {
 		env                       Environment
 	)
 
+	BeforeEach(func() {
+		fakeStemcellFinder = &fakestem.FakeStemcellFinder{}
+		fakeStemcell = &fakestem.FakeStemcell{}
+		fakeVmCreator = &fakescommon.FakeVMCreator{}
+		fakeCreatorProvider = &fakeaction.FakeCreatorProvider{}
+		fakeOptions = &ConcreteFactoryOptions{}
+
+		stemcellCID = StemcellCID(1234)
+		networks = Networks{"fake-net-name": Network{IP: "fake-ip"}}
+		diskLocality = []DiskCID{1234}
+		env = Environment{"fake-env-key": "fake-env-value"}
+
+		action = NewCreateVM(fakeStemcellFinder, fakeCreatorProvider, *fakeOptions)
+	})
+
 	Describe("Run", func() {
 		var (
 			vmCidString    string
 			err            error
 		)
-
-		BeforeEach(func() {
-			fakeStemcellFinder = &fakestem.FakeStemcellFinder{}
-			fakeStemcell = &fakestem.FakeStemcell{}
-			fakeVmCreator = &fakescommon.FakeVMCreator{}
-			fakeCreatorProvider = &fakeaction.FakeCreatorProvider{}
-
-			stemcellCID = StemcellCID(1234)
-			networks = Networks{"fake-net-name": Network{IP: "fake-ip"}}
-			diskLocality = []DiskCID{1234}
-			env = Environment{"fake-env-key": "fake-env-value"}
-
-			action = NewCreateVM(fakeStemcellFinder, fakeCreatorProvider, fakeOptions)
-		})
 
 		JustBeforeEach(func() {
 			vmCidString, err = action.Run("fake-agent-id", stemcellCID, fakeCloudProp, networks, diskLocality, env)
@@ -61,7 +62,7 @@ var _ = Describe("CreateVM", func() {
 			BeforeEach(func() {
 				fakeVm.IDReturns(1234567)
 				fakeStemcellFinder.FindByIdReturns(fakeStemcell, nil)
-				fakeOptions = ConcreteFactoryOptions{
+				fakeOptions = &ConcreteFactoryOptions{
 					SoftLayerConfig: SoftLayerConfig{FeatureOptions : FeatureOptions{EnablePool : true}},
 				}
 				fakeCloudProp = VMCloudProperties{

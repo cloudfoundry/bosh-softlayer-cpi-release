@@ -23,24 +23,17 @@ func NewDeleteVM(
 
 func (a DeleteVMAction) Run(vmCID VMCID) (interface{}, error) {
 	var vmDeleter VMDeleter
-	var err error
 	if a.options.Softlayer.FeatureOptions.EnablePool {
-		vmDeleter, err = a.vmDeleterProvider.Get("pool")
-		if err != nil {
-			return nil, bosherr.WrapError(err, "Could not get vm deleter for pool")
-		}
+		vmDeleter = a.vmDeleterProvider.Get("pool")
 
-		err = vmDeleter.Delete(int(vmCID))
+		err := vmDeleter.Delete(int(vmCID))
 		if err != nil {
 			return nil, bosherr.WrapError(err, fmt.Sprintf("Update vm %d to free in pool", int(vmCID)))
 		}
 	} else {
-		vmDeleter, err = a.vmDeleterProvider.Get("virtualguest")
-		err = vmDeleter.Delete(int(vmCID))
-		if err != nil {
-			return nil, bosherr.WrapError(err, "Could not get vm deleter for virtual guest")
-		}
+		vmDeleter = a.vmDeleterProvider.Get("virtualguest")
 
+		err := vmDeleter.Delete(int(vmCID))
 		if err != nil {
 			return nil, bosherr.WrapError(err, fmt.Sprintf("Deleting vm %d", int(vmCID)))
 		}

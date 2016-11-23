@@ -2,69 +2,95 @@ package action_test
 
 import (
 	"errors"
-
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/action"
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
+	fakeaction "github.com/cloudfoundry/bosh-softlayer-cpi/action/fakes"
 
-	fakevm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm/fakes"
+	fakescommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/fakes"
+
 )
 
 var _ = Describe("DeleteVM", func() {
 	var (
-		vmFinder *fakevm.FakeFinder
+		fakeVmFinder *fakescommon.FakeVMFinder
+		fakeVmDeleterProvider *fakeaction.FakeDeleterProvider
+		fakeVmDeleter *fakescommon.FakeVMDeleter
+		fakeOptions *ConcreteFactoryOptions
+
+		vmCid VMCID
+
 		action   DeleteVMAction
 	)
 
 	BeforeEach(func() {
-		vmFinder = &fakevm.FakeFinder{}
-		action = NewDeleteVM(vmFinder)
+		fakeVmFinder = &fakescommon.FakeVMFinder{}
+		fakeVmDeleter = &fakescommon.FakeVMDeleter{}
+		fakeVmDeleterProvider = &fakeaction.FakeDeleterProvider{}
+		fakeOptions = &ConcreteFactoryOptions{}
+
+		vmCid = VMCID(1234)
+		action = NewDeleteVM(fakeVmDeleterProvider, *fakeOptions)
 	})
 
 	Describe("Run", func() {
-		Context("when vm is found with given vm cid", func() {
-			var (
-				vm *fakevm.FakeVM
-			)
-
+		var (
+			err error
+		)
+		JustBeforeEach(func() {
+			_, err = action.Run(vmCid)
+		})
+		Context("when delete vm with enable pool succeeds", func() {
 			BeforeEach(func() {
-				vm = fakevm.NewFakeVM(1234)
-				vmFinder.FindVM = vm
-				vmFinder.FindFound = true
+				fakeOptions = &ConcreteFactoryOptions{
+					SoftLayerConfig: SoftLayerConfig{FeatureOptions : FeatureOptions{EnablePool : true}},
+				}
+				fakeVmDeleterProvider.GetReturns(fakeVmDeleter)
+				fakeVmDeleter.DeleteReturns(nil)
 			})
 
-			It("deletes vm", func() {
-				_, err := action.Run(1234)
-				Expect(err).ToNot(HaveOccurred())
-
-				Expect(vm.DeleteCalled).To(BeTrue())
+			It("fetches deleter by `pool`", func() {
+				Expect(fakeVmDeleterProvider.GetCallCount()).To(Equal(1))
+				actualKey := fakeVmDeleterProvider.GetArgsForCall(0)
+				Expect(actualKey).To(Equal("pool"))
 			})
 
-			It("returns error if deleting vm fails", func() {
-				vm.DeleteErr = errors.New("fake-delete-err")
-
-				_, err := action.Run(1234)
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("fake-delete-err"))
-			})
-		})
-
-		Context("when vm is not found with given cid", func() {
-			It("does vmFinder does not return error", func() {
-				vmFinder.FindFound = false
-
-				_, err := action.Run(1234)
-				Expect(err).ToNot(HaveOccurred())
+			It("no error return", func() {
+				Expect(fakeVmDeleter.DeleteCallCount()).To(Equal(1))
+				actualCid := fakeVmDeleter.DeleteArgsForCall(0)
+				Expect(actualCid).To(Equal(1234))
+				Expect(err).NotTo(HaveOccurred())
 			})
 		})
 
-		Context("when vm finding fails", func() {
-			It("does not return error", func() {
-				vmFinder.FindErr = errors.New("fake-find-err")
+		Context("when delete vm without enable pool succeeds", func() {
+			BeforeEach(func() {
+				fakeOptions = &ConcreteFactoryOptions{
+					SoftLayerConfig: SoftLayerConfig{FeatureOptions : FeatureOptions{EnablePool : false}},
+				}
+				fakeVmDeleterProvider.GetReturns(fakeVmDeleter)
+			})
 
-				_, err := action.Run(1234)
-				Expect(err).ToNot(HaveOccurred())
+			It("fetches deleter by `virtualguest`", func() {
+				Expect(fakeVmDeleterProvider.GetCallCount()).To(Equal(1))
+				actualKey := fakeVmDeleterProvider.GetArgsForCall(0)
+				Expect(actualKey).To(Equal("virtualguest"))
+			})
+		})
+
+		Context("when delete vm error out", func() {
+			BeforeEach(func() {
+				fakeOptions = &ConcreteFactoryOptions{
+					SoftLayerConfig: SoftLayerConfig{FeatureOptions : FeatureOptions{EnablePool : true}},
+				}
+				fakeVmDeleterProvider.GetReturns(fakeVmDeleter)
+				fakeVmDeleter.DeleteReturns(errors.New("kaboom"))
+			})
+
+			It("fetches deleter by `pool`", func() {
+				Expect(err.Error()).To(ContainSubstring("kaboomr"))
 			})
 		})
 	})

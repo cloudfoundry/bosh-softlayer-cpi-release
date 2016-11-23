@@ -4,16 +4,16 @@ import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 
 	bslcdisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk"
-	bslcvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 )
 
 type DetachDiskAction struct {
-	vmFinder   bslcvm.Finder
+	vmFinder   VMFinder
 	diskFinder bslcdisk.DiskFinder
 }
 
 func NewDetachDisk(
-	vmFinder bslcvm.Finder,
+	vmFinder VMFinder,
 	diskFinder bslcdisk.DiskFinder,
 ) (action DetachDiskAction) {
 	action.vmFinder = vmFinder

@@ -116,7 +116,7 @@ var _ = Describe("AttachDisk", func() {
 
 			It("provides relevant error information", func() {
 				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring(fmt.Sprintf("Expected to find disk '%s'", diskCID))))
+				Expect(err.Error()).To(ContainSubstring(fmt.Sprintf("Expected to find disk '%s'", diskCID)))
 			})
 		})
 
