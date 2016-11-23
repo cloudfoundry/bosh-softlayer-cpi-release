@@ -6,21 +6,23 @@ import (
 	"net"
 
 	strfmt "github.com/go-openapi/strfmt"
+
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
-	datatypes "github.com/maximilien/softlayer-go/data_types"
-
-	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
-	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
 
 	sl "github.com/maximilien/softlayer-go/softlayer"
-	"github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/pool/client"
-	operations "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/pool/client/vm"
 
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
+	datatypes "github.com/maximilien/softlayer-go/data_types"
+
+	slhelper "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
+	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
+	operations "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/pool/client/vm"
+	util "github.com/cloudfoundry/bosh-softlayer-cpi/util"
+
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 
 	"github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/pool/models"
-	"github.com/cloudfoundry/bosh-softlayer-cpi/common"
+	"github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/pool/client"
 )
 
 const SOFTLAYER_POOL_CREATOR_LOG_TAG = "SoftLayerPoolCreator"
@@ -35,14 +37,14 @@ type softLayerPoolCreator struct {
 
 	logger                 boshlog.Logger
 
-	vmFinder               Finder
+	vmFinder               VMFinder
 
 	featureOptions         FeatureOptions
 }
 
-func NewSoftLayerPoolCreator(vmFinder Finder, softLayerVmPoolClient *client.SoftLayerVMPool, softLayerClient sl.Client, agentOptions AgentOptions, logger boshlog.Logger, featureOptions FeatureOptions) VMCreator {
-	bslcommon.TIMEOUT = 120 * time.Minute
-	bslcommon.POLLING_INTERVAL = 5 * time.Second
+func NewSoftLayerPoolCreator(vmFinder VMFinder, softLayerVmPoolClient *client.SoftLayerVMPool, softLayerClient sl.Client, agentOptions AgentOptions, logger boshlog.Logger, featureOptions FeatureOptions) VMCreator {
+	slhelper.TIMEOUT = 120 * time.Minute
+	slhelper.POLLING_INTERVAL = 5 * time.Second
 
 	return &softLayerPoolCreator{
 		softLayerVmPoolClient: softLayerVmPoolClient,
@@ -155,12 +157,12 @@ func (c *softLayerPoolCreator) createBySoftlayer(agentID string, stemcell bslcst
 	}
 
 	if cloudProps.EphemeralDiskSize == 0 {
-		err = bslcommon.WaitForVirtualGuestLastCompleteTransaction(c.softLayerClient, virtualGuest.Id, "Service Setup")
+		err = slhelper.WaitForVirtualGuestLastCompleteTransaction(c.softLayerClient, virtualGuest.Id, "Service Setup")
 		if err != nil {
 			return nil, bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` has Service Setup transaction complete", virtualGuest.Id)
 		}
 	} else {
-		err = bslcommon.AttachEphemeralDiskToVirtualGuest(c.softLayerClient, virtualGuest.Id, cloudProps.EphemeralDiskSize, c.logger)
+		err = slhelper.AttachEphemeralDiskToVirtualGuest(c.softLayerClient, virtualGuest.Id, cloudProps.EphemeralDiskSize, c.logger)
 		if err != nil {
 			return nil, bosherr.WrapError(err, fmt.Sprintf("Attaching ephemeral disk to VirtualGuest `%d`", virtualGuest.Id))
 		}
@@ -222,7 +224,7 @@ func (c *softLayerPoolCreator) createByOSReload(agentID string , stemcell bslcst
 	for _, network := range networks {
 		switch network.Type {
 		case "dynamic":
-			if common.IsPrivateSubnet(net.ParseIP(network.IP)) {
+			if util.IsPrivateSubnet(net.ParseIP(network.IP)) {
 				virtualGuest, err = virtualGuestService.GetObjectByPrimaryBackendIpAddress(network.IP)
 			} else {
 				virtualGuest, err = virtualGuestService.GetObjectByPrimaryIpAddress(network.IP)
@@ -244,19 +246,19 @@ func (c *softLayerPoolCreator) createByOSReload(agentID string , stemcell bslcst
 		return nil, bosherr.WrapErrorf(err, "Cannot find virtualGuest with id: %d", virtualGuest.Id)
 	}
 
-	bslcommon.TIMEOUT = 4 * time.Hour
+	slhelper.TIMEOUT = 4 * time.Hour
 	err = vm.ReloadOS(stemcell)
 	if err != nil {
 		return nil, bosherr.WrapError(err, "Failed to reload OS")
 	}
 
 	if cloudProps.EphemeralDiskSize == 0 {
-		err = bslcommon.WaitForVirtualGuestLastCompleteTransaction(c.softLayerClient, vm.ID(), "Service Setup")
+		err = slhelper.WaitForVirtualGuestLastCompleteTransaction(c.softLayerClient, vm.ID(), "Service Setup")
 		if err != nil {
 			return nil, bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` has Service Setup transaction complete", vm.ID())
 		}
 	} else {
-		err = bslcommon.AttachEphemeralDiskToVirtualGuest(c.softLayerClient, vm.ID(), cloudProps.EphemeralDiskSize, c.logger)
+		err = slhelper.AttachEphemeralDiskToVirtualGuest(c.softLayerClient, vm.ID(), cloudProps.EphemeralDiskSize, c.logger)
 		if err != nil {
 			return nil, bosherr.WrapError(err, fmt.Sprintf("Attaching ephemeral disk to VirtualGuest `%d`", vm.ID()))
 		}
@@ -315,19 +317,19 @@ func (c *softLayerPoolCreator) oSReloadVMInPool (cid int, agentID string , stemc
 		return nil, bosherr.WrapErrorf(err, "Cannot find virtualGuest with id: %d", cid)
 	}
 
-	bslcommon.TIMEOUT = 4 * time.Hour
+	slhelper.TIMEOUT = 4 * time.Hour
 	err = vm.ReloadOS(stemcell)
 	if err != nil {
 		return nil, bosherr.WrapErrorf(err, "Failed to do os_reload against %d", cid)
 	}
 
 	if cloudProps.EphemeralDiskSize == 0 {
-		err = bslcommon.WaitForVirtualGuestLastCompleteTransaction(c.softLayerClient, vm.ID(), "Service Setup")
+		err = slhelper.WaitForVirtualGuestLastCompleteTransaction(c.softLayerClient, vm.ID(), "Service Setup")
 		if err != nil {
 			return nil, bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` has Service Setup transaction complete", vm.ID())
 		}
 	} else {
-		err = bslcommon.AttachEphemeralDiskToVirtualGuest(c.softLayerClient, vm.ID(), cloudProps.EphemeralDiskSize, c.logger)
+		err = slhelper.AttachEphemeralDiskToVirtualGuest(c.softLayerClient, vm.ID(), cloudProps.EphemeralDiskSize, c.logger)
 		if err != nil {
 			return nil, bosherr.WrapError(err, fmt.Sprintf("Attaching ephemeral disk to VirtualGuest `%d`", vm.ID()))
 		}

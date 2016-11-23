@@ -62,7 +62,7 @@ var _ = Describe("RebootVM", func() {
 			})
 
 			It("provides relevant error information", func() {
-				Expect(err.Error()).To(ContainSubstring("kaboomr"))
+				Expect(err.Error()).To(ContainSubstring("kaboom"))
 			})
 		})
 

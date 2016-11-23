@@ -23,36 +23,35 @@ var _ = Describe("CreateVM", func() {
 		fakeVmCreator     *fakescommon.FakeVMCreator
 		fakeVm            *fakescommon.FakeVM
 		fakeCreatorProvider *fakeaction.FakeCreatorProvider
-	        fakeOptions *ConcreteFactoryOptions
-		action CreateVMAction
-
-		stemcellCID               StemcellCID
-		fakeCloudProp VMCloudProperties
-		networks                  Networks
-		diskLocality              []DiskCID
-		env                       Environment
 	)
 
 	BeforeEach(func() {
 		fakeStemcellFinder = &fakestem.FakeStemcellFinder{}
+		fakeVm =  &fakescommon.FakeVM{}
 		fakeStemcell = &fakestem.FakeStemcell{}
 		fakeVmCreator = &fakescommon.FakeVMCreator{}
 		fakeCreatorProvider = &fakeaction.FakeCreatorProvider{}
-		fakeOptions = &ConcreteFactoryOptions{}
-
-		stemcellCID = StemcellCID(1234)
-		networks = Networks{"fake-net-name": Network{IP: "fake-ip"}}
-		diskLocality = []DiskCID{1234}
-		env = Environment{"fake-env-key": "fake-env-value"}
-
-		action = NewCreateVM(fakeStemcellFinder, fakeCreatorProvider, *fakeOptions)
 	})
 
 	Describe("Run", func() {
 		var (
 			vmCidString    string
+			stemcellCID    StemcellCID
 			err            error
+			networks                  Networks
+			diskLocality              []DiskCID
+			env                       Environment
+			action CreateVMAction
+			fakeCloudProp VMCloudProperties
+			fakeOptions *ConcreteFactoryOptions
 		)
+
+		BeforeEach(func() {
+			stemcellCID = StemcellCID(1234)
+			networks = Networks{"fake-net-name": Network{IP: "fake-ip"}}
+			env = Environment{"fake-env-key": "fake-env-value"}
+			diskLocality = []DiskCID{1234}
+		})
 
 		JustBeforeEach(func() {
 			vmCidString, err = action.Run("fake-agent-id", stemcellCID, fakeCloudProp, networks, diskLocality, env)
@@ -60,10 +59,8 @@ var _ = Describe("CreateVM", func() {
 
 		Context("when create vm with enabled pool succeeds", func() {
 			BeforeEach(func() {
-				fakeVm.IDReturns(1234567)
-				fakeStemcellFinder.FindByIdReturns(fakeStemcell, nil)
 				fakeOptions = &ConcreteFactoryOptions{
-					SoftLayerConfig: SoftLayerConfig{FeatureOptions : FeatureOptions{EnablePool : true}},
+					Softlayer: SoftLayerConfig{FeatureOptions : FeatureOptions{EnablePool : true}},
 				}
 				fakeCloudProp = VMCloudProperties{
 					StartCpus:    2,
@@ -75,6 +72,10 @@ var _ = Describe("CreateVM", func() {
 						sldatatypes.SshKey{Id: 1234},
 					},
 				}
+				action = NewCreateVM(fakeStemcellFinder, fakeCreatorProvider, *fakeOptions)
+
+				fakeVm.IDReturns(1234567)
+				fakeStemcellFinder.FindByIdReturns(fakeStemcell, nil)
 				fakeCreatorProvider.GetReturns(fakeVmCreator)
 				fakeVmCreator.CreateReturns(fakeVm,nil)
 			})
@@ -104,36 +105,42 @@ var _ = Describe("CreateVM", func() {
 
 		Context("when stemcell not found", func() {
 			BeforeEach(func() {
+				fakeOptions = &ConcreteFactoryOptions{
+					Softlayer: SoftLayerConfig{FeatureOptions : FeatureOptions{EnablePool : true}},
+				}
+				action = NewCreateVM(fakeStemcellFinder, fakeCreatorProvider, *fakeOptions)
+
 				fakeStemcellFinder.FindByIdReturns(nil, errors.New("kaboom"))
 			})
 
 			It("provides relevant error information", func() {
-				Expect(err).To(MatchError("kaboom"))
+				Expect(err.Error()).To(ContainSubstring("kaboom"))
 				Expect(vmCidString).To(Equal("0"))
 			})
 		})
 
 		Context("when create vm with enabled pool error out", func() {
 			BeforeEach(func() {
-				fakeStemcellFinder.FindByIdReturns(fakeStemcell, nil)
-				fakeOptions = ConcreteFactoryOptions{
-					SoftLayerConfig: SoftLayerConfig{FeatureOptions : FeatureOptions{EnablePool : true}},
+				fakeOptions = &ConcreteFactoryOptions{
+					Softlayer: SoftLayerConfig{FeatureOptions : FeatureOptions{EnablePool : true}},
 				}
+				action = NewCreateVM(fakeStemcellFinder, fakeCreatorProvider, *fakeOptions)
+
 				fakeCreatorProvider.GetReturns(fakeVmCreator)
+				fakeStemcellFinder.FindByIdReturns(fakeStemcell, nil)
 				fakeVmCreator.CreateReturns(nil,errors.New("kaboom"))
 			})
 
 			It("provides relevant error information", func() {
-				Expect(err).To(MatchError("kaboom"))
+				Expect(err.Error()).To(ContainSubstring("kaboom"))
 				Expect(vmCidString).To(Equal("0"))
 			})
 		})
 
 		Context("when create vm without pool", func() {
 			BeforeEach(func() {
-				fakeStemcellFinder.FindByIdReturns(fakeStemcell, nil)
-				fakeOptions = ConcreteFactoryOptions{
-					SoftLayerConfig: SoftLayerConfig{FeatureOptions : FeatureOptions{EnablePool : false}},
+				fakeOptions = &ConcreteFactoryOptions{
+					Softlayer: SoftLayerConfig{FeatureOptions : FeatureOptions{EnablePool : false}},
 				}
 				fakeCloudProp = VMCloudProperties{
 					StartCpus:    2,
@@ -145,7 +152,12 @@ var _ = Describe("CreateVM", func() {
 						sldatatypes.SshKey{Id: 1234},
 					},
 				}
+				action = NewCreateVM(fakeStemcellFinder, fakeCreatorProvider, *fakeOptions)
+
+				fakeVm.IDReturns(1234567)
+				fakeStemcellFinder.FindByIdReturns(fakeStemcell, nil)
 				fakeCreatorProvider.GetReturns(fakeVmCreator)
+				fakeVmCreator.CreateReturns(fakeVm,nil)
 			})
 
 			It("fetches creator by virtualguest", func() {
@@ -157,9 +169,8 @@ var _ = Describe("CreateVM", func() {
 
 		Context("when create baremetal", func() {
 			BeforeEach(func() {
-				fakeStemcellFinder.FindByIdReturns(fakeStemcell, nil)
-				fakeOptions = ConcreteFactoryOptions{
-					SoftLayerConfig: SoftLayerConfig{FeatureOptions : FeatureOptions{EnablePool : false}},
+				fakeOptions = &ConcreteFactoryOptions {
+					Softlayer: SoftLayerConfig{FeatureOptions : FeatureOptions{EnablePool : false}},
 				}
 				fakeCloudProp = VMCloudProperties{
 					StartCpus:    2,
@@ -172,7 +183,12 @@ var _ = Describe("CreateVM", func() {
 						sldatatypes.SshKey{Id: 1234},
 					},
 				}
+				action = NewCreateVM(fakeStemcellFinder, fakeCreatorProvider, *fakeOptions)
+
+				fakeVm.IDReturns(1234567)
+				fakeStemcellFinder.FindByIdReturns(fakeStemcell, nil)
 				fakeCreatorProvider.GetReturns(fakeVmCreator)
+				fakeVmCreator.CreateReturns(fakeVm,nil)
 			})
 
 			It("fetches creator by baremetal", func() {

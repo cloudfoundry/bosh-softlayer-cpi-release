@@ -18,35 +18,37 @@ var _ = Describe("DeleteVM", func() {
 		fakeVmFinder *fakescommon.FakeVMFinder
 		fakeVmDeleterProvider *fakeaction.FakeDeleterProvider
 		fakeVmDeleter *fakescommon.FakeVMDeleter
-		fakeOptions *ConcreteFactoryOptions
-
-		vmCid VMCID
-
-		action   DeleteVMAction
 	)
 
 	BeforeEach(func() {
 		fakeVmFinder = &fakescommon.FakeVMFinder{}
 		fakeVmDeleter = &fakescommon.FakeVMDeleter{}
 		fakeVmDeleterProvider = &fakeaction.FakeDeleterProvider{}
-		fakeOptions = &ConcreteFactoryOptions{}
-
-		vmCid = VMCID(1234)
-		action = NewDeleteVM(fakeVmDeleterProvider, *fakeOptions)
 	})
 
 	Describe("Run", func() {
 		var (
+			action   DeleteVMAction
+			fakeOptions *ConcreteFactoryOptions
+
+			vmCid VMCID
 			err error
 		)
+
+		BeforeEach(func() {
+			vmCid = VMCID(1234)
+		})
+
 		JustBeforeEach(func() {
 			_, err = action.Run(vmCid)
 		})
 		Context("when delete vm with enable pool succeeds", func() {
 			BeforeEach(func() {
 				fakeOptions = &ConcreteFactoryOptions{
-					SoftLayerConfig: SoftLayerConfig{FeatureOptions : FeatureOptions{EnablePool : true}},
+					Softlayer: SoftLayerConfig{FeatureOptions: FeatureOptions{EnablePool: true}},
 				}
+				action = NewDeleteVM(fakeVmDeleterProvider, *fakeOptions)
+
 				fakeVmDeleterProvider.GetReturns(fakeVmDeleter)
 				fakeVmDeleter.DeleteReturns(nil)
 			})
@@ -68,8 +70,10 @@ var _ = Describe("DeleteVM", func() {
 		Context("when delete vm without enable pool succeeds", func() {
 			BeforeEach(func() {
 				fakeOptions = &ConcreteFactoryOptions{
-					SoftLayerConfig: SoftLayerConfig{FeatureOptions : FeatureOptions{EnablePool : false}},
+					Softlayer: SoftLayerConfig{FeatureOptions: FeatureOptions{EnablePool: false}},
 				}
+				action = NewDeleteVM(fakeVmDeleterProvider, *fakeOptions)
+
 				fakeVmDeleterProvider.GetReturns(fakeVmDeleter)
 			})
 
@@ -83,14 +87,16 @@ var _ = Describe("DeleteVM", func() {
 		Context("when delete vm error out", func() {
 			BeforeEach(func() {
 				fakeOptions = &ConcreteFactoryOptions{
-					SoftLayerConfig: SoftLayerConfig{FeatureOptions : FeatureOptions{EnablePool : true}},
+					Softlayer: SoftLayerConfig{FeatureOptions : FeatureOptions{EnablePool : true}},
 				}
+				action = NewDeleteVM(fakeVmDeleterProvider, *fakeOptions)
+
 				fakeVmDeleterProvider.GetReturns(fakeVmDeleter)
 				fakeVmDeleter.DeleteReturns(errors.New("kaboom"))
 			})
 
 			It("fetches deleter by `pool`", func() {
-				Expect(err.Error()).To(ContainSubstring("kaboomr"))
+				Expect(err.Error()).To(ContainSubstring("kaboom"))
 			})
 		})
 	})

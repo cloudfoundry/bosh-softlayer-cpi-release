@@ -6,18 +6,16 @@ import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
-	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
+	slhelper "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
 
 	sl "github.com/maximilien/softlayer-go/softlayer"
 	"github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/pool/client"
 	operations "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/pool/client/vm"
 
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 
 	"github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/pool/models"
 )
-
-const SOFTLAYER_POOL_DELETER_LOG_TAG = "SoftLayerPoolDeleter"
 
 type softLayerPoolDeleter struct {
 	softLayerClient        sl.Client
@@ -38,7 +36,7 @@ func (c *softLayerPoolDeleter) Delete(cid int) error {
 	if err != nil {
 		_, ok := err.(*operations.DeleteVMNotFound)
 		if ok {
-			virtualGuest, err := bslcommon.GetObjectDetailsOnVirtualGuest(c.softLayerClient, cid)
+			virtualGuest, err := slhelper.GetObjectDetailsOnVirtualGuest(c.softLayerClient, cid)
 			if err != nil {
 				return bosherr.WrapError(err, fmt.Sprintf("Getting virtual guest %d details from SoftLayer", cid))
 			}

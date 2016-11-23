@@ -28,8 +28,6 @@ var _ = Describe("AttachDisk", func() {
 		fakeDiskFinder = &fakedisk.FakeDiskFinder{}
 		fakeDisk = &fakedisk.FakeDisk{}
 		action = NewAttachDisk(fakeVmFinder, fakeDiskFinder)
-
-
 	})
 
 	Describe("Run", func() {
@@ -46,7 +44,7 @@ var _ = Describe("AttachDisk", func() {
 		})
 
 		JustBeforeEach(func() {
-			err = action.Run(vmCid, diskCID)
+			_, err = action.Run(vmCid, diskCID)
 		})
 
 		Context("when attach disk succeeds", func() {
@@ -71,7 +69,7 @@ var _ = Describe("AttachDisk", func() {
 
 			It("no error return", func() {
 				Expect(fakeVm.AttachDiskCallCount()).To(Equal(1))
-				actualDisk := Expect(fakeVm.AttachDiskArgsForCall(0))
+				actualDisk := fakeVm.AttachDiskArgsForCall(0)
 				Expect(actualDisk).To(Equal(fakeDisk))
 				Expect(err).NotTo(HaveOccurred())
 			})
@@ -83,7 +81,7 @@ var _ = Describe("AttachDisk", func() {
 			})
 
 			It("provides relevant error information", func() {
-				Expect(err.Error()).To(ContainSubstring("kaboomr"))
+				Expect(err.Error()).To(ContainSubstring("kaboom"))
 			})
 		})
 
@@ -105,12 +103,13 @@ var _ = Describe("AttachDisk", func() {
 			})
 
 			It("provides relevant error information", func() {
-				Expect(err.Error()).To(ContainSubstring("kaboomr"))
+				Expect(err.Error()).To(ContainSubstring("kaboom"))
 			})
 		})
 
 		Context("when find disk return false", func() {
 			BeforeEach(func() {
+				fakeVmFinder.FindReturns(fakeVm, true, nil)
 				fakeDiskFinder.FindReturns(nil, false, nil)
 			})
 
@@ -130,7 +129,7 @@ var _ = Describe("AttachDisk", func() {
 
 			It("provides relevant error information", func() {
 				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("kaboomr"))
+				Expect(err.Error()).To(ContainSubstring("kaboom"))
 			})
 		})
 	})

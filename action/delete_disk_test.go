@@ -9,7 +9,6 @@ import (
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/action"
 
 	fakedisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk/fakes"
-	"fmt"
 )
 
 var _ = Describe("DeleteDisk", func() {
@@ -21,7 +20,7 @@ var _ = Describe("DeleteDisk", func() {
 
 	BeforeEach(func() {
 		fakeDiskFinder = &fakedisk.FakeDiskFinder{}
-		fakeDisk *fakedisk.FakeDisk{}
+		fakeDisk = &fakedisk.FakeDisk{}
 		action = NewDeleteDisk(fakeDiskFinder)
 	})
 
@@ -62,18 +61,18 @@ var _ = Describe("DeleteDisk", func() {
 				fakeDiskFinder.FindReturns(nil, false, nil)
 			})
 
-			It("provides relevant error information", func() {
-				Expect(err.Error()).To(ContainSubstring(fmt.Sprintf("Finding disk '%s'", diskCid.String())))
+			It("no err return", func() {
+				Expect(err).NotTo(HaveOccurred())
 			})
 		})
 
 		Context("when find disk error", func() {
 			BeforeEach(func() {
-				fakeDiskFinder.FindReturns(nil, nil, errors.New("kaboom"))
+				fakeDiskFinder.FindReturns(nil, false, errors.New("kaboom"))
 			})
 
 			It("provides relevant error information", func() {
-				Expect(err.Error()).To(ContainSubstring("kaboomr"))
+				Expect(err.Error()).To(ContainSubstring("kaboom"))
 			})
 		})
 
@@ -85,7 +84,7 @@ var _ = Describe("DeleteDisk", func() {
 
 			It("provides relevant error information", func() {
 				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("kaboomr"))
+				Expect(err.Error()).To(ContainSubstring("kaboom"))
 			})
 		})
 	})

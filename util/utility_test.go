@@ -1,7 +1,7 @@
-package common_test
+package util_test
 
 import (
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/common"
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/util"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

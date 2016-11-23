@@ -20,8 +20,6 @@ type CreateVMAction struct {
 	options ConcreteFactoryOptions
 }
 
-type Environment map[string]interface{}
-
 func NewCreateVM(
 	stemcellFinder bslcstem.StemcellFinder,
 	vmCreatorProvider CreatorProvider,
@@ -35,9 +33,6 @@ func NewCreateVM(
 }
 
 func (a CreateVMAction) Run(agentID string, stemcellCID StemcellCID, cloudProps VMCloudProperties, networks Networks, diskIDs []DiskCID, env Environment) (string, error) {
-	vmNetworks := networks.AsVMNetworks()
-	vmEnv := Environment(env)
-
 	a.updateCloudProperties(&cloudProps)
 
 	helper.TIMEOUT = 30 * time.Second
@@ -49,8 +44,8 @@ func (a CreateVMAction) Run(agentID string, stemcellCID StemcellCID, cloudProps 
 	}
 
 	if a.options.Softlayer.FeatureOptions.EnablePool {
-		a.vmCreator, err = a.vmCreatorProvider.Get("pool")
-		vm, err := a.vmCreator.Create(agentID, stemcell, cloudProps, vmNetworks, vmEnv)
+		a.vmCreator = a.vmCreatorProvider.Get("pool")
+		vm, err := a.vmCreator.Create(agentID, stemcell, cloudProps, networks, env)
 		if err != nil {
 			return "0", bosherr.WrapErrorf(err, "Creating vm with agent ID '%s'", agentID)
 		}
@@ -59,16 +54,16 @@ func (a CreateVMAction) Run(agentID string, stemcellCID StemcellCID, cloudProps 
 	}
 
 	if cloudProps.Baremetal {
-		a.vmCreator, err = a.vmCreatorProvider.Get("baremetal")
-		vm, err := a.vmCreator.Create(agentID, stemcell, cloudProps, vmNetworks, vmEnv)
+		a.vmCreator = a.vmCreatorProvider.Get("baremetal")
+		vm, err := a.vmCreator.Create(agentID, stemcell, cloudProps, networks, env)
 		if err != nil {
 			return "0", bosherr.WrapErrorf(err, "Creating Baremetal with agent ID '%s'", agentID)
 		}
 
 		return VMCID(vm.ID()).String(), nil
 	} else {
-		a.vmCreator, err = a.vmCreatorProvider.Get("virtualguest")
-		vm, err := a.vmCreator.Create(agentID, stemcell, cloudProps, vmNetworks, vmEnv)
+		a.vmCreator = a.vmCreatorProvider.Get("virtualguest")
+		vm, err := a.vmCreator.Create(agentID, stemcell, cloudProps, networks, env)
 		if err != nil {
 			return "0", bosherr.WrapErrorf(err, "Creating Virtual_Guest with agent ID '%s'", agentID)
 		}

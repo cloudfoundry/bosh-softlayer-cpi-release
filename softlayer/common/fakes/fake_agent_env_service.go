@@ -4,21 +4,21 @@ package fakes
 import (
 	"sync"
 
-	"github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
+	"github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 )
 
 type FakeAgentEnvService struct {
-	FetchStub        func() (vm.AgentEnv, error)
+	FetchStub        func() (common.AgentEnv, error)
 	fetchMutex       sync.RWMutex
 	fetchArgsForCall []struct{}
 	fetchReturns     struct {
-		result1 vm.AgentEnv
+		result1 common.AgentEnv
 		result2 error
 	}
-	UpdateStub        func(vm.AgentEnv) error
+	UpdateStub        func(common.AgentEnv) error
 	updateMutex       sync.RWMutex
 	updateArgsForCall []struct {
-		arg1 vm.AgentEnv
+		arg1 common.AgentEnv
 	}
 	updateReturns struct {
 		result1 error
@@ -27,7 +27,7 @@ type FakeAgentEnvService struct {
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *FakeAgentEnvService) Fetch() (vm.AgentEnv, error) {
+func (fake *FakeAgentEnvService) Fetch() (common.AgentEnv, error) {
 	fake.fetchMutex.Lock()
 	fake.fetchArgsForCall = append(fake.fetchArgsForCall, struct{}{})
 	fake.recordInvocation("Fetch", []interface{}{})
@@ -45,18 +45,18 @@ func (fake *FakeAgentEnvService) FetchCallCount() int {
 	return len(fake.fetchArgsForCall)
 }
 
-func (fake *FakeAgentEnvService) FetchReturns(result1 vm.AgentEnv, result2 error) {
+func (fake *FakeAgentEnvService) FetchReturns(result1 common.AgentEnv, result2 error) {
 	fake.FetchStub = nil
 	fake.fetchReturns = struct {
-		result1 vm.AgentEnv
+		result1 common.AgentEnv
 		result2 error
 	}{result1, result2}
 }
 
-func (fake *FakeAgentEnvService) Update(arg1 vm.AgentEnv) error {
+func (fake *FakeAgentEnvService) Update(arg1 common.AgentEnv) error {
 	fake.updateMutex.Lock()
 	fake.updateArgsForCall = append(fake.updateArgsForCall, struct {
-		arg1 vm.AgentEnv
+		arg1 common.AgentEnv
 	}{arg1})
 	fake.recordInvocation("Update", []interface{}{arg1})
 	fake.updateMutex.Unlock()
@@ -73,7 +73,7 @@ func (fake *FakeAgentEnvService) UpdateCallCount() int {
 	return len(fake.updateArgsForCall)
 }
 
-func (fake *FakeAgentEnvService) UpdateArgsForCall(i int) vm.AgentEnv {
+func (fake *FakeAgentEnvService) UpdateArgsForCall(i int) common.AgentEnv {
 	fake.updateMutex.RLock()
 	defer fake.updateMutex.RUnlock()
 	return fake.updateArgsForCall[i].arg1
@@ -108,4 +108,4 @@ func (fake *FakeAgentEnvService) recordInvocation(key string, args []interface{}
 	fake.invocations[key] = append(fake.invocations[key], args)
 }
 
-var _ vm.AgentEnvService = new(FakeAgentEnvService)
+var _ common.AgentEnvService = new(FakeAgentEnvService)

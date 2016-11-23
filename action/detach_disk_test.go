@@ -45,7 +45,7 @@ var _ = Describe("DetachDisk", func() {
 		})
 
 		JustBeforeEach(func() {
-			err = action.Run(vmCid, diskCID)
+			_, err = action.Run(vmCid, diskCID)
 		})
 
 		Context("when detach disk succeeds", func() {
@@ -70,7 +70,7 @@ var _ = Describe("DetachDisk", func() {
 
 			It("no error return", func() {
 				Expect(fakeVm.DetachDiskCallCount()).To(Equal(1))
-				actualDisk := Expect(fakeVm.DetachDiskArgsForCall(0))
+				actualDisk := fakeVm.DetachDiskArgsForCall(0)
 				Expect(actualDisk).To(Equal(fakeDisk))
 				Expect(err).NotTo(HaveOccurred())
 			})
@@ -82,7 +82,7 @@ var _ = Describe("DetachDisk", func() {
 			})
 
 			It("provides relevant error information", func() {
-				Expect(err.Error()).To(ContainSubstring("kaboomr"))
+				Expect(err.Error()).To(ContainSubstring("kaboom"))
 			})
 		})
 
@@ -104,12 +104,13 @@ var _ = Describe("DetachDisk", func() {
 			})
 
 			It("provides relevant error information", func() {
-				Expect(err.Error()).To(ContainSubstring("kaboomr"))
+				Expect(err.Error()).To(ContainSubstring("kaboom"))
 			})
 		})
 
 		Context("when find disk return false", func() {
 			BeforeEach(func() {
+				fakeVmFinder.FindReturns(fakeVm, true, nil)
 				fakeDiskFinder.FindReturns(nil, false, nil)
 			})
 
@@ -129,7 +130,7 @@ var _ = Describe("DetachDisk", func() {
 
 			It("provides relevant error information", func() {
 				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("kaboomr"))
+				Expect(err.Error()).To(ContainSubstring("kaboom"))
 			})
 		})
 	})

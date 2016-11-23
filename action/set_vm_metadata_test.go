@@ -63,7 +63,7 @@ var _ = Describe("SetVMMetadata", func() {
 
 			It("no error return", func() {
 				Expect(fakeVm.SetMetadataCallCount()).To(Equal(1))
-				actualMetadata := Expect(fakeVm.SetMetadataArgsForCall(0))
+				actualMetadata := fakeVm.SetMetadataArgsForCall(0)
 				Expect(actualMetadata).To(Equal(metadata))
 				Expect(err).NotTo(HaveOccurred())
 			})
@@ -75,7 +75,7 @@ var _ = Describe("SetVMMetadata", func() {
 			})
 
 			It("provides relevant error information", func() {
-				Expect(err.Error()).To(ContainSubstring("kaboomr"))
+				Expect(err.Error()).To(ContainSubstring("kaboom"))
 			})
 		})
 

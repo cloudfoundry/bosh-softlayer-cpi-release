@@ -21,28 +21,33 @@ var _ = Describe("CreateDisk", func() {
 		fakeDisk       *fakedisk.FakeDisk
 		action     CreateDiskAction
 		fakeDiskCreator *fakedisk.FakeDiskCreator
-		vmCid      VMCID
-		diskCloudProp bslcdisk.DiskCloudProperties
 
-		err error
+		diskCloudProp bslcdisk.DiskCloudProperties
 	)
 
-	Describe("Run", func() {
-		BeforeEach(func() {
-			fakeVmFinder = &fakescommon.FakeVMFinder{}
-			fakeVm = &fakescommon.FakeVM{}
-			fakeDiskCreator = &fakedisk.FakeDiskCreator{}
-			fakeDisk = &fakedisk.FakeDisk{}
-			action = NewCreateDisk(fakeVmFinder, fakeDiskCreator)
-			diskCloudProp = bslcdisk.DiskCloudProperties{}
+	BeforeEach(func() {
+		fakeVmFinder = &fakescommon.FakeVMFinder{}
+		fakeVm = &fakescommon.FakeVM{}
+		fakeDiskCreator = &fakedisk.FakeDiskCreator{}
+		fakeDisk = &fakedisk.FakeDisk{}
+		action = NewCreateDisk(fakeVmFinder, fakeDiskCreator)
+		diskCloudProp = bslcdisk.DiskCloudProperties{}
+	})
 
+	Describe("Run", func() {
+		var (
+			diskCidStr string
+			err error
+			vmCid      VMCID
+		)
+
+		BeforeEach(func() {
 			vmCid = VMCID(123456)
 		})
 
 		JustBeforeEach(func() {
-			err = action.Run(100, diskCloudProp, vmCid)
+			diskCidStr, err = action.Run(100, diskCloudProp, vmCid)
 		})
-
 
 		Context("when create disk succeeds", func() {
 			BeforeEach(func() {
@@ -73,7 +78,7 @@ var _ = Describe("CreateDisk", func() {
 			})
 
 			It("provides relevant error information", func() {
-				Expect(err).To(MatchError("kaboom"))
+				Expect(err.Error()).To(ContainSubstring("kaboom"))
 			})
 		})
 

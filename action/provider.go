@@ -9,7 +9,6 @@ import (
 	slhw "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/hardware"
 	slpool "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/pool"
 	slpoolclient "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/pool/client"
-	bosherror "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 )
 

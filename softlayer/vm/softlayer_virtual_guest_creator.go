@@ -12,8 +12,9 @@ import (
 	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
 	datatypes "github.com/maximilien/softlayer-go/data_types"
 	sl "github.com/maximilien/softlayer-go/softlayer"
-	slh "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
-	"github.com/cloudfoundry/bosh-softlayer-cpi/common"
+	slhelper "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
+
+	util "github.com/cloudfoundry/bosh-softlayer-cpi/util"
 )
 
 type softLayerVirtualGuestCreator struct {
@@ -28,8 +29,8 @@ type softLayerVirtualGuestCreator struct {
 }
 
 func NewSoftLayerCreator(vmFinder VMFinder, softLayerClient sl.Client, agentOptions AgentOptions, logger boshlog.Logger, featureOptions FeatureOptions) VMCreator {
-	slh.TIMEOUT = 120 * time.Minute
-	slh.POLLING_INTERVAL = 5 * time.Second
+	slhelper.TIMEOUT = 120 * time.Minute
+	slhelper.POLLING_INTERVAL = 5 * time.Second
 
 	return &softLayerVirtualGuestCreator{
 		vmFinder:        vmFinder,
@@ -82,12 +83,12 @@ func (c *softLayerVirtualGuestCreator) createBySoftlayer(agentID string, stemcel
 	}
 
 	if cloudProps.EphemeralDiskSize == 0 {
-		err = slh.WaitForVirtualGuestLastCompleteTransaction(c.softLayerClient, virtualGuest.Id, "Service Setup")
+		err = slhelper.WaitForVirtualGuestLastCompleteTransaction(c.softLayerClient, virtualGuest.Id, "Service Setup")
 		if err != nil {
 			return nil, bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` has Service Setup transaction complete", virtualGuest.Id)
 		}
 	} else {
-		err = slh.AttachEphemeralDiskToVirtualGuest(c.softLayerClient, virtualGuest.Id, cloudProps.EphemeralDiskSize, c.logger)
+		err = slhelper.AttachEphemeralDiskToVirtualGuest(c.softLayerClient, virtualGuest.Id, cloudProps.EphemeralDiskSize, c.logger)
 		if err != nil {
 			return nil, bosherr.WrapError(err, fmt.Sprintf("Attaching ephemeral disk to VirtualGuest `%d`", virtualGuest.Id))
 		}
@@ -149,7 +150,7 @@ func (c *softLayerVirtualGuestCreator) createByOSReload(agentID string, stemcell
 	for _, network := range networks {
 		switch network.Type {
 		case "dynamic":
-			if common.IsPrivateSubnet(net.ParseIP(network.IP)) {
+			if util.IsPrivateSubnet(net.ParseIP(network.IP)) {
 				virtualGuest, err = virtualGuestService.GetObjectByPrimaryBackendIpAddress(network.IP)
 			} else {
 				virtualGuest, err = virtualGuestService.GetObjectByPrimaryIpAddress(network.IP)
@@ -171,19 +172,19 @@ func (c *softLayerVirtualGuestCreator) createByOSReload(agentID string, stemcell
 		return nil, bosherr.WrapErrorf(err, "Cannot find virtualGuest with id: %d", virtualGuest.Id)
 	}
 
-	slh.TIMEOUT = 4 * time.Hour
+	slhelper.TIMEOUT = 4 * time.Hour
 	err = vm.ReloadOS(stemcell)
 	if err != nil {
 		return nil, bosherr.WrapError(err, "Failed to reload OS")
 	}
 
 	if cloudProps.EphemeralDiskSize == 0 {
-		err = slh.WaitForVirtualGuestLastCompleteTransaction(c.softLayerClient, vm.ID(), "Service Setup")
+		err = slhelper.WaitForVirtualGuestLastCompleteTransaction(c.softLayerClient, vm.ID(), "Service Setup")
 		if err != nil {
 			return nil, bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` has Service Setup transaction complete", vm.ID())
 		}
 	} else {
-		err = slh.AttachEphemeralDiskToVirtualGuest(c.softLayerClient, vm.ID(), cloudProps.EphemeralDiskSize, c.logger)
+		err = slhelper.AttachEphemeralDiskToVirtualGuest(c.softLayerClient, vm.ID(), cloudProps.EphemeralDiskSize, c.logger)
 		if err != nil {
 			return nil, bosherr.WrapError(err, fmt.Sprintf("Attaching ephemeral disk to VirtualGuest `%d`", vm.ID()))
 		}

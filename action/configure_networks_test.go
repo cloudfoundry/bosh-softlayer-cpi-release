@@ -7,6 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/action"
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 
 	fakescommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/fakes"
 )
@@ -33,7 +34,7 @@ var _ = Describe("ConfigureNetworks", func() {
 		})
 
 		JustBeforeEach(func() {
-			err = action.Run(vmCid, networks)
+			_, err = action.Run(vmCid, networks)
 		})
 
 		Context("when configure network succeeds", func() {
@@ -52,7 +53,7 @@ var _ = Describe("ConfigureNetworks", func() {
 
 			It("no error return", func() {
 				Expect(fakeVm.ConfigureNetworksCallCount()).To(Equal(1))
-				actualNetworks := Expect(fakeVm.ConfigureNetworksArgsForCall(0))
+				actualNetworks := fakeVm.ConfigureNetworksArgsForCall(0)
 				Expect(actualNetworks).To(Equal(networks))
 				Expect(err).NotTo(HaveOccurred())
 			})
@@ -64,7 +65,7 @@ var _ = Describe("ConfigureNetworks", func() {
 			})
 
 			It("provides relevant error information", func() {
-				Expect(err).To(MatchError("kaboom"))
+				Expect(err.Error()).To(ContainSubstring("kaboom"))
 			})
 		})
 
@@ -81,14 +82,13 @@ var _ = Describe("ConfigureNetworks", func() {
 		Context("when configure network error out", func() {
 			BeforeEach(func() {
 				fakeVmFinder.FindReturns(fakeVm, true, nil)
-
 				fakeVm.ConfigureNetworksReturns(errors.New("kaboom"))
 			})
 
 			It("provides relevant error information", func() {
 				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("kaboom"))
 			})
 		})
-
 	})
 })
