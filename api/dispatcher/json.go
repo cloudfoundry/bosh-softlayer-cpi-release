@@ -7,6 +7,7 @@ import (
 	bslcaction "github.com/cloudfoundry/bosh-softlayer-cpi/action"
 	bslcapi "github.com/cloudfoundry/bosh-softlayer-cpi/api"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
+
 	slhelper "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
 
 	"fmt"
