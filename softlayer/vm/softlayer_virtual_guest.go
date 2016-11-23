@@ -102,43 +102,6 @@ func (vm *softLayerVirtualGuest) SetAgentEnvService(agentEnvService AgentEnvServ
 	return nil
 }
 
-func (vm *softLayerVirtualGuest) Delete(agentID string) error {
-	return vm.DeleteVM()
-}
-
-func (vm *softLayerVirtualGuest) DeleteVM() error {
-	virtualGuestService, err := vm.softLayerClient.GetSoftLayer_Virtual_Guest_Service()
-	if err != nil {
-		return bosherr.WrapError(err, "Creating SoftLayer VirtualGuestService from client")
-	}
-
-	vmCID := vm.ID()
-	err = slh.WaitForVirtualGuestToHaveNoRunningTransactions(vm.softLayerClient, vmCID)
-	if err != nil {
-		if !strings.Contains(err.Error(), "HTTP error code") {
-			return bosherr.WrapError(err, fmt.Sprintf("Waiting for VirtualGuest `%d` to have no pending transactions before deleting vm", vmCID))
-		}
-	}
-
-	deleted, err := virtualGuestService.DeleteObject(vm.ID())
-	if err != nil {
-		if !strings.Contains(err.Error(), "HTTP error code") {
-			return bosherr.WrapError(err, "Deleting SoftLayer VirtualGuest from client")
-		}
-	}
-
-	if !deleted {
-		return bosherr.WrapError(nil, "Did not delete SoftLayer VirtualGuest from client")
-	}
-
-	err = vm.postCheckActiveTransactionsForDeleteVM(vm.softLayerClient, vmCID)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (vm *softLayerVirtualGuest) Reboot() error {
 	virtualGuestService, err := vm.softLayerClient.GetSoftLayer_Virtual_Guest_Service()
 	if err != nil {

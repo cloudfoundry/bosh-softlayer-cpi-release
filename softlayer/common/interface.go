@@ -102,7 +102,6 @@ type VM interface {
 	ConfigureNetworks2(Networks) error
 
 	DetachDisk(bslcdisk.Disk) error
-	Delete(agentId string) error
 
 	GetDataCenterId() int
 	GetPrimaryIP() string
