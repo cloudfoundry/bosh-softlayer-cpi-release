@@ -8,18 +8,18 @@ import (
 
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/action"
 
-	fakedisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk/fakes"
 	fakescommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/fakes"
+	fakedisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk/fakes"
 
 	bslcdisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk"
 )
 
 var _ = Describe("CreateDisk", func() {
 	var (
-		fakeVmFinder   *fakescommon.FakeVMFinder
-		fakeVm         *fakescommon.FakeVM
-		fakeDisk       *fakedisk.FakeDisk
-		action     CreateDiskAction
+		fakeVmFinder    *fakescommon.FakeVMFinder
+		fakeVm          *fakescommon.FakeVM
+		fakeDisk        *fakedisk.FakeDisk
+		action          CreateDiskAction
 		fakeDiskCreator *fakedisk.FakeDiskCreator
 
 		diskCloudProp bslcdisk.DiskCloudProperties
@@ -37,7 +37,7 @@ var _ = Describe("CreateDisk", func() {
 	Describe("Run", func() {
 		var (
 			diskCidStr string
-			err error
+			err        error
 			vmCid      VMCID
 		)
 

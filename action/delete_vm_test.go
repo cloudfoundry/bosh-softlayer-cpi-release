@@ -6,18 +6,17 @@ import (
 	. "github.com/onsi/gomega"
 
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/action"
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 	fakeaction "github.com/cloudfoundry/bosh-softlayer-cpi/action/fakes"
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 
 	fakescommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/fakes"
-
 )
 
 var _ = Describe("DeleteVM", func() {
 	var (
-		fakeVmFinder *fakescommon.FakeVMFinder
+		fakeVmFinder          *fakescommon.FakeVMFinder
 		fakeVmDeleterProvider *fakeaction.FakeDeleterProvider
-		fakeVmDeleter *fakescommon.FakeVMDeleter
+		fakeVmDeleter         *fakescommon.FakeVMDeleter
 	)
 
 	BeforeEach(func() {
@@ -28,11 +27,11 @@ var _ = Describe("DeleteVM", func() {
 
 	Describe("Run", func() {
 		var (
-			action   DeleteVMAction
+			action      DeleteVMAction
 			fakeOptions *ConcreteFactoryOptions
 
 			vmCid VMCID
-			err error
+			err   error
 		)
 
 		BeforeEach(func() {
@@ -87,7 +86,7 @@ var _ = Describe("DeleteVM", func() {
 		Context("when delete vm error out", func() {
 			BeforeEach(func() {
 				fakeOptions = &ConcreteFactoryOptions{
-					Softlayer: SoftLayerConfig{FeatureOptions : FeatureOptions{EnablePool : true}},
+					Softlayer: SoftLayerConfig{FeatureOptions: FeatureOptions{EnablePool: true}},
 				}
 				action = NewDeleteVM(fakeVmDeleterProvider, *fakeOptions)
 

@@ -19,16 +19,16 @@ import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
-	sldatatypes "github.com/maximilien/softlayer-go/data_types"
 	slh "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
+	sldatatypes "github.com/maximilien/softlayer-go/data_types"
 )
 
 var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 	var (
 		softLayerClient *fakeslclient.FakeSoftLayerClient
 		sshClient       *fakesutil.FakeSshClient
-		fakeVmFinder        *fakescommon.FakeVMFinder
-		fakeVm                *fakescommon.FakeVM
+		fakeVmFinder    *fakescommon.FakeVMFinder
+		fakeVm          *fakescommon.FakeVM
 		agentOptions    AgentOptions
 		logger          boshlog.Logger
 		creator         VMCreator
@@ -63,7 +63,6 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 
 				env = Environment{}
 				featureOptions = FeatureOptions{DisableOsReload: false}
-
 
 				fakeVm.IDReturns(1234567)
 				fakeVmFinder.FindReturns(fakeVm, true, nil)

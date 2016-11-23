@@ -4,8 +4,8 @@ import (
 	"os"
 	"strconv"
 
-	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
+	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 )
 
 type ConcreteFactoryOptions struct {
@@ -13,7 +13,7 @@ type ConcreteFactoryOptions struct {
 
 	Baremetal BaremetalConfig `json:"baremetal,omitempty"`
 
-	Pool  PoolConfig `json:"pool,omitempty"`
+	Pool PoolConfig `json:"pool,omitempty"`
 
 	StemcellsDir string `json:"stemcelldir,omitempty"`
 
@@ -39,8 +39,8 @@ func (o ConcreteFactoryOptions) Validate() error {
 }
 
 type SoftLayerConfig struct {
-	Username       string                `json:"username"`
-	ApiKey         string                `json:"apiKey"`
+	Username       string         `json:"username"`
+	ApiKey         string         `json:"apiKey"`
 	FeatureOptions FeatureOptions `json:"featureOptions,omitempty"`
 }
 
@@ -52,7 +52,7 @@ type BaremetalConfig struct {
 
 type PoolConfig struct {
 	Host string `json:"host,omitempty"`
-	Port int `json:"port,omitempty"`
+	Port int    `json:"port,omitempty"`
 }
 
 func (c SoftLayerConfig) Validate() error {

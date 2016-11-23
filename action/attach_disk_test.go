@@ -8,9 +8,9 @@ import (
 
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/action"
 
-	fakedisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk/fakes"
-	fakescommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/fakes"
 	"fmt"
+	fakescommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/fakes"
+	fakedisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk/fakes"
 )
 
 var _ = Describe("AttachDisk", func() {
@@ -19,7 +19,7 @@ var _ = Describe("AttachDisk", func() {
 		fakeVm         *fakescommon.FakeVM
 		fakeDiskFinder *fakedisk.FakeDiskFinder
 		fakeDisk       *fakedisk.FakeDisk
-		action     AttachDiskAction
+		action         AttachDiskAction
 	)
 
 	BeforeEach(func() {
@@ -32,8 +32,8 @@ var _ = Describe("AttachDisk", func() {
 
 	Describe("Run", func() {
 		var (
-			vmCid      VMCID
-			diskCID    DiskCID
+			vmCid   VMCID
+			diskCID DiskCID
 
 			err error
 		)
@@ -50,7 +50,7 @@ var _ = Describe("AttachDisk", func() {
 		Context("when attach disk succeeds", func() {
 			BeforeEach(func() {
 				fakeVmFinder.FindReturns(fakeVm, true, nil)
-				fakeDiskFinder.FindReturns(fakeDisk,true,nil)
+				fakeDiskFinder.FindReturns(fakeDisk, true, nil)
 
 				fakeVm.AttachDiskReturns(nil)
 			})
@@ -122,7 +122,7 @@ var _ = Describe("AttachDisk", func() {
 		Context("when attach disk error out", func() {
 			BeforeEach(func() {
 				fakeVmFinder.FindReturns(fakeVm, true, nil)
-				fakeDiskFinder.FindReturns(fakeDisk,true,nil)
+				fakeDiskFinder.FindReturns(fakeDisk, true, nil)
 
 				fakeVm.AttachDiskReturns(errors.New("kaboom"))
 			})

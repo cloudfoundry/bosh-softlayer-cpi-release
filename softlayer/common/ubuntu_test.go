@@ -35,7 +35,7 @@ var _ = Describe("UbuntuNetwork", func() {
 				PrimaryIPAddress: "10.155.248.190",
 				NetworkVLAN: NetworkVLAN{
 					Name: "private vlan",
-					Subnets: [] Subnet{{
+					Subnets: []Subnet{{
 						NetworkIdentifier: "10.155.248.160",
 						Gateway:           "10.155.248.161",
 						BroadcastAddress:  "10.155.248.191",

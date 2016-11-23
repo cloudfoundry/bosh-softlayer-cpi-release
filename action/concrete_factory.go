@@ -11,12 +11,12 @@ import (
 	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
 	bslcvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
 
-	httptransport "github.com/go-openapi/runtime/client"
 	apiclient "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/pool/client"
+	httptransport "github.com/go-openapi/runtime/client"
 
+	"fmt"
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 	"github.com/go-openapi/strfmt"
-	"fmt"
 )
 
 type concreteFactory struct {
@@ -26,7 +26,7 @@ type concreteFactory struct {
 func NewConcreteFactory(options ConcreteFactoryOptions, logger boshlog.Logger) concreteFactory {
 	softLayerClient := slclient.NewSoftLayerClient(options.Softlayer.Username, options.Softlayer.ApiKey)
 	baremetalClient := bmsclient.NewBmpClient(options.Baremetal.Username, options.Baremetal.Password, options.Baremetal.EndPoint, nil, "")
-	poolClient := apiclient.New(httptransport.New(fmt.Sprintf("%s:%d",options.Pool.Host,options.Pool.Port), "v2", nil), strfmt.Default).VM
+	poolClient := apiclient.New(httptransport.New(fmt.Sprintf("%s:%d", options.Pool.Host, options.Pool.Port), "v2", nil), strfmt.Default).VM
 
 	stemcellFinder := bslcstem.NewSoftLayerFinder(softLayerClient, logger)
 

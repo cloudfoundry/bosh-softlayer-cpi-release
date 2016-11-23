@@ -9,8 +9,8 @@ import (
 
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/action"
 
-	fakedisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk/fakes"
 	fakescommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/fakes"
+	fakedisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk/fakes"
 )
 
 var _ = Describe("DetachDisk", func() {
@@ -19,7 +19,7 @@ var _ = Describe("DetachDisk", func() {
 		fakeVm         *fakescommon.FakeVM
 		fakeDiskFinder *fakedisk.FakeDiskFinder
 		fakeDisk       *fakedisk.FakeDisk
-		action DetachDiskAction
+		action         DetachDiskAction
 	)
 
 	BeforeEach(func() {
@@ -33,7 +33,7 @@ var _ = Describe("DetachDisk", func() {
 
 	Describe("Run", func() {
 		var (
-			vmCid VMCID
+			vmCid   VMCID
 			diskCID DiskCID
 
 			err error

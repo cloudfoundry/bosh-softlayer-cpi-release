@@ -15,17 +15,17 @@ import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
-	sl "github.com/maximilien/softlayer-go/softlayer"
 	slh "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
+	sl "github.com/maximilien/softlayer-go/softlayer"
 
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 	bslcdisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk"
 	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
 
+	api "github.com/cloudfoundry/bosh-softlayer-cpi/api"
 	"github.com/cloudfoundry/bosh-softlayer-cpi/util"
 	datatypes "github.com/maximilien/softlayer-go/data_types"
 	sldatatypes "github.com/maximilien/softlayer-go/data_types"
-	api "github.com/cloudfoundry/bosh-softlayer-cpi/api"
 )
 
 type softLayerVirtualGuest struct {

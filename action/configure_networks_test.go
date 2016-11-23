@@ -16,9 +16,9 @@ var _ = Describe("ConfigureNetworks", func() {
 	var (
 		fakeVmFinder *fakescommon.FakeVMFinder
 		fakeVm       *fakescommon.FakeVM
-		action   ConfigureNetworksAction
-		networks Networks
-		vmCid      VMCID
+		action       ConfigureNetworksAction
+		networks     Networks
+		vmCid        VMCID
 
 		err error
 	)

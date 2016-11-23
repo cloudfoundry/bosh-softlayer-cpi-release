@@ -17,14 +17,14 @@ import (
 
 	bsldisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk"
 
+	fakescommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/fakes"
 	fakedisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk/fakes"
 	fakestemcell "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell/fakes"
-	fakescommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/fakes"
 	fakesutil "github.com/cloudfoundry/bosh-softlayer-cpi/util/fakes"
 	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
 
-	datatypes "github.com/maximilien/softlayer-go/data_types"
 	slh "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
+	datatypes "github.com/maximilien/softlayer-go/data_types"
 )
 
 var _ = Describe("SoftLayerVirtualGuest", func() {

@@ -14,8 +14,8 @@ import (
 var _ = Describe("DeleteDisk", func() {
 	var (
 		fakeDiskFinder *fakedisk.FakeDiskFinder
-		fakeDisk         *fakedisk.FakeDisk
-		action     DeleteDiskAction
+		fakeDisk       *fakedisk.FakeDisk
+		action         DeleteDiskAction
 	)
 
 	BeforeEach(func() {
@@ -24,11 +24,10 @@ var _ = Describe("DeleteDisk", func() {
 		action = NewDeleteDisk(fakeDiskFinder)
 	})
 
-
 	Describe("Run", func() {
 		var (
 			diskCid DiskCID
-			err error
+			err     error
 		)
 
 		BeforeEach(func() {

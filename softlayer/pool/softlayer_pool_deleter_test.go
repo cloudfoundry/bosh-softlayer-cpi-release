@@ -1,27 +1,27 @@
 package pool_test
 
 import (
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/pool"
 	"github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/pool/models"
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	fakespool "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/pool/client/vm/fakes"
 	"github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/pool/client/vm"
-	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
+	fakespool "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/pool/client/vm/fakes"
 	testhelpers "github.com/cloudfoundry/bosh-softlayer-cpi/test_helpers"
+	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 )
 
 var _ = Describe("SoftlayerPoolDeleter", func() {
 	var (
-		softLayerClient *fakeslclient.FakeSoftLayerClient
+		softLayerClient         *fakeslclient.FakeSoftLayerClient
 		fakeSoftlayerPoolClient *fakespool.FakeSoftLayerPoolClient
-		logger          boshlog.Logger
-		deleter         VMDeleter
+		logger                  boshlog.Logger
+		deleter                 VMDeleter
 	)
 
 	BeforeEach(func() {
@@ -42,7 +42,7 @@ var _ = Describe("SoftlayerPoolDeleter", func() {
 		Context("when operation vm in pool succeeds", func() {
 			BeforeEach(func() {
 				fakeSoftlayerPoolClient.GetVMByCidReturns(vm.NewGetVMByCidOK(), nil)
-				fakeSoftlayerPoolClient.UpdateVMWithStateReturns(vm.NewUpdateVMWithStateOK(),nil)
+				fakeSoftlayerPoolClient.UpdateVMWithStateReturns(vm.NewUpdateVMWithStateOK(), nil)
 			})
 
 			It("get vm by cid", func() {
@@ -66,7 +66,7 @@ var _ = Describe("SoftlayerPoolDeleter", func() {
 			BeforeEach(func() {
 				fakeSoftlayerPoolClient.GetVMByCidReturns(nil, vm.NewDeleteVMNotFound())
 				testhelpers.SetTestFixtureForFakeSoftLayerClient(softLayerClient, "SoftLayer_Virtual_Guest_Service_getObject.json")
-				fakeSoftlayerPoolClient.AddVMReturns(vm.NewAddVMOK(),nil)
+				fakeSoftlayerPoolClient.AddVMReturns(vm.NewAddVMOK(), nil)
 			})
 
 			It("add vm to pool", func() {

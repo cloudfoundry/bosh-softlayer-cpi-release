@@ -3,18 +3,18 @@ package action
 import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 	"fmt"
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 )
 
 type DeleteVMAction struct {
 	vmDeleterProvider DeleterProvider
-	options ConcreteFactoryOptions
+	options           ConcreteFactoryOptions
 }
 
 func NewDeleteVM(
 	vmDeleterProvider DeleterProvider,
-        options ConcreteFactoryOptions,
+	options ConcreteFactoryOptions,
 ) (action DeleteVMAction) {
 	action.vmDeleterProvider = vmDeleterProvider
 	action.options = options

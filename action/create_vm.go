@@ -17,13 +17,13 @@ type CreateVMAction struct {
 	vmCreatorProvider CreatorProvider
 	vmCreator         VMCreator
 	vmCloudProperties *VMCloudProperties
-	options ConcreteFactoryOptions
+	options           ConcreteFactoryOptions
 }
 
 func NewCreateVM(
 	stemcellFinder bslcstem.StemcellFinder,
 	vmCreatorProvider CreatorProvider,
-        options ConcreteFactoryOptions,
+	options ConcreteFactoryOptions,
 ) (action CreateVMAction) {
 	action.options = options
 	action.stemcellFinder = stemcellFinder

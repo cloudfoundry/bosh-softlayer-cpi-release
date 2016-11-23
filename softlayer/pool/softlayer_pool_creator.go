@@ -2,8 +2,8 @@ package pool
 
 import (
 	"fmt"
-	"time"
 	"net"
+	"time"
 
 	strfmt "github.com/go-openapi/strfmt"
 
@@ -15,8 +15,8 @@ import (
 	datatypes "github.com/maximilien/softlayer-go/data_types"
 
 	slhelper "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
-	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
 	operations "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/pool/client/vm"
+	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
 	util "github.com/cloudfoundry/bosh-softlayer-cpi/util"
 
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
@@ -27,18 +27,18 @@ import (
 const SOFTLAYER_POOL_CREATOR_LOG_TAG = "SoftLayerPoolCreator"
 
 type softLayerPoolCreator struct {
-	softLayerClient        sl.Client
-	softLayerVmPoolClient  operations.SoftLayerPoolClient
+	softLayerClient       sl.Client
+	softLayerVmPoolClient operations.SoftLayerPoolClient
 
 	agentEnvServiceFactory AgentEnvServiceFactory
 
-	agentOptions           AgentOptions
+	agentOptions AgentOptions
 
-	logger                 boshlog.Logger
+	logger boshlog.Logger
 
-	vmFinder               VMFinder
+	vmFinder VMFinder
 
-	featureOptions         FeatureOptions
+	featureOptions FeatureOptions
 }
 
 func NewSoftLayerPoolCreator(vmFinder VMFinder, softLayerVmPoolClient operations.SoftLayerPoolClient, softLayerClient sl.Client, agentOptions AgentOptions, logger boshlog.Logger, featureOptions FeatureOptions) VMCreator {
@@ -47,30 +47,30 @@ func NewSoftLayerPoolCreator(vmFinder VMFinder, softLayerVmPoolClient operations
 
 	return &softLayerPoolCreator{
 		softLayerVmPoolClient: softLayerVmPoolClient,
-		softLayerClient: softLayerClient,
-		agentOptions:    agentOptions,
-		logger:          logger,
-		vmFinder:        vmFinder,
-		featureOptions:  featureOptions,
+		softLayerClient:       softLayerClient,
+		agentOptions:          agentOptions,
+		logger:                logger,
+		vmFinder:              vmFinder,
+		featureOptions:        featureOptions,
 	}
 }
 
 func (c *softLayerPoolCreator) Create(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
 	for _, network := range networks {
 		switch network.Type {
-			case "dynamic":
-				if len(network.IP) == 0 {
-					return c.createFromVMPool(agentID, stemcell, cloudProps, networks, env)
-				} else {
-					return c.createByOSReload(agentID, stemcell, cloudProps, networks, env)
-				}
-			case "vip":
-				return nil, bosherr.Error("SoftLayer Not Support VIP netowrk")
-			default:
-				continue
+		case "dynamic":
+			if len(network.IP) == 0 {
+				return c.createFromVMPool(agentID, stemcell, cloudProps, networks, env)
+			} else {
+				return c.createByOSReload(agentID, stemcell, cloudProps, networks, env)
+			}
+		case "vip":
+			return nil, bosherr.Error("SoftLayer Not Support VIP netowrk")
+		default:
+			continue
 		}
-        }
-        return nil, bosherr.Error("virtual guests must have exactly one dynamic network")
+	}
+	return nil, bosherr.Error("virtual guests must have exactly one dynamic network")
 }
 
 // Private methods
@@ -82,7 +82,7 @@ func (c *softLayerPoolCreator) createFromVMPool(agentID string, stemcell bslcste
 		MemoryMb:    int32(virtualGuestTemplate.MaxMemory),
 		PrivateVlan: int32(virtualGuestTemplate.PrimaryBackendNetworkComponent.NetworkVlan.Id),
 		PublicVlan:  int32(virtualGuestTemplate.PrimaryNetworkComponent.NetworkVlan.Id),
-		State: models.StateFree,
+		State:       models.StateFree,
 	}
 	orderVmResp, err := c.softLayerVmPoolClient.OrderVMByFilter(operations.NewOrderVMByFilterParams().WithBody(filter))
 	if err != nil {
@@ -95,14 +95,14 @@ func (c *softLayerPoolCreator) createFromVMPool(agentID string, stemcell bslcste
 				return nil, bosherr.WrapError(err, "Creating vm in SoftLayer")
 			}
 			slPoolVm := &models.VM{
-				Cid: int32(sl_vm.ID()),
-				CPU: int32(virtualGuestTemplate.StartCpus),
-				MemoryMb: int32(virtualGuestTemplate.MaxMemory),
-				IP:  strfmt.IPv4(sl_vm.GetPrimaryBackendIP()),
-				Hostname: sl_vm.GetFullyQualifiedDomainName(),
+				Cid:         int32(sl_vm.ID()),
+				CPU:         int32(virtualGuestTemplate.StartCpus),
+				MemoryMb:    int32(virtualGuestTemplate.MaxMemory),
+				IP:          strfmt.IPv4(sl_vm.GetPrimaryBackendIP()),
+				Hostname:    sl_vm.GetFullyQualifiedDomainName(),
 				PrivateVlan: int32(virtualGuestTemplate.PrimaryBackendNetworkComponent.NetworkVlan.Id),
-				PublicVlan: int32(virtualGuestTemplate.PrimaryNetworkComponent.NetworkVlan.Id),
-				State: models.StateUsing,
+				PublicVlan:  int32(virtualGuestTemplate.PrimaryNetworkComponent.NetworkVlan.Id),
+				State:       models.StateUsing,
 			}
 			_, err = c.softLayerVmPoolClient.AddVM(operations.NewAddVMParams().WithBody(slPoolVm))
 			if err != nil {
@@ -212,7 +212,7 @@ func (c *softLayerPoolCreator) createBySoftlayer(agentID string, stemcell bslcst
 	return vm, nil
 }
 
-func (c *softLayerPoolCreator) createByOSReload(agentID string , stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
+func (c *softLayerPoolCreator) createByOSReload(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
 	virtualGuestService, err := c.softLayerClient.GetSoftLayer_Virtual_Guest_Service()
 	if err != nil {
 		return nil, bosherr.WrapError(err, "Creating VirtualGuestService from SoftLayer client")
@@ -310,7 +310,7 @@ func (c *softLayerPoolCreator) createByOSReload(agentID string , stemcell bslcst
 	return vm, nil
 }
 
-func (c *softLayerPoolCreator) oSReloadVMInPool (cid int, agentID string , stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
+func (c *softLayerPoolCreator) oSReloadVMInPool(cid int, agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
 	vm, found, err := c.vmFinder.Find(cid)
 	if err != nil || !found {
 		return nil, bosherr.WrapErrorf(err, "Cannot find virtualGuest with id: %d", cid)

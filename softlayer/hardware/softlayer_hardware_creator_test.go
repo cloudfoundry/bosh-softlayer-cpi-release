@@ -2,10 +2,10 @@ package hardware_test
 
 import (
 	"encoding/json"
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/hardware"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"time"
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/hardware"
 
 	testhelpers "github.com/cloudfoundry/bosh-softlayer-cpi/test_helpers"
 
@@ -20,8 +20,8 @@ import (
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
-	sldatatypes "github.com/maximilien/softlayer-go/data_types"
 	slh "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
+	sldatatypes "github.com/maximilien/softlayer-go/data_types"
 )
 
 var _ = Describe("SoftLayer_Hardware_Creator", func() {

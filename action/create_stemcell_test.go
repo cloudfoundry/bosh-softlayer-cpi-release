@@ -14,9 +14,9 @@ import (
 var _ = Describe("CreateStemcell", func() {
 	var (
 		fakeStemcellFinder *fakestem.FakeStemcellFinder
-		fakeStemcell *fakestem.FakeStemcell
+		fakeStemcell       *fakestem.FakeStemcell
 
-		action         CreateStemcellAction
+		action CreateStemcellAction
 	)
 
 	BeforeEach(func() {
@@ -28,7 +28,7 @@ var _ = Describe("CreateStemcell", func() {
 	Describe("Run", func() {
 		var (
 			stemcellIdStr string
-			err error
+			err           error
 		)
 
 		JustBeforeEach(func() {
