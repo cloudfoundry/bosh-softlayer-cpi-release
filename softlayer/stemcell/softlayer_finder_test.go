@@ -19,7 +19,7 @@ var _ = Describe("SoftLayerFinder", func() {
 	var (
 		softLayerClient  *fakesslclient.FakeSoftLayerClient
 		logger           boshlog.Logger
-		finder SoftLayerStemcellFinder
+		finder           SoftLayerStemcellFinder
 		expectedStemcell SoftLayerStemcell
 	)
 

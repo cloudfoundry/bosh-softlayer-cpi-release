@@ -13,8 +13,8 @@ import (
 )
 
 type SoftLayerStemcell struct {
-	id              int
-	uuid            string
+	id   int
+	uuid string
 
 	softLayerFinder SoftLayerStemcellFinder
 }
