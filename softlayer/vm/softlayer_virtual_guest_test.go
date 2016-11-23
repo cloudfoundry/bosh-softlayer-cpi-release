@@ -24,7 +24,7 @@ import (
 	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
 
 	datatypes "github.com/maximilien/softlayer-go/data_types"
-	slh "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/utils"
+	slh "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
 )
 
 var _ = Describe("SoftLayerVirtualGuest", func() {

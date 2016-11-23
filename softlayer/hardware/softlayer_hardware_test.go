@@ -25,7 +25,7 @@ import (
 
 	datatypes "github.com/maximilien/softlayer-go/data_types"
 	"github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/hardware"
-	slh "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/utils"
+	slh "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
 )
 
 var _ = Describe("SoftLayerHardware", func() {

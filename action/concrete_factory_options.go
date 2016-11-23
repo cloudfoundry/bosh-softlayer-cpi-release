@@ -4,8 +4,8 @@ import (
 	"os"
 	"strconv"
 
-	bslcvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 )
 
 type ConcreteFactoryOptions struct {
@@ -17,11 +17,11 @@ type ConcreteFactoryOptions struct {
 
 	StemcellsDir string `json:"stemcelldir,omitempty"`
 
-	Agent bslcvm.AgentOptions `json:"agent"`
+	Agent AgentOptions `json:"agent"`
 
 	AgentEnvService string `json:"agentenvservice,omitempty"`
 
-	Registry bslcvm.RegistryOptions `json:"registry,omitempty"`
+	Registry RegistryOptions `json:"registry,omitempty"`
 }
 
 func (o ConcreteFactoryOptions) Validate() error {
@@ -41,7 +41,7 @@ func (o ConcreteFactoryOptions) Validate() error {
 type SoftLayerConfig struct {
 	Username       string                `json:"username"`
 	ApiKey         string                `json:"apiKey"`
-	FeatureOptions bslcvm.FeatureOptions `json:"featureOptions,omitempty"`
+	FeatureOptions FeatureOptions `json:"featureOptions,omitempty"`
 }
 
 type BaremetalConfig struct {

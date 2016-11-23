@@ -12,7 +12,7 @@ import (
 	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
 	datatypes "github.com/maximilien/softlayer-go/data_types"
 	sl "github.com/maximilien/softlayer-go/softlayer"
-	slh "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/utils"
+	slh "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
 	"github.com/cloudfoundry/bosh-softlayer-cpi/common"
 )
 

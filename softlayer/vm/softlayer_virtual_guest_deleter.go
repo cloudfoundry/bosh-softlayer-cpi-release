@@ -10,7 +10,7 @@ import (
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 
 	sl "github.com/maximilien/softlayer-go/softlayer"
-	slh "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/utils"
+	slh "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
 )
 
 const SOFTLAYER_VM_DELETER_LOG_TAG = "SoftLayerVMDeleter"

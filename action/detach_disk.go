@@ -9,12 +9,12 @@ import (
 
 type DetachDiskAction struct {
 	vmFinder   bslcvm.Finder
-	diskFinder bslcdisk.Finder
+	diskFinder bslcdisk.DiskFinder
 }
 
 func NewDetachDisk(
 	vmFinder bslcvm.Finder,
-	diskFinder bslcdisk.Finder,
+	diskFinder bslcdisk.DiskFinder,
 ) (action DetachDiskAction) {
 	action.vmFinder = vmFinder
 	action.diskFinder = diskFinder

@@ -1,7 +1,7 @@
 package action
 
 import (
-	bslcvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
+	bslcvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 )
 
 type Networks map[string]Network

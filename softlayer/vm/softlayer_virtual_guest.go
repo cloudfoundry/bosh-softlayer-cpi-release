@@ -16,7 +16,7 @@ import (
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
 	sl "github.com/maximilien/softlayer-go/softlayer"
-	slh "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/utils"
+	slh "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
 
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 	bslcdisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk"

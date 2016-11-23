@@ -16,7 +16,7 @@ import (
 
 	bmscl "github.com/cloudfoundry-community/bosh-softlayer-tools/clients"
 	sl "github.com/maximilien/softlayer-go/softlayer"
-	slh "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/utils"
+	slh "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
 
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 	"github.com/cloudfoundry/bosh-softlayer-cpi/util"

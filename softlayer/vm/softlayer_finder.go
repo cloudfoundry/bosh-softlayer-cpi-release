@@ -5,10 +5,10 @@ import (
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
+	slhelper "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
 
 	bmscl "github.com/cloudfoundry-community/bosh-softlayer-tools/clients"
 	sl "github.com/maximilien/softlayer-go/softlayer"
-	slh "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/utils"
 	slhw "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/hardware"
 
 	"github.com/cloudfoundry/bosh-softlayer-cpi/util"
@@ -32,9 +32,9 @@ func NewSoftLayerFinder(softLayerClient sl.Client, baremetalClient bmscl.BmpClie
 
 func (f *softLayerFinder) Find(vmID int) (VM, bool, error) {
 	var vm VM
-	virtualGuest, err := slh.GetObjectDetailsOnVirtualGuest(f.softLayerClient, vmID)
+	virtualGuest, err := slhelper.GetObjectDetailsOnVirtualGuest(f.softLayerClient, vmID)
 	if err != nil {
-		hardware, err := slh.GetObjectDetailsOnHardware(f.softLayerClient, vmID)
+		hardware, err := slhelper.GetObjectDetailsOnHardware(f.softLayerClient, vmID)
 		if err != nil {
 			return nil, false, bosherr.Errorf("Failed to find VM or Baremetal %d", vmID)
 		}

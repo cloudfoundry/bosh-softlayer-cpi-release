@@ -7,11 +7,11 @@ import (
 )
 
 type DeleteDiskAction struct {
-	diskFinder bslcdisk.Finder
+	diskFinder bslcdisk.DiskFinder
 }
 
 func NewDeleteDisk(
-	diskFinder bslcdisk.Finder,
+	diskFinder bslcdisk.DiskFinder,
 ) (action DeleteDiskAction) {
 	action.diskFinder = diskFinder
 	return

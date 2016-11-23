@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/action"
-	bslcvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 )
 
 var _ = Describe("ConcreteFactoryOptions", func() {
@@ -16,25 +16,25 @@ var _ = Describe("ConcreteFactoryOptions", func() {
 
 		validOptions = ConcreteFactoryOptions{
 
-			Agent: bslcvm.AgentOptions{
+			Agent: AgentOptions{
 				Mbus: "fake-mbus",
 				NTP:  []string{},
 
-				Blobstore: bslcvm.BlobstoreOptions{
+				Blobstore: BlobstoreOptions{
 					Provider: "fake-blobstore-type",
 				},
 			},
 			Softlayer: SoftLayerConfig{
 				Username:       "fake-username",
 				ApiKey:         "fke-apikey",
-				FeatureOptions: bslcvm.FeatureOptions{},
+				FeatureOptions: FeatureOptions{},
 			},
 		}
 	)
 
 	Context("when the option values are specified", func() {
 		BeforeEach(func() {
-			validOptions.Softlayer.FeatureOptions = bslcvm.FeatureOptions{
+			validOptions.Softlayer.FeatureOptions = FeatureOptions{
 				ApiEndpoint:                      "api.service.softlayer.com",
 				ApiWaitTime:                      3,
 				ApiRetryCount:                    5,
@@ -58,7 +58,7 @@ var _ = Describe("ConcreteFactoryOptions", func() {
 
 	Context("when the option values are not specified", func() {
 		BeforeEach(func() {
-			validOptions.Softlayer.FeatureOptions = bslcvm.FeatureOptions{}
+			validOptions.Softlayer.FeatureOptions = FeatureOptions{}
 			options = validOptions
 		})
 

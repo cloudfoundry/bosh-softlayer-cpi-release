@@ -21,7 +21,7 @@ import (
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
 	sldatatypes "github.com/maximilien/softlayer-go/data_types"
-	slh "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/utils"
+	slh "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
 )
 
 var _ = Describe("SoftLayer_Hardware_Creator", func() {
