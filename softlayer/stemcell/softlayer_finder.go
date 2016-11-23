@@ -15,16 +15,16 @@ import (
 	"strings"
 )
 
-type SoftLayerFinder struct {
+type SoftLayerStemcellFinder struct {
 	client sl.Client
 	logger boshlog.Logger
 }
 
-func NewSoftLayerFinder(client sl.Client, logger boshlog.Logger) SoftLayerFinder {
-	return SoftLayerFinder{client: client, logger: logger}
+func NewSoftLayerStemcellFinder(client sl.Client, logger boshlog.Logger) SoftLayerStemcellFinder {
+	return SoftLayerStemcellFinder{client: client, logger: logger}
 }
 
-func (f SoftLayerFinder) FindById(id int) (Stemcell, error) {
+func (f SoftLayerStemcellFinder) FindById(id int) (Stemcell, error) {
 	vgbdtg := sl_datatypes.SoftLayer_Virtual_Guest_Block_Device_Template_Group{}
 	vgdtgService, err := f.client.GetSoftLayer_Virtual_Guest_Block_Device_Template_Group_Service()
 
