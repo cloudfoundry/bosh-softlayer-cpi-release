@@ -32,5 +32,15 @@
 	},
 	"datacenter": {
 		"id": 123
+	},
+	"primaryNetworkComponent": {
+		"networkVlan": {
+			"id": 1421726
+		}
+	},
+	"primaryBackendNetworkComponent": {
+		"networkVlan": {
+			"id": 1421725
+		}
 	}
 }

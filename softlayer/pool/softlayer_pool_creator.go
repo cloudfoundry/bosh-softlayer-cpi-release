@@ -22,14 +22,13 @@ import (
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 
 	"github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/pool/models"
-	"github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/pool/client"
 )
 
 const SOFTLAYER_POOL_CREATOR_LOG_TAG = "SoftLayerPoolCreator"
 
 type softLayerPoolCreator struct {
 	softLayerClient        sl.Client
-	softLayerVmPoolClient  *client.SoftLayerVMPool
+	softLayerVmPoolClient  operations.SoftLayerPoolClient
 
 	agentEnvServiceFactory AgentEnvServiceFactory
 
@@ -42,7 +41,7 @@ type softLayerPoolCreator struct {
 	featureOptions         FeatureOptions
 }
 
-func NewSoftLayerPoolCreator(vmFinder VMFinder, softLayerVmPoolClient *client.SoftLayerVMPool, softLayerClient sl.Client, agentOptions AgentOptions, logger boshlog.Logger, featureOptions FeatureOptions) VMCreator {
+func NewSoftLayerPoolCreator(vmFinder VMFinder, softLayerVmPoolClient operations.SoftLayerPoolClient, softLayerClient sl.Client, agentOptions AgentOptions, logger boshlog.Logger, featureOptions FeatureOptions) VMCreator {
 	slhelper.TIMEOUT = 120 * time.Minute
 	slhelper.POLLING_INTERVAL = 5 * time.Second
 
@@ -85,7 +84,7 @@ func (c *softLayerPoolCreator) createFromVMPool(agentID string, stemcell bslcste
 		PublicVlan:  int32(virtualGuestTemplate.PrimaryNetworkComponent.NetworkVlan.Id),
 		State: models.StateFree,
 	}
-	orderVmResp, err := c.softLayerVmPoolClient.VM.OrderVMByFilter(operations.NewOrderVMByFilterParams().WithBody(filter))
+	orderVmResp, err := c.softLayerVmPoolClient.OrderVMByFilter(operations.NewOrderVMByFilterParams().WithBody(filter))
 	if err != nil {
 		_, ok := err.(*operations.OrderVMByFilterNotFound)
 		if !ok {
@@ -105,7 +104,7 @@ func (c *softLayerPoolCreator) createFromVMPool(agentID string, stemcell bslcste
 				PublicVlan: int32(virtualGuestTemplate.PrimaryNetworkComponent.NetworkVlan.Id),
 				State: models.StateUsing,
 			}
-			_, err = c.softLayerVmPoolClient.VM.AddVM(operations.NewAddVMParams().WithBody(slPoolVm))
+			_, err = c.softLayerVmPoolClient.AddVM(operations.NewAddVMParams().WithBody(slPoolVm))
 			if err != nil {
 				return nil, bosherr.WrapError(err, "Adding vm into pool")
 			}
@@ -130,7 +129,7 @@ func (c *softLayerPoolCreator) createFromVMPool(agentID string, stemcell bslcste
 	using := &models.VMState{
 		State: models.StateUsing,
 	}
-	_, err = c.softLayerVmPoolClient.VM.UpdateVMWithState(operations.NewUpdateVMWithStateParams().WithBody(using).WithCid(int32(virtualGuestId)))
+	_, err = c.softLayerVmPoolClient.UpdateVMWithState(operations.NewUpdateVMWithStateParams().WithBody(using).WithCid(int32(virtualGuestId)))
 	if err != nil {
 		return nil, bosherr.WrapErrorf(err, "Updating state of vm %d in pool to using", virtualGuestId)
 	}
