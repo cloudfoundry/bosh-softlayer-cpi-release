@@ -10,7 +10,7 @@ import (
 	testhelpers "github.com/cloudfoundry/bosh-softlayer-cpi/test_helpers"
 
 	fakebmsclient "github.com/cloudfoundry-community/bosh-softlayer-tools/clients/fakes"
-	fakevm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/fakes"
+	fakescommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/fakes"
 	fakesutil "github.com/cloudfoundry/bosh-softlayer-cpi/util/fakes"
 	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
 
@@ -29,7 +29,7 @@ var _ = Describe("SoftLayer_Hardware_Creator", func() {
 		softLayerClient *fakeslclient.FakeSoftLayerClient
 		baremetalClient *fakebmsclient.FakeBmpClient
 		sshClient       *fakesutil.FakeSshClient
-		vmFinder        *fakevm.FakeVMFinder
+		fakeVmFinder    *fakescommon.FakeVMFinder
 		agentOptions    bslcommon.AgentOptions
 		logger          boshlog.Logger
 		creator         bslcommon.VMCreator
@@ -41,10 +41,10 @@ var _ = Describe("SoftLayer_Hardware_Creator", func() {
 		sshClient = &fakesutil.FakeSshClient{}
 		agentOptions = bslcommon.AgentOptions{Mbus: "fake-mbus"}
 		logger = boshlog.NewLogger(boshlog.LevelNone)
-		vmFinder = &fakevm.FakeVMFinder{}
+		fakeVmFinder = &fakescommon.FakeVMFinder{}
 
 		creator = NewBaremetalCreator(
-			vmFinder,
+			fakeVmFinder,
 			softLayerClient,
 			baremetalClient,
 			agentOptions,
@@ -61,6 +61,7 @@ var _ = Describe("SoftLayer_Hardware_Creator", func() {
 			cloudProps bslcommon.VMCloudProperties
 			networks   bslcommon.Networks
 			env        bslcommon.Environment
+			fakeVm     *fakescommon.FakeVM
 		)
 
 		Context("valid arguments", func() {
@@ -69,11 +70,6 @@ var _ = Describe("SoftLayer_Hardware_Creator", func() {
 				stemcell = bslcstem.NewSoftLayerStemcell(1234, "fake-stemcell-uuid", softLayerClient, logger)
 
 				env = bslcommon.Environment{}
-
-				vmFinder.find = fakevm.FakeVMFinder{}
-
-				vmFinder.FindFound = true
-				vmFinder.FindErr = nil
 			})
 
 			Context("provisioning vm in baremetal server", func() {
@@ -164,6 +160,10 @@ var _ = Describe("SoftLayer_Hardware_Creator", func() {
 						baremetalClient.TaskJsonResponses = []bmsclients.TaskJsonResponse{taskJson, serverJson}
 
 						setFakeSoftlayerClientFixtures(softLayerClient)
+
+						fakeVm = &fakescommon.FakeVM{}
+						fakeVm.IDReturns(1234567)
+						fakeVmFinder.FindReturns(fakeVm, true, nil)
 						vm, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
 						Expect(err).ToNot(HaveOccurred())
 						Expect(vm.ID()).To(Equal(1234567))
@@ -238,6 +238,9 @@ var _ = Describe("SoftLayer_Hardware_Creator", func() {
 
 						baremetalClient.TaskJsonResponses = []bmsclients.TaskJsonResponse{taskJson, serverJson}
 						setFakeSoftlayerClientFixtures(softLayerClient)
+						fakeVm = &fakescommon.FakeVM{}
+						fakeVm.IDReturns(1234567)
+						fakeVmFinder.FindReturns(fakeVm, true, nil)
 						vm, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
 						Expect(err).ToNot(HaveOccurred())
 						Expect(vm.ID()).To(Equal(1234567))
@@ -268,9 +271,6 @@ var _ = Describe("SoftLayer_Hardware_Creator", func() {
 							CloudProperties: map[string]interface{}{},
 						},
 					}
-
-					vmFinder.FindVM = fakevm.NewFakeVM(1234567)
-					vmFinder.FindFound = false
 				})
 
 				It("fails when VMProperties is missing StartCpus", func() {
