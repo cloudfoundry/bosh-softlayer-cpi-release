@@ -8,7 +8,7 @@ import (
 	slvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
 	slhw "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/hardware"
 	slpool "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/pool"
-	slpoolclient "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/pool/client"
+	operations "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/pool/client/vm"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 )
 
@@ -30,8 +30,7 @@ type deleterProvider struct {
 	deleters map[string]VMDeleter
 }
 
-func NewCreatorProvider(softLayerClient sl.Client, baremetalClient bmscl.BmpClient, softLayerPoolClient *slpoolclient.SoftLayerVMPool ,options ConcreteFactoryOptions, logger boshlog.Logger) CreatorProvider {
-
+func NewCreatorProvider(softLayerClient sl.Client, baremetalClient bmscl.BmpClient, softLayerPoolClient operations.SoftLayerPoolClient ,options ConcreteFactoryOptions, logger boshlog.Logger) CreatorProvider {
 	agentEnvServiceFactory := NewSoftLayerAgentEnvServiceFactory(options.AgentEnvService, options.Registry, logger)
 
 	vmFinder := slvm.NewSoftLayerFinder(
@@ -79,7 +78,7 @@ func (p creatorProvider) Get(name string) VMCreator {
 	return p.creators[name]
 }
 
-func NewDeleterProvider(softLayerClient sl.Client, softLayerPoolClient *slpoolclient.SoftLayerVMPool, logger boshlog.Logger) DeleterProvider {
+func NewDeleterProvider(softLayerClient sl.Client, softLayerPoolClient operations.SoftLayerPoolClient, logger boshlog.Logger) DeleterProvider {
 	virtualGuestDeleter := slvm.NewSoftLayerVMDeleter(
 		softLayerClient,
 		logger,
