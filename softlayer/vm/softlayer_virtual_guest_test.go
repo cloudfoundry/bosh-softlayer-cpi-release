@@ -203,7 +203,7 @@ var _ = Describe("SoftLayerVirtualGuest", func() {
 					"SoftLayer_Virtual_Guest_Service_getPowerState.json",
 				}
 				testhelpers.SetTestFixturesForFakeSoftLayerClient(fakeSoftLayerClient, fileNames)
-				stemcell = fakestemcell.NewFakeStemcell(123456, "5b7bc66a-72c6-447a-94a1-967803fcd76b")
+				stemcell = &fakestemcell.FakeStemcell{}
 			})
 
 			It("os reload on the VM successfully", func() {
@@ -337,7 +337,7 @@ var _ = Describe("SoftLayerVirtualGuest", func() {
 `
 
 		BeforeEach(func() {
-			disk = fakedisk.FakeDisk{}
+			disk = &fakedisk.FakeDisk{}
 			fileNames := []string{
 				"SoftLayer_Network_Storage_Service_getIscsiVolume.json",
 				"SoftLayer_Network_Storage_Service_getAllowedVirtualGuests_None.json",
@@ -465,7 +465,7 @@ iscsiadm: No records found
  * Starting multipath daemon multipathd
  `
 		BeforeEach(func() {
-			disk = fakedisk.FakeDisk{}
+			disk = &fakedisk.FakeDisk{}
 			fileNames := []string{
 				"SoftLayer_Network_Storage_Service_getIscsiVolume.json",
 				"SoftLayer_Network_Storage_Service_getAllowedVirtualGuests.json",

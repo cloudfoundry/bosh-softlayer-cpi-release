@@ -27,8 +27,8 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 	var (
 		softLayerClient *fakeslclient.FakeSoftLayerClient
 		sshClient       *fakesutil.FakeSshClient
-		vmFinder        *fakescommon.FakeVMFinder
-		vm 		*fakescommon.FakeVM
+		fakeVmFinder        *fakescommon.FakeVMFinder
+		fakeVm                *fakescommon.FakeVM
 		agentOptions    AgentOptions
 		logger          boshlog.Logger
 		creator         VMCreator
@@ -40,8 +40,8 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 		sshClient = &fakesutil.FakeSshClient{}
 		agentOptions = AgentOptions{Mbus: "fake-mbus"}
 		logger = boshlog.NewLogger(boshlog.LevelNone)
-		vmFinder = &fakescommon.FakeVMFinder{}
-		vm = &fakescommon.FakeVM{}
+		fakeVmFinder = &fakescommon.FakeVMFinder{}
+		fakeVm = &fakescommon.FakeVM{}
 
 		slh.TIMEOUT = 2 * time.Second
 		slh.POLLING_INTERVAL = 1 * time.Second
@@ -65,10 +65,11 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 				featureOptions = FeatureOptions{DisableOsReload: false}
 
 
-				vmFinder.FindReturns(vm, true, nil)
+				fakeVm.IDReturns(1234567)
+				fakeVmFinder.FindReturns(fakeVm, true, nil)
 
 				creator = NewSoftLayerCreator(
-					vmFinder,
+					fakeVmFinder,
 					softLayerClient,
 					agentOptions,
 					logger,
@@ -449,10 +450,11 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 
 				featureOptions = FeatureOptions{DisableOsReload: true}
 
-				vmFinder.FindReturns(vm, true, nil)
+				fakeVm.IDReturns(1234567)
+				fakeVmFinder.FindReturns(fakeVm, true, nil)
 
 				creator = NewSoftLayerCreator(
-					vmFinder,
+					fakeVmFinder,
 					softLayerClient,
 					agentOptions,
 					logger,
@@ -624,7 +626,8 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 						},
 					}
 
-					vmFinder.FindReturns(vm, false, nil)
+					fakeVm.IDReturns(1234567)
+					fakeVmFinder.FindReturns(fakeVm, false, nil)
 
 					setFakeSoftlayerClientCreateObjectTestFixturesWithEphemeralDiskSize(softLayerClient)
 				})
