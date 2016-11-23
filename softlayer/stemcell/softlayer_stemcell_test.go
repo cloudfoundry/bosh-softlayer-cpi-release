@@ -7,7 +7,7 @@ import (
 
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
 
-	slh "github.com/cloudfoundry/bosh-softlayer-cpi/common"
+	slhelper "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
 	testhelpers "github.com/cloudfoundry/bosh-softlayer-cpi/test_helpers"
@@ -28,8 +28,8 @@ var _ = Describe("SoftLayerStemcell", func() {
 
 		stemcell = NewSoftLayerStemcell(1234, "fake-stemcell-uuid", fakeSoftLayerClient, logger)
 
-		slh.TIMEOUT = 10 * time.Millisecond
-		slh.POLLING_INTERVAL = 2 * time.Millisecond
+		slhelper.TIMEOUT = 10 * time.Millisecond
+		slhelper.POLLING_INTERVAL = 2 * time.Millisecond
 	})
 
 	Describe("#Delete", func() {

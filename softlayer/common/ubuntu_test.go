@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
-	"github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/fakes"
+	fakescommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/fakes"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -14,9 +14,9 @@ var _ = Describe("UbuntuNetwork", func() {
 	var (
 		networks             Networks
 		networkComponents    VirtualGuestNetworkComponents
-		softlayerClient      *fakes.FakeSoftLayerClient
-		sshClient            *fakes.FakeSSHClient
-		softlayerFileService *fakes.FakeSLFileService
+		softlayerClient      *fakescommon.FakeSoftLayerClient
+		sshClient            *fakescommon.FakeSSHClient
+		softlayerFileService *fakescommon.FakeSLFileService
 
 		ubuntu *Ubuntu
 	)
@@ -45,9 +45,9 @@ var _ = Describe("UbuntuNetwork", func() {
 			},
 			PrimaryNetworkComponent: NetworkComponent{},
 		}
-		softlayerClient = &fakes.FakeSoftLayerClient{}
-		sshClient = &fakes.FakeSSHClient{}
-		softlayerFileService = &fakes.FakeSLFileService{}
+		softlayerClient = &fakescommon.FakeSoftLayerClient{}
+		sshClient = &fakescommon.FakeSSHClient{}
+		softlayerFileService = &fakescommon.FakeSLFileService{}
 
 		ubuntu = &Ubuntu{
 			SoftLayerClient:      softlayerClient,
@@ -73,8 +73,7 @@ var _ = Describe("UbuntuNetwork", func() {
 		})
 
 		It("uploads the configuration and restarts networking", func() {
-
-			err := ubuntu.ConfigureNetwork(networks, fakes.FakeVM{})
+			err := ubuntu.ConfigureNetwork(networks, &fakescommon.FakeVM{})
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(softlayerFileService.UploadCallCount()).To(Equal(1))

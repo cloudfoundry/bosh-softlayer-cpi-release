@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 
-	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
+	slhelper "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
 	fakebslvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/fakes"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
@@ -25,7 +25,7 @@ var _ = Describe("SoftlayerAgentEnvService", func() {
 
 	BeforeEach(func() {
 		fakeSoftlayerFileService = fakebslvm.NewFakeSoftlayerFileService()
-		fakevm = fakebslvm.FakeVM{}
+		fakevm = &fakebslvm.FakeVM{}
 		logger := boshlog.NewLogger(boshlog.LevelNone)
 		agentEnvService = NewFSAgentEnvService(fakevm, fakeSoftlayerFileService, logger)
 	})
@@ -110,7 +110,7 @@ var _ = Describe("SoftlayerAgentEnvService", func() {
 
 		Context("when the length of hostname is greater than 63 chars", func() {
 			BeforeEach(func() {
-				bslcommon.LengthOfHostName = 64
+				slhelper.LengthOfHostName = 64
 				fakeSoftlayerFileService.UploadErr = errors.New("A faked error occurred")
 			})
 
