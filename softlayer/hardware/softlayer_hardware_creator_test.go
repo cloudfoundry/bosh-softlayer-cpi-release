@@ -5,13 +5,12 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"time"
-
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/hardware"
 
 	testhelpers "github.com/cloudfoundry/bosh-softlayer-cpi/test_helpers"
 
 	fakebmsclient "github.com/cloudfoundry-community/bosh-softlayer-tools/clients/fakes"
-	fakevm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm/fakes"
+	fakevm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/fakes"
 	fakesutil "github.com/cloudfoundry/bosh-softlayer-cpi/util/fakes"
 	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
 
@@ -22,6 +21,7 @@ import (
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
 	sldatatypes "github.com/maximilien/softlayer-go/data_types"
+	slh "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
 )
 
 var _ = Describe("SoftLayer_Hardware_Creator", func() {
@@ -29,19 +29,19 @@ var _ = Describe("SoftLayer_Hardware_Creator", func() {
 		softLayerClient *fakeslclient.FakeSoftLayerClient
 		baremetalClient *fakebmsclient.FakeBmpClient
 		sshClient       *fakesutil.FakeSshClient
-		vmFinder        *fakevm.FakeFinder
-		agentOptions    AgentOptions
+		vmFinder        *fakevm.FakeVMFinder
+		agentOptions    bslcommon.AgentOptions
 		logger          boshlog.Logger
-		creator         VMCreator
+		creator         bslcommon.VMCreator
 	)
 
 	BeforeEach(func() {
 		softLayerClient = fakeslclient.NewFakeSoftLayerClient("fake-username", "fake-api-key")
 		baremetalClient = fakebmsclient.NewFakeBmpClient("fake-username", "fake-api-key", "fake-url", "fake-config-path")
 		sshClient = &fakesutil.FakeSshClient{}
-		agentOptions = AgentOptions{Mbus: "fake-mbus"}
+		agentOptions = bslcommon.AgentOptions{Mbus: "fake-mbus"}
 		logger = boshlog.NewLogger(boshlog.LevelNone)
-		vmFinder = &fakevm.FakeFinder{}
+		vmFinder = &fakevm.FakeVMFinder{}
 
 		creator = NewBaremetalCreator(
 			vmFinder,
@@ -50,17 +50,17 @@ var _ = Describe("SoftLayer_Hardware_Creator", func() {
 			agentOptions,
 			logger,
 		)
-		bslcommon.TIMEOUT = 2 * time.Second
-		bslcommon.POLLING_INTERVAL = 1 * time.Second
+		slh.TIMEOUT = 2 * time.Second
+		slh.POLLING_INTERVAL = 1 * time.Second
 	})
 
 	Describe("#Create", func() {
 		var (
 			agentID    string
 			stemcell   bslcstem.SoftLayerStemcell
-			cloudProps VMCloudProperties
-			networks   Networks
-			env        Environment
+			cloudProps bslcommon.VMCloudProperties
+			networks   bslcommon.Networks
+			env        bslcommon.Environment
 		)
 
 		Context("valid arguments", func() {
@@ -68,9 +68,10 @@ var _ = Describe("SoftLayer_Hardware_Creator", func() {
 				agentID = "fake-agent-id"
 				stemcell = bslcstem.NewSoftLayerStemcell(1234, "fake-stemcell-uuid", softLayerClient, logger)
 
-				env = Environment{}
+				env = bslcommon.Environment{}
 
-				vmFinder.FindVM = fakevm.NewFakeVM(1234567)
+				vmFinder.find = fakevm.FakeVMFinder{}
+
 				vmFinder.FindFound = true
 				vmFinder.FindErr = nil
 			})
@@ -78,8 +79,8 @@ var _ = Describe("SoftLayer_Hardware_Creator", func() {
 			Context("provisioning vm in baremetal server", func() {
 				Context("with dynamic networking", func() {
 					BeforeEach(func() {
-						networks = map[string]Network{
-							"fake-network0": Network{
+						networks = map[string]bslcommon.Network{
+							"fake-network0": bslcommon.Network{
 								Type:    "dynamic",
 								Netmask: "fake-Netmask",
 								Gateway: "fake-Gateway",
@@ -95,7 +96,7 @@ var _ = Describe("SoftLayer_Hardware_Creator", func() {
 					})
 
 					It("returns a new SoftLayerVM", func() {
-						cloudProps = VMCloudProperties{
+						cloudProps = bslcommon.VMCloudProperties{
 							StartCpus: 4,
 							MaxMemory: 2048,
 							Domain:    "fake-domain.com",
@@ -169,7 +170,7 @@ var _ = Describe("SoftLayer_Hardware_Creator", func() {
 					})
 
 					It("returns a new SoftLayerVM without bosh ip", func() {
-						cloudProps = VMCloudProperties{
+						cloudProps = bslcommon.VMCloudProperties{
 							StartCpus: 4,
 							MaxMemory: 2048,
 							Domain:    "fake-domain.com",
@@ -250,11 +251,11 @@ var _ = Describe("SoftLayer_Hardware_Creator", func() {
 				BeforeEach(func() {
 					agentID = "fake-agent-id"
 					stemcell = bslcstem.NewSoftLayerStemcell(1234, "fake-stemcell-uuid", softLayerClient, logger)
-					networks = Networks{}
-					env = Environment{}
+					networks = bslcommon.Networks{}
+					env = bslcommon.Environment{}
 
-					networks = map[string]Network{
-						"fake-network0": Network{
+					networks = map[string]bslcommon.Network{
+						"fake-network0": bslcommon.Network{
 							Type:    "dynamic",
 							Netmask: "fake-Netmask",
 							Gateway: "fake-Gateway",
@@ -273,7 +274,7 @@ var _ = Describe("SoftLayer_Hardware_Creator", func() {
 				})
 
 				It("fails when VMProperties is missing StartCpus", func() {
-					cloudProps = VMCloudProperties{
+					cloudProps = bslcommon.VMCloudProperties{
 						MaxMemory:  2048,
 						Datacenter: sldatatypes.Datacenter{Name: "fake-datacenter"},
 					}
@@ -283,7 +284,7 @@ var _ = Describe("SoftLayer_Hardware_Creator", func() {
 				})
 
 				It("fails when VMProperties is missing MaxMemory", func() {
-					cloudProps = VMCloudProperties{
+					cloudProps = bslcommon.VMCloudProperties{
 						StartCpus:  4,
 						Datacenter: sldatatypes.Datacenter{Name: "fake-datacenter"},
 					}
@@ -293,7 +294,7 @@ var _ = Describe("SoftLayer_Hardware_Creator", func() {
 				})
 
 				It("fails when VMProperties is missing Domain", func() {
-					cloudProps = VMCloudProperties{
+					cloudProps = bslcommon.VMCloudProperties{
 						StartCpus: 4,
 						MaxMemory: 1024,
 					}

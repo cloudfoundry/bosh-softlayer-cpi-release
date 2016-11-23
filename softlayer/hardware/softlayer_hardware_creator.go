@@ -8,9 +8,10 @@ import (
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
 	bmslc "github.com/cloudfoundry-community/bosh-softlayer-tools/clients"
-	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
 	sl "github.com/maximilien/softlayer-go/softlayer"
+        slh "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
 )
 
 type baremetalCreator struct {
@@ -20,12 +21,12 @@ type baremetalCreator struct {
 
 	agentOptions AgentOptions
 	logger       boshlog.Logger
-	vmFinder     Finder
+	vmFinder     VMFinder
 }
 
-func NewBaremetalCreator(vmFinder Finder, softLayerClient sl.Client, bmsClient bmslc.BmpClient, agentOptions AgentOptions, logger boshlog.Logger) VMCreator {
-	bslcommon.TIMEOUT = 15 * time.Minute
-	bslcommon.POLLING_INTERVAL = 5 * time.Second
+func NewBaremetalCreator(vmFinder VMFinder, softLayerClient sl.Client, bmsClient bmslc.BmpClient, agentOptions AgentOptions, logger boshlog.Logger) VMCreator {
+	slh.TIMEOUT = 15 * time.Minute
+	slh.POLLING_INTERVAL = 5 * time.Second
 
 	return &baremetalCreator{
 		vmFinder:        vmFinder,
@@ -175,9 +176,9 @@ func (c *baremetalCreator) provisionBaremetal(server_name string, stemcell strin
 	}
 
 	task_id := createBaremetalResponse.Data.TaskId
-	bslcommon.TIMEOUT = 120 * time.Minute
+	slh.TIMEOUT = 120 * time.Minute
 	totalTime := time.Duration(0)
-	for totalTime < bslcommon.TIMEOUT {
+	for totalTime < slh.TIMEOUT {
 
 		taskOutput, err := c.bmsClient.TaskJsonOutput(task_id, "task")
 		if err != nil {
@@ -197,8 +198,8 @@ func (c *baremetalCreator) provisionBaremetal(server_name string, stemcell strin
 			info = serverOutput.Data["info"].(map[string]interface{})
 			return int(info["id"].(float64)), nil
 		default:
-			totalTime += bslcommon.POLLING_INTERVAL
-			time.Sleep(bslcommon.POLLING_INTERVAL)
+			totalTime += slh.POLLING_INTERVAL
+			time.Sleep(slh.POLLING_INTERVAL)
 		}
 	}
 
