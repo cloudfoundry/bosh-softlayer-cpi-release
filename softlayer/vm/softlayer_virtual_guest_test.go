@@ -73,7 +73,6 @@ var _ = Describe("SoftLayerVirtualGuest", func() {
 		vm.SetAgentEnvService(agentEnvService)
 	})
 
-
 	Describe("Reboot", func() {
 		Context("valid VM ID is used", func() {
 			BeforeEach(func() {

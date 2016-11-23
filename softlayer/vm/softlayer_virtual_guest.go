@@ -86,6 +86,10 @@ func (vm *softLayerVirtualGuest) GetFullyQualifiedDomainName() string {
 	return vm.virtualGuest.FullyQualifiedDomainName
 }
 
+func (vm *softLayerVirtualGuest) Delete(agentID string) error {
+	return nil
+}
+
 func (vm *softLayerVirtualGuest) SetVcapPassword(encryptedPwd string) (err error) {
 	command := fmt.Sprintf("usermod -p '%s' vcap", encryptedPwd)
 	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryBackendIP(), command)
