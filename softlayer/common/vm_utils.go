@@ -18,6 +18,7 @@ import (
 	boshsys "github.com/cloudfoundry/bosh-utils/system"
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
+	sl "github.com/maximilien/softlayer-go/softlayer"
 )
 
 func CreateDisksSpec(ephemeralDiskSize int) DisksSpec {
@@ -159,6 +160,20 @@ func UpdateEtcHostsOfBoshInit(record string) (err error) {
 		return bosherr.WrapError(err, "Writing to /etc/hosts")
 	}
 
+	return nil
+}
+
+func UpdateDeviceName(vmID int, virtualGuestService sl.SoftLayer_Virtual_Guest_Service, cloudProps VMCloudProperties) (err error) {
+	deviceName := sldatatypes.SoftLayer_Virtual_Guest{
+		Hostname: cloudProps.VmNamePrefix,
+		Domain: cloudProps.Domain,
+		FullyQualifiedDomainName: cloudProps.VmNamePrefix+cloudProps.Domain,
+	}
+
+	_, err = virtualGuestService.EditObject(vmID, deviceName)
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Failed to update properties for virtualGuest with id: %d", vmID)
+	}
 	return nil
 }
 

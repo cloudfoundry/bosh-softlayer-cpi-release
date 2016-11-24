@@ -14,7 +14,7 @@ import (
 	datatypes "github.com/maximilien/softlayer-go/data_types"
 	sl "github.com/maximilien/softlayer-go/softlayer"
 
-	util "github.com/cloudfoundry/bosh-softlayer-cpi/util"
+	"github.com/cloudfoundry/bosh-softlayer-cpi/util"
 )
 
 type softLayerVirtualGuestCreator struct {
@@ -176,6 +176,11 @@ func (c *softLayerVirtualGuestCreator) createByOSReload(agentID string, stemcell
 	err = vm.ReloadOS(stemcell)
 	if err != nil {
 		return nil, bosherr.WrapError(err, "Failed to reload OS")
+	}
+
+	err = UpdateDeviceName(virtualGuest.Id, virtualGuestService, cloudProps)
+	if err != nil {
+		return nil, err
 	}
 
 	if cloudProps.EphemeralDiskSize == 0 {
