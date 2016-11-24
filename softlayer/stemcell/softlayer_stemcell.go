@@ -16,14 +16,14 @@ type SoftLayerStemcell struct {
 	id   int
 	uuid string
 
-	softLayerFinder SoftLayerFinder
+	softLayerFinder SoftLayerStemcellFinder
 }
 
 func NewSoftLayerStemcell(id int, uuid string, softLayerClient sl.Client, logger boshlog.Logger) SoftLayerStemcell {
 	slh.TIMEOUT = 60 * time.Minute
 	slh.POLLING_INTERVAL = 10 * time.Second
 
-	softLayerFinder := SoftLayerFinder{
+	softLayerFinder := SoftLayerStemcellFinder{
 		client: softLayerClient,
 		logger: logger,
 	}

@@ -14,7 +14,7 @@ import (
 var _ = Describe("HasVM", func() {
 	var (
 		fakeVmFinder *fakescommon.FakeVMFinder
-		action   HasVMAction
+		action       HasVMAction
 	)
 
 	BeforeEach(func() {
@@ -26,7 +26,7 @@ var _ = Describe("HasVM", func() {
 		var (
 			vmCid VMCID
 			found bool
-			err error
+			err   error
 		)
 		BeforeEach(func() {
 			vmCid = VMCID(123456)

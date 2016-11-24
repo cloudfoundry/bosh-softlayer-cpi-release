@@ -19,16 +19,16 @@ import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
-	sldatatypes "github.com/maximilien/softlayer-go/data_types"
 	slh "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
+	sldatatypes "github.com/maximilien/softlayer-go/data_types"
 )
 
 var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 	var (
 		softLayerClient *fakeslclient.FakeSoftLayerClient
 		sshClient       *fakesutil.FakeSshClient
-		fakeVmFinder        *fakescommon.FakeVMFinder
-		fakeVm                *fakescommon.FakeVM
+		fakeVmFinder    *fakescommon.FakeVMFinder
+		fakeVm          *fakescommon.FakeVM
 		agentOptions    AgentOptions
 		logger          boshlog.Logger
 		creator         VMCreator
@@ -63,7 +63,6 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 
 				env = Environment{}
 				featureOptions = FeatureOptions{DisableOsReload: false}
-
 
 				fakeVm.IDReturns(1234567)
 				fakeVmFinder.FindReturns(fakeVm, true, nil)
@@ -599,67 +598,6 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 						Expect(err).ToNot(HaveOccurred())
 						Expect(vm.ID()).To(Equal(1234567))
 					})
-				})
-			})
-		})
-
-		Context("invalid arguments", func() {
-			Context("missing correct VMProperties", func() {
-				BeforeEach(func() {
-					agentID = "fake-agent-id"
-					stemcell = bslcstem.NewSoftLayerStemcell(1234, "fake-stemcell-uuid", softLayerClient, logger)
-					networks = Networks{}
-					env = Environment{}
-
-					networks = map[string]Network{
-						"fake-network0": Network{
-							Type:    "dynamic",
-							Netmask: "fake-Netmask",
-							Gateway: "fake-Gateway",
-							DNS: []string{
-								"fake-dns0",
-								"fake-dns1",
-							},
-							Default:         []string{},
-							Preconfigured:   true,
-							CloudProperties: map[string]interface{}{},
-						},
-					}
-
-					fakeVm.IDReturns(1234567)
-					fakeVmFinder.FindReturns(fakeVm, false, nil)
-
-					setFakeSoftlayerClientCreateObjectTestFixturesWithEphemeralDiskSize(softLayerClient)
-				})
-
-				It("fails when VMProperties is missing StartCpus", func() {
-					cloudProps = VMCloudProperties{
-						MaxMemory:  2048,
-						Datacenter: sldatatypes.Datacenter{Name: "fake-datacenter"},
-					}
-
-					_, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
-					Expect(err).To(HaveOccurred())
-				})
-
-				It("fails when VMProperties is missing MaxMemory", func() {
-					cloudProps = VMCloudProperties{
-						StartCpus:  4,
-						Datacenter: sldatatypes.Datacenter{Name: "fake-datacenter"},
-					}
-
-					_, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
-					Expect(err).To(HaveOccurred())
-				})
-
-				It("fails when VMProperties is missing Domain", func() {
-					cloudProps = VMCloudProperties{
-						StartCpus: 4,
-						MaxMemory: 1024,
-					}
-
-					_, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
-					Expect(err).To(HaveOccurred())
 				})
 			})
 		})

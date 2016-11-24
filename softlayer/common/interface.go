@@ -15,8 +15,8 @@ type Mount struct {
 }
 
 type FeatureOptions struct {
-	DisableOsReload bool `json:"disableOsReload"`
-	EnablePool      bool `json:"enablePool"`
+	DisableOsReload                  bool   `json:"disableOsReload"`
+	EnablePool                       bool   `json:"enablePool"`
 	ApiEndpoint                      string `json:"apiEndpoint"`
 	ApiWaitTime                      int    `json:"apiWaitTime"`
 	ApiRetryCount                    int    `json:"apiRetryCount"`
@@ -89,7 +89,7 @@ const (
 	SOFTLAYER_VM_OS_RELOAD_TAG   = "OSReload"
 	SOFTLAYER_VM_LOG_TAG         = "SoftLayerVM"
 	ROOT_USER_NAME               = "root"
-        SOFTLAYER_VM_CREATOR_LOG_TAG = "SoftLayerVMCreator"
+	SOFTLAYER_VM_CREATOR_LOG_TAG = "SoftLayerVMCreator"
 )
 
 //go:generate counterfeiter -o fakes/fake_vm.go . VM

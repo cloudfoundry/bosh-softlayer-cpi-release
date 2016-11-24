@@ -1,8 +1,8 @@
 package action_test
 
 import (
-	"errors"
 	"encoding/json"
+	"errors"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -15,9 +15,9 @@ import (
 var _ = Describe("SetVMMetadata", func() {
 	var (
 		fakeVmFinder *fakescommon.FakeVMFinder
-		fakeVm *fakescommon.FakeVM
-		action   SetVMMetadataAction
-		metadata VMMetadata
+		fakeVm       *fakescommon.FakeVM
+		action       SetVMMetadataAction
+		metadata     VMMetadata
 	)
 
 	BeforeEach(func() {

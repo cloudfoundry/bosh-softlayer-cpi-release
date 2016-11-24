@@ -28,7 +28,7 @@ var _ = Describe("DeleteStemcell", func() {
 	Describe("Run", func() {
 		var (
 			stemcellCid StemcellCID
-			err error
+			err         error
 		)
 
 		BeforeEach(func() {

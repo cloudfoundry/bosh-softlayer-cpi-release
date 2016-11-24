@@ -9,21 +9,21 @@ import (
 
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 
-	sl "github.com/maximilien/softlayer-go/softlayer"
 	slh "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
+	sl "github.com/maximilien/softlayer-go/softlayer"
 )
 
 const SOFTLAYER_VM_DELETER_LOG_TAG = "SoftLayerVMDeleter"
 
 type softLayerVMDeleter struct {
-	softLayerClient        sl.Client
-	logger       boshlog.Logger
+	softLayerClient sl.Client
+	logger          boshlog.Logger
 }
 
 func NewSoftLayerVMDeleter(softLayerClient sl.Client, logger boshlog.Logger) VMDeleter {
 	return &softLayerVMDeleter{
-		softLayerClient:        softLayerClient,
-		logger: logger,
+		softLayerClient: softLayerClient,
+		logger:          logger,
 	}
 }
 

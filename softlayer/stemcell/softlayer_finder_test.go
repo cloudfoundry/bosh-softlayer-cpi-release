@@ -19,7 +19,7 @@ var _ = Describe("SoftLayerFinder", func() {
 	var (
 		softLayerClient  *fakesslclient.FakeSoftLayerClient
 		logger           boshlog.Logger
-		finder           SoftLayerFinder
+		finder           SoftLayerStemcellFinder
 		expectedStemcell SoftLayerStemcell
 	)
 
@@ -39,7 +39,7 @@ var _ = Describe("SoftLayerFinder", func() {
 				testhelpers.SetTestFixtureForFakeSoftLayerClient(softLayerClient, "SoftLayer_Virtual_Guest_Block_Device_Template_Group_Service_getObject.json")
 
 				softLayerClient.FakeHttpClient.DoRawHttpRequestInt = 200
-				finder = NewSoftLayerFinder(softLayerClient, logger)
+				finder = NewSoftLayerStemcellFinder(softLayerClient, logger)
 
 				stemcell, err := finder.FindById(200150)
 				Expect(err).ToNot(HaveOccurred())
@@ -50,7 +50,7 @@ var _ = Describe("SoftLayerFinder", func() {
 		Context("Failed if the stemcell does not exists, 404 error returned", func() {
 			It("returns error if stemcell does not exist", func() {
 				softLayerClient.FakeHttpClient.DoRawHttpRequestInt = 404
-				finder = NewSoftLayerFinder(softLayerClient, logger)
+				finder = NewSoftLayerStemcellFinder(softLayerClient, logger)
 
 				_, err := finder.FindById(200150)
 				Expect(err).To(HaveOccurred())

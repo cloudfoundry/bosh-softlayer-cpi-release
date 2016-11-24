@@ -17,15 +17,15 @@ import (
 	bsldisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk"
 
 	fakebmsclient "github.com/cloudfoundry-community/bosh-softlayer-tools/clients/fakes"
+	fakevm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/fakes"
 	fakedisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk/fakes"
 	fakestemcell "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell/fakes"
-	fakevm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/fakes"
 	fakesutil "github.com/cloudfoundry/bosh-softlayer-cpi/util/fakes"
 	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
 
-	datatypes "github.com/maximilien/softlayer-go/data_types"
-	"github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/hardware"
 	slh "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
+	"github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/hardware"
+	datatypes "github.com/maximilien/softlayer-go/data_types"
 )
 
 var _ = Describe("SoftLayerHardware", func() {

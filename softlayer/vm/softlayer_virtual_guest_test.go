@@ -17,14 +17,14 @@ import (
 
 	bsldisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk"
 
+	fakescommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/fakes"
 	fakedisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk/fakes"
 	fakestemcell "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell/fakes"
-	fakescommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/fakes"
 	fakesutil "github.com/cloudfoundry/bosh-softlayer-cpi/util/fakes"
 	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
 
-	datatypes "github.com/maximilien/softlayer-go/data_types"
 	slh "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
+	datatypes "github.com/maximilien/softlayer-go/data_types"
 )
 
 var _ = Describe("SoftLayerVirtualGuest", func() {
@@ -71,96 +71,6 @@ var _ = Describe("SoftLayerVirtualGuest", func() {
 
 		vm = NewSoftLayerVirtualGuest(virtualGuest, fakeSoftLayerClient, sshClient, logger)
 		vm.SetAgentEnvService(agentEnvService)
-	})
-
-	Describe("Delete", func() {
-		Context("valid VM ID is used and averageDuration is normal", func() {
-			BeforeEach(func() {
-				fileNames := []string{
-					"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
-					"SoftLayer_Virtual_Guest_Service_deleteObject_true.json",
-					"SoftLayer_Virtual_Guest_Service_getActiveTransactions.json",
-					"SoftLayer_Virtual_Guest_Service_getObject.json",
-					"SoftLayer_Virtual_Guest_Service_getActiveTransaction.json",
-					"SoftLayer_Virtual_Guest_Service_getEmptyObject.json",
-				}
-				testhelpers.SetTestFixturesForFakeSoftLayerClient(fakeSoftLayerClient, fileNames)
-			})
-
-			It("deletes the VM successfully", func() {
-				slh.TIMEOUT = 2 * time.Second
-				slh.POLLING_INTERVAL = 1 * time.Second
-
-				err := vm.Delete("fake-agentID")
-				Expect(err).ToNot(HaveOccurred())
-			})
-		})
-
-		Context("valid VM ID is used and averageDuration is \"\"", func() {
-			BeforeEach(func() {
-				fileNames := []string{
-					"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
-					"SoftLayer_Virtual_Guest_Service_deleteObject_true.json",
-					"SoftLayer_Virtual_Guest_Service_getActiveTransactions.json",
-					"SoftLayer_Virtual_Guest_Service_getObject.json",
-					"SoftLayer_Virtual_Guest_Service_getActiveTransaction_ADEmpty.json",
-					"SoftLayer_Virtual_Guest_Service_getEmptyObject.json",
-				}
-				testhelpers.SetTestFixturesForFakeSoftLayerClient(fakeSoftLayerClient, fileNames)
-			})
-
-			It("deletes the VM successfully", func() {
-				slh.TIMEOUT = 2 * time.Second
-				slh.POLLING_INTERVAL = 1 * time.Second
-
-				err := vm.Delete("")
-				Expect(err).ToNot(HaveOccurred())
-			})
-		})
-
-		Context("valid VM ID is used and averageDuration is invalid", func() {
-			BeforeEach(func() {
-				fileNames := []string{
-					"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
-					"SoftLayer_Virtual_Guest_Service_deleteObject_true.json",
-					"SoftLayer_Virtual_Guest_Service_getActiveTransactions.json",
-					"SoftLayer_Virtual_Guest_Service_getObject.json",
-					"SoftLayer_Virtual_Guest_Service_getActiveTransaction_ADInvalid.json",
-					"SoftLayer_Virtual_Guest_Service_getEmptyObject.json",
-				}
-				testhelpers.SetTestFixturesForFakeSoftLayerClient(fakeSoftLayerClient, fileNames)
-			})
-
-			It("deletes the VM successfully", func() {
-				slh.TIMEOUT = 2 * time.Second
-				slh.POLLING_INTERVAL = 1 * time.Second
-
-				err := vm.Delete("fake-agent-id")
-				Expect(err).ToNot(HaveOccurred())
-			})
-		})
-
-		Context("invalid VM ID is used", func() {
-			BeforeEach(func() {
-				fileNames := []string{
-					"SoftLayer_Virtual_Guest_Service_getActiveTransactions.json",
-					"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
-					"SoftLayer_Virtual_Guest_Service_deleteObject_false.json",
-					"SoftLayer_Virtual_Guest_Service_getActiveTransactions.json",
-					"SoftLayer_Virtual_Guest_Service_getObject.json",
-					"SoftLayer_Virtual_Guest_Service_getActiveTransaction.json",
-					"SoftLayer_Virtual_Guest_Service_getEmptyObject.json",
-				}
-				testhelpers.SetTestFixturesForFakeSoftLayerClient(fakeSoftLayerClient, fileNames)
-				slh.TIMEOUT = 2 * time.Second
-				slh.POLLING_INTERVAL = 1 * time.Second
-			})
-
-			It("fails deleting the VM", func() {
-				err := vm.Delete("fake-agent-id")
-				Expect(err).To(HaveOccurred())
-			})
-		})
 	})
 
 	Describe("Reboot", func() {

@@ -3,8 +3,8 @@ package action
 import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 
-	bslcdisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk"
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
+	bslcdisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk"
 )
 
 type AttachDiskAction struct {

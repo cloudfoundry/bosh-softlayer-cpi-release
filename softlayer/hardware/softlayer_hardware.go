@@ -15,12 +15,12 @@ import (
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
 	bmscl "github.com/cloudfoundry-community/bosh-softlayer-tools/clients"
-	sl "github.com/maximilien/softlayer-go/softlayer"
 	slh "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
+	sl "github.com/maximilien/softlayer-go/softlayer"
 
+	"github.com/cloudfoundry/bosh-softlayer-cpi/api"
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 	"github.com/cloudfoundry/bosh-softlayer-cpi/util"
-	"github.com/cloudfoundry/bosh-softlayer-cpi/api"
 
 	bslcdisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk"
 	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"

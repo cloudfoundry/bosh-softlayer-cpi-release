@@ -11,8 +11,6 @@ import (
 
 	bslcaction "github.com/cloudfoundry/bosh-softlayer-cpi/action"
 
-
-
 	"github.com/cloudfoundry/bosh-softlayer-cpi/config"
 )
 

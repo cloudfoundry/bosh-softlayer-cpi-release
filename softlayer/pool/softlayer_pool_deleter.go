@@ -2,14 +2,14 @@ package pool
 
 import (
 	"fmt"
-	strfmt "github.com/go-openapi/strfmt"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
+	strfmt "github.com/go-openapi/strfmt"
 
 	slhelper "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
 
-	sl "github.com/maximilien/softlayer-go/softlayer"
 	operations "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/pool/client/vm"
+	sl "github.com/maximilien/softlayer-go/softlayer"
 
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 
@@ -17,16 +17,16 @@ import (
 )
 
 type softLayerPoolDeleter struct {
-	softLayerClient        sl.Client
-	softLayerVmPoolClient  operations.SoftLayerPoolClient
-	logger       boshlog.Logger
+	softLayerClient       sl.Client
+	softLayerVmPoolClient operations.SoftLayerPoolClient
+	logger                boshlog.Logger
 }
 
 func NewSoftLayerPoolDeleter(softLayerVmPoolClient operations.SoftLayerPoolClient, softLayerClient sl.Client, logger boshlog.Logger) VMDeleter {
 	return &softLayerPoolDeleter{
-		softLayerClient:        softLayerClient,
+		softLayerClient:       softLayerClient,
 		softLayerVmPoolClient: softLayerVmPoolClient,
-		logger: logger,
+		logger:                logger,
 	}
 }
 
@@ -41,14 +41,14 @@ func (c *softLayerPoolDeleter) Delete(cid int) error {
 			}
 
 			slPoolVm := &models.VM{
-				Cid: int32(cid),
-				CPU: int32(virtualGuest.StartCpus),
-				MemoryMb: int32(virtualGuest.MaxMemory),
-				IP:  strfmt.IPv4(virtualGuest.PrimaryBackendIpAddress),
-				Hostname: virtualGuest.FullyQualifiedDomainName,
+				Cid:         int32(cid),
+				CPU:         int32(virtualGuest.StartCpus),
+				MemoryMb:    int32(virtualGuest.MaxMemory),
+				IP:          strfmt.IPv4(virtualGuest.PrimaryBackendIpAddress),
+				Hostname:    virtualGuest.FullyQualifiedDomainName,
 				PrivateVlan: int32(virtualGuest.PrimaryBackendNetworkComponent.NetworkVlan.Id),
-				PublicVlan: int32(virtualGuest.PrimaryNetworkComponent.NetworkVlan.Id),
-				State: models.StateFree,
+				PublicVlan:  int32(virtualGuest.PrimaryNetworkComponent.NetworkVlan.Id),
+				State:       models.StateFree,
 			}
 			_, err = c.softLayerVmPoolClient.AddVM(operations.NewAddVMParams().WithBody(slPoolVm))
 			if err != nil {

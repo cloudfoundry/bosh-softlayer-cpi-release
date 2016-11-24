@@ -1,8 +1,8 @@
 package action
 
 import (
-	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
+	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 )
 
 type DeleteStemcellAction struct {

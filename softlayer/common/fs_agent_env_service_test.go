@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 
-	slhelper "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
 	fakebslvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/fakes"
+	slhelper "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
 	. "github.com/onsi/ginkgo"

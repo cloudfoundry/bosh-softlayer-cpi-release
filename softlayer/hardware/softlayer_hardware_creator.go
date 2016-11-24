@@ -9,9 +9,9 @@ import (
 
 	bmslc "github.com/cloudfoundry-community/bosh-softlayer-tools/clients"
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
+	slh "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
 	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
 	sl "github.com/maximilien/softlayer-go/softlayer"
-        slh "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
 )
 
 type baremetalCreator struct {

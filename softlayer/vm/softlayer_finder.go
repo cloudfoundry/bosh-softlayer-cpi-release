@@ -8,8 +8,8 @@ import (
 	slhelper "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
 
 	bmscl "github.com/cloudfoundry-community/bosh-softlayer-tools/clients"
-	sl "github.com/maximilien/softlayer-go/softlayer"
 	slhw "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/hardware"
+	sl "github.com/maximilien/softlayer-go/softlayer"
 
 	"github.com/cloudfoundry/bosh-softlayer-cpi/util"
 )

@@ -14,9 +14,9 @@ import (
 var _ = Describe("RebootVM", func() {
 	var (
 		fakeVmFinder *fakescommon.FakeVMFinder
-		fakeVm *fakescommon.FakeVM
+		fakeVm       *fakescommon.FakeVM
 
-		action   RebootVMAction
+		action RebootVMAction
 	)
 
 	BeforeEach(func() {
@@ -28,7 +28,7 @@ var _ = Describe("RebootVM", func() {
 	Describe("Run", func() {
 		var (
 			vmCid VMCID
-			err error
+			err   error
 		)
 
 		BeforeEach(func() {
@@ -38,7 +38,6 @@ var _ = Describe("RebootVM", func() {
 		JustBeforeEach(func() {
 			_, err = action.Run(vmCid)
 		})
-
 
 		Context("when reboot vm succeeds", func() {
 			BeforeEach(func() {

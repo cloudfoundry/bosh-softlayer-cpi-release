@@ -15,17 +15,17 @@ import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
-	sl "github.com/maximilien/softlayer-go/softlayer"
 	slh "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
+	sl "github.com/maximilien/softlayer-go/softlayer"
 
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 	bslcdisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk"
 	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
 
+	api "github.com/cloudfoundry/bosh-softlayer-cpi/api"
 	"github.com/cloudfoundry/bosh-softlayer-cpi/util"
 	datatypes "github.com/maximilien/softlayer-go/data_types"
 	sldatatypes "github.com/maximilien/softlayer-go/data_types"
-	api "github.com/cloudfoundry/bosh-softlayer-cpi/api"
 )
 
 type softLayerVirtualGuest struct {
@@ -86,6 +86,10 @@ func (vm *softLayerVirtualGuest) GetFullyQualifiedDomainName() string {
 	return vm.virtualGuest.FullyQualifiedDomainName
 }
 
+func (vm *softLayerVirtualGuest) Delete(agentID string) error {
+	return nil
+}
+
 func (vm *softLayerVirtualGuest) SetVcapPassword(encryptedPwd string) (err error) {
 	command := fmt.Sprintf("usermod -p '%s' vcap", encryptedPwd)
 	_, err = vm.sshClient.ExecCommand(ROOT_USER_NAME, vm.GetRootPassword(), vm.GetPrimaryBackendIP(), command)
@@ -99,43 +103,6 @@ func (vm *softLayerVirtualGuest) SetAgentEnvService(agentEnvService AgentEnvServ
 	if agentEnvService != nil {
 		vm.agentEnvService = agentEnvService
 	}
-	return nil
-}
-
-func (vm *softLayerVirtualGuest) Delete(agentID string) error {
-	return vm.DeleteVM()
-}
-
-func (vm *softLayerVirtualGuest) DeleteVM() error {
-	virtualGuestService, err := vm.softLayerClient.GetSoftLayer_Virtual_Guest_Service()
-	if err != nil {
-		return bosherr.WrapError(err, "Creating SoftLayer VirtualGuestService from client")
-	}
-
-	vmCID := vm.ID()
-	err = slh.WaitForVirtualGuestToHaveNoRunningTransactions(vm.softLayerClient, vmCID)
-	if err != nil {
-		if !strings.Contains(err.Error(), "HTTP error code") {
-			return bosherr.WrapError(err, fmt.Sprintf("Waiting for VirtualGuest `%d` to have no pending transactions before deleting vm", vmCID))
-		}
-	}
-
-	deleted, err := virtualGuestService.DeleteObject(vm.ID())
-	if err != nil {
-		if !strings.Contains(err.Error(), "HTTP error code") {
-			return bosherr.WrapError(err, "Deleting SoftLayer VirtualGuest from client")
-		}
-	}
-
-	if !deleted {
-		return bosherr.WrapError(nil, "Did not delete SoftLayer VirtualGuest from client")
-	}
-
-	err = vm.postCheckActiveTransactionsForDeleteVM(vm.softLayerClient, vmCID)
-	if err != nil {
-		return err
-	}
-
 	return nil
 }
 
