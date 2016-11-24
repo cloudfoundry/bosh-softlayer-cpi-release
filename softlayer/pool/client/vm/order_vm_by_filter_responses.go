@@ -57,7 +57,6 @@ func (o *OrderVMByFilterOK) WithPayload(payload *models.VMResponse) *OrderVMByFi
 	return o
 }
 
-
 /*OrderVMByFilterOK handles this case with default header values.
 
 successful operation

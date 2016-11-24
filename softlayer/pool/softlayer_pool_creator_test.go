@@ -17,8 +17,8 @@ import (
 	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
 
 	fakescommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/fakes"
-	fakesutil "github.com/cloudfoundry/bosh-softlayer-cpi/util/fakes"
 	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
+	fakesutil "github.com/cloudfoundry/bosh-softlayer-cpi/util/fakes"
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	sldatatypes "github.com/maximilien/softlayer-go/data_types"
@@ -32,7 +32,6 @@ var _ = Describe("SoftlayerPoolCreator", func() {
 		fakeVmFinder    *fakescommon.FakeVMFinder
 		agentOptions    AgentOptions
 		logger          boshlog.Logger
-
 	)
 
 	BeforeEach(func() {
@@ -46,34 +45,34 @@ var _ = Describe("SoftlayerPoolCreator", func() {
 
 	Describe("create from pool", func() {
 		var (
-			err error
+			err        error
 			agentID    string
 			stemcell   bslcstem.SoftLayerStemcell
-			cloudProps  VMCloudProperties
+			cloudProps VMCloudProperties
 			networks   Networks
 			env        Environment
 
-			creator         VMCreator
-			featureOptions  *FeatureOptions
+			creator        VMCreator
+			featureOptions *FeatureOptions
 
 			fakeVm         *fakescommon.FakeVM
 			poolVmResponse *models.VMResponse
-			poolVm *models.VM
+			poolVm         *models.VM
 
 			expectedCmdResults []string
 
-			actualVm  VM
+			actualVm VM
 		)
 
 		BeforeEach(func() {
 			fakeVm = &fakescommon.FakeVM{}
 
-			poolVm = &models.VM {
-				Cid: int32(1234567),
-				CPU: int32(4),
-				MemoryMb: int32(2048),
+			poolVm = &models.VM{
+				Cid:         int32(1234567),
+				CPU:         int32(4),
+				MemoryMb:    int32(2048),
 				PrivateVlan: int32(524956),
-				PublicVlan: int32(524956),
+				PublicVlan:  int32(524956),
 			}
 
 			poolVmResponse = &models.VMResponse{
@@ -154,7 +153,7 @@ var _ = Describe("SoftlayerPoolCreator", func() {
 				fakeVm.ConfigureNetworks2Returns(nil)
 				fakeVm.UpdateAgentEnvReturns(nil)
 
-				fakePoolClient.UpdateVMWithStateReturns(vm.NewUpdateVMWithStateOK().WithPayload("updated successfully"),nil)
+				fakePoolClient.UpdateVMWithStateReturns(vm.NewUpdateVMWithStateOK().WithPayload("updated successfully"), nil)
 			})
 
 			It("order vm by filter", func() {
@@ -180,12 +179,12 @@ var _ = Describe("SoftlayerPoolCreator", func() {
 				setFakeSoftlayerClientCreateObjectTestFixturesWithEphemeralDiskSize(softLayerClient)
 
 				fakeVm.IDReturns(1234567)
-				fakePoolClient.OrderVMByFilterReturns(nil,vm.NewOrderVMByFilterNotFound())
+				fakePoolClient.OrderVMByFilterReturns(nil, vm.NewOrderVMByFilterNotFound())
 				fakeVmFinder.FindReturns(fakeVm, true, nil)
 				fakeVm.ConfigureNetworks2Returns(nil)
 				fakeVm.UpdateAgentEnvReturns(nil)
 
-				fakePoolClient.AddVMReturns(vm.NewAddVMOK().WithPayload("added successfully"),nil)
+				fakePoolClient.AddVMReturns(vm.NewAddVMOK().WithPayload("added successfully"), nil)
 			})
 
 			It("order vm by filter", func() {
@@ -208,7 +207,7 @@ var _ = Describe("SoftlayerPoolCreator", func() {
 
 		Context("when order vm by filter from pool error out", func() {
 			BeforeEach(func() {
-				fakePoolClient.OrderVMByFilterReturns(nil,vm.NewOrderVMByFilterDefault(500))
+				fakePoolClient.OrderVMByFilterReturns(nil, vm.NewOrderVMByFilterDefault(500))
 			})
 
 			It("provides relevant error information", func() {
@@ -222,12 +221,12 @@ var _ = Describe("SoftlayerPoolCreator", func() {
 				setFakeSoftlayerClientCreateObjectTestFixturesWithEphemeralDiskSize(softLayerClient)
 
 				fakeVm.IDReturns(1234567)
-				fakePoolClient.OrderVMByFilterReturns(nil,vm.NewOrderVMByFilterNotFound())
+				fakePoolClient.OrderVMByFilterReturns(nil, vm.NewOrderVMByFilterNotFound())
 				fakeVmFinder.FindReturns(fakeVm, true, nil)
 				fakeVm.ConfigureNetworks2Returns(nil)
 				fakeVm.UpdateAgentEnvReturns(nil)
 
-				fakePoolClient.AddVMReturns(nil,vm.NewAddVMDefault(500))
+				fakePoolClient.AddVMReturns(nil, vm.NewAddVMDefault(500))
 			})
 
 			It("provides relevant error information", func() {
@@ -260,7 +259,7 @@ var _ = Describe("SoftlayerPoolCreator", func() {
 				networks = map[string]Network{
 					"fake-network0": Network{
 						Type:    "dynamic",
-						IP: 	"10.0.0.1",
+						IP:      "10.0.0.1",
 						Netmask: "fake-Netmask",
 						Gateway: "fake-Gateway",
 						DNS: []string{
