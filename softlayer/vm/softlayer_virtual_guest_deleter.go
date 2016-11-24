@@ -40,15 +40,11 @@ func (c *softLayerVMDeleter) Delete(cid int) error {
 		}
 	}
 
-	deleted, err := virtualGuestService.DeleteObject(cid)
+	_, err = virtualGuestService.DeleteObject(cid)
 	if err != nil {
 		if !strings.Contains(err.Error(), "HTTP error code") {
 			return bosherr.WrapError(err, "Deleting SoftLayer VirtualGuest from client")
 		}
-	}
-
-	if !deleted {
-		return bosherr.WrapError(nil, "Did not delete SoftLayer VirtualGuest from client")
 	}
 
 	return nil
