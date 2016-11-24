@@ -51,6 +51,12 @@ func NewUpdateVMWithStateOK() *UpdateVMWithStateOK {
 	return &UpdateVMWithStateOK{}
 }
 
+// WithPayload adds the payload to the update Vm with state o k response
+func (o *UpdateVMWithStateOK) WithPayload(payload string) *UpdateVMWithStateOK {
+	o.Payload = payload
+	return o
+}
+
 /*UpdateVMWithStateOK handles this case with default header values.
 
 state updated successfully

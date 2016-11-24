@@ -44,6 +44,12 @@ func NewAddVMOK() *AddVMOK {
 	return &AddVMOK{}
 }
 
+// WithPayload adds the payload to the add Vm o k response
+func (o *AddVMOK) WithPayload(payload string) *AddVMOK {
+	o.Payload = payload
+	return o
+}
+
 /*AddVMOK handles this case with default header values.
 
 add a new vm into the pool
