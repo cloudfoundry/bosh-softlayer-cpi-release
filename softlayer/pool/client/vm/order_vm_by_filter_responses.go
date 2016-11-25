@@ -51,6 +51,12 @@ func NewOrderVMByFilterOK() *OrderVMByFilterOK {
 	return &OrderVMByFilterOK{}
 }
 
+// WithPayload adds the payload to the order Vm by filter o k response
+func (o *OrderVMByFilterOK) WithPayload(payload *models.VMResponse) *OrderVMByFilterOK {
+	o.Payload = payload
+	return o
+}
+
 /*OrderVMByFilterOK handles this case with default header values.
 
 successful operation

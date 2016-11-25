@@ -64,7 +64,7 @@ var _ = Describe("SoftlayerPoolDeleter", func() {
 
 		Context("when operation vm out of pool succeeds", func() {
 			BeforeEach(func() {
-				fakeSoftlayerPoolClient.GetVMByCidReturns(nil, vm.NewDeleteVMNotFound())
+				fakeSoftlayerPoolClient.GetVMByCidReturns(nil, vm.NewGetVMByCidNotFound())
 				testhelpers.SetTestFixtureForFakeSoftLayerClient(softLayerClient, "SoftLayer_Virtual_Guest_Service_getObject.json")
 				fakeSoftlayerPoolClient.AddVMReturns(vm.NewAddVMOK(), nil)
 			})
