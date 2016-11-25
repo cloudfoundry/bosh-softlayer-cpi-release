@@ -126,17 +126,19 @@ func (c *softLayerPoolCreator) createFromVMPool(agentID string, stemcell bslcste
 		return nil, bosherr.WrapError(err, "Os reloading vm in SoftLayer")
 	}
 
-	using := &models.VMState{
-		State: models.StateUsing,
-	}
-	_, err = c.softLayerVmPoolClient.UpdateVMWithState(operations.NewUpdateVMWithStateParams().WithBody(using).WithCid(int32(virtualGuestId)))
+	virtualGuest, err := slhelper.GetObjectDetailsOnVirtualGuest(c.softLayerClient, virtualGuestId)
 	if err != nil {
-		return nil, bosherr.WrapErrorf(err, "Updating state of vm %d in pool to using", virtualGuestId)
+		return nil, bosherr.WrapError(err, fmt.Sprintf("Getting virtual guest %d details from SoftLayer", virtualGuestId))
 	}
-
 	deviceName := &models.VM{
-		Cid: int32(virtualGuestId),
-		Hostname: cloudProps.VmNamePrefix+cloudProps.Domain,
+		Cid:         int32(virtualGuestId),
+		CPU:         int32(virtualGuest.StartCpus),
+		MemoryMb:    int32(virtualGuest.MaxMemory),
+		IP:          strfmt.IPv4(virtualGuest.PrimaryBackendIpAddress),
+		Hostname:    cloudProps.VmNamePrefix + cloudProps.Domain,
+		PrivateVlan: int32(virtualGuest.PrimaryBackendNetworkComponent.NetworkVlan.Id),
+		PublicVlan:  int32(virtualGuest.PrimaryNetworkComponent.NetworkVlan.Id),
+		State:       models.StateUsing,
 	}
 	_, err = c.softLayerVmPoolClient.UpdateVM(operations.NewUpdateVMParams().WithBody(deviceName))
 	if err != nil {

@@ -166,8 +166,8 @@ func UpdateEtcHostsOfBoshInit(record string) (err error) {
 func UpdateDeviceName(vmID int, virtualGuestService sl.SoftLayer_Virtual_Guest_Service, cloudProps VMCloudProperties) (err error) {
 	deviceName := sldatatypes.SoftLayer_Virtual_Guest{
 		Hostname: cloudProps.VmNamePrefix,
-		Domain: cloudProps.Domain,
-		FullyQualifiedDomainName: cloudProps.VmNamePrefix+cloudProps.Domain,
+		Domain:   cloudProps.Domain,
+		FullyQualifiedDomainName: cloudProps.VmNamePrefix + cloudProps.Domain,
 	}
 
 	_, err = virtualGuestService.EditObject(vmID, deviceName)

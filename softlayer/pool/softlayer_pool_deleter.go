@@ -33,7 +33,7 @@ func NewSoftLayerPoolDeleter(softLayerVmPoolClient operations.SoftLayerPoolClien
 func (c *softLayerPoolDeleter) Delete(cid int) error {
 	_, err := c.softLayerVmPoolClient.GetVMByCid(operations.NewGetVMByCidParams().WithCid(int32(cid)))
 	if err != nil {
-		_, ok := err.(*operations.DeleteVMNotFound)
+		_, ok := err.(*operations.GetVMByCidNotFound)
 		if ok {
 			virtualGuest, err := slhelper.GetObjectDetailsOnVirtualGuest(c.softLayerClient, cid)
 			if err != nil {

@@ -11,12 +11,16 @@ import (
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 
 	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
+	"github.com/maximilien/softlayer-go/softlayer"
 
 	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
+	testhelpers "github.com/cloudfoundry/bosh-softlayer-cpi/test_helpers"
 	sldatatypes "github.com/maximilien/softlayer-go/data_types"
+
+	"errors"
 )
 
 var _ = Describe("VM Utils", func() {
@@ -583,6 +587,41 @@ var _ = Describe("VM Utils", func() {
 				//Since VGT.Hostname use timestamp we need to fix it here
 				expectedVgt.Hostname = vgt.Hostname
 				Expect(vgt).To(Equal(expectedVgt))
+			})
+		})
+	})
+
+	Describe("#UpdateDeviceName", func() {
+		var (
+			cloudProps VMCloudProperties
+			slvgs      softlayer.SoftLayer_Virtual_Guest_Service
+		)
+		BeforeEach(func() {
+			cloudProps = VMCloudProperties{
+				VmNamePrefix: "fake-hostname",
+				Domain:       "fake-domain",
+			}
+			slvgs, _ = softLayerClient.GetSoftLayer_Virtual_Guest_Service()
+
+			fileNames := []string{
+				"SoftLayer_Virtual_Guest_Service_editObject.json",
+			}
+			testhelpers.SetTestFixturesForFakeSoftLayerClient(softLayerClient, fileNames)
+		})
+		Context("when device name is updated successfully", func() {
+			It("returns nil from EditObject", func() {
+				err := UpdateDeviceName(1, slvgs, VMCloudProperties{})
+				Expect(err).ToNot(HaveOccurred())
+
+			})
+		})
+		Context("when fails to update device name", func() {
+			BeforeEach(func() {
+				softLayerClient.FakeHttpClient.DoRawHttpRequestError = errors.New("Error occurred when updating the object")
+			})
+			It("returns error from EditObject", func() {
+				err := UpdateDeviceName(1, slvgs, VMCloudProperties{})
+				Expect(err).To(HaveOccurred())
 			})
 		})
 	})
