@@ -1,15 +1,15 @@
 package action
 
 import (
-	bslcvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 )
 
 type HasVMAction struct {
-	vmFinder bslcvm.Finder
+	vmFinder VMFinder
 }
 
 func NewHasVM(
-	vmFinder bslcvm.Finder,
+	vmFinder VMFinder,
 ) (action HasVMAction) {
 	action.vmFinder = vmFinder
 	return

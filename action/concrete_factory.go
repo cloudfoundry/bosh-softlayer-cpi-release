@@ -10,6 +10,13 @@ import (
 	bslcdisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk"
 	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
 	bslcvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
+
+	apiclient "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/pool/client"
+	httptransport "github.com/go-openapi/runtime/client"
+
+	"fmt"
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
+	"github.com/go-openapi/strfmt"
 )
 
 type concreteFactory struct {
@@ -19,10 +26,11 @@ type concreteFactory struct {
 func NewConcreteFactory(options ConcreteFactoryOptions, logger boshlog.Logger) concreteFactory {
 	softLayerClient := slclient.NewSoftLayerClient(options.Softlayer.Username, options.Softlayer.ApiKey)
 	baremetalClient := bmsclient.NewBmpClient(options.Baremetal.Username, options.Baremetal.Password, options.Baremetal.EndPoint, nil, "")
+	poolClient := apiclient.New(httptransport.New(fmt.Sprintf("%s:%d", options.Pool.Host, options.Pool.Port), "v2", nil), strfmt.Default).VM
 
-	stemcellFinder := bslcstem.NewSoftLayerFinder(softLayerClient, logger)
+	stemcellFinder := bslcstem.NewSoftLayerStemcellFinder(softLayerClient, logger)
 
-	agentEnvServiceFactory := bslcvm.NewSoftLayerAgentEnvServiceFactory(options.AgentEnvService, options.Registry, logger)
+	agentEnvServiceFactory := NewSoftLayerAgentEnvServiceFactory(options.AgentEnvService, options.Registry, logger)
 
 	vmFinder := bslcvm.NewSoftLayerFinder(
 		softLayerClient,
@@ -31,10 +39,17 @@ func NewConcreteFactory(options ConcreteFactoryOptions, logger boshlog.Logger) c
 		logger,
 	)
 
-	vmCreatorProvider := NewProvider(
+	vmCreatorProvider := NewCreatorProvider(
 		softLayerClient,
 		baremetalClient,
+		poolClient,
 		options,
+		logger,
+	)
+
+	vmDeleterProvider := NewDeleterProvider(
+		softLayerClient,
+		poolClient,
 		logger,
 	)
 
@@ -55,8 +70,8 @@ func NewConcreteFactory(options ConcreteFactoryOptions, logger boshlog.Logger) c
 			"delete_stemcell": NewDeleteStemcell(stemcellFinder, logger),
 
 			// VM management
-			"create_vm":          NewCreateVM(stemcellFinder, vmCreatorProvider),
-			"delete_vm":          NewDeleteVM(vmFinder),
+			"create_vm":          NewCreateVM(stemcellFinder, vmCreatorProvider, options),
+			"delete_vm":          NewDeleteVM(vmDeleterProvider, options),
 			"has_vm":             NewHasVM(vmFinder),
 			"reboot_vm":          NewRebootVM(vmFinder),
 			"set_vm_metadata":    NewSetVMMetadata(vmFinder),

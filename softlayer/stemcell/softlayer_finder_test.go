@@ -8,7 +8,7 @@ import (
 
 	testhelpers "github.com/cloudfoundry/bosh-softlayer-cpi/test_helpers"
 
-	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
+	slhelper "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
 	fakesslclient "github.com/maximilien/softlayer-go/client/fakes"
@@ -19,15 +19,15 @@ var _ = Describe("SoftLayerFinder", func() {
 	var (
 		softLayerClient  *fakesslclient.FakeSoftLayerClient
 		logger           boshlog.Logger
-		finder           SoftLayerFinder
+		finder           SoftLayerStemcellFinder
 		expectedStemcell SoftLayerStemcell
 	)
 
 	BeforeEach(func() {
 		softLayerClient = fakesslclient.NewFakeSoftLayerClient("fake-username", "fake-api-key")
 
-		bslcommon.TIMEOUT = 10 * time.Millisecond
-		bslcommon.POLLING_INTERVAL = 2 * time.Millisecond
+		slhelper.TIMEOUT = 10 * time.Millisecond
+		slhelper.POLLING_INTERVAL = 2 * time.Millisecond
 		logger = boshlog.NewLogger(boshlog.LevelNone)
 
 		expectedStemcell = NewSoftLayerStemcell(200150, "8071601b-5ee1-483e-a9e8-6e5582dcb9f7", softLayerClient, logger)
@@ -39,7 +39,7 @@ var _ = Describe("SoftLayerFinder", func() {
 				testhelpers.SetTestFixtureForFakeSoftLayerClient(softLayerClient, "SoftLayer_Virtual_Guest_Block_Device_Template_Group_Service_getObject.json")
 
 				softLayerClient.FakeHttpClient.DoRawHttpRequestInt = 200
-				finder = NewSoftLayerFinder(softLayerClient, logger)
+				finder = NewSoftLayerStemcellFinder(softLayerClient, logger)
 
 				stemcell, err := finder.FindById(200150)
 				Expect(err).ToNot(HaveOccurred())
@@ -50,7 +50,7 @@ var _ = Describe("SoftLayerFinder", func() {
 		Context("Failed if the stemcell does not exists, 404 error returned", func() {
 			It("returns error if stemcell does not exist", func() {
 				softLayerClient.FakeHttpClient.DoRawHttpRequestInt = 404
-				finder = NewSoftLayerFinder(softLayerClient, logger)
+				finder = NewSoftLayerStemcellFinder(softLayerClient, logger)
 
 				_, err := finder.FindById(200150)
 				Expect(err).To(HaveOccurred())

@@ -7,7 +7,7 @@ import (
 	sl_datatypes "github.com/maximilien/softlayer-go/data_types"
 	sl "github.com/maximilien/softlayer-go/softlayer"
 
-	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
+	slh "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
 	boshretry "github.com/cloudfoundry/bosh-utils/retrystrategy"
 
 	"fmt"
@@ -15,16 +15,16 @@ import (
 	"strings"
 )
 
-type SoftLayerFinder struct {
+type SoftLayerStemcellFinder struct {
 	client sl.Client
 	logger boshlog.Logger
 }
 
-func NewSoftLayerFinder(client sl.Client, logger boshlog.Logger) SoftLayerFinder {
-	return SoftLayerFinder{client: client, logger: logger}
+func NewSoftLayerStemcellFinder(client sl.Client, logger boshlog.Logger) SoftLayerStemcellFinder {
+	return SoftLayerStemcellFinder{client: client, logger: logger}
 }
 
-func (f SoftLayerFinder) FindById(id int) (Stemcell, error) {
+func (f SoftLayerStemcellFinder) FindById(id int) (Stemcell, error) {
 	vgbdtg := sl_datatypes.SoftLayer_Virtual_Guest_Block_Device_Template_Group{}
 	vgdtgService, err := f.client.GetSoftLayer_Virtual_Guest_Block_Device_Template_Group_Service()
 
@@ -42,7 +42,7 @@ func (f SoftLayerFinder) FindById(id int) (Stemcell, error) {
 			return false, nil
 		})
 	timeService := clock.NewClock()
-	timeoutRetryStrategy := boshretry.NewTimeoutRetryStrategy(bslcommon.TIMEOUT, bslcommon.POLLING_INTERVAL, execStmtRetryable, timeService, boshlog.NewLogger(boshlog.LevelInfo))
+	timeoutRetryStrategy := boshretry.NewTimeoutRetryStrategy(slh.TIMEOUT, slh.POLLING_INTERVAL, execStmtRetryable, timeService, boshlog.NewLogger(boshlog.LevelInfo))
 	err = timeoutRetryStrategy.Try()
 	if err != nil {
 		return SoftLayerStemcell{}, bosherr.Error(fmt.Sprintf("Can not find VirtualGuestBlockDeviceTemplateGroup with id `%d`", id))

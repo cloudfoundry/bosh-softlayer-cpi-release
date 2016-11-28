@@ -4,7 +4,7 @@ import (
 	"os"
 	"strconv"
 
-	bslcvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 )
 
@@ -13,13 +13,15 @@ type ConcreteFactoryOptions struct {
 
 	Baremetal BaremetalConfig `json:"baremetal,omitempty"`
 
+	Pool PoolConfig `json:"pool,omitempty"`
+
 	StemcellsDir string `json:"stemcelldir,omitempty"`
 
-	Agent bslcvm.AgentOptions `json:"agent"`
+	Agent AgentOptions `json:"agent"`
 
 	AgentEnvService string `json:"agentenvservice,omitempty"`
 
-	Registry bslcvm.RegistryOptions `json:"registry,omitempty"`
+	Registry RegistryOptions `json:"registry,omitempty"`
 }
 
 func (o ConcreteFactoryOptions) Validate() error {
@@ -37,15 +39,20 @@ func (o ConcreteFactoryOptions) Validate() error {
 }
 
 type SoftLayerConfig struct {
-	Username       string                `json:"username"`
-	ApiKey         string                `json:"apiKey"`
-	FeatureOptions bslcvm.FeatureOptions `json:"featureOptions"`
+	Username       string         `json:"username"`
+	ApiKey         string         `json:"apiKey"`
+	FeatureOptions FeatureOptions `json:"featureOptions,omitempty"`
 }
 
 type BaremetalConfig struct {
 	Username string `json:"username,omitempty"`
 	Password string `json:"password,omitempty"`
 	EndPoint string `json:"endpoint,omitempty"`
+}
+
+type PoolConfig struct {
+	Host string `json:"host,omitempty"`
+	Port int    `json:"port,omitempty"`
 }
 
 func (c SoftLayerConfig) Validate() error {

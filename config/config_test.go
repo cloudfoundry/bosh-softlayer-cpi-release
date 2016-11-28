@@ -6,11 +6,10 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 	fakesys "github.com/cloudfoundry/bosh-utils/system/fakes"
 
 	bslcaction "github.com/cloudfoundry/bosh-softlayer-cpi/action"
-
-	bslcvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
 
 	"github.com/cloudfoundry/bosh-softlayer-cpi/config"
 )
@@ -21,14 +20,14 @@ var validProperties = bslcaction.ConcreteFactoryOptions{
 	Agent:        validAgentOption,
 }
 
-var validAgentOption = bslcvm.AgentOptions{
+var validAgentOption = AgentOptions{
 	Mbus:         "fake-mubus",
 	NTP:          []string{""},
 	Blobstore:    validBlobstoreOptions,
 	VcapPassword: "fake-vcappassword",
 }
 
-var validBlobstoreOptions = bslcvm.BlobstoreOptions{
+var validBlobstoreOptions = BlobstoreOptions{
 	Provider: "local",
 }
 

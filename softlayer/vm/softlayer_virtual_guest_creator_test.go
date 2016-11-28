@@ -5,20 +5,21 @@ import (
 	. "github.com/onsi/gomega"
 	"time"
 
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
 
 	testhelpers "github.com/cloudfoundry/bosh-softlayer-cpi/test_helpers"
 
-	fakevm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm/fakes"
+	fakescommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/fakes"
 	fakesutil "github.com/cloudfoundry/bosh-softlayer-cpi/util/fakes"
 	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
 
-	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
+	slh "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
 	sldatatypes "github.com/maximilien/softlayer-go/data_types"
 )
 
@@ -26,7 +27,8 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 	var (
 		softLayerClient *fakeslclient.FakeSoftLayerClient
 		sshClient       *fakesutil.FakeSshClient
-		vmFinder        *fakevm.FakeFinder
+		fakeVmFinder    *fakescommon.FakeVMFinder
+		fakeVm          *fakescommon.FakeVM
 		agentOptions    AgentOptions
 		logger          boshlog.Logger
 		creator         VMCreator
@@ -38,10 +40,11 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 		sshClient = &fakesutil.FakeSshClient{}
 		agentOptions = AgentOptions{Mbus: "fake-mbus"}
 		logger = boshlog.NewLogger(boshlog.LevelNone)
-		vmFinder = &fakevm.FakeFinder{}
+		fakeVmFinder = &fakescommon.FakeVMFinder{}
+		fakeVm = &fakescommon.FakeVM{}
 
-		bslcommon.TIMEOUT = 2 * time.Second
-		bslcommon.POLLING_INTERVAL = 1 * time.Second
+		slh.TIMEOUT = 2 * time.Second
+		slh.POLLING_INTERVAL = 1 * time.Second
 	})
 
 	Describe("#Create", func() {
@@ -61,12 +64,11 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 				env = Environment{}
 				featureOptions = FeatureOptions{DisableOsReload: false}
 
-				vmFinder.FindVM = fakevm.NewFakeVM(1234567)
-				vmFinder.FindFound = true
-				vmFinder.FindErr = nil
+				fakeVm.IDReturns(1234567)
+				fakeVmFinder.FindReturns(fakeVm, true, nil)
 
 				creator = NewSoftLayerCreator(
-					vmFinder,
+					fakeVmFinder,
 					softLayerClient,
 					agentOptions,
 					logger,
@@ -447,12 +449,11 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 
 				featureOptions = FeatureOptions{DisableOsReload: true}
 
-				vmFinder.FindVM = fakevm.NewFakeVM(1234567)
-				vmFinder.FindFound = true
-				vmFinder.FindErr = nil
+				fakeVm.IDReturns(1234567)
+				fakeVmFinder.FindReturns(fakeVm, true, nil)
 
 				creator = NewSoftLayerCreator(
-					vmFinder,
+					fakeVmFinder,
 					softLayerClient,
 					agentOptions,
 					logger,
@@ -597,67 +598,6 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 						Expect(err).ToNot(HaveOccurred())
 						Expect(vm.ID()).To(Equal(1234567))
 					})
-				})
-			})
-		})
-
-		Context("invalid arguments", func() {
-			Context("missing correct VMProperties", func() {
-				BeforeEach(func() {
-					agentID = "fake-agent-id"
-					stemcell = bslcstem.NewSoftLayerStemcell(1234, "fake-stemcell-uuid", softLayerClient, logger)
-					networks = Networks{}
-					env = Environment{}
-
-					networks = map[string]Network{
-						"fake-network0": Network{
-							Type:    "dynamic",
-							Netmask: "fake-Netmask",
-							Gateway: "fake-Gateway",
-							DNS: []string{
-								"fake-dns0",
-								"fake-dns1",
-							},
-							Default:         []string{},
-							Preconfigured:   true,
-							CloudProperties: map[string]interface{}{},
-						},
-					}
-
-					vmFinder.FindVM = fakevm.NewFakeVM(1234567)
-					vmFinder.FindFound = false
-
-					setFakeSoftlayerClientCreateObjectTestFixturesWithEphemeralDiskSize(softLayerClient)
-				})
-
-				It("fails when VMProperties is missing StartCpus", func() {
-					cloudProps = VMCloudProperties{
-						MaxMemory:  2048,
-						Datacenter: sldatatypes.Datacenter{Name: "fake-datacenter"},
-					}
-
-					_, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
-					Expect(err).To(HaveOccurred())
-				})
-
-				It("fails when VMProperties is missing MaxMemory", func() {
-					cloudProps = VMCloudProperties{
-						StartCpus:  4,
-						Datacenter: sldatatypes.Datacenter{Name: "fake-datacenter"},
-					}
-
-					_, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
-					Expect(err).To(HaveOccurred())
-				})
-
-				It("fails when VMProperties is missing Domain", func() {
-					cloudProps = VMCloudProperties{
-						StartCpus: 4,
-						MaxMemory: 1024,
-					}
-
-					_, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
-					Expect(err).To(HaveOccurred())
 				})
 			})
 		})
