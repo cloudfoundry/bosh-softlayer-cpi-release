@@ -153,7 +153,8 @@ var _ = Describe("SoftlayerPoolCreator", func() {
 				fakeVm.ConfigureNetworks2Returns(nil)
 				fakeVm.UpdateAgentEnvReturns(nil)
 
-				fakePoolClient.UpdateVMWithStateReturns(vm.NewUpdateVMWithStateOK().WithPayload("updated successfully"), nil)
+				//fakePoolClient.UpdateVMWithStateReturns(vm.NewUpdateVMWithStateOK().WithPayload("updated successfully"), nil)
+				fakePoolClient.UpdateVMReturns(vm.NewUpdateVMOK(), nil)
 			})
 
 			It("order vm by filter", func() {
@@ -163,9 +164,9 @@ var _ = Describe("SoftlayerPoolCreator", func() {
 				Expect(orderVMByFilterParams.Body.PublicVlan).To(Equal(int32(524956)))
 			})
 			It("update vm state to using", func() {
-				Expect(fakePoolClient.UpdateVMWithStateCallCount()).To(Equal(1))
-				updateVMWithStateParams := fakePoolClient.UpdateVMWithStateArgsForCall(0)
-				Expect(updateVMWithStateParams.Body.State).To(Equal(models.StateUsing))
+				Expect(fakePoolClient.UpdateVMCallCount()).To(Equal(1))
+				updateVMParams := fakePoolClient.UpdateVMArgsForCall(0)
+				Expect(updateVMParams.Body.State).To(Equal(models.StateUsing))
 			})
 
 			It("no error return", func() {
@@ -245,12 +246,13 @@ var _ = Describe("SoftlayerPoolCreator", func() {
 				fakeVm.ConfigureNetworks2Returns(nil)
 				fakeVm.UpdateAgentEnvReturns(nil)
 
-				fakePoolClient.UpdateVMWithStateReturns(nil, vm.NewUpdateVMDefault(500))
+				//fakePoolClient.UpdateVMWithStateReturns(nil, vm.NewUpdateVMDefault(500))
+				fakePoolClient.UpdateVMReturns(nil, vm.NewUpdateVMDefault(500))
 			})
 
 			It("provides relevant error information", func() {
 				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("Updating state of vm"))
+				Expect(err.Error()).To(ContainSubstring("Updating the hostname of vm"))
 			})
 		})
 
@@ -289,6 +291,7 @@ var _ = Describe("SoftlayerPoolCreator", func() {
 
 func setFakeSoftlayerClientCreateObjectTestFixturesWithEphemeralDiskSize_OS_Reload(fakeSoftLayerClient *fakeslclient.FakeSoftLayerClient) {
 	fileNames := []string{
+		"SoftLayer_Virtual_Guest_Service_editObject.json",
 		"SoftLayer_Virtual_Guest_Service_getLastTransaction.json",
 		"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
 		"SoftLayer_Virtual_Guest_Service_getUpgradeItemPrices.json",
@@ -308,6 +311,7 @@ func setFakeSoftlayerClientCreateObjectTestFixturesWithEphemeralDiskSize_OS_Relo
 func setFakeSoftlayerClientCreateObjectTestFixturesWithEphemeralDiskSize_OS_Reload_2(fakeSoftLayerClient *fakeslclient.FakeSoftLayerClient) {
 	fileNames := []string{
 		"SoftLayer_Virtual_Guest_Service_getObjects.json",
+		"SoftLayer_Virtual_Guest_Service_editObject.json",
 		"SoftLayer_Virtual_Guest_Service_getLastTransaction.json",
 		"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
 		"SoftLayer_Virtual_Guest_Service_getUpgradeItemPrices.json",
