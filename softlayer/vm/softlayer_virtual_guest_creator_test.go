@@ -617,6 +617,7 @@ func setFakeSoftlayerClientCreateObjectTestFixturesWithEphemeralDiskSize(fakeSof
 		"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
 		"SoftLayer_Virtual_Guest_Service_getLastTransaction_CloudInstanceUpgrade.json",
 		"SoftLayer_Virtual_Guest_Service_getPowerState.json",
+		"SoftLayer_Virtual_Guest_Service_getBlockDevices.json",
 
 		"SoftLayer_Virtual_Guest_Service_getObject.json",
 	}
@@ -626,7 +627,6 @@ func setFakeSoftlayerClientCreateObjectTestFixturesWithEphemeralDiskSize(fakeSof
 func setFakeSoftlayerClientCreateObjectTestFixturesWithEphemeralDiskSize_OS_Reload(fakeSoftLayerClient *fakeslclient.FakeSoftLayerClient) {
 	fileNames := []string{
 		"SoftLayer_Virtual_Guest_Service_getObjects.json",
-		"SoftLayer_Virtual_Guest_Service_editObject.json",
 		"SoftLayer_Virtual_Guest_Service_getLastTransaction.json",
 		"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
 		"SoftLayer_Virtual_Guest_Service_getUpgradeItemPrices.json",
@@ -636,6 +636,7 @@ func setFakeSoftlayerClientCreateObjectTestFixturesWithEphemeralDiskSize_OS_Relo
 		"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
 		"SoftLayer_Virtual_Guest_Service_getLastTransaction_CloudInstanceUpgrade.json",
 		"SoftLayer_Virtual_Guest_Service_getPowerState.json",
+		"SoftLayer_Virtual_Guest_Service_getBlockDevices.json",
 
 		"SoftLayer_Virtual_Guest_Service_getObject.json",
 		"SoftLayer_Virtual_Guest_Service_getObject.json",
@@ -657,7 +658,6 @@ func setFakeSoftlayerClientCreateObjectTestFixturesWithoutEphemeralDiskSize(fake
 func setFakeSoflayerClientCreateObjectTestFixturesWithoutEphemeralDiskSize_OS_Reload(fakeSoftLayerClient *fakeslclient.FakeSoftLayerClient) {
 	fileNames := []string{
 		"SoftLayer_Virtual_Guest_Service_getObjects.json",
-		"SoftLayer_Virtual_Guest_Service_editObject.json",
 
 		"SoftLayer_Virtual_Guest_Service_getLastTransaction.json",
 
@@ -679,6 +679,7 @@ func setFakeSoftlayerClientCreateObjectTestFixturesWithoutBoshIP(fakeSoftLayerCl
 		"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
 		"SoftLayer_Virtual_Guest_Service_getLastTransaction_CloudInstanceUpgrade.json",
 		"SoftLayer_Virtual_Guest_Service_getPowerState.json",
+		"SoftLayer_Virtual_Guest_Service_getBlockDevices.json",
 
 		"SoftLayer_Virtual_Guest_Service_getObject.json",
 	}
@@ -688,7 +689,6 @@ func setFakeSoftlayerClientCreateObjectTestFixturesWithoutBoshIP(fakeSoftLayerCl
 func setFakeSoftlayerClientCreateObjectTestFixturesWithoutBoshIP_OS_Reload(fakeSoftLayerClient *fakeslclient.FakeSoftLayerClient) {
 	fileNames := []string{
 		"SoftLayer_Virtual_Guest_Service_getObjects.json",
-		"SoftLayer_Virtual_Guest_Service_editObject.json",
 
 		"SoftLayer_Virtual_Guest_Service_getLastTransaction.json",
 		"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
@@ -699,6 +699,7 @@ func setFakeSoftlayerClientCreateObjectTestFixturesWithoutBoshIP_OS_Reload(fakeS
 		"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
 		"SoftLayer_Virtual_Guest_Service_getLastTransaction_CloudInstanceUpgrade.json",
 		"SoftLayer_Virtual_Guest_Service_getPowerState.json",
+		"SoftLayer_Virtual_Guest_Service_getBlockDevices.json",
 
 		"SoftLayer_Virtual_Guest_Service_getObject.json",
 		"SoftLayer_Virtual_Guest_Service_getObject.json",

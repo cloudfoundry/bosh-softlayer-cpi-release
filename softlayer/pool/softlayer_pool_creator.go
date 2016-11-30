@@ -262,11 +262,6 @@ func (c *softLayerPoolCreator) createByOSReload(agentID string, stemcell bslcste
 		return nil, bosherr.WrapError(err, "Failed to reload OS")
 	}
 
-	err = UpdateDeviceName(vm.ID(), virtualGuestService, cloudProps)
-	if err != nil {
-		return nil, err
-	}
-
 	if cloudProps.EphemeralDiskSize == 0 {
 		err = slhelper.WaitForVirtualGuestLastCompleteTransaction(c.softLayerClient, vm.ID(), "Service Setup")
 		if err != nil {
