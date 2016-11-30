@@ -135,7 +135,7 @@ func (c *softLayerPoolCreator) createFromVMPool(agentID string, stemcell bslcste
 		CPU:         int32(virtualGuest.StartCpus),
 		MemoryMb:    int32(virtualGuest.MaxMemory),
 		IP:          strfmt.IPv4(virtualGuest.PrimaryBackendIpAddress),
-		Hostname:    cloudProps.VmNamePrefix + cloudProps.Domain,
+		Hostname:    cloudProps.VmNamePrefix + "." + cloudProps.Domain,
 		PrivateVlan: int32(virtualGuest.PrimaryBackendNetworkComponent.NetworkVlan.Id),
 		PublicVlan:  int32(virtualGuest.PrimaryNetworkComponent.NetworkVlan.Id),
 		State:       models.StateUsing,
