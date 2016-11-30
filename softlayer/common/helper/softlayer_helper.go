@@ -72,6 +72,14 @@ func AttachEphemeralDiskToVirtualGuest(softLayerClient sl.Client, virtualGuestId
 		return bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d`", virtualGuestId)
 	}
 
+	blockDevices, err := service.GetBlockDevices(virtualGuestId)
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Get the attached ephemeral disk of VirtualGuest `%d`", virtualGuestId)
+	}
+	if len(blockDevices) < 3 {
+		return bosherr.WrapErrorf(err, "The ephemeral disk is not attached on VirtualGuest `%d` properly, one possible reason is there is not enough disk resource.", virtualGuestId)
+	}
+
 	return nil
 }
 
