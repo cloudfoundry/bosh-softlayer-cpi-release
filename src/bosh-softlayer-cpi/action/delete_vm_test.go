@@ -5,11 +5,11 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/action"
-	fakeaction "github.com/cloudfoundry/bosh-softlayer-cpi/action/fakes"
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
+	. "bosh-softlayer-cpi/action"
+	fakeaction "bosh-softlayer-cpi/action/fakes"
+	. "bosh-softlayer-cpi/softlayer/common"
 
-	fakescommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/fakes"
+	fakescommon "bosh-softlayer-cpi/softlayer/common/fakes"
 )
 
 var _ = Describe("DeleteVM", func() {

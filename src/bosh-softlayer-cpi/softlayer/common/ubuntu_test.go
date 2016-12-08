@@ -3,8 +3,8 @@ package common_test
 import (
 	"encoding/json"
 
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
-	fakescommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/fakes"
+	. "bosh-softlayer-cpi/softlayer/common"
+	fakescommon "bosh-softlayer-cpi/softlayer/common/fakes"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

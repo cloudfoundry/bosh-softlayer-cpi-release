@@ -3,8 +3,8 @@ package common
 import (
 	sldatatypes "github.com/maximilien/softlayer-go/data_types"
 
-	bslcdisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk"
-	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
+	bslcdisk "bosh-softlayer-cpi/softlayer/disk"
+	bslcstem "bosh-softlayer-cpi/softlayer/stemcell"
 )
 
 type Environment map[string]interface{}

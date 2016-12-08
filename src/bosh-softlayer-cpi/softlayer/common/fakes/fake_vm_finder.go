@@ -4,7 +4,7 @@ package fakes
 import (
 	"sync"
 
-	"github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
+	"bosh-softlayer-cpi/softlayer/common"
 )
 
 type FakeVMFinder struct {

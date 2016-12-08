@@ -1,26 +1,26 @@
 package hardware_test
 
 import (
+	. "bosh-softlayer-cpi/softlayer/hardware"
 	"encoding/json"
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/hardware"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"time"
 
-	testhelpers "github.com/cloudfoundry/bosh-softlayer-cpi/test_helpers"
+	testhelpers "bosh-softlayer-cpi/test_helpers"
 
+	fakescommon "bosh-softlayer-cpi/softlayer/common/fakes"
+	fakesutil "bosh-softlayer-cpi/util/fakes"
 	fakebmsclient "github.com/cloudfoundry-community/bosh-softlayer-tools/clients/fakes"
-	fakescommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/fakes"
-	fakesutil "github.com/cloudfoundry/bosh-softlayer-cpi/util/fakes"
 	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
 
+	bslcommon "bosh-softlayer-cpi/softlayer/common"
+	bslcstem "bosh-softlayer-cpi/softlayer/stemcell"
 	bmsclients "github.com/cloudfoundry-community/bosh-softlayer-tools/clients"
-	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
-	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
-	slh "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
+	slh "bosh-softlayer-cpi/softlayer/common/helper"
 	sldatatypes "github.com/maximilien/softlayer-go/data_types"
 )
 

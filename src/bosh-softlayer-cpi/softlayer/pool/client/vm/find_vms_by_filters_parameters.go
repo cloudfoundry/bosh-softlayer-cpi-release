@@ -14,7 +14,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/pool/models"
+	"bosh-softlayer-cpi/softlayer/pool/models"
 )
 
 // NewFindVmsByFiltersParams creates a new FindVmsByFiltersParams object

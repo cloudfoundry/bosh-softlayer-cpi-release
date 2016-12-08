@@ -6,10 +6,10 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/action"
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
+	. "bosh-softlayer-cpi/action"
+	. "bosh-softlayer-cpi/softlayer/common"
 
-	fakescommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/fakes"
+	fakescommon "bosh-softlayer-cpi/softlayer/common/fakes"
 )
 
 var _ = Describe("ConfigureNetworks", func() {

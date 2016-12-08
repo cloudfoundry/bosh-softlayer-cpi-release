@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"time"
 
-	slh "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
+	slh "bosh-softlayer-cpi/softlayer/common/helper"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 )

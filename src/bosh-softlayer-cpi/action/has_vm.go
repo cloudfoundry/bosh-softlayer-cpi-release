@@ -1,7 +1,7 @@
 package action
 
 import (
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
+	. "bosh-softlayer-cpi/softlayer/common"
 )
 
 type HasVMAction struct {

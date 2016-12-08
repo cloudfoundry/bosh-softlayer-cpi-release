@@ -1,7 +1,7 @@
 package action
 
 import (
-	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
+	bslcstem "bosh-softlayer-cpi/softlayer/stemcell"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 )
 

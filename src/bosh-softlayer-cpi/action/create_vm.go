@@ -5,9 +5,9 @@ import (
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
-	helper "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
-	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
+	. "bosh-softlayer-cpi/softlayer/common"
+	helper "bosh-softlayer-cpi/softlayer/common/helper"
+	bslcstem "bosh-softlayer-cpi/softlayer/stemcell"
 
 	sldatatypes "github.com/maximilien/softlayer-go/data_types"
 )

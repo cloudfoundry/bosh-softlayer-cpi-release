@@ -4,7 +4,7 @@ package fakes
 import (
 	"sync"
 
-	"github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/pool/client/vm"
+	"bosh-softlayer-cpi/softlayer/pool/client/vm"
 	"github.com/go-openapi/runtime"
 )
 

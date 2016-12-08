@@ -7,10 +7,10 @@ import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
+	. "bosh-softlayer-cpi/softlayer/common"
+	slh "bosh-softlayer-cpi/softlayer/common/helper"
+	bslcstem "bosh-softlayer-cpi/softlayer/stemcell"
 	bmslc "github.com/cloudfoundry-community/bosh-softlayer-tools/clients"
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
-	slh "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
-	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
 	sl "github.com/maximilien/softlayer-go/softlayer"
 )
 

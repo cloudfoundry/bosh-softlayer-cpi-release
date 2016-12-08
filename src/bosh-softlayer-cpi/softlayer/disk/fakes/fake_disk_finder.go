@@ -4,7 +4,7 @@ package fakes
 import (
 	"sync"
 
-	"github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk"
+	"bosh-softlayer-cpi/softlayer/disk"
 )
 
 type FakeDiskFinder struct {

@@ -4,7 +4,7 @@ import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
-	slh "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
+	slh "bosh-softlayer-cpi/softlayer/common/helper"
 
 	sl "github.com/maximilien/softlayer-go/softlayer"
 

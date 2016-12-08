@@ -1,7 +1,7 @@
 package fakes
 
 import (
-	bslcaction "github.com/cloudfoundry/bosh-softlayer-cpi/action"
+	bslcaction "bosh-softlayer-cpi/action"
 )
 
 type FakeCaller struct {

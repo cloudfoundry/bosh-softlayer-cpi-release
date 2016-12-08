@@ -3,7 +3,7 @@ package action
 import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
+	. "bosh-softlayer-cpi/softlayer/common"
 )
 
 type RebootVMAction struct {

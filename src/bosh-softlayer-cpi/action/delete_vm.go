@@ -3,8 +3,8 @@ package action
 import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 
+	. "bosh-softlayer-cpi/softlayer/common"
 	"fmt"
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 )
 
 type DeleteVMAction struct {

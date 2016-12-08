@@ -6,7 +6,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
+	. "bosh-softlayer-cpi/softlayer/common"
 )
 
 var _ = Describe("AgentEnv", func() {

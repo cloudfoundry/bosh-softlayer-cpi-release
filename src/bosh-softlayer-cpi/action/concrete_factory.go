@@ -7,15 +7,15 @@ import (
 	bmsclient "github.com/cloudfoundry-community/bosh-softlayer-tools/clients"
 	slclient "github.com/maximilien/softlayer-go/client"
 
-	bslcdisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk"
-	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
-	bslcvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
+	bslcdisk "bosh-softlayer-cpi/softlayer/disk"
+	bslcstem "bosh-softlayer-cpi/softlayer/stemcell"
+	bslcvm "bosh-softlayer-cpi/softlayer/vm"
 
-	apiclient "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/pool/client"
+	apiclient "bosh-softlayer-cpi/softlayer/pool/client"
 	httptransport "github.com/go-openapi/runtime/client"
 
+	. "bosh-softlayer-cpi/softlayer/common"
 	"fmt"
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 	"github.com/go-openapi/strfmt"
 )
 

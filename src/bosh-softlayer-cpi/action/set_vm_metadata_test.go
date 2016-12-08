@@ -7,9 +7,9 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/action"
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
-	fakescommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/fakes"
+	. "bosh-softlayer-cpi/action"
+	. "bosh-softlayer-cpi/softlayer/common"
+	fakescommon "bosh-softlayer-cpi/softlayer/common/fakes"
 )
 
 var _ = Describe("SetVMMetadata", func() {

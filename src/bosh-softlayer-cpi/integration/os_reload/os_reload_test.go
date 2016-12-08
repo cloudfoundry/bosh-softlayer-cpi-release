@@ -13,7 +13,7 @@ import (
 	"fmt"
 	"log"
 
-	testhelperscpi "github.com/cloudfoundry/bosh-softlayer-cpi/test_helpers"
+	testhelperscpi "bosh-softlayer-cpi/test_helpers"
 	slclient "github.com/maximilien/softlayer-go/client"
 	softlayer "github.com/maximilien/softlayer-go/softlayer"
 	testhelpers "github.com/maximilien/softlayer-go/test_helpers"

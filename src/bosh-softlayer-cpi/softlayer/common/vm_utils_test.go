@@ -8,16 +8,16 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
+	. "bosh-softlayer-cpi/softlayer/common"
 
 	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
 	"github.com/maximilien/softlayer-go/softlayer"
 
-	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
+	bslcstem "bosh-softlayer-cpi/softlayer/stemcell"
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
-	testhelpers "github.com/cloudfoundry/bosh-softlayer-cpi/test_helpers"
+	testhelpers "bosh-softlayer-cpi/test_helpers"
 	sldatatypes "github.com/maximilien/softlayer-go/data_types"
 
 	"errors"

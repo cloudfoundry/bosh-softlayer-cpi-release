@@ -5,7 +5,7 @@ import (
 	"io"
 	"sync"
 
-	"github.com/cloudfoundry/bosh-softlayer-cpi/util"
+	"bosh-softlayer-cpi/util"
 )
 
 type FakeSshClient struct {
