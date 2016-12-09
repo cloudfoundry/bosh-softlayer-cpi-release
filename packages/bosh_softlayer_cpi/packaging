@@ -1,0 +1,21 @@
+set -e -x
+
+if [ -z "$BOSH_PACKAGES_DIR" ]; then
+	golang_pkg_dir=$(readlink -nf /var/vcap/packages/golang_1.7.1)
+else
+	golang_pkg_dir=$BOSH_PACKAGES_DIR/golang_1.7.1
+fi
+
+export GOROOT=$golang_pkg_dir
+export GOPATH=$PWD
+export PATH=$GOROOT/bin:$PATH
+
+ls -l .
+mkdir src && cp -a github.com src
+
+ls -l src
+cd src/github.com/cloudfoundry/bosh-softlayer-cpi
+bin/build-linux-amd64
+
+mkdir -p $BOSH_INSTALL_TARGET/bin
+cp out/softlayer_cpi $BOSH_INSTALL_TARGET/bin/softlayer_cpi
