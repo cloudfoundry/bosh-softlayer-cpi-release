@@ -10,21 +10,21 @@ import (
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
-	testhelpers "github.com/cloudfoundry/bosh-softlayer-cpi/test_helpers"
+	testhelpers "bosh-softlayer-cpi/test_helpers"
 
+	bslcommon "bosh-softlayer-cpi/softlayer/common"
+	bsldisk "bosh-softlayer-cpi/softlayer/disk"
 	bmsclients "github.com/cloudfoundry-community/bosh-softlayer-tools/clients"
-	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
-	bsldisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk"
 
+	fakevm "bosh-softlayer-cpi/softlayer/common/fakes"
+	fakedisk "bosh-softlayer-cpi/softlayer/disk/fakes"
+	fakestemcell "bosh-softlayer-cpi/softlayer/stemcell/fakes"
+	fakesutil "bosh-softlayer-cpi/util/fakes"
 	fakebmsclient "github.com/cloudfoundry-community/bosh-softlayer-tools/clients/fakes"
-	fakevm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/fakes"
-	fakedisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk/fakes"
-	fakestemcell "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell/fakes"
-	fakesutil "github.com/cloudfoundry/bosh-softlayer-cpi/util/fakes"
 	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
 
-	slh "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
-	"github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/hardware"
+	slh "bosh-softlayer-cpi/softlayer/common/helper"
+	"bosh-softlayer-cpi/softlayer/hardware"
 	datatypes "github.com/maximilien/softlayer-go/data_types"
 )
 

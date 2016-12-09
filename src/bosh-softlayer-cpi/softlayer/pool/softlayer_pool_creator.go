@@ -14,14 +14,14 @@ import (
 
 	datatypes "github.com/maximilien/softlayer-go/data_types"
 
-	slhelper "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
-	operations "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/pool/client/vm"
-	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
-	util "github.com/cloudfoundry/bosh-softlayer-cpi/util"
+	slhelper "bosh-softlayer-cpi/softlayer/common/helper"
+	operations "bosh-softlayer-cpi/softlayer/pool/client/vm"
+	bslcstem "bosh-softlayer-cpi/softlayer/stemcell"
+	util "bosh-softlayer-cpi/util"
 
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
+	. "bosh-softlayer-cpi/softlayer/common"
 
-	"github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/pool/models"
+	"bosh-softlayer-cpi/softlayer/pool/models"
 )
 
 const SOFTLAYER_POOL_CREATOR_LOG_TAG = "SoftLayerPoolCreator"

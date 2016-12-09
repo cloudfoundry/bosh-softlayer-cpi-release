@@ -6,7 +6,7 @@ import (
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 
-	bslcaction "github.com/cloudfoundry/bosh-softlayer-cpi/action"
+	bslcaction "bosh-softlayer-cpi/action"
 )
 
 type Caller interface {

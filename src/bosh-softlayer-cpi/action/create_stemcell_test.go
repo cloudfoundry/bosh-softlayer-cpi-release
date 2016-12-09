@@ -6,9 +6,9 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/action"
+	. "bosh-softlayer-cpi/action"
 
-	fakestem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell/fakes"
+	fakestem "bosh-softlayer-cpi/softlayer/stemcell/fakes"
 )
 
 var _ = Describe("CreateStemcell", func() {

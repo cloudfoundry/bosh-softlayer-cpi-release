@@ -6,12 +6,12 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
+	. "bosh-softlayer-cpi/softlayer/common"
 	fakesys "github.com/cloudfoundry/bosh-utils/system/fakes"
 
-	bslcaction "github.com/cloudfoundry/bosh-softlayer-cpi/action"
+	bslcaction "bosh-softlayer-cpi/action"
 
-	"github.com/cloudfoundry/bosh-softlayer-cpi/config"
+	"bosh-softlayer-cpi/config"
 )
 
 var validProperties = bslcaction.ConcreteFactoryOptions{

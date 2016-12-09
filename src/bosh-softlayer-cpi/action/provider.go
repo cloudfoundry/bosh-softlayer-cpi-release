@@ -4,11 +4,11 @@ import (
 	bmscl "github.com/cloudfoundry-community/bosh-softlayer-tools/clients"
 	sl "github.com/maximilien/softlayer-go/softlayer"
 
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
-	slhw "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/hardware"
-	slpool "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/pool"
-	operations "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/pool/client/vm"
-	slvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
+	. "bosh-softlayer-cpi/softlayer/common"
+	slhw "bosh-softlayer-cpi/softlayer/hardware"
+	slpool "bosh-softlayer-cpi/softlayer/pool"
+	operations "bosh-softlayer-cpi/softlayer/pool/client/vm"
+	slvm "bosh-softlayer-cpi/softlayer/vm"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 )
 

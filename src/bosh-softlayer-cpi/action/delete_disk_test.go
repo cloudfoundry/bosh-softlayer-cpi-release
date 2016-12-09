@@ -6,9 +6,9 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/action"
+	. "bosh-softlayer-cpi/action"
 
-	fakedisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk/fakes"
+	fakedisk "bosh-softlayer-cpi/softlayer/disk/fakes"
 )
 
 var _ = Describe("DeleteDisk", func() {

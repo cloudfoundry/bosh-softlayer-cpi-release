@@ -1,10 +1,10 @@
 package vm_test
 
 import (
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
-	slh "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
-	testhelpers "github.com/cloudfoundry/bosh-softlayer-cpi/test_helpers"
+	. "bosh-softlayer-cpi/softlayer/common"
+	slh "bosh-softlayer-cpi/softlayer/common/helper"
+	. "bosh-softlayer-cpi/softlayer/vm"
+	testhelpers "bosh-softlayer-cpi/test_helpers"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
 	. "github.com/onsi/ginkgo"

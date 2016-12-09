@@ -8,13 +8,13 @@ import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
-	slhelper "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
-	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
+	. "bosh-softlayer-cpi/softlayer/common"
+	slhelper "bosh-softlayer-cpi/softlayer/common/helper"
+	bslcstem "bosh-softlayer-cpi/softlayer/stemcell"
 	datatypes "github.com/maximilien/softlayer-go/data_types"
 	sl "github.com/maximilien/softlayer-go/softlayer"
 
-	"github.com/cloudfoundry/bosh-softlayer-cpi/util"
+	"bosh-softlayer-cpi/util"
 )
 
 type softLayerVirtualGuestCreator struct {

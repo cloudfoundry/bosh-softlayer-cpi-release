@@ -1,8 +1,8 @@
 package action
 
 import (
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
-	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
+	. "bosh-softlayer-cpi/softlayer/common/helper"
+	bslcstem "bosh-softlayer-cpi/softlayer/stemcell"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 
 	"time"

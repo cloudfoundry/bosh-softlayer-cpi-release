@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 
-	fakebslvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/fakes"
-	slhelper "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
+	fakebslvm "bosh-softlayer-cpi/softlayer/common/fakes"
+	slhelper "bosh-softlayer-cpi/softlayer/common/helper"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
 	. "github.com/onsi/ginkgo"
@@ -13,7 +13,7 @@ import (
 
 	"os"
 
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
+	. "bosh-softlayer-cpi/softlayer/common"
 )
 
 var _ = Describe("SoftlayerAgentEnvService", func() {

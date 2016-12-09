@@ -11,7 +11,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/pool/models"
+	"bosh-softlayer-cpi/softlayer/pool/models"
 )
 
 // FindVmsByDeploymentReader is a Reader for the FindVmsByDeployment structure.

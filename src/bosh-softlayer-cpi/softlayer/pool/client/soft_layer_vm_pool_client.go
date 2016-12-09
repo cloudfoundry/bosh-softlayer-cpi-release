@@ -9,7 +9,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/pool/client/vm"
+	"bosh-softlayer-cpi/softlayer/pool/client/vm"
 )
 
 // Default soft layer VM pool HTTP client.

@@ -4,11 +4,11 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
+	. "bosh-softlayer-cpi/softlayer/stemcell"
 
-	testhelpers "github.com/cloudfoundry/bosh-softlayer-cpi/test_helpers"
+	testhelpers "bosh-softlayer-cpi/test_helpers"
 
-	slhelper "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
+	slhelper "bosh-softlayer-cpi/softlayer/common/helper"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
 	fakesslclient "github.com/maximilien/softlayer-go/client/fakes"

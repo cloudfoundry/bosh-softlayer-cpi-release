@@ -12,8 +12,8 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
-	testhelperscpi "github.com/cloudfoundry/bosh-softlayer-cpi/test_helpers"
+	bslcstem "bosh-softlayer-cpi/softlayer/stemcell"
+	testhelperscpi "bosh-softlayer-cpi/test_helpers"
 	"github.com/cloudfoundry/bosh-utils/logger"
 	slclient "github.com/maximilien/softlayer-go/client"
 	datatypes "github.com/maximilien/softlayer-go/data_types"

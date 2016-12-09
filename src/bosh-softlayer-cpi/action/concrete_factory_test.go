@@ -4,7 +4,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/action"
+	. "bosh-softlayer-cpi/action"
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 )

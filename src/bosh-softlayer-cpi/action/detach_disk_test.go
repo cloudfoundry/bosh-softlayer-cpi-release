@@ -7,10 +7,10 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/action"
+	. "bosh-softlayer-cpi/action"
 
-	fakescommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/fakes"
-	fakedisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk/fakes"
+	fakescommon "bosh-softlayer-cpi/softlayer/common/fakes"
+	fakedisk "bosh-softlayer-cpi/softlayer/disk/fakes"
 )
 
 var _ = Describe("DetachDisk", func() {

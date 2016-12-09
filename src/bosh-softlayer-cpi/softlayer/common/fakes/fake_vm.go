@@ -4,9 +4,9 @@ package fakes
 import (
 	"sync"
 
-	"github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
-	"github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk"
-	"github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
+	"bosh-softlayer-cpi/softlayer/common"
+	"bosh-softlayer-cpi/softlayer/disk"
+	"bosh-softlayer-cpi/softlayer/stemcell"
 )
 
 type FakeVM struct {

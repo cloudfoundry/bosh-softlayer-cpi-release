@@ -6,7 +6,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/api/dispatcher"
+	. "bosh-softlayer-cpi/api/dispatcher"
 )
 
 type valueType struct {

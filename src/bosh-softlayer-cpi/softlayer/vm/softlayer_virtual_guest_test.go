@@ -8,22 +8,22 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
+	. "bosh-softlayer-cpi/softlayer/common"
+	. "bosh-softlayer-cpi/softlayer/vm"
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
-	testhelpers "github.com/cloudfoundry/bosh-softlayer-cpi/test_helpers"
+	testhelpers "bosh-softlayer-cpi/test_helpers"
 
-	bsldisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk"
+	bsldisk "bosh-softlayer-cpi/softlayer/disk"
 
-	fakescommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/fakes"
-	fakedisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk/fakes"
-	fakestemcell "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell/fakes"
-	fakesutil "github.com/cloudfoundry/bosh-softlayer-cpi/util/fakes"
+	fakescommon "bosh-softlayer-cpi/softlayer/common/fakes"
+	fakedisk "bosh-softlayer-cpi/softlayer/disk/fakes"
+	fakestemcell "bosh-softlayer-cpi/softlayer/stemcell/fakes"
+	fakesutil "bosh-softlayer-cpi/util/fakes"
 	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
 
-	slh "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
+	slh "bosh-softlayer-cpi/softlayer/common/helper"
 	datatypes "github.com/maximilien/softlayer-go/data_types"
 )
 

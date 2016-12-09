@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"encoding/json"
 
-	bslcaction "github.com/cloudfoundry/bosh-softlayer-cpi/action"
-	bslcapi "github.com/cloudfoundry/bosh-softlayer-cpi/api"
-	slhelper "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
+	bslcaction "bosh-softlayer-cpi/action"
+	bslcapi "bosh-softlayer-cpi/api"
+	slhelper "bosh-softlayer-cpi/softlayer/common/helper"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
 	"fmt"

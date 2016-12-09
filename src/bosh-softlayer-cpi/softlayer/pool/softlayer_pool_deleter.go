@@ -6,14 +6,14 @@ import (
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	strfmt "github.com/go-openapi/strfmt"
 
-	slhelper "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
+	slhelper "bosh-softlayer-cpi/softlayer/common/helper"
 
-	operations "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/pool/client/vm"
+	operations "bosh-softlayer-cpi/softlayer/pool/client/vm"
 	sl "github.com/maximilien/softlayer-go/softlayer"
 
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
+	. "bosh-softlayer-cpi/softlayer/common"
 
-	"github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/pool/models"
+	"bosh-softlayer-cpi/softlayer/pool/models"
 )
 
 type softLayerPoolDeleter struct {

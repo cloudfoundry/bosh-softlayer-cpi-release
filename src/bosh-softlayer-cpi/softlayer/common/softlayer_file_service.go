@@ -6,7 +6,7 @@ import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
-	"github.com/cloudfoundry/bosh-softlayer-cpi/util"
+	"bosh-softlayer-cpi/util"
 )
 
 type SoftlayerFileService interface {

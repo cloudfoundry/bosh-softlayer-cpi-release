@@ -4,7 +4,7 @@ import (
 	"os"
 	"strconv"
 
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
+	. "bosh-softlayer-cpi/softlayer/common"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 )
 

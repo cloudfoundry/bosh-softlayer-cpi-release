@@ -4,8 +4,8 @@ package fakes
 import (
 	"sync"
 
-	"github.com/cloudfoundry/bosh-softlayer-cpi/action"
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
+	"bosh-softlayer-cpi/action"
+	. "bosh-softlayer-cpi/softlayer/common"
 )
 
 type FakeDeleterProvider struct {

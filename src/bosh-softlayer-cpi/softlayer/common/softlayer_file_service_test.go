@@ -10,9 +10,9 @@ import (
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
-	fakesutil "github.com/cloudfoundry/bosh-softlayer-cpi/util/fakes"
+	fakesutil "bosh-softlayer-cpi/util/fakes"
 
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
+	. "bosh-softlayer-cpi/softlayer/common"
 )
 
 var _ = Describe("SoftlayerFileService", func() {

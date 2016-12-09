@@ -7,11 +7,11 @@ import (
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	boshsys "github.com/cloudfoundry/bosh-utils/system"
 
-	bslcaction "github.com/cloudfoundry/bosh-softlayer-cpi/action"
-	bslcdisp "github.com/cloudfoundry/bosh-softlayer-cpi/api/dispatcher"
-	bslctrans "github.com/cloudfoundry/bosh-softlayer-cpi/api/transport"
+	bslcaction "bosh-softlayer-cpi/action"
+	bslcdisp "bosh-softlayer-cpi/api/dispatcher"
+	bslctrans "bosh-softlayer-cpi/api/transport"
 
-	"github.com/cloudfoundry/bosh-softlayer-cpi/config"
+	"bosh-softlayer-cpi/config"
 )
 
 const mainLogTag = "main"

@@ -1,24 +1,24 @@
 package pool_test
 
 import (
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/pool"
+	. "bosh-softlayer-cpi/softlayer/common"
+	. "bosh-softlayer-cpi/softlayer/pool"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	testhelpers "github.com/cloudfoundry/bosh-softlayer-cpi/test_helpers"
+	testhelpers "bosh-softlayer-cpi/test_helpers"
 
-	fakespool "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/pool/client/vm/fakes"
+	fakespool "bosh-softlayer-cpi/softlayer/pool/client/vm/fakes"
 
-	"github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/pool/client/vm"
-	"github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/pool/models"
+	"bosh-softlayer-cpi/softlayer/pool/client/vm"
+	"bosh-softlayer-cpi/softlayer/pool/models"
 
 	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
 
-	fakescommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/fakes"
-	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
-	fakesutil "github.com/cloudfoundry/bosh-softlayer-cpi/util/fakes"
+	fakescommon "bosh-softlayer-cpi/softlayer/common/fakes"
+	bslcstem "bosh-softlayer-cpi/softlayer/stemcell"
+	fakesutil "bosh-softlayer-cpi/util/fakes"
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	sldatatypes "github.com/maximilien/softlayer-go/data_types"

@@ -6,14 +6,14 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/api/dispatcher"
+	. "bosh-softlayer-cpi/api/dispatcher"
 
-	slhelper "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
+	slhelper "bosh-softlayer-cpi/softlayer/common/helper"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
-	fakeaction "github.com/cloudfoundry/bosh-softlayer-cpi/action/fakes"
-	fakedisp "github.com/cloudfoundry/bosh-softlayer-cpi/api/dispatcher/fakes"
-	fakeapi "github.com/cloudfoundry/bosh-softlayer-cpi/api/fakes"
+	fakeaction "bosh-softlayer-cpi/action/fakes"
+	fakedisp "bosh-softlayer-cpi/api/dispatcher/fakes"
+	fakeapi "bosh-softlayer-cpi/api/fakes"
 )
 
 var _ = Describe("JSON", func() {

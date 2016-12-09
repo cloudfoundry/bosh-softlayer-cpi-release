@@ -12,7 +12,7 @@ import (
 
 	sldatatypes "github.com/maximilien/softlayer-go/data_types"
 
-	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
+	bslcstem "bosh-softlayer-cpi/softlayer/stemcell"
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	boshsys "github.com/cloudfoundry/bosh-utils/system"

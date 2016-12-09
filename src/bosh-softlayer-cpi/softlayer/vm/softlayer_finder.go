@@ -4,14 +4,14 @@ import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
-	slhelper "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
+	. "bosh-softlayer-cpi/softlayer/common"
+	slhelper "bosh-softlayer-cpi/softlayer/common/helper"
 
+	slhw "bosh-softlayer-cpi/softlayer/hardware"
 	bmscl "github.com/cloudfoundry-community/bosh-softlayer-tools/clients"
-	slhw "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/hardware"
 	sl "github.com/maximilien/softlayer-go/softlayer"
 
-	"github.com/cloudfoundry/bosh-softlayer-cpi/util"
+	"bosh-softlayer-cpi/util"
 )
 
 type softLayerFinder struct {

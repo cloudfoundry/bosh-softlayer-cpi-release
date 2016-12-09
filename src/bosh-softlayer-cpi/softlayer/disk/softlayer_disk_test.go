@@ -3,11 +3,11 @@ package disk_test
 import (
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
-	testhelpers "github.com/cloudfoundry/bosh-softlayer-cpi/test_helpers"
+	testhelpers "bosh-softlayer-cpi/test_helpers"
 
 	fakeclient "github.com/maximilien/softlayer-go/client/fakes"
 
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk"
+	. "bosh-softlayer-cpi/softlayer/disk"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

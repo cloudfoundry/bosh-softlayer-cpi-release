@@ -6,11 +6,11 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/action"
+	. "bosh-softlayer-cpi/action"
 
+	fakescommon "bosh-softlayer-cpi/softlayer/common/fakes"
+	fakedisk "bosh-softlayer-cpi/softlayer/disk/fakes"
 	"fmt"
-	fakescommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/fakes"
-	fakedisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk/fakes"
 )
 
 var _ = Describe("AttachDisk", func() {

@@ -1,16 +1,16 @@
 package pool_test
 
 import (
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/pool"
-	"github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/pool/models"
+	. "bosh-softlayer-cpi/softlayer/common"
+	. "bosh-softlayer-cpi/softlayer/pool"
+	"bosh-softlayer-cpi/softlayer/pool/models"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/pool/client/vm"
-	fakespool "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/pool/client/vm/fakes"
-	testhelpers "github.com/cloudfoundry/bosh-softlayer-cpi/test_helpers"
+	"bosh-softlayer-cpi/softlayer/pool/client/vm"
+	fakespool "bosh-softlayer-cpi/softlayer/pool/client/vm/fakes"
+	testhelpers "bosh-softlayer-cpi/test_helpers"
 	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
