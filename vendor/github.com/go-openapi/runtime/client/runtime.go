@@ -24,6 +24,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"crypto/tls"
 
 	"golang.org/x/net/context"
 	"golang.org/x/net/context/ctxhttp"
@@ -75,7 +76,9 @@ func New(host, basePath string, schemes []string) *Runtime {
 		runtime.TextMime:    runtime.TextProducer(),
 		runtime.DefaultMime: runtime.ByteStreamProducer(),
 	}
-	rt.Transport = http.DefaultTransport
+	rt.Transport = &http.Transport{
+		TLSClientConfig:    &tls.Config{InsecureSkipVerify: true},
+	}
 	rt.Jar = nil
 	rt.Host = host
 	rt.BasePath = basePath
