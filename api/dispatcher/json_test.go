@@ -8,7 +8,7 @@ import (
 
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/api/dispatcher"
 
-	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
+	slhelper "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
 	fakeaction "github.com/cloudfoundry/bosh-softlayer-cpi/action/fakes"
@@ -85,10 +85,10 @@ var _ = Describe("JSON", func() {
 				Context("verify if localDiskFlagNotSet is set properly", func() {
 					It("localDiskFlagNotSet is set to true if LocalDiskFlag is not set, and false if LocalDiskFlag is set to false", func() {
 						_ = dispatcher.Dispatch([]byte(`{"method":"fake-action","arguments":["fake-arg"]}`))
-						Expect(bslcommon.LocalDiskFlagNotSet).To(Equal(true))
+						Expect(slhelper.LocalDiskFlagNotSet).To(Equal(true))
 
 						_ = dispatcher.Dispatch([]byte(`{"method":"fake-action","arguments":["fake-arg", "localDiskFlag:false"]}`))
-						Expect(bslcommon.LocalDiskFlagNotSet).To(Equal(false))
+						Expect(slhelper.LocalDiskFlagNotSet).To(Equal(false))
 					})
 				})
 			})

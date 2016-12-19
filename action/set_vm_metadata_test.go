@@ -2,28 +2,28 @@ package action_test
 
 import (
 	"encoding/json"
+	"errors"
 
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/action"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	action "github.com/cloudfoundry/bosh-softlayer-cpi/action"
-	bslcvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
-	fakevm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm/fakes"
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/action"
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
+	fakescommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/fakes"
 )
 
 var _ = Describe("SetVMMetadata", func() {
 	var (
-		vmID     action.VMCID
-		vmFinder *fakevm.FakeFinder
-		action   SetVMMetadataAction
-		metadata bslcvm.VMMetadata
+		fakeVmFinder *fakescommon.FakeVMFinder
+		fakeVm       *fakescommon.FakeVM
+		action       SetVMMetadataAction
+		metadata     VMMetadata
 	)
 
 	BeforeEach(func() {
-		vmID = 1234
-		vmFinder = &fakevm.FakeFinder{}
-		action = NewSetVMMetadata(vmFinder)
+		fakeVmFinder = &fakescommon.FakeVMFinder{}
+		fakeVm = &fakescommon.FakeVM{}
+		action = NewSetVMMetadata(fakeVmFinder)
 
 		metadataBytes := []byte(`{
 		  "tag1": "dea",
@@ -31,62 +31,62 @@ var _ = Describe("SetVMMetadata", func() {
 		  "tag3": "blue"
 		}`)
 
-		metadata = bslcvm.VMMetadata{}
+		metadata = VMMetadata{}
 		err := json.Unmarshal(metadataBytes, &metadata)
 		Expect(err).ToNot(HaveOccurred())
 	})
 
-	Describe("#Run", func() {
-		Context("when VM could NOT be found", func() {
+	Describe("Run", func() {
+		var (
+			vmCid VMCID
+			err   error
+		)
+		BeforeEach(func() {
+			vmCid = VMCID(123456)
+
+		})
+
+		JustBeforeEach(func() {
+			_, err = action.Run(vmCid, metadata)
+		})
+		Context("when set vm metadata succeeds", func() {
 			BeforeEach(func() {
-				vmFinder.FindFound = false
+				fakeVmFinder.FindReturns(fakeVm, true, nil)
+				fakeVm.SetMetadataReturns(nil)
 			})
 
-			It("errors with message that VM could not be found", func() {
-				_, err := action.Run(vmID, metadata)
-				Expect(err).To(HaveOccurred())
+			It("fetches vm by cid", func() {
+				Expect(fakeVmFinder.FindCallCount()).To(Equal(1))
+				actualCid := fakeVmFinder.FindArgsForCall(0)
+				Expect(actualCid).To(Equal(123456))
+			})
+
+			It("no error return", func() {
+				Expect(fakeVm.SetMetadataCallCount()).To(Equal(1))
+				actualMetadata := fakeVm.SetMetadataArgsForCall(0)
+				Expect(actualMetadata).To(Equal(metadata))
+				Expect(err).NotTo(HaveOccurred())
 			})
 		})
 
-		Context("when VM could be found", func() {
+		Context("when find vm error out", func() {
 			BeforeEach(func() {
-				vmFinder.FindFound = true
-				vmFinder.FindVM = fakevm.NewFakeVM(int(vmID))
+				fakeVmFinder.FindReturns(nil, false, errors.New("kaboom"))
 			})
 
-			Context("when metadata is not valid", func() {
-				Context("when metadata is empty", func() {
-					It("does not do anything and returns no error", func() {
-						_, err := action.Run(vmID, bslcvm.VMMetadata{})
-						Expect(err).ToNot(HaveOccurred())
-					})
-				})
+			It("provides relevant error information", func() {
+				Expect(err.Error()).To(ContainSubstring("kaboom"))
+			})
+		})
 
-				Context("when metadata is not a hash of string/string", func() {
-					BeforeEach(func() {
-						metadataBytes := []byte(`{
-  							"tag1": 0,
-  							"tag2": null,
-  							"tag3": false
-						}`)
+		Context("when find vm return false", func() {
+			BeforeEach(func() {
+				fakeVmFinder.FindReturns(nil, false, nil)
+			})
 
-						metadata = bslcvm.VMMetadata{}
-						err := json.Unmarshal(metadataBytes, &metadata)
-						Expect(err).ToNot(HaveOccurred())
-					})
-
-					It("does not do anything and returns no error", func() {
-						_, err := action.Run(vmID, metadata)
-						Expect(err).ToNot(HaveOccurred())
-					})
-				})
-
-				Context("when metadata is a hash of tags as key/value pairs", func() {
-					It("sets each tag on VM", func() {
-						_, err := action.Run(vmID, metadata)
-						Expect(err).ToNot(HaveOccurred())
-					})
-				})
+			It("provides relevant error information", func() {
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("Finding VM"))
 			})
 		})
 	})

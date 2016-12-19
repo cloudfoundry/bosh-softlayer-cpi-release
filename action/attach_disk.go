@@ -3,18 +3,18 @@ package action
 import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 	bslcdisk "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/disk"
-	bslcvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
 )
 
 type AttachDiskAction struct {
-	vmFinder   bslcvm.Finder
-	diskFinder bslcdisk.Finder
+	vmFinder   VMFinder
+	diskFinder bslcdisk.DiskFinder
 }
 
 func NewAttachDisk(
-	vmFinder bslcvm.Finder,
-	diskFinder bslcdisk.Finder,
+	vmFinder VMFinder,
+	diskFinder bslcdisk.DiskFinder,
 ) (action AttachDiskAction) {
 	action.vmFinder = vmFinder
 	action.diskFinder = diskFinder

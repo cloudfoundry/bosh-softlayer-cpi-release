@@ -13,32 +13,53 @@ import (
 
 var _ = Describe("CreateStemcell", func() {
 	var (
-		stemcellFinder *fakestem.FakeFinder
-		action         CreateStemcellAction
+		fakeStemcellFinder *fakestem.FakeStemcellFinder
+		fakeStemcell       *fakestem.FakeStemcell
+
+		action CreateStemcellAction
 	)
 
 	BeforeEach(func() {
-		stemcellFinder = &fakestem.FakeFinder{}
-		action = NewCreateStemcell(stemcellFinder)
+		fakeStemcellFinder = &fakestem.FakeStemcellFinder{}
+		fakeStemcell = &fakestem.FakeStemcell{}
+		action = NewCreateStemcell(fakeStemcellFinder)
 	})
 
 	Describe("Run", func() {
-		It("returns id for created stemcell from image path", func() {
-			stemcellFinder.FindErr = nil
-			stemcellFinder.FindStemcell = fakestem.NewFakeStemcell(1234, "fake-stemcell-id")
+		var (
+			stemcellIdStr string
+			err           error
+		)
 
-			id, err := action.Run("fake-path", CreateStemcellCloudProps{Uuid: "fake-stemcell-id"})
-			Expect(err).ToNot(HaveOccurred())
-			Expect(id).To(Equal(StemcellCID(1234).String()))
+		JustBeforeEach(func() {
+			stemcellIdStr, err = action.Run("fake-path", CreateStemcellCloudProps{Uuid: "fake-stemcell-id", Id: 123456})
 		})
 
-		It("returns error if creating stemcell fails", func() {
-			stemcellFinder.FindErr = errors.New("fake-add-err")
+		Context("when create stemcell succeeds", func() {
+			BeforeEach(func() {
+				fakeStemcellFinder.FindByIdReturns(fakeStemcell, nil)
+			})
 
-			id, err := action.Run("fake-path", CreateStemcellCloudProps{Uuid: "fake-stemcell-id"})
-			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring("fake-add-err"))
-			Expect(id).To(Equal(StemcellCID(0).String()))
+			It("find stemcell by id", func() {
+				Expect(fakeStemcellFinder.FindByIdCallCount()).To(Equal(1))
+				acutalStemcellId := fakeStemcellFinder.FindByIdArgsForCall(0)
+				Expect(acutalStemcellId).To(Equal(123456))
+			})
+
+			It("no error return", func() {
+				Expect(err).NotTo(HaveOccurred())
+			})
+		})
+
+		Context("when find stemcell error return", func() {
+			BeforeEach(func() {
+				fakeStemcellFinder.FindByIdReturns(nil, errors.New("kaboom"))
+			})
+
+			It("provides relevant error information", func() {
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("kaboom"))
+			})
 		})
 	})
 })

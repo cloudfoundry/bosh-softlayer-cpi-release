@@ -8,15 +8,14 @@ import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
-	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
+	slhelper "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
 	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
 	datatypes "github.com/maximilien/softlayer-go/data_types"
 	sl "github.com/maximilien/softlayer-go/softlayer"
 
-	"github.com/cloudfoundry/bosh-softlayer-cpi/common"
+	"github.com/cloudfoundry/bosh-softlayer-cpi/util"
 )
-
-const SOFTLAYER_VM_CREATOR_LOG_TAG = "SoftLayerVMCreator"
 
 type softLayerVirtualGuestCreator struct {
 	softLayerClient        sl.Client
@@ -24,14 +23,14 @@ type softLayerVirtualGuestCreator struct {
 
 	agentOptions AgentOptions
 	logger       boshlog.Logger
-	vmFinder     Finder
+	vmFinder     VMFinder
 
 	featureOptions FeatureOptions
 }
 
-func NewSoftLayerCreator(vmFinder Finder, softLayerClient sl.Client, agentOptions AgentOptions, logger boshlog.Logger, featureOptions FeatureOptions) VMCreator {
-	bslcommon.TIMEOUT = 120 * time.Minute
-	bslcommon.POLLING_INTERVAL = 5 * time.Second
+func NewSoftLayerCreator(vmFinder VMFinder, softLayerClient sl.Client, agentOptions AgentOptions, logger boshlog.Logger, featureOptions FeatureOptions) VMCreator {
+	slhelper.TIMEOUT = 120 * time.Minute
+	slhelper.POLLING_INTERVAL = 5 * time.Second
 
 	return &softLayerVirtualGuestCreator{
 		vmFinder:        vmFinder,
@@ -84,12 +83,12 @@ func (c *softLayerVirtualGuestCreator) createBySoftlayer(agentID string, stemcel
 	}
 
 	if cloudProps.EphemeralDiskSize == 0 {
-		err = bslcommon.WaitForVirtualGuestLastCompleteTransaction(c.softLayerClient, virtualGuest.Id, "Service Setup")
+		err = slhelper.WaitForVirtualGuestLastCompleteTransaction(c.softLayerClient, virtualGuest.Id, "Service Setup")
 		if err != nil {
 			return nil, bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` has Service Setup transaction complete", virtualGuest.Id)
 		}
 	} else {
-		err = bslcommon.AttachEphemeralDiskToVirtualGuest(c.softLayerClient, virtualGuest.Id, cloudProps.EphemeralDiskSize, c.logger)
+		err = slhelper.AttachEphemeralDiskToVirtualGuest(c.softLayerClient, virtualGuest.Id, cloudProps.EphemeralDiskSize, c.logger)
 		if err != nil {
 			return nil, bosherr.WrapError(err, fmt.Sprintf("Attaching ephemeral disk to VirtualGuest `%d`", virtualGuest.Id))
 		}
@@ -155,7 +154,7 @@ func (c *softLayerVirtualGuestCreator) createByOSReload(agentID string, stemcell
 	for _, network := range networks {
 		switch network.Type {
 		case "dynamic":
-			if common.IsPrivateSubnet(net.ParseIP(network.IP)) {
+			if util.IsPrivateSubnet(net.ParseIP(network.IP)) {
 				virtualGuest, err = virtualGuestService.GetObjectByPrimaryBackendIpAddress(network.IP)
 			} else {
 				virtualGuest, err = virtualGuestService.GetObjectByPrimaryIpAddress(network.IP)
@@ -177,19 +176,24 @@ func (c *softLayerVirtualGuestCreator) createByOSReload(agentID string, stemcell
 		return nil, bosherr.WrapErrorf(err, "Cannot find virtualGuest with id: %d", virtualGuest.Id)
 	}
 
-	bslcommon.TIMEOUT = 4 * time.Hour
+	slhelper.TIMEOUT = 4 * time.Hour
 	err = vm.ReloadOS(stemcell)
 	if err != nil {
 		return nil, bosherr.WrapError(err, "Failed to reload OS")
 	}
 
+	err = UpdateDeviceName(virtualGuest.Id, virtualGuestService, cloudProps)
+	if err != nil {
+		return nil, err
+	}
+
 	if cloudProps.EphemeralDiskSize == 0 {
-		err = bslcommon.WaitForVirtualGuestLastCompleteTransaction(c.softLayerClient, vm.ID(), "Service Setup")
+		err = slhelper.WaitForVirtualGuestLastCompleteTransaction(c.softLayerClient, vm.ID(), "Service Setup")
 		if err != nil {
 			return nil, bosherr.WrapErrorf(err, "Waiting for VirtualGuest `%d` has Service Setup transaction complete", vm.ID())
 		}
 	} else {
-		err = bslcommon.AttachEphemeralDiskToVirtualGuest(c.softLayerClient, vm.ID(), cloudProps.EphemeralDiskSize, c.logger)
+		err = slhelper.AttachEphemeralDiskToVirtualGuest(c.softLayerClient, vm.ID(), cloudProps.EphemeralDiskSize, c.logger)
 		if err != nil {
 			return nil, bosherr.WrapError(err, fmt.Sprintf("Attaching ephemeral disk to VirtualGuest `%d`", vm.ID()))
 		}

@@ -4,11 +4,14 @@ import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
-	bslcommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
+	slhelper "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
 
 	bmscl "github.com/cloudfoundry-community/bosh-softlayer-tools/clients"
-	"github.com/cloudfoundry/bosh-softlayer-cpi/util"
+	slhw "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/hardware"
 	sl "github.com/maximilien/softlayer-go/softlayer"
+
+	"github.com/cloudfoundry/bosh-softlayer-cpi/util"
 )
 
 type softLayerFinder struct {
@@ -18,7 +21,7 @@ type softLayerFinder struct {
 	logger                 boshlog.Logger
 }
 
-func NewSoftLayerFinder(softLayerClient sl.Client, baremetalClient bmscl.BmpClient, agentEnvServiceFactory AgentEnvServiceFactory, logger boshlog.Logger) Finder {
+func NewSoftLayerFinder(softLayerClient sl.Client, baremetalClient bmscl.BmpClient, agentEnvServiceFactory AgentEnvServiceFactory, logger boshlog.Logger) VMFinder {
 	return &softLayerFinder{
 		softLayerClient:        softLayerClient,
 		baremetalClient:        baremetalClient,
@@ -29,13 +32,13 @@ func NewSoftLayerFinder(softLayerClient sl.Client, baremetalClient bmscl.BmpClie
 
 func (f *softLayerFinder) Find(vmID int) (VM, bool, error) {
 	var vm VM
-	virtualGuest, err := bslcommon.GetObjectDetailsOnVirtualGuest(f.softLayerClient, vmID)
+	virtualGuest, err := slhelper.GetObjectDetailsOnVirtualGuest(f.softLayerClient, vmID)
 	if err != nil {
-		hardware, err := bslcommon.GetObjectDetailsOnHardware(f.softLayerClient, vmID)
+		hardware, err := slhelper.GetObjectDetailsOnHardware(f.softLayerClient, vmID)
 		if err != nil {
 			return nil, false, bosherr.Errorf("Failed to find VM or Baremetal %d", vmID)
 		}
-		vm = NewSoftLayerHardware(hardware, f.softLayerClient, f.baremetalClient, util.GetSshClient(), f.logger)
+		vm = slhw.NewSoftLayerHardware(hardware, f.softLayerClient, f.baremetalClient, util.GetSshClient(), f.logger)
 	} else {
 		vm = NewSoftLayerVirtualGuest(virtualGuest, f.softLayerClient, util.GetSshClient(), f.logger)
 	}
