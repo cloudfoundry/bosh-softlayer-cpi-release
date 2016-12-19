@@ -33,6 +33,7 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 		logger          boshlog.Logger
 		creator         VMCreator
 		featureOptions  FeatureOptions
+		registryOptions RegistryOptions
 	)
 
 	BeforeEach(func() {
@@ -63,6 +64,7 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 
 				env = Environment{}
 				featureOptions = FeatureOptions{DisableOsReload: false}
+				registryOptions = RegistryOptions{}
 
 				fakeVm.IDReturns(1234567)
 				fakeVmFinder.FindReturns(fakeVm, true, nil)
@@ -71,8 +73,9 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 					fakeVmFinder,
 					softLayerClient,
 					agentOptions,
-					logger,
 					featureOptions,
+					registryOptions,
+					logger,
 				)
 			})
 			Context("creating vm by os_reload", func() {
@@ -448,6 +451,7 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 				env = Environment{}
 
 				featureOptions = FeatureOptions{DisableOsReload: true}
+				registryOptions = RegistryOptions{}
 
 				fakeVm.IDReturns(1234567)
 				fakeVmFinder.FindReturns(fakeVm, true, nil)
@@ -456,8 +460,9 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 					fakeVmFinder,
 					softLayerClient,
 					agentOptions,
-					logger,
 					featureOptions,
+					registryOptions,
+					logger,
 				)
 			})
 

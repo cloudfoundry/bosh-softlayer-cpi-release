@@ -15,6 +15,7 @@
 package client
 
 import (
+	"crypto/tls"
 	"fmt"
 	"mime"
 	"net/http"
@@ -75,7 +76,9 @@ func New(host, basePath string, schemes []string) *Runtime {
 		runtime.TextMime:    runtime.TextProducer(),
 		runtime.DefaultMime: runtime.ByteStreamProducer(),
 	}
-	rt.Transport = http.DefaultTransport
+	rt.Transport = &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
 	rt.Jar = nil
 	rt.Host = host
 	rt.BasePath = basePath

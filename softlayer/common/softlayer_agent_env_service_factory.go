@@ -6,20 +6,17 @@ import (
 )
 
 type SoftLayerAgentEnvServiceFactory struct {
-	agentEnvService string
 	registryOptions RegistryOptions
 	logger          boshlog.Logger
 }
 
 func NewSoftLayerAgentEnvServiceFactory(
-	agentEnvService string,
 	registryOptions RegistryOptions,
 	logger boshlog.Logger,
 ) SoftLayerAgentEnvServiceFactory {
 	return SoftLayerAgentEnvServiceFactory{
-		logger:          logger,
-		agentEnvService: agentEnvService,
 		registryOptions: registryOptions,
+		logger:          logger,
 	}
 }
 
@@ -27,7 +24,7 @@ func (f SoftLayerAgentEnvServiceFactory) New(
 	vm VM,
 	softlayerFileService SoftlayerFileService,
 ) AgentEnvService {
-	if f.agentEnvService == "registry" {
+	if len(f.registryOptions.Host) > 0 {
 		return NewRegistryAgentEnvService(f.registryOptions, strconv.Itoa(vm.ID()), f.logger)
 	}
 	return NewFSAgentEnvService(vm, softlayerFileService, f.logger)

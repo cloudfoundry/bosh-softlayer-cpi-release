@@ -6,6 +6,25 @@ import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 )
 
+type UserDataContentsType struct {
+	Registry RegistryType `json:"registry,omitempty"`
+	Server   ServerType   `json:"server,omitempty"`
+	DNS      DNSType      `json:"dns,omitempty"`
+	Networks Networks     `json:"networks,omitempty"`
+}
+
+type RegistryType struct {
+	Endpoint string `json:"endpoint,omitempty"`
+}
+
+type ServerType struct {
+	Name string `json:"name,omitempty"` // Name given by CPI e.g. vm-384sd4-r7re9e...
+}
+
+type DNSType struct {
+	Nameserver []string `json:"nameserver,omitempty"`
+}
+
 type AgentEnv struct {
 	AgentID string `json:"agent_id"`
 
