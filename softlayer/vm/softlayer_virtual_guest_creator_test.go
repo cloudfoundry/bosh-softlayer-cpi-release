@@ -210,7 +210,7 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 							return expectedCmdResults[sshClient.ExecCommandCallCount()-1], nil
 						}
 						setFakeSoftlayerClientCreateObjectTestFixturesWithoutBoshIP_OS_Reload(softLayerClient)
-						bslcommon.LocalDNSConfigurationFile = "/tmp/hosts"
+						slh.LocalDNSConfigurationFile = "/tmp/hosts"
 						vm, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
 						Expect(err).ToNot(HaveOccurred())
 						Expect(vm.ID()).To(Equal(1234567))
@@ -434,7 +434,7 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 							return expectedCmdResults[sshClient.ExecCommandCallCount()-1], nil
 						}
 						setFakeSoftlayerClientCreateObjectTestFixturesWithoutBoshIP(softLayerClient)
-						bslcommon.LocalDNSConfigurationFile = "/tmp/hosts"
+						slh.LocalDNSConfigurationFile = "/tmp/hosts"
 						vm, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
 						Expect(err).ToNot(HaveOccurred())
 						Expect(vm.ID()).To(Equal(1234567))
@@ -597,7 +597,7 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 							return expectedCmdResults[sshClient.ExecCommandCallCount()-1], nil
 						}
 						setFakeSoftlayerClientCreateObjectTestFixturesWithoutBoshIP(softLayerClient)
-						bslcommon.LocalDNSConfigurationFile = "/tmp/hosts"
+						slh.LocalDNSConfigurationFile = "/tmp/hosts"
 						vm, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
 						Expect(err).ToNot(HaveOccurred())
 						Expect(vm.ID()).To(Equal(1234567))
@@ -638,7 +638,7 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 							return expectedCmdResults[sshClient.ExecCommandCallCount()-1], nil
 						}
 						setFakeSoftlayerClientCreateObjectTestFixturesWithoutBoshIP(softLayerClient)
-						bslcommon.LocalDNSConfigurationFile = "/etc/hosts"
+						slh.LocalDNSConfigurationFile = "/etc/hosts"
 						_, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
 						Expect(err).To(HaveOccurred())
 					})
