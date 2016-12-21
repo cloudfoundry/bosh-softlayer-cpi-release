@@ -39,7 +39,7 @@ type softLayerPoolCreator struct {
 	logger boshlog.Logger
 }
 
-func NewSoftLayerPoolCreator(vmFinder VMFinder, softLayerVmPoolClient operations.SoftLayerPoolClient, softLayerClient sl.Client, agentOptions AgentOptions, registryOptions RegistryOptions, featureOptions FeatureOptions, logger boshlog.Logger) VMCreator {
+func NewSoftLayerPoolCreator(vmFinder VMFinder, softLayerVmPoolClient operations.SoftLayerPoolClient, softLayerClient sl.Client, agentOptions AgentOptions, featureOptions FeatureOptions, registryOptions RegistryOptions, logger boshlog.Logger) VMCreator {
 	slhelper.TIMEOUT = 120 * time.Minute
 	slhelper.POLLING_INTERVAL = 5 * time.Second
 
