@@ -30,7 +30,7 @@ func NewConcreteFactory(options ConcreteFactoryOptions, logger boshlog.Logger) c
 
 	stemcellFinder := bslcstem.NewSoftLayerStemcellFinder(softLayerClient, logger)
 
-	agentEnvServiceFactory := NewSoftLayerAgentEnvServiceFactory(options.AgentEnvService, options.Registry, logger)
+	agentEnvServiceFactory := NewSoftLayerAgentEnvServiceFactory(options.Registry, logger)
 
 	vmFinder := bslcvm.NewSoftLayerFinder(
 		softLayerClient,
