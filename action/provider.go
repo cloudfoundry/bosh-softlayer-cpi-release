@@ -44,8 +44,9 @@ func NewCreatorProvider(softLayerClient sl.Client, baremetalClient bmscl.BmpClie
 		vmFinder,
 		softLayerClient,
 		options.Agent,
-		logger,
 		options.Softlayer.FeatureOptions,
+		options.Registry,
+		logger,
 	)
 
 	baremetalCreator := slhw.NewBaremetalCreator(

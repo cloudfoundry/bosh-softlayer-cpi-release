@@ -30,28 +30,27 @@ type softLayerPoolCreator struct {
 	softLayerClient       sl.Client
 	softLayerVmPoolClient operations.SoftLayerPoolClient
 
-	agentEnvServiceFactory AgentEnvServiceFactory
-
-	agentOptions AgentOptions
-
-	logger boshlog.Logger
-
 	vmFinder VMFinder
 
+	agentOptions AgentOptions
+	registryOptions RegistryOptions
 	featureOptions FeatureOptions
+
+	logger boshlog.Logger
 }
 
-func NewSoftLayerPoolCreator(vmFinder VMFinder, softLayerVmPoolClient operations.SoftLayerPoolClient, softLayerClient sl.Client, agentOptions AgentOptions, logger boshlog.Logger, featureOptions FeatureOptions) VMCreator {
+func NewSoftLayerPoolCreator(vmFinder VMFinder, softLayerVmPoolClient operations.SoftLayerPoolClient, softLayerClient sl.Client, agentOptions AgentOptions, registryOptions RegistryOptions, featureOptions FeatureOptions, logger boshlog.Logger) VMCreator {
 	slhelper.TIMEOUT = 120 * time.Minute
 	slhelper.POLLING_INTERVAL = 5 * time.Second
 
 	return &softLayerPoolCreator{
 		softLayerVmPoolClient: softLayerVmPoolClient,
 		softLayerClient:       softLayerClient,
-		agentOptions:          agentOptions,
-		logger:                logger,
 		vmFinder:              vmFinder,
+		agentOptions:          agentOptions,
+		registryOptions:       registryOptions,
 		featureOptions:        featureOptions,
+		logger:                logger,
 	}
 }
 
@@ -76,7 +75,7 @@ func (c *softLayerPoolCreator) Create(agentID string, stemcell bslcstem.Stemcell
 // Private methods
 func (c *softLayerPoolCreator) createFromVMPool(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
 	var err error
-	virtualGuestTemplate, err := CreateVirtualGuestTemplate(stemcell, cloudProps, networks)
+	virtualGuestTemplate, err := CreateVirtualGuestTemplate(stemcell, cloudProps, networks, CreateUserDataForInstance(agentID, networks, c.registryOptions))
 	filter := &models.VMFilter{
 		CPU:         int32(virtualGuestTemplate.StartCpus),
 		MemoryMb:    int32(virtualGuestTemplate.MaxMemory),
@@ -151,7 +150,7 @@ func (c *softLayerPoolCreator) createFromVMPool(agentID string, stemcell bslcste
 }
 
 func (c *softLayerPoolCreator) createBySoftlayer(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
-	virtualGuestTemplate, err := CreateVirtualGuestTemplate(stemcell, cloudProps, networks)
+	virtualGuestTemplate, err := CreateVirtualGuestTemplate(stemcell, cloudProps, networks, CreateUserDataForInstance(agentID, networks, c.registryOptions))
 	if err != nil {
 		return nil, bosherr.WrapError(err, "Creating VirtualGuest template")
 	}

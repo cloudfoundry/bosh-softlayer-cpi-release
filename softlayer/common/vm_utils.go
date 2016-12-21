@@ -19,6 +19,7 @@ import (
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	sl "github.com/maximilien/softlayer-go/softlayer"
+	"encoding/json"
 )
 
 func CreateDisksSpec(ephemeralDiskSize int) DisksSpec {
@@ -38,7 +39,7 @@ func TimeStampForTime(now time.Time) string {
 	return now.Format("20060102-030405-") + strconv.Itoa(int(now.UnixNano()/1e6-now.Unix()*1e3))
 }
 
-func CreateVirtualGuestTemplate(stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks) (sldatatypes.SoftLayer_Virtual_Guest_Template, error) {
+func CreateVirtualGuestTemplate(stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, userData string) (sldatatypes.SoftLayer_Virtual_Guest_Template, error) {
 	for _, network := range networks {
 		switch network.Type {
 		case "dynamic":
@@ -102,6 +103,12 @@ func CreateVirtualGuestTemplate(stemcell bslcstem.Stemcell, cloudProps VMCloudPr
 		PrivateNetworkOnlyFlag:         cloudProps.PrivateNetworkOnlyFlag,
 		PrimaryNetworkComponent:        &cloudProps.PrimaryNetworkComponent,
 		PrimaryBackendNetworkComponent: &cloudProps.PrimaryBackendNetworkComponent,
+
+		UserData: []sldatatypes.UserData{
+			sldatatypes.UserData{
+				Value: userData,
+			},
+		},
 	}
 
 	return virtualGuestTemplate, nil
@@ -112,6 +119,30 @@ func CreateAgentUserData(agentID string, cloudProps VMCloudProperties, networks 
 	disks := CreateDisksSpec(cloudProps.EphemeralDiskSize)
 	agentEnv := NewAgentEnvForVM(agentID, agentName, networks, disks, env, agentOptions)
 	return agentEnv
+}
+
+func CreateUserDataForInstance(agentID string, networks Networks, registryOptions RegistryOptions) string {
+	server := fmt.Sprintf("vm-%s", agentID)
+
+	userDataContents := UserDataContentsType{
+		Registry: fmt.Sprintf(
+		"http://%s:%s@%s:%d",
+		registryOptions.Username,
+		registryOptions.Password,
+		registryOptions.Host,
+		registryOptions.Port,
+		),
+		Server: {
+			Name: server,
+		},
+		DNS: {
+			Nameserver: networks.First().DNS,
+		},
+		Networks: networks,
+	}
+
+	contentsBytes, _ := json.Marshal(userDataContents)
+	return string(contentsBytes[:])
 }
 
 func UpdateDavConfig(config *DavConfig, directorIP string) (err error) {
