@@ -24,7 +24,7 @@ func (f SoftLayerAgentEnvServiceFactory) New(
 	vm VM,
 	softlayerFileService SoftlayerFileService,
 ) AgentEnvService {
-	if f.registryOptions != nil {
+	if len(f.registryOptions.Host) > 0 {
 		return NewRegistryAgentEnvService(f.registryOptions, strconv.Itoa(vm.ID()), f.logger)
 	}
 	return NewFSAgentEnvService(vm, softlayerFileService, f.logger)

@@ -31,7 +31,7 @@ type deleterProvider struct {
 }
 
 func NewCreatorProvider(softLayerClient sl.Client, baremetalClient bmscl.BmpClient, softLayerPoolClient operations.SoftLayerPoolClient, options ConcreteFactoryOptions, logger boshlog.Logger) CreatorProvider {
-	agentEnvServiceFactory := NewSoftLayerAgentEnvServiceFactory(options.AgentEnvService, options.Registry, logger)
+	agentEnvServiceFactory := NewSoftLayerAgentEnvServiceFactory(options.Registry, logger)
 
 	vmFinder := slvm.NewSoftLayerFinder(
 		softLayerClient,
