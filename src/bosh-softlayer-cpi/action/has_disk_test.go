@@ -7,19 +7,27 @@ import (
 	. "github.com/onsi/gomega"
 	. "bosh-softlayer-cpi/action"
 
+	fakeclient "github.com/maximilien/softlayer-go/client/fakes"
         fakeDisk "bosh-softlayer-cpi/softlayer/disk/fakes"
+	boshlog "github.com/cloudfoundry/bosh-utils/logger"
+	softlayerDisk "bosh-softlayer-cpi/softlayer/disk"
 )
 
 var _ = Describe("HasDisk", func() {
 	var (
 		fakeDiskFinder *fakeDisk.FakeDiskFinder
 		action       HasDiskAction
-
+		fc      *fakeclient.FakeSoftLayerClient
+		logger  boshlog.Logger
+		disk1   softlayerDisk.Disk
 	)
 
 	BeforeEach(func() {
 		fakeDiskFinder = &fakeDisk.FakeDiskFinder{}
 		action = NewHasDisk(fakeDiskFinder)
+		fc = fakeclient.NewFakeSoftLayerClient("fake-user", "fake-key")
+		logger = boshlog.NewLogger(boshlog.LevelNone)
+		disk1 = softlayerDisk.NewSoftLayerDisk(1234, fc, logger)
 	})
 
 	Describe("Run", func() {
@@ -36,10 +44,10 @@ var _ = Describe("HasDisk", func() {
 		JustBeforeEach(func() {
 			found, err = action.Run(diskCid)
 		})
-		
+
 		Context("when has disk succeeds", func() {
 			BeforeEach(func() {
-				fakeDiskFinder.FindReturns(nil, true, nil)
+				fakeDiskFinder.FindReturns(disk1, true, nil)
 			})
 
 			It("returns no error", func() {
@@ -48,7 +56,7 @@ var _ = Describe("HasDisk", func() {
 			})
 		})
 
-		Context("when no error occurs but diskID is 0", func() {
+		Context("when no error occurs but diskID is invalid", func() {
 			BeforeEach(func() {
 				fakeDiskFinder.FindReturns(nil, false, nil)
 			})
