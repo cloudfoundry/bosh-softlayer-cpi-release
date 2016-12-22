@@ -123,28 +123,21 @@ func CreateAgentUserData(agentID string, cloudProps VMCloudProperties, networks 
 
 func CreateUserDataForInstance(agentID string, networks Networks, registryOptions RegistryOptions) string {
 	serverName := fmt.Sprintf("vm-%s", agentID)
-
 	userDataContents := UserDataContentsType{
+		Registry: RegistryType{
+			Endpoint: fmt.Sprintf("http://%s:%s@%s:%d",
+				        registryOptions.Username,
+				        registryOptions.Password,
+				        registryOptions.Host,
+				        registryOptions.Port),
+		},
+		Server: ServerType{
+			Name: serverName,
+		},
 		Networks: networks,
 	}
-
-	registry := struct {
-		Endpoint string
-	}{ fmt.Sprintf("http://%s:%s@%s:%d", registryOptions.Username, registryOptions.Password, registryOptions.Host, registryOptions.Port)}
-        userDataContents.Registry = registry
-
-	server := struct {
-		Name string // Name given by CPI e.g. vm-384sd4-r7re9e...
-        }{ serverName }
-	userDataContents.Server = server
-
-	dns := struct {
-		Nameserver []string
-        }{ networks.First().DNS }
-	userDataContents.DNS = dns
-
 	contentsBytes, _ := json.Marshal(userDataContents)
-	return string(contentsBytes[:])
+	return string(contentsBytes)
 }
 
 func UpdateDavConfig(config *DavConfig, directorIP string) (err error) {
