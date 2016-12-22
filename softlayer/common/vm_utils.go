@@ -134,7 +134,6 @@ func CreateUserDataForInstance(agentID string, networks Networks, registryOption
 		Server: ServerType{
 			Name: serverName,
 		},
-		Networks: networks,
 	}
 	contentsBytes, _ := json.Marshal(userDataContents)
 	return string(contentsBytes)
