@@ -79,7 +79,27 @@ func NewAgentEnvFromJSON(bytes []byte) (AgentEnv, error) {
 	return agentEnv, nil
 }
 
-func NewAgentEnvForVM(agentID, vmCID string, networksSpec Networks, disksSpec DisksSpec, env Environment, agentOptions AgentOptions) AgentEnv {
+func NewAgentEnvForVM(agentID, vmCID string, networks Networks, disksSpec DisksSpec, env Environment, agentOptions AgentOptions) AgentEnv {
+	networksSpec := Networks{}
+
+	for netName, network := range networks {
+		networksSpec[netName] = Network{
+			Type: network.Type,
+
+			IP:      network.IP,
+			Netmask: network.Netmask,
+			Gateway: network.Gateway,
+
+			DNS:           network.DNS,
+			Default:       network.Default,
+			Preconfigured: true,
+
+			MAC: "",
+
+			CloudProperties: network.CloudProperties,
+		}
+	}
+
 	agentEnv := AgentEnv{
 		AgentID: agentID,
 
