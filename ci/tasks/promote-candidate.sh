@@ -11,7 +11,6 @@ source /etc/profile.d/chruby.sh
 chruby 2.2.4
 
 integer_version=$( cat version-semver/number | sed 's/\.0$//;s/\.0$//' )
-cp version-semver/number bumped-version-semver/number
 
 cp -r bosh-cpi-release promoted/repo
 
