@@ -10,9 +10,7 @@ check_param S3_SECRET_ACCESS_KEY
 source /etc/profile.d/chruby.sh
 chruby 2.2.4
 
-# Creates an integer version number from the semantic version format
-# May be changed when we decide to fully use semantic versions for releases
-VERSION=$( cat version-semver/number | sed 's/\.0$//;s/\.0$//' )
+integer_version=$( cat version-semver/number | sed 's/\.0$//;s/\.0$//' )
 cp version-semver/number bumped-version-semver/number
 
 cp -r bosh-cpi-release promoted/repo
