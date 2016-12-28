@@ -25,6 +25,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"crypto/tls"
 
 	"golang.org/x/net/context"
 	"golang.org/x/net/context/ctxhttp"

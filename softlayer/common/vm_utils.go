@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	sl "github.com/maximilien/softlayer-go/softlayer"
+	"encoding/json"
 )
 
 func CreateDisksSpec(ephemeralDiskSize int) DisksSpec {
