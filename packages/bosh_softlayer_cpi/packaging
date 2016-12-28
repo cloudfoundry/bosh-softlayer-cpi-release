@@ -19,4 +19,4 @@ bin/build-linux-amd64
 mkdir -p $BOSH_INSTALL_TARGET/bin
 cp out/softlayer_cpi $BOSH_INSTALL_TARGET/bin/softlayer_cpi
 
-cp src/bosh-softlayer-cpi/version ${BOSH_INSTALL_TARGET}
+cp version ${BOSH_INSTALL_TARGET}
