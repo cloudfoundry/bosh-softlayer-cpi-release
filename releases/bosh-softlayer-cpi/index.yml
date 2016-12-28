@@ -30,4 +30,6 @@ builds:
     version: 3.0.1
   0be26360-9cf4-4c3b-a52b-b55d1b6e9dae:
     version: '5'
+  f0061896-0273-42f4-8360-40f6e2c41d5a:
+    version: '6'
 format-version: '2'
