@@ -19,10 +19,12 @@ pushd bosh-cpi-release
   echo "using bosh CLI version..."
   bosh version
 
+  echo $semver > src/bosh-softlayer-cpi/version
+
   cpi_release_name="bosh-softlayer-cpi"
 
   echo "building CPI release..."
-  bosh create release --name $cpi_release_name --version $semver --with-tarball
+  bosh create release --name $cpi_release_name --version $semver --with-tarball --force
 popd
 
 mv bosh-cpi-release/dev_releases/$cpi_release_name/$cpi_release_name-$semver.tgz candidate/
