@@ -19,6 +19,8 @@ pushd bosh-cpi-release
   echo "using bosh CLI version..."
   bosh version
 
+  echo $semver > src/bosh-softlayer-cpi/version
+
   cpi_release_name="bosh-softlayer-cpi"
 
   echo "building CPI release..."

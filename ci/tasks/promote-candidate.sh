@@ -12,8 +12,8 @@ chruby 2.2.4
 
 # Creates an integer version number from the semantic version format
 # May be changed when we decide to fully use semantic versions for releases
-integer_version=`cat release-version-semver/number`
-echo $integer_version > promoted/integer_version
+VERSION=$( cat version-semver/number | sed 's/\.0$//;s/\.0$//' )
+cp version-semver/number bumped-version-semver/number
 
 cp -r bosh-cpi-release promoted/repo
 
