@@ -1,6 +1,7 @@
 package common
 
 import (
+	"fmt"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	"strconv"
 )
@@ -25,7 +26,14 @@ func (f SoftLayerAgentEnvServiceFactory) New(
 	softlayerFileService SoftlayerFileService,
 ) AgentEnvService {
 	if len(f.registryOptions.Host) > 0 {
-		return NewRegistryAgentEnvService(f.registryOptions, strconv.Itoa(vm.ID()), f.logger)
+		endpoint := fmt.Sprintf(
+			"http://%s:%s@%s:%d",
+			f.registryOptions.Username,
+			f.registryOptions.Password,
+			f.registryOptions.Host,
+			f.registryOptions.Port,
+		)
+		return NewRegistryAgentEnvService(endpoint, strconv.Itoa(vm.ID()), f.logger)
 	}
 	return NewFSAgentEnvService(vm, softlayerFileService, f.logger)
 }

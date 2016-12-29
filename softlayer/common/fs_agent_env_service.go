@@ -90,3 +90,7 @@ func (s *fsAgentEnvService) Update(agentEnv AgentEnv) error {
 
 	return bosherr.WrapError(err, "Updating Agent Env timeout. "+longHostNameWarningMsg)
 }
+
+func (s *fsAgentEnvService) Delete() error {
+	return nil
+}
