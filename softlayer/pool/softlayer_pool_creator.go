@@ -5,7 +5,7 @@ import (
 	"net"
 	"time"
 
-	strfmt "github.com/go-openapi/strfmt"
+	"github.com/go-openapi/strfmt"
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
@@ -17,7 +17,7 @@ import (
 	slhelper "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
 	operations "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/pool/client/vm"
 	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
-	util "github.com/cloudfoundry/bosh-softlayer-cpi/util"
+	"github.com/cloudfoundry/bosh-softlayer-cpi/util"
 
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 
@@ -183,7 +183,7 @@ func (c *softLayerPoolCreator) createBySoftlayer(agentID string, stemcell bslcst
 		return nil, bosherr.WrapErrorf(err, "Cannot find VirtualGuest with id: %d.", virtualGuest.Id)
 	}
 
-	if len(cloudProps.BoshIp) == 0 {
+	if cloudProps.NotDeployedByDirector {
 		UpdateEtcHostsOfBoshInit(fmt.Sprintf("%s  %s", vm.GetPrimaryBackendIP(), vm.GetFullyQualifiedDomainName()))
 		mbus, err := ParseMbusURL(c.agentOptions.Mbus, vm.GetPrimaryBackendIP())
 		if err != nil {
@@ -191,7 +191,17 @@ func (c *softLayerPoolCreator) createBySoftlayer(agentID string, stemcell bslcst
 		}
 		c.agentOptions.Mbus = mbus
 	} else {
-		mbus, err := ParseMbusURL(c.agentOptions.Mbus, cloudProps.BoshIp)
+		var boshIP string
+		if cloudProps.BoshIp != "" {
+			boshIP = cloudProps.BoshIp
+		} else {
+			boshIP, err = GetLocalIPAddressOfGivenInterface(slhelper.NetworkInterface)
+			if err != nil {
+				return nil, bosherr.WrapErrorf(err, fmt.Sprintf("Failed to get IP address of %s in local", slhelper.NetworkInterface))
+			}
+		}
+
+		mbus, err := ParseMbusURL(c.agentOptions.Mbus, boshIP)
 		if err != nil {
 			return nil, bosherr.WrapErrorf(err, "Cannot construct mbus url.")
 		}
@@ -200,7 +210,7 @@ func (c *softLayerPoolCreator) createBySoftlayer(agentID string, stemcell bslcst
 		switch c.agentOptions.Blobstore.Provider {
 		case BlobstoreTypeDav:
 			davConf := DavConfig(c.agentOptions.Blobstore.Options)
-			UpdateDavConfig(&davConf, cloudProps.BoshIp)
+			UpdateDavConfig(&davConf, boshIP)
 		}
 	}
 
@@ -279,7 +289,7 @@ func (c *softLayerPoolCreator) createByOSReload(agentID string, stemcell bslcste
 		}
 	}
 
-	if len(cloudProps.BoshIp) == 0 {
+	if cloudProps.NotDeployedByDirector {
 		UpdateEtcHostsOfBoshInit(fmt.Sprintf("%s  %s", vm.GetPrimaryBackendIP(), vm.GetFullyQualifiedDomainName()))
 		mbus, err := ParseMbusURL(c.agentOptions.Mbus, vm.GetPrimaryBackendIP())
 		if err != nil {
@@ -287,7 +297,17 @@ func (c *softLayerPoolCreator) createByOSReload(agentID string, stemcell bslcste
 		}
 		c.agentOptions.Mbus = mbus
 	} else {
-		mbus, err := ParseMbusURL(c.agentOptions.Mbus, cloudProps.BoshIp)
+		var boshIP string
+		if cloudProps.BoshIp != "" {
+			boshIP = cloudProps.BoshIp
+		} else {
+			boshIP, err = GetLocalIPAddressOfGivenInterface(slhelper.NetworkInterface)
+			if err != nil {
+				return nil, bosherr.WrapErrorf(err, fmt.Sprintf("Failed to get IP address of %s in local", slhelper.NetworkInterface))
+			}
+		}
+
+		mbus, err := ParseMbusURL(c.agentOptions.Mbus, boshIP)
 		if err != nil {
 			return nil, bosherr.WrapErrorf(err, "Cannot construct mbus url.")
 		}
@@ -296,7 +316,7 @@ func (c *softLayerPoolCreator) createByOSReload(agentID string, stemcell bslcste
 		switch c.agentOptions.Blobstore.Provider {
 		case BlobstoreTypeDav:
 			davConf := DavConfig(c.agentOptions.Blobstore.Options)
-			UpdateDavConfig(&davConf, cloudProps.BoshIp)
+			UpdateDavConfig(&davConf, boshIP)
 		}
 	}
 
@@ -356,7 +376,7 @@ func (c *softLayerPoolCreator) oSReloadVMInPool(cid int, agentID string, stemcel
 		}
 	}
 
-	if len(cloudProps.BoshIp) == 0 {
+	if cloudProps.NotDeployedByDirector {
 		UpdateEtcHostsOfBoshInit(fmt.Sprintf("%s  %s", vm.GetPrimaryBackendIP(), vm.GetFullyQualifiedDomainName()))
 		mbus, err := ParseMbusURL(c.agentOptions.Mbus, vm.GetPrimaryBackendIP())
 		if err != nil {
@@ -364,7 +384,17 @@ func (c *softLayerPoolCreator) oSReloadVMInPool(cid int, agentID string, stemcel
 		}
 		c.agentOptions.Mbus = mbus
 	} else {
-		mbus, err := ParseMbusURL(c.agentOptions.Mbus, cloudProps.BoshIp)
+		var boshIP string
+		if cloudProps.BoshIp != "" {
+			boshIP = cloudProps.BoshIp
+		} else {
+			boshIP, err = GetLocalIPAddressOfGivenInterface(slhelper.NetworkInterface)
+			if err != nil {
+				return nil, bosherr.WrapErrorf(err, fmt.Sprintf("Failed to get IP address of %s in local", slhelper.NetworkInterface))
+			}
+		}
+
+		mbus, err := ParseMbusURL(c.agentOptions.Mbus, boshIP)
 		if err != nil {
 			return nil, bosherr.WrapErrorf(err, "Cannot construct mbus url.")
 		}
@@ -373,7 +403,7 @@ func (c *softLayerPoolCreator) oSReloadVMInPool(cid int, agentID string, stemcel
 		switch c.agentOptions.Blobstore.Provider {
 		case BlobstoreTypeDav:
 			davConf := DavConfig(c.agentOptions.Blobstore.Options)
-			UpdateDavConfig(&davConf, cloudProps.BoshIp)
+			UpdateDavConfig(&davConf, boshIP)
 		}
 	}
 

@@ -177,6 +177,30 @@ func UpdateDeviceName(vmID int, virtualGuestService sl.SoftLayer_Virtual_Guest_S
 	return nil
 }
 
+func GetLocalIPAddressOfGivenInterface(networkInterface string) (string, error) {
+	interfaces, err := net.Interfaces()
+	if err != nil {
+		return "", bosherr.WrapErrorf(err, "Failed to get network interfaces")
+	}
+
+	for _, i := range interfaces {
+		if i.Name == networkInterface {
+			addrs, err := i.Addrs()
+			if err != nil {
+				return "", bosherr.WrapErrorf(err, fmt.Sprintf("Failed to get interface addresses for %s", networkInterface))
+			}
+			for _, addr := range addrs {
+				ipnet, _ := addr.(*net.IPNet)
+				if ipnet.IP.To4() != nil {
+					return ipnet.IP.String(), nil
+				}
+			}
+		}
+	}
+
+	return "", bosherr.Error(fmt.Sprintf("Failed to get IP address of %s", networkInterface))
+}
+
 const ETC_HOSTS_TEMPLATE = `127.0.0.1 localhost
 {{.}}
 `

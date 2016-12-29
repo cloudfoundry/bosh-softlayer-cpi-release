@@ -18,6 +18,7 @@ var (
 	POLLING_INTERVAL    time.Duration
 	LocalDiskFlagNotSet bool
 	LengthOfHostName    int
+	NetworkInterface    string
 )
 
 type SoftLayer_Hardware_Parameters struct {
