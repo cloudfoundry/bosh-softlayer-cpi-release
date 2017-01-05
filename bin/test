@@ -21,7 +21,7 @@ $bin/go vet ./...
 let "result+=$?"
 
 echo -e "\n Running build script to confirm everything compiles..."
-$bin/build-linux-amd64
+$bin/build-amd64
 let "result+=$?"
 
 if [ $result -eq 0 ]; then
