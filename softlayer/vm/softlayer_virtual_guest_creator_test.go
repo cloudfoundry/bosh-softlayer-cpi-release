@@ -211,6 +211,7 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 							return expectedCmdResults[sshClient.ExecCommandCallCount()-1], nil
 						}
 						setFakeSoftlayerClientCreateObjectTestFixturesWithoutBoshIP_OS_Reload(softLayerClient)
+
 						switch runtime.GOOS {
 						case "darwin":
 							slh.NetworkInterface = "en0"
@@ -219,6 +220,8 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 						default:
 							slh.NetworkInterface = "eth0"
 						}
+						slh.LocalDNSConfigurationFile = "/tmp/hosts"
+
 						vm, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
 						Expect(err).ToNot(HaveOccurred())
 						Expect(vm.ID()).To(Equal(1234567))
@@ -489,6 +492,7 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 							return expectedCmdResults[sshClient.ExecCommandCallCount()-1], nil
 						}
 						setFakeSoftlayerClientCreateObjectTestFixturesWithoutBoshIP(softLayerClient)
+
 						switch runtime.GOOS {
 						case "darwin":
 							slh.NetworkInterface = "en0"
@@ -497,6 +501,8 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 						default:
 							slh.NetworkInterface = "eth0"
 						}
+						slh.LocalDNSConfigurationFile = "/tmp/hosts"
+
 						vm, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
 						Expect(err).ToNot(HaveOccurred())
 						Expect(vm.ID()).To(Equal(1234567))
@@ -544,6 +550,8 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 						default:
 							slh.NetworkInterface = "eth0"
 						}
+						slh.LocalDNSConfigurationFile = "/tmp/hosts"
+
 						vm, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
 						Expect(err).ToNot(HaveOccurred())
 						Expect(vm.ID()).To(Equal(1234567))
@@ -707,6 +715,7 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 							return expectedCmdResults[sshClient.ExecCommandCallCount()-1], nil
 						}
 						setFakeSoftlayerClientCreateObjectTestFixturesWithoutBoshIP(softLayerClient)
+
 						switch runtime.GOOS {
 						case "darwin":
 							slh.NetworkInterface = "en0"
@@ -715,6 +724,8 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 						default:
 							slh.NetworkInterface = "eth0"
 						}
+						slh.LocalDNSConfigurationFile = "/tmp/hosts"
+
 						vm, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
 						Expect(err).ToNot(HaveOccurred())
 						Expect(vm.ID()).To(Equal(1234567))
@@ -745,7 +756,7 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 								NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
 							PrimaryBackendNetworkComponent: sldatatypes.PrimaryBackendNetworkComponent{
 								NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
-							DisableOsReload:       true,
+							DisableOsReload: true,
 						}
 
 						expectedCmdResults := []string{
@@ -755,6 +766,7 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 							return expectedCmdResults[sshClient.ExecCommandCallCount()-1], nil
 						}
 						setFakeSoftlayerClientCreateObjectTestFixturesWithoutBoshIP(softLayerClient)
+
 						switch runtime.GOOS {
 						case "darwin":
 							slh.NetworkInterface = "en0"
@@ -763,11 +775,11 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 						default:
 							slh.NetworkInterface = "eth0"
 						}
-						vm, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
-						Expect(err).ToNot(HaveOccurred())
-						Expect(vm.ID()).To(Equal(1234567))
-					})
 
+						slh.LocalDNSConfigurationFile = "/tmp/hosts"
+						_, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
+						Expect(err).ToNot(HaveOccurred())
+					})
 				})
 			})
 		})
@@ -787,6 +799,7 @@ func setFakeSoftlayerClientCreateObjectTestFixturesWithEphemeralDiskSize(fakeSof
 		"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
 		"SoftLayer_Virtual_Guest_Service_getLastTransaction_CloudInstanceUpgrade.json",
 		"SoftLayer_Virtual_Guest_Service_getPowerState.json",
+		"SoftLayer_Virtual_Guest_Service_getBlockDevices.json",
 
 		"SoftLayer_Virtual_Guest_Service_getObject.json",
 	}
@@ -806,6 +819,7 @@ func setFakeSoftlayerClientCreateObjectTestFixturesWithEphemeralDiskSize_OS_Relo
 		"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
 		"SoftLayer_Virtual_Guest_Service_getLastTransaction_CloudInstanceUpgrade.json",
 		"SoftLayer_Virtual_Guest_Service_getPowerState.json",
+		"SoftLayer_Virtual_Guest_Service_getBlockDevices.json",
 
 		"SoftLayer_Virtual_Guest_Service_getObject.json",
 		"SoftLayer_Virtual_Guest_Service_getObject.json",
@@ -849,6 +863,7 @@ func setFakeSoftlayerClientCreateObjectTestFixturesWithoutBoshIP(fakeSoftLayerCl
 		"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
 		"SoftLayer_Virtual_Guest_Service_getLastTransaction_CloudInstanceUpgrade.json",
 		"SoftLayer_Virtual_Guest_Service_getPowerState.json",
+		"SoftLayer_Virtual_Guest_Service_getBlockDevices.json",
 
 		"SoftLayer_Virtual_Guest_Service_getObject.json",
 	}
@@ -869,6 +884,7 @@ func setFakeSoftlayerClientCreateObjectTestFixturesWithoutBoshIP_OS_Reload(fakeS
 		"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
 		"SoftLayer_Virtual_Guest_Service_getLastTransaction_CloudInstanceUpgrade.json",
 		"SoftLayer_Virtual_Guest_Service_getPowerState.json",
+		"SoftLayer_Virtual_Guest_Service_getBlockDevices.json",
 
 		"SoftLayer_Virtual_Guest_Service_getObject.json",
 		"SoftLayer_Virtual_Guest_Service_getObject.json",
