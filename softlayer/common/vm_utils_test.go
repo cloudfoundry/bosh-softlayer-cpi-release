@@ -2,6 +2,7 @@ package common_test
 
 import (
 	"encoding/json"
+	"net"
 	"strconv"
 	"time"
 
@@ -21,6 +22,7 @@ import (
 	sldatatypes "github.com/maximilien/softlayer-go/data_types"
 
 	"errors"
+	"strings"
 )
 
 var _ = Describe("VM Utils", func() {
@@ -612,7 +614,6 @@ var _ = Describe("VM Utils", func() {
 			It("returns nil from EditObject", func() {
 				err := UpdateDeviceName(1, slvgs, VMCloudProperties{})
 				Expect(err).ToNot(HaveOccurred())
-
 			})
 		})
 		Context("when fails to update device name", func() {
@@ -621,6 +622,38 @@ var _ = Describe("VM Utils", func() {
 			})
 			It("returns error from EditObject", func() {
 				err := UpdateDeviceName(1, slvgs, VMCloudProperties{})
+				Expect(err).To(HaveOccurred())
+			})
+		})
+	})
+
+	Describe("#GetLocalIPAddressOfGivenInterface", func() {
+		var (
+			ip         string
+			interfaces []net.Interface
+			err        error
+		)
+		BeforeEach(func() {
+			interfaces, _ = net.Interfaces()
+		})
+		Context("when specifying a valid network interface", func() {
+			It("returns the correct IPv4 address", func() {
+				for _, i := range interfaces {
+					if i.Name == "eth0" || i.Name == "en0" {
+						ip, err = GetLocalIPAddressOfGivenInterface(i.Name)
+						break
+					}
+				}
+
+				Expect(err).ToNot(HaveOccurred())
+				Expect(3).To(Equal(strings.Count(ip, ".")))
+			})
+		})
+		Context("when specifying an invalid network interface", func() {
+			It("returns an empty string and error", func() {
+				ip, err = GetLocalIPAddressOfGivenInterface("wrongInterface")
+
+				Expect("").To(Equal(ip))
 				Expect(err).To(HaveOccurred())
 			})
 		})

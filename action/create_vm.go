@@ -6,7 +6,7 @@ import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
-	helper "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
+	"github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
 	bslcstem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell"
 
 	sldatatypes "github.com/maximilien/softlayer-go/data_types"
@@ -37,6 +37,7 @@ func (a CreateVMAction) Run(agentID string, stemcellCID StemcellCID, cloudProps 
 
 	helper.TIMEOUT = 30 * time.Second
 	helper.POLLING_INTERVAL = 5 * time.Second
+	helper.NetworkInterface = "eth0"
 	helper.LocalDNSConfigurationFile = "/etc/hosts"
 
 	stemcell, err := a.stemcellFinder.FindById(int(stemcellCID))

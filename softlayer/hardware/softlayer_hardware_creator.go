@@ -69,7 +69,17 @@ func (c *baremetalCreator) createByBaremetal(agentID string, stemcell bslcstem.S
 		return nil, bosherr.WrapErrorf(err, "Cannot find hardware with id: %d.", hardwareId)
 	}
 
-	mbus, err := ParseMbusURL(c.agentOptions.Mbus, cloudProps.BoshIp)
+	var boshIP string
+	if cloudProps.BoshIp != "" {
+		boshIP = cloudProps.BoshIp
+	} else {
+		boshIP, err = GetLocalIPAddressOfGivenInterface(slh.NetworkInterface)
+		if err != nil {
+			return nil, bosherr.WrapErrorf(err, fmt.Sprintf("Failed to get IP address of %s in local", slh.NetworkInterface))
+		}
+	}
+
+	mbus, err := ParseMbusURL(c.agentOptions.Mbus, boshIP)
 	if err != nil {
 		return nil, bosherr.WrapErrorf(err, "Cannot construct mbus url.")
 	}
@@ -78,7 +88,7 @@ func (c *baremetalCreator) createByBaremetal(agentID string, stemcell bslcstem.S
 	switch c.agentOptions.Blobstore.Provider {
 	case BlobstoreTypeDav:
 		davConf := DavConfig(c.agentOptions.Blobstore.Options)
-		UpdateDavConfig(&davConf, cloudProps.BoshIp)
+		UpdateDavConfig(&davConf, boshIP)
 	}
 
 	agentEnv := CreateAgentUserData(agentID, cloudProps, networks, env, c.agentOptions)
@@ -131,7 +141,17 @@ func (c *baremetalCreator) createByOSReload(agentID string, stemcell bslcstem.St
 	}
 
 	// Update mbus url setting
-	mbus, err := ParseMbusURL(c.agentOptions.Mbus, cloudProps.BoshIp)
+	var boshIP string
+	if cloudProps.BoshIp != "" {
+		boshIP = cloudProps.BoshIp
+	} else {
+		boshIP, err = GetLocalIPAddressOfGivenInterface(slh.NetworkInterface)
+		if err != nil {
+			return nil, bosherr.WrapErrorf(err, fmt.Sprintf("Failed to get IP address of %s in local", slh.NetworkInterface))
+		}
+	}
+
+	mbus, err := ParseMbusURL(c.agentOptions.Mbus, boshIP)
 	if err != nil {
 		return nil, bosherr.WrapErrorf(err, "Cannot construct mbus url.")
 	}
@@ -140,7 +160,7 @@ func (c *baremetalCreator) createByOSReload(agentID string, stemcell bslcstem.St
 	switch c.agentOptions.Blobstore.Provider {
 	case BlobstoreTypeDav:
 		davConf := DavConfig(c.agentOptions.Blobstore.Options)
-		UpdateDavConfig(&davConf, cloudProps.BoshIp)
+		UpdateDavConfig(&davConf, boshIP)
 	}
 
 	agentEnv := CreateAgentUserData(agentID, cloudProps, networks, env, c.agentOptions)
