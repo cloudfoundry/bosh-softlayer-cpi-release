@@ -37,6 +37,8 @@ func (a CreateVMAction) Run(agentID string, stemcellCID StemcellCID, cloudProps 
 
 	helper.TIMEOUT = 30 * time.Second
 	helper.POLLING_INTERVAL = 5 * time.Second
+	helper.NetworkInterface = "eth0"
+	helper.LocalDNSConfigurationFile = "/etc/hosts"
 
 	stemcell, err := a.stemcellFinder.FindById(int(stemcellCID))
 	if err != nil {

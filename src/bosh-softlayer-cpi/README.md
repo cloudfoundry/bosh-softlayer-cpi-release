@@ -97,7 +97,7 @@ SWEET SUITE SUCCESS
 ## Contributing
 ---------------
 
-* We gratefully acknowledge and thank the [current contributors](https://bosh-softlayer-cpi/graphs/contributors)
+* We gratefully acknowledge and thank the [current contributors](https://github.com/cloudfoundry/bosh-softlayer-cpi/graphs/contributors)
 * We welcome any and all contributions as Pull Requests (PR)
 * We also welcome issues and bug report and new feature request. We will address as time permits
 * Follow the steps above in Developing to get your system setup correctly
@@ -108,7 +108,7 @@ SWEET SUITE SUCCESS
 ### Managing dependencies
 -------------------------
 
-* All dependencies managed via [Godep](https://github.com/tools/godep). See [Godeps/_workspace](https://bosh-softlayer-cpi/tree/master/Godeps/_workspace) directory on master
+* All dependencies managed via [Godep](https://github.com/tools/godep). See [Godeps/_workspace](https://github.com/cloudfoundry/bosh-softlayer-cpi/tree/master/Godeps/_workspace) directory on master
 
 #### Short `godep` Guide
 * If you ever import a new package `foo/bar` (after you `go get foo/bar`, so that foo/bar is in `$GOPATH`), you can type `godep save ./...` to add it to the `Godeps` directory.
@@ -117,7 +117,7 @@ SWEET SUITE SUCCESS
 * To update an existing dependency, you can use `godep update foo/bar` or `godep update foo/...` (where `...` is a wildcard)
 * The godep project [readme](https://github.com/tools/godep/README.md) is a pretty good resource: [https://github.com/tools/godep](https://github.com/tools/godep)
 
-* Since GO1.5, dependencies can be managed via [Govendor](https://github.com/kardianos/govendor). See [vendor](https://bosh-softlayer-cpi/tree/master/vendor) directory.
+* Since GO1.5, dependencies can be managed via [Govendor](https://github.com/kardianos/govendor). See [vendor](https://github.com/cloudfoundry/bosh-softlayer-cpi/tree/master/vendor) directory.
 
 ### Current conventions
 -----------------------

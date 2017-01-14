@@ -143,7 +143,7 @@ func ParseMbusURL(mbusURL string, primaryBackendIpAddress string) (string, error
 	return fmt.Sprintf("%s://%s:%s", parsedURL.Scheme, primaryBackendIpAddress, port), nil
 }
 
-func UpdateEtcHostsOfBoshInit(record string) (err error) {
+func UpdateEtcHostsOfBoshInit(fileName string, record string) (err error) {
 	buffer := bytes.NewBuffer([]byte{})
 	t := template.Must(template.New("etc-hosts").Parse(ETC_HOSTS_TEMPLATE))
 
@@ -155,7 +155,7 @@ func UpdateEtcHostsOfBoshInit(record string) (err error) {
 	logger := boshlog.NewWriterLogger(boshlog.LevelError, os.Stderr, os.Stderr)
 	fs := boshsys.NewOsFileSystem(logger)
 
-	err = fs.WriteFile("/etc/hosts", buffer.Bytes())
+	err = fs.WriteFile(fileName, buffer.Bytes())
 	if err != nil {
 		return bosherr.WrapError(err, "Writing to /etc/hosts")
 	}
@@ -175,6 +175,30 @@ func UpdateDeviceName(vmID int, virtualGuestService sl.SoftLayer_Virtual_Guest_S
 		return bosherr.WrapErrorf(err, "Failed to update properties for virtualGuest with id: %d", vmID)
 	}
 	return nil
+}
+
+func GetLocalIPAddressOfGivenInterface(networkInterface string) (string, error) {
+	interfaces, err := net.Interfaces()
+	if err != nil {
+		return "", bosherr.WrapErrorf(err, "Failed to get network interfaces")
+	}
+
+	for _, i := range interfaces {
+		if i.Name == networkInterface {
+			addrs, err := i.Addrs()
+			if err != nil {
+				return "", bosherr.WrapErrorf(err, fmt.Sprintf("Failed to get interface addresses for %s", networkInterface))
+			}
+			for _, addr := range addrs {
+				ipnet, _ := addr.(*net.IPNet)
+				if ipnet.IP.To4() != nil {
+					return ipnet.IP.String(), nil
+				}
+			}
+		}
+	}
+
+	return "", bosherr.Error(fmt.Sprintf("Failed to get IP address of %s", networkInterface))
 }
 
 const ETC_HOSTS_TEMPLATE = `127.0.0.1 localhost
