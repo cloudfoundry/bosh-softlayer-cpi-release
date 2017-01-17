@@ -14,7 +14,7 @@ cp -a * ${BOSH_INSTALL_TARGET}/src
 export GOPATH=$BOSH_INSTALL_TARGET
 
 cd ${BOSH_INSTALL_TARGET}/src/bosh-softlayer-cpi
-bin/build-linux-amd64
+bin/build-amd64
 
 mkdir -p $BOSH_INSTALL_TARGET/bin
 cp out/softlayer_cpi $BOSH_INSTALL_TARGET/bin/softlayer_cpi
