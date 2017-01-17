@@ -167,12 +167,6 @@
 			"revisionTime": "2016-10-28T10:15:48Z"
 		},
 		{
-			"origin": "develop",
-			"path": "github.com/maximilien/softlayer-go",
-			"revision": "develop",
-			"version": "develop"
-		},
-		{
 			"checksumSHA1": "E611q4DGLEibKTtgMltyFAeHyqU=",
 			"path": "github.com/maximilien/softlayer-go/client",
 			"revision": "1d4217550aef2c9207aeae5a93c7ce5c3c91ef21",
@@ -199,18 +193,14 @@
 		{
 			"checksumSHA1": "BsdKAcYXM60hA67l2Iao/Jr9N9w=",
 			"path": "github.com/maximilien/softlayer-go/services",
-			"revision": "c924c8f534bf5c0f9e02a68809677c3d137cb4dc",
-			"revisionTime": "2016-11-29T14:54:06Z",
-			"version": "develop",
-			"versionExact": "develop"
+			"revision": "649046aa8a9f196ddb6187660e3e38d6905fffab",
+			"revisionTime": "2016-11-30T18:58:16Z"
 		},
 		{
 			"checksumSHA1": "UKYqNCJEq4RTrCnmSLDyTarFfTY=",
 			"path": "github.com/maximilien/softlayer-go/softlayer",
-			"revision": "c924c8f534bf5c0f9e02a68809677c3d137cb4dc",
-			"revisionTime": "2016-11-29T14:54:06Z",
-			"version": "develop",
-			"versionExact": "develop"
+			"revision": "649046aa8a9f196ddb6187660e3e38d6905fffab",
+			"revisionTime": "2016-11-30T18:58:16Z"
 		},
 		{
 			"checksumSHA1": "TIdT4Jg+JvArPSxEA9nvYqeciDo=",

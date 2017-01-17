@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"runtime"
 	"time"
 
 	testhelpers "bosh-softlayer-cpi/test_helpers"
@@ -198,6 +199,7 @@ var _ = Describe("SoftLayer_Hardware_Creator", func() {
 							Baremetal:             true,
 							BaremetalStemcell:     "fake-stemcell",
 							BaremetalNetbootImage: "fake-netboot-image",
+							NotDeployedByDirector: true,
 						}
 
 						expectedCmdResults := []string{
@@ -241,6 +243,98 @@ var _ = Describe("SoftLayer_Hardware_Creator", func() {
 						fakeVm = &fakescommon.FakeVM{}
 						fakeVm.IDReturns(1234567)
 						fakeVmFinder.FindReturns(fakeVm, true, nil)
+						switch runtime.GOOS {
+						case "darwin":
+							slh.NetworkInterface = "en0"
+						case "linux":
+							slh.NetworkInterface = "eth0"
+						default:
+							slh.NetworkInterface = "eth0"
+						}
+						vm, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
+						Expect(err).ToNot(HaveOccurred())
+						Expect(vm.ID()).To(Equal(1234567))
+					})
+					It("returns a new SoftLayerVM with niether bosh ip nor NotDeployedByDirector", func() {
+						cloudProps = bslcommon.VMCloudProperties{
+							StartCpus: 4,
+							MaxMemory: 2048,
+							Domain:    "fake-domain.com",
+							BlockDeviceTemplateGroup: sldatatypes.BlockDeviceTemplateGroup{
+								GlobalIdentifier: "fake-uuid",
+							},
+							RootDiskSize:                 25,
+							EphemeralDiskSize:            25,
+							Datacenter:                   sldatatypes.Datacenter{Name: "fake-datacenter"},
+							HourlyBillingFlag:            true,
+							LocalDiskFlag:                true,
+							VmNamePrefix:                 "bosh-",
+							PostInstallScriptUri:         "",
+							DedicatedAccountHostOnlyFlag: true,
+							PrivateNetworkOnlyFlag:       false,
+							SshKeys:                      []sldatatypes.SshKey{{Id: 74826}},
+							BlockDevices: []sldatatypes.BlockDevice{{
+								Device:    "0",
+								DiskImage: sldatatypes.DiskImage{Capacity: 100}}},
+							NetworkComponents: []sldatatypes.NetworkComponents{{MaxSpeed: 1000}},
+							PrimaryNetworkComponent: sldatatypes.PrimaryNetworkComponent{
+								NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
+							PrimaryBackendNetworkComponent: sldatatypes.PrimaryBackendNetworkComponent{
+								NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
+							Baremetal:             true,
+							BaremetalStemcell:     "fake-stemcell",
+							BaremetalNetbootImage: "fake-netboot-image",
+						}
+
+						expectedCmdResults := []string{
+							"",
+						}
+						sshClient.ExecCommandStub = func(_, _, _, _ string) (string, error) {
+							return expectedCmdResults[sshClient.ExecCommandCallCount()-1], nil
+						}
+
+						baremetalClient.ProvisioningBaremetalResponse = bmsclients.CreateBaremetalsResponse{
+							Status: 200,
+							Data: bmsclients.TaskInfo{
+								TaskId: 1234567,
+							},
+						}
+
+						taskCompletedJSON := `{
+ 								 "status": 200,
+  								 "data": {
+    										"info": {
+      												"status": "completed"
+   											 }
+  							                 }
+							     }`
+						taskJson := bmsclients.TaskJsonResponse{}
+						err := json.Unmarshal([]byte(taskCompletedJSON), &taskJson)
+
+						serverInfoJson := `{
+ 								 "status": 200,
+  								 "data": {
+    										"info": {
+      												"id": 1234567
+   											 }
+  							                 }
+							     }`
+						serverJson := bmsclients.TaskJsonResponse{}
+						err = json.Unmarshal([]byte(serverInfoJson), &serverJson)
+
+						baremetalClient.TaskJsonResponses = []bmsclients.TaskJsonResponse{taskJson, serverJson}
+						setFakeSoftlayerClientFixtures(softLayerClient)
+						fakeVm = &fakescommon.FakeVM{}
+						fakeVm.IDReturns(1234567)
+						fakeVmFinder.FindReturns(fakeVm, true, nil)
+						switch runtime.GOOS {
+						case "darwin":
+							slh.NetworkInterface = "en0"
+						case "linux":
+							slh.NetworkInterface = "eth0"
+						default:
+							slh.NetworkInterface = "eth0"
+						}
 						vm, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
 						Expect(err).ToNot(HaveOccurred())
 						Expect(vm.ID()).To(Equal(1234567))

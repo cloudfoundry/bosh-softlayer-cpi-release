@@ -4,7 +4,7 @@ import (
 	"fmt"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
-	strfmt "github.com/go-openapi/strfmt"
+	"github.com/go-openapi/strfmt"
 
 	slhelper "bosh-softlayer-cpi/softlayer/common/helper"
 
