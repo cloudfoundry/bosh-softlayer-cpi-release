@@ -221,12 +221,16 @@ var _ = Describe("VM Utils", func() {
 						sldatatypes.SshKey{Id: 74826},
 					},
 
+					UserData: []sldatatypes.UserData{
+						sldatatypes.UserData{Value: "fake-user-data"},
+					},
+
 					PostInstallScriptUri: "",
 				}
 			})
 
 			It("returns a correct virtual guest template", func() {
-				vgt, err := CreateVirtualGuestTemplate(stemcell, cloudProps, networks)
+				vgt, err := CreateVirtualGuestTemplate(stemcell, cloudProps, networks, "fake-user-data")
 				Expect(err).ToNot(HaveOccurred())
 
 				//Since VGT.Hostname use timestamp we need to fix it here
@@ -340,12 +344,16 @@ var _ = Describe("VM Utils", func() {
 						sldatatypes.SshKey{Id: 74826},
 					},
 
+					UserData: []sldatatypes.UserData{
+						sldatatypes.UserData{Value: "fake-user-data"},
+					},
+
 					PostInstallScriptUri: "",
 				}
 			})
 
 			It("returns a correct virtual guest template", func() {
-				vgt, err := CreateVirtualGuestTemplate(stemcell, cloudProps, networks)
+				vgt, err := CreateVirtualGuestTemplate(stemcell, cloudProps, networks, "fake-user-data")
 				Expect(err).ToNot(HaveOccurred())
 
 				//Since VGT.Hostname use timestamp we need to fix it here
@@ -454,12 +462,16 @@ var _ = Describe("VM Utils", func() {
 						sldatatypes.SshKey{Id: 74826},
 					},
 
+					UserData: []sldatatypes.UserData{
+						sldatatypes.UserData{Value: "fake-user-data"},
+					},
+
 					PostInstallScriptUri: "",
 				}
 			})
 
 			It("returns a correct virtual guest template", func() {
-				vgt, err := CreateVirtualGuestTemplate(stemcell, cloudProps, networks)
+				vgt, err := CreateVirtualGuestTemplate(stemcell, cloudProps, networks, "fake-user-data")
 				Expect(err).ToNot(HaveOccurred())
 
 				//Since VGT.Hostname use timestamp we need to fix it here
@@ -578,12 +590,16 @@ var _ = Describe("VM Utils", func() {
 						sldatatypes.SshKey{Id: 74826},
 					},
 
+					UserData: []sldatatypes.UserData{
+						sldatatypes.UserData{Value: "fake-user-data"},
+					},
+
 					PostInstallScriptUri: "",
 				}
 			})
 
 			It("returns a correct virtual guest template", func() {
-				vgt, err := CreateVirtualGuestTemplate(stemcell, cloudProps, networks)
+				vgt, err := CreateVirtualGuestTemplate(stemcell, cloudProps, networks, "fake-user-data")
 				Expect(err).ToNot(HaveOccurred())
 
 				//Since VGT.Hostname use timestamp we need to fix it here

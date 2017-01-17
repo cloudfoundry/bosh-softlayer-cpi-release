@@ -4,11 +4,14 @@ package fakes
 import "sync"
 
 type FakeSLFileService struct {
-	UploadStub        func(path string, data []byte) error
+	UploadStub        func(user string, password string, target string, destinationPath string, contents []byte) error
 	uploadMutex       sync.RWMutex
 	uploadArgsForCall []struct {
-		path string
-		data []byte
+		user            string
+		password        string
+		target          string
+		destinationPath string
+		contents        []byte
 	}
 	uploadReturns struct {
 		result1 error
@@ -17,21 +20,24 @@ type FakeSLFileService struct {
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *FakeSLFileService) Upload(user string, password string, target string, path string, data []byte) error {
-	var dataCopy []byte
-	if data != nil {
-		dataCopy = make([]byte, len(data))
-		copy(dataCopy, data)
+func (fake *FakeSLFileService) Upload(user string, password string, target string, destinationPath string, contents []byte) error {
+	var contentsCopy []byte
+	if contents != nil {
+		contentsCopy = make([]byte, len(contents))
+		copy(contentsCopy, contents)
 	}
 	fake.uploadMutex.Lock()
 	fake.uploadArgsForCall = append(fake.uploadArgsForCall, struct {
-		path string
-		data []byte
-	}{path, dataCopy})
-	fake.recordInvocation("Upload", []interface{}{path, dataCopy})
+		user            string
+		password        string
+		target          string
+		destinationPath string
+		contents        []byte
+	}{user, password, target, destinationPath, contentsCopy})
+	fake.recordInvocation("Upload", []interface{}{user, password, target, destinationPath, contentsCopy})
 	fake.uploadMutex.Unlock()
 	if fake.UploadStub != nil {
-		return fake.UploadStub(path, data)
+		return fake.UploadStub(user, password, target, destinationPath, contents)
 	} else {
 		return fake.uploadReturns.result1
 	}
@@ -43,10 +49,10 @@ func (fake *FakeSLFileService) UploadCallCount() int {
 	return len(fake.uploadArgsForCall)
 }
 
-func (fake *FakeSLFileService) UploadArgsForCall(i int) (string, []byte) {
+func (fake *FakeSLFileService) UploadArgsForCall(i int) (string, string, string, string, []byte) {
 	fake.uploadMutex.RLock()
 	defer fake.uploadMutex.RUnlock()
-	return fake.uploadArgsForCall[i].path, fake.uploadArgsForCall[i].data
+	return fake.uploadArgsForCall[i].user, fake.uploadArgsForCall[i].password, fake.uploadArgsForCall[i].target, fake.uploadArgsForCall[i].destinationPath, fake.uploadArgsForCall[i].contents
 }
 
 func (fake *FakeSLFileService) UploadReturns(result1 error) {

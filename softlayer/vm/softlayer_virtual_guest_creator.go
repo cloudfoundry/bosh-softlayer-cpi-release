@@ -18,17 +18,15 @@ import (
 )
 
 type softLayerVirtualGuestCreator struct {
-	softLayerClient        sl.Client
-	agentEnvServiceFactory AgentEnvServiceFactory
-
-	agentOptions AgentOptions
-	logger       boshlog.Logger
-	vmFinder     VMFinder
-
-	featureOptions FeatureOptions
+	softLayerClient sl.Client
+	vmFinder        VMFinder
+	agentOptions    AgentOptions
+	registryOptions RegistryOptions
+	featureOptions  FeatureOptions
+	logger          boshlog.Logger
 }
 
-func NewSoftLayerCreator(vmFinder VMFinder, softLayerClient sl.Client, agentOptions AgentOptions, logger boshlog.Logger, featureOptions FeatureOptions) VMCreator {
+func NewSoftLayerCreator(vmFinder VMFinder, softLayerClient sl.Client, agentOptions AgentOptions, featureOptions FeatureOptions, registryOptions RegistryOptions, logger boshlog.Logger) VMCreator {
 	slhelper.TIMEOUT = 120 * time.Minute
 	slhelper.POLLING_INTERVAL = 5 * time.Second
 
@@ -36,8 +34,9 @@ func NewSoftLayerCreator(vmFinder VMFinder, softLayerClient sl.Client, agentOpti
 		vmFinder:        vmFinder,
 		softLayerClient: softLayerClient,
 		agentOptions:    agentOptions,
-		logger:          logger,
+		registryOptions: registryOptions,
 		featureOptions:  featureOptions,
+		logger:          logger,
 	}
 }
 
@@ -67,7 +66,7 @@ func (c *softLayerVirtualGuestCreator) Create(agentID string, stemcell bslcstem.
 
 // Private methods
 func (c *softLayerVirtualGuestCreator) createBySoftlayer(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
-	virtualGuestTemplate, err := CreateVirtualGuestTemplate(stemcell, cloudProps, networks)
+	virtualGuestTemplate, err := CreateVirtualGuestTemplate(stemcell, cloudProps, networks, CreateUserDataForInstance(agentID, networks, c.registryOptions))
 	if err != nil {
 		return nil, bosherr.WrapError(err, "Creating VirtualGuest template")
 	}
