@@ -9,7 +9,7 @@ type HasDiskAction struct {
 }
 
 func NewHasDisk(
-        diskFinder DiskFinder,
+	diskFinder DiskFinder,
 ) (action HasDiskAction) {
 	action.diskFinder = diskFinder
 	return

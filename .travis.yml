@@ -8,7 +8,7 @@ before_install:
 - go get github.com/golang/go/src/cmd/vet
 - go get github.com/onsi/gomega
 install: true
-script: bin/ci
+script: src/bosh-softlayer-cpi/bin/ci
 branches:
   only:
   - master

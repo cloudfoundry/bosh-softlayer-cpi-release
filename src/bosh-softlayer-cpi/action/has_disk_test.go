@@ -1,25 +1,25 @@
 package action_test
 
 import (
-        "errors"
+	"errors"
 
+	. "bosh-softlayer-cpi/action"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	. "bosh-softlayer-cpi/action"
 
-	fakeclient "github.com/maximilien/softlayer-go/client/fakes"
-        fakeDisk "bosh-softlayer-cpi/softlayer/disk/fakes"
-	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	softlayerDisk "bosh-softlayer-cpi/softlayer/disk"
+	fakeDisk "bosh-softlayer-cpi/softlayer/disk/fakes"
+	boshlog "github.com/cloudfoundry/bosh-utils/logger"
+	fakeclient "github.com/maximilien/softlayer-go/client/fakes"
 )
 
 var _ = Describe("HasDisk", func() {
 	var (
 		fakeDiskFinder *fakeDisk.FakeDiskFinder
-		action       HasDiskAction
-		fc      *fakeclient.FakeSoftLayerClient
-		logger  boshlog.Logger
-		disk1   softlayerDisk.Disk
+		action         HasDiskAction
+		fc             *fakeclient.FakeSoftLayerClient
+		logger         boshlog.Logger
+		disk1          softlayerDisk.Disk
 	)
 
 	BeforeEach(func() {
@@ -33,8 +33,8 @@ var _ = Describe("HasDisk", func() {
 	Describe("Run", func() {
 		var (
 			diskCid DiskCID
-			found bool
-			err   error
+			found   bool
+			err     error
 		)
 
 		BeforeEach(func() {
@@ -79,4 +79,3 @@ var _ = Describe("HasDisk", func() {
 		})
 	})
 })
-
