@@ -1,0 +1,29 @@
+resources:
+- name: bosh-cpi-final-artifacts
+  type: s3
+  source:
+    regexp: bosh-softlayer-cpi-([0-9.]+)\.tgz
+    bucket: {{s3_pipeline_bucket}}
+    access_key_id: {{s3_access_key_id}}
+    secret_access_key: {{s3_secret_access_key}}
+
+- name: bosh-cpi-patch-artifacts
+  type: s3
+  source:
+    regexp: bosh-softlayer-cpi-patch-(\d+\.\d+\.\d+)\.tgz
+    bucket: {{s3_pipeline_bucket}}
+    access_key_id: {{s3_access_key_id}}
+    secret_access_key: {{s3_secret_access_key}}
+
+jobs:
+- name: build-patch
+  serial: true
+  plan:
+  - aggregate:
+    - {trigger: false, get: bosh-cpi-release, resource: bosh-cpi-final-artifacts}
+
+  - task: build-patch
+    file: bosh-cpi-release/ci/tasks/build-patch.yml
+
+  - put: bosh-cpi-patch-artifacts
+    params: {file: promote/bosh-softlayer-cpi-patch/bosh-softlayer-cpi-patch-*.tgz}

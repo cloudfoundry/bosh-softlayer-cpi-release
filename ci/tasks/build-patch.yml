@@ -1,0 +1,9 @@
+---
+platform: linux
+image: docker:///cloudfoundry/bosh-lite-ci
+inputs:
+  - name: bosh-cpi-release
+outputs:
+  - name: promote
+run:
+  path: bosh-cpi-release/ci/tasks/build-patch.sh
