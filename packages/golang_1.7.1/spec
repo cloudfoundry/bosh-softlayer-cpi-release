@@ -1,7 +1,0 @@
----
-name: golang_1.7.1
-
-dependencies:
-
-files:
-  - golang_1.7.1/go1.7.1.linux-amd64.tar.gz # https://storage.googleapis.com/golang/go1.7.1.linux-amd64.tar.gz

@@ -1,0 +1,15 @@
+#!/bin/bash
+
+(
+  set -e
+
+  base=$( cd "$( dirname "$( dirname "$0" )")" && pwd )
+  base_gopath=$( cd $base/../../../.. && pwd )
+
+  export GOPATH=$base_gopath:$GOPATH
+
+  cd $base
+  go build -o out/cpi github.com/cloudfoundry/bosh-softlayer-cpi/main
+
+)
+

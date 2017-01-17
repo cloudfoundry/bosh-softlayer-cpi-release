@@ -1,5 +1,0 @@
-check process cpi
-  with pidfile /var/vcap/sys/run/softlayer_cpi/cpi.pid
-  start program "/var/vcap/jobs/softlayer_cpi/bin/cpi_ctl start"
-  stop program "/var/vcap/jobs/softlayer_cpi/bin/cpi_ctl stop"
-  group vcap
