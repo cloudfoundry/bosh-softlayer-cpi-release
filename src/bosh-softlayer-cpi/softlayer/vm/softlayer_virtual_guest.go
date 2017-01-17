@@ -22,7 +22,7 @@ import (
 	bslcdisk "bosh-softlayer-cpi/softlayer/disk"
 	bslcstem "bosh-softlayer-cpi/softlayer/stemcell"
 
-	api "bosh-softlayer-cpi/api"
+	"bosh-softlayer-cpi/api"
 	"bosh-softlayer-cpi/util"
 	datatypes "github.com/maximilien/softlayer-go/data_types"
 	sldatatypes "github.com/maximilien/softlayer-go/data_types"

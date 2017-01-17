@@ -1,4 +1,4 @@
-package utils
+package helper
 
 import (
 	"strings"
@@ -14,10 +14,12 @@ import (
 )
 
 var (
-	TIMEOUT             time.Duration
-	POLLING_INTERVAL    time.Duration
-	LocalDiskFlagNotSet bool
-	LengthOfHostName    int
+	TIMEOUT                   time.Duration
+	POLLING_INTERVAL          time.Duration
+	LocalDiskFlagNotSet       bool
+	LengthOfHostName          int
+	NetworkInterface          string
+	LocalDNSConfigurationFile string
 )
 
 type SoftLayer_Hardware_Parameters struct {

@@ -99,15 +99,28 @@ func (c *softLayerVirtualGuestCreator) createBySoftlayer(agentID string, stemcel
 		return nil, bosherr.WrapErrorf(err, "Cannot find VirtualGuest with id: %d.", virtualGuest.Id)
 	}
 
-	if len(cloudProps.BoshIp) == 0 {
-		UpdateEtcHostsOfBoshInit(fmt.Sprintf("%s  %s", vm.GetPrimaryBackendIP(), vm.GetFullyQualifiedDomainName()))
+	if cloudProps.NotDeployedByDirector {
+		err := UpdateEtcHostsOfBoshInit(slhelper.LocalDNSConfigurationFile, fmt.Sprintf("%s  %s", vm.GetPrimaryBackendIP(), vm.GetFullyQualifiedDomainName()))
+		if err != nil {
+			return nil, bosherr.WrapErrorf(err, "Updating BOSH director hostname/IP mapping entry in /etc/hosts")
+		}
+
 		mbus, err := ParseMbusURL(c.agentOptions.Mbus, vm.GetPrimaryBackendIP())
 		if err != nil {
 			return nil, bosherr.WrapErrorf(err, "Cannot construct mbus url.")
 		}
 		c.agentOptions.Mbus = mbus
 	} else {
-		mbus, err := ParseMbusURL(c.agentOptions.Mbus, cloudProps.BoshIp)
+		var boshIP string
+		if cloudProps.BoshIp != "" {
+			boshIP = cloudProps.BoshIp
+		} else {
+			boshIP, err = GetLocalIPAddressOfGivenInterface(slhelper.NetworkInterface)
+			if err != nil {
+				return nil, bosherr.WrapErrorf(err, fmt.Sprintf("Failed to get IP address of %s in local", slhelper.NetworkInterface))
+			}
+		}
+		mbus, err := ParseMbusURL(c.agentOptions.Mbus, boshIP)
 		if err != nil {
 			return nil, bosherr.WrapErrorf(err, "Cannot construct mbus url.")
 		}
@@ -116,7 +129,7 @@ func (c *softLayerVirtualGuestCreator) createBySoftlayer(agentID string, stemcel
 		switch c.agentOptions.Blobstore.Provider {
 		case BlobstoreTypeDav:
 			davConf := DavConfig(c.agentOptions.Blobstore.Options)
-			UpdateDavConfig(&davConf, cloudProps.BoshIp)
+			UpdateDavConfig(&davConf, boshIP)
 		}
 	}
 
@@ -178,6 +191,11 @@ func (c *softLayerVirtualGuestCreator) createByOSReload(agentID string, stemcell
 		return nil, bosherr.WrapError(err, "Failed to reload OS")
 	}
 
+	err = UpdateDeviceName(virtualGuest.Id, virtualGuestService, cloudProps)
+	if err != nil {
+		return nil, err
+	}
+
 	if cloudProps.EphemeralDiskSize == 0 {
 		err = slhelper.WaitForVirtualGuestLastCompleteTransaction(c.softLayerClient, vm.ID(), "Service Setup")
 		if err != nil {
@@ -190,15 +208,29 @@ func (c *softLayerVirtualGuestCreator) createByOSReload(agentID string, stemcell
 		}
 	}
 
-	if len(cloudProps.BoshIp) == 0 {
-		UpdateEtcHostsOfBoshInit(fmt.Sprintf("%s  %s", vm.GetPrimaryBackendIP(), vm.GetFullyQualifiedDomainName()))
+	if cloudProps.NotDeployedByDirector {
+		err := UpdateEtcHostsOfBoshInit(slhelper.LocalDNSConfigurationFile, fmt.Sprintf("%s  %s", vm.GetPrimaryBackendIP(), vm.GetFullyQualifiedDomainName()))
+		if err != nil {
+			return nil, bosherr.WrapErrorf(err, "Updating BOSH director hostname/IP mapping entry in /etc/hosts")
+		}
+
 		mbus, err := ParseMbusURL(c.agentOptions.Mbus, vm.GetPrimaryBackendIP())
 		if err != nil {
 			return nil, bosherr.WrapErrorf(err, "Cannot construct mbus url.")
 		}
 		c.agentOptions.Mbus = mbus
 	} else {
-		mbus, err := ParseMbusURL(c.agentOptions.Mbus, cloudProps.BoshIp)
+		var boshIP string
+		if cloudProps.BoshIp != "" {
+			boshIP = cloudProps.BoshIp
+		} else {
+			boshIP, err = GetLocalIPAddressOfGivenInterface(slhelper.NetworkInterface)
+			if err != nil {
+				return nil, bosherr.WrapErrorf(err, fmt.Sprintf("Failed to get IP address of %s in local", slhelper.NetworkInterface))
+			}
+		}
+
+		mbus, err := ParseMbusURL(c.agentOptions.Mbus, boshIP)
 		if err != nil {
 			return nil, bosherr.WrapErrorf(err, "Cannot construct mbus url.")
 		}
@@ -207,7 +239,7 @@ func (c *softLayerVirtualGuestCreator) createByOSReload(agentID string, stemcell
 		switch c.agentOptions.Blobstore.Provider {
 		case BlobstoreTypeDav:
 			davConf := DavConfig(c.agentOptions.Blobstore.Options)
-			UpdateDavConfig(&davConf, cloudProps.BoshIp)
+			UpdateDavConfig(&davConf, boshIP)
 		}
 	}
 
