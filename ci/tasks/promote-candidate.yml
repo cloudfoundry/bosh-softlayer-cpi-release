@@ -4,7 +4,7 @@ image: docker:///boshcpi/azure-cpi-release
 inputs:
   - name: bosh-cpi-release
   - name: bosh-cpi-dev-artifacts
-  - name: release-version-semver
+  - name: version-semver
 outputs:
   - name: promoted
 run:
