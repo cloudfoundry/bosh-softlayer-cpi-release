@@ -5,7 +5,6 @@ set -e
 bin=$(dirname $0)
 
 export GOARCH=amd64
-export GOOS=linux
-export GOTOOLDIR=$(go env GOROOT)/pkg/linux_amd64
+export GOOS=`uname | tr '[:upper:]' '[:lower:]'`
 
 $bin/build
