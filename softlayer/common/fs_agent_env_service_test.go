@@ -5,7 +5,6 @@ import (
 	"errors"
 
 	fakebslvm "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/fakes"
-	slhelper "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
 	. "github.com/onsi/ginkgo"
@@ -105,19 +104,6 @@ var _ = Describe("SoftlayerAgentEnvService", func() {
 			It("returns error with specific error message", func() {
 				err := agentEnvService.Update(newAgentEnv)
 				Expect(err).To(HaveOccurred())
-			})
-		})
-
-		Context("when the length of hostname is greater than 63 chars", func() {
-			BeforeEach(func() {
-				slhelper.LengthOfHostName = 64
-				fakeSoftlayerFileService.UploadErr = errors.New("A faked error occurred")
-			})
-
-			It("returns error with specific error message", func() {
-				err := agentEnvService.Update(newAgentEnv)
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("the length of device hostname is greater than 63 characters"))
 			})
 		})
 	})

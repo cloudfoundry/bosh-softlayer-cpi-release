@@ -11,6 +11,7 @@ import (
 
 	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
 	fakescommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/fakes"
+	helper "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
 	fakestem "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/stemcell/fakes"
 
 	sldatatypes "github.com/maximilien/softlayer-go/data_types"
@@ -66,7 +67,7 @@ var _ = Describe("CreateVM", func() {
 					StartCpus:    2,
 					MaxMemory:    2048,
 					Datacenter:   sldatatypes.Datacenter{Name: "fake-datacenter"},
-					VmNamePrefix: "fake-hostname",
+					VmNamePrefix: "fake-hostname123456789123456789",
 					BoshIp:       "10.0.0.0",
 					SshKeys: []sldatatypes.SshKey{
 						sldatatypes.SshKey{Id: 1234},
@@ -78,6 +79,8 @@ var _ = Describe("CreateVM", func() {
 				fakeStemcellFinder.FindByIdReturns(fakeStemcell, nil)
 				fakeCreatorProvider.GetReturns(fakeVmCreator)
 				fakeVmCreator.CreateReturns(fakeVm, nil)
+				Expect(helper.LengthOfHostName).ToNot(Equal(64))
+
 			})
 
 			It("fetches stemcell by id", func() {
