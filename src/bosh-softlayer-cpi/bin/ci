@@ -4,11 +4,8 @@
   set -e
 
   base=$( cd "$( dirname "$( dirname "$0" )")" && pwd )
-  echo "zhgdebug base..."$base
   base_gopath=$( cd $base/../.. && pwd )
-  echo "zhgdebug base_gopath..."$base_gopath
   export GOPATH=$base_gopath:$GOPATH
-  echo "zhgdebug GOPATH..."$GOPATH
 
   function printStatus {
       if [ $? -eq 0 ]; then
