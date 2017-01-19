@@ -100,7 +100,7 @@ resources:
   type: git
   source:
     uri: git@github.com:cloudfoundry/bosh-softlayer-cpi.git
-    branch: develop_v4
+    branch: master
     private_key: {{github_private_key_zhanggbj}}
     ignore_paths:
         - .final_builds/**/*.yml
@@ -110,7 +110,7 @@ resources:
   type: git
   source:
     uri: git@github.com:cloudfoundry/bosh-softlayer-cpi.git
-    branch: develop_v4
+    branch: master
     private_key: {{github_private_key_zhanggbj}}
 
 - name: version-semver
