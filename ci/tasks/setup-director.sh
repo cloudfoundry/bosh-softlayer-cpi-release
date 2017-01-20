@@ -40,6 +40,7 @@ resource_pools:
   stemcell:
     url: file://stemcell.tgz
   cloud_properties:
+    not_deployed_by_director: true
     VmNamePrefix: $SL_VM_NAME_PREFIX
     Domain: $SL_VM_DOMAIN
     StartCpus: 4
