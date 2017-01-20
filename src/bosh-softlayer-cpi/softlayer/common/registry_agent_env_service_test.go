@@ -9,9 +9,11 @@ import (
 	"net/http"
 
 	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/config"
 	. "github.com/onsi/gomega"
 
 	. "bosh-softlayer-cpi/softlayer/common"
+
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 )
 
@@ -29,7 +31,7 @@ var _ = Describe("RegistryAgentEnvService", func() {
 
 		registryOptions := RegistryOptions{
 			Host:     "127.0.0.1",
-			Port:     6307,
+			Port:     6307 + GinkgoConfig.ParallelNode,
 			Username: "fake-username",
 			Password: "fake-password",
 		}
