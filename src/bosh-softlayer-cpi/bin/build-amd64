@@ -1,0 +1,10 @@
+#!/bin/bash 
+
+set -e
+
+bin=$(dirname $0)
+
+export GOARCH=amd64
+export GOOS=`uname | tr '[:upper:]' '[:lower:]'`
+
+$bin/build

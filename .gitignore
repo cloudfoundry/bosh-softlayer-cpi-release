@@ -33,3 +33,15 @@ _testmain.go
 
 # vim
 *.swp
+config/dev.yml
+config/private.yml
+releases/*.tgz
+releases/**/*.tgz
+dev_releases
+.blobs
+blobs
+.dev_builds
+.idea
+.final_builds/jobs/**/*.tgz
+.final_builds/packages/**/*.tgz
+credentials.yml
