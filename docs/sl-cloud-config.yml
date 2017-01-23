@@ -35,7 +35,7 @@ networks:
   type: dynamic
   subnets:
   - {az: az1, dns: [ REPLACE_ME ]}
-  cloud_properites:
+  cloud_properties:
     # replace with your public vlan id, e.g. 524956
     PrimaryNetworkComponent: { NetworkVlan: { Id: REPLACE_ME } }
     # replace with your private vlan id, e.g. 524954
