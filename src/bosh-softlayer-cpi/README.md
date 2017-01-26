@@ -19,11 +19,10 @@ TBD
 Clone this repo and build it. Using the following commands on a Linux or Mac OS X system:
 
 ```
-$ mkdir -p bosh-softlayer-cpi/src/github.com/cloudfoundry
-$ export GOPATH=$(pwd)/bosh-softlayer-cpi:$GOPATH
-$ cd bosh-softlayer-cpi/src/github.com/cloudfoundry
 $ git clone https://github.com/cloudfoundry/bosh-softlayer-cpi.git
 $ cd bosh-softlayer-cpi
+$ direnv allow # or source .envrc to set GOPATH
+$ cd src/bosh-softlayer-cpi
 $ ./bin/build
 $ ./bin/test-unit
 $ export SL_USERNAME=your-username@your-org.com
@@ -108,16 +107,7 @@ SWEET SUITE SUCCESS
 ### Managing dependencies
 -------------------------
 
-* All dependencies managed via [Godep](https://github.com/tools/godep). See [Godeps/_workspace](https://github.com/cloudfoundry/bosh-softlayer-cpi/tree/master/Godeps/_workspace) directory on master
-
-#### Short `godep` Guide
-* If you ever import a new package `foo/bar` (after you `go get foo/bar`, so that foo/bar is in `$GOPATH`), you can type `godep save ./...` to add it to the `Godeps` directory.
-* To restore dependencies from the `Godeps` directory, simply use `godep restore`. `restore` is the opposite of `save`.
-* If you ever remove a dependency or a link becomes deprecated, the easiest way is probably to remove your entire `Godeps` directory and run `godep save ./...` again, after making sure all your dependencies are in your `$GOPATH`. Don't manually edit `Godeps.json`!
-* To update an existing dependency, you can use `godep update foo/bar` or `godep update foo/...` (where `...` is a wildcard)
-* The godep project [readme](https://github.com/tools/godep/README.md) is a pretty good resource: [https://github.com/tools/godep](https://github.com/tools/godep)
-
-* Since GO1.5, dependencies can be managed via [Govendor](https://github.com/kardianos/govendor). See [vendor](https://github.com/cloudfoundry/bosh-softlayer-cpi/tree/master/vendor) directory.
+Dependencies are managed via [govendor](https://github.com/kardianos/govendor). See [vendor.json](vendor/vendor.json) for the current dependencies.
 
 ### Current conventions
 -----------------------
