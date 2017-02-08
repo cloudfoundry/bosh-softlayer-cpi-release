@@ -7,7 +7,7 @@ cp -a ./bosh-cpi-release/* ${PWD}/src
 export GOPATH=${PWD}/src
 
 pushd ${PWD}/src
-  bin/build-linux-amd64
+  bin/build-amd64
   cp version out/softlayer_cpi promote/bosh-softlayer-cpi-patch
 popd
 
