@@ -77,7 +77,7 @@ func (a CreateVMAction) Run(agentID string, stemcellCID StemcellCID, cloudProps 
 func (a CreateVMAction) updateCloudProperties(cloudProps *VMCloudProperties) {
 	a.vmCloudProperties = cloudProps
 
-	if len(cloudProps.BoshIp) == 0 || cloudProps.Baremetal {
+	if cloudProps.NotDeployedByDirector {
 		a.vmCloudProperties.VmNamePrefix = cloudProps.VmNamePrefix
 	} else {
 		a.vmCloudProperties.VmNamePrefix = cloudProps.VmNamePrefix + TimeStampForTime(time.Now().UTC())
