@@ -121,6 +121,7 @@ type VM interface {
 	SetAgentEnvService(AgentEnvService) error
 
 	UpdateAgentEnv(AgentEnv) error
+	DeleteAgentEnv() error
 }
 
 //go:generate counterfeiter -o fakes/fake_vm_creator.go . VMCreator

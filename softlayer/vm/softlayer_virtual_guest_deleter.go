@@ -18,12 +18,14 @@ const SOFTLAYER_VM_DELETER_LOG_TAG = "SoftLayerVMDeleter"
 type softLayerVMDeleter struct {
 	softLayerClient sl.Client
 	logger          boshlog.Logger
+	vmFinder        VMFinder
 }
 
-func NewSoftLayerVMDeleter(softLayerClient sl.Client, logger boshlog.Logger) VMDeleter {
+func NewSoftLayerVMDeleter(softLayerClient sl.Client, logger boshlog.Logger, vmFinder VMFinder) VMDeleter {
 	return &softLayerVMDeleter{
 		softLayerClient: softLayerClient,
 		logger:          logger,
+		vmFinder:        vmFinder,
 	}
 }
 
@@ -38,6 +40,16 @@ func (c *softLayerVMDeleter) Delete(cid int) error {
 		if !strings.Contains(err.Error(), "HTTP error code") {
 			return bosherr.WrapError(err, fmt.Sprintf("Waiting for VirtualGuest `%d` to have no pending transactions before deleting vm", cid))
 		}
+	}
+
+	vm, found, err := c.vmFinder.Find(cid)
+	if err != nil || !found {
+		return bosherr.WrapErrorf(err, "Cannot find VirtualGuest with id: %d.", cid)
+	}
+
+	err = vm.DeleteAgentEnv()
+	if err != nil {
+		return bosherr.WrapError(err, "Deleting VM's agent env")
 	}
 
 	_, err = virtualGuestService.DeleteObject(cid)
