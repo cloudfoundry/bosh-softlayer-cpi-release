@@ -78,16 +78,16 @@ func (a CreateVMAction) updateCloudProperties(cloudProps *VMCloudProperties) {
 	a.vmCloudProperties = cloudProps
 
 	if cloudProps.NotDeployedByDirector {
-		if cloudProps.Hostname {
-			a.vmCloudProperties.VmNamePrefix = cloudProps.Hostname
-		} else {
+		if len(cloudProps.Hostname) == 0 {
 			a.vmCloudProperties.VmNamePrefix = cloudProps.VmNamePrefix
+		} else {
+			a.vmCloudProperties.VmNamePrefix = cloudProps.Hostname
 		}
 	} else {
-		if cloudProps.Hostname {
-			a.vmCloudProperties.VmNamePrefix = cloudProps.Hostname
-		} else {
+		if len(cloudProps.Hostname) == 0 {
 			a.vmCloudProperties.VmNamePrefix = cloudProps.VmNamePrefix + TimeStampForTime(time.Now().UTC())
+		} else {
+			a.vmCloudProperties.VmNamePrefix = cloudProps.Hostname
 		}
 	}
 
