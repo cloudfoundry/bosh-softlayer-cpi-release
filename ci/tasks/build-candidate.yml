@@ -4,6 +4,7 @@ image: docker:///cloudfoundry/bosh-lite-ci
 inputs:
   - name: bosh-cpi-release
   - name: version-semver
+  - name: bosh-cli
 outputs:
   - name: candidate
 run:
