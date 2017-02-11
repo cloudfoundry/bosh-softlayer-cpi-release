@@ -95,7 +95,11 @@ func (a CreateVMAction) updateCloudProperties(cloudProps *VMCloudProperties) {
 		a.vmCloudProperties.Domain = "softlayer.com"
 	}
 	helper.LengthOfHostName = len(a.vmCloudProperties.VmNamePrefix + "." + a.vmCloudProperties.Domain)
-
+	// A workaround for the issue #129 in bosh-softlayer-cpi
+	if helper.LengthOfHostName == 64 {
+		a.vmCloudProperties.VmNamePrefix = a.vmCloudProperties.VmNamePrefix + "-1"
+		helper.LengthOfHostName = len(a.vmCloudProperties.VmNamePrefix + "." + a.vmCloudProperties.Domain)
+	}
 	if len(cloudProps.NetworkComponents) == 0 {
 		a.vmCloudProperties.NetworkComponents = []sldatatypes.NetworkComponents{{MaxSpeed: 1000}}
 	}
