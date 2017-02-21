@@ -5,7 +5,7 @@ result=0
 bin=$(dirname $0)
 
 echo -e "\n Formatting packages..."
-$bin/go fmt ./...
+$bin/go fmt $($bin/go list ./... | grep -v /vendor/)
 let "result+=$?"
 
 echo -e "\n Installing ginkgo..."
