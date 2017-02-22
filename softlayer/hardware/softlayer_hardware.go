@@ -300,6 +300,10 @@ func (vm *softLayerHardware) UpdateAgentEnv(agentEnv AgentEnv) error {
 	return vm.agentEnvService.Update(agentEnv)
 }
 
+func (vm *softLayerHardware) DeleteAgentEnv() error {
+	return vm.agentEnvService.Delete()
+}
+
 // Private methods
 func (vm *softLayerHardware) waitForVolumeAttached(volume datatypes.SoftLayer_Network_Storage, hasMultiPath bool) (string, error) {
 

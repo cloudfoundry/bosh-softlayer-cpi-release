@@ -364,6 +364,10 @@ func (vm *softLayerVirtualGuest) UpdateAgentEnv(agentEnv AgentEnv) error {
 	return vm.agentEnvService.Update(agentEnv)
 }
 
+func (vm *softLayerVirtualGuest) DeleteAgentEnv() error {
+	return vm.agentEnvService.Delete()
+}
+
 // Private methods
 func (vm *softLayerVirtualGuest) extractTagsFromVMMetadata(vmMetadata VMMetadata) ([]string, error) {
 	tags := []string{}
