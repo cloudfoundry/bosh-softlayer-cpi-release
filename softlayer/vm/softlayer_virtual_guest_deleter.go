@@ -43,8 +43,12 @@ func (c *softLayerVMDeleter) Delete(cid int) error {
 	}
 
 	vm, found, err := c.vmFinder.Find(cid)
-	if err != nil || !found {
-		return bosherr.WrapErrorf(err, "Cannot find VirtualGuest with id: %d.", cid)
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Finding VirtualGuest with id: %d.", cid)
+	} else {
+		if !found {
+			return bosherr.WrapErrorf(err, "Cannot find VirtualGuest with id: %d.", cid)
+		}
 	}
 
 	err = vm.DeleteAgentEnv()

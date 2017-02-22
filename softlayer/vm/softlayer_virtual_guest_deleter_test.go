@@ -1,17 +1,19 @@
 package vm_test
 
 import (
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
+	"errors"
+	"time"
+
 	fakescommon "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/fakes"
 	slh "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common/helper"
-	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
 	testhelpers "github.com/cloudfoundry/bosh-softlayer-cpi/test_helpers"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
+
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/common"
+	. "github.com/cloudfoundry/bosh-softlayer-cpi/softlayer/vm"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/pkg/errors"
-	"time"
 )
 
 var _ = Describe("SoftlayerVirtualGuestDeleter", func() {
@@ -70,9 +72,22 @@ var _ = Describe("SoftlayerVirtualGuestDeleter", func() {
 			})
 		})
 
-		Context("when can not find virtual guest with id 1234567", func() {
+		Context("when finding virtual guest with id 1234567 fails", func() {
 			BeforeEach(func() {
 				fakeVmFinder.FindReturns(nil, false, errors.New("fake-find-error"))
+				testhelpers.SetTestFixtureForFakeSoftLayerClient(fakeSoftLayerClient, "SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json")
+			})
+
+			It("returns an error", func() {
+				Expect(err).To(HaveOccurred())
+				Expect(fakeVmFinder.FindCallCount()).To(Equal(1))
+				Expect(err.Error()).To(ContainSubstring("Finding VirtualGuest with id"))
+			})
+		})
+
+		Context("when cannot find virtual guest with id 1234567", func() {
+			BeforeEach(func() {
+				fakeVmFinder.FindReturns(nil, false, nil)
 				testhelpers.SetTestFixtureForFakeSoftLayerClient(fakeSoftLayerClient, "SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json")
 			})
 
@@ -98,7 +113,7 @@ var _ = Describe("SoftlayerVirtualGuestDeleter", func() {
 			})
 		})
 
-		Context("when deleting object and error occures", func() {
+		Context("when deleting object and error occurs", func() {
 			BeforeEach(func() {
 				fakeVm.IDReturns(1234567)
 				fakeVmFinder.FindReturns(fakeVm, true, nil)
