@@ -47,8 +47,8 @@ type VMCloudProperties struct {
 	UserData                       []sldatatypes.UserData                     `json:"userData,omitempty"`
 	PostInstallScriptUri           string                                     `json:"postInstallScriptUri,omitempty"`
 
-	BoshIp                string `json:"bosh_ip,omitempty"`
-	NotDeployedByDirector bool   `json:"not_deployed_by_director,omitempty"`
+	BoshIp            string `json:"bosh_ip,omitempty"`
+	DeployedByBoshCLI bool   `json:"not_deployed_by_director,omitempty"`
 
 	Baremetal             bool   `json:"baremetal,omitempty"`
 	BaremetalStemcell     string `json:"bm_stemcell,omitempty"`

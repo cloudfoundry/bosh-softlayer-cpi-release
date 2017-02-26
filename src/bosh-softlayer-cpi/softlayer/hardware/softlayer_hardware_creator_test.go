@@ -199,7 +199,7 @@ var _ = Describe("SoftLayer_Hardware_Creator", func() {
 							Baremetal:             true,
 							BaremetalStemcell:     "fake-stemcell",
 							BaremetalNetbootImage: "fake-netboot-image",
-							NotDeployedByDirector: true,
+							DeployedByBoshCLI:     true,
 						}
 
 						expectedCmdResults := []string{
@@ -255,7 +255,7 @@ var _ = Describe("SoftLayer_Hardware_Creator", func() {
 						Expect(err).ToNot(HaveOccurred())
 						Expect(vm.ID()).To(Equal(1234567))
 					})
-					It("returns a new SoftLayerVM with niether bosh ip nor NotDeployedByDirector", func() {
+					It("returns a new SoftLayerVM with niether bosh ip nor DeployedByBoshCLI", func() {
 						cloudProps = bslcommon.VMCloudProperties{
 							StartCpus: 4,
 							MaxMemory: 2048,

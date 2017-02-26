@@ -183,7 +183,7 @@ func (c *softLayerPoolCreator) createBySoftlayer(agentID string, stemcell bslcst
 		return nil, bosherr.WrapErrorf(err, "Cannot find VirtualGuest with id: %d.", virtualGuest.Id)
 	}
 
-	if cloudProps.NotDeployedByDirector {
+	if cloudProps.DeployedByBoshCLI {
 		err := UpdateEtcHostsOfBoshInit(slhelper.LocalDNSConfigurationFile, fmt.Sprintf("%s  %s", vm.GetPrimaryBackendIP(), vm.GetFullyQualifiedDomainName()))
 		if err != nil {
 			return nil, bosherr.WrapErrorf(err, "Updating BOSH director hostname/IP mapping entry in /etc/hosts")
@@ -293,7 +293,7 @@ func (c *softLayerPoolCreator) createByOSReload(agentID string, stemcell bslcste
 		}
 	}
 
-	if cloudProps.NotDeployedByDirector {
+	if cloudProps.DeployedByBoshCLI {
 		err := UpdateEtcHostsOfBoshInit(slhelper.LocalDNSConfigurationFile, fmt.Sprintf("%s  %s", vm.GetPrimaryBackendIP(), vm.GetFullyQualifiedDomainName()))
 		if err != nil {
 			return nil, bosherr.WrapErrorf(err, "Updating BOSH director hostname/IP mapping entry in /etc/hosts")
@@ -384,7 +384,7 @@ func (c *softLayerPoolCreator) oSReloadVMInPool(cid int, agentID string, stemcel
 		}
 	}
 
-	if cloudProps.NotDeployedByDirector {
+	if cloudProps.DeployedByBoshCLI {
 		err := UpdateEtcHostsOfBoshInit(slhelper.LocalDNSConfigurationFile, fmt.Sprintf("%s  %s", vm.GetPrimaryBackendIP(), vm.GetFullyQualifiedDomainName()))
 		if err != nil {
 			return nil, bosherr.WrapErrorf(err, "Updating BOSH director hostname/IP mapping entry in /etc/hosts")
