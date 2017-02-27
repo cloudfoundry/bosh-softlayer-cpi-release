@@ -104,12 +104,6 @@ func (c *softLayerVirtualGuestCreator) createBySoftlayer(agentID string, stemcel
 		if err != nil {
 			return nil, bosherr.WrapErrorf(err, "Updating BOSH director hostname/IP mapping entry in /etc/hosts")
 		}
-
-		mbus, err := ParseMbusURL(c.agentOptions.Mbus, vm.GetPrimaryBackendIP())
-		if err != nil {
-			return nil, bosherr.WrapErrorf(err, "Cannot construct mbus url.")
-		}
-		c.agentOptions.Mbus = mbus
 	} else {
 		var boshIP string
 		if cloudProps.BoshIp != "" {
@@ -213,12 +207,6 @@ func (c *softLayerVirtualGuestCreator) createByOSReload(agentID string, stemcell
 		if err != nil {
 			return nil, bosherr.WrapErrorf(err, "Updating BOSH director hostname/IP mapping entry in /etc/hosts")
 		}
-
-		mbus, err := ParseMbusURL(c.agentOptions.Mbus, vm.GetPrimaryBackendIP())
-		if err != nil {
-			return nil, bosherr.WrapErrorf(err, "Cannot construct mbus url.")
-		}
-		c.agentOptions.Mbus = mbus
 	} else {
 		var boshIP string
 		if cloudProps.BoshIp != "" {
