@@ -79,10 +79,10 @@ func (a *CreateVMAction) Run(agentID string, stemcellCID StemcellCID, cloudProps
 func (a *CreateVMAction) updateCloudProperties(cloudProps *VMCloudProperties) {
 	a.vmCloudProperties = cloudProps
 
-	if len(cloudProps.BoshIp) == 0 || cloudProps.Baremetal {
-		a.vmCloudProperties.VmNamePrefix = cloudProps.VmNamePrefix
+	if cloudProps.DeployedByBoshCLI {
+		a.vmCloudProperties.VmNamePrefix = updateHostNameInCloudProps(cloudProps, "")
 	} else {
-		a.vmCloudProperties.VmNamePrefix = cloudProps.VmNamePrefix + TimeStampForTime(time.Now().UTC())
+		a.vmCloudProperties.VmNamePrefix = updateHostNameInCloudProps(cloudProps, TimeStampForTime(time.Now().UTC()))
 	}
 
 	if cloudProps.StartCpus == 0 {
@@ -107,5 +107,13 @@ func (a *CreateVMAction) updateCloudProperties(cloudProps *VMCloudProperties) {
 
 	if helper.LocalDiskFlagNotSet == true {
 		a.vmCloudProperties.LocalDiskFlag = true
+	}
+}
+
+func updateHostNameInCloudProps(cloudProps *VMCloudProperties, timeStamplePostfix string) string {
+	if len(cloudProps.Hostname) == 0 {
+		return cloudProps.VmNamePrefix + timeStamplePostfix
+	} else {
+		return cloudProps.Hostname
 	}
 }

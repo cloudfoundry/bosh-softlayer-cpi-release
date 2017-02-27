@@ -201,7 +201,7 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 								NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
 							PrimaryBackendNetworkComponent: sldatatypes.PrimaryBackendNetworkComponent{
 								NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
-							NotDeployedByDirector: true,
+							DeployedByBoshCLI: true,
 						}
 
 						expectedCmdResults := []string{
@@ -226,7 +226,7 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 						Expect(err).ToNot(HaveOccurred())
 						Expect(vm.ID()).To(Equal(1234567))
 					})
-					It("returns a new SoftLayerVM with neither bosh ip nor NotDeployedByDirector flag", func() {
+					It("returns a new SoftLayerVM with neither bosh ip nor DeployedByBoshCLI flag", func() {
 						cloudProps = VMCloudProperties{
 							StartCpus: 4,
 							MaxMemory: 2048,
@@ -482,7 +482,7 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 								NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
 							PrimaryBackendNetworkComponent: sldatatypes.PrimaryBackendNetworkComponent{
 								NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
-							NotDeployedByDirector: true,
+							DeployedByBoshCLI: true,
 						}
 
 						expectedCmdResults := []string{
@@ -507,7 +507,7 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 						Expect(err).ToNot(HaveOccurred())
 						Expect(vm.ID()).To(Equal(1234567))
 					})
-					It("returns a new SoftLayerVM with neither bosh ip nor NotDeployedByDirector flag", func() {
+					It("returns a new SoftLayerVM with neither bosh ip nor DeployedByBoshCLI flag", func() {
 						cloudProps = VMCloudProperties{
 							StartCpus: 4,
 							MaxMemory: 2048,
@@ -704,8 +704,8 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 								NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
 							PrimaryBackendNetworkComponent: sldatatypes.PrimaryBackendNetworkComponent{
 								NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
-							DisableOsReload:       true,
-							NotDeployedByDirector: true,
+							DisableOsReload:   true,
+							DeployedByBoshCLI: true,
 						}
 
 						expectedCmdResults := []string{
@@ -730,7 +730,7 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 						Expect(err).ToNot(HaveOccurred())
 						Expect(vm.ID()).To(Equal(1234567))
 					})
-					It("returns a new SoftLayerVM with neither bosh ip nor NotDeployedByDirector flag", func() {
+					It("returns a new SoftLayerVM with neither bosh ip nor DeployedByBoshCLI flag", func() {
 						cloudProps = VMCloudProperties{
 							StartCpus: 4,
 							MaxMemory: 2048,
