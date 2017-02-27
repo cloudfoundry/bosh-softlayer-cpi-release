@@ -32,9 +32,12 @@ func NewCreateVM(
 	return
 }
 
-func (a CreateVMAction) Run(agentID string, stemcellCID StemcellCID, cloudProps VMCloudProperties, networks Networks, diskIDs []DiskCID, env Environment) (string, error) {
-	a.updateCloudProperties(&cloudProps)
+func (a *CreateVMAction) GetVMCloudProperties() *VMCloudProperties {
+	return a.vmCloudProperties
+}
 
+func (a *CreateVMAction) Run(agentID string, stemcellCID StemcellCID, cloudProps VMCloudProperties, networks Networks, diskIDs []DiskCID, env Environment) (string, error) {
+	a.updateCloudProperties(&cloudProps)
 	helper.TIMEOUT = 30 * time.Second
 	helper.POLLING_INTERVAL = 5 * time.Second
 	helper.NetworkInterface = "eth0"
@@ -69,12 +72,11 @@ func (a CreateVMAction) Run(agentID string, stemcellCID StemcellCID, cloudProps 
 		if err != nil {
 			return "0", bosherr.WrapErrorf(err, "Creating Virtual_Guest with agent ID '%s'", agentID)
 		}
-
 		return VMCID(vm.ID()).String(), nil
 	}
 }
 
-func (a CreateVMAction) updateCloudProperties(cloudProps *VMCloudProperties) {
+func (a *CreateVMAction) updateCloudProperties(cloudProps *VMCloudProperties) {
 	a.vmCloudProperties = cloudProps
 
 	if len(cloudProps.BoshIp) == 0 || cloudProps.Baremetal {
@@ -94,8 +96,11 @@ func (a CreateVMAction) updateCloudProperties(cloudProps *VMCloudProperties) {
 	if len(cloudProps.Domain) == 0 {
 		a.vmCloudProperties.Domain = "softlayer.com"
 	}
-	helper.LengthOfHostName = len(a.vmCloudProperties.VmNamePrefix + "." + a.vmCloudProperties.Domain)
-
+	// A workaround for the issue #129 in bosh-softlayer-cpi
+	lengthOfHostName := len(a.vmCloudProperties.VmNamePrefix + "." + a.vmCloudProperties.Domain)
+	if lengthOfHostName == 64 {
+		a.vmCloudProperties.VmNamePrefix = a.vmCloudProperties.VmNamePrefix + "-1"
+	}
 	if len(cloudProps.NetworkComponents) == 0 {
 		a.vmCloudProperties.NetworkComponents = []sldatatypes.NetworkComponents{{MaxSpeed: 1000}}
 	}
