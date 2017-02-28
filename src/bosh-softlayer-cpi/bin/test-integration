@@ -22,7 +22,7 @@
   go clean
 
   echo -e "\n Formatting packages..."
-  go fmt ./...
+  go fmt $(go list ./... | grep -v /vendor/)
 
   echo -e "\n cd to base of project..."
   cd $base

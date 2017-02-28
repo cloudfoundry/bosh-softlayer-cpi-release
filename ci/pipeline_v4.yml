@@ -96,7 +96,7 @@ jobs:
     plan:
     - aggregate:
       - {trigger: true,  get: bosh-cpi-dev-artifacts, passed: [bats-ubuntu]}
-      - {trigger: false, get: bosh-cpi-release, resource: bosh-cpi-release-out}
+      - {trigger: false, get: bosh-cpi-release, resource: bosh-cpi-release-in}
       - {trigger: false, get: version-semver,  resource: version-semver}
 
     - task: promote
@@ -150,7 +150,7 @@ resources:
   - name: bosh-cpi-release-in
     type: git
     source:
-      uri: git@github.com:zhanggbj/bosh-softlayer-cpi-release.git
+      uri: git@github.com:cloudfoundry/bosh-softlayer-cpi-release.git
       branch: master
       private_key: {{github_private_key_zhanggbj}}
       ignore_paths:
@@ -176,7 +176,7 @@ resources:
   - name: bosh-cpi-release-out
     type: git
     source:
-      uri: git@github.com:zhanggbj/bosh-softlayer-cpi-release.git
+      uri: git@github.com:cloudfoundry/bosh-softlayer-cpi-release.git
       branch: master
       private_key: {{github_private_key_zhanggbj}}
 

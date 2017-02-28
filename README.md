@@ -1,8 +1,7 @@
 # BOSH Softlayer CPI Release
 
 * Documentation: [bosh.io/docs](https://bosh.io/docs)
-* BOSH Slack channel: [#bosh](https://cloudfoundry.slack.com/archives/bosh)
-* BOSH SoftLayer CPI Slack channel: [#bosh-softlayer-cpi](https://cloudfoundry.slack.com/archives/bosh-softlayer-cpi)
+* BOSH SoftLayer CPI Slack channel: #bosh-softlayer-cpi on [https://cloudfoundry.slack.com/](https://cloudfoundry.slack.com/)
 * Mailing list: [cf-bosh](https://lists.cloudfoundry.org/pipermail/cf-bosh)
 * CI: <http://bosh-softlayer-cpi.ci.bluemix.net/pipelines/bosh-softlayer-cpi-release-v2>
 * Roadmap: [Pivotal Tracker](https://www.pivotaltracker.com/n/projects/1344876)

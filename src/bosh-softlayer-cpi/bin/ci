@@ -21,7 +21,7 @@
   go clean
 
   echo -e "\n Formatting packages..."
-  go fmt ./...
+  go fmt $(go list ./... | grep -v /vendor/)
 
   echo -e "\n Unit Testing packages:"
   ginkgo -r -p -v $base/action $base/api $base/softlayer $base/util
