@@ -48,7 +48,7 @@ type VMCloudProperties struct {
 	PostInstallScriptUri           string                                     `json:"postInstallScriptUri,omitempty"`
 
 	BoshIp            string `json:"bosh_ip,omitempty"`
-	DeployedByBoshCLI bool   `json:"not_deployed_by_director,omitempty"`
+	DeployedByBoshCLI bool   `json:"deployedByBoshcli,omitempty"`
 
 	Baremetal             bool   `json:"baremetal,omitempty"`
 	BaremetalStemcell     string `json:"bm_stemcell,omitempty"`

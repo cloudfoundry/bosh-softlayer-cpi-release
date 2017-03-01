@@ -105,9 +105,9 @@ func (a CreateVMAction) updateCloudProperties(cloudProps *VMCloudProperties) {
 	}
 }
 
-func updateHostNameInCloudProps(cloudProps *VMCloudProperties, timeStamplePostfix string) string {
+func updateHostNameInCloudProps(cloudProps *VMCloudProperties, timeStampPostfix string) string {
 	if len(cloudProps.Hostname) == 0 {
-		return cloudProps.VmNamePrefix + timeStamplePostfix
+		return cloudProps.VmNamePrefix + timeStampPostfix
 	} else {
 		return cloudProps.Hostname
 	}
