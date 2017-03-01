@@ -2,8 +2,8 @@ package common_test
 
 import (
 	"encoding/json"
-	"fmt"
 	"net"
+	"strconv"
 	"time"
 
 	. "github.com/onsi/ginkgo"
@@ -97,7 +97,7 @@ var _ = Describe("VM Utils", func() {
 			timeStamp := TimeStampForTime(now)
 			Expect(timeStamp).ToNot(Equal(""))
 			prefix := now.Format("20060102-030405-")
-			suffix := fmt.Sprintf("%03d", int(now.UnixNano()/1e6-now.Unix()*1e3))
+			suffix := strconv.Itoa(int(now.UnixNano()/1e6 - now.Unix()*1e3))
 			Expect(timeStamp).To(Equal(prefix + suffix))
 		})
 	})

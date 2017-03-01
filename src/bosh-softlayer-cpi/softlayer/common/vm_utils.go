@@ -6,6 +6,7 @@ import (
 	"net"
 	"net/url"
 	"os"
+	"strconv"
 	"text/template"
 	"time"
 
@@ -34,7 +35,7 @@ func CreateDisksSpec(ephemeralDiskSize int) DisksSpec {
 
 func TimeStampForTime(now time.Time) string {
 	//utilize the constants list in the http://golang.org/src/time/format.go file to get the expect time formats
-	return now.Format("20060102-030405-") + fmt.Sprintf("%03d", int(now.UnixNano()/1e6-now.Unix()*1e3))
+	return now.Format("20060102-030405-") + strconv.Itoa(int(now.UnixNano()/1e6-now.Unix()*1e3))
 }
 
 func CreateVirtualGuestTemplate(stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks) (sldatatypes.SoftLayer_Virtual_Guest_Template, error) {
