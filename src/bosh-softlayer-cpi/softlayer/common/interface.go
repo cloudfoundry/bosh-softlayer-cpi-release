@@ -128,6 +128,7 @@ type VM interface {
 //go:generate counterfeiter -o fakes/fake_vm_creator.go . VMCreator
 type VMCreator interface {
 	Create(string, bslcstem.Stemcell, VMCloudProperties, Networks, Environment) (VM, error)
+	GetAgentOptions() AgentOptions
 }
 
 //go:generate counterfeiter -o fakes/fake_vm_deleter.go . VMDeleter

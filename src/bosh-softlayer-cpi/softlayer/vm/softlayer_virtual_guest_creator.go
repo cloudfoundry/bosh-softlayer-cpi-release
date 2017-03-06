@@ -65,6 +65,8 @@ func (c *softLayerVirtualGuestCreator) Create(agentID string, stemcell bslcstem.
 	return nil, bosherr.Error("virtual guests must have exactly one dynamic network")
 }
 
+func (c *softLayerVirtualGuestCreator) GetAgentOptions() AgentOptions { return c.agentOptions }
+
 // Private methods
 func (c *softLayerVirtualGuestCreator) createBySoftlayer(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
 	virtualGuestTemplate, err := CreateVirtualGuestTemplate(stemcell, cloudProps, networks)

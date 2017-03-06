@@ -150,6 +150,8 @@ func (c *softLayerPoolCreator) createFromVMPool(agentID string, stemcell bslcste
 	return sl_vm_os, nil
 }
 
+func (c *softLayerPoolCreator) GetAgentOptions() AgentOptions { return c.agentOptions }
+
 func (c *softLayerPoolCreator) createBySoftlayer(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
 	virtualGuestTemplate, err := CreateVirtualGuestTemplate(stemcell, cloudProps, networks)
 	if err != nil {

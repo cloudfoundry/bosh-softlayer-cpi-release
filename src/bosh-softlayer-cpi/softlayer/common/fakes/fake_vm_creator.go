@@ -72,6 +72,8 @@ func (fake *FakeVMCreator) Invocations() map[string][][]interface{} {
 	return fake.invocations
 }
 
+func (fake *FakeVMCreator) GetAgentOptions() common.AgentOptions { return common.AgentOptions{} }
+
 func (fake *FakeVMCreator) recordInvocation(key string, args []interface{}) {
 	fake.invocationsMutex.Lock()
 	defer fake.invocationsMutex.Unlock()

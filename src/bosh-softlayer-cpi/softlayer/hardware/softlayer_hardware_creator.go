@@ -58,6 +58,8 @@ func (c *baremetalCreator) Create(agentID string, stemcell bslcstem.Stemcell, cl
 	return nil, nil
 }
 
+func (c *baremetalCreator) GetAgentOptions() AgentOptions { return c.agentOptions }
+
 func (c *baremetalCreator) createByBaremetal(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
 	hardwareId, err := c.provisionBaremetal(cloudProps.VmNamePrefix, cloudProps.BaremetalStemcell, cloudProps.BaremetalNetbootImage)
 	if err != nil {
