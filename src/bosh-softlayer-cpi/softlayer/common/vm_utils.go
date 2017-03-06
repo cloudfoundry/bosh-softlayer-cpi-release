@@ -146,6 +146,13 @@ func UpdateEtcHostsOfBoshInit(path string, record string) (err error) {
 	logger := boshlog.NewWriterLogger(boshlog.LevelError, os.Stderr, os.Stderr)
 	fs := boshsys.NewOsFileSystem(logger)
 
+	if !fs.FileExists(path) {
+		err := fs.WriteFile(path, []byte{})
+		if err != nil {
+			return bosherr.WrapErrorf(err, "Creating the new file %s if it does not exist", path)
+		}
+	}
+
 	fileHandle, err := fs.OpenFile(path, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
 	if err != nil {
 		return bosherr.WrapErrorf(err, "Opening file %s", path)

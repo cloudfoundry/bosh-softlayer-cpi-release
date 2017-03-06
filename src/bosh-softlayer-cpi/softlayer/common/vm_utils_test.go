@@ -685,10 +685,11 @@ var _ = Describe("VM Utils", func() {
 			BeforeEach(func() {
 				fs.RemoveAll(testFilePath1)
 			})
-			It("returns error when opening the file", func() {
+			It("create the file if the file does not exist", func() {
 				err := UpdateEtcHostsOfBoshInit(testFilePath1, appendDNSEntry)
-				Expect(err).To(HaveOccurred())
-				Ω(err.Error()).Should(ContainSubstring("Opening file"))
+				Expect(err).ToNot(HaveOccurred())
+				fileContent, _ := fs.ReadFileString(testFilePath1)
+				Ω(fileContent).Should(ContainSubstring(appendDNSEntry))
 			})
 		})
 		Context("when the target file exists", func() {
