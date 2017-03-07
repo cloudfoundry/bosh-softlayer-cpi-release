@@ -161,7 +161,14 @@ func UpdateEtcHostsOfBoshInit(path string, record string) (err error) {
 	writer := bufio.NewWriter(fileHandle)
 	defer fileHandle.Close()
 
-	fmt.Fprintln(writer, "\n"+record)
+	length, err := fmt.Fprintln(writer, "\n"+record)
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Writing '%s' to Writer", record)
+	}
+	if length != len(record)+2 {
+		return bosherr.Errorf("The number (%d) of bytes written in Writer is not equal to the length (%d) of string", length, len(record)+2)
+	}
+
 	err = writer.Flush()
 	if err != nil {
 		return bosherr.WrapErrorf(err, "Writing '%s' to file %s", record, path)

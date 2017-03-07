@@ -665,6 +665,7 @@ var _ = Describe("VM Utils", func() {
 		const (
 			testFilePath1  = "/tmp/test_updateEtcHostsOfBoshInit1"
 			testFilePath2  = "/tmp/test_updateEtcHostsOfBoshInit2"
+			testFilePath3  = "/test_updateEtcHostsOfBoshInit3"
 			appendDNSEntry = "0.0.0.0    bosh-cpi-test.softlayer.com"
 		)
 		var (
@@ -702,6 +703,13 @@ var _ = Describe("VM Utils", func() {
 				Expect(err).ToNot(HaveOccurred())
 				fileContent, _ := fs.ReadFileString(testFilePath2)
 				Ω(fileContent).Should(ContainSubstring(appendDNSEntry))
+			})
+		})
+		Context("when the target file cannot be created", func() {
+			It("returns error due to no permission", func() {
+				err := UpdateEtcHostsOfBoshInit(testFilePath3, appendDNSEntry)
+				Expect(err).To(HaveOccurred())
+				Ω(err.Error()).Should(ContainSubstring("permission denied"))
 			})
 		})
 	})
