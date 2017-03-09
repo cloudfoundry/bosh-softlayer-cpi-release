@@ -27,3 +27,13 @@ For Cloud Config, see [sl-cloud-config](docs/sl-cloud-config.yml)
 For Concourse, follow the guide of [Cluster with BOSH](http://concourse.ci/clusters-with-bosh.html) and reference the deployment manifest sample in ```Deploying Concourse``` section.
 
 For a minimalistic deployment of Cloud Foundry (diego architecture), follow the introduction  [minimalistic_cf_deployment.md](docs/minimalistic_cf_deployment.md).
+
+## Frequently Asked Questions and Answers
+
+1. Q: How do I specify a dynamic network through subnet instead of vlan id?
+
+   A: We don't support it currently.
+
+2. Q: Is there any restrictions about the hostname supported by Softlayer?
+
+   A: Yes. The hostname length can't be exactly 64. Otherwise there will be problems with ssh login.
