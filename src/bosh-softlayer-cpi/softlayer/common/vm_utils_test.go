@@ -17,11 +17,13 @@ import (
 	bslcstem "bosh-softlayer-cpi/softlayer/stemcell"
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
+	boshsys "github.com/cloudfoundry/bosh-utils/system"
 
 	testhelpers "bosh-softlayer-cpi/test_helpers"
 	sldatatypes "github.com/maximilien/softlayer-go/data_types"
 
 	"errors"
+	"os"
 	"strings"
 )
 
@@ -655,6 +657,59 @@ var _ = Describe("VM Utils", func() {
 
 				Expect("").To(Equal(ip))
 				Expect(err).To(HaveOccurred())
+			})
+		})
+	})
+
+	Describe("#UpdateEtcHostsOfBoshInit", func() {
+		const (
+			testFilePath1  = "/tmp/test_updateEtcHostsOfBoshInit1"
+			testFilePath2  = "/tmp/test_updateEtcHostsOfBoshInit2"
+			testFilePath3  = "/test_updateEtcHostsOfBoshInit3"
+			appendDNSEntry = "0.0.0.0    bosh-cpi-test.softlayer.com"
+		)
+		var (
+			logger boshlog.Logger
+			fs     boshsys.FileSystem
+		)
+
+		BeforeEach(func() {
+			logger = boshlog.NewWriterLogger(boshlog.LevelError, os.Stderr, os.Stderr)
+			fs = boshsys.NewOsFileSystem(logger)
+		})
+		AfterEach(func() {
+			fs.RemoveAll(testFilePath1)
+			fs.RemoveAll(testFilePath2)
+		})
+
+		Context("when the target file does not exists", func() {
+			BeforeEach(func() {
+				fs.RemoveAll(testFilePath1)
+			})
+			It("create the file if the file does not exist", func() {
+				err := UpdateEtcHostsOfBoshInit(testFilePath1, appendDNSEntry)
+				Expect(err).ToNot(HaveOccurred())
+				fileContent, _ := fs.ReadFileString(testFilePath1)
+				Ω(fileContent).Should(ContainSubstring(appendDNSEntry))
+			})
+		})
+		Context("when the target file exists", func() {
+			BeforeEach(func() {
+				fs.RemoveAll(testFilePath2)
+				fs.WriteFileString(testFilePath2, "This is the first line")
+			})
+			It("update file successfully", func() {
+				err := UpdateEtcHostsOfBoshInit(testFilePath2, appendDNSEntry)
+				Expect(err).ToNot(HaveOccurred())
+				fileContent, _ := fs.ReadFileString(testFilePath2)
+				Ω(fileContent).Should(ContainSubstring(appendDNSEntry))
+			})
+		})
+		Context("when the target file cannot be created", func() {
+			It("returns error due to no permission", func() {
+				err := UpdateEtcHostsOfBoshInit(testFilePath3, appendDNSEntry)
+				Expect(err).To(HaveOccurred())
+				Ω(err.Error()).Should(ContainSubstring("permission denied"))
 			})
 		})
 	})
