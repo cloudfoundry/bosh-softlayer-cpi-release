@@ -1,13 +1,11 @@
 package common
 
 import (
-	"bytes"
 	"fmt"
 	"net"
 	"net/url"
 	"os"
 	"strconv"
-	"text/template"
 	"time"
 
 	sldatatypes "github.com/maximilien/softlayer-go/data_types"
@@ -17,6 +15,7 @@ import (
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	boshsys "github.com/cloudfoundry/bosh-utils/system"
 
+	"bufio"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	sl "github.com/maximilien/softlayer-go/softlayer"
 )
@@ -143,21 +142,36 @@ func ParseMbusURL(mbusURL string, primaryBackendIpAddress string) (string, error
 	return fmt.Sprintf("%s://%s:%s", parsedURL.Scheme, primaryBackendIpAddress, port), nil
 }
 
-func UpdateEtcHostsOfBoshInit(fileName string, record string) (err error) {
-	buffer := bytes.NewBuffer([]byte{})
-	t := template.Must(template.New("etc-hosts").Parse(ETC_HOSTS_TEMPLATE))
-
-	err = t.Execute(buffer, record)
-	if err != nil {
-		return bosherr.WrapError(err, "Generating config from template")
-	}
-
+func UpdateEtcHostsOfBoshInit(path string, record string) (err error) {
 	logger := boshlog.NewWriterLogger(boshlog.LevelError, os.Stderr, os.Stderr)
 	fs := boshsys.NewOsFileSystem(logger)
 
-	err = fs.WriteFile(fileName, buffer.Bytes())
+	if !fs.FileExists(path) {
+		err := fs.WriteFile(path, []byte{})
+		if err != nil {
+			return bosherr.WrapErrorf(err, "Creating the new file %s if it does not exist", path)
+		}
+	}
+
+	fileHandle, err := fs.OpenFile(path, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
 	if err != nil {
-		return bosherr.WrapError(err, "Writing to /etc/hosts")
+		return bosherr.WrapErrorf(err, "Opening file %s", path)
+	}
+
+	writer := bufio.NewWriter(fileHandle)
+	defer fileHandle.Close()
+
+	length, err := fmt.Fprintln(writer, "\n"+record)
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Writing '%s' to Writer", record)
+	}
+	if length != len(record)+2 {
+		return bosherr.Errorf("The number (%d) of bytes written in Writer is not equal to the length (%d) of string", length, len(record)+2)
+	}
+
+	err = writer.Flush()
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Writing '%s' to file %s", record, path)
 	}
 
 	return nil
