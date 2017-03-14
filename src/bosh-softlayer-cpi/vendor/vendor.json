@@ -167,46 +167,46 @@
 			"revisionTime": "2016-10-28T10:15:48Z"
 		},
 		{
-			"checksumSHA1": "E611q4DGLEibKTtgMltyFAeHyqU=",
+			"checksumSHA1": "0UVlZIGmbx4uAO43XyDSFK8JAr4=",
 			"path": "github.com/maximilien/softlayer-go/client",
-			"revision": "1d4217550aef2c9207aeae5a93c7ce5c3c91ef21",
-			"revisionTime": "2016-10-27T06:03:25Z"
+			"revision": "4e2e3475ad4fbdbc622692c1fdfad60418b770a4",
+			"revisionTime": "2017-03-14T00:31:25Z"
 		},
 		{
-			"checksumSHA1": "ugei8AHG33d7Mnic/MhYmjNiYeE=",
+			"checksumSHA1": "MLINP/4ftv+/byowTNRvgeYomOU=",
 			"path": "github.com/maximilien/softlayer-go/client/fakes",
-			"revision": "1d4217550aef2c9207aeae5a93c7ce5c3c91ef21",
-			"revisionTime": "2016-10-27T06:03:25Z"
+			"revision": "4e2e3475ad4fbdbc622692c1fdfad60418b770a4",
+			"revisionTime": "2017-03-14T00:31:25Z"
 		},
 		{
 			"checksumSHA1": "nPaYMMjIl21a30j9R2lURjb8Nts=",
 			"path": "github.com/maximilien/softlayer-go/common",
-			"revision": "1d4217550aef2c9207aeae5a93c7ce5c3c91ef21",
-			"revisionTime": "2016-10-27T06:03:25Z"
+			"revision": "4e2e3475ad4fbdbc622692c1fdfad60418b770a4",
+			"revisionTime": "2017-03-14T00:31:25Z"
 		},
 		{
-			"checksumSHA1": "QX0ziTd3v7aZ6fsWYQ7CbOl24BM=",
+			"checksumSHA1": "9s83tabrVG6j5xZ3PFRGJdfwLYs=",
 			"path": "github.com/maximilien/softlayer-go/data_types",
-			"revision": "1d4217550aef2c9207aeae5a93c7ce5c3c91ef21",
-			"revisionTime": "2016-10-27T06:03:25Z"
+			"revision": "4e2e3475ad4fbdbc622692c1fdfad60418b770a4",
+			"revisionTime": "2017-03-14T00:31:25Z"
 		},
 		{
-			"checksumSHA1": "BsdKAcYXM60hA67l2Iao/Jr9N9w=",
+			"checksumSHA1": "n6v93rb3oy1JZH3hQwGTJLGA7XM=",
 			"path": "github.com/maximilien/softlayer-go/services",
-			"revision": "649046aa8a9f196ddb6187660e3e38d6905fffab",
-			"revisionTime": "2016-11-30T18:58:16Z"
+			"revision": "4e2e3475ad4fbdbc622692c1fdfad60418b770a4",
+			"revisionTime": "2017-03-14T00:31:25Z"
 		},
 		{
-			"checksumSHA1": "UKYqNCJEq4RTrCnmSLDyTarFfTY=",
+			"checksumSHA1": "rAdirobiTWcBwIYxYgySqeqhTSM=",
 			"path": "github.com/maximilien/softlayer-go/softlayer",
-			"revision": "649046aa8a9f196ddb6187660e3e38d6905fffab",
-			"revisionTime": "2016-11-30T18:58:16Z"
+			"revision": "4e2e3475ad4fbdbc622692c1fdfad60418b770a4",
+			"revisionTime": "2017-03-14T00:31:25Z"
 		},
 		{
 			"checksumSHA1": "TIdT4Jg+JvArPSxEA9nvYqeciDo=",
 			"path": "github.com/maximilien/softlayer-go/test_helpers",
-			"revision": "1d4217550aef2c9207aeae5a93c7ce5c3c91ef21",
-			"revisionTime": "2016-10-27T06:03:25Z"
+			"revision": "4e2e3475ad4fbdbc622692c1fdfad60418b770a4",
+			"revisionTime": "2017-03-14T00:31:25Z"
 		},
 		{
 			"checksumSHA1": "gcLub3oB+u4QrOJZcYmk/y2AP4k=",
@@ -540,6 +540,14 @@
 			"path": "gopkg.in/yaml.v2",
 			"revision": "a5b47d31c556af34a302ce5d659e6fea44d90de0",
 			"revisionTime": "2016-09-28T15:37:09Z"
+		},
+		{
+			"path": "https://github.com/maximilien/softlayer-go",
+			"revision": ""
+		},
+		{
+			"path": "https://github.com/maximilien/softlayer-go.git",
+			"revision": ""
 		}
 	],
 	"rootPath": "bosh-softlayer-cpi"
