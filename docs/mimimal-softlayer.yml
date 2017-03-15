@@ -34,7 +34,7 @@ resource_pools:
       keep_root_password: true
       password: REPLACE_WITH_PASSWORD
   name: small_z1
-  network: cf_private
+  network: cf_dynamic
   stemcell:
     name: bosh-softlayer-xen-ubuntu-trusty-go_agent
     version: latest
@@ -53,7 +53,7 @@ resource_pools:
       keep_root_password: true
       password: REPLACE_WITH_PASSWORD
   name: diego
-  network: cf_private
+  network: cf_dynamic
   stemcell:
     name: bosh-softlayer-xen-ubuntu-trusty-go_agent
     version: latest
@@ -418,7 +418,7 @@ properties:
   router:
     route_services_secret: REPLACE_WITH_PASSWORD
     ssl_skip_validation: true
-  networks: {apps: cf_private}
+  networks: {apps: cf_dynamic}
   app_domains: [REPLACE_WITH_SYSTEM_DOMAIN]
   cc:
     allow_app_ssh_access: true
