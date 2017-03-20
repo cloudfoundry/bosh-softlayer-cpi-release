@@ -150,6 +150,8 @@ func (c *softLayerPoolCreator) createFromVMPool(agentID string, stemcell bslcste
 	return sl_vm_os, nil
 }
 
+func (c *softLayerPoolCreator) GetAgentOptions() AgentOptions { return c.agentOptions }
+
 func (c *softLayerPoolCreator) createBySoftlayer(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
 	virtualGuestTemplate, err := CreateVirtualGuestTemplate(stemcell, cloudProps, networks)
 	if err != nil {
@@ -188,12 +190,6 @@ func (c *softLayerPoolCreator) createBySoftlayer(agentID string, stemcell bslcst
 		if err != nil {
 			return nil, bosherr.WrapErrorf(err, "Updating BOSH director hostname/IP mapping entry in /etc/hosts")
 		}
-
-		mbus, err := ParseMbusURL(c.agentOptions.Mbus, vm.GetPrimaryBackendIP())
-		if err != nil {
-			return nil, bosherr.WrapErrorf(err, "Cannot construct mbus url.")
-		}
-		c.agentOptions.Mbus = mbus
 	} else {
 		var boshIP string
 		if cloudProps.BoshIp != "" {
@@ -298,12 +294,6 @@ func (c *softLayerPoolCreator) createByOSReload(agentID string, stemcell bslcste
 		if err != nil {
 			return nil, bosherr.WrapErrorf(err, "Updating BOSH director hostname/IP mapping entry in /etc/hosts")
 		}
-
-		mbus, err := ParseMbusURL(c.agentOptions.Mbus, vm.GetPrimaryBackendIP())
-		if err != nil {
-			return nil, bosherr.WrapErrorf(err, "Cannot construct mbus url.")
-		}
-		c.agentOptions.Mbus = mbus
 	} else {
 		var boshIP string
 		if cloudProps.BoshIp != "" {
@@ -389,12 +379,6 @@ func (c *softLayerPoolCreator) oSReloadVMInPool(cid int, agentID string, stemcel
 		if err != nil {
 			return nil, bosherr.WrapErrorf(err, "Updating BOSH director hostname/IP mapping entry in /etc/hosts")
 		}
-
-		mbus, err := ParseMbusURL(c.agentOptions.Mbus, vm.GetPrimaryBackendIP())
-		if err != nil {
-			return nil, bosherr.WrapErrorf(err, "Cannot construct mbus url.")
-		}
-		c.agentOptions.Mbus = mbus
 	} else {
 		var boshIP string
 		if cloudProps.BoshIp != "" {

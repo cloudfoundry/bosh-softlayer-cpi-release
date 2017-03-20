@@ -65,6 +65,8 @@ func (c *softLayerVirtualGuestCreator) Create(agentID string, stemcell bslcstem.
 	return nil, bosherr.Error("virtual guests must have exactly one dynamic network")
 }
 
+func (c *softLayerVirtualGuestCreator) GetAgentOptions() AgentOptions { return c.agentOptions }
+
 // Private methods
 func (c *softLayerVirtualGuestCreator) createBySoftlayer(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
 	virtualGuestTemplate, err := CreateVirtualGuestTemplate(stemcell, cloudProps, networks)
@@ -104,12 +106,6 @@ func (c *softLayerVirtualGuestCreator) createBySoftlayer(agentID string, stemcel
 		if err != nil {
 			return nil, bosherr.WrapErrorf(err, "Updating BOSH director hostname/IP mapping entry in /etc/hosts")
 		}
-
-		mbus, err := ParseMbusURL(c.agentOptions.Mbus, vm.GetPrimaryBackendIP())
-		if err != nil {
-			return nil, bosherr.WrapErrorf(err, "Cannot construct mbus url.")
-		}
-		c.agentOptions.Mbus = mbus
 	} else {
 		var boshIP string
 		if cloudProps.BoshIp != "" {
@@ -120,6 +116,7 @@ func (c *softLayerVirtualGuestCreator) createBySoftlayer(agentID string, stemcel
 				return nil, bosherr.WrapErrorf(err, fmt.Sprintf("Failed to get IP address of %s in local", slhelper.NetworkInterface))
 			}
 		}
+
 		mbus, err := ParseMbusURL(c.agentOptions.Mbus, boshIP)
 		if err != nil {
 			return nil, bosherr.WrapErrorf(err, "Cannot construct mbus url.")
@@ -213,12 +210,6 @@ func (c *softLayerVirtualGuestCreator) createByOSReload(agentID string, stemcell
 		if err != nil {
 			return nil, bosherr.WrapErrorf(err, "Updating BOSH director hostname/IP mapping entry in /etc/hosts")
 		}
-
-		mbus, err := ParseMbusURL(c.agentOptions.Mbus, vm.GetPrimaryBackendIP())
-		if err != nil {
-			return nil, bosherr.WrapErrorf(err, "Cannot construct mbus url.")
-		}
-		c.agentOptions.Mbus = mbus
 	} else {
 		var boshIP string
 		if cloudProps.BoshIp != "" {
