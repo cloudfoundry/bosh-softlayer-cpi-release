@@ -11,6 +11,7 @@ import (
 
 	. "bosh-softlayer-cpi/softlayer/common"
 	fakescommon "bosh-softlayer-cpi/softlayer/common/fakes"
+	helper "bosh-softlayer-cpi/softlayer/common/helper"
 	fakestem "bosh-softlayer-cpi/softlayer/stemcell/fakes"
 
 	sldatatypes "github.com/maximilien/softlayer-go/data_types"
@@ -78,6 +79,7 @@ var _ = Describe("CreateVM", func() {
 				fakeStemcellFinder.FindByIdReturns(fakeStemcell, nil)
 				fakeCreatorProvider.GetReturns(fakeVmCreator)
 				fakeVmCreator.CreateReturns(fakeVm, nil)
+
 			})
 
 			It("fetches stemcell by id", func() {
@@ -100,6 +102,57 @@ var _ = Describe("CreateVM", func() {
 				Expect(actualEnv).To(Equal(env))
 				Expect(vmCidString).To(Equal(VMCID(fakeVm.ID()).String()))
 				Expect(err).NotTo(HaveOccurred())
+			})
+		})
+
+		Context("when vm name prefix is specified", func() {
+			BeforeEach(func() {
+				fakeOptions = &ConcreteFactoryOptions{
+					Softlayer: SoftLayerConfig{FeatureOptions: FeatureOptions{EnablePool: true}},
+				}
+				fakeCloudProp = VMCloudProperties{
+					StartCpus:    2,
+					MaxMemory:    2048,
+					Datacenter:   sldatatypes.Datacenter{Name: "fake-datacenter"},
+					VmNamePrefix: "",
+					BoshIp:       "10.0.0.0",
+					SshKeys: []sldatatypes.SshKey{
+						sldatatypes.SshKey{Id: 1234},
+					},
+				}
+				action = NewCreateVM(fakeStemcellFinder, fakeCreatorProvider, *fakeOptions)
+
+				fakeVm.IDReturns(1234567)
+				fakeStemcellFinder.FindByIdReturns(fakeStemcell, nil)
+				fakeCreatorProvider.GetReturns(fakeVmCreator)
+				fakeVmCreator.CreateReturns(fakeVm, nil)
+			})
+			Context("when vm name is < 64 character long", func() {
+				BeforeEach(func() {
+					fakeCloudProp.VmNamePrefix = "63charac_long_name_with_suffix"
+				})
+				It("does not modify the name length", func() {
+					Expect(helper.LengthOfHostName).To(Equal(63))
+					Expect(fakeStemcellFinder.FindByIdCallCount()).To(Equal(1))
+				})
+			})
+			Context("when vm name is exactly 64 character long", func() {
+				BeforeEach(func() {
+					fakeCloudProp.VmNamePrefix = "64charact_long_name_with_suffix"
+				})
+				It("adds 2 additional characters to the name", func() {
+					Expect(helper.LengthOfHostName).To(Equal(66))
+					Expect(fakeStemcellFinder.FindByIdCallCount()).To(Equal(1))
+				})
+			})
+			Context("when vm name > 64 characters", func() {
+				BeforeEach(func() {
+					fakeCloudProp.VmNamePrefix = "65characte_long_name_with_suffix"
+				})
+				It("does not modify the name length", func() {
+					Expect(helper.LengthOfHostName).To(Equal(65))
+					Expect(fakeStemcellFinder.FindByIdCallCount()).To(Equal(1))
+				})
 			})
 		})
 
