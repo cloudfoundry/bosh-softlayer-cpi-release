@@ -39,7 +39,7 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 	BeforeEach(func() {
 		softLayerClient = fakeslclient.NewFakeSoftLayerClient("fake-username", "fake-api-key")
 		sshClient = &fakesutil.FakeSshClient{}
-		agentOptions = AgentOptions{Mbus: "fake-mbus"}
+		agentOptions = AgentOptions{Mbus: "fake-mbus", VcapPassword: "fake-vcap-password"}
 		logger = boshlog.NewLogger(boshlog.LevelNone)
 		fakeVmFinder = &fakescommon.FakeVMFinder{}
 		fakeVm = &fakescommon.FakeVM{}
@@ -226,6 +226,7 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 						Expect(err).ToNot(HaveOccurred())
 						Expect(vm.ID()).To(Equal(1234567))
 						Expect(creator.GetAgentOptions().Mbus).To(Equal("fake-mbus"))
+						Expect(creator.GetAgentOptions().VcapPassword).To(Equal("fake-vcap-password"))
 					})
 					It("returns a new SoftLayerVM with neither bosh ip nor DeployedByBoshCLI flag", func() {
 						cloudProps = VMCloudProperties{
@@ -274,6 +275,7 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 						Expect(err).ToNot(HaveOccurred())
 						Expect(vm.ID()).To(Equal(1234567))
 						Expect(creator.GetAgentOptions().Mbus).ToNot(Equal("fake-mbus"))
+						Expect(creator.GetAgentOptions().VcapPassword).To(Equal("fake-vcap-password"))
 					})
 				})
 			})
@@ -509,6 +511,7 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 						Expect(err).ToNot(HaveOccurred())
 						Expect(vm.ID()).To(Equal(1234567))
 						Expect(creator.GetAgentOptions().Mbus).To(Equal("fake-mbus"))
+						Expect(creator.GetAgentOptions().VcapPassword).To(Equal("fake-vcap-password"))
 					})
 					It("returns a new SoftLayerVM with neither bosh ip nor DeployedByBoshCLI flag", func() {
 						cloudProps = VMCloudProperties{
@@ -559,6 +562,7 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 						Expect(err).ToNot(HaveOccurred())
 						Expect(vm.ID()).To(Equal(1234567))
 						Expect(creator.GetAgentOptions().Mbus).ToNot(Equal("fake-mbus"))
+						Expect(creator.GetAgentOptions().VcapPassword).To(Equal("fake-vcap-password"))
 					})
 				})
 			})
