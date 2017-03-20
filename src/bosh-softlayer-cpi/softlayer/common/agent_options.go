@@ -13,7 +13,7 @@ type AgentOptions struct {
 
 	Blobstore BlobstoreOptions
 
-	//vcap password
+	//The SHA-512 encrypted vcap password
 	VcapPassword string
 }
 
