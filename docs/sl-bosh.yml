@@ -3,15 +3,18 @@ name: bosh
 
 releases:
 - name: bosh
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh?v=256.2
-  sha1: ff2f4e16e02f66b31c595196052a809100cfd5a8
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh?v=257.14
+  sha1: b41821dccee78ad7bd44466cd0160920c183787a
 - name: bosh-softlayer-cpi
-  url: https://bosh.io/d/github.com/cloudfoundry-incubator/bosh-softlayer-cpi-release?v=2.3.0
-  sha1: ed79e5617961076a22c8111d173bc5bfeb6a9b14
+  url: https://bosh.io/d/github.com/cloudfoundry-incubator/bosh-softlayer-cpi-release?v=3.0.5
+  sha1: e7eac102bf24b5c80574ffd287dff429bc8f0cd9
   
 resource_pools:
 - name: vms
   network: default
+  env:
+    bosh:
+      keep_root_password: true
   stemcell:
     url: file://./light-bosh-stemcell-3232.4-softlayer-esxi-ubuntu-trusty-go_agent.tgz 
   cloud_properties:
