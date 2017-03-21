@@ -113,12 +113,9 @@ jobs:
 
 resources:
   - name: bosh-release
-    type: s3
+    type: bosh-io-release
     source:
-      regexp: bosh-([0-9]+)\.tgz
-      bucket: {{s3_pipeline_bucket}}
-      access_key_id: {{s3_access_key_id}}
-      secret_access_key: {{s3_secret_access_key}}
+        repository: cloudfoundry/bosh
 
   - name: light-stemcell
     type: s3
@@ -138,7 +135,7 @@ resources:
   - name: pipelines
     type: git
     source:
-      uri: https://github.com/zhanggbj/bosh-cpi-certification
+      uri: https://github.com/jianqiu/bosh-cpi-certification
       branch: master
 
   - name: bats
