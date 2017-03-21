@@ -131,8 +131,8 @@ If don't perform this run book, the next `bosh deploy` will create a new vm to b
      
     ### 5) Re-run "bosh deploy"
 
-
-- ### <a id="scenario2"></a>Scenario 2: user_data.json does not exist
+---
+- ## <a id="scenario2"></a>Scenario 2: user_data.json does not exist
     Sometimes when `bosh deploy` fails, user_data.json has not yet been generated in cases like create_vm failure.
     
     Make sure the failing vm can still been seen from [Softlayer Portal](https://control.softlayer.com)
