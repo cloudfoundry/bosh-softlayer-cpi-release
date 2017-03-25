@@ -62,6 +62,9 @@ instance_groups:
   persistent_disk_type: small
   networks:
   - name: concourse
+  env:
+    bosh:
+      keep_root_password: true
 
 update:
   canaries: 0
