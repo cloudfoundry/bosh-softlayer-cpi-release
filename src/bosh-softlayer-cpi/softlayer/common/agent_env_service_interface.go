@@ -4,4 +4,5 @@ package common
 type AgentEnvService interface {
 	Fetch() (AgentEnv, error)
 	Update(AgentEnv) error
+	Delete() error
 }

@@ -45,6 +45,7 @@ func (s *softlayerFileService) Download(user string, password string, target str
 
 func (s *softlayerFileService) Upload(user string, password string, target string, destinationPath string, contents []byte) error {
 	s.logger.Debug(s.logTag, "Uploading file to %s", destinationPath)
+	s.logger.Debug(s.logTag, "Uploading file contents: %s", string(contents))
 
 	buf := bytes.NewBuffer(contents)
 	err := s.sshClient.Upload(user, password, target, buf, destinationPath)

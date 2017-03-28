@@ -12,9 +12,10 @@ import (
 )
 
 type registryAgentEnvService struct {
-	endpoint string
-	logger   boshlog.Logger
-	logTag   string
+	endpoint   string
+	instanceID string
+	logger     boshlog.Logger
+	logTag     string
 }
 
 type registryResp struct {
@@ -22,30 +23,24 @@ type registryResp struct {
 }
 
 func NewRegistryAgentEnvService(
-	registryOptions RegistryOptions,
+	endpoint string,
 	instanceID string,
 	logger boshlog.Logger,
 ) AgentEnvService {
-	endpoint := fmt.Sprintf(
-		"http://%s:%s@%s:%d/instances/%s/settings",
-		registryOptions.Username,
-		registryOptions.Password,
-		registryOptions.Host,
-		registryOptions.Port,
-		instanceID,
-	)
 	return registryAgentEnvService{
-		endpoint: endpoint,
-		logger:   logger,
-		logTag:   "registryAgentEnvService",
+		endpoint:   endpoint,
+		instanceID: instanceID,
+		logger:     logger,
+		logTag:     "registryAgentEnvService",
 	}
 }
 
 func (s registryAgentEnvService) Fetch() (AgentEnv, error) {
 	s.logger.Debug(s.logTag, "Fetching agent env from registry endpoint %s", s.endpoint)
 
+	settingsURL := fmt.Sprintf("%s/instances/%s/settings", s.endpoint, s.instanceID)
 	httpClient := http.Client{}
-	httpResponse, err := httpClient.Get(s.endpoint)
+	httpResponse, err := httpClient.Get(settingsURL)
 	if err != nil {
 		return AgentEnv{}, bosherr.WrapError(err, "Fetching agent env from registry")
 	}
@@ -89,7 +84,8 @@ func (s registryAgentEnvService) Update(agentEnv AgentEnv) error {
 	s.logger.Debug(s.logTag, "Updating registry endpoint '%s' with agent env: '%s'", s.endpoint, settingsJSON)
 
 	putPayload := bytes.NewReader(settingsJSON)
-	request, err := http.NewRequest("PUT", s.endpoint, putPayload)
+	settingsURL := fmt.Sprintf("%s/instances/%s/settings", s.endpoint, s.instanceID)
+	request, err := http.NewRequest("PUT", settingsURL, putPayload)
 	if err != nil {
 		return bosherr.WrapErrorf(err, "Creating PUT request to update registry at '%s' with settings '%s'", s.endpoint, settingsJSON)
 	}
@@ -103,6 +99,28 @@ func (s registryAgentEnvService) Update(agentEnv AgentEnv) error {
 	defer httpResponse.Body.Close()
 
 	if httpResponse.StatusCode != http.StatusOK && httpResponse.StatusCode != http.StatusCreated {
+		return bosherr.Errorf("Received non-2xx status code when contacting registry: '%d'", httpResponse.StatusCode)
+	}
+
+	return nil
+}
+
+func (s registryAgentEnvService) Delete() error {
+	settingsURL := fmt.Sprintf("%s/instances/%s/settings", s.endpoint, s.instanceID)
+	request, err := http.NewRequest("DELETE", settingsURL, nil)
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Creating DELETE request to update registry at '%s' with settings '%s'", s.endpoint)
+	}
+
+	httpClient := http.Client{}
+	httpResponse, err := httpClient.Do(request)
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Deleting settings from registry endpoint '%s'", s.endpoint)
+	}
+
+	defer httpResponse.Body.Close()
+
+	if httpResponse.StatusCode != http.StatusOK {
 		return bosherr.Errorf("Received non-2xx status code when contacting registry: '%d'", httpResponse.StatusCode)
 	}
 

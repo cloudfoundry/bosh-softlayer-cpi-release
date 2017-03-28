@@ -78,7 +78,7 @@ var _ = Describe("UbuntuNetwork", func() {
 
 			Expect(softlayerFileService.UploadCallCount()).To(Equal(1))
 
-			path, data := softlayerFileService.UploadArgsForCall(0)
+			_, _, _, path, data := softlayerFileService.UploadArgsForCall(0)
 			Expect(path).To(Equal("/etc/network/interfaces.bosh"))
 			Expect(data).To(BeEquivalentTo(expectedConfig))
 

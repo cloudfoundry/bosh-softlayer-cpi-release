@@ -1,181 +1,176 @@
 package common_test
 
 import (
-	"encoding/base64"
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
-	"net"
 	"net/http"
+	"net/http/httptest"
 
 	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/ginkgo/config"
 	. "github.com/onsi/gomega"
 
-	. "bosh-softlayer-cpi/softlayer/common"
-
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
+
+	. "bosh-softlayer-cpi/softlayer/common"
 )
 
 var _ = Describe("RegistryAgentEnvService", func() {
 	var (
-		logger               boshlog.Logger
-		agentEnvService      AgentEnvService
-		registryServer       *registryServer
-		expectedAgentEnv     AgentEnv
-		expectedAgentEnvJSON []byte
+		logger          boshlog.Logger
+		agentEnvService AgentEnvService
+		instanceID      string
 	)
 
 	BeforeEach(func() {
 		logger = boshlog.NewLogger(boshlog.LevelNone)
-
-		registryOptions := RegistryOptions{
-			Host:     "127.0.0.1",
-			Port:     6307 + GinkgoConfig.ParallelNode,
-			Username: "fake-username",
-			Password: "fake-password",
-		}
-
-		if registryServer == nil {
-			registryServer = NewRegistryServer(registryOptions)
-
-			readyCh := make(chan struct{})
-			stopCh := make(chan error)
-
-			go func() {
-				err := registryServer.Start(readyCh)
-				if err != nil {
-					stopCh <- err
-				}
-			}()
-
-			select {
-			case <-readyCh:
-				// ok, continue
-			case err := <-stopCh:
-				panic(fmt.Sprintf("Error occurred waiting for registry server to start: %s", err))
-			}
-		}
-
-		instanceID := "fake-instance-id"
-		agentEnvService = NewRegistryAgentEnvService(registryOptions, instanceID, logger)
-
-		expectedAgentEnv = AgentEnv{AgentID: "fake-agent-id"}
-		var err error
-		expectedAgentEnvJSON, err = json.Marshal(expectedAgentEnv)
-		Expect(err).ToNot(HaveOccurred())
-	})
-
-	AfterEach(func() {
-		// Leaking registry server on purpose
-		registryServer.Stop()
+		instanceID = "fake-instance-id"
+		agentEnvService = NewRegistryAgentEnvService("fake-registry-host", instanceID, logger)
 	})
 
 	Describe("Fetch", func() {
-		Context("when settings for the instance exist in the registry", func() {
+		Context("when instance is present in the registry", func() {
+			var (
+				ts           *httptest.Server
+				settingsJSON string
+				agentEnv     AgentEnv
+			)
+
 			BeforeEach(func() {
-				registryServer.InstanceSettings = expectedAgentEnvJSON
+				handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					defer GinkgoRecover()
+
+					Expect(r.Method).To(Equal("GET"))
+					Expect(r.URL.Path).To(Equal("/instances/fake-instance-id/settings"))
+
+					w.Write([]byte(settingsJSON))
+				})
+				ts = httptest.NewServer(handler)
+
+				agentEnvService = NewRegistryAgentEnvService(ts.URL, instanceID, logger)
+			})
+
+			AfterEach(func() {
+				ts.Close()
 			})
 
 			It("fetches settings from the registry", func() {
+				settingsJSON = `{"settings": "{\"agent_id\":\"my-agent-id\"}"}`
+				agentEnv = AgentEnv{AgentID: "fake-agent-id"}
+
 				agentEnv, err := agentEnvService.Fetch()
 				Expect(err).ToNot(HaveOccurred())
-				Expect(agentEnv).To(Equal(expectedAgentEnv))
+				Expect(agentEnv).To(Equal(agentEnv))
+			})
+
+			It("returns error if registry settings wrapper cannot be parsed", func() {
+				settingsJSON = "invalid-json"
+
+				agentEnv, err := agentEnvService.Fetch()
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("Unmarshalling registry response"))
+
+				Expect(agentEnv).To(Equal(AgentEnv{}))
+			})
+
+			It("returns error if registry settings wrapper contains invalid json", func() {
+				settingsJSON = `{"settings": "invalid-json"}`
+
+				agentEnv, err := agentEnvService.Fetch()
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("Unmarshalling agent env from registry"))
+
+				Expect(agentEnv).To(Equal(AgentEnv{}))
 			})
 		})
 
-		Context("when settings for instance do not exist", func() {
+		Context("when instance is not present in the registry", func() {
+			var (
+				ts *httptest.Server
+			)
+
+			BeforeEach(func() {
+				handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					defer GinkgoRecover()
+
+					Expect(r.Method).To(Equal("GET"))
+					Expect(r.URL.Path).To(Equal("/instances/fake-instance-id/settings"))
+
+					w.WriteHeader(http.StatusNotFound)
+				})
+				ts = httptest.NewServer(handler)
+
+				agentEnvService = NewRegistryAgentEnvService(ts.URL, instanceID, logger)
+			})
+
+			AfterEach(func() {
+				ts.Close()
+			})
+
 			It("returns an error", func() {
 				agentEnv, err := agentEnvService.Fetch()
 				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("Received non-200 status code when contacting registry"))
 				Expect(agentEnv).To(Equal(AgentEnv{}))
 			})
 		})
 	})
 
 	Describe("Update", func() {
-		It("updates settings in the registry", func() {
-			Expect(registryServer.InstanceSettings).To(BeNil())
-			err := agentEnvService.Update(expectedAgentEnv)
+		var (
+			ts       *httptest.Server
+			agentEnv AgentEnv
+		)
+
+		BeforeEach(func() {
+			handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				defer GinkgoRecover()
+
+				Expect(r.Method).To(Equal("PUT"))
+				Expect(r.URL.Path).To(Equal("/instances/fake-instance-id/settings"))
+
+				w.WriteHeader(http.StatusCreated)
+
+			})
+			ts = httptest.NewServer(handler)
+
+			agentEnvService = NewRegistryAgentEnvService(ts.URL, instanceID, logger)
+		})
+
+		AfterEach(func() {
+			ts.Close()
+		})
+
+		It("Updates settings in the registry", func() {
+			agentEnv = AgentEnv{AgentID: "fake-agent-id"}
+			err := agentEnvService.Update(agentEnv)
 			Expect(err).ToNot(HaveOccurred())
-			Expect(registryServer.InstanceSettings).To(Equal(expectedAgentEnvJSON))
+		})
+	})
+
+	Describe("Delete", func() {
+		var (
+			ts *httptest.Server
+		)
+
+		BeforeEach(func() {
+			handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				defer GinkgoRecover()
+
+				Expect(r.Method).To(Equal("DELETE"))
+				Expect(r.URL.Path).To(Equal("/instances/fake-instance-id/settings"))
+
+				w.WriteHeader(http.StatusOK)
+			})
+			ts = httptest.NewServer(handler)
+
+			agentEnvService = NewRegistryAgentEnvService(ts.URL, instanceID, logger)
+		})
+
+		AfterEach(func() {
+			ts.Close()
+		})
+
+		It("Deletes settings in the registry", func() {
+			err := agentEnvService.Delete()
+			Expect(err).ToNot(HaveOccurred())
 		})
 	})
 })
-
-type registryServer struct {
-	InstanceSettings []byte
-	options          RegistryOptions
-	listener         net.Listener
-}
-
-func NewRegistryServer(options RegistryOptions) *registryServer {
-	return &registryServer{options: options}
-}
-
-func (s *registryServer) Start(readyCh chan struct{}) error {
-	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", s.options.Host, s.options.Port))
-	if err != nil {
-		return err
-	}
-
-	s.listener = listener
-
-	readyCh <- struct{}{}
-
-	mux := http.NewServeMux()
-	mux.HandleFunc("/instances/fake-instance-id/settings", s.instanceHandler)
-
-	server := &http.Server{Handler: mux}
-
-	return server.Serve(s.listener)
-}
-
-func (s *registryServer) Stop() error {
-	// if client keeps connection alive, server will still be running
-	s.InstanceSettings = nil
-
-	return nil
-}
-
-type registryResp struct {
-	Settings string `json:"settings"`
-}
-
-func (s *registryServer) instanceHandler(w http.ResponseWriter, req *http.Request) {
-	if !s.isAuthorized(req) {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-
-	if req.Method == "GET" {
-		resp := registryResp{Settings: string(s.InstanceSettings)}
-
-		respBytes, err := json.Marshal(resp)
-		if err != nil {
-			http.Error(w, "Failed to marshal instance settings", 500)
-			return
-		}
-
-		if s.InstanceSettings != nil {
-			w.Write(respBytes)
-			return
-		}
-
-		http.NotFound(w, req)
-		return
-	}
-
-	if req.Method == "PUT" {
-		reqBody, _ := ioutil.ReadAll(req.Body)
-		s.InstanceSettings = reqBody
-		w.WriteHeader(http.StatusOK)
-		return
-	}
-}
-
-func (s *registryServer) isAuthorized(req *http.Request) bool {
-	auth := s.options.Username + ":" + s.options.Password
-	expectedAuthorizationHeader := "Basic " + base64.StdEncoding.EncodeToString([]byte(auth))
-	return expectedAuthorizationHeader == req.Header.Get("Authorization")
-}

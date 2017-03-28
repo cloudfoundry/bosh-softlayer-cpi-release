@@ -52,8 +52,9 @@ var _ = Describe("SoftlayerPoolCreator", func() {
 			networks   Networks
 			env        Environment
 
-			creator        VMCreator
-			featureOptions *FeatureOptions
+			creator         VMCreator
+			featureOptions  *FeatureOptions
+			registryOptions *RegistryOptions
 
 			fakeVm         *fakescommon.FakeVM
 			poolVmResponse *models.VMResponse
@@ -128,7 +129,9 @@ var _ = Describe("SoftlayerPoolCreator", func() {
 			featureOptions = &FeatureOptions{
 				EnablePool: true,
 			}
-			creator = NewSoftLayerPoolCreator(fakeVmFinder, fakePoolClient, softLayerClient, agentOptions, logger, *featureOptions)
+			registryOptions = &RegistryOptions{}
+
+			creator = NewSoftLayerPoolCreator(fakeVmFinder, fakePoolClient, softLayerClient, agentOptions, *featureOptions, *registryOptions, logger)
 
 			expectedCmdResults = []string{
 				"",

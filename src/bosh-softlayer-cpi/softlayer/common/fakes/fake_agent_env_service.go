@@ -23,6 +23,12 @@ type FakeAgentEnvService struct {
 	updateReturns struct {
 		result1 error
 	}
+	DeleteStub        func() error
+	deleteMutex       sync.RWMutex
+	deleteArgsForCall []struct{}
+	deleteReturns     struct {
+		result1 error
+	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
 }
@@ -86,6 +92,31 @@ func (fake *FakeAgentEnvService) UpdateReturns(result1 error) {
 	}{result1}
 }
 
+func (fake *FakeAgentEnvService) Delete() error {
+	fake.deleteMutex.Lock()
+	fake.deleteArgsForCall = append(fake.deleteArgsForCall, struct{}{})
+	fake.recordInvocation("Delete", []interface{}{})
+	fake.deleteMutex.Unlock()
+	if fake.DeleteStub != nil {
+		return fake.DeleteStub()
+	} else {
+		return fake.deleteReturns.result1
+	}
+}
+
+func (fake *FakeAgentEnvService) DeleteCallCount() int {
+	fake.deleteMutex.RLock()
+	defer fake.deleteMutex.RUnlock()
+	return len(fake.deleteArgsForCall)
+}
+
+func (fake *FakeAgentEnvService) DeleteReturns(result1 error) {
+	fake.DeleteStub = nil
+	fake.deleteReturns = struct {
+		result1 error
+	}{result1}
+}
+
 func (fake *FakeAgentEnvService) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
@@ -93,6 +124,8 @@ func (fake *FakeAgentEnvService) Invocations() map[string][][]interface{} {
 	defer fake.fetchMutex.RUnlock()
 	fake.updateMutex.RLock()
 	defer fake.updateMutex.RUnlock()
+	fake.deleteMutex.RLock()
+	defer fake.deleteMutex.RUnlock()
 	return fake.invocations
 }
 
