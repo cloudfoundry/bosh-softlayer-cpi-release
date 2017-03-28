@@ -80,10 +80,11 @@ func (p creatorProvider) Get(name string) VMCreator {
 	return p.creators[name]
 }
 
-func NewDeleterProvider(softLayerClient sl.Client, softLayerPoolClient operations.SoftLayerPoolClient, logger boshlog.Logger) DeleterProvider {
+func NewDeleterProvider(softLayerClient sl.Client, softLayerPoolClient operations.SoftLayerPoolClient, logger boshlog.Logger, vmFinder VMFinder) DeleterProvider {
 	virtualGuestDeleter := slvm.NewSoftLayerVMDeleter(
 		softLayerClient,
 		logger,
+		vmFinder,
 	)
 
 	poolDeleter := slpool.NewSoftLayerPoolDeleter(

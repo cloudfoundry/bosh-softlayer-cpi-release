@@ -51,6 +51,7 @@ func NewConcreteFactory(options ConcreteFactoryOptions, logger boshlog.Logger) c
 		softLayerClient,
 		poolClient,
 		logger,
+		vmFinder,
 	)
 
 	diskCreator := bslcdisk.NewSoftLayerDiskCreator(
