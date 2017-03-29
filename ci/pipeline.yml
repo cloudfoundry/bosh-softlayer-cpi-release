@@ -71,7 +71,6 @@ jobs:
           passed:
             - build-candidate
         - get: stemcell
-          trigger: true
           resource: light-stemcell
         - get: pipelines
         - get: bosh-cli
@@ -120,8 +119,8 @@ resources:
   - name: light-stemcell
     type: s3
     source:
-      regexp: light-bosh-stemcell-(\d+\.\d+)-softlayer-xen-ubuntu-trusty-go_agent\.tgz
-      bucket: bosh-softlayer-stemcells-bluemix
+      regexp: light-bosh-stemcell-(.*)-softlayer-(.*).tgz
+      bucket: bosh-softlayer-cpi-stemcells
       access_key_id: {{stemcell-aws-access-key}}
       secret_access_key: {{stemcell-aws-secret-key}}
 
