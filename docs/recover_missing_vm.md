@@ -10,10 +10,10 @@
   - [Scenario 2: user_data.json does not exist](#scenario2)
 
 # <a id="purpose"></a>Purpose
-When `bosh deploy` fails, sometimes the failing vm is missing from `bosh vms` (deleted from bosh db) but still alive in Softlayer. If you do nothing, in the next `bosh deploy`, bosh will trea as missing vm and create a new one with different IP. Sometimes we need to keep the vm IP unchanged, so the missing vm needs to be recovered in the bosh db.
+When `bosh deploy` fails, sometimes the failing vm is missing from `bosh vms` (deleted from bosh db) but still alive in Softlayer. If you do nothing, in the next `bosh deploy`, bosh will treat it as a missing vm and create a new one with different IP. Sometimes we need to keep the vm IP unchanged, so the missing vm needs to be recovered in the bosh db.
 
 # <a id="user_impact"></a>User Impact
-If don't perform this run book, the next `bosh deploy` will create a new vm to backfill the missing vm with different IP. This will break the cases when the vm IP needs to be kept unchanged. 
+If you don't perform this run book, the next `bosh deploy` will create a new vm to backfill the missing vm with different IP. This will break the cases when the vm IP needs to be kept unchanged. 
 
 # <a id="instructions"></a>Instructions to Fix
 
