@@ -43,28 +43,34 @@ func CreateVirtualGuestTemplate(stemcell bslcstem.Stemcell, cloudProps VMCloudPr
 		switch network.Type {
 		case "dynamic":
 			if value, ok := network.CloudProperties["PrimaryNetworkComponent"]; ok {
+				networkVlan := sldatatypes.NetworkVlan{}
 				networkComponent := value.(map[string]interface{})
 				if value1, ok := networkComponent["NetworkVlan"]; ok {
-					networkValn := value1.(map[string]interface{})
-					if value2, ok := networkValn["Id"]; ok {
-						cloudProps.PrimaryNetworkComponent = sldatatypes.PrimaryNetworkComponent{
-							NetworkVlan: sldatatypes.NetworkVlan{
-								Id: int(value2.(float64)),
-							},
-						}
+					networkVlanInfo := value1.(map[string]interface{})
+					if value2, ok := networkVlanInfo["Id"]; ok {
+						networkVlan.Id = int(value2.(float64))
+					}
+					if value2, ok := networkVlanInfo["PrimarySubnetId"]; ok {
+						networkVlan.PrimarySubnetId = int(value2.(float64))
+					}
+					cloudProps.PrimaryNetworkComponent = sldatatypes.PrimaryNetworkComponent{
+						NetworkVlan: networkVlan,
 					}
 				}
 			}
 			if value, ok := network.CloudProperties["PrimaryBackendNetworkComponent"]; ok {
+				networkVlan := sldatatypes.NetworkVlan{}
 				networkComponent := value.(map[string]interface{})
 				if value1, ok := networkComponent["NetworkVlan"]; ok {
-					networkValn := value1.(map[string]interface{})
-					if value2, ok := networkValn["Id"]; ok {
-						cloudProps.PrimaryBackendNetworkComponent = sldatatypes.PrimaryBackendNetworkComponent{
-							NetworkVlan: sldatatypes.NetworkVlan{
-								Id: int(value2.(float64)),
-							},
-						}
+					networkVlanInfo := value1.(map[string]interface{})
+					if value2, ok := networkVlanInfo["Id"]; ok {
+						networkVlan.Id = int(value2.(float64))
+					}
+					if value2, ok := networkVlanInfo["PrimarySubnetId"]; ok {
+						networkVlan.PrimarySubnetId = int(value2.(float64))
+					}
+					cloudProps.PrimaryBackendNetworkComponent = sldatatypes.PrimaryBackendNetworkComponent{
+						NetworkVlan: networkVlan,
 					}
 				}
 			}

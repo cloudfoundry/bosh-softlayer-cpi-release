@@ -167,7 +167,7 @@ var _ = Describe("VM Utils", func() {
 					PrimaryNetworkComponent: sldatatypes.PrimaryNetworkComponent{
 						NetworkVlan: sldatatypes.NetworkVlan{Id: 524954}},
 					PrimaryBackendNetworkComponent: sldatatypes.PrimaryBackendNetworkComponent{
-						NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
+						NetworkVlan: sldatatypes.NetworkVlan{Id: 524956, PrimarySubnetId: 1100909}},
 				}
 
 				networks = Networks{}
@@ -208,7 +208,8 @@ var _ = Describe("VM Utils", func() {
 
 					PrimaryBackendNetworkComponent: &sldatatypes.PrimaryBackendNetworkComponent{
 						NetworkVlan: sldatatypes.NetworkVlan{
-							Id: 524956,
+							Id:              524956,
+							PrimarySubnetId: 1100909,
 						},
 					},
 
