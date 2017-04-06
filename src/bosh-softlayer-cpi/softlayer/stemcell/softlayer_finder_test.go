@@ -8,9 +8,9 @@ import (
 
 	testhelpers "bosh-softlayer-cpi/test_helpers"
 
-	slhelper "bosh-softlayer-cpi/softlayer/common/helper"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
+	"bosh-softlayer-cpi/api"
 	fakesslclient "github.com/maximilien/softlayer-go/client/fakes"
 	"time"
 )
@@ -26,8 +26,8 @@ var _ = Describe("SoftLayerFinder", func() {
 	BeforeEach(func() {
 		softLayerClient = fakesslclient.NewFakeSoftLayerClient("fake-username", "fake-api-key")
 
-		slhelper.TIMEOUT = 10 * time.Millisecond
-		slhelper.POLLING_INTERVAL = 2 * time.Millisecond
+		api.TIMEOUT = 10 * time.Millisecond
+		api.POLLING_INTERVAL = 2 * time.Millisecond
 		logger = boshlog.NewLogger(boshlog.LevelNone)
 
 		expectedStemcell = NewSoftLayerStemcell(200150, "8071601b-5ee1-483e-a9e8-6e5582dcb9f7", softLayerClient, logger)

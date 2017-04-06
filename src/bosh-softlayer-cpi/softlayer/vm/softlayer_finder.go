@@ -5,7 +5,8 @@ import (
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
 	. "bosh-softlayer-cpi/softlayer/common"
-	slhelper "bosh-softlayer-cpi/softlayer/common/helper"
+
+	slhelper "bosh-softlayer-cpi/softlayer/common/helpers"
 
 	slhw "bosh-softlayer-cpi/softlayer/hardware"
 	bmscl "github.com/cloudfoundry-community/bosh-softlayer-tools/clients"

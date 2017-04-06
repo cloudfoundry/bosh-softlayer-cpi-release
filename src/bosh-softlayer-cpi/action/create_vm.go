@@ -6,9 +6,9 @@ import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 
 	. "bosh-softlayer-cpi/softlayer/common"
-	helper "bosh-softlayer-cpi/softlayer/common/helper"
 	bslcstem "bosh-softlayer-cpi/softlayer/stemcell"
 
+	"bosh-softlayer-cpi/api"
 	sldatatypes "github.com/maximilien/softlayer-go/data_types"
 )
 
@@ -35,10 +35,10 @@ func NewCreateVM(
 func (a CreateVMAction) Run(agentID string, stemcellCID StemcellCID, cloudProps VMCloudProperties, networks Networks, diskIDs []DiskCID, env Environment) (string, error) {
 	a.updateCloudProperties(&cloudProps)
 
-	helper.TIMEOUT = 30 * time.Second
-	helper.POLLING_INTERVAL = 5 * time.Second
-	helper.NetworkInterface = "eth0"
-	helper.LocalDNSConfigurationFile = "/etc/hosts"
+	api.TIMEOUT = 30 * time.Second
+	api.POLLING_INTERVAL = 5 * time.Second
+	api.NetworkInterface = "eth0"
+	api.LocalDNSConfigurationFile = "/etc/hosts"
 
 	stemcell, err := a.stemcellFinder.FindById(int(stemcellCID))
 	if err != nil {
@@ -78,9 +78,9 @@ func (a CreateVMAction) updateCloudProperties(cloudProps *VMCloudProperties) {
 	a.vmCloudProperties = cloudProps
 
 	if cloudProps.DeployedByBoshCLI {
-		a.vmCloudProperties.VmNamePrefix = updateHostNameInCloudProps(cloudProps, "")
+		a.vmCloudProperties.VmNamePrefix = cloudProps.VmNamePrefix
 	} else {
-		a.vmCloudProperties.VmNamePrefix = updateHostNameInCloudProps(cloudProps, TimeStampForTime(time.Now().UTC()))
+		a.vmCloudProperties.VmNamePrefix = cloudProps.VmNamePrefix + TimeStampForTime(time.Now().UTC())
 	}
 
 	if cloudProps.StartCpus == 0 {
@@ -94,25 +94,17 @@ func (a CreateVMAction) updateCloudProperties(cloudProps *VMCloudProperties) {
 	if len(cloudProps.Domain) == 0 {
 		a.vmCloudProperties.Domain = "softlayer.com"
 	}
-	helper.LengthOfHostName = len(a.vmCloudProperties.VmNamePrefix + "." + a.vmCloudProperties.Domain)
+	api.LengthOfHostName = len(a.vmCloudProperties.VmNamePrefix + "." + a.vmCloudProperties.Domain)
 	// A workaround for the issue #129 in bosh-softlayer-cpi
-	if helper.LengthOfHostName == 64 {
+	if api.LengthOfHostName == 64 {
 		a.vmCloudProperties.VmNamePrefix = a.vmCloudProperties.VmNamePrefix + "-1"
-		helper.LengthOfHostName = len(a.vmCloudProperties.VmNamePrefix + "." + a.vmCloudProperties.Domain)
+		api.LengthOfHostName = len(a.vmCloudProperties.VmNamePrefix + "." + a.vmCloudProperties.Domain)
 	}
 	if len(cloudProps.NetworkComponents) == 0 {
 		a.vmCloudProperties.NetworkComponents = []sldatatypes.NetworkComponents{{MaxSpeed: 1000}}
 	}
 
-	if helper.LocalDiskFlagNotSet == true {
+	if api.LocalDiskFlagNotSet == true {
 		a.vmCloudProperties.LocalDiskFlag = true
-	}
-}
-
-func updateHostNameInCloudProps(cloudProps *VMCloudProperties, timeStampPostfix string) string {
-	if len(cloudProps.Hostname) == 0 {
-		return cloudProps.VmNamePrefix + timeStampPostfix
-	} else {
-		return cloudProps.Hostname
 	}
 }

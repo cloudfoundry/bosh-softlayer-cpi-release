@@ -1,6 +1,7 @@
 package common_test
 
 import (
+	"bosh-softlayer-cpi/api"
 	"encoding/json"
 	"errors"
 
@@ -105,6 +106,19 @@ var _ = Describe("SoftlayerAgentEnvService", func() {
 			It("returns error with specific error message", func() {
 				err := agentEnvService.Update(newAgentEnv)
 				Expect(err).To(HaveOccurred())
+			})
+		})
+
+		Context("when the length of hostname is greater than 63 chars", func() {
+			BeforeEach(func() {
+				api.LengthOfHostName = 64
+				fakeSoftlayerFileService.UploadErr = errors.New("A faked error occurred")
+			})
+
+			It("returns error with specific error message", func() {
+				err := agentEnvService.Update(newAgentEnv)
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("the length of device hostname is greater than 63 characters"))
 			})
 		})
 	})

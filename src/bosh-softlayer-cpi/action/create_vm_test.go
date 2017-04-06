@@ -11,9 +11,9 @@ import (
 
 	. "bosh-softlayer-cpi/softlayer/common"
 	fakescommon "bosh-softlayer-cpi/softlayer/common/fakes"
-	helper "bosh-softlayer-cpi/softlayer/common/helper"
 	fakestem "bosh-softlayer-cpi/softlayer/stemcell/fakes"
 
+	"bosh-softlayer-cpi/api"
 	sldatatypes "github.com/maximilien/softlayer-go/data_types"
 )
 
@@ -66,7 +66,7 @@ var _ = Describe("CreateVM", func() {
 				fakeCloudProp = VMCloudProperties{
 					StartCpus:    2,
 					MaxMemory:    2048,
-					Datacenter:   sldatatypes.Datacenter{Name: "fake-datacenter"},
+					Datacenter:   "fake-datacenter",
 					VmNamePrefix: "fake-hostname",
 					BoshIp:       "10.0.0.0",
 					SshKeys: []sldatatypes.SshKey{
@@ -113,7 +113,7 @@ var _ = Describe("CreateVM", func() {
 				fakeCloudProp = VMCloudProperties{
 					StartCpus:    2,
 					MaxMemory:    2048,
-					Datacenter:   sldatatypes.Datacenter{Name: "fake-datacenter"},
+					Datacenter:   "fake-datacenter",
 					VmNamePrefix: "",
 					BoshIp:       "10.0.0.0",
 					SshKeys: []sldatatypes.SshKey{
@@ -132,7 +132,7 @@ var _ = Describe("CreateVM", func() {
 					fakeCloudProp.VmNamePrefix = "63charac_long_name_with_suffix"
 				})
 				It("does not modify the name length", func() {
-					Expect(helper.LengthOfHostName).To(Equal(63))
+					Expect(api.LengthOfHostName).To(Equal(63))
 					Expect(fakeStemcellFinder.FindByIdCallCount()).To(Equal(1))
 				})
 			})
@@ -141,7 +141,7 @@ var _ = Describe("CreateVM", func() {
 					fakeCloudProp.VmNamePrefix = "64charact_long_name_with_suffix"
 				})
 				It("adds 2 additional characters to the name", func() {
-					Expect(helper.LengthOfHostName).To(Equal(66))
+					Expect(api.LengthOfHostName).To(Equal(66))
 					Expect(fakeStemcellFinder.FindByIdCallCount()).To(Equal(1))
 				})
 			})
@@ -150,7 +150,7 @@ var _ = Describe("CreateVM", func() {
 					fakeCloudProp.VmNamePrefix = "65characte_long_name_with_suffix"
 				})
 				It("does not modify the name length", func() {
-					Expect(helper.LengthOfHostName).To(Equal(65))
+					Expect(api.LengthOfHostName).To(Equal(65))
 					Expect(fakeStemcellFinder.FindByIdCallCount()).To(Equal(1))
 				})
 			})
@@ -198,11 +198,11 @@ var _ = Describe("CreateVM", func() {
 				fakeCloudProp = VMCloudProperties{
 					StartCpus:    2,
 					MaxMemory:    2048,
-					Datacenter:   sldatatypes.Datacenter{Name: "fake-datacenter"},
+					Datacenter:   "fake-datacenter",
 					VmNamePrefix: "fake-hostname",
 					BoshIp:       "10.0.0.0",
 					SshKeys: []sldatatypes.SshKey{
-						sldatatypes.SshKey{Id: 1234},
+						{Id: 1234},
 					},
 				}
 				action = NewCreateVM(fakeStemcellFinder, fakeCreatorProvider, *fakeOptions)
@@ -228,12 +228,12 @@ var _ = Describe("CreateVM", func() {
 				fakeCloudProp = VMCloudProperties{
 					StartCpus:    2,
 					MaxMemory:    2048,
-					Datacenter:   sldatatypes.Datacenter{Name: "fake-datacenter"},
+					Datacenter:   "fake-datacenter",
 					VmNamePrefix: "fake-hostname",
 					Baremetal:    true,
 					BoshIp:       "10.0.0.0",
 					SshKeys: []sldatatypes.SshKey{
-						sldatatypes.SshKey{Id: 1234},
+						{Id: 1234},
 					},
 				}
 				action = NewCreateVM(fakeStemcellFinder, fakeCreatorProvider, *fakeOptions)

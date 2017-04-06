@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"time"
 
+	"bosh-softlayer-cpi/api"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
 	. "bosh-softlayer-cpi/softlayer/common"
-	slh "bosh-softlayer-cpi/softlayer/common/helper"
 	bslcstem "bosh-softlayer-cpi/softlayer/stemcell"
 	bmslc "github.com/cloudfoundry-community/bosh-softlayer-tools/clients"
 	sl "github.com/maximilien/softlayer-go/softlayer"
@@ -25,9 +25,6 @@ type baremetalCreator struct {
 }
 
 func NewBaremetalCreator(vmFinder VMFinder, softLayerClient sl.Client, bmsClient bmslc.BmpClient, agentOptions AgentOptions, logger boshlog.Logger) VMCreator {
-	slh.TIMEOUT = 15 * time.Minute
-	slh.POLLING_INTERVAL = 5 * time.Second
-
 	return &baremetalCreator{
 		vmFinder:        vmFinder,
 		softLayerClient: softLayerClient,
@@ -38,6 +35,9 @@ func NewBaremetalCreator(vmFinder VMFinder, softLayerClient sl.Client, bmsClient
 }
 
 func (c *baremetalCreator) Create(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
+	api.TIMEOUT = 15 * time.Minute
+	api.POLLING_INTERVAL = 5 * time.Second
+
 	for _, network := range networks {
 		switch network.Type {
 		case "dynamic":
@@ -75,9 +75,9 @@ func (c *baremetalCreator) createByBaremetal(agentID string, stemcell bslcstem.S
 	if cloudProps.BoshIp != "" {
 		boshIP = cloudProps.BoshIp
 	} else {
-		boshIP, err = GetLocalIPAddressOfGivenInterface(slh.NetworkInterface)
+		boshIP, err = GetLocalIPAddressOfGivenInterface(api.NetworkInterface)
 		if err != nil {
-			return nil, bosherr.WrapErrorf(err, fmt.Sprintf("Failed to get IP address of %s in local", slh.NetworkInterface))
+			return nil, bosherr.WrapErrorf(err, fmt.Sprintf("Failed to get IP address of %s in local", api.NetworkInterface))
 		}
 	}
 
@@ -147,9 +147,9 @@ func (c *baremetalCreator) createByOSReload(agentID string, stemcell bslcstem.St
 	if cloudProps.BoshIp != "" {
 		boshIP = cloudProps.BoshIp
 	} else {
-		boshIP, err = GetLocalIPAddressOfGivenInterface(slh.NetworkInterface)
+		boshIP, err = GetLocalIPAddressOfGivenInterface(api.NetworkInterface)
 		if err != nil {
-			return nil, bosherr.WrapErrorf(err, fmt.Sprintf("Failed to get IP address of %s in local", slh.NetworkInterface))
+			return nil, bosherr.WrapErrorf(err, fmt.Sprintf("Failed to get IP address of %s in local", api.NetworkInterface))
 		}
 	}
 
@@ -198,9 +198,9 @@ func (c *baremetalCreator) provisionBaremetal(server_name string, stemcell strin
 	}
 
 	task_id := createBaremetalResponse.Data.TaskId
-	slh.TIMEOUT = 120 * time.Minute
+	api.TIMEOUT = 120 * time.Minute
 	totalTime := time.Duration(0)
-	for totalTime < slh.TIMEOUT {
+	for totalTime < api.TIMEOUT {
 
 		taskOutput, err := c.bmsClient.TaskJsonOutput(task_id, "task")
 		if err != nil {
@@ -220,8 +220,8 @@ func (c *baremetalCreator) provisionBaremetal(server_name string, stemcell strin
 			info = serverOutput.Data["info"].(map[string]interface{})
 			return int(info["id"].(float64)), nil
 		default:
-			totalTime += slh.POLLING_INTERVAL
-			time.Sleep(slh.POLLING_INTERVAL)
+			totalTime += api.POLLING_INTERVAL
+			time.Sleep(api.POLLING_INTERVAL)
 		}
 	}
 

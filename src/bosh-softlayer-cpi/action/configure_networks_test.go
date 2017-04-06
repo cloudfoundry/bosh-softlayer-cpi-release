@@ -42,7 +42,8 @@ var _ = Describe("ConfigureNetworks", func() {
 				fakeVm.IDReturns(vmCid.Int())
 				fakeVmFinder.FindReturns(fakeVm, true, nil)
 
-				fakeVm.ConfigureNetworksReturns(nil)
+				fakeVm.ConfigureNetworksReturns(networks, nil)
+				fakeVm.ConfigureNetworksSettingsReturns(nil)
 			})
 
 			It("fetches vm by cid", func() {
@@ -55,7 +56,8 @@ var _ = Describe("ConfigureNetworks", func() {
 				Expect(fakeVm.ConfigureNetworksCallCount()).To(Equal(1))
 				actualNetworks := fakeVm.ConfigureNetworksArgsForCall(0)
 				Expect(actualNetworks).To(Equal(networks))
-				Expect(err).NotTo(HaveOccurred())
+
+				Expect(fakeVm.ConfigureNetworksSettingsCallCount()).To(Equal(1))
 			})
 		})
 
@@ -82,7 +84,7 @@ var _ = Describe("ConfigureNetworks", func() {
 		Context("when configure network error out", func() {
 			BeforeEach(func() {
 				fakeVmFinder.FindReturns(fakeVm, true, nil)
-				fakeVm.ConfigureNetworksReturns(errors.New("kaboom"))
+				fakeVm.ConfigureNetworksReturns(nil, errors.New("kaboom"))
 			})
 
 			It("provides relevant error information", func() {

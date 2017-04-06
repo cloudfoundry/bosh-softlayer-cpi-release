@@ -28,8 +28,7 @@ var _ = Describe("Network", func() {
 						"fake-dns1",
 					},
 					Default:         []string{},
-					Preconfigured:   true,
-					CloudProperties: map[string]interface{}{},
+					CloudProperties: NetworkCloudProperties{},
 				},
 			}
 
@@ -45,8 +44,7 @@ var _ = Describe("Network", func() {
 					"fake-dns1",
 				},
 				Default:         []string{},
-				Preconfigured:   true,
-				CloudProperties: map[string]interface{}{},
+				CloudProperties: NetworkCloudProperties{},
 			}
 		})
 
@@ -74,8 +72,7 @@ var _ = Describe("Network", func() {
 					"fake-dns1",
 				},
 				Default:         []string{},
-				Preconfigured:   true,
-				CloudProperties: map[string]interface{}{},
+				CloudProperties: NetworkCloudProperties{},
 			}
 
 			emptyNetwork = Network{}
@@ -104,8 +101,7 @@ var _ = Describe("Network", func() {
 					"fake-dns1",
 				},
 				Default:         []string{"dns", "gateway"},
-				Preconfigured:   true,
-				CloudProperties: map[string]interface{}{},
+				CloudProperties: NetworkCloudProperties{},
 			}
 
 			networkWithOutDefaultGateway = Network{
@@ -118,8 +114,7 @@ var _ = Describe("Network", func() {
 					"fake-dns1",
 				},
 				Default:         []string{},
-				Preconfigured:   true,
-				CloudProperties: map[string]interface{}{},
+				CloudProperties: NetworkCloudProperties{},
 			}
 
 			emptyNetwork = Network{}
@@ -153,8 +148,7 @@ var _ = Describe("Network", func() {
 					"fake-dns1",
 				},
 				Default:         []string{},
-				Preconfigured:   true,
-				CloudProperties: map[string]interface{}{},
+				CloudProperties: NetworkCloudProperties{},
 			}
 
 			expectedNetwork = Network{
@@ -168,8 +162,7 @@ var _ = Describe("Network", func() {
 					"fake-dns2",
 				},
 				Default:         []string{},
-				Preconfigured:   true,
-				CloudProperties: map[string]interface{}{},
+				CloudProperties: NetworkCloudProperties{},
 			}
 		})
 

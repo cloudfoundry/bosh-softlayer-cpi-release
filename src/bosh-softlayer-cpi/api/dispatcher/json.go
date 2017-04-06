@@ -6,7 +6,6 @@ import (
 
 	bslcaction "bosh-softlayer-cpi/action"
 	bslcapi "bosh-softlayer-cpi/api"
-	slhelper "bosh-softlayer-cpi/softlayer/common/helper"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
 	"fmt"
@@ -176,8 +175,8 @@ func (c JSON) buildNotImplementedError() []byte {
 // This function will be removed if we can ensure LocalDiskFlag property is set in place in all deployment manifest
 func (c JSON) localDiskFlagNotSet(reqString string) {
 	if strings.Contains(strings.ToUpper(reqString), strings.ToUpper("localDiskFlag")) {
-		slhelper.LocalDiskFlagNotSet = false
+		bslcapi.LocalDiskFlagNotSet = false
 	} else {
-		slhelper.LocalDiskFlagNotSet = true
+		bslcapi.LocalDiskFlagNotSet = true
 	}
 }

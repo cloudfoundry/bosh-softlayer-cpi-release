@@ -84,16 +84,12 @@ var _ = Describe("SoftlayerPoolCreator", func() {
 			stemcell = bslcstem.NewSoftLayerStemcell(1234, "fake-stemcell-uuid", softLayerClient, logger)
 			env = Environment{}
 			cloudProps = VMCloudProperties{
-				StartCpus: 4,
-				MaxMemory: 2048,
-				Domain:    "fake-domain.com",
-				BlockDeviceTemplateGroup: sldatatypes.BlockDeviceTemplateGroup{
-					GlobalIdentifier: "fake-uuid",
-				},
-				RootDiskSize:                 25,
+				StartCpus:                    4,
+				MaxMemory:                    2048,
+				Domain:                       "fake-domain.com",
 				BoshIp:                       "10.0.0.1",
 				EphemeralDiskSize:            25,
-				Datacenter:                   sldatatypes.Datacenter{Name: "fake-datacenter"},
+				Datacenter:                   "fake-datacenter",
 				HourlyBillingFlag:            true,
 				LocalDiskFlag:                true,
 				VmNamePrefix:                 "bosh-test",
@@ -101,18 +97,10 @@ var _ = Describe("SoftlayerPoolCreator", func() {
 				DedicatedAccountHostOnlyFlag: true,
 				PrivateNetworkOnlyFlag:       false,
 				SshKeys:                      []sldatatypes.SshKey{{Id: 74826}},
-				BlockDevices: []sldatatypes.BlockDevice{{
-					Device:    "0",
-					DiskImage: sldatatypes.DiskImage{Capacity: 100}}},
-				NetworkComponents: []sldatatypes.NetworkComponents{{MaxSpeed: 1000}},
-				PrimaryNetworkComponent: sldatatypes.PrimaryNetworkComponent{
-					NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
-				PrimaryBackendNetworkComponent: sldatatypes.PrimaryBackendNetworkComponent{
-					NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
 			}
 
 			networks = map[string]Network{
-				"fake-network0": Network{
+				"fake-network0": {
 					Type:    "dynamic",
 					Netmask: "fake-Netmask",
 					Gateway: "fake-Gateway",
@@ -120,9 +108,23 @@ var _ = Describe("SoftlayerPoolCreator", func() {
 						"fake-dns0",
 						"fake-dns1",
 					},
-					Default:         []string{},
-					Preconfigured:   true,
-					CloudProperties: map[string]interface{}{},
+					Default: []string{},
+					CloudProperties: NetworkCloudProperties{
+						VlanID: 1234567,
+					},
+				},
+				"fake-network1": {
+					Type:    "dynamic",
+					Netmask: "fake-Netmask",
+					Gateway: "fake-Gateway",
+					DNS: []string{
+						"fake-dns0",
+						"fake-dns1",
+					},
+					Default: []string{},
+					CloudProperties: NetworkCloudProperties{
+						VlanID: 1234568,
+					},
 				},
 			}
 
@@ -153,7 +155,7 @@ var _ = Describe("SoftlayerPoolCreator", func() {
 				fakeVm.IDReturns(1234567)
 				fakePoolClient.OrderVMByFilterReturns(vm.NewOrderVMByFilterOK().WithPayload(poolVmResponse), nil)
 				fakeVmFinder.FindReturns(fakeVm, true, nil)
-				fakeVm.ConfigureNetworks2Returns(nil)
+				fakeVm.ConfigureNetworksReturns(nil, nil)
 				fakeVm.UpdateAgentEnvReturns(nil)
 
 				//fakePoolClient.UpdateVMWithStateReturns(vm.NewUpdateVMWithStateOK().WithPayload("updated successfully"), nil)
@@ -164,7 +166,7 @@ var _ = Describe("SoftlayerPoolCreator", func() {
 				Expect(fakePoolClient.OrderVMByFilterCallCount()).To(Equal(1))
 				orderVMByFilterParams := fakePoolClient.OrderVMByFilterArgsForCall(0)
 				Expect(orderVMByFilterParams.Body.CPU).To(Equal(int32(4)))
-				Expect(orderVMByFilterParams.Body.PublicVlan).To(Equal(int32(524956)))
+				Expect(orderVMByFilterParams.Body.PublicVlan).To(Equal(int32(1234567)))
 			})
 			It("update vm state to using", func() {
 				Expect(fakePoolClient.UpdateVMCallCount()).To(Equal(1))
@@ -185,7 +187,7 @@ var _ = Describe("SoftlayerPoolCreator", func() {
 				fakeVm.IDReturns(1234567)
 				fakePoolClient.OrderVMByFilterReturns(nil, vm.NewOrderVMByFilterNotFound())
 				fakeVmFinder.FindReturns(fakeVm, true, nil)
-				fakeVm.ConfigureNetworks2Returns(nil)
+				fakeVm.ConfigureNetworksReturns(nil, nil)
 				fakeVm.UpdateAgentEnvReturns(nil)
 
 				fakePoolClient.AddVMReturns(vm.NewAddVMOK().WithPayload("added successfully"), nil)
@@ -195,7 +197,8 @@ var _ = Describe("SoftlayerPoolCreator", func() {
 				Expect(fakePoolClient.OrderVMByFilterCallCount()).To(Equal(1))
 				orderVMByFilterParams := fakePoolClient.OrderVMByFilterArgsForCall(0)
 				Expect(orderVMByFilterParams.Body.CPU).To(Equal(int32(4)))
-				Expect(orderVMByFilterParams.Body.PublicVlan).To(Equal(int32(524956)))
+				Expect(orderVMByFilterParams.Body.PublicVlan).To(Equal(int32(1234567)))
+				Expect(orderVMByFilterParams.Body.PrivateVlan).To(Equal(int32(1234568)))
 			})
 			It("add vm to pool after creating in softlayer", func() {
 				Expect(fakePoolClient.AddVMCallCount()).To(Equal(1))
@@ -211,6 +214,10 @@ var _ = Describe("SoftlayerPoolCreator", func() {
 
 		Context("when order vm by filter from pool error out", func() {
 			BeforeEach(func() {
+				testhelpers.SetTestFixturesForFakeSoftLayerClient(softLayerClient, []string{
+					"SoftLayer_Network_Vlan_Service_getObject_PublicVlan.json",
+					"SoftLayer_Network_Vlan_Service_getObject_PrivateVlan.json",
+				})
 				fakePoolClient.OrderVMByFilterReturns(nil, vm.NewOrderVMByFilterDefault(500))
 			})
 
@@ -227,7 +234,7 @@ var _ = Describe("SoftlayerPoolCreator", func() {
 				fakeVm.IDReturns(1234567)
 				fakePoolClient.OrderVMByFilterReturns(nil, vm.NewOrderVMByFilterNotFound())
 				fakeVmFinder.FindReturns(fakeVm, true, nil)
-				fakeVm.ConfigureNetworks2Returns(nil)
+				fakeVm.ConfigureNetworksReturns(nil, nil)
 				fakeVm.UpdateAgentEnvReturns(nil)
 
 				fakePoolClient.AddVMReturns(nil, vm.NewAddVMDefault(500))
@@ -246,7 +253,7 @@ var _ = Describe("SoftlayerPoolCreator", func() {
 				fakeVm.IDReturns(1234567)
 				fakePoolClient.OrderVMByFilterReturns(vm.NewOrderVMByFilterOK().WithPayload(poolVmResponse), nil)
 				fakeVmFinder.FindReturns(fakeVm, true, nil)
-				fakeVm.ConfigureNetworks2Returns(nil)
+				fakeVm.ConfigureNetworksReturns(nil, nil)
 				fakeVm.UpdateAgentEnvReturns(nil)
 
 				//fakePoolClient.UpdateVMWithStateReturns(nil, vm.NewUpdateVMDefault(500))
@@ -272,8 +279,7 @@ var _ = Describe("SoftlayerPoolCreator", func() {
 							"fake-dns1",
 						},
 						Default:         []string{},
-						Preconfigured:   true,
-						CloudProperties: map[string]interface{}{},
+						CloudProperties: NetworkCloudProperties{},
 					},
 				}
 
@@ -281,7 +287,7 @@ var _ = Describe("SoftlayerPoolCreator", func() {
 
 				fakeVm.IDReturns(1234567)
 				fakeVmFinder.FindReturns(fakeVm, true, nil)
-				fakeVm.ConfigureNetworks2Returns(nil)
+				fakeVm.ConfigureNetworksReturns(nil, nil)
 				fakeVm.UpdateAgentEnvReturns(nil)
 			})
 
@@ -294,6 +300,9 @@ var _ = Describe("SoftlayerPoolCreator", func() {
 
 func setFakeSoftlayerClientCreateObjectTestFixturesWithEphemeralDiskSize_OS_Reload(fakeSoftLayerClient *fakeslclient.FakeSoftLayerClient) {
 	fileNames := []string{
+		"SoftLayer_Network_Vlan_Service_getObject_PublicVlan.json",
+		"SoftLayer_Network_Vlan_Service_getObject_PrivateVlan.json",
+
 		"SoftLayer_Virtual_Guest_Service_editObject.json",
 		"SoftLayer_Virtual_Guest_Service_getLastTransaction.json",
 		"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
@@ -334,6 +343,11 @@ func setFakeSoftlayerClientCreateObjectTestFixturesWithEphemeralDiskSize_OS_Relo
 
 func setFakeSoftlayerClientCreateObjectTestFixturesWithEphemeralDiskSize(fakeSoftLayerClient *fakeslclient.FakeSoftLayerClient) {
 	fileNames := []string{
+		"SoftLayer_Network_Vlan_Service_getObject_PublicVlan.json",
+		"SoftLayer_Network_Vlan_Service_getObject_PrivateVlan.json",
+		"SoftLayer_Network_Vlan_Service_getObject_PublicVlan.json",
+		"SoftLayer_Network_Vlan_Service_getObject_PrivateVlan.json",
+
 		"SoftLayer_Virtual_Guest_Service_createObject.json",
 
 		"SoftLayer_Virtual_Guest_Service_getLastTransaction.json",

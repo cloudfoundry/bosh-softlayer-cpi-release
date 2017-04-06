@@ -1,17 +1,15 @@
 package pool
 
 import (
+	. "bosh-softlayer-cpi/softlayer/common"
+	operations "bosh-softlayer-cpi/softlayer/pool/client/vm"
 	"fmt"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	"github.com/go-openapi/strfmt"
-
-	slhelper "bosh-softlayer-cpi/softlayer/common/helper"
-
-	operations "bosh-softlayer-cpi/softlayer/pool/client/vm"
 	sl "github.com/maximilien/softlayer-go/softlayer"
 
-	. "bosh-softlayer-cpi/softlayer/common"
+	slhelper "bosh-softlayer-cpi/softlayer/common/helpers"
 
 	"bosh-softlayer-cpi/softlayer/pool/models"
 )

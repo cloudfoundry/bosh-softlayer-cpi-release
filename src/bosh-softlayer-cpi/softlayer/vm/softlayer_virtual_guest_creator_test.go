@@ -20,7 +20,7 @@ import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
-	slh "bosh-softlayer-cpi/softlayer/common/helper"
+	"bosh-softlayer-cpi/api"
 	sldatatypes "github.com/maximilien/softlayer-go/data_types"
 )
 
@@ -45,8 +45,8 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 		fakeVmFinder = &fakescommon.FakeVMFinder{}
 		fakeVm = &fakescommon.FakeVM{}
 
-		slh.TIMEOUT = 2 * time.Second
-		slh.POLLING_INTERVAL = 1 * time.Second
+		api.TIMEOUT = 2 * time.Second
+		api.POLLING_INTERVAL = 1 * time.Second
 	})
 
 	Describe("#Create", func() {
@@ -93,24 +93,19 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 									"fake-dns1",
 								},
 								Default:         []string{},
-								Preconfigured:   true,
-								CloudProperties: map[string]interface{}{},
+								CloudProperties: NetworkCloudProperties{},
 							},
 						}
 					})
 
 					It("returns a new SoftLayerVM with ephemeral size", func() {
 						cloudProps = VMCloudProperties{
-							StartCpus: 4,
-							MaxMemory: 2048,
-							Domain:    "fake-domain.com",
-							BlockDeviceTemplateGroup: sldatatypes.BlockDeviceTemplateGroup{
-								GlobalIdentifier: "fake-uuid",
-							},
-							RootDiskSize:                 25,
+							StartCpus:                    4,
+							MaxMemory:                    2048,
+							Domain:                       "fake-domain.com",
 							BoshIp:                       "10.0.0.1",
 							EphemeralDiskSize:            25,
-							Datacenter:                   sldatatypes.Datacenter{Name: "fake-datacenter"},
+							Datacenter:                   "fake-datacenter",
 							HourlyBillingFlag:            true,
 							LocalDiskFlag:                true,
 							VmNamePrefix:                 "bosh-test",
@@ -118,14 +113,7 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 							DedicatedAccountHostOnlyFlag: true,
 							PrivateNetworkOnlyFlag:       false,
 							SshKeys:                      []sldatatypes.SshKey{{Id: 74826}},
-							BlockDevices: []sldatatypes.BlockDevice{{
-								Device:    "0",
-								DiskImage: sldatatypes.DiskImage{Capacity: 100}}},
-							NetworkComponents: []sldatatypes.NetworkComponents{{MaxSpeed: 1000}},
-							PrimaryNetworkComponent: sldatatypes.PrimaryNetworkComponent{
-								NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
-							PrimaryBackendNetworkComponent: sldatatypes.PrimaryBackendNetworkComponent{
-								NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
+							NetworkComponents:            []sldatatypes.NetworkComponents{{MaxSpeed: 1000}},
 						}
 						expectedCmdResults := []string{
 							"",
@@ -142,15 +130,11 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 
 					It("returns a new SoftLayerVM without ephemeral size", func() {
 						cloudProps = VMCloudProperties{
-							StartCpus: 4,
-							MaxMemory: 2048,
-							Domain:    "fake-domain.com",
-							BlockDeviceTemplateGroup: sldatatypes.BlockDeviceTemplateGroup{
-								GlobalIdentifier: "fake-uuid",
-							},
-							RootDiskSize:                 25,
+							StartCpus:                    4,
+							MaxMemory:                    2048,
+							Domain:                       "fake-domain.com",
 							BoshIp:                       "10.0.0.1",
-							Datacenter:                   sldatatypes.Datacenter{Name: "fake-datacenter"},
+							Datacenter:                   "fake-datacenter",
 							HourlyBillingFlag:            true,
 							LocalDiskFlag:                true,
 							VmNamePrefix:                 "bosh-test",
@@ -158,14 +142,7 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 							DedicatedAccountHostOnlyFlag: true,
 							PrivateNetworkOnlyFlag:       false,
 							SshKeys:                      []sldatatypes.SshKey{{Id: 74826}},
-							BlockDevices: []sldatatypes.BlockDevice{{
-								Device:    "0",
-								DiskImage: sldatatypes.DiskImage{Capacity: 100}}},
-							NetworkComponents: []sldatatypes.NetworkComponents{{MaxSpeed: 1000}},
-							PrimaryNetworkComponent: sldatatypes.PrimaryNetworkComponent{
-								NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
-							PrimaryBackendNetworkComponent: sldatatypes.PrimaryBackendNetworkComponent{
-								NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
+							NetworkComponents:            []sldatatypes.NetworkComponents{{MaxSpeed: 1000}},
 						}
 						expectedCmdResults := []string{
 							"",
@@ -180,15 +157,11 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 					})
 					It("returns a new SoftLayerVM without bosh ip", func() {
 						cloudProps = VMCloudProperties{
-							StartCpus: 4,
-							MaxMemory: 2048,
-							Domain:    "fake-domain.com",
-							BlockDeviceTemplateGroup: sldatatypes.BlockDeviceTemplateGroup{
-								GlobalIdentifier: "fake-uuid",
-							},
-							RootDiskSize:                 25,
+							StartCpus:                    4,
+							MaxMemory:                    2048,
+							Domain:                       "fake-domain.com",
 							EphemeralDiskSize:            25,
-							Datacenter:                   sldatatypes.Datacenter{Name: "fake-datacenter"},
+							Datacenter:                   "fake-datacenter",
 							HourlyBillingFlag:            true,
 							LocalDiskFlag:                true,
 							VmNamePrefix:                 "bosh-",
@@ -196,15 +169,8 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 							DedicatedAccountHostOnlyFlag: true,
 							PrivateNetworkOnlyFlag:       false,
 							SshKeys:                      []sldatatypes.SshKey{{Id: 74826}},
-							BlockDevices: []sldatatypes.BlockDevice{{
-								Device:    "0",
-								DiskImage: sldatatypes.DiskImage{Capacity: 100}}},
-							NetworkComponents: []sldatatypes.NetworkComponents{{MaxSpeed: 1000}},
-							PrimaryNetworkComponent: sldatatypes.PrimaryNetworkComponent{
-								NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
-							PrimaryBackendNetworkComponent: sldatatypes.PrimaryBackendNetworkComponent{
-								NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
-							DeployedByBoshCLI: true,
+							NetworkComponents:            []sldatatypes.NetworkComponents{{MaxSpeed: 1000}},
+							DeployedByBoshCLI:            true,
 						}
 
 						expectedCmdResults := []string{
@@ -217,13 +183,13 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 
 						switch runtime.GOOS {
 						case "darwin":
-							slh.NetworkInterface = "en0"
+							api.NetworkInterface = "en0"
 						case "linux":
-							slh.NetworkInterface = "eth0"
+							api.NetworkInterface = "eth0"
 						default:
-							slh.NetworkInterface = "eth0"
+							api.NetworkInterface = "eth0"
 						}
-						slh.LocalDNSConfigurationFile = "/tmp/hosts"
+						api.LocalDNSConfigurationFile = "/tmp/hosts"
 
 						vm, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
 						Expect(err).ToNot(HaveOccurred())
@@ -233,15 +199,11 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 					})
 					It("returns a new SoftLayerVM with neither bosh ip nor DeployedByBoshCLI flag", func() {
 						cloudProps = VMCloudProperties{
-							StartCpus: 4,
-							MaxMemory: 2048,
-							Domain:    "fake-domain.com",
-							BlockDeviceTemplateGroup: sldatatypes.BlockDeviceTemplateGroup{
-								GlobalIdentifier: "fake-uuid",
-							},
-							RootDiskSize:                 25,
+							StartCpus:                    4,
+							MaxMemory:                    2048,
+							Domain:                       "fake-domain.com",
 							EphemeralDiskSize:            25,
-							Datacenter:                   sldatatypes.Datacenter{Name: "fake-datacenter"},
+							Datacenter:                   "fake-datacenter",
 							HourlyBillingFlag:            true,
 							LocalDiskFlag:                true,
 							VmNamePrefix:                 "bosh-",
@@ -249,14 +211,7 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 							DedicatedAccountHostOnlyFlag: true,
 							PrivateNetworkOnlyFlag:       false,
 							SshKeys:                      []sldatatypes.SshKey{{Id: 74826}},
-							BlockDevices: []sldatatypes.BlockDevice{{
-								Device:    "0",
-								DiskImage: sldatatypes.DiskImage{Capacity: 100}}},
-							NetworkComponents: []sldatatypes.NetworkComponents{{MaxSpeed: 1000}},
-							PrimaryNetworkComponent: sldatatypes.PrimaryNetworkComponent{
-								NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
-							PrimaryBackendNetworkComponent: sldatatypes.PrimaryBackendNetworkComponent{
-								NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
+							NetworkComponents:            []sldatatypes.NetworkComponents{{MaxSpeed: 1000}},
 						}
 
 						expectedCmdResults := []string{
@@ -268,11 +223,11 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 						setFakeSoftlayerClientCreateObjectTestFixturesWithoutBoshIP_OS_Reload(softLayerClient)
 						switch runtime.GOOS {
 						case "darwin":
-							slh.NetworkInterface = "en0"
+							api.NetworkInterface = "en0"
 						case "linux":
-							slh.NetworkInterface = "eth0"
+							api.NetworkInterface = "eth0"
 						default:
-							slh.NetworkInterface = "eth0"
+							api.NetworkInterface = "eth0"
 						}
 						vm, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
 						Expect(err).ToNot(HaveOccurred())
@@ -298,8 +253,7 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 									"fake-dns1",
 								},
 								Default:         []string{},
-								Preconfigured:   true,
-								CloudProperties: map[string]interface{}{},
+								CloudProperties: NetworkCloudProperties{},
 							},
 						}
 
@@ -321,24 +275,19 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 									"fake-dns1",
 								},
 								Default:         []string{},
-								Preconfigured:   true,
-								CloudProperties: map[string]interface{}{},
+								CloudProperties: NetworkCloudProperties{},
 							},
 						}
 					})
 
 					It("returns a new SoftLayerVM with ephemeral size", func() {
 						cloudProps = VMCloudProperties{
-							StartCpus: 4,
-							MaxMemory: 2048,
-							Domain:    "fake-domain.com",
-							BlockDeviceTemplateGroup: sldatatypes.BlockDeviceTemplateGroup{
-								GlobalIdentifier: "fake-uuid",
-							},
-							RootDiskSize:                 25,
+							StartCpus:                    4,
+							MaxMemory:                    2048,
+							Domain:                       "fake-domain.com",
 							BoshIp:                       "10.0.0.1",
 							EphemeralDiskSize:            25,
-							Datacenter:                   sldatatypes.Datacenter{Name: "fake-datacenter"},
+							Datacenter:                   "fake-datacenter",
 							HourlyBillingFlag:            true,
 							LocalDiskFlag:                true,
 							VmNamePrefix:                 "bosh-test",
@@ -346,14 +295,7 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 							DedicatedAccountHostOnlyFlag: true,
 							PrivateNetworkOnlyFlag:       false,
 							SshKeys:                      []sldatatypes.SshKey{{Id: 74826}},
-							BlockDevices: []sldatatypes.BlockDevice{{
-								Device:    "0",
-								DiskImage: sldatatypes.DiskImage{Capacity: 100}}},
-							NetworkComponents: []sldatatypes.NetworkComponents{{MaxSpeed: 1000}},
-							PrimaryNetworkComponent: sldatatypes.PrimaryNetworkComponent{
-								NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
-							PrimaryBackendNetworkComponent: sldatatypes.PrimaryBackendNetworkComponent{
-								NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
+							NetworkComponents:            []sldatatypes.NetworkComponents{{MaxSpeed: 1000}},
 						}
 						expectedCmdResults := []string{
 							"",
@@ -380,22 +322,17 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 									"fake-dns1",
 								},
 								Default:         []string{},
-								Preconfigured:   true,
-								CloudProperties: map[string]interface{}{},
+								CloudProperties: NetworkCloudProperties{},
 							},
 						}
 
 						cloudProps = VMCloudProperties{
-							StartCpus: 4,
-							MaxMemory: 2048,
-							Domain:    "fake-domain.com",
-							BlockDeviceTemplateGroup: sldatatypes.BlockDeviceTemplateGroup{
-								GlobalIdentifier: "fake-uuid",
-							},
-							RootDiskSize:                 25,
+							StartCpus:                    4,
+							MaxMemory:                    2048,
+							Domain:                       "fake-domain.com",
 							BoshIp:                       "10.0.0.1",
 							EphemeralDiskSize:            25,
-							Datacenter:                   sldatatypes.Datacenter{Name: "fake-datacenter"},
+							Datacenter:                   "fake-datacenter",
 							HourlyBillingFlag:            true,
 							LocalDiskFlag:                true,
 							VmNamePrefix:                 "bosh-test",
@@ -403,15 +340,7 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 							DedicatedAccountHostOnlyFlag: true,
 							PrivateNetworkOnlyFlag:       false,
 							SshKeys:                      []sldatatypes.SshKey{{Id: 74826}},
-							BlockDevices: []sldatatypes.BlockDevice{{
-								Device:    "0",
-								DiskImage: sldatatypes.DiskImage{Capacity: 100}}},
-							NetworkComponents: []sldatatypes.NetworkComponents{{MaxSpeed: 1000}},
-							PrimaryNetworkComponent: sldatatypes.PrimaryNetworkComponent{
-								NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
-							PrimaryBackendNetworkComponent: sldatatypes.PrimaryBackendNetworkComponent{
-								NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
-							DisableOsReload: true,
+							NetworkComponents:            []sldatatypes.NetworkComponents{{MaxSpeed: 1000}},
 						}
 						expectedCmdResults := []string{
 							"",
@@ -428,15 +357,11 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 
 					It("returns a new SoftLayerVM without ephemeral size", func() {
 						cloudProps = VMCloudProperties{
-							StartCpus: 4,
-							MaxMemory: 2048,
-							Domain:    "fake-domain.com",
-							BlockDeviceTemplateGroup: sldatatypes.BlockDeviceTemplateGroup{
-								GlobalIdentifier: "fake-uuid",
-							},
-							RootDiskSize:                 25,
+							StartCpus:                    4,
+							MaxMemory:                    2048,
+							Domain:                       "fake-domain.com",
 							BoshIp:                       "10.0.0.1",
-							Datacenter:                   sldatatypes.Datacenter{Name: "fake-datacenter"},
+							Datacenter:                   "fake-datacenter",
 							HourlyBillingFlag:            true,
 							LocalDiskFlag:                true,
 							VmNamePrefix:                 "bosh-test",
@@ -444,14 +369,7 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 							DedicatedAccountHostOnlyFlag: true,
 							PrivateNetworkOnlyFlag:       false,
 							SshKeys:                      []sldatatypes.SshKey{{Id: 74826}},
-							BlockDevices: []sldatatypes.BlockDevice{{
-								Device:    "0",
-								DiskImage: sldatatypes.DiskImage{Capacity: 100}}},
-							NetworkComponents: []sldatatypes.NetworkComponents{{MaxSpeed: 1000}},
-							PrimaryNetworkComponent: sldatatypes.PrimaryNetworkComponent{
-								NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
-							PrimaryBackendNetworkComponent: sldatatypes.PrimaryBackendNetworkComponent{
-								NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
+							NetworkComponents:            []sldatatypes.NetworkComponents{{MaxSpeed: 1000}},
 						}
 						expectedCmdResults := []string{
 							"",
@@ -466,15 +384,11 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 					})
 					It("returns a new SoftLayerVM without bosh ip", func() {
 						cloudProps = VMCloudProperties{
-							StartCpus: 4,
-							MaxMemory: 2048,
-							Domain:    "fake-domain.com",
-							BlockDeviceTemplateGroup: sldatatypes.BlockDeviceTemplateGroup{
-								GlobalIdentifier: "fake-uuid",
-							},
-							RootDiskSize:                 25,
+							StartCpus:                    4,
+							MaxMemory:                    2048,
+							Domain:                       "fake-domain.com",
 							EphemeralDiskSize:            25,
-							Datacenter:                   sldatatypes.Datacenter{Name: "fake-datacenter"},
+							Datacenter:                   "fake-datacenter",
 							HourlyBillingFlag:            true,
 							LocalDiskFlag:                true,
 							VmNamePrefix:                 "bosh-",
@@ -482,15 +396,8 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 							DedicatedAccountHostOnlyFlag: true,
 							PrivateNetworkOnlyFlag:       false,
 							SshKeys:                      []sldatatypes.SshKey{{Id: 74826}},
-							BlockDevices: []sldatatypes.BlockDevice{{
-								Device:    "0",
-								DiskImage: sldatatypes.DiskImage{Capacity: 100}}},
-							NetworkComponents: []sldatatypes.NetworkComponents{{MaxSpeed: 1000}},
-							PrimaryNetworkComponent: sldatatypes.PrimaryNetworkComponent{
-								NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
-							PrimaryBackendNetworkComponent: sldatatypes.PrimaryBackendNetworkComponent{
-								NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
-							DeployedByBoshCLI: true,
+							NetworkComponents:            []sldatatypes.NetworkComponents{{MaxSpeed: 1000}},
+							DeployedByBoshCLI:            true,
 						}
 
 						expectedCmdResults := []string{
@@ -503,13 +410,13 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 
 						switch runtime.GOOS {
 						case "darwin":
-							slh.NetworkInterface = "en0"
+							api.NetworkInterface = "en0"
 						case "linux":
-							slh.NetworkInterface = "eth0"
+							api.NetworkInterface = "eth0"
 						default:
-							slh.NetworkInterface = "eth0"
+							api.NetworkInterface = "eth0"
 						}
-						slh.LocalDNSConfigurationFile = "/tmp/hosts"
+						api.LocalDNSConfigurationFile = "/tmp/hosts"
 
 						vm, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
 						Expect(err).ToNot(HaveOccurred())
@@ -519,15 +426,11 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 					})
 					It("returns a new SoftLayerVM with neither bosh ip nor DeployedByBoshCLI flag", func() {
 						cloudProps = VMCloudProperties{
-							StartCpus: 4,
-							MaxMemory: 2048,
-							Domain:    "fake-domain.com",
-							BlockDeviceTemplateGroup: sldatatypes.BlockDeviceTemplateGroup{
-								GlobalIdentifier: "fake-uuid",
-							},
-							RootDiskSize:                 25,
+							StartCpus:                    4,
+							MaxMemory:                    2048,
+							Domain:                       "fake-domain.com",
 							EphemeralDiskSize:            25,
-							Datacenter:                   sldatatypes.Datacenter{Name: "fake-datacenter"},
+							Datacenter:                   "fake-datacenter",
 							HourlyBillingFlag:            true,
 							LocalDiskFlag:                true,
 							VmNamePrefix:                 "bosh-",
@@ -535,14 +438,7 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 							DedicatedAccountHostOnlyFlag: true,
 							PrivateNetworkOnlyFlag:       false,
 							SshKeys:                      []sldatatypes.SshKey{{Id: 74826}},
-							BlockDevices: []sldatatypes.BlockDevice{{
-								Device:    "0",
-								DiskImage: sldatatypes.DiskImage{Capacity: 100}}},
-							NetworkComponents: []sldatatypes.NetworkComponents{{MaxSpeed: 1000}},
-							PrimaryNetworkComponent: sldatatypes.PrimaryNetworkComponent{
-								NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
-							PrimaryBackendNetworkComponent: sldatatypes.PrimaryBackendNetworkComponent{
-								NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
+							NetworkComponents:            []sldatatypes.NetworkComponents{{MaxSpeed: 1000}},
 						}
 
 						expectedCmdResults := []string{
@@ -554,13 +450,13 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 						setFakeSoftlayerClientCreateObjectTestFixturesWithoutBoshIP(softLayerClient)
 						switch runtime.GOOS {
 						case "darwin":
-							slh.NetworkInterface = "en0"
+							api.NetworkInterface = "en0"
 						case "linux":
-							slh.NetworkInterface = "eth0"
+							api.NetworkInterface = "eth0"
 						default:
-							slh.NetworkInterface = "eth0"
+							api.NetworkInterface = "eth0"
 						}
-						slh.LocalDNSConfigurationFile = "/tmp/hosts"
+						api.LocalDNSConfigurationFile = "/tmp/hosts"
 
 						vm, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
 						Expect(err).ToNot(HaveOccurred())
@@ -608,24 +504,19 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 									"fake-dns1",
 								},
 								Default:         []string{},
-								Preconfigured:   true,
-								CloudProperties: map[string]interface{}{},
+								CloudProperties: NetworkCloudProperties{},
 							},
 						}
 					})
 
 					It("returns a new SoftLayerVM with ephemeral size", func() {
 						cloudProps = VMCloudProperties{
-							StartCpus: 4,
-							MaxMemory: 2048,
-							Domain:    "fake-domain.com",
-							BlockDeviceTemplateGroup: sldatatypes.BlockDeviceTemplateGroup{
-								GlobalIdentifier: "fake-uuid",
-							},
-							RootDiskSize:                 25,
+							StartCpus:                    4,
+							MaxMemory:                    2048,
+							Domain:                       "fake-domain.com",
 							BoshIp:                       "10.0.0.1",
 							EphemeralDiskSize:            25,
-							Datacenter:                   sldatatypes.Datacenter{Name: "fake-datacenter"},
+							Datacenter:                   "fake-datacenter",
 							HourlyBillingFlag:            true,
 							LocalDiskFlag:                true,
 							VmNamePrefix:                 "bosh-test",
@@ -633,14 +524,7 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 							DedicatedAccountHostOnlyFlag: true,
 							PrivateNetworkOnlyFlag:       false,
 							SshKeys:                      []sldatatypes.SshKey{{Id: 74826}},
-							BlockDevices: []sldatatypes.BlockDevice{{
-								Device:    "0",
-								DiskImage: sldatatypes.DiskImage{Capacity: 100}}},
-							NetworkComponents: []sldatatypes.NetworkComponents{{MaxSpeed: 1000}},
-							PrimaryNetworkComponent: sldatatypes.PrimaryNetworkComponent{
-								NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
-							PrimaryBackendNetworkComponent: sldatatypes.PrimaryBackendNetworkComponent{
-								NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
+							NetworkComponents:            []sldatatypes.NetworkComponents{{MaxSpeed: 1000}},
 						}
 						expectedCmdResults := []string{
 							"",
@@ -656,15 +540,11 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 					})
 					It("returns a new SoftLayerVM without ephemeral size", func() {
 						cloudProps = VMCloudProperties{
-							StartCpus: 4,
-							MaxMemory: 2048,
-							Domain:    "fake-domain.com",
-							BlockDeviceTemplateGroup: sldatatypes.BlockDeviceTemplateGroup{
-								GlobalIdentifier: "fake-uuid",
-							},
-							RootDiskSize:                 25,
+							StartCpus:                    4,
+							MaxMemory:                    2048,
+							Domain:                       "fake-domain.com",
 							BoshIp:                       "10.0.0.1",
-							Datacenter:                   sldatatypes.Datacenter{Name: "fake-datacenter"},
+							Datacenter:                   "fake-datacenter",
 							HourlyBillingFlag:            true,
 							LocalDiskFlag:                true,
 							VmNamePrefix:                 "bosh-test",
@@ -672,14 +552,7 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 							DedicatedAccountHostOnlyFlag: true,
 							PrivateNetworkOnlyFlag:       false,
 							SshKeys:                      []sldatatypes.SshKey{{Id: 74826}},
-							BlockDevices: []sldatatypes.BlockDevice{{
-								Device:    "0",
-								DiskImage: sldatatypes.DiskImage{Capacity: 100}}},
-							NetworkComponents: []sldatatypes.NetworkComponents{{MaxSpeed: 1000}},
-							PrimaryNetworkComponent: sldatatypes.PrimaryNetworkComponent{
-								NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
-							PrimaryBackendNetworkComponent: sldatatypes.PrimaryBackendNetworkComponent{
-								NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
+							NetworkComponents:            []sldatatypes.NetworkComponents{{MaxSpeed: 1000}},
 						}
 						expectedCmdResults := []string{
 							"",
@@ -694,15 +567,11 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 					})
 					It("returns a new SoftLayerVM without bosh ip", func() {
 						cloudProps = VMCloudProperties{
-							StartCpus: 4,
-							MaxMemory: 2048,
-							Domain:    "fake-domain.com",
-							BlockDeviceTemplateGroup: sldatatypes.BlockDeviceTemplateGroup{
-								GlobalIdentifier: "fake-uuid",
-							},
-							RootDiskSize:                 25,
+							StartCpus:                    4,
+							MaxMemory:                    2048,
+							Domain:                       "fake-domain.com",
 							EphemeralDiskSize:            25,
-							Datacenter:                   sldatatypes.Datacenter{Name: "fake-datacenter"},
+							Datacenter:                   "fake-datacenter",
 							HourlyBillingFlag:            true,
 							LocalDiskFlag:                true,
 							VmNamePrefix:                 "bosh-",
@@ -710,16 +579,8 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 							DedicatedAccountHostOnlyFlag: true,
 							PrivateNetworkOnlyFlag:       false,
 							SshKeys:                      []sldatatypes.SshKey{{Id: 74826}},
-							BlockDevices: []sldatatypes.BlockDevice{{
-								Device:    "0",
-								DiskImage: sldatatypes.DiskImage{Capacity: 100}}},
-							NetworkComponents: []sldatatypes.NetworkComponents{{MaxSpeed: 1000}},
-							PrimaryNetworkComponent: sldatatypes.PrimaryNetworkComponent{
-								NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
-							PrimaryBackendNetworkComponent: sldatatypes.PrimaryBackendNetworkComponent{
-								NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
-							DisableOsReload:   true,
-							DeployedByBoshCLI: true,
+							NetworkComponents:            []sldatatypes.NetworkComponents{{MaxSpeed: 1000}},
+							DeployedByBoshCLI:            true,
 						}
 
 						expectedCmdResults := []string{
@@ -732,13 +593,13 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 
 						switch runtime.GOOS {
 						case "darwin":
-							slh.NetworkInterface = "en0"
+							api.NetworkInterface = "en0"
 						case "linux":
-							slh.NetworkInterface = "eth0"
+							api.NetworkInterface = "eth0"
 						default:
-							slh.NetworkInterface = "eth0"
+							api.NetworkInterface = "eth0"
 						}
-						slh.LocalDNSConfigurationFile = "/tmp/hosts"
+						api.LocalDNSConfigurationFile = "/tmp/hosts"
 
 						vm, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
 						Expect(err).ToNot(HaveOccurred())
@@ -746,15 +607,11 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 					})
 					It("returns a new SoftLayerVM with neither bosh ip nor DeployedByBoshCLI flag", func() {
 						cloudProps = VMCloudProperties{
-							StartCpus: 4,
-							MaxMemory: 2048,
-							Domain:    "fake-domain.com",
-							BlockDeviceTemplateGroup: sldatatypes.BlockDeviceTemplateGroup{
-								GlobalIdentifier: "fake-uuid",
-							},
-							RootDiskSize:                 25,
+							StartCpus:                    4,
+							MaxMemory:                    2048,
+							Domain:                       "fake-domain.com",
 							EphemeralDiskSize:            25,
-							Datacenter:                   sldatatypes.Datacenter{Name: "fake-datacenter"},
+							Datacenter:                   "fake-datacenter",
 							HourlyBillingFlag:            true,
 							LocalDiskFlag:                true,
 							VmNamePrefix:                 "bosh-",
@@ -762,15 +619,7 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 							DedicatedAccountHostOnlyFlag: true,
 							PrivateNetworkOnlyFlag:       false,
 							SshKeys:                      []sldatatypes.SshKey{{Id: 74826}},
-							BlockDevices: []sldatatypes.BlockDevice{{
-								Device:    "0",
-								DiskImage: sldatatypes.DiskImage{Capacity: 100}}},
-							NetworkComponents: []sldatatypes.NetworkComponents{{MaxSpeed: 1000}},
-							PrimaryNetworkComponent: sldatatypes.PrimaryNetworkComponent{
-								NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
-							PrimaryBackendNetworkComponent: sldatatypes.PrimaryBackendNetworkComponent{
-								NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
-							DisableOsReload: true,
+							NetworkComponents:            []sldatatypes.NetworkComponents{{MaxSpeed: 1000}},
 						}
 
 						expectedCmdResults := []string{
@@ -783,14 +632,14 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 
 						switch runtime.GOOS {
 						case "darwin":
-							slh.NetworkInterface = "en0"
+							api.NetworkInterface = "en0"
 						case "linux":
-							slh.NetworkInterface = "eth0"
+							api.NetworkInterface = "eth0"
 						default:
-							slh.NetworkInterface = "eth0"
+							api.NetworkInterface = "eth0"
 						}
 
-						slh.LocalDNSConfigurationFile = "/tmp/hosts"
+						api.LocalDNSConfigurationFile = "/tmp/hosts"
 						_, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
 						Expect(err).ToNot(HaveOccurred())
 					})

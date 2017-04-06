@@ -17,13 +17,10 @@ var _ = Describe("NewAgentEnvForVM", func() {
 				Netmask: "fake-netmask",
 				Gateway: "fake-gateway",
 
-				DNS:           []string{"fake-dns"},
-				Default:       []string{"fake-default"},
-				Preconfigured: true,
+				DNS:     []string{"fake-dns"},
+				Default: []string{"fake-default"},
 
-				CloudProperties: map[string]interface{}{
-					"fake-cp-key": "fake-cp-value",
-				},
+				CloudProperties: NetworkCloudProperties{},
 			},
 		}
 
@@ -79,15 +76,12 @@ var _ = Describe("NewAgentEnvForVM", func() {
 					Netmask: "fake-netmask",
 					Gateway: "fake-gateway",
 
-					DNS:           []string{"fake-dns"},
-					Default:       []string{"fake-default"},
-					Preconfigured: true,
+					DNS:     []string{"fake-dns"},
+					Default: []string{"fake-default"},
 
 					MAC: "",
 
-					CloudProperties: map[string]interface{}{
-						"fake-cp-key": "fake-cp-value",
-					},
+					CloudProperties: NetworkCloudProperties{},
 				},
 			},
 

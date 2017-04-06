@@ -179,15 +179,12 @@ var _ = Describe("AgentEnv", func() {
 						Netmask: "fake-netmask",
 						Gateway: "fake-gateway",
 
-						DNS:           []string{"fake-dns"},
-						Default:       []string{"fake-default"},
-						Preconfigured: true,
+						DNS:     []string{"fake-dns"},
+						Default: []string{"fake-default"},
 
 						MAC: "fake-mac",
 
-						CloudProperties: map[string]interface{}{
-							"fake-cp-key": "fake-cp-value",
-						},
+						CloudProperties: NetworkCloudProperties{},
 					},
 				},
 
@@ -208,22 +205,6 @@ var _ = Describe("AgentEnv", func() {
 			outAgentEnv, err := NewAgentEnvFromJSON(jsonBytes)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(outAgentEnv).To(Equal(agentEnv))
-		})
-
-		It("returns error if agent env cannot be JSON encoded", func() {
-			agentEnv := AgentEnv{
-				Networks: Networks{
-					"fake-net-name": Network{
-						CloudProperties: map[string]interface{}{
-							"fake-key": NonJSONMarshable{},
-						},
-					},
-				},
-			}
-
-			_, err := json.Marshal(agentEnv)
-			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring("fake-marshal-err"))
 		})
 	})
 })

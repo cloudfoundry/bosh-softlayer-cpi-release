@@ -5,11 +5,11 @@ import (
 	"time"
 
 	fakescommon "bosh-softlayer-cpi/softlayer/common/fakes"
-	slh "bosh-softlayer-cpi/softlayer/common/helper"
 	testhelpers "bosh-softlayer-cpi/test_helpers"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	fakeslclient "github.com/maximilien/softlayer-go/client/fakes"
 
+	"bosh-softlayer-cpi/api"
 	. "bosh-softlayer-cpi/softlayer/common"
 	. "bosh-softlayer-cpi/softlayer/vm"
 	. "github.com/onsi/ginkgo"
@@ -31,8 +31,8 @@ var _ = Describe("SoftlayerVirtualGuestDeleter", func() {
 		fakeVmFinder = &fakescommon.FakeVMFinder{}
 		fakeVm = &fakescommon.FakeVM{}
 		deleter = NewSoftLayerVMDeleter(fakeSoftLayerClient, logger, fakeVmFinder)
-		slh.TIMEOUT = 2 * time.Second
-		slh.POLLING_INTERVAL = 1 * time.Second
+		api.TIMEOUT = 2 * time.Second
+		api.POLLING_INTERVAL = 1 * time.Second
 	})
 
 	Describe("Delete", func() {

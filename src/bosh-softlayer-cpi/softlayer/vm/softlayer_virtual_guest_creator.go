@@ -9,12 +9,14 @@ import (
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
 	. "bosh-softlayer-cpi/softlayer/common"
-	slhelper "bosh-softlayer-cpi/softlayer/common/helper"
 	bslcstem "bosh-softlayer-cpi/softlayer/stemcell"
 	datatypes "github.com/maximilien/softlayer-go/data_types"
 	sl "github.com/maximilien/softlayer-go/softlayer"
 
+	"bosh-softlayer-cpi/api"
 	"bosh-softlayer-cpi/util"
+
+	slhelper "bosh-softlayer-cpi/softlayer/common/helpers"
 )
 
 type softLayerVirtualGuestCreator struct {
@@ -27,9 +29,6 @@ type softLayerVirtualGuestCreator struct {
 }
 
 func NewSoftLayerCreator(vmFinder VMFinder, softLayerClient sl.Client, agentOptions AgentOptions, featureOptions FeatureOptions, registryOptions RegistryOptions, logger boshlog.Logger) VMCreator {
-	slhelper.TIMEOUT = 120 * time.Minute
-	slhelper.POLLING_INTERVAL = 5 * time.Second
-
 	return &softLayerVirtualGuestCreator{
 		vmFinder:        vmFinder,
 		softLayerClient: softLayerClient,
@@ -41,10 +40,13 @@ func NewSoftLayerCreator(vmFinder VMFinder, softLayerClient sl.Client, agentOpti
 }
 
 func (c *softLayerVirtualGuestCreator) Create(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
+	api.TIMEOUT = 120 * time.Minute
+	api.POLLING_INTERVAL = 5 * time.Second
+
 	for _, network := range networks {
 		switch network.Type {
 		case "dynamic":
-			if cloudProps.DisableOsReload || c.featureOptions.DisableOsReload {
+			if c.featureOptions.DisableOsReload {
 				return c.createBySoftlayer(agentID, stemcell, cloudProps, networks, env)
 			} else {
 				if len(network.IP) == 0 {
@@ -68,7 +70,17 @@ func (c *softLayerVirtualGuestCreator) GetAgentOptions() AgentOptions { return c
 
 // Private methods
 func (c *softLayerVirtualGuestCreator) createBySoftlayer(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
-	virtualGuestTemplate, err := CreateVirtualGuestTemplate(stemcell, cloudProps, networks, CreateUserDataForInstance(agentID, networks, c.registryOptions))
+	userDataTypeContents, err := CreateUserDataForInstance(agentID, c.registryOptions)
+	if err != nil {
+		return nil, bosherr.WrapError(err, "Creating VirtualGuest UserData")
+	}
+
+	publicVlanId, privateVlanId, err := slhelper.GetVlanIds(c.softLayerClient, networks)
+	if err != nil {
+		return nil, bosherr.WrapError(err, "Getting Vlan Ids from networks settings")
+	}
+
+	virtualGuestTemplate, err := CreateVirtualGuestTemplate(stemcell.Uuid(), cloudProps, userDataTypeContents, publicVlanId, privateVlanId)
 	if err != nil {
 		return nil, bosherr.WrapError(err, "Creating VirtualGuest template")
 	}
@@ -101,7 +113,7 @@ func (c *softLayerVirtualGuestCreator) createBySoftlayer(agentID string, stemcel
 	}
 
 	if cloudProps.DeployedByBoshCLI {
-		err := UpdateEtcHostsOfBoshInit(slhelper.LocalDNSConfigurationFile, fmt.Sprintf("%s  %s", vm.GetPrimaryBackendIP(), vm.GetFullyQualifiedDomainName()))
+		err := UpdateEtcHostsOfBoshInit(api.LocalDNSConfigurationFile, fmt.Sprintf("%s  %s", vm.GetPrimaryBackendIP(), vm.GetFullyQualifiedDomainName()))
 		if err != nil {
 			return nil, bosherr.WrapErrorf(err, "Updating BOSH director hostname/IP mapping entry in /etc/hosts")
 		}
@@ -110,9 +122,9 @@ func (c *softLayerVirtualGuestCreator) createBySoftlayer(agentID string, stemcel
 		if cloudProps.BoshIp != "" {
 			boshIP = cloudProps.BoshIp
 		} else {
-			boshIP, err = GetLocalIPAddressOfGivenInterface(slhelper.NetworkInterface)
+			boshIP, err = GetLocalIPAddressOfGivenInterface(api.NetworkInterface)
 			if err != nil {
-				return nil, bosherr.WrapErrorf(err, fmt.Sprintf("Failed to get IP address of %s in local", slhelper.NetworkInterface))
+				return nil, bosherr.WrapErrorf(err, fmt.Sprintf("Failed to get IP address of %s in local", api.NetworkInterface))
 			}
 		}
 
@@ -129,7 +141,10 @@ func (c *softLayerVirtualGuestCreator) createBySoftlayer(agentID string, stemcel
 		}
 	}
 
-	vm.ConfigureNetworks2(networks)
+	networks, err = vm.ConfigureNetworks(networks)
+	if err != nil {
+		return nil, bosherr.WrapError(err, "Configuring VM's networking")
+	}
 
 	agentEnv := CreateAgentUserData(agentID, cloudProps, networks, env, c.agentOptions)
 
@@ -167,6 +182,7 @@ func (c *softLayerVirtualGuestCreator) createByOSReload(agentID string, stemcell
 			if err != nil || virtualGuest.Id == 0 {
 				return nil, bosherr.WrapErrorf(err, "Could not find VirtualGuest by ip address: %s", network.IP)
 			}
+			break
 		case "manual", "":
 			continue
 		default:
@@ -181,7 +197,7 @@ func (c *softLayerVirtualGuestCreator) createByOSReload(agentID string, stemcell
 		return nil, bosherr.WrapErrorf(err, "Cannot find virtualGuest with id: %d", virtualGuest.Id)
 	}
 
-	slhelper.TIMEOUT = 4 * time.Hour
+	api.TIMEOUT = 4 * time.Hour
 	err = vm.ReloadOS(stemcell)
 	if err != nil {
 		return nil, bosherr.WrapError(err, "Failed to reload OS")
@@ -205,7 +221,7 @@ func (c *softLayerVirtualGuestCreator) createByOSReload(agentID string, stemcell
 	}
 
 	if cloudProps.DeployedByBoshCLI {
-		err := UpdateEtcHostsOfBoshInit(slhelper.LocalDNSConfigurationFile, fmt.Sprintf("%s  %s", vm.GetPrimaryBackendIP(), vm.GetFullyQualifiedDomainName()))
+		err := UpdateEtcHostsOfBoshInit(api.LocalDNSConfigurationFile, fmt.Sprintf("%s  %s", vm.GetPrimaryBackendIP(), vm.GetFullyQualifiedDomainName()))
 		if err != nil {
 			return nil, bosherr.WrapErrorf(err, "Updating BOSH director hostname/IP mapping entry in /etc/hosts")
 		}
@@ -214,9 +230,9 @@ func (c *softLayerVirtualGuestCreator) createByOSReload(agentID string, stemcell
 		if cloudProps.BoshIp != "" {
 			boshIP = cloudProps.BoshIp
 		} else {
-			boshIP, err = GetLocalIPAddressOfGivenInterface(slhelper.NetworkInterface)
+			boshIP, err = GetLocalIPAddressOfGivenInterface(api.NetworkInterface)
 			if err != nil {
-				return nil, bosherr.WrapErrorf(err, fmt.Sprintf("Failed to get IP address of %s in local", slhelper.NetworkInterface))
+				return nil, bosherr.WrapErrorf(err, fmt.Sprintf("Failed to get IP address of %s in local", api.NetworkInterface))
 			}
 		}
 
@@ -238,7 +254,7 @@ func (c *softLayerVirtualGuestCreator) createByOSReload(agentID string, stemcell
 		return nil, bosherr.WrapErrorf(err, "refresh VM with id: %d after os_reload", virtualGuest.Id)
 	}
 
-	vm.ConfigureNetworks2(networks)
+	vm.ConfigureNetworks(networks)
 
 	agentEnv := CreateAgentUserData(agentID, cloudProps, networks, env, c.agentOptions)
 	if err != nil {

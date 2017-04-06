@@ -1,46 +1,260 @@
 {
-	"accountId": 12345,
-	"createDate": "2014-08-12T12:13:01-08:00",
+	"accountId": 278444,
+	"createDate": "2017-01-12T12:36:17+08:00",
 	"dedicatedAccountHostOnlyFlag": false,
-	"domain": "fake-domain",
-	"fullyQualifiedDomainName": "fake-qualified-name",
-	"hostname": "fake-host",
-	"id": 1234567,
+	"domain": "softlayer.com",
+	"fullyQualifiedDomainName": "bosh-director.softlayer.com",
+	"hostname": "bosh-director",
+	"id": 27443781,
 	"lastPowerStateId": null,
 	"lastVerifiedDate": null,
-	"maxCpu": 1,
-	"maxCpuUnits": "fake-unit",
-	"maxMemory": 1024,
+	"maxCpu": 4,
+	"maxCpuUnits": "CORE",
+	"maxMemory": 8192,
 	"metricPollDate": null,
-	"modifyDate": "2014-08-12T12:14:39-08:00",
-	"startCpus": 1,
-	"statusId": 1,
-	"uuid": "fake-uuid",
-	"globalIdentifier": "fake-id",
-	"primaryBackendIpAddress": "fake-backend-ip",
-	"primaryIpAddress": "fake-ip",
-	"location": {
-		"id": 1234567
-	},
-	"operatingSystem": {
-		"passwords": [
-			{
-				"username": "fake-user",
-				"password": "fake-password"
-			}
-		]
+	"modifyDate": "2017-01-12T12:41:35+08:00",
+	"startCpus": 4,
+	"statusId": 1001,
+	"uuid": "2ee3f838-2ec8-6a18-a1fb-1966d50eb9c3",
+	"blockDeviceTemplateGroup": {
+		"globalIdentifier": "1db9301d-f69e-494a-abab-1b6748a5be69"
 	},
 	"datacenter": {
-		"id": 123
+		"id": 358694,
+		"longName": "London 2",
+		"name": "lon02"
 	},
-	"primaryNetworkComponent": {
-		"networkVlan": {
-			"id": 1421726
+	"globalIdentifier": "48e87532-f9bb-431e-a7ea-5efc8a9324e3",
+	"hourlyBillingFlag": true,
+	"localDiskFlag": false,
+	"location": {
+		"id": 1806889,
+		"name": "27"
+	},
+	"managedResourceFlag": false,
+	"networkComponents": [
+		{
+			"maxSpeed": 1000
+		},
+		{
+			"maxSpeed": 1000
+		}
+	],
+	"operatingSystem": {
+		"hardwareId": null,
+		"id": 14021333,
+		"manufacturerLicenseInstance": "",
+		"passwords": [
+			{
+				"password": "******",
+				"username": "root"
+			}
+		],
+		"softwareLicense": {
+			"id": 1932,
+			"softwareDescriptionId": 1342,
+			"softwareDescription": {
+				"controlPanel": 0,
+				"id": 1342,
+				"licenseTermValue": null,
+				"longDescription": "Ubuntu 14.04-64 Minimal for VSI",
+				"manufacturer": "Ubuntu",
+				"name": "Ubuntu",
+				"operatingSystem": 1,
+				"referenceCode": "UBUNTU_14_64",
+				"upgradeSoftwareDescriptionId": null,
+				"upgradeSwDescId": null,
+				"version": "14.04-64 Minimal for VSI",
+				"virtualLicense": 0,
+				"virtualizationPlatform": 0,
+				"requiredUser": "root"
+			}
 		}
 	},
+	"primaryBackendIpAddress": "10.164.169.15",
 	"primaryBackendNetworkComponent": {
 		"networkVlan": {
-			"id": 1421725
+			"id": 1292651,
+			"subnets": [
+				{
+					"broadcastAddress": "10.164.43.191",
+					"cidr": 27,
+					"gateway": "10.164.43.161",
+					"id": 1233959,
+					"isCustomerOwned": false,
+					"isCustomerRoutable": false,
+					"modifyDate": "2016-06-22T13:49:49+08:00",
+					"netmask": "255.255.255.224",
+					"networkIdentifier": "10.164.43.160",
+					"networkVlanId": 1292651,
+					"sortOrder": "1",
+					"subnetType": "ADDITIONAL_PRIMARY",
+					"totalIpAddresses": "32",
+					"usableIpAddressCount": "29",
+					"version": 4,
+					"addressSpace": "PRIVATE"
+				},
+				{
+					"broadcastAddress": "10.164.169.255",
+					"cidr": 24,
+					"gateway": "10.164.169.1",
+					"id": 1318213,
+					"isCustomerOwned": false,
+					"isCustomerRoutable": false,
+					"modifyDate": "2016-10-21T19:37:48+08:00",
+					"netmask": "255.255.255.0",
+					"networkIdentifier": "10.164.169.0",
+					"networkVlanId": 1292651,
+					"sortOrder": "1",
+					"subnetType": "ADDITIONAL_PRIMARY",
+					"totalIpAddresses": "256",
+					"usableIpAddressCount": "253",
+					"version": 4,
+					"addressSpace": "PRIVATE"
+				},
+				{
+					"broadcastAddress": "10.164.115.159",
+					"cidr": 28,
+					"gateway": "10.164.115.145",
+					"id": 1237427,
+					"isCustomerOwned": false,
+					"isCustomerRoutable": false,
+					"modifyDate": "2016-06-22T23:49:34+08:00",
+					"netmask": "255.255.255.240",
+					"networkIdentifier": "10.164.115.144",
+					"networkVlanId": 1292651,
+					"note": "DataPower YS1 London Pod2",
+					"sortOrder": "2",
+					"subnetType": "SECONDARY_ON_VLAN",
+					"totalIpAddresses": "16",
+					"usableIpAddressCount": "13",
+					"version": 4,
+					"addressSpace": "PRIVATE"
+				}
+			]
 		}
-	}
+	},
+	"primaryIpAddress": "169.50.198.170",
+	"primaryNetworkComponent": {
+		"networkVlan": {
+			"id": 1292653,
+			"subnets": [
+				{
+					"broadcastAddress": "169.50.94.255",
+					"cidr": 27,
+					"gateway": "169.50.94.225",
+					"id": 1236371,
+					"isCustomerOwned": false,
+					"isCustomerRoutable": false,
+					"modifyDate": "2016-06-22T13:51:27+08:00",
+					"netmask": "255.255.255.224",
+					"networkIdentifier": "169.50.94.224",
+					"networkVlanId": 1292653,
+					"sortOrder": "1",
+					"subnetType": "ADDITIONAL_PRIMARY",
+					"totalIpAddresses": "32",
+					"usableIpAddressCount": "29",
+					"version": 4,
+					"addressSpace": "PUBLIC"
+				},
+				{
+					"broadcastAddress": "169.50.105.255",
+					"cidr": 27,
+					"gateway": "169.50.105.225",
+					"id": 1225321,
+					"isCustomerOwned": false,
+					"isCustomerRoutable": false,
+					"modifyDate": "2016-11-04T11:02:27+08:00",
+					"netmask": "255.255.255.224",
+					"networkIdentifier": "169.50.105.224",
+					"networkVlanId": 1292653,
+					"sortOrder": "1",
+					"subnetType": "ADDITIONAL_PRIMARY",
+					"totalIpAddresses": "32",
+					"usableIpAddressCount": "29",
+					"version": 4,
+					"addressSpace": "PUBLIC"
+				},
+				{
+					"broadcastAddress": "169.50.107.95",
+					"cidr": 27,
+					"gateway": "169.50.107.65",
+					"id": 1230155,
+					"isCustomerOwned": false,
+					"isCustomerRoutable": false,
+					"modifyDate": "2016-11-03T15:24:30+08:00",
+					"netmask": "255.255.255.224",
+					"networkIdentifier": "169.50.107.64",
+					"networkVlanId": 1292653,
+					"sortOrder": "1",
+					"subnetType": "ADDITIONAL_PRIMARY",
+					"totalIpAddresses": "32",
+					"usableIpAddressCount": "29",
+					"version": 4,
+					"addressSpace": "PUBLIC"
+				},
+				{
+					"broadcastAddress": "169.50.192.191",
+					"cidr": 27,
+					"gateway": "169.50.192.161",
+					"id": 1320141,
+					"isCustomerOwned": false,
+					"isCustomerRoutable": false,
+					"modifyDate": "2016-11-29T15:49:04+08:00",
+					"netmask": "255.255.255.224",
+					"networkIdentifier": "169.50.192.160",
+					"networkVlanId": 1292653,
+					"sortOrder": "1",
+					"subnetType": "ADDITIONAL_PRIMARY",
+					"totalIpAddresses": "32",
+					"usableIpAddressCount": "29",
+					"version": 4,
+					"addressSpace": "PUBLIC"
+				},
+				{
+					"broadcastAddress": "169.50.198.191",
+					"cidr": 27,
+					"gateway": "169.50.198.161",
+					"id": 1344379,
+					"isCustomerOwned": false,
+					"isCustomerRoutable": false,
+					"modifyDate": "2016-12-01T11:54:38+08:00",
+					"netmask": "255.255.255.224",
+					"networkIdentifier": "169.50.198.160",
+					"networkVlanId": 1292653,
+					"sortOrder": "1",
+					"subnetType": "ADDITIONAL_PRIMARY",
+					"totalIpAddresses": "32",
+					"usableIpAddressCount": "29",
+					"version": 4,
+					"addressSpace": "PUBLIC"
+				},
+				{
+					"broadcastAddress": "169.50.109.31",
+					"cidr": 28,
+					"gateway": "169.50.109.17",
+					"id": 1237443,
+					"isCustomerOwned": false,
+					"isCustomerRoutable": false,
+					"modifyDate": "2016-06-22T23:51:40+08:00",
+					"netmask": "255.255.255.240",
+					"networkIdentifier": "169.50.109.16",
+					"networkVlanId": 1292653,
+					"note": "DataPower YS1 London Pod2",
+					"sortOrder": "2",
+					"subnetType": "SECONDARY_ON_VLAN",
+					"totalIpAddresses": "16",
+					"usableIpAddressCount": "13",
+					"version": 4,
+					"addressSpace": "PUBLIC"
+				}
+			]
+		}
+	},
+	"privateNetworkOnlyFlag": false,
+	"userData": [
+		{
+			"value": "eyJyZWdpc3RyeSI6eyJlbmRwb2ludCI6Imh0dHA6Ly86QDowIn0sInNlcnZlciI6eyJuYW1lIjoidm0tNTlhNjQ0ZmItNTRiNC00MjVlLTRmZGItYTI5NTA1MzU0OWNlIn0sImRucyI6e319"
+		}
+	]
 }

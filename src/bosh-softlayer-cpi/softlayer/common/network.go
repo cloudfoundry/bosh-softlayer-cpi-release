@@ -2,6 +2,11 @@ package common
 
 type Networks map[string]Network
 
+type NetworkCloudProperties struct {
+	VlanID              int  `json:"vlanId"`
+	SourcePolicyRouting bool `json:"source_policy_routing,omitempty"`
+}
+
 type Network struct {
 	Type string `json:"type"`
 
@@ -12,11 +17,12 @@ type Network struct {
 	DNS     []string `json:"dns,omitempty"`
 	Default []string `json:"default,omitempty"`
 
-	Preconfigured bool `json:"preconfigured,omitempty"`
-
 	MAC string `json:"mac,omitempty"`
 
-	CloudProperties map[string]interface{} `json:"cloud_properties,omitempty"`
+	Alias  string  `json:"alias,omitempty"`
+	Routes []Route `json:"routes,omitempty"`
+
+	CloudProperties NetworkCloudProperties `json:"cloud_properties,omitempty"`
 }
 
 func (ns Networks) First() Network {
@@ -34,6 +40,10 @@ func (n Network) HasDefaultGateway() bool {
 		}
 	}
 	return false
+}
+
+func (n Network) SourcePolicyRouting() bool {
+	return n.CloudProperties.SourcePolicyRouting
 }
 
 func (n Network) IsDynamic() bool { return n.Type == "dynamic" }

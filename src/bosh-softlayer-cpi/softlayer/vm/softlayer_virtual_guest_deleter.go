@@ -9,7 +9,7 @@ import (
 
 	. "bosh-softlayer-cpi/softlayer/common"
 
-	slh "bosh-softlayer-cpi/softlayer/common/helper"
+	slhelper "bosh-softlayer-cpi/softlayer/common/helpers"
 	sl "github.com/maximilien/softlayer-go/softlayer"
 )
 
@@ -35,7 +35,7 @@ func (c *softLayerVMDeleter) Delete(cid int) error {
 		return bosherr.WrapError(err, "Creating SoftLayer VirtualGuestService from client")
 	}
 
-	err = slh.WaitForVirtualGuestToHaveNoRunningTransactions(c.softLayerClient, cid)
+	err = slhelper.WaitForVirtualGuestToHaveNoRunningTransactions(c.softLayerClient, cid)
 	if err != nil {
 		if !strings.Contains(err.Error(), "HTTP error code") {
 			return bosherr.WrapError(err, fmt.Sprintf("Waiting for VirtualGuest `%d` to have no pending transactions before deleting vm", cid))

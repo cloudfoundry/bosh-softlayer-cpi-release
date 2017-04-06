@@ -25,36 +25,28 @@ type FeatureOptions struct {
 }
 
 type VMCloudProperties struct {
-	Hostname                 string                               `json:"hostname,omitempty"`
-	VmNamePrefix             string                               `json:"vmNamePrefix,omitempty"`
-	Domain                   string                               `json:"domain,omitempty"`
-	StartCpus                int                                  `json:"startCpus,omitempty"`
-	MaxMemory                int                                  `json:"maxMemory,omitempty"`
-	Datacenter               sldatatypes.Datacenter               `json:"datacenter"`
-	BlockDeviceTemplateGroup sldatatypes.BlockDeviceTemplateGroup `json:"blockDeviceTemplateGroup,omitempty"`
-	SshKeys                  []sldatatypes.SshKey                 `json:"sshKeys,omitempty"`
-	RootDiskSize             int                                  `json:"rootDiskSize,omitempty"`
-	EphemeralDiskSize        int                                  `json:"ephemeralDiskSize,omitempty"`
+	VmNamePrefix      string               `json:"vmNamePrefix,omitempty"`
+	Domain            string               `json:"domain,omitempty"`
+	StartCpus         int                  `json:"startCpus,omitempty"`
+	MaxMemory         int                  `json:"maxMemory,omitempty"`
+	Datacenter        string               `json:"datacenter"`
+	SshKeys           []sldatatypes.SshKey `json:"sshKeys,omitempty"`
+	EphemeralDiskSize int                  `json:"ephemeralDiskSize,omitempty"`
 
-	HourlyBillingFlag              bool                                       `json:"hourlyBillingFlag,omitempty"`
-	LocalDiskFlag                  bool                                       `json:"localDiskFlag,omitempty"`
-	DedicatedAccountHostOnlyFlag   bool                                       `json:"dedicatedAccountHostOnlyFlag,omitempty"`
-	NetworkComponents              []sldatatypes.NetworkComponents            `json:"networkComponents,omitempty"`
-	PrivateNetworkOnlyFlag         bool                                       `json:"privateNetworkOnlyFlag,omitempty"`
-	PrimaryNetworkComponent        sldatatypes.PrimaryNetworkComponent        `json:"primaryNetworkComponent,omitempty"`
-	PrimaryBackendNetworkComponent sldatatypes.PrimaryBackendNetworkComponent `json:"primaryBackendNetworkComponent,omitempty"`
-	BlockDevices                   []sldatatypes.BlockDevice                  `json:"blockDevices,omitempty"`
-	UserData                       []sldatatypes.UserData                     `json:"userData,omitempty"`
-	PostInstallScriptUri           string                                     `json:"postInstallScriptUri,omitempty"`
+	HourlyBillingFlag            bool                            `json:"hourlyBillingFlag,omitempty"`
+	LocalDiskFlag                bool                            `json:"localDiskFlag,omitempty"`
+	DedicatedAccountHostOnlyFlag bool                            `json:"dedicatedAccountHostOnlyFlag,omitempty"`
+	NetworkComponents            []sldatatypes.NetworkComponents `json:"networkComponents,omitempty"`
+	PrivateNetworkOnlyFlag       bool                            `json:"privateNetworkOnlyFlag,omitempty"`
+	UserData                     []sldatatypes.UserData          `json:"userData,omitempty"`
+	PostInstallScriptUri         string                          `json:"postInstallScriptUri,omitempty"`
 
 	BoshIp            string `json:"bosh_ip,omitempty"`
-	DeployedByBoshCLI bool   `json:"deployedByBoshcli,omitempty"`
+	DeployedByBoshCLI bool   `json:"deployedByBoshCli,omitempty"`
 
 	Baremetal             bool   `json:"baremetal,omitempty"`
 	BaremetalStemcell     string `json:"bm_stemcell,omitempty"`
 	BaremetalNetbootImage string `json:"bm_netboot_image,omitempty"`
-
-	DisableOsReload bool `json:"disableOsReload,omitempty"`
 }
 
 type AllowedHostCredential struct {
@@ -98,10 +90,10 @@ const (
 type VM interface {
 	AttachDisk(bslcdisk.Disk) error
 
-	ConfigureNetworks(Networks) error
+	ConfigureNetworksSettings(Networks) error
 
-	//dedicated for setup network by modify /etc/network/interfaces
-	ConfigureNetworks2(Networks) error
+	//specific to configuring network with modifying /etc/network/interfaces
+	ConfigureNetworks(Networks) (Networks, error)
 
 	DetachDisk(bslcdisk.Disk) error
 	Delete(agentId string) error
