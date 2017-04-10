@@ -59,14 +59,34 @@ var _ = Describe("SoftLayerVirtualGuest", func() {
 			GlobalIdentifier:         "fake-globalIdentifier",
 			PrimaryBackendIpAddress:  "fake-primary-backend-ip",
 			PrimaryIpAddress:         "fake-primary-ip",
-			PrimaryBackendNetworkComponent:   &datatypes.SoftLayer_Virtual_Guest_Network_Component{
-				NetworkVlan : datatypes.SoftLayer_Network_Vlan{
+			PrimaryBackendNetworkComponent: &datatypes.SoftLayer_Virtual_Guest_Network_Component{
+				PrimaryIpAddress: "10.0.0.2",
+				NetworkVlan: datatypes.SoftLayer_Network_Vlan{
 					Id: 1234568,
+					Subnets: []datatypes.SoftLayer_Network_Subnet{
+						{
+							Id:                12345689,
+							NetworkIdentifier: "10.0.0.0",
+							Gateway:           "10.0.0.254",
+							BroadcastAddress:  "10.0.0.255",
+							Netmask:           "255.255.255.0",
+						},
+					},
 				},
 			},
-			PrimaryNetworkComponent:   &datatypes.SoftLayer_Virtual_Guest_Network_Component{
-				NetworkVlan : datatypes.SoftLayer_Network_Vlan{
+			PrimaryNetworkComponent: &datatypes.SoftLayer_Virtual_Guest_Network_Component{
+				PrimaryIpAddress: "10.0.1.2",
+				NetworkVlan: datatypes.SoftLayer_Network_Vlan{
 					Id: 1234567,
+					Subnets: []datatypes.SoftLayer_Network_Subnet{
+						{
+							Id:                12345679,
+							NetworkIdentifier: "10.0.1.0",
+							Gateway:           "10.0.1.254",
+							BroadcastAddress:  "10.0.1.255",
+							Netmask:           "255.255.255.0",
+						},
+					},
 				},
 			},
 			OperatingSystem: &datatypes.SoftLayer_Operating_System{
@@ -195,7 +215,6 @@ var _ = Describe("SoftLayerVirtualGuest", func() {
 			networks = map[string]Network{
 				"fake-network0": {
 					Type:    "dynamic",
-					IP:      "10.0.0.11",
 					Netmask: "fake-Netmask",
 					Gateway: "fake-Gateway",
 					DNS: []string{
@@ -209,7 +228,6 @@ var _ = Describe("SoftLayerVirtualGuest", func() {
 				},
 				"fake-network1": {
 					Type:    "dynamic",
-					IP:      "10.0.0.12",
 					Netmask: "fake-Netmask",
 					Gateway: "fake-Gateway",
 					DNS: []string{
@@ -224,7 +242,7 @@ var _ = Describe("SoftLayerVirtualGuest", func() {
 			}
 		})
 
-		FIt("returns the expected network", func() {
+		It("returns the expected network", func() {
 			fileNames := []string{
 				"SoftLayer_Network_Vlan_Service_getObject_PublicVlan.json",
 				"SoftLayer_Network_Vlan_Service_getObject_PrivateVlan.json",
