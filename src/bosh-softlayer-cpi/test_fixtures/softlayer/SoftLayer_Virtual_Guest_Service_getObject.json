@@ -5,7 +5,7 @@
 	"domain": "softlayer.com",
 	"fullyQualifiedDomainName": "bosh-director.softlayer.com",
 	"hostname": "bosh-director",
-	"id": 27443781,
+	"id": 1234567,
 	"lastPowerStateId": null,
 	"lastVerifiedDate": null,
 	"maxCpu": 4,

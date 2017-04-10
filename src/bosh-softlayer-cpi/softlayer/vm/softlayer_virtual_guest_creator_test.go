@@ -266,7 +266,7 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 				Context("with dynamic networking", func() {
 					BeforeEach(func() {
 						networks = map[string]Network{
-							"fake-network0": Network{
+							"fake-network0": {
 								Type:    "dynamic",
 								Netmask: "fake-Netmask",
 								Gateway: "fake-Gateway",
@@ -274,8 +274,23 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 									"fake-dns0",
 									"fake-dns1",
 								},
-								Default:         []string{},
-								CloudProperties: NetworkCloudProperties{},
+								Default: []string{},
+								CloudProperties: NetworkCloudProperties{
+									VlanID: 1234567,
+								},
+							},
+							"fake-network1": {
+								Type:    "dynamic",
+								Netmask: "fake-Netmask",
+								Gateway: "fake-Gateway",
+								DNS: []string{
+									"fake-dns0",
+									"fake-dns1",
+								},
+								Default: []string{},
+								CloudProperties: NetworkCloudProperties{
+									VlanID: 1234568,
+								},
 							},
 						}
 					})
@@ -312,17 +327,31 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 
 					It("returns a new SoftLayerVM with ephemeral size", func() {
 						networks = map[string]Network{
-							"fake-network0": Network{
+							"fake-network0": {
 								Type:    "dynamic",
-								IP:      "10.0.0.11",
 								Netmask: "fake-Netmask",
 								Gateway: "fake-Gateway",
 								DNS: []string{
 									"fake-dns0",
 									"fake-dns1",
 								},
-								Default:         []string{},
-								CloudProperties: NetworkCloudProperties{},
+								Default: []string{},
+								CloudProperties: NetworkCloudProperties{
+									VlanID: 1234567,
+								},
+							},
+							"fake-network1": {
+								Type:    "dynamic",
+								Netmask: "fake-Netmask",
+								Gateway: "fake-Gateway",
+								DNS: []string{
+									"fake-dns0",
+									"fake-dns1",
+								},
+								Default: []string{},
+								CloudProperties: NetworkCloudProperties{
+									VlanID: 1234568,
+								},
 							},
 						}
 
@@ -495,7 +524,7 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 				Context("with dynamic networking", func() {
 					BeforeEach(func() {
 						networks = map[string]Network{
-							"fake-network0": Network{
+							"fake-network0": {
 								Type:    "dynamic",
 								Netmask: "fake-Netmask",
 								Gateway: "fake-Gateway",
@@ -503,8 +532,23 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 									"fake-dns0",
 									"fake-dns1",
 								},
-								Default:         []string{},
-								CloudProperties: NetworkCloudProperties{},
+								Default: []string{},
+								CloudProperties: NetworkCloudProperties{
+									VlanID: 1234567,
+								},
+							},
+							"fake-network1": {
+								Type:    "dynamic",
+								Netmask: "fake-Netmask",
+								Gateway: "fake-Gateway",
+								DNS: []string{
+									"fake-dns0",
+									"fake-dns1",
+								},
+								Default: []string{},
+								CloudProperties: NetworkCloudProperties{
+									VlanID: 1234568,
+								},
 							},
 						}
 					})
@@ -651,6 +695,9 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 
 func setFakeSoftlayerClientCreateObjectTestFixturesWithEphemeralDiskSize(fakeSoftLayerClient *fakeslclient.FakeSoftLayerClient) {
 	fileNames := []string{
+		"SoftLayer_Network_Vlan_Service_getObject_PublicVlan.json",
+		"SoftLayer_Network_Vlan_Service_getObject_PrivateVlan.json",
+
 		"SoftLayer_Virtual_Guest_Service_createObject.json",
 
 		"SoftLayer_Virtual_Guest_Service_getLastTransaction.json",
@@ -692,6 +739,8 @@ func setFakeSoftlayerClientCreateObjectTestFixturesWithEphemeralDiskSize_OS_Relo
 
 func setFakeSoftlayerClientCreateObjectTestFixturesWithoutEphemeralDiskSize(fakeSoftLayerClient *fakeslclient.FakeSoftLayerClient) {
 	fileNames := []string{
+		"SoftLayer_Network_Vlan_Service_getObject_PublicVlan.json",
+		"SoftLayer_Network_Vlan_Service_getObject_PrivateVlan.json",
 		"SoftLayer_Virtual_Guest_Service_createObject.json",
 
 		"SoftLayer_Virtual_Guest_Service_getLastTransaction.json",
@@ -716,6 +765,9 @@ func setFakeSoflayerClientCreateObjectTestFixturesWithoutEphemeralDiskSize_OS_Re
 
 func setFakeSoftlayerClientCreateObjectTestFixturesWithoutBoshIP(fakeSoftLayerClient *fakeslclient.FakeSoftLayerClient) {
 	fileNames := []string{
+		"SoftLayer_Network_Vlan_Service_getObject_PublicVlan.json",
+		"SoftLayer_Network_Vlan_Service_getObject_PrivateVlan.json",
+
 		"SoftLayer_Virtual_Guest_Service_createObject.json",
 		"SoftLayer_Virtual_Guest_Service_getLastTransaction.json",
 		"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",

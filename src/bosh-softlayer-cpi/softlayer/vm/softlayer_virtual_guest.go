@@ -199,6 +199,7 @@ func (vm *softLayerVirtualGuest) ConfigureNetworks(networks Networks) (Networks,
 	}
 
 	componentByNetwork, err := ubuntu.ComponentByNetworkName(vm.virtualGuest, networks)
+
 	if err != nil {
 		return networks, bosherr.WrapError(err, "Mapping network component and name")
 	}

@@ -59,9 +59,39 @@ var _ = Describe("SoftLayerVirtualGuest", func() {
 			GlobalIdentifier:         "fake-globalIdentifier",
 			PrimaryBackendIpAddress:  "fake-primary-backend-ip",
 			PrimaryIpAddress:         "fake-primary-ip",
+			PrimaryBackendNetworkComponent: &datatypes.SoftLayer_Virtual_Guest_Network_Component{
+				PrimaryIpAddress: "10.0.0.2",
+				NetworkVlan: datatypes.SoftLayer_Network_Vlan{
+					Id: 1234568,
+					Subnets: []datatypes.SoftLayer_Network_Subnet{
+						{
+							Id:                12345689,
+							NetworkIdentifier: "10.0.0.0",
+							Gateway:           "10.0.0.254",
+							BroadcastAddress:  "10.0.0.255",
+							Netmask:           "255.255.255.0",
+						},
+					},
+				},
+			},
+			PrimaryNetworkComponent: &datatypes.SoftLayer_Virtual_Guest_Network_Component{
+				PrimaryIpAddress: "10.0.1.2",
+				NetworkVlan: datatypes.SoftLayer_Network_Vlan{
+					Id: 1234567,
+					Subnets: []datatypes.SoftLayer_Network_Subnet{
+						{
+							Id:                12345679,
+							NetworkIdentifier: "10.0.1.0",
+							Gateway:           "10.0.1.254",
+							BroadcastAddress:  "10.0.1.255",
+							Netmask:           "255.255.255.0",
+						},
+					},
+				},
+			},
 			OperatingSystem: &datatypes.SoftLayer_Operating_System{
 				Passwords: []datatypes.SoftLayer_Password{
-					datatypes.SoftLayer_Password{
+					{
 						Username: "fake-root-user",
 						Password: "fake-root-password",
 					},
@@ -183,22 +213,42 @@ var _ = Describe("SoftLayerVirtualGuest", func() {
 
 		BeforeEach(func() {
 			networks = map[string]Network{
-				"fake-network0": Network{
-					Type:    "fake-type",
-					IP:      "fake-IP",
+				"fake-network0": {
+					Type:    "dynamic",
 					Netmask: "fake-Netmask",
 					Gateway: "fake-Gateway",
 					DNS: []string{
 						"fake-dns0",
 						"fake-dns1",
 					},
-					Default:         []string{},
-					CloudProperties: NetworkCloudProperties{},
+					Default: []string{},
+					CloudProperties: NetworkCloudProperties{
+						VlanID: 1234567,
+					},
+				},
+				"fake-network1": {
+					Type:    "dynamic",
+					Netmask: "fake-Netmask",
+					Gateway: "fake-Gateway",
+					DNS: []string{
+						"fake-dns0",
+						"fake-dns1",
+					},
+					Default: []string{},
+					CloudProperties: NetworkCloudProperties{
+						VlanID: 1234568,
+					},
 				},
 			}
 		})
 
 		It("returns the expected network", func() {
+			fileNames := []string{
+				"SoftLayer_Network_Vlan_Service_getObject_PublicVlan.json",
+				"SoftLayer_Network_Vlan_Service_getObject_PrivateVlan.json",
+			}
+			testhelpers.SetTestFixturesForFakeSoftLayerClient(fakeSoftLayerClient, fileNames)
+
 			_, err := vm.ConfigureNetworks(networks)
 			Expect(err).ToNot(HaveOccurred())
 		})
