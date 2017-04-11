@@ -5,6 +5,7 @@ import (
 	"net"
 	"net/url"
 	"os"
+	"reflect"
 	"time"
 
 	sldatatypes "github.com/maximilien/softlayer-go/data_types"
@@ -42,40 +43,19 @@ func CreateVirtualGuestTemplate(stemcell bslcstem.Stemcell, cloudProps VMCloudPr
 	for _, network := range networks {
 		switch network.Type {
 		case "dynamic":
-			if value, ok := network.CloudProperties["PrimaryNetworkComponent"]; ok {
-				networkVlan := sldatatypes.NetworkVlan{}
-				networkComponent := value.(map[string]interface{})
-				if value1, ok := networkComponent["NetworkVlan"]; ok {
-					networkVlanInfo := value1.(map[string]interface{})
-					if value2, ok := networkVlanInfo["Id"]; ok {
-						networkVlan.Id = int(value2.(float64))
-					}
-					if value2, ok := networkVlanInfo["PrimarySubnetId"]; ok {
-						networkVlan.PrimarySubnetId = int(value2.(float64))
-					}
-					cloudProps.PrimaryNetworkComponent = sldatatypes.PrimaryNetworkComponent{
-						NetworkVlan: networkVlan,
-					}
-				}
+			networkComponent, exist := network.CloudProperties["PrimaryNetworkComponent"]
+			if exist {
+				configureNetwork(networkComponent.(map[string]interface{}), &cloudProps, true)
 			}
-			if value, ok := network.CloudProperties["PrimaryBackendNetworkComponent"]; ok {
-				networkVlan := sldatatypes.NetworkVlan{}
-				networkComponent := value.(map[string]interface{})
-				if value1, ok := networkComponent["NetworkVlan"]; ok {
-					networkVlanInfo := value1.(map[string]interface{})
-					if value2, ok := networkVlanInfo["Id"]; ok {
-						networkVlan.Id = int(value2.(float64))
-					}
-					if value2, ok := networkVlanInfo["PrimarySubnetId"]; ok {
-						networkVlan.PrimarySubnetId = int(value2.(float64))
-					}
-					cloudProps.PrimaryBackendNetworkComponent = sldatatypes.PrimaryBackendNetworkComponent{
-						NetworkVlan: networkVlan,
-					}
-				}
+
+			networkComponent, exist = network.CloudProperties["PrimaryBackendNetworkComponent"]
+			if exist {
+				configureNetwork(networkComponent.(map[string]interface{}), &cloudProps, false)
 			}
-			if value, ok := network.CloudProperties["PrivateNetworkOnlyFlag"]; ok {
-				privateOnly := value.(bool)
+
+			privateNetworkOnlyFlag, exist := network.CloudProperties["PrivateNetworkOnlyFlag"]
+			if exist {
+				privateOnly := privateNetworkOnlyFlag.(bool)
 				cloudProps.PrivateNetworkOnlyFlag = privateOnly
 			}
 		default:
@@ -249,3 +229,31 @@ func GetLocalIPAddressOfGivenInterface(networkInterface string) (string, error) 
 const ETC_HOSTS_TEMPLATE = `127.0.0.1 localhost
 {{.}}
 `
+
+// private methods
+func configureNetwork(networkComponent map[string]interface{}, cloudProps *VMCloudProperties, primaryNetwork bool) {
+	networkVlan := sldatatypes.NetworkVlan{}
+	networkComponentNetworkVlan, exist := networkComponent["NetworkVlan"]
+	if exist {
+		networkVlanInfo := networkComponentNetworkVlan.(map[string]interface{})
+		configureNetworkVlan(networkVlanInfo, &networkVlan, "Id")
+		configureNetworkVlan(networkVlanInfo, &networkVlan, "PrimarySubnetId")
+
+		if primaryNetwork {
+			cloudProps.PrimaryNetworkComponent = sldatatypes.PrimaryNetworkComponent{
+				NetworkVlan: networkVlan,
+			}
+		} else {
+			cloudProps.PrimaryBackendNetworkComponent = sldatatypes.PrimaryBackendNetworkComponent{
+				NetworkVlan: networkVlan,
+			}
+		}
+	}
+}
+
+func configureNetworkVlan(networkVlanInfo map[string]interface{}, networkVlan *sldatatypes.NetworkVlan, fieldName string) {
+	fieldValue, exist := networkVlanInfo[fieldName]
+	if exist {
+		reflect.ValueOf(networkVlan).Elem().FieldByName(fieldName).SetInt(int64(fieldValue.(float64)))
+	}
+}

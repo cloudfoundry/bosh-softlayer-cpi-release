@@ -283,7 +283,8 @@ var _ = Describe("VM Utils", func() {
 						CloudProperties: map[string]interface{}{
 							"PrimaryNetworkComponent": map[string]interface{}{
 								"NetworkVlan": map[string]interface{}{
-									"Id": float64(524954),
+									"Id":              float64(524954),
+									"PrimarySubnetId": float64(1100907),
 								},
 							},
 							"PrimaryBackendNetworkComponent": map[string]interface{}{
@@ -326,7 +327,8 @@ var _ = Describe("VM Utils", func() {
 
 					PrimaryNetworkComponent: &sldatatypes.PrimaryNetworkComponent{
 						NetworkVlan: sldatatypes.NetworkVlan{
-							Id: 524954,
+							Id:              524954,
+							PrimarySubnetId: 1100907,
 						},
 					},
 
@@ -406,7 +408,8 @@ var _ = Describe("VM Utils", func() {
 						CloudProperties: map[string]interface{}{
 							"PrimaryBackendNetworkComponent": map[string]interface{}{
 								"NetworkVlan": map[string]interface{}{
-									"Id": float64(524956),
+									"Id":              float64(524956),
+									"PrimarySubnetId": float64(1100909),
 								},
 							},
 							"PrivateNetworkOnlyFlag": true,
@@ -450,7 +453,8 @@ var _ = Describe("VM Utils", func() {
 					},
 					PrimaryBackendNetworkComponent: &sldatatypes.PrimaryBackendNetworkComponent{
 						NetworkVlan: sldatatypes.NetworkVlan{
-							Id: 524956,
+							Id:              524956,
+							PrimarySubnetId: 1100909,
 						},
 					},
 
@@ -509,9 +513,9 @@ var _ = Describe("VM Utils", func() {
 						DiskImage: sldatatypes.DiskImage{Capacity: 100}}},
 					NetworkComponents: []sldatatypes.NetworkComponents{{MaxSpeed: 1000}},
 					PrimaryNetworkComponent: sldatatypes.PrimaryNetworkComponent{
-						NetworkVlan: sldatatypes.NetworkVlan{Id: 524954}},
+						NetworkVlan: sldatatypes.NetworkVlan{Id: 524954, PrimarySubnetId: 1100907}},
 					PrimaryBackendNetworkComponent: sldatatypes.PrimaryBackendNetworkComponent{
-						NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
+						NetworkVlan: sldatatypes.NetworkVlan{Id: 524956, PrimarySubnetId: 1100909}},
 				}
 
 				networks = Networks{
@@ -529,12 +533,14 @@ var _ = Describe("VM Utils", func() {
 						CloudProperties: map[string]interface{}{
 							"PrimaryNetworkComponent": map[string]interface{}{
 								"NetworkVlan": map[string]interface{}{
-									"Id": float64(123456),
+									"Id":              float64(123456),
+									"PrimarySubnetId": float64(2201814),
 								},
 							},
 							"PrimaryBackendNetworkComponent": map[string]interface{}{
 								"NetworkVlan": map[string]interface{}{
-									"Id": float64(123456),
+									"Id":              float64(123456),
+									"PrimarySubnetId": float64(2201818),
 								},
 							},
 						},
@@ -572,13 +578,15 @@ var _ = Describe("VM Utils", func() {
 
 					PrimaryNetworkComponent: &sldatatypes.PrimaryNetworkComponent{
 						NetworkVlan: sldatatypes.NetworkVlan{
-							Id: 123456,
+							Id:              123456,
+							PrimarySubnetId: 2201814,
 						},
 					},
 
 					PrimaryBackendNetworkComponent: &sldatatypes.PrimaryBackendNetworkComponent{
 						NetworkVlan: sldatatypes.NetworkVlan{
-							Id: 123456,
+							Id:              123456,
+							PrimarySubnetId: 2201818,
 						},
 					},
 
