@@ -75,14 +75,12 @@ var _ = Describe("VM Utils", func() {
     "options": null
   },
   "networks": {
-
   },
   "disks": {
     "ephemeral": "/dev/xvdc",
     "persistent": null
   },
   "env": {
-
   }
 }`
 		})
@@ -139,109 +137,8 @@ var _ = Describe("VM Utils", func() {
 			expectedVgt  sldatatypes.SoftLayer_Virtual_Guest_Template
 		)
 
-		Context("when PrimaryNetworkComponent, PrimaryBackendNetworkComponent exist in cloudProps", func() {
-			BeforeEach(func() {
-				agentID = "fake-agentID"
-				stemcell = bslcstem.NewSoftLayerStemcell(1234, "fake-stemcell-uuid", softLayerClient, logger)
-				cloudProps = VMCloudProperties{
-					StartCpus: 4,
-					MaxMemory: 2048,
-					Domain:    "fake-domain.com",
-					BlockDeviceTemplateGroup: sldatatypes.BlockDeviceTemplateGroup{
-						GlobalIdentifier: "fake-uuid",
-					},
-					RootDiskSize:                 25,
-					EphemeralDiskSize:            25,
-					Datacenter:                   sldatatypes.Datacenter{Name: "fake-datacenter"},
-					HourlyBillingFlag:            true,
-					LocalDiskFlag:                true,
-					VmNamePrefix:                 "bosh-",
-					PostInstallScriptUri:         "",
-					DedicatedAccountHostOnlyFlag: true,
-					PrivateNetworkOnlyFlag:       false,
-					SshKeys:                      []sldatatypes.SshKey{{Id: 74826}},
-					BlockDevices: []sldatatypes.BlockDevice{{
-						Device:    "0",
-						DiskImage: sldatatypes.DiskImage{Capacity: 100}}},
-					NetworkComponents: []sldatatypes.NetworkComponents{{MaxSpeed: 1000}},
-					PrimaryNetworkComponent: sldatatypes.PrimaryNetworkComponent{
-						NetworkVlan: sldatatypes.NetworkVlan{Id: 524954}},
-					PrimaryBackendNetworkComponent: sldatatypes.PrimaryBackendNetworkComponent{
-						NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
-				}
-
-				networks = Networks{}
-				env = Environment{}
-				agentOptions = AgentOptions{}
-
-				expectedVgt = sldatatypes.SoftLayer_Virtual_Guest_Template{
-					Hostname:  "bosh-20150810-081217-541",
-					Domain:    "fake-domain.com",
-					StartCpus: 4,
-					MaxMemory: 2048,
-
-					Datacenter: sldatatypes.Datacenter{
-						Name: "fake-datacenter",
-					},
-
-					HourlyBillingFlag:            true,
-					LocalDiskFlag:                true,
-					OperatingSystemReferenceCode: "",
-
-					BlockDeviceTemplateGroup: &sldatatypes.BlockDeviceTemplateGroup{
-						GlobalIdentifier: "fake-stemcell-uuid",
-					},
-
-					DedicatedAccountHostOnlyFlag: true,
-
-					NetworkComponents: []sldatatypes.NetworkComponents{
-						sldatatypes.NetworkComponents{MaxSpeed: 1000},
-					},
-
-					PrivateNetworkOnlyFlag: false,
-
-					PrimaryNetworkComponent: &sldatatypes.PrimaryNetworkComponent{
-						NetworkVlan: sldatatypes.NetworkVlan{
-							Id: 524954,
-						},
-					},
-
-					PrimaryBackendNetworkComponent: &sldatatypes.PrimaryBackendNetworkComponent{
-						NetworkVlan: sldatatypes.NetworkVlan{
-							Id: 524956,
-						},
-					},
-
-					BlockDevices: []sldatatypes.BlockDevice{
-						sldatatypes.BlockDevice{
-							Device:    "0",
-							DiskImage: sldatatypes.DiskImage{Capacity: 100},
-						},
-					},
-
-					SshKeys: []sldatatypes.SshKey{
-						sldatatypes.SshKey{Id: 74826},
-					},
-
-					UserData: []sldatatypes.UserData{
-						sldatatypes.UserData{Value: "fake-user-data"},
-					},
-
-					PostInstallScriptUri: "",
-				}
-			})
-
-			It("returns a correct virtual guest template", func() {
-				vgt, err := CreateVirtualGuestTemplate(stemcell, cloudProps, networks, "fake-user-data")
-				Expect(err).ToNot(HaveOccurred())
-
-				//Since VGT.Hostname use timestamp we need to fix it here
-				expectedVgt.Hostname = vgt.Hostname
-				Expect(vgt).To(Equal(expectedVgt))
-			})
-		})
-
-		Context("when PrimaryNetworkComponent, PrimaryBackendNetworkComponent exist in network settings", func() {
+		// Setting in network
+		Context("when PrimaryNetworkComponent_Id, PrimaryBackendNetworkComponent_PSId exist in network settings", func() {
 			BeforeEach(func() {
 				agentID = "fake-agentID"
 				stemcell = bslcstem.NewSoftLayerStemcell(1234, "fake-stemcell-uuid", softLayerClient, logger)
@@ -282,12 +179,12 @@ var _ = Describe("VM Utils", func() {
 						CloudProperties: map[string]interface{}{
 							"PrimaryNetworkComponent": map[string]interface{}{
 								"NetworkVlan": map[string]interface{}{
-									"Id": float64(524954),
+									"Id":              float64(524954),
 								},
 							},
 							"PrimaryBackendNetworkComponent": map[string]interface{}{
 								"NetworkVlan": map[string]interface{}{
-									"Id": float64(524956),
+									"PrimarySubnetId": float64(1100909),
 								},
 							},
 						},
@@ -325,13 +222,13 @@ var _ = Describe("VM Utils", func() {
 
 					PrimaryNetworkComponent: &sldatatypes.PrimaryNetworkComponent{
 						NetworkVlan: sldatatypes.NetworkVlan{
-							Id: 524954,
+							Id:              524954,
 						},
 					},
 
 					PrimaryBackendNetworkComponent: &sldatatypes.PrimaryBackendNetworkComponent{
 						NetworkVlan: sldatatypes.NetworkVlan{
-							Id: 524956,
+							PrimarySubnetId: 1100909,
 						},
 					},
 
@@ -364,7 +261,7 @@ var _ = Describe("VM Utils", func() {
 			})
 		})
 
-		Context("when PrimaryBackendNetworkComponent, PrivateNetworkOnlyFlag exist in network settings", func() {
+		Context("when PrimaryBackendNetworkComponent_Id_PSId, PrivateNetworkOnlyFlag exist in network settings", func() {
 			BeforeEach(func() {
 				agentID = "fake-agentID"
 				stemcell = bslcstem.NewSoftLayerStemcell(1234, "fake-stemcell-uuid", softLayerClient, logger)
@@ -405,7 +302,8 @@ var _ = Describe("VM Utils", func() {
 						CloudProperties: map[string]interface{}{
 							"PrimaryBackendNetworkComponent": map[string]interface{}{
 								"NetworkVlan": map[string]interface{}{
-									"Id": float64(524956),
+									"Id":              float64(524956),
+									"PrimarySubnetId": float64(1100909),
 								},
 							},
 							"PrivateNetworkOnlyFlag": true,
@@ -447,9 +345,11 @@ var _ = Describe("VM Utils", func() {
 							Id: 0,
 						},
 					},
+
 					PrimaryBackendNetworkComponent: &sldatatypes.PrimaryBackendNetworkComponent{
 						NetworkVlan: sldatatypes.NetworkVlan{
-							Id: 524956,
+							Id:              524956,
+							PrimarySubnetId: 1100909,
 						},
 					},
 
@@ -482,7 +382,7 @@ var _ = Describe("VM Utils", func() {
 			})
 		})
 
-		Context("when PrimaryBackendNetworkComponent, PrimaryBackendNetworkComponent exist in both cloudProps and network settings", func() {
+		Context("when PrimaryNetworkComponent_Id_PSId, PrimaryBackendNetworkComponent_Id exist in network settings", func() {
 			BeforeEach(func() {
 				agentID = "fake-agentID"
 				stemcell = bslcstem.NewSoftLayerStemcell(1234, "fake-stemcell-uuid", softLayerClient, logger)
@@ -501,16 +401,11 @@ var _ = Describe("VM Utils", func() {
 					VmNamePrefix:                 "bosh-",
 					PostInstallScriptUri:         "",
 					DedicatedAccountHostOnlyFlag: true,
-					PrivateNetworkOnlyFlag:       false,
-					SshKeys:                      []sldatatypes.SshKey{{Id: 74826}},
+					SshKeys: []sldatatypes.SshKey{{Id: 74826}},
 					BlockDevices: []sldatatypes.BlockDevice{{
 						Device:    "0",
 						DiskImage: sldatatypes.DiskImage{Capacity: 100}}},
 					NetworkComponents: []sldatatypes.NetworkComponents{{MaxSpeed: 1000}},
-					PrimaryNetworkComponent: sldatatypes.PrimaryNetworkComponent{
-						NetworkVlan: sldatatypes.NetworkVlan{Id: 524954}},
-					PrimaryBackendNetworkComponent: sldatatypes.PrimaryBackendNetworkComponent{
-						NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
 				}
 
 				networks = Networks{
@@ -528,12 +423,13 @@ var _ = Describe("VM Utils", func() {
 						CloudProperties: map[string]interface{}{
 							"PrimaryNetworkComponent": map[string]interface{}{
 								"NetworkVlan": map[string]interface{}{
-									"Id": float64(123456),
+									"Id":              float64(524954),
+									"PrimarySubnetId": float64(1100907),
 								},
 							},
 							"PrimaryBackendNetworkComponent": map[string]interface{}{
 								"NetworkVlan": map[string]interface{}{
-									"Id": float64(123456),
+									"Id": float64(524956),
 								},
 							},
 						},
@@ -571,13 +467,1061 @@ var _ = Describe("VM Utils", func() {
 
 					PrimaryNetworkComponent: &sldatatypes.PrimaryNetworkComponent{
 						NetworkVlan: sldatatypes.NetworkVlan{
+							Id:              524954,
+							PrimarySubnetId: 1100907,
+						},
+					},
+
+					PrimaryBackendNetworkComponent: &sldatatypes.PrimaryBackendNetworkComponent{
+						NetworkVlan: sldatatypes.NetworkVlan{
+							Id: 524956,
+						},
+					},
+
+					BlockDevices: []sldatatypes.BlockDevice{
+						sldatatypes.BlockDevice{
+							Device:    "0",
+							DiskImage: sldatatypes.DiskImage{Capacity: 100},
+						},
+					},
+
+					SshKeys: []sldatatypes.SshKey{
+						sldatatypes.SshKey{Id: 74826},
+					},
+
+					UserData: []sldatatypes.UserData{
+						sldatatypes.UserData{Value: "fake-user-data"},
+					},
+
+					PostInstallScriptUri: "",
+				}
+			})
+
+			It("returns a correct virtual guest template", func() {
+				vgt, err := CreateVirtualGuestTemplate(stemcell, cloudProps, networks, "fake-user-data")
+				Expect(err).ToNot(HaveOccurred())
+
+				//Since VGT.Hostname use timestamp we need to fix it here
+				expectedVgt.Hostname = vgt.Hostname
+				Expect(vgt).To(Equal(expectedVgt))
+			})
+		})
+
+		Context("when PrimaryNetworkComponent_PSId exists in network settings, PrivateNetworkOnlyFlag exists in cloudProps", func() {
+			BeforeEach(func() {
+				agentID = "fake-agentID"
+				stemcell = bslcstem.NewSoftLayerStemcell(1234, "fake-stemcell-uuid", softLayerClient, logger)
+				cloudProps = VMCloudProperties{
+					StartCpus: 4,
+					MaxMemory: 2048,
+					Domain:    "fake-domain.com",
+					BlockDeviceTemplateGroup: sldatatypes.BlockDeviceTemplateGroup{
+						GlobalIdentifier: "fake-uuid",
+					},
+					RootDiskSize:                 25,
+					EphemeralDiskSize:            25,
+					Datacenter:                   sldatatypes.Datacenter{Name: "fake-datacenter"},
+					HourlyBillingFlag:            true,
+					LocalDiskFlag:                true,
+					VmNamePrefix:                 "bosh-",
+					PostInstallScriptUri:         "",
+					DedicatedAccountHostOnlyFlag: true,
+					PrivateNetworkOnlyFlag:       true,
+					SshKeys: []sldatatypes.SshKey{{Id: 74826}},
+					BlockDevices: []sldatatypes.BlockDevice{{
+						Device:    "0",
+						DiskImage: sldatatypes.DiskImage{Capacity: 100}}},
+					NetworkComponents: []sldatatypes.NetworkComponents{{MaxSpeed: 1000}},
+				}
+
+				networks = Networks{
+					"fake-net-name": Network{
+						Type: "dynamic",
+
+						IP:      "fake-ip",
+						Netmask: "fake-netmask",
+						Gateway: "fake-gateway",
+
+						DNS:           []string{"fake-dns"},
+						Default:       []string{"fake-default"},
+						Preconfigured: true,
+
+						CloudProperties: map[string]interface{}{
+							"PrimaryNetworkComponent": map[string]interface{}{
+								"NetworkVlan": map[string]interface{}{
+									"PrimarySubnetId": float64(1100907),
+								},
+							},
+						},
+					},
+				}
+
+				env = Environment{}
+				agentOptions = AgentOptions{}
+
+				expectedVgt = sldatatypes.SoftLayer_Virtual_Guest_Template{
+					Hostname:  "bosh-20150810-081217-541",
+					Domain:    "fake-domain.com",
+					StartCpus: 4,
+					MaxMemory: 2048,
+
+					Datacenter: sldatatypes.Datacenter{
+						Name: "fake-datacenter",
+					},
+
+					HourlyBillingFlag:            true,
+					LocalDiskFlag:                true,
+					OperatingSystemReferenceCode: "",
+
+					BlockDeviceTemplateGroup: &sldatatypes.BlockDeviceTemplateGroup{
+						GlobalIdentifier: "fake-stemcell-uuid",
+					},
+
+					DedicatedAccountHostOnlyFlag: true,
+
+					NetworkComponents: []sldatatypes.NetworkComponents{
+						sldatatypes.NetworkComponents{MaxSpeed: 1000},
+					},
+
+					PrivateNetworkOnlyFlag: true,
+
+					PrimaryNetworkComponent: &sldatatypes.PrimaryNetworkComponent{
+						NetworkVlan: sldatatypes.NetworkVlan{
+							PrimarySubnetId: 1100907,
+						},
+					},
+
+					PrimaryBackendNetworkComponent: &sldatatypes.PrimaryBackendNetworkComponent{
+						NetworkVlan: sldatatypes.NetworkVlan{
+							Id: 0,
+						},
+					},
+
+					BlockDevices: []sldatatypes.BlockDevice{
+						sldatatypes.BlockDevice{
+							Device:    "0",
+							DiskImage: sldatatypes.DiskImage{Capacity: 100},
+						},
+					},
+
+					SshKeys: []sldatatypes.SshKey{
+						sldatatypes.SshKey{Id: 74826},
+					},
+
+					UserData: []sldatatypes.UserData{
+						sldatatypes.UserData{Value: "fake-user-data"},
+					},
+
+					PostInstallScriptUri: "",
+				}
+			})
+
+			It("returns a correct virtual guest template", func() {
+				vgt, err := CreateVirtualGuestTemplate(stemcell, cloudProps, networks, "fake-user-data")
+				Expect(err).ToNot(HaveOccurred())
+
+				//Since VGT.Hostname use timestamp we need to fix it here
+				expectedVgt.Hostname = vgt.Hostname
+				Expect(vgt).To(Equal(expectedVgt))
+			})
+		})
+
+
+		// Setting in cloudProps
+		Context("when PrimaryNetworkComponent_Id, PrimaryBackendNetworkComponent_Id_PSId exist in cloudProps", func() {
+			BeforeEach(func() {
+				agentID = "fake-agentID"
+				stemcell = bslcstem.NewSoftLayerStemcell(1234, "fake-stemcell-uuid", softLayerClient, logger)
+				cloudProps = VMCloudProperties{
+					StartCpus: 4,
+					MaxMemory: 2048,
+					Domain:    "fake-domain.com",
+					BlockDeviceTemplateGroup: sldatatypes.BlockDeviceTemplateGroup{
+						GlobalIdentifier: "fake-uuid",
+					},
+					RootDiskSize:                 25,
+					EphemeralDiskSize:            25,
+					Datacenter:                   sldatatypes.Datacenter{Name: "fake-datacenter"},
+					HourlyBillingFlag:            true,
+					LocalDiskFlag:                true,
+					VmNamePrefix:                 "bosh-",
+					PostInstallScriptUri:         "",
+					DedicatedAccountHostOnlyFlag: true,
+					PrivateNetworkOnlyFlag:       false,
+					SshKeys:                      []sldatatypes.SshKey{{Id: 74826}},
+					BlockDevices: []sldatatypes.BlockDevice{{
+						Device:    "0",
+						DiskImage: sldatatypes.DiskImage{Capacity: 100}}},
+					NetworkComponents: []sldatatypes.NetworkComponents{{MaxSpeed: 1000}},
+					PrimaryNetworkComponent: sldatatypes.PrimaryNetworkComponent{
+						NetworkVlan: sldatatypes.NetworkVlan{Id: 524954}},
+					PrimaryBackendNetworkComponent: sldatatypes.PrimaryBackendNetworkComponent{
+						NetworkVlan: sldatatypes.NetworkVlan{Id: 524956, PrimarySubnetId: 1100909}},
+				}
+
+				networks = Networks{}
+				env = Environment{}
+				agentOptions = AgentOptions{}
+
+				expectedVgt = sldatatypes.SoftLayer_Virtual_Guest_Template{
+					Hostname:  "bosh-20150810-081217-541",
+					Domain:    "fake-domain.com",
+					StartCpus: 4,
+					MaxMemory: 2048,
+
+					Datacenter: sldatatypes.Datacenter{
+						Name: "fake-datacenter",
+					},
+
+					HourlyBillingFlag:            true,
+					LocalDiskFlag:                true,
+					OperatingSystemReferenceCode: "",
+
+					BlockDeviceTemplateGroup: &sldatatypes.BlockDeviceTemplateGroup{
+						GlobalIdentifier: "fake-stemcell-uuid",
+					},
+
+					DedicatedAccountHostOnlyFlag: true,
+
+					NetworkComponents: []sldatatypes.NetworkComponents{
+						sldatatypes.NetworkComponents{MaxSpeed: 1000},
+					},
+
+					PrivateNetworkOnlyFlag: false,
+
+					PrimaryNetworkComponent: &sldatatypes.PrimaryNetworkComponent{
+						NetworkVlan: sldatatypes.NetworkVlan{
+							Id: 524954,
+						},
+					},
+
+					PrimaryBackendNetworkComponent: &sldatatypes.PrimaryBackendNetworkComponent{
+						NetworkVlan: sldatatypes.NetworkVlan{
+							Id:              524956,
+							PrimarySubnetId: 1100909,
+						},
+					},
+
+					BlockDevices: []sldatatypes.BlockDevice{
+						sldatatypes.BlockDevice{
+							Device:    "0",
+							DiskImage: sldatatypes.DiskImage{Capacity: 100},
+						},
+					},
+
+					SshKeys: []sldatatypes.SshKey{
+						sldatatypes.SshKey{Id: 74826},
+					},
+
+					UserData: []sldatatypes.UserData{
+						sldatatypes.UserData{Value: "fake-user-data"},
+					},
+
+					PostInstallScriptUri: "",
+				}
+			})
+
+			It("returns a correct virtual guest template", func() {
+				vgt, err := CreateVirtualGuestTemplate(stemcell, cloudProps, networks, "fake-user-data")
+				Expect(err).ToNot(HaveOccurred())
+
+				//Since VGT.Hostname use timestamp we need to fix it here
+				expectedVgt.Hostname = vgt.Hostname
+				Expect(vgt).To(Equal(expectedVgt))
+			})
+		})
+
+		Context("when PrimaryNetworkComponent_Id_PSId, PrivateNetworkOnlyFlag exist in cloudProps", func() {
+			BeforeEach(func() {
+				agentID = "fake-agentID"
+				stemcell = bslcstem.NewSoftLayerStemcell(1234, "fake-stemcell-uuid", softLayerClient, logger)
+				cloudProps = VMCloudProperties{
+					StartCpus: 4,
+					MaxMemory: 2048,
+					Domain:    "fake-domain.com",
+					BlockDeviceTemplateGroup: sldatatypes.BlockDeviceTemplateGroup{
+						GlobalIdentifier: "fake-uuid",
+					},
+					RootDiskSize:                 25,
+					EphemeralDiskSize:            25,
+					Datacenter:                   sldatatypes.Datacenter{Name: "fake-datacenter"},
+					HourlyBillingFlag:            true,
+					LocalDiskFlag:                true,
+					VmNamePrefix:                 "bosh-",
+					PostInstallScriptUri:         "",
+					DedicatedAccountHostOnlyFlag: true,
+					PrivateNetworkOnlyFlag:       true,
+					SshKeys:                      []sldatatypes.SshKey{{Id: 74826}},
+					BlockDevices: []sldatatypes.BlockDevice{{
+						Device:    "0",
+						DiskImage: sldatatypes.DiskImage{Capacity: 100}}},
+					NetworkComponents: []sldatatypes.NetworkComponents{{MaxSpeed: 1000}},
+					PrimaryNetworkComponent: sldatatypes.PrimaryNetworkComponent{
+						NetworkVlan: sldatatypes.NetworkVlan{Id: 524956, PrimarySubnetId: 1100909}},
+				}
+
+				networks = Networks{}
+				env = Environment{}
+				agentOptions = AgentOptions{}
+
+				expectedVgt = sldatatypes.SoftLayer_Virtual_Guest_Template{
+					Hostname:  "bosh-20150810-081217-541",
+					Domain:    "fake-domain.com",
+					StartCpus: 4,
+					MaxMemory: 2048,
+
+					Datacenter: sldatatypes.Datacenter{
+						Name: "fake-datacenter",
+					},
+
+					HourlyBillingFlag:            true,
+					LocalDiskFlag:                true,
+					OperatingSystemReferenceCode: "",
+
+					BlockDeviceTemplateGroup: &sldatatypes.BlockDeviceTemplateGroup{
+						GlobalIdentifier: "fake-stemcell-uuid",
+					},
+
+					DedicatedAccountHostOnlyFlag: true,
+
+					NetworkComponents: []sldatatypes.NetworkComponents{
+						sldatatypes.NetworkComponents{MaxSpeed: 1000},
+					},
+
+					PrivateNetworkOnlyFlag: true,
+
+					PrimaryNetworkComponent: &sldatatypes.PrimaryNetworkComponent{
+						NetworkVlan: sldatatypes.NetworkVlan{
+							Id:              524956,
+							PrimarySubnetId: 1100909,
+						},
+					},
+
+					PrimaryBackendNetworkComponent: &sldatatypes.PrimaryBackendNetworkComponent{
+						NetworkVlan: sldatatypes.NetworkVlan{
+							Id: 0,
+						},
+					},
+
+					BlockDevices: []sldatatypes.BlockDevice{
+						sldatatypes.BlockDevice{
+							Device:    "0",
+							DiskImage: sldatatypes.DiskImage{Capacity: 100},
+						},
+					},
+
+					SshKeys: []sldatatypes.SshKey{
+						sldatatypes.SshKey{Id: 74826},
+					},
+
+					UserData: []sldatatypes.UserData{
+						sldatatypes.UserData{Value: "fake-user-data"},
+					},
+
+					PostInstallScriptUri: "",
+				}
+			})
+
+			It("returns a correct virtual guest template", func() {
+				vgt, err := CreateVirtualGuestTemplate(stemcell, cloudProps, networks, "fake-user-data")
+				Expect(err).ToNot(HaveOccurred())
+
+				//Since VGT.Hostname use timestamp we need to fix it here
+				expectedVgt.Hostname = vgt.Hostname
+				Expect(vgt).To(Equal(expectedVgt))
+			})
+		})
+
+		Context("when PrimaryBackendNetworkComponent_PSId, PrivateNetworkOnlyFlag exist in cloudProps", func() {
+			BeforeEach(func() {
+				agentID = "fake-agentID"
+				stemcell = bslcstem.NewSoftLayerStemcell(1234, "fake-stemcell-uuid", softLayerClient, logger)
+				cloudProps = VMCloudProperties{
+					StartCpus: 4,
+					MaxMemory: 2048,
+					Domain:    "fake-domain.com",
+					BlockDeviceTemplateGroup: sldatatypes.BlockDeviceTemplateGroup{
+						GlobalIdentifier: "fake-uuid",
+					},
+					RootDiskSize:                 25,
+					EphemeralDiskSize:            25,
+					Datacenter:                   sldatatypes.Datacenter{Name: "fake-datacenter"},
+					HourlyBillingFlag:            true,
+					LocalDiskFlag:                true,
+					VmNamePrefix:                 "bosh-",
+					PostInstallScriptUri:         "",
+					DedicatedAccountHostOnlyFlag: true,
+					PrivateNetworkOnlyFlag:       true,
+					SshKeys:                      []sldatatypes.SshKey{{Id: 74826}},
+					BlockDevices: []sldatatypes.BlockDevice{{
+						Device:    "0",
+						DiskImage: sldatatypes.DiskImage{Capacity: 100}}},
+					NetworkComponents: []sldatatypes.NetworkComponents{{MaxSpeed: 1000}},
+					PrimaryBackendNetworkComponent: sldatatypes.PrimaryBackendNetworkComponent{
+						NetworkVlan: sldatatypes.NetworkVlan{PrimarySubnetId: 1100909}},
+				}
+
+				networks = Networks{}
+				env = Environment{}
+				agentOptions = AgentOptions{}
+
+				expectedVgt = sldatatypes.SoftLayer_Virtual_Guest_Template{
+					Hostname:  "bosh-20150810-081217-541",
+					Domain:    "fake-domain.com",
+					StartCpus: 4,
+					MaxMemory: 2048,
+
+					Datacenter: sldatatypes.Datacenter{
+						Name: "fake-datacenter",
+					},
+
+					HourlyBillingFlag:            true,
+					LocalDiskFlag:                true,
+					OperatingSystemReferenceCode: "",
+
+					BlockDeviceTemplateGroup: &sldatatypes.BlockDeviceTemplateGroup{
+						GlobalIdentifier: "fake-stemcell-uuid",
+					},
+
+					DedicatedAccountHostOnlyFlag: true,
+
+					NetworkComponents: []sldatatypes.NetworkComponents{
+						sldatatypes.NetworkComponents{MaxSpeed: 1000},
+					},
+
+					PrivateNetworkOnlyFlag: true,
+
+					PrimaryNetworkComponent: &sldatatypes.PrimaryNetworkComponent{
+						NetworkVlan: sldatatypes.NetworkVlan{
+							Id: 0,
+						},
+					},
+
+					PrimaryBackendNetworkComponent: &sldatatypes.PrimaryBackendNetworkComponent{
+						NetworkVlan: sldatatypes.NetworkVlan{
+							PrimarySubnetId: 1100909,
+						},
+					},
+
+					BlockDevices: []sldatatypes.BlockDevice{
+						sldatatypes.BlockDevice{
+							Device:    "0",
+							DiskImage: sldatatypes.DiskImage{Capacity: 100},
+						},
+					},
+
+					SshKeys: []sldatatypes.SshKey{
+						sldatatypes.SshKey{Id: 74826},
+					},
+
+					UserData: []sldatatypes.UserData{
+						sldatatypes.UserData{Value: "fake-user-data"},
+					},
+
+					PostInstallScriptUri: "",
+				}
+			})
+
+			It("returns a correct virtual guest template", func() {
+				vgt, err := CreateVirtualGuestTemplate(stemcell, cloudProps, networks, "fake-user-data")
+				Expect(err).ToNot(HaveOccurred())
+
+				//Since VGT.Hostname use timestamp we need to fix it here
+				expectedVgt.Hostname = vgt.Hostname
+				Expect(vgt).To(Equal(expectedVgt))
+			})
+		})
+
+		Context("when PrimaryNetworkComponent_PSId, PrimaryBackendNetworkComponent_Id exist in cloudProps", func() {
+			BeforeEach(func() {
+				agentID = "fake-agentID"
+				stemcell = bslcstem.NewSoftLayerStemcell(1234, "fake-stemcell-uuid", softLayerClient, logger)
+				cloudProps = VMCloudProperties{
+					StartCpus: 4,
+					MaxMemory: 2048,
+					Domain:    "fake-domain.com",
+					BlockDeviceTemplateGroup: sldatatypes.BlockDeviceTemplateGroup{
+						GlobalIdentifier: "fake-uuid",
+					},
+					RootDiskSize:                 25,
+					EphemeralDiskSize:            25,
+					Datacenter:                   sldatatypes.Datacenter{Name: "fake-datacenter"},
+					HourlyBillingFlag:            true,
+					LocalDiskFlag:                true,
+					VmNamePrefix:                 "bosh-",
+					PostInstallScriptUri:         "",
+					DedicatedAccountHostOnlyFlag: true,
+					PrivateNetworkOnlyFlag:       false,
+					SshKeys:                      []sldatatypes.SshKey{{Id: 74826}},
+					BlockDevices: []sldatatypes.BlockDevice{{
+						Device:    "0",
+						DiskImage: sldatatypes.DiskImage{Capacity: 100}}},
+					NetworkComponents: []sldatatypes.NetworkComponents{{MaxSpeed: 1000}},
+					PrimaryNetworkComponent: sldatatypes.PrimaryNetworkComponent{
+						NetworkVlan: sldatatypes.NetworkVlan{PrimarySubnetId: 1100909}},
+					PrimaryBackendNetworkComponent: sldatatypes.PrimaryBackendNetworkComponent{
+						NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
+				}
+
+				networks = Networks{}
+				env = Environment{}
+				agentOptions = AgentOptions{}
+
+				expectedVgt = sldatatypes.SoftLayer_Virtual_Guest_Template{
+					Hostname:  "bosh-20150810-081217-541",
+					Domain:    "fake-domain.com",
+					StartCpus: 4,
+					MaxMemory: 2048,
+
+					Datacenter: sldatatypes.Datacenter{
+						Name: "fake-datacenter",
+					},
+
+					HourlyBillingFlag:            true,
+					LocalDiskFlag:                true,
+					OperatingSystemReferenceCode: "",
+
+					BlockDeviceTemplateGroup: &sldatatypes.BlockDeviceTemplateGroup{
+						GlobalIdentifier: "fake-stemcell-uuid",
+					},
+
+					DedicatedAccountHostOnlyFlag: true,
+
+					NetworkComponents: []sldatatypes.NetworkComponents{
+						sldatatypes.NetworkComponents{MaxSpeed: 1000},
+					},
+
+					PrivateNetworkOnlyFlag: false,
+
+					PrimaryNetworkComponent: &sldatatypes.PrimaryNetworkComponent{
+						NetworkVlan: sldatatypes.NetworkVlan{
+							PrimarySubnetId: 1100909,
+						},
+					},
+
+					PrimaryBackendNetworkComponent: &sldatatypes.PrimaryBackendNetworkComponent{
+						NetworkVlan: sldatatypes.NetworkVlan{
+							Id:              524956,
+						},
+					},
+
+					BlockDevices: []sldatatypes.BlockDevice{
+						sldatatypes.BlockDevice{
+							Device:    "0",
+							DiskImage: sldatatypes.DiskImage{Capacity: 100},
+						},
+					},
+
+					SshKeys: []sldatatypes.SshKey{
+						sldatatypes.SshKey{Id: 74826},
+					},
+
+					UserData: []sldatatypes.UserData{
+						sldatatypes.UserData{Value: "fake-user-data"},
+					},
+
+					PostInstallScriptUri: "",
+				}
+			})
+
+			It("returns a correct virtual guest template", func() {
+				vgt, err := CreateVirtualGuestTemplate(stemcell, cloudProps, networks, "fake-user-data")
+				Expect(err).ToNot(HaveOccurred())
+
+				//Since VGT.Hostname use timestamp we need to fix it here
+				expectedVgt.Hostname = vgt.Hostname
+				Expect(vgt).To(Equal(expectedVgt))
+			})
+		})
+
+
+		// Setting in both network and cloudProps
+		Context("when PrimaryNetworkComponent and PrimaryBackendNetworkComponent contain Id and PSId in cloudProps but only Id in network settings ", func() {
+			BeforeEach(func() {
+				agentID = "fake-agentID"
+				stemcell = bslcstem.NewSoftLayerStemcell(1234, "fake-stemcell-uuid", softLayerClient, logger)
+				cloudProps = VMCloudProperties{
+					StartCpus: 4,
+					MaxMemory: 2048,
+					Domain:    "fake-domain.com",
+					BlockDeviceTemplateGroup: sldatatypes.BlockDeviceTemplateGroup{
+						GlobalIdentifier: "fake-uuid",
+					},
+					RootDiskSize:                 25,
+					EphemeralDiskSize:            25,
+					Datacenter:                   sldatatypes.Datacenter{Name: "fake-datacenter"},
+					HourlyBillingFlag:            true,
+					LocalDiskFlag:                true,
+					VmNamePrefix:                 "bosh-",
+					PostInstallScriptUri:         "",
+					DedicatedAccountHostOnlyFlag: true,
+					PrivateNetworkOnlyFlag:       true,
+					SshKeys:                      []sldatatypes.SshKey{{Id: 74826}},
+					BlockDevices: []sldatatypes.BlockDevice{{
+						Device:    "0",
+						DiskImage: sldatatypes.DiskImage{Capacity: 100}}},
+					NetworkComponents: []sldatatypes.NetworkComponents{{MaxSpeed: 1000}},
+					PrimaryNetworkComponent: sldatatypes.PrimaryNetworkComponent{
+						NetworkVlan: sldatatypes.NetworkVlan{Id: 524954, PrimarySubnetId: 1100907}},
+					PrimaryBackendNetworkComponent: sldatatypes.PrimaryBackendNetworkComponent{
+						NetworkVlan: sldatatypes.NetworkVlan{Id: 524956, PrimarySubnetId: 1100909}},
+				}
+
+				networks = Networks{
+					"fake-net-name": Network{
+						Type: "dynamic",
+
+						IP:      "fake-ip",
+						Netmask: "fake-netmask",
+						Gateway: "fake-gateway",
+
+						DNS:           []string{"fake-dns"},
+						Default:       []string{"fake-default"},
+						Preconfigured: true,
+
+						CloudProperties: map[string]interface{}{
+							"PrimaryNetworkComponent": map[string]interface{}{
+								"NetworkVlan": map[string]interface{}{
+									"Id": float64(123456),
+								},
+							},
+							"PrimaryBackendNetworkComponent": map[string]interface{}{
+								"NetworkVlan": map[string]interface{}{
+									"Id": float64(654321),
+								},
+							},
+						},
+					},
+				}
+
+				env = Environment{}
+				agentOptions = AgentOptions{}
+
+				expectedVgt = sldatatypes.SoftLayer_Virtual_Guest_Template{
+					Hostname:  "bosh-20150810-081217-541",
+					Domain:    "fake-domain.com",
+					StartCpus: 4,
+					MaxMemory: 2048,
+
+					Datacenter: sldatatypes.Datacenter{
+						Name: "fake-datacenter",
+					},
+
+					HourlyBillingFlag:            true,
+					LocalDiskFlag:                true,
+					OperatingSystemReferenceCode: "",
+
+					BlockDeviceTemplateGroup: &sldatatypes.BlockDeviceTemplateGroup{
+						GlobalIdentifier: "fake-stemcell-uuid",
+					},
+
+					DedicatedAccountHostOnlyFlag: true,
+
+					NetworkComponents: []sldatatypes.NetworkComponents{
+						sldatatypes.NetworkComponents{MaxSpeed: 1000},
+					},
+
+					PrivateNetworkOnlyFlag: true,
+
+					PrimaryNetworkComponent: &sldatatypes.PrimaryNetworkComponent{
+						NetworkVlan: sldatatypes.NetworkVlan{
 							Id: 123456,
 						},
 					},
 
 					PrimaryBackendNetworkComponent: &sldatatypes.PrimaryBackendNetworkComponent{
 						NetworkVlan: sldatatypes.NetworkVlan{
+							Id: 654321,
+						},
+					},
+
+					BlockDevices: []sldatatypes.BlockDevice{
+						sldatatypes.BlockDevice{
+							Device:    "0",
+							DiskImage: sldatatypes.DiskImage{Capacity: 100},
+						},
+					},
+
+					SshKeys: []sldatatypes.SshKey{
+						sldatatypes.SshKey{Id: 74826},
+					},
+
+					UserData: []sldatatypes.UserData{
+						sldatatypes.UserData{Value: "fake-user-data"},
+					},
+
+					PostInstallScriptUri: "",
+				}
+			})
+
+			It("returns a correct virtual guest template", func() {
+				vgt, err := CreateVirtualGuestTemplate(stemcell, cloudProps, networks, "fake-user-data")
+				Expect(err).ToNot(HaveOccurred())
+
+				//Since VGT.Hostname use timestamp we need to fix it here
+				expectedVgt.Hostname = vgt.Hostname
+				Expect(vgt).To(Equal(expectedVgt))
+			})
+		})
+
+		Context("when PrimaryNetworkComponent and PrimaryBackendNetworkComponent contain Id and PSId in network settings but only Id in cloudProps ", func() {
+			BeforeEach(func() {
+				agentID = "fake-agentID"
+				stemcell = bslcstem.NewSoftLayerStemcell(1234, "fake-stemcell-uuid", softLayerClient, logger)
+				cloudProps = VMCloudProperties{
+					StartCpus: 4,
+					MaxMemory: 2048,
+					Domain:    "fake-domain.com",
+					BlockDeviceTemplateGroup: sldatatypes.BlockDeviceTemplateGroup{
+						GlobalIdentifier: "fake-uuid",
+					},
+					RootDiskSize:                 25,
+					EphemeralDiskSize:            25,
+					Datacenter:                   sldatatypes.Datacenter{Name: "fake-datacenter"},
+					HourlyBillingFlag:            true,
+					LocalDiskFlag:                true,
+					VmNamePrefix:                 "bosh-",
+					PostInstallScriptUri:         "",
+					DedicatedAccountHostOnlyFlag: true,
+					SshKeys:                      []sldatatypes.SshKey{{Id: 74826}},
+					BlockDevices: []sldatatypes.BlockDevice{{
+						Device:    "0",
+						DiskImage: sldatatypes.DiskImage{Capacity: 100}}},
+					NetworkComponents: []sldatatypes.NetworkComponents{{MaxSpeed: 1000}},
+					PrimaryNetworkComponent: sldatatypes.PrimaryNetworkComponent{
+						NetworkVlan: sldatatypes.NetworkVlan{Id: 524954}},
+					PrimaryBackendNetworkComponent: sldatatypes.PrimaryBackendNetworkComponent{
+						NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
+				}
+
+				networks = Networks{
+					"fake-net-name": Network{
+						Type: "dynamic",
+
+						IP:      "fake-ip",
+						Netmask: "fake-netmask",
+						Gateway: "fake-gateway",
+
+						DNS:           []string{"fake-dns"},
+						Default:       []string{"fake-default"},
+						Preconfigured: true,
+
+						CloudProperties: map[string]interface{}{
+							"PrimaryNetworkComponent": map[string]interface{}{
+								"NetworkVlan": map[string]interface{}{
+									"Id":              float64(123456),
+									"PrimarySubnetId": float64(2201814),
+								},
+							},
+							"PrimaryBackendNetworkComponent": map[string]interface{}{
+								"NetworkVlan": map[string]interface{}{
+									"Id":              float64(654321),
+									"PrimarySubnetId": float64(2201818),
+								},
+							},
+						},
+					},
+				}
+
+				env = Environment{}
+				agentOptions = AgentOptions{}
+
+				expectedVgt = sldatatypes.SoftLayer_Virtual_Guest_Template{
+					Hostname:  "bosh-20150810-081217-541",
+					Domain:    "fake-domain.com",
+					StartCpus: 4,
+					MaxMemory: 2048,
+
+					Datacenter: sldatatypes.Datacenter{
+						Name: "fake-datacenter",
+					},
+
+					HourlyBillingFlag:            true,
+					LocalDiskFlag:                true,
+					OperatingSystemReferenceCode: "",
+
+					BlockDeviceTemplateGroup: &sldatatypes.BlockDeviceTemplateGroup{
+						GlobalIdentifier: "fake-stemcell-uuid",
+					},
+
+					DedicatedAccountHostOnlyFlag: true,
+
+					NetworkComponents: []sldatatypes.NetworkComponents{
+						sldatatypes.NetworkComponents{MaxSpeed: 1000},
+					},
+
+					PrivateNetworkOnlyFlag: false,
+
+					PrimaryNetworkComponent: &sldatatypes.PrimaryNetworkComponent{
+						NetworkVlan: sldatatypes.NetworkVlan{
+							Id:              123456,
+							PrimarySubnetId: 2201814,
+						},
+					},
+
+					PrimaryBackendNetworkComponent: &sldatatypes.PrimaryBackendNetworkComponent{
+						NetworkVlan: sldatatypes.NetworkVlan{
+							Id:              654321,
+							PrimarySubnetId: 2201818,
+						},
+					},
+
+					BlockDevices: []sldatatypes.BlockDevice{
+						sldatatypes.BlockDevice{
+							Device:    "0",
+							DiskImage: sldatatypes.DiskImage{Capacity: 100},
+						},
+					},
+
+					SshKeys: []sldatatypes.SshKey{
+						sldatatypes.SshKey{Id: 74826},
+					},
+
+					UserData: []sldatatypes.UserData{
+						sldatatypes.UserData{Value: "fake-user-data"},
+					},
+
+					PostInstallScriptUri: "",
+				}
+			})
+
+			It("returns a correct virtual guest template", func() {
+				vgt, err := CreateVirtualGuestTemplate(stemcell, cloudProps, networks, "fake-user-data")
+				Expect(err).ToNot(HaveOccurred())
+
+				//Since VGT.Hostname use timestamp we need to fix it here
+				expectedVgt.Hostname = vgt.Hostname
+				Expect(vgt).To(Equal(expectedVgt))
+			})
+		})
+
+		Context("when PrimaryNetworkComponent contains PSId in cloudProps but Id in network settings and PrimaryBackendNetworkComponent contains PSId in network settings but Id in cloudProps", func() {
+			BeforeEach(func() {
+				agentID = "fake-agentID"
+				stemcell = bslcstem.NewSoftLayerStemcell(1234, "fake-stemcell-uuid", softLayerClient, logger)
+				cloudProps = VMCloudProperties{
+					StartCpus: 4,
+					MaxMemory: 2048,
+					Domain:    "fake-domain.com",
+					BlockDeviceTemplateGroup: sldatatypes.BlockDeviceTemplateGroup{
+						GlobalIdentifier: "fake-uuid",
+					},
+					RootDiskSize:                 25,
+					EphemeralDiskSize:            25,
+					Datacenter:                   sldatatypes.Datacenter{Name: "fake-datacenter"},
+					HourlyBillingFlag:            true,
+					LocalDiskFlag:                true,
+					VmNamePrefix:                 "bosh-",
+					PostInstallScriptUri:         "",
+					DedicatedAccountHostOnlyFlag: true,
+					PrivateNetworkOnlyFlag:       true,
+					SshKeys:                      []sldatatypes.SshKey{{Id: 74826}},
+					BlockDevices: []sldatatypes.BlockDevice{{
+						Device:    "0",
+						DiskImage: sldatatypes.DiskImage{Capacity: 100}}},
+					NetworkComponents: []sldatatypes.NetworkComponents{{MaxSpeed: 1000}},
+					PrimaryNetworkComponent: sldatatypes.PrimaryNetworkComponent{
+						NetworkVlan: sldatatypes.NetworkVlan{PrimarySubnetId: 1100907}},
+					PrimaryBackendNetworkComponent: sldatatypes.PrimaryBackendNetworkComponent{
+						NetworkVlan: sldatatypes.NetworkVlan{Id: 524956}},
+				}
+
+				networks = Networks{
+					"fake-net-name": Network{
+						Type: "dynamic",
+
+						IP:      "fake-ip",
+						Netmask: "fake-netmask",
+						Gateway: "fake-gateway",
+
+						DNS:           []string{"fake-dns"},
+						Default:       []string{"fake-default"},
+						Preconfigured: true,
+
+						CloudProperties: map[string]interface{}{
+							"PrimaryNetworkComponent": map[string]interface{}{
+								"NetworkVlan": map[string]interface{}{
+									"Id": float64(123456),
+								},
+							},
+							"PrimaryBackendNetworkComponent": map[string]interface{}{
+								"NetworkVlan": map[string]interface{}{
+									"PrimarySubnetId": float64(2201818),
+								},
+							},
+						},
+					},
+				}
+
+				env = Environment{}
+				agentOptions = AgentOptions{}
+
+				expectedVgt = sldatatypes.SoftLayer_Virtual_Guest_Template{
+					Hostname:  "bosh-20150810-081217-541",
+					Domain:    "fake-domain.com",
+					StartCpus: 4,
+					MaxMemory: 2048,
+
+					Datacenter: sldatatypes.Datacenter{
+						Name: "fake-datacenter",
+					},
+
+					HourlyBillingFlag:            true,
+					LocalDiskFlag:                true,
+					OperatingSystemReferenceCode: "",
+
+					BlockDeviceTemplateGroup: &sldatatypes.BlockDeviceTemplateGroup{
+						GlobalIdentifier: "fake-stemcell-uuid",
+					},
+
+					DedicatedAccountHostOnlyFlag: true,
+
+					NetworkComponents: []sldatatypes.NetworkComponents{
+						sldatatypes.NetworkComponents{MaxSpeed: 1000},
+					},
+
+					PrivateNetworkOnlyFlag: true,
+
+					PrimaryNetworkComponent: &sldatatypes.PrimaryNetworkComponent{
+						NetworkVlan: sldatatypes.NetworkVlan{
 							Id: 123456,
+						},
+					},
+
+					PrimaryBackendNetworkComponent: &sldatatypes.PrimaryBackendNetworkComponent{
+						NetworkVlan: sldatatypes.NetworkVlan{
+							PrimarySubnetId: 2201818,
+						},
+					},
+
+					BlockDevices: []sldatatypes.BlockDevice{
+						sldatatypes.BlockDevice{
+							Device:    "0",
+							DiskImage: sldatatypes.DiskImage{Capacity: 100},
+						},
+					},
+
+					SshKeys: []sldatatypes.SshKey{
+						sldatatypes.SshKey{Id: 74826},
+					},
+
+					UserData: []sldatatypes.UserData{
+						sldatatypes.UserData{Value: "fake-user-data"},
+					},
+
+					PostInstallScriptUri: "",
+				}
+			})
+
+			It("returns a correct virtual guest template", func() {
+				vgt, err := CreateVirtualGuestTemplate(stemcell, cloudProps, networks, "fake-user-data")
+				Expect(err).ToNot(HaveOccurred())
+
+				//Since VGT.Hostname use timestamp we need to fix it here
+				expectedVgt.Hostname = vgt.Hostname
+				Expect(vgt).To(Equal(expectedVgt))
+			})
+		})
+
+		Context("when PrimaryNetworkComponent and PrimaryBackendNetworkComponent contains Id and PSId in both network settings and cloudProps", func() {
+			BeforeEach(func() {
+				agentID = "fake-agentID"
+				stemcell = bslcstem.NewSoftLayerStemcell(1234, "fake-stemcell-uuid", softLayerClient, logger)
+				cloudProps = VMCloudProperties{
+					StartCpus: 4,
+					MaxMemory: 2048,
+					Domain:    "fake-domain.com",
+					BlockDeviceTemplateGroup: sldatatypes.BlockDeviceTemplateGroup{
+						GlobalIdentifier: "fake-uuid",
+					},
+					RootDiskSize:                 25,
+					EphemeralDiskSize:            25,
+					Datacenter:                   sldatatypes.Datacenter{Name: "fake-datacenter"},
+					HourlyBillingFlag:            true,
+					LocalDiskFlag:                true,
+					VmNamePrefix:                 "bosh-",
+					PostInstallScriptUri:         "",
+					DedicatedAccountHostOnlyFlag: true,
+					SshKeys:                      []sldatatypes.SshKey{{Id: 74826}},
+					BlockDevices: []sldatatypes.BlockDevice{{
+						Device:    "0",
+						DiskImage: sldatatypes.DiskImage{Capacity: 100}}},
+					NetworkComponents: []sldatatypes.NetworkComponents{{MaxSpeed: 1000}},
+					PrimaryNetworkComponent: sldatatypes.PrimaryNetworkComponent{
+						NetworkVlan: sldatatypes.NetworkVlan{Id: 524954, PrimarySubnetId: 1100907}},
+					PrimaryBackendNetworkComponent: sldatatypes.PrimaryBackendNetworkComponent{
+						NetworkVlan: sldatatypes.NetworkVlan{Id: 524956, PrimarySubnetId: 1100909}},
+				}
+
+				networks = Networks{
+					"fake-net-name": Network{
+						Type: "dynamic",
+
+						IP:      "fake-ip",
+						Netmask: "fake-netmask",
+						Gateway: "fake-gateway",
+
+						DNS:           []string{"fake-dns"},
+						Default:       []string{"fake-default"},
+						Preconfigured: true,
+
+						CloudProperties: map[string]interface{}{
+							"PrimaryNetworkComponent": map[string]interface{}{
+								"NetworkVlan": map[string]interface{}{
+									"Id":              float64(123456),
+									"PrimarySubnetId": float64(2201814),
+								},
+							},
+							"PrimaryBackendNetworkComponent": map[string]interface{}{
+								"NetworkVlan": map[string]interface{}{
+									"Id":              float64(654321),
+									"PrimarySubnetId": float64(2201818),
+								},
+							},
+						},
+					},
+				}
+
+				env = Environment{}
+				agentOptions = AgentOptions{}
+
+				expectedVgt = sldatatypes.SoftLayer_Virtual_Guest_Template{
+					Hostname:  "bosh-20150810-081217-541",
+					Domain:    "fake-domain.com",
+					StartCpus: 4,
+					MaxMemory: 2048,
+
+					Datacenter: sldatatypes.Datacenter{
+						Name: "fake-datacenter",
+					},
+
+					HourlyBillingFlag:            true,
+					LocalDiskFlag:                true,
+					OperatingSystemReferenceCode: "",
+
+					BlockDeviceTemplateGroup: &sldatatypes.BlockDeviceTemplateGroup{
+						GlobalIdentifier: "fake-stemcell-uuid",
+					},
+
+					DedicatedAccountHostOnlyFlag: true,
+
+					NetworkComponents: []sldatatypes.NetworkComponents{
+						sldatatypes.NetworkComponents{MaxSpeed: 1000},
+					},
+
+					PrivateNetworkOnlyFlag: false,
+
+					PrimaryNetworkComponent: &sldatatypes.PrimaryNetworkComponent{
+						NetworkVlan: sldatatypes.NetworkVlan{
+							Id:              123456,
+							PrimarySubnetId: 2201814,
+						},
+					},
+
+					PrimaryBackendNetworkComponent: &sldatatypes.PrimaryBackendNetworkComponent{
+						NetworkVlan: sldatatypes.NetworkVlan{
+							Id:              654321,
+							PrimarySubnetId: 2201818,
 						},
 					},
 
