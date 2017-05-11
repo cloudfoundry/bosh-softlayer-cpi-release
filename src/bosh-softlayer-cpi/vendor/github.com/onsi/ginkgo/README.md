@@ -1,6 +1,6 @@
 ![Ginkgo: A Golang BDD Testing Framework](http://onsi.github.io/ginkgo/images/ginkgo.png)
 
-[![Build Status](https://travis-ci.org/onsi/ginkgo.png)](https://travis-ci.org/onsi/ginkgo)
+[![Build Status](https://travis-ci.org/onsi/ginkgo.svg)](https://travis-ci.org/onsi/ginkgo)
 
 Jump to the [docs](http://onsi.github.io/ginkgo/) to learn more.  To start rolling your Ginkgo tests *now* [keep reading](#set-me-up)!
 
@@ -63,7 +63,7 @@ You'll need Golang v1.3+ (Ubuntu users: you probably have Golang v1.0 -- you'll 
 
 ```bash
 
-go get github.com/onsi/ginkgo/ginkgo  # installs the ginkgo CLI
+go get github.com/onsi/ginkgo         # installs the ginkgo CLI
 go get github.com/onsi/gomega         # fetches the matcher library
 
 cd path/to/package/you/want/to/test

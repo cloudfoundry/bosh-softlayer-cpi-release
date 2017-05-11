@@ -33,7 +33,7 @@ func (f SoftLayerAgentEnvServiceFactory) New(
 			f.registryOptions.Host,
 			f.registryOptions.Port,
 		)
-		return NewRegistryAgentEnvService(endpoint, strconv.Itoa(vm.ID()), f.logger)
+		return NewRegistryAgentEnvService(endpoint, strconv.Itoa(*vm.ID()), f.logger)
 	}
 	return NewFSAgentEnvService(vm, softlayerFileService, f.logger)
 }

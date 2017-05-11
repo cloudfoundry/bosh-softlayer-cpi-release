@@ -2,6 +2,7 @@ package action
 
 import (
 	. "bosh-softlayer-cpi/softlayer/disk"
+	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 )
 
 type HasDiskAction struct {
@@ -16,14 +17,14 @@ func NewHasDisk(
 }
 
 func (a HasDiskAction) Run(diskCID DiskCID) (bool, error) {
-	result, found, err := a.diskFinder.Find(int(diskCID))
+	result, err := a.diskFinder.Find(int(diskCID))
 	if err != nil {
-		return false, err
-	} else {
-		if result == nil {
-			return false, nil
-		}
+		return false, bosherr.WrapErrorf(err, "Finding disk with id `%d`", diskCID.Int())
 	}
 
-	return found, nil
+	if result.ID() == 0 {
+		return false, bosherr.Errorf("Unable to find disk with id `%d`", diskCID.Int())
+	}
+
+	return true, nil
 }

@@ -1,20 +1,18 @@
 package disk
 
 import (
+	bsl "bosh-softlayer-cpi/softlayer/client"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
-	slc "github.com/maximilien/softlayer-go/softlayer"
 )
-
-const SOFTLAYER_DISK_LOG_TAG = "SoftLayerDisk"
 
 type SoftLayerDisk struct {
 	id              int
-	softLayerClient slc.Client
+	softLayerClient bsl.Client
 	logger          boshlog.Logger
 }
 
-func NewSoftLayerDisk(id int, client slc.Client, logger boshlog.Logger) SoftLayerDisk {
+func NewSoftLayerDisk(id int, client bsl.Client, logger boshlog.Logger) SoftLayerDisk {
 	return SoftLayerDisk{
 		id:              id,
 		softLayerClient: client,
@@ -22,19 +20,12 @@ func NewSoftLayerDisk(id int, client slc.Client, logger boshlog.Logger) SoftLaye
 	}
 }
 
-func (s SoftLayerDisk) ID() int { return s.id }
+func (sd SoftLayerDisk) ID() int { return sd.id }
 
-func (s SoftLayerDisk) Delete() error {
-	s.logger.Debug(SOFTLAYER_DISK_LOG_TAG, "Deleting disk '%s'", s.id)
-
-	service, err := s.softLayerClient.GetSoftLayer_Network_Storage_Service()
+func (sd SoftLayerDisk) Delete() error {
+	err := sd.softLayerClient.CancelBlockVolume(sd.id, "", true)
 	if err != nil {
-		return bosherr.WrapError(err, "Cannot get network storage service.")
-	}
-
-	err = service.DeleteNetworkStorage(s.id, true)
-	if err != nil {
-		return bosherr.WrapErrorf(err, "Failed to delete iSCSI volume with id: %d", s.id)
+		return bosherr.WrapErrorf(err, "Deleting disk with id `%d`", sd.id)
 	}
 
 	return nil

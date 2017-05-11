@@ -1,22 +1,15 @@
 package action
 
 import (
-	bosherr "github.com/cloudfoundry/bosh-utils/errors"
-	boshlog "github.com/cloudfoundry/bosh-utils/logger"
-
-	bmsclient "github.com/cloudfoundry-community/bosh-softlayer-tools/clients"
-	slclient "github.com/maximilien/softlayer-go/client"
-
 	bslcdisk "bosh-softlayer-cpi/softlayer/disk"
 	bslcstem "bosh-softlayer-cpi/softlayer/stemcell"
 	bslcvm "bosh-softlayer-cpi/softlayer/vm"
+	bosherr "github.com/cloudfoundry/bosh-utils/errors"
+	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
-	apiclient "bosh-softlayer-cpi/softlayer/pool/client"
-	httptransport "github.com/go-openapi/runtime/client"
+	bsl "bosh-softlayer-cpi/softlayer/client"
 
 	. "bosh-softlayer-cpi/softlayer/common"
-	"fmt"
-	"github.com/go-openapi/strfmt"
 )
 
 type concreteFactory struct {
@@ -24,43 +17,39 @@ type concreteFactory struct {
 }
 
 func NewConcreteFactory(options ConcreteFactoryOptions, logger boshlog.Logger) concreteFactory {
-	softLayerClient := slclient.NewSoftLayerClient(options.Softlayer.Username, options.Softlayer.ApiKey)
-	baremetalClient := bmsclient.NewBmpClient(options.Baremetal.Username, options.Baremetal.Password, options.Baremetal.EndPoint, nil, "")
-	poolClient := apiclient.New(httptransport.New(fmt.Sprintf("%s:%d", options.Pool.Host, options.Pool.Port), "v2", []string{"https"}), strfmt.Default).VM
+	softLayerClient := bsl.NewSoftlayerClientSession(bsl.SoftlayerAPIEndpointPublicDefault, options.Softlayer.Username, options.Softlayer.ApiKey, true, 300)
+	repClientFactory := bsl.NewClientFactory(bsl.NewSoftLayerClientManager(softLayerClient))
+	client := repClientFactory.CreateClient()
 
-	stemcellFinder := bslcstem.NewSoftLayerStemcellFinder(softLayerClient, logger)
+	stemcellFinder := bslcstem.NewSoftLayerStemcellFinder(client, logger)
 
 	agentEnvServiceFactory := NewSoftLayerAgentEnvServiceFactory(options.Registry, logger)
 
 	vmFinder := bslcvm.NewSoftLayerFinder(
-		softLayerClient,
-		baremetalClient,
+		client,
 		agentEnvServiceFactory,
 		logger,
 	)
 
 	vmCreatorProvider := NewCreatorProvider(
-		softLayerClient,
-		baremetalClient,
-		poolClient,
+		client,
 		options,
 		logger,
 	)
 
 	vmDeleterProvider := NewDeleterProvider(
-		softLayerClient,
-		poolClient,
+		client,
 		logger,
 		vmFinder,
 	)
 
 	diskCreator := bslcdisk.NewSoftLayerDiskCreator(
-		softLayerClient,
+		client,
 		logger,
 	)
 
 	diskFinder := bslcdisk.NewSoftLayerDiskFinder(
-		softLayerClient,
+		client,
 		logger,
 	)
 

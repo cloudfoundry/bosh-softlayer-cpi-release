@@ -22,14 +22,14 @@ func NewCreateDisk(
 }
 
 func (a CreateDiskAction) Run(size int, cloudProps bslcdisk.DiskCloudProperties, instanceId VMCID) (string, error) {
-	vm, found, err := a.vmFinder.Find(int(instanceId))
-	if err != nil || !found {
-		return "0", bosherr.WrapErrorf(err, "Not Finding vm '%s'", instanceId)
+	vm, err := a.vmFinder.Find(int(instanceId))
+	if err != nil {
+		return "", bosherr.WrapErrorf(err, "Finding VM with cid '%s'", instanceId)
 	}
 
-	disk, err := a.diskCreator.Create(size, cloudProps, vm.GetDataCenterId())
+	disk, err := a.diskCreator.Create(size, cloudProps, *vm.GetDataCenter())
 	if err != nil {
-		return "0", bosherr.WrapErrorf(err, "Creating disk of size '%d'", size)
+		return "", bosherr.WrapErrorf(err, "Creating disk of size '%d'", size)
 	}
 
 	return DiskCID(disk.ID()).String(), nil

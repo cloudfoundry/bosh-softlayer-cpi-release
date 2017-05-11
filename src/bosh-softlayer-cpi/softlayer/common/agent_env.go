@@ -3,14 +3,15 @@ package common
 import (
 	"encoding/json"
 
+	bslnet "bosh-softlayer-cpi/softlayer/networks"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 )
 
 type UserDataContentsType struct {
-	Registry RegistryType `json:"registry,omitempty"`
-	Server   ServerType   `json:"server,omitempty"`
-	DNS      DNSType      `json:"dns,omitempty"`
-	Networks Networks     `json:"networks,omitempty"`
+	Registry RegistryType    `json:"registry,omitempty"`
+	Server   ServerType      `json:"server,omitempty"`
+	DNS      DNSType         `json:"dns,omitempty"`
+	Networks bslnet.Networks `json:"networks,omitempty"`
 }
 
 type RegistryType struct {
@@ -35,7 +36,7 @@ type AgentEnv struct {
 
 	Blobstore BlobstoreSpec `json:"blobstore"`
 
-	Networks Networks `json:"networks"`
+	Networks bslnet.Networks `json:"networks"`
 
 	Disks DisksSpec `json:"disks"`
 
@@ -79,20 +80,19 @@ func NewAgentEnvFromJSON(bytes []byte) (AgentEnv, error) {
 	return agentEnv, nil
 }
 
-func NewAgentEnvForVM(agentID, vmCID string, networks Networks, disksSpec DisksSpec, env Environment, agentOptions AgentOptions) AgentEnv {
-	networksSpec := Networks{}
+func NewAgentEnvForVM(agentID, vmCID string, networks bslnet.Networks, disksSpec DisksSpec, env Environment, agentOptions AgentOptions) AgentEnv {
+	networksSpec := bslnet.Networks{}
 
 	for netName, network := range networks {
-		networksSpec[netName] = Network{
+		networksSpec[netName] = bslnet.Network{
 			Type: network.Type,
 
 			IP:      network.IP,
 			Netmask: network.Netmask,
 			Gateway: network.Gateway,
 
-			DNS:           network.DNS,
-			Default:       network.Default,
-			Preconfigured: true,
+			DNS:     network.DNS,
+			Default: network.Default,
 
 			MAC: "",
 

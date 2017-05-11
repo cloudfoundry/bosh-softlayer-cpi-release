@@ -3,42 +3,31 @@ package disk
 import (
 	"strings"
 
+	bsl "bosh-softlayer-cpi/softlayer/client"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
-	slc "github.com/maximilien/softlayer-go/softlayer"
 )
 
-const SOFTLAYER_DISK_FINDER_LOG_TAG = "SoftLayerDiskFinder"
-
 type SoftLayerFinder struct {
-	softLayerClient slc.Client
+	softLayerClient bsl.Client
 	logger          boshlog.Logger
 }
 
-func NewSoftLayerDiskFinder(client slc.Client, logger boshlog.Logger) SoftLayerFinder {
+func NewSoftLayerDiskFinder(client bsl.Client, logger boshlog.Logger) SoftLayerFinder {
 	return SoftLayerFinder{softLayerClient: client, logger: logger}
 }
 
-func (f SoftLayerFinder) Find(id int) (Disk, bool, error) {
-	f.logger.Debug(SOFTLAYER_DISK_FINDER_LOG_TAG, "Finding disk '%s'", id)
-
-	service, err := f.softLayerClient.GetSoftLayer_Network_Storage_Service()
-	if err != nil {
-		return nil, false, bosherr.WrapError(err, "Cannot get network storage service.")
-	}
-
-	disk, err := service.GetNetworkStorage(id)
+func (sf SoftLayerFinder) Find(id int) (Disk, error) {
+	volume, err := sf.softLayerClient.GetBlockVolumeDetails(id, bsl.VOLUME_DEFAULT_MASK)
 	if err != nil {
 		if !strings.Contains(err.Error(), "HTTP error code") {
-			return nil, false, bosherr.WrapErrorf(err, "Failed to find iSCSI volume with id: %d", id)
+			return nil, bosherr.WrapErrorf(err, "Failed to find iSCSI volume with id: %d", id)
 		}
 	}
 
-	if disk.Id == 0 {
-		return nil, false, nil
+	if volume.Id == nil {
+		return nil, bosherr.WrapErrorf(err, "Finding volume with id: `%d` failed", id)
 	}
 
-	result := NewSoftLayerDisk(id, f.softLayerClient, f.logger)
-
-	return result, true, nil
+	return NewSoftLayerDisk(id, sf.softLayerClient, sf.logger), nil
 }

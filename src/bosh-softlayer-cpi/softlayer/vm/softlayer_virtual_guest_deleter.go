@@ -1,27 +1,21 @@
 package vm
 
 import (
-	"fmt"
-	"strings"
-
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
 	. "bosh-softlayer-cpi/softlayer/common"
 
-	slh "bosh-softlayer-cpi/softlayer/common/helper"
-	sl "github.com/maximilien/softlayer-go/softlayer"
+	bsl "bosh-softlayer-cpi/softlayer/client"
 )
 
-const SOFTLAYER_VM_DELETER_LOG_TAG = "SoftLayerVMDeleter"
-
 type softLayerVMDeleter struct {
-	softLayerClient sl.Client
+	softLayerClient bsl.Client
 	logger          boshlog.Logger
 	vmFinder        VMFinder
 }
 
-func NewSoftLayerVMDeleter(softLayerClient sl.Client, logger boshlog.Logger, vmFinder VMFinder) VMDeleter {
+func NewSoftLayerVMDeleter(softLayerClient bsl.Client, logger boshlog.Logger, vmFinder VMFinder) VMDeleter {
 	return &softLayerVMDeleter{
 		softLayerClient: softLayerClient,
 		logger:          logger,
@@ -29,26 +23,10 @@ func NewSoftLayerVMDeleter(softLayerClient sl.Client, logger boshlog.Logger, vmF
 	}
 }
 
-func (c *softLayerVMDeleter) Delete(cid int) error {
-	virtualGuestService, err := c.softLayerClient.GetSoftLayer_Virtual_Guest_Service()
+func (sd *softLayerVMDeleter) Delete(cid int) error {
+	vm, err := sd.vmFinder.Find(cid)
 	if err != nil {
-		return bosherr.WrapError(err, "Creating SoftLayer VirtualGuestService from client")
-	}
-
-	err = slh.WaitForVirtualGuestToHaveNoRunningTransactions(c.softLayerClient, cid)
-	if err != nil {
-		if !strings.Contains(err.Error(), "HTTP error code") {
-			return bosherr.WrapError(err, fmt.Sprintf("Waiting for VirtualGuest `%d` to have no pending transactions before deleting vm", cid))
-		}
-	}
-
-	vm, found, err := c.vmFinder.Find(cid)
-	if err != nil {
-		return bosherr.WrapErrorf(err, "Finding VirtualGuest with id: %d.", cid)
-	} else {
-		if !found {
-			return bosherr.WrapErrorf(err, "Cannot find VirtualGuest with id: %d.", cid)
-		}
+		return bosherr.WrapErrorf(err, "Finding VM with id: %d.", cid)
 	}
 
 	err = vm.DeleteAgentEnv()
@@ -56,12 +34,5 @@ func (c *softLayerVMDeleter) Delete(cid int) error {
 		return bosherr.WrapError(err, "Deleting VM's agent env")
 	}
 
-	_, err = virtualGuestService.DeleteObject(cid)
-	if err != nil {
-		if !strings.Contains(err.Error(), "HTTP error code") {
-			return bosherr.WrapError(err, "Deleting SoftLayer VirtualGuest from client")
-		}
-	}
-
-	return nil
+	return sd.softLayerClient.CancelInstance(cid)
 }

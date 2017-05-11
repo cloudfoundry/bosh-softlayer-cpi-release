@@ -1,44 +1,37 @@
 package disk
 
 import (
-	"strconv"
-
+	bsl "bosh-softlayer-cpi/softlayer/client"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
-	sl "github.com/maximilien/softlayer-go/softlayer"
 )
 
 const SOFTLAYER_DISK_CREATOR_LOG_TAG = "SoftLayerDiskCreator"
 
 type SoftLayerCreator struct {
-	softLayerClient sl.Client
+	softLayerClient bsl.Client
 	logger          boshlog.Logger
 }
 
-func NewSoftLayerDiskCreator(client sl.Client, logger boshlog.Logger) SoftLayerCreator {
+func NewSoftLayerDiskCreator(client bsl.Client, logger boshlog.Logger) SoftLayerCreator {
 	return SoftLayerCreator{
 		softLayerClient: client,
 		logger:          logger,
 	}
 }
 
-func (c SoftLayerCreator) Create(size int, cloudProps DiskCloudProperties, datacenter_id int) (Disk, error) {
-	c.logger.Debug(SOFTLAYER_DISK_CREATOR_LOG_TAG, "Creating disk of size '%d'", size)
+func (sc SoftLayerCreator) Create(size int, cloudProps DiskCloudProperties, location string) (Disk, error) {
+	sc.logger.Debug(SOFTLAYER_DISK_CREATOR_LOG_TAG, "Creating disk of size '%d'", size)
 
-	storageService, err := c.softLayerClient.GetSoftLayer_Network_Storage_Service()
+	volume, err := sc.softLayerClient.CreateVolume(location, sc.getSoftLayerDiskSize(size), cloudProps.Iops)
 	if err != nil {
-		return SoftLayerDisk{}, bosherr.WrapError(err, "Create SoftLayer Network Storage Service error.")
+		return nil, bosherr.WrapErrorf(err, "Creating volume with size `%d`, iops `%d`, location `%sd`", sc.getSoftLayerDiskSize(size), cloudProps.Iops, location)
 	}
 
-	disk, err := storageService.CreateNetworkStorage(c.getSoftLayerDiskSize(size), cloudProps.Iops, strconv.Itoa(datacenter_id), cloudProps.UseHourlyPricing)
-	if err != nil {
-		return SoftLayerDisk{}, bosherr.WrapError(err, "Create SoftLayer iSCSI disk error.")
-	}
-
-	return NewSoftLayerDisk(disk.Id, c.softLayerClient, c.logger), nil
+	return NewSoftLayerDisk(*volume.Id, sc.softLayerClient, sc.logger), nil
 }
 
-func (c SoftLayerCreator) getSoftLayerDiskSize(size int) int {
+func (sc SoftLayerCreator) getSoftLayerDiskSize(size int) int {
 	// Sizes and IOPS ranges: http://knowledgelayer.softlayer.com/learning/performance-storage-concepts
 	sizeArray := []int{20, 40, 80, 100, 250, 500, 1000, 2000, 4000, 8000, 12000}
 

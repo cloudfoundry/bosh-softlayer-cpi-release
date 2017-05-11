@@ -1,25 +1,25 @@
 package common
 
 import (
+	"encoding/base64"
 	"fmt"
 	"net"
 	"net/url"
 	"os"
-	"reflect"
 	"time"
 
-	sldatatypes "github.com/maximilien/softlayer-go/data_types"
+	datatypes "github.com/softlayer/softlayer-go/datatypes"
 
-	bslcstem "bosh-softlayer-cpi/softlayer/stemcell"
-
+	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	boshsys "github.com/cloudfoundry/bosh-utils/system"
 
 	"bufio"
-
 	"encoding/json"
-	bosherr "github.com/cloudfoundry/bosh-utils/errors"
-	sl "github.com/maximilien/softlayer-go/softlayer"
+
+	bslc "bosh-softlayer-cpi/softlayer/client"
+	snet "bosh-softlayer-cpi/softlayer/networks"
+	"github.com/softlayer/softlayer-go/sl"
 )
 
 func CreateDisksSpec(ephemeralDiskSize int) DisksSpec {
@@ -39,74 +39,70 @@ func TimeStampForTime(now time.Time) string {
 	return now.Format("20060102-030405-") + fmt.Sprintf("%03d", int(now.UnixNano()/1e6-now.Unix()*1e3))
 }
 
-func CreateVirtualGuestTemplate(stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, userData string) (sldatatypes.SoftLayer_Virtual_Guest_Template, error) {
-	for _, network := range networks {
-		switch network.Type {
-		case "dynamic":
-			networkComponent, exist := network.CloudProperties["PrimaryNetworkComponent"]
-			if exist {
-				configureNetwork(networkComponent.(map[string]interface{}), &cloudProps, true)
-			}
+func CreateVirtualGuestTemplate(stemcellUuid string, cloudProps VMCloudProperties, userData string, publicVlanId int, privateVlanId int) *datatypes.Virtual_Guest {
+	var publicNetworkComponent, privateNetworkComponent *datatypes.Virtual_Guest_Network_Component
 
-			networkComponent, exist = network.CloudProperties["PrimaryBackendNetworkComponent"]
-			if exist {
-				configureNetwork(networkComponent.(map[string]interface{}), &cloudProps, false)
-			}
-
-			privateNetworkOnlyFlag, exist := network.CloudProperties["PrivateNetworkOnlyFlag"]
-			if exist {
-				privateOnly := privateNetworkOnlyFlag.(bool)
-				cloudProps.PrivateNetworkOnlyFlag = privateOnly
-			}
-		default:
-			continue
+	if publicVlanId != 0 {
+		publicNetworkComponent = &datatypes.Virtual_Guest_Network_Component{
+			NetworkVlan: &datatypes.Network_Vlan{
+				Id: sl.Int(publicVlanId),
+			},
 		}
 	}
 
-	virtualGuestTemplate := sldatatypes.SoftLayer_Virtual_Guest_Template{
-		Hostname:  cloudProps.VmNamePrefix,
-		Domain:    cloudProps.Domain,
-		StartCpus: cloudProps.StartCpus,
-		MaxMemory: cloudProps.MaxMemory,
-
-		Datacenter: sldatatypes.Datacenter{
-			Name: cloudProps.Datacenter.Name,
-		},
-
-		BlockDeviceTemplateGroup: &sldatatypes.BlockDeviceTemplateGroup{
-			GlobalIdentifier: stemcell.Uuid(),
-		},
-
-		SshKeys: cloudProps.SshKeys,
-
-		HourlyBillingFlag: cloudProps.HourlyBillingFlag,
-		LocalDiskFlag:     cloudProps.LocalDiskFlag,
-
-		DedicatedAccountHostOnlyFlag:   cloudProps.DedicatedAccountHostOnlyFlag,
-		BlockDevices:                   cloudProps.BlockDevices,
-		NetworkComponents:              cloudProps.NetworkComponents,
-		PrivateNetworkOnlyFlag:         cloudProps.PrivateNetworkOnlyFlag,
-		PrimaryNetworkComponent:        &cloudProps.PrimaryNetworkComponent,
-		PrimaryBackendNetworkComponent: &cloudProps.PrimaryBackendNetworkComponent,
-
-		UserData: []sldatatypes.UserData{
-			sldatatypes.UserData{
-				Value: userData,
-			},
+	privateNetworkComponent = &datatypes.Virtual_Guest_Network_Component{
+		NetworkVlan: &datatypes.Network_Vlan{
+			Id: sl.Int(privateVlanId),
 		},
 	}
 
-	return virtualGuestTemplate, nil
+	return &datatypes.Virtual_Guest{
+		// instance type
+		Hostname:  sl.String(cloudProps.VmNamePrefix),
+		Domain:    sl.String(cloudProps.Domain),
+		StartCpus: sl.Int(cloudProps.StartCpus),
+		MaxMemory: sl.Int(cloudProps.MaxMemory),
+
+		// datacenter or availbility zone
+		Datacenter: &datatypes.Location{
+			Name: sl.String(cloudProps.Datacenter),
+		},
+
+		// stemcell or image
+		BlockDeviceTemplateGroup: &datatypes.Virtual_Guest_Block_Device_Template_Group{
+			GlobalIdentifier: sl.String(stemcellUuid),
+		},
+
+		// billing options
+		HourlyBillingFlag:            sl.Bool(cloudProps.HourlyBillingFlag),
+		LocalDiskFlag:                sl.Bool(cloudProps.LocalDiskFlag),
+		DedicatedAccountHostOnlyFlag: sl.Bool(cloudProps.DedicatedAccountHostOnlyFlag),
+
+		// network components
+		NetworkComponents: []datatypes.Virtual_Guest_Network_Component{
+			{MaxSpeed: sl.Int(cloudProps.MaxNetworkSpeed)},
+		},
+		PrivateNetworkOnlyFlag:         sl.Bool(publicNetworkComponent == nil),
+		PrimaryNetworkComponent:        publicNetworkComponent,
+		PrimaryBackendNetworkComponent: privateNetworkComponent,
+
+		// metadata or user data
+		UserData: []datatypes.Virtual_Guest_Attribute{
+			{
+				Value: sl.String(userData),
+			},
+		},
+	}
 }
 
-func CreateAgentUserData(agentID string, cloudProps VMCloudProperties, networks Networks, env Environment, agentOptions AgentOptions) AgentEnv {
+func CreateAgentUserData(agentID string, cloudProps VMCloudProperties, networks snet.Networks, env Environment, agentOptions AgentOptions) AgentEnv {
 	agentName := fmt.Sprintf("vm-%s", agentID)
 	disks := CreateDisksSpec(cloudProps.EphemeralDiskSize)
 	agentEnv := NewAgentEnvForVM(agentID, agentName, networks, disks, env, agentOptions)
 	return agentEnv
 }
 
-func CreateUserDataForInstance(agentID string, networks Networks, registryOptions RegistryOptions) string {
+func CreateUserDataForInstance(agentID string, registryOptions RegistryOptions) (string, error) {
 	serverName := fmt.Sprintf("vm-%s", agentID)
 	userDataContents := UserDataContentsType{
 		Registry: RegistryType{
@@ -120,8 +116,12 @@ func CreateUserDataForInstance(agentID string, networks Networks, registryOption
 			Name: serverName,
 		},
 	}
-	contentsBytes, _ := json.Marshal(userDataContents)
-	return string(contentsBytes)
+	contentsBytes, err := json.Marshal(userDataContents)
+	if err != nil {
+		return "", bosherr.WrapError(err, "Preparing user data contents")
+	}
+
+	return base64.RawURLEncoding.EncodeToString(contentsBytes), nil
 }
 
 func UpdateDavConfig(config *DavConfig, directorIP string) (err error) {
@@ -188,14 +188,14 @@ func UpdateEtcHostsOfBoshInit(path string, record string) (err error) {
 	return nil
 }
 
-func UpdateDeviceName(vmID int, virtualGuestService sl.SoftLayer_Virtual_Guest_Service, cloudProps VMCloudProperties) (err error) {
-	deviceName := sldatatypes.SoftLayer_Virtual_Guest{
-		Hostname: cloudProps.VmNamePrefix,
-		Domain:   cloudProps.Domain,
-		FullyQualifiedDomainName: cloudProps.VmNamePrefix + "." + cloudProps.Domain,
+func UpdateDeviceName(vmID int, virtualGuestService bslc.Client, cloudProps VMCloudProperties) (err error) {
+	editingVirtualGuest := &datatypes.Virtual_Guest{
+		Hostname: sl.String(cloudProps.VmNamePrefix),
+		Domain:   sl.String(cloudProps.Domain),
+		FullyQualifiedDomainName: sl.String(cloudProps.VmNamePrefix + "." + cloudProps.Domain),
 	}
 
-	_, err = virtualGuestService.EditObject(vmID, deviceName)
+	_, err = virtualGuestService.EditInstance(editingVirtualGuest)
 	if err != nil {
 		return bosherr.WrapErrorf(err, "Failed to update properties for virtualGuest with id: %d", vmID)
 	}
@@ -226,34 +226,44 @@ func GetLocalIPAddressOfGivenInterface(networkInterface string) (string, error) 
 	return "", bosherr.Error(fmt.Sprintf("Failed to get IP address of %s", networkInterface))
 }
 
-const ETC_HOSTS_TEMPLATE = `127.0.0.1 localhost
-{{.}}
-`
+func GetVlanIds(softLayerClient bslc.Client, networks snet.Networks) (int, int, error) {
+	var publicVlanID, privateVlanID int
 
-// private methods
-func configureNetwork(networkComponent map[string]interface{}, cloudProps *VMCloudProperties, primaryNetwork bool) {
-	networkVlan := sldatatypes.NetworkVlan{}
-	networkComponentNetworkVlan, exist := networkComponent["NetworkVlan"]
-	if exist {
-		networkVlanInfo := networkComponentNetworkVlan.(map[string]interface{})
-		configureNetworkVlan(networkVlanInfo, &networkVlan, "Id")
-		configureNetworkVlan(networkVlanInfo, &networkVlan, "PrimarySubnetId")
+	for name, nw := range networks {
+		networkSpace, err := getNetworkSpace(softLayerClient, nw.CloudProperties.VlanID)
+		if err != nil {
+			return 0, 0, bosherr.WrapErrorf(err, "Network: %q, vlan id: %d", name, nw.CloudProperties.VlanID)
+		}
 
-		if primaryNetwork {
-			cloudProps.PrimaryNetworkComponent = sldatatypes.PrimaryNetworkComponent{
-				NetworkVlan: networkVlan,
+		switch networkSpace {
+		case "PRIVATE":
+			if privateVlanID == 0 {
+				privateVlanID = nw.CloudProperties.VlanID
+			} else if privateVlanID != nw.CloudProperties.VlanID {
+				return 0, 0, bosherr.Error("Only one private VLAN is supported")
 			}
-		} else {
-			cloudProps.PrimaryBackendNetworkComponent = sldatatypes.PrimaryBackendNetworkComponent{
-				NetworkVlan: networkVlan,
+		case "PUBLIC":
+			if publicVlanID == 0 {
+				publicVlanID = nw.CloudProperties.VlanID
+			} else if publicVlanID != nw.CloudProperties.VlanID {
+				return 0, 0, bosherr.Error("Only one public VLAN is supported")
 			}
+		default:
+			return 0, 0, bosherr.Errorf("Vlan id %d: unknown network type '%s'", nw.CloudProperties.VlanID, networkSpace)
 		}
 	}
+
+	if privateVlanID == 0 {
+		return 0, 0, bosherr.Error("A private vlan is required")
+	}
+
+	return publicVlanID, privateVlanID, nil
 }
 
-func configureNetworkVlan(networkVlanInfo map[string]interface{}, networkVlan *sldatatypes.NetworkVlan, fieldName string) {
-	fieldValue, exist := networkVlanInfo[fieldName]
-	if exist {
-		reflect.ValueOf(networkVlan).Elem().FieldByName(fieldName).SetInt(int64(fieldValue.(float64)))
+func getNetworkSpace(softLayerClient bslc.Client, vlanID int) (string, error) {
+	networkVlan, err := softLayerClient.GetVlan(vlanID, bslc.NETWORK_DEFAULT_VLAN)
+	if err != nil {
+		return "", bosherr.WrapErrorf(err, "Getting vlan info with id `%d`", vlanID)
 	}
+	return *networkVlan.NetworkSpace, nil
 }

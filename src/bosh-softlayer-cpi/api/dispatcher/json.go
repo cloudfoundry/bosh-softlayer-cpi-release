@@ -4,13 +4,9 @@ import (
 	"bytes"
 	"encoding/json"
 
-	bslcaction "bosh-softlayer-cpi/action"
-	bslcapi "bosh-softlayer-cpi/api"
-	slhelper "bosh-softlayer-cpi/softlayer/common/helper"
+	bslaction "bosh-softlayer-cpi/action"
+	bslapi "bosh-softlayer-cpi/api"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
-
-	"fmt"
-	"strings"
 )
 
 const (
@@ -43,13 +39,13 @@ type ResponseError struct {
 }
 
 type JSON struct {
-	actionFactory bslcaction.Factory
+	actionFactory bslaction.Factory
 	caller        Caller
 	logger        boshlog.Logger
 }
 
 func NewJSON(
-	actionFactory bslcaction.Factory,
+	actionFactory bslaction.Factory,
 	caller Caller,
 	logger boshlog.Logger,
 ) JSON {
@@ -71,9 +67,6 @@ func (c JSON) Dispatch(reqBytes []byte) []byte {
 	}
 
 	c.logger.DebugWithDetails(jsonLogTag, "Deserialized request", req)
-
-	// Will remove this line of code after we make sure LocalDiskFlag is defined properly in all deployment manifest files
-	c.localDiskFlagNotSet(fmt.Sprintf("%s", req))
 
 	if req.Method == "" {
 		return c.buildCpiError("Must provide method key")
@@ -114,7 +107,7 @@ func (c JSON) buildCloudError(err error) []byte {
 		Error: &ResponseError{},
 	}
 
-	if typedErr, ok := err.(bslcapi.CloudError); ok {
+	if typedErr, ok := err.(bslapi.CloudError); ok {
 		respErr.Error.Type = typedErr.Type()
 	} else {
 		respErr.Error.Type = jsonCloudErrorType
@@ -122,7 +115,7 @@ func (c JSON) buildCloudError(err error) []byte {
 
 	respErr.Error.Message = err.Error()
 
-	if typedErr, ok := err.(bslcapi.RetryableError); ok {
+	if typedErr, ok := err.(bslapi.RetryableError); ok {
 		respErr.Error.CanRetry = typedErr.CanRetry()
 	}
 
@@ -170,14 +163,4 @@ func (c JSON) buildNotImplementedError() []byte {
 	c.logger.DebugWithDetails(jsonLogTag, "NotImplementedError response bytes", string(respErrBytes))
 
 	return respErrBytes
-}
-
-// This function is used to set the default value of localDiskFlag to true if it is not specified in the input json file.
-// This function will be removed if we can ensure LocalDiskFlag property is set in place in all deployment manifest
-func (c JSON) localDiskFlagNotSet(reqString string) {
-	if strings.Contains(strings.ToUpper(reqString), strings.ToUpper("localDiskFlag")) {
-		slhelper.LocalDiskFlagNotSet = false
-	} else {
-		slhelper.LocalDiskFlagNotSet = true
-	}
 }

@@ -22,22 +22,14 @@ func NewDetachDisk(
 }
 
 func (a DetachDiskAction) Run(vmCID VMCID, diskCID DiskCID) (interface{}, error) {
-	vm, found, err := a.vmFinder.Find(vmCID.Int())
+	vm, err := a.vmFinder.Find(vmCID.Int())
 	if err != nil {
 		return nil, bosherr.WrapErrorf(err, "Finding VM '%s'", vmCID)
 	}
 
-	if !found {
-		return nil, bosherr.Errorf("Expected to find VM '%s'", vmCID)
-	}
-
-	disk, found, err := a.diskFinder.Find(diskCID.Int())
+	disk, err := a.diskFinder.Find(diskCID.Int())
 	if err != nil {
 		return nil, bosherr.WrapErrorf(err, "Finding disk '%s'", diskCID)
-	}
-
-	if !found {
-		return nil, bosherr.Errorf("Expected to find disk '%s'", diskCID)
 	}
 
 	err = vm.DetachDisk(disk)

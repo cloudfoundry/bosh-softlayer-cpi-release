@@ -6,14 +6,12 @@ import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 
 	. "bosh-softlayer-cpi/softlayer/common"
-	helper "bosh-softlayer-cpi/softlayer/common/helper"
-	bslcstem "bosh-softlayer-cpi/softlayer/stemcell"
-
-	sldatatypes "github.com/maximilien/softlayer-go/data_types"
+	bslnet "bosh-softlayer-cpi/softlayer/networks"
+	bslstem "bosh-softlayer-cpi/softlayer/stemcell"
 )
 
 type CreateVMAction struct {
-	stemcellFinder    bslcstem.StemcellFinder
+	stemcellFinder    bslstem.StemcellFinder
 	vmCreatorProvider CreatorProvider
 	vmCreator         VMCreator
 	vmCloudProperties *VMCloudProperties
@@ -21,7 +19,7 @@ type CreateVMAction struct {
 }
 
 func NewCreateVM(
-	stemcellFinder bslcstem.StemcellFinder,
+	stemcellFinder bslstem.StemcellFinder,
 	vmCreatorProvider CreatorProvider,
 	options ConcreteFactoryOptions,
 ) (action CreateVMAction) {
@@ -32,87 +30,54 @@ func NewCreateVM(
 	return
 }
 
-func (a CreateVMAction) Run(agentID string, stemcellCID StemcellCID, cloudProps VMCloudProperties, networks Networks, diskIDs []DiskCID, env Environment) (string, error) {
-	a.updateCloudProperties(&cloudProps)
+func (cvm CreateVMAction) Run(agentID string, stemcellCID StemcellCID, cloudProps VMCloudProperties, networks bslnet.Networks, diskIDs []DiskCID, env Environment) (string, error) {
+	cvm.updateCloudProperties(&cloudProps)
 
-	helper.TIMEOUT = 30 * time.Second
-	helper.POLLING_INTERVAL = 5 * time.Second
-	helper.NetworkInterface = "eth0"
-	helper.LocalDNSConfigurationFile = "/etc/hosts"
-
-	stemcell, err := a.stemcellFinder.FindById(int(stemcellCID))
+	stemcell, err := cvm.stemcellFinder.FindById(int(stemcellCID))
 	if err != nil {
-		return "0", bosherr.WrapErrorf(err, "Finding stemcell '%s'", stemcellCID)
+		return "", bosherr.WrapErrorf(err, "Finding stemcell '%s'", stemcellCID)
 	}
 
-	if a.options.Softlayer.FeatureOptions.EnablePool {
-		a.vmCreator = a.vmCreatorProvider.Get("pool")
-		vm, err := a.vmCreator.Create(agentID, stemcell, cloudProps, networks, env)
-		if err != nil {
-			return "0", bosherr.WrapErrorf(err, "Creating vm with agent ID '%s'", agentID)
-		}
-
-		return VMCID(vm.ID()).String(), nil
+	cvm.vmCreator = cvm.vmCreatorProvider.Get("virtualguest")
+	vm, err := cvm.vmCreator.Create(agentID, stemcell, cloudProps, networks, env)
+	if err != nil {
+		return "", bosherr.WrapErrorf(err, "Creating Virtual_Guest with agent ID '%s'", agentID)
 	}
 
-	if cloudProps.Baremetal {
-		a.vmCreator = a.vmCreatorProvider.Get("baremetal")
-		vm, err := a.vmCreator.Create(agentID, stemcell, cloudProps, networks, env)
-		if err != nil {
-			return "0", bosherr.WrapErrorf(err, "Creating Baremetal with agent ID '%s'", agentID)
-		}
+	return VMCID(*vm.ID()).String(), nil
 
-		return VMCID(vm.ID()).String(), nil
-	} else {
-		a.vmCreator = a.vmCreatorProvider.Get("virtualguest")
-		vm, err := a.vmCreator.Create(agentID, stemcell, cloudProps, networks, env)
-		if err != nil {
-			return "0", bosherr.WrapErrorf(err, "Creating Virtual_Guest with agent ID '%s'", agentID)
-		}
-
-		return VMCID(vm.ID()).String(), nil
-	}
 }
 
-func (a CreateVMAction) updateCloudProperties(cloudProps *VMCloudProperties) {
-	a.vmCloudProperties = cloudProps
+func (cvm CreateVMAction) updateCloudProperties(cloudProps *VMCloudProperties) {
+	cvm.vmCloudProperties = cloudProps
 
 	if cloudProps.DeployedByBoshCLI {
-		a.vmCloudProperties.VmNamePrefix = updateHostNameInCloudProps(cloudProps, "")
+		cvm.vmCloudProperties.VmNamePrefix = updateHostNameInCloudProps(cloudProps, "")
 	} else {
-		a.vmCloudProperties.VmNamePrefix = updateHostNameInCloudProps(cloudProps, TimeStampForTime(time.Now().UTC()))
+		cvm.vmCloudProperties.VmNamePrefix = updateHostNameInCloudProps(cloudProps, TimeStampForTime(time.Now().UTC()))
 	}
 
 	if cloudProps.StartCpus == 0 {
-		a.vmCloudProperties.StartCpus = 4
+		cvm.vmCloudProperties.StartCpus = 4
 	}
 
 	if cloudProps.MaxMemory == 0 {
-		a.vmCloudProperties.MaxMemory = 8192
+		cvm.vmCloudProperties.MaxMemory = 8192
 	}
 
 	if len(cloudProps.Domain) == 0 {
-		a.vmCloudProperties.Domain = "softlayer.com"
-	}
-	helper.LengthOfHostName = len(a.vmCloudProperties.VmNamePrefix + "." + a.vmCloudProperties.Domain)
-	// A workaround for the issue #129 in bosh-softlayer-cpi
-	if helper.LengthOfHostName == 64 {
-		a.vmCloudProperties.VmNamePrefix = a.vmCloudProperties.VmNamePrefix + "-1"
-		helper.LengthOfHostName = len(a.vmCloudProperties.VmNamePrefix + "." + a.vmCloudProperties.Domain)
-	}
-	if len(cloudProps.NetworkComponents) == 0 {
-		a.vmCloudProperties.NetworkComponents = []sldatatypes.NetworkComponents{{MaxSpeed: 1000}}
+		cvm.vmCloudProperties.Domain = "softlayer.com"
 	}
 
-	if helper.LocalDiskFlagNotSet == true {
-		a.vmCloudProperties.LocalDiskFlag = true
+	if cloudProps.MaxNetworkSpeed == 0 {
+		cvm.vmCloudProperties.MaxNetworkSpeed = 1000
 	}
 }
 
 func updateHostNameInCloudProps(cloudProps *VMCloudProperties, timeStampPostfix string) string {
-	if len(cloudProps.Hostname) == 0 {
-		return cloudProps.VmNamePrefix + timeStampPostfix
+	if len(timeStampPostfix) == 0 {
+		return cloudProps.VmNamePrefix
 	} else {
-		return cloudProps.Hostname
+		return cloudProps.VmNamePrefix + "." + timeStampPostfix
 	}
 }

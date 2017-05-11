@@ -1,64 +1,21 @@
 package stemcell
 
 import (
-	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
-
-	slh "bosh-softlayer-cpi/softlayer/common/helper"
-
-	sl "github.com/maximilien/softlayer-go/softlayer"
-
-	"fmt"
-	"time"
 )
 
 type SoftLayerStemcell struct {
 	id   int
 	uuid string
-
-	softLayerFinder SoftLayerStemcellFinder
 }
 
-func NewSoftLayerStemcell(id int, uuid string, softLayerClient sl.Client, logger boshlog.Logger) SoftLayerStemcell {
-	slh.TIMEOUT = 60 * time.Minute
-	slh.POLLING_INTERVAL = 10 * time.Second
-
-	softLayerFinder := SoftLayerStemcellFinder{
-		client: softLayerClient,
-		logger: logger,
-	}
-
+func NewSoftLayerStemcell(id int, uuid string, logger boshlog.Logger) SoftLayerStemcell {
 	return SoftLayerStemcell{
-		id:              id,
-		uuid:            uuid,
-		softLayerFinder: softLayerFinder,
+		id:   id,
+		uuid: uuid,
 	}
 }
 
-func (s SoftLayerStemcell) ID() int { return s.id }
+func (ss SoftLayerStemcell) ID() int { return ss.id }
 
-func (s SoftLayerStemcell) Uuid() string { return s.uuid }
-
-func (s SoftLayerStemcell) Delete() error {
-	vgdtgService, err := s.softLayerFinder.client.GetSoftLayer_Virtual_Guest_Block_Device_Template_Group_Service()
-	if err != nil {
-		return bosherr.WrapError(err, "Getting SoftLayer_Virtual_Guest_Block_Device_Template_Group_Service from SoftLayer client")
-	}
-
-	_, err = vgdtgService.DeleteObject(s.id)
-	if err != nil {
-		return bosherr.WrapError(err, "Deleting VirtualGuestBlockDeviceTemplateGroup from service")
-	}
-
-	err = slh.WaitForVirtualGuestToHaveNoRunningTransactions(s.softLayerFinder.client, s.id)
-	if err != nil {
-		return bosherr.WrapError(err, fmt.Sprintf("Waiting for VirtualGuest `%d` to have no pending transactions", s.id))
-	}
-
-	_, err = s.softLayerFinder.FindById(s.id)
-	if err == nil {
-		return bosherr.WrapError(nil, fmt.Sprintf("Could not delete VirtualGuestBlockDeviceTemplateGroup with id `%d`", s.id))
-	}
-
-	return nil
-}
+func (ss SoftLayerStemcell) Uuid() string { return ss.uuid }

@@ -1,10 +1,9 @@
 package common
 
 import (
-	sldatatypes "github.com/maximilien/softlayer-go/data_types"
-
-	bslcdisk "bosh-softlayer-cpi/softlayer/disk"
-	bslcstem "bosh-softlayer-cpi/softlayer/stemcell"
+	bsldisk "bosh-softlayer-cpi/softlayer/disk"
+	bslnetwork "bosh-softlayer-cpi/softlayer/networks"
+	bslstem "bosh-softlayer-cpi/softlayer/stemcell"
 )
 
 type Environment map[string]interface{}
@@ -25,42 +24,21 @@ type FeatureOptions struct {
 }
 
 type VMCloudProperties struct {
-	Hostname                 string                               `json:"hostname,omitempty"`
-	VmNamePrefix             string                               `json:"vmNamePrefix,omitempty"`
-	Domain                   string                               `json:"domain,omitempty"`
-	StartCpus                int                                  `json:"startCpus,omitempty"`
-	MaxMemory                int                                  `json:"maxMemory,omitempty"`
-	Datacenter               sldatatypes.Datacenter               `json:"datacenter"`
-	BlockDeviceTemplateGroup sldatatypes.BlockDeviceTemplateGroup `json:"blockDeviceTemplateGroup,omitempty"`
-	SshKeys                  []sldatatypes.SshKey                 `json:"sshKeys,omitempty"`
-	RootDiskSize             int                                  `json:"rootDiskSize,omitempty"`
-	EphemeralDiskSize        int                                  `json:"ephemeralDiskSize,omitempty"`
+	VmNamePrefix      string `json:"vmNamePrefix,omitempty"`
+	Domain            string `json:"domain,omitempty"`
+	StartCpus         int    `json:"startCpus,omitempty"`
+	MaxMemory         int    `json:"maxMemory,omitempty"`
+	Datacenter        string `json:"datacenter"`
+	EphemeralDiskSize int    `json:"ephemeralDiskSize,omitempty"`
 
-	HourlyBillingFlag              bool                                       `json:"hourlyBillingFlag,omitempty"`
-	LocalDiskFlag                  bool                                       `json:"localDiskFlag,omitempty"`
-	DedicatedAccountHostOnlyFlag   bool                                       `json:"dedicatedAccountHostOnlyFlag,omitempty"`
-	NetworkComponents              []sldatatypes.NetworkComponents            `json:"networkComponents,omitempty"`
-	PrivateNetworkOnlyFlag         bool                                       `json:"privateNetworkOnlyFlag,omitempty"`
-	PrimaryNetworkComponent        sldatatypes.PrimaryNetworkComponent        `json:"primaryNetworkComponent,omitempty"`
-	PrimaryBackendNetworkComponent sldatatypes.PrimaryBackendNetworkComponent `json:"primaryBackendNetworkComponent,omitempty"`
-	BlockDevices                   []sldatatypes.BlockDevice                  `json:"blockDevices,omitempty"`
-	UserData                       []sldatatypes.UserData                     `json:"userData,omitempty"`
-	PostInstallScriptUri           string                                     `json:"postInstallScriptUri,omitempty"`
+	HourlyBillingFlag            bool `json:"hourlyBillingFlag,omitempty"`
+	LocalDiskFlag                bool `json:"localDiskFlag,omitempty"`
+	DedicatedAccountHostOnlyFlag bool `json:"dedicatedAccountHostOnlyFlag,omitempty"`
+	PrivateNetworkOnlyFlag       bool `json:"privateNetworkOnlyFlag,omitempty"`
 
-	BoshIp            string `json:"bosh_ip,omitempty"`
-	DeployedByBoshCLI bool   `json:"deployedByBoshcli,omitempty"`
+	DeployedByBoshCLI bool `json:"deployedByBoshcli,omitempty"`
 
-	Baremetal             bool   `json:"baremetal,omitempty"`
-	BaremetalStemcell     string `json:"bm_stemcell,omitempty"`
-	BaremetalNetbootImage string `json:"bm_netboot_image,omitempty"`
-
-	DisableOsReload bool `json:"disableOsReload,omitempty"`
-}
-
-type AllowedHostCredential struct {
-	Iqn      string `json:"iqn"`
-	Username string `json:"username"`
-	Password string `json:"password"`
+	MaxNetworkSpeed int `json:"maxNetworkSpeed,omitempty"`
 }
 
 type VMMetadata map[string]interface{}
@@ -86,9 +64,6 @@ node.conn[0].iscsi.MaxRecvDataSegmentLength = 65536
 `
 
 const (
-	SOFTLAYER_HARDWARE_LOG_TAG   = "SoftLayerHardware"
-	SOFTLAYER_VM_FINDER_LOG_TAG  = "SoftLayerVMFinder"
-	SOFTLAYER_VM_OS_RELOAD_TAG   = "OSReload"
 	SOFTLAYER_VM_LOG_TAG         = "SoftLayerVM"
 	ROOT_USER_NAME               = "root"
 	SOFTLAYER_VM_CREATOR_LOG_TAG = "SoftLayerVMCreator"
@@ -96,39 +71,37 @@ const (
 
 //go:generate counterfeiter -o fakes/fake_vm.go . VM
 type VM interface {
-	AttachDisk(bslcdisk.Disk) error
+	AttachDisk(bsldisk.Disk) error
 
-	ConfigureNetworks(Networks) error
+	ConfigureNetworksSettings(bslnetwork.Networks) error
 
-	//dedicated for setup network by modify /etc/network/interfaces
-	ConfigureNetworks2(Networks) error
+	//specific to configuring network with modifying /etc/network/interfaces
+	ConfigureNetworks(bslnetwork.Networks) (bslnetwork.Networks, error)
 
-	DetachDisk(bslcdisk.Disk) error
-	Delete(agentId string) error
+	DetachDisk(bsldisk.Disk) error
+	DeleteAgentEnv() error
 
-	GetDataCenterId() int
-	GetPrimaryIP() string
-	GetPrimaryBackendIP() string
-	GetRootPassword() string
-	GetFullyQualifiedDomainName() string
+	GetDataCenter() *string
+	GetPrimaryIP() *string
+	GetPrimaryBackendIP() *string
+	GetRootPassword() *string
+	GetFullyQualifiedDomainName() *string
 
-	ID() int
+	ID() *int
 
 	Reboot() error
-	ReloadOS(bslcstem.Stemcell) error
-	ReloadOSForBaremetal(string, string) error
+	ReloadOS(bslstem.Stemcell) error
 
 	SetMetadata(VMMetadata) error
 	SetVcapPassword(string) error
 	SetAgentEnvService(AgentEnvService) error
 
 	UpdateAgentEnv(AgentEnv) error
-	DeleteAgentEnv() error
 }
 
 //go:generate counterfeiter -o fakes/fake_vm_creator.go . VMCreator
 type VMCreator interface {
-	Create(string, bslcstem.Stemcell, VMCloudProperties, Networks, Environment) (VM, error)
+	Create(string, bslstem.Stemcell, VMCloudProperties, bslnetwork.Networks, Environment) (VM, error)
 	GetAgentOptions() AgentOptions
 }
 
@@ -139,5 +112,5 @@ type VMDeleter interface {
 
 //go:generate counterfeiter -o fakes/fake_vm_finder.go . VMFinder
 type VMFinder interface {
-	Find(int) (VM, bool, error)
+	Find(int) (VM, error)
 }

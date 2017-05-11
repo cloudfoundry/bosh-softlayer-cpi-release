@@ -1,54 +1,45 @@
 {
   "method": "create_vm",
   "arguments": [
-    "45632666-9fb1-422a-af35-2ab6102c5c1b",
-    "1543215",
+    "459b4916-6a5b-4931-5733-b61eda1c8c0f",
+    "1459855",
     {
-      "vmNamePrefix": "ecpi-test",
+      "deployedByBoshcli": true,
+      "datacenter": "lon02",
       "domain": "softlayer.com",
-      "startCpus": 1,
-      "maxMemory": 1024,
+      "ephemeralDiskSize": 100,
       "hourlyBillingFlag": true,
-      "localDiskFlag": true,
-      "dedicatedAccountHostOnlyFlag": false,
-      "datacenter": {
-        "name": "lon02"
-      },
-      "bosh_ip": "10.112.116.127",
-      "primaryNetworkComponent": {
-        "networkVlan": {
-          "id": 1292653
-        }
-      },
-      "primaryBackendNetworkComponent": {
-        "networkVlan": {
-          "id": 1292651
-        }
-      },
-      "sshKeys": [
-        {
-          "id": 74826
-        }
-      ]
+      "maxMemory": 8192,
+      "startCpus": 4,
+      "vmNamePrefix": "bosh-sl-test"
     },
     {
-      "default": {
-        "type": "dynamic",
+      "lon02_private": {
+        "cloud_properties": {
+          "vlanId": 1292651
+        },
         "dns": [
           "8.8.8.8",
           "10.0.80.11",
           "10.0.80.12"
         ],
+        "type": "dynamic"
+      },
+      "lon02_public": {
+        "cloud_properties": {
+          "vlanId": 1292653
+        },
         "default": [
           "dns",
           "gateway"
-        ]
+        ],
+        "type": "dynamic"
       }
     },
-    null,
+    [],
     {}
   ],
   "context": {
-    "director_uuid": "5276b588-1016-4023-acae-9a0d797168be"
+    "director_uuid": "254a3f6b-412-4639-6b37-f79a68ec410c"
   }
 }
