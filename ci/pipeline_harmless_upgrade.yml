@@ -1,8 +1,18 @@
 resources:
+- name: bosh-cpi-release-in
+  type: git
+  source:
+    uri: git@github.com:cloudfoundry/bosh-softlayer-cpi.git
+    branch: master
+    private_key: {{github_private_key_zhanggbj}}
+    ignore_paths:
+        - .final_builds/**/*.yml
+        - releases/**/*.yml
+
 - name: bosh-cpi-final-artifacts
   type: s3
   source:
-    regexp: bosh-softlayer-cpi-([0-9.]+)\.tgz
+    regexp: bosh-softlayer-cpi-([0-9]+)\.tgz
     bucket: {{s3_pipeline_bucket}}
     access_key_id: {{s3_access_key_id}}
     secret_access_key: {{s3_secret_access_key}}
@@ -16,14 +26,15 @@ resources:
     secret_access_key: {{s3_secret_access_key}}
 
 jobs:
-- name: build-patch
+- name: build-cpi-patch
   serial: true
   plan:
   - aggregate:
-    - {trigger: false, get: bosh-cpi-release, resource: bosh-cpi-final-artifacts}
+    - {trigger: false, get: bosh-cpi-release, resource: bosh-cpi-release-in}
+    - {trigger: false, get: bosh-cpi-final-release, resource: bosh-cpi-final-artifacts}
 
-  - task: build-patch
+  - task: build-cpi-patch
     file: bosh-cpi-release/ci/tasks/build-patch.yml
 
   - put: bosh-cpi-patch-artifacts
-    params: {file: promote/bosh-softlayer-cpi-patch/bosh-softlayer-cpi-patch-*.tgz}
+    params: {file: promote/bosh-softlayer-cpi-patch-*.tgz}
