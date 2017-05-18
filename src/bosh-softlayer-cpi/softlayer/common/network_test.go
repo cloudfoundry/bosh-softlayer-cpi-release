@@ -5,14 +5,16 @@ import (
 	. "github.com/onsi/gomega"
 
 	. "bosh-softlayer-cpi/softlayer/common"
+	"encoding/json"
 )
 
 var _ = Describe("Network", func() {
 	var (
-		networks, emptyNetworks                                 Networks
+		networks, emptyNetworks, networksExpect                 Networks
 		dynamicNetwork, emptyNetwork, dnsNetwork                Network
 		expectedNetwork                                         Network
 		networkWithDefaultGateway, networkWithOutDefaultGateway Network
+		networksJsonCamelCase, networksJsonSnakeCase            []byte
 	)
 
 	Describe("#First", func() {
@@ -183,4 +185,75 @@ var _ = Describe("Network", func() {
 			Expect(network2).To(Equal(dnsNetwork))
 		})
 	})
+
+	Describe("Unmarshal underscore network configurations", func() {
+		BeforeEach(func() {
+			networksExpect = Networks{
+				"fake-net-name": Network{
+					Type:          "dynamic",
+					IP:            "fake-ip",
+					Netmask:       "fake-netmask",
+					Gateway:       "fake-gateway",
+					DNS:           []string{"fake-dns1", "fake-dns2"},
+					Default:       []string{"fake-default"},
+					Preconfigured: true,
+
+					CloudProperties: map[string]interface{}{
+						"PrimaryBackendNetworkComponent": map[string]interface{}{
+							"NetworkVlan": map[string]interface{}{
+								"Id":              float64(524956),
+								"PrimarySubnetId": float64(1100909),
+							},
+						},
+						"PrivateNetworkOnlyFlag": true,
+					},
+				},
+			}
+
+			networksJsonSnakeCase = []byte(`{"fake-net-name":{"type":"dynamic",
+								   "ip":"fake-ip",
+								   "netmask":"fake-netmask",
+								   "gateway":"fake-gateway",
+								   "dns":["fake-dns1","fake-dns2"],
+								   "default":["fake-default"],
+								   "preconfigured":true,
+								   "cloud_properties":
+								       {"primary_backend_network_component":
+								           {"network_vlan":
+								               {"id":524956,
+								                "primary_subnet_id":1100909}},
+								             "private_network_only_flag":true}}}`)
+
+			networksJsonCamelCase = []byte(`{"fake-net-name":{"type":"dynamic",
+								   "ip":"fake-ip",
+								   "netmask":"fake-netmask",
+								   "gateway":"fake-gateway",
+								   "dns":["fake-dns1","fake-dns2"],
+								   "default":["fake-default"],
+								   "preconfigured":true,
+								   "cloud_properties":
+								       {"primaryBackendNetworkComponent":
+								           {"networkVlan":
+								               {"id":524956,
+								                "primarySubnetId":1100909}},
+								             "privateNetworkOnlyFlag":true}}}`)
+
+		})
+
+		It("Correctly unmarshal snake case json format", func() {
+			networksUnmarshaled := Networks{}
+			err := json.Unmarshal(networksJsonCamelCase, &networksUnmarshaled)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(networksUnmarshaled).To(Equal(networksExpect))
+		})
+
+		It("Correctly unmarshal camel case json format", func() {
+			networksUnmarshaled := Networks{}
+			err := json.Unmarshal(networksJsonSnakeCase, &networksUnmarshaled)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(networksUnmarshaled).To(Equal(networksExpect))
+		})
+
+	})
+
 })

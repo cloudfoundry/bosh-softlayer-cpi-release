@@ -1,10 +1,13 @@
 package common
 
 import (
-	sldatatypes "github.com/maximilien/softlayer-go/data_types"
-
 	bslcdisk "bosh-softlayer-cpi/softlayer/disk"
 	bslcstem "bosh-softlayer-cpi/softlayer/stemcell"
+	"encoding/json"
+	sldatatypes "github.com/maximilien/softlayer-go/data_types"
+	"reflect"
+	"strings"
+	"unicode"
 )
 
 type Environment map[string]interface{}
@@ -55,6 +58,74 @@ type VMCloudProperties struct {
 	BaremetalNetbootImage string `json:"bm_netboot_image,omitempty"`
 
 	DisableOsReload bool `json:"disableOsReload,omitempty"`
+}
+
+func (vmprop *VMCloudProperties) UnmarshalJSON(data []byte) error {
+	type vmCloudProperties VMCloudProperties
+	var oriProps map[string]interface{}
+	err := json.Unmarshal(data, &oriProps)
+	if err != nil {
+		return err
+	}
+	converted, err := ConvertKeysCamelized(oriProps)
+	if err != nil {
+		return err
+	}
+	j, err := json.Marshal(converted)
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(j, (*vmCloudProperties)(vmprop))
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func ConvertKeysCamelized(ori interface{}) (interface{}, error) {
+	rv := reflect.ValueOf(ori)
+	switch rv.Kind() {
+	case reflect.Slice:
+		ret := make([]interface{}, rv.Len())
+		for i := 0; i < rv.Len(); i++ {
+			v, err := ConvertKeysCamelized(rv.Index(i).Interface())
+			if err != nil {
+				return nil, err
+			}
+			ret[i] = v
+		}
+		return ret, nil
+	case reflect.Map:
+		ret := make(map[string]interface{})
+		for _, k := range rv.MapKeys() {
+			new_k := camelize(k.Interface().(string))
+			v := rv.MapIndex(k).Interface()
+			new_v, err := ConvertKeysCamelized(v)
+			if err != nil {
+				return nil, err
+			}
+			ret[new_k] = new_v
+		}
+		return ret, nil
+	default:
+		return rv.Interface(), nil
+
+	}
+}
+
+func camelize(in string) string {
+	var res string
+	words := strings.Split(in, "_")
+	for _, word := range words {
+		if len(word) > 0 {
+			runes := []rune(word)
+			runes[0] = unicode.ToUpper(runes[0])
+			res += string(runes)
+		} else {
+			res += word
+		}
+	}
+	return res
 }
 
 type AllowedHostCredential struct {

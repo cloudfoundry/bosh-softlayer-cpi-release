@@ -1,6 +1,11 @@
 package common
 
+import "encoding/json"
+
+//import "encoding/json"
+
 type Networks map[string]Network
+type CloudProperties map[string]interface{}
 
 type Network struct {
 	Type string `json:"type"`
@@ -16,7 +21,32 @@ type Network struct {
 
 	MAC string `json:"mac,omitempty"`
 
-	CloudProperties map[string]interface{} `json:"cloud_properties,omitempty"`
+	CloudProperties CloudProperties `json:"cloud_properties,omitempty"`
+}
+
+func (cloudProp *CloudProperties) UnmarshalJSON(data []byte) error {
+	//*cloudProp = CloudProperties{"s": "df"}
+	//return nil
+	type cloudProperties CloudProperties
+	var oriProps map[string]interface{}
+	err := json.Unmarshal(data, &oriProps)
+	if err != nil {
+		return err
+	}
+	converted, err := ConvertKeysCamelized(oriProps)
+	if err != nil {
+		return err
+	}
+	j, err := json.Marshal(converted)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(j, (*cloudProperties)(cloudProp))
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (ns Networks) First() Network {

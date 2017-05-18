@@ -60,7 +60,7 @@ var _ = Describe("NewAgentEnvFromJSON", func() {
 						MAC: "fake-mac",
 
 						CloudProperties: map[string]interface{}{
-							"fake-cp-key": "fake-cp-value",
+							"Fake-cp-key": "fake-cp-value",
 						},
 					},
 				},
