@@ -1,77 +1,73 @@
 package action
 
 import (
-	bslcdisk "bosh-softlayer-cpi/softlayer/disk"
-	bslcstem "bosh-softlayer-cpi/softlayer/stemcell"
-	bslcvm "bosh-softlayer-cpi/softlayer/vm"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
-	bsl "bosh-softlayer-cpi/softlayer/client"
+	"bosh-softlayer-cpi/config"
+	"bosh-softlayer-cpi/softlayer/client"
+	"bosh-softlayer-cpi/softlayer/disk_service"
+	"bosh-softlayer-cpi/softlayer/virtual_guest_service"
 
-	. "bosh-softlayer-cpi/softlayer/common"
+	"bosh-softlayer-cpi/registry"
+	"bosh-softlayer-cpi/softlayer/stemcell_service"
 )
 
 type concreteFactory struct {
 	availableActions map[string]Action
 }
 
-func NewConcreteFactory(options ConcreteFactoryOptions, logger boshlog.Logger) concreteFactory {
-	softLayerClient := bsl.NewSoftlayerClientSession(bsl.SoftlayerAPIEndpointPublicDefault, options.Softlayer.Username, options.Softlayer.ApiKey, true, 300)
-	repClientFactory := bsl.NewClientFactory(bsl.NewSoftLayerClientManager(softLayerClient))
-	client := repClientFactory.CreateClient()
+func NewConcreteFactory(
+	softlayerClient client.Client,
+	cfg config.Config,
+	logger boshlog.Logger,
+) concreteFactory {
 
-	stemcellFinder := bslcstem.NewSoftLayerStemcellFinder(client, logger)
-
-	agentEnvServiceFactory := NewSoftLayerAgentEnvServiceFactory(options.Registry, logger)
-
-	vmFinder := bslcvm.NewSoftLayerFinder(
-		client,
-		agentEnvServiceFactory,
+	registryClient := registry.NewHTTPClient(
+		cfg.Cloud.Properties.Registry,
 		logger,
 	)
 
-	vmCreatorProvider := NewCreatorProvider(
-		client,
-		options,
+	diskService := disk.NewSoftlayerDiskService(
+		softlayerClient,
 		logger,
 	)
 
-	vmDeleterProvider := NewDeleterProvider(
-		client,
-		logger,
-		vmFinder,
-	)
-
-	diskCreator := bslcdisk.NewSoftLayerDiskCreator(
-		client,
+	stemcellService := stemcell.NewSoftlayerStemcellService(
+		softlayerClient,
 		logger,
 	)
 
-	diskFinder := bslcdisk.NewSoftLayerDiskFinder(
-		client,
+	vmService := instance.NewSoftLayerVirtualGuestService(
+		softlayerClient,
 		logger,
 	)
 
 	return concreteFactory{
 		availableActions: map[string]Action{
 			// Stemcell management
-			"create_stemcell": NewCreateStemcell(stemcellFinder),
-			"delete_stemcell": NewDeleteStemcell(stemcellFinder, logger),
+			"create_stemcell": NewCreateStemcell(stemcellService),
+			"delete_stemcell": NewDeleteStemcell(stemcellService),
 
 			// VM management
-			"create_vm":          NewCreateVM(stemcellFinder, vmCreatorProvider, options),
-			"delete_vm":          NewDeleteVM(vmDeleterProvider, options),
-			"has_vm":             NewHasVM(vmFinder),
-			"reboot_vm":          NewRebootVM(vmFinder),
-			"set_vm_metadata":    NewSetVMMetadata(vmFinder),
-			"configure_networks": NewConfigureNetworks(vmFinder),
+			"create_vm": NewCreateVM(
+				stemcellService,
+				vmService,
+				registryClient,
+				cfg.Cloud.Properties.Registry,
+				cfg.Cloud.Properties.Agent,
+			),
+			"delete_vm":          NewDeleteVM(vmService, registryClient),
+			"has_vm":             NewHasVM(vmService),
+			"reboot_vm":          NewRebootVM(vmService),
+			"set_vm_metadata":    NewSetVMMetadata(vmService),
+			"configure_networks": NewConfigureNetworks(vmService, registryClient),
 
 			// Disk management
-			"create_disk": NewCreateDisk(vmFinder, diskCreator),
-			"delete_disk": NewDeleteDisk(diskFinder),
-			"attach_disk": NewAttachDisk(vmFinder, diskFinder),
-			"detach_disk": NewDetachDisk(vmFinder, diskFinder),
+			"create_disk": NewCreateDisk(diskService, vmService),
+			"delete_disk": NewDeleteDisk(diskService),
+			"attach_disk": NewAttachDisk(diskService, vmService, registryClient),
+			"detach_disk": NewDetachDisk(vmService, registryClient),
 
 			// Not implemented (disk related):
 			//   snapshot_disk

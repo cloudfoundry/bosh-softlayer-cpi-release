@@ -1,6 +1,6 @@
 package registry
 
-const defaultSystemDisk = "/dev/sda"
+const DefaultEphemeralDisk = "/dev/xvdc"
 
 type agentSettingsResponse struct {
 	Settings string `json:"settings"`
@@ -99,8 +99,20 @@ type NetworkSettings struct {
 	// List of defaults
 	Default []string `json:"default"`
 
+	Alias string `json:"alias,omitempty"`
+
+	Routes Routes `json:"routes,omitempty"`
+
 	// Network cloud properties
 	CloudProperties map[string]interface{} `json:"cloud_properties"`
+}
+
+type Routes []Route
+
+type Route struct {
+	Destination string
+	Gateway     string
+	NetMask     string
 }
 
 // VMSettings are the VM settings for a particular VM.
@@ -114,7 +126,7 @@ func NewAgentSettings(agentID string, vmCID string, networksSettings NetworksSet
 	agentSettings := AgentSettings{
 		AgentID: agentID,
 		Disks: DisksSettings{
-			System:     defaultSystemDisk,
+			Ephemeral:  "",
 			Persistent: map[string]PersistentSettings{},
 		},
 		Blobstore: BlobstoreSettings{
@@ -145,6 +157,13 @@ func (as AgentSettings) AttachPersistentDisk(diskID string, volumeID string, pat
 		Path:     path,
 	}
 	as.Disks.Persistent = persistenDiskSettings
+
+	return as
+}
+
+// AttachPersistentDisk updates the agent settings in order to add an attached persistent disk.
+func (as AgentSettings) AttachEphemeralDisk(path string) AgentSettings {
+	as.Disks.Ephemeral = path
 
 	return as
 }

@@ -5,7 +5,7 @@
       'properties' => {
         'softlayer' => {
           'username' => p('softlayer.username'),
-          'apiKey' => p('softlayer.apiKey'),
+          'api_key' => p('softlayer.api_key'),
         },
         'agent' => {
           'ntp' => p('ntp')
@@ -13,53 +13,8 @@
       }
     }
   }
-  if_p('softlayer.featureOptions') do
-    softlayer_feature_options_params = {}
-    if_p('softlayer.featureOptions.enablePool') do |enablePool|
-      softlayer_feature_options_params.merge!('enablePool' => enablePool)
-    end
-    if_p('softlayer.featureOptions.disableOsReload') do |disableOsReload|
-      softlayer_feature_options_params.merge!('disableOsReload' => disableOsReload)
-    end
-    if_p('softlayer.featureOptions.apiEndpoint') do |apiEndpoint|
-      softlayer_feature_options_params.merge!('apiEndpoint' => apiEndpoint)
-    end
-    if_p('softlayer.featureOptions.apiWaitTime') do |apiWaitTime|
-      softlayer_feature_options_params.merge!('apiWaitTime' => apiWaitTime)
-    end
-    if_p('softlayer.featureOptions.apiRetryCount') do |apiRetryCount|
-      softlayer_feature_options_params.merge!('apiRetryCount' => apiRetryCount)
-    end
-    if_p('softlayer.featureOptions.createIscsiVolumeTimeout') do |createIscsiVolumeTimeout|
-      softlayer_feature_options_params.merge!('createIscsiVolumeTimeout' => createIscsiVolumeTimeout)
-    end
-    if_p('softlayer.featureOptions.createIscsiVolumePollingInterval') do |createIscsiVolumePollingInterval|
-      softlayer_feature_options_params.merge!('createIscsiVolumePollingInterval' => createIscsiVolumePollingInterval)
-    end
-    params['cloud']['properties']['softlayer']['featureOptions'] = softlayer_feature_options_params
-  end
-  if_p('baremetal') do
-    baremetal_params = {}
-    if_p('baremetal.username') do |username|
-      baremetal_params.merge!('username' => username)
-    end
-    if_p('baremetal.password') do |password|
-      baremetal_params.merge!('password' => password)
-    end
-    if_p('baremetal.endpoint') do |endpoint|
-      baremetal_params.merge!('endpoint' => endpoint)
-    end
-    params['cloud']['properties']['baremetal'] = baremetal_params
-  end
-  if_p('pool') do
-    pool_params = {}
-    if_p('pool.host') do |host|
-      pool_params.merge!('host' => host)
-    end
-    if_p('pool.port') do |port|
-      pool_params.merge!('port' => port)
-    end
-    params['cloud']['properties']['pool'] = pool_params
+  if_p('softlayer.api_endpoint') do |endpoint|
+    params['cloud']['properties']['softlayer']['api_endpoint'] = endpoint
   end
   if_p('blobstore') do
     blobstore_params = {

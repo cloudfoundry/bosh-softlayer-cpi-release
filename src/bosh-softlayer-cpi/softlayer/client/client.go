@@ -172,11 +172,11 @@ func (c *clientManager) GetInstanceByPrimaryIpAddress(ip string) (datatypes.Virt
 func (c *clientManager) GetAllowedHostCredential(id int) (datatypes.Network_Storage_Allowed_Host, error) {
 	allowedHost, err := c.VirtualGuestService.Id(id).Mask(ALLOWD_HOST_DEFAULT_MASK).GetAllowedHost()
 	if err != nil {
-		return datatypes.Network_Storage_Allowed_Host{}, bosherr.WrapErrorf(err, "Getting allowed host with instance id `%d`", id)
+		return datatypes.Network_Storage_Allowed_Host{}, bosherr.WrapErrorf(err, "Getting allowed host with instance id '%d'", id)
 	}
 
 	if allowedHost.Id == nil {
-		return datatypes.Network_Storage_Allowed_Host{}, bosherr.Errorf("Unable to getting allowed host with instance id `%d`", id)
+		return datatypes.Network_Storage_Allowed_Host{}, bosherr.Errorf("Unable to getting allowed host with instance id '%d'", id)
 	}
 
 	return allowedHost, err
@@ -196,7 +196,7 @@ func (c *clientManager) WaitInstanceUntilReady(id int, until time.Time) error {
 	for {
 		virtualGuest, err := c.GetInstance(id, "id, lastOperatingSystemReload[id,modifyDate], activeTransaction[id,transactionStatus.name], provisionDate, powerState.keyName")
 		if err != nil {
-			return bosherr.WrapErrorf(err, "Getting instance with id `%d`", id)
+			return bosherr.WrapErrorf(err, "Getting instance with id '%d'", id)
 		}
 
 		lastReload := virtualGuest.LastOperatingSystemReload
@@ -235,7 +235,7 @@ func (c *clientManager) WaitInstanceHasActiveTransaction(id int, until time.Time
 	for {
 		virtualGuest, err := c.GetInstance(id, "id, lastOperatingSystemReload[id,modifyDate], activeTransaction[id,transactionStatus.name], provisionDate, powerState.keyName")
 		if err != nil {
-			return bosherr.WrapErrorf(err, "Getting instance with id `%d`", id)
+			return bosherr.WrapErrorf(err, "Getting instance with id '%d'", id)
 		}
 
 		// if activeTxn != nil && activeTxn.TransactionStatus != nil && activeTxn.TransactionStatus.Name != nil {
@@ -248,7 +248,7 @@ func (c *clientManager) WaitInstanceHasActiveTransaction(id int, until time.Time
 
 		now := time.Now()
 		if now.After(until) {
-			return bosherr.Errorf("Wait instance with id of `%d` has active transaction time out", id)
+			return bosherr.Errorf("Wait instance with id of '%d' has active transaction time out", id)
 		}
 
 		min := math.Min(float64(5.0), float64(until.Sub(now)))
@@ -260,7 +260,7 @@ func (c *clientManager) WaitInstanceHasNoneActiveTransaction(id int, until time.
 	for {
 		virtualGuest, err := c.GetInstance(id, "id, lastOperatingSystemReload[id,modifyDate], activeTransaction[id,transactionStatus.name], provisionDate, powerState.keyName")
 		if err != nil {
-			return bosherr.WrapErrorf(err, "Getting instance with id `%d`", id)
+			return bosherr.WrapErrorf(err, "Getting instance with id '%d'", id)
 		}
 
 		// if activeTxn != nil && activeTxn.TransactionStatus != nil && activeTxn.TransactionStatus.Name != nil {
@@ -273,7 +273,7 @@ func (c *clientManager) WaitInstanceHasNoneActiveTransaction(id int, until time.
 
 		now := time.Now()
 		if now.After(until) {
-			return bosherr.Errorf("Waiting instance with id of `%d` has none active transaction time out", id)
+			return bosherr.Errorf("Waiting instance with id of '%d' has none active transaction time out", id)
 		}
 
 		min := math.Min(float64(5.0), float64(until.Sub(now)))
@@ -350,25 +350,18 @@ func (c *clientManager) ReloadInstance(id int, stemcellId int) error {
 }
 
 func (c *clientManager) CancelInstance(id int) error {
-	activeTransactions, err := c.VirtualGuestService.GetActiveTransactions()
-	if err != nil {
-		return bosherr.WrapErrorf(err, "Getting active transactions on instance with id `%d`", id)
-	}
-
-	if len(activeTransactions) > 0 {
-		until := time.Now().Add(time.Duration(30) * time.Minute)
-		err = c.WaitInstanceHasNoneActiveTransaction(id, until)
-		if err != nil {
-			return bosherr.WrapErrorf(err, "Waiting until instance with id `%d` has active transaction", id)
-		}
+	var err error
+	until := time.Now().Add(time.Duration(30) * time.Minute)
+	if err = c.WaitInstanceHasNoneActiveTransaction(*sl.Int(id), until); err != nil {
+		return bosherr.WrapError(err, "Waiting until instance has none active transaction before canceling")
 	}
 
 	resp, err := c.VirtualGuestService.Id(id).DeleteObject()
 	if err != nil {
-		return bosherr.WrapErrorf(err, "Deleting instance with id `%d`", id)
+		return bosherr.WrapErrorf(err, "Deleting instance with id '%d'", id)
 	}
 	if !resp {
-		return bosherr.WrapError(err, "Deleting instance with id `%d` failed")
+		return bosherr.WrapError(err, "Deleting instance with id '%d' failed")
 	}
 
 	return nil
@@ -643,7 +636,7 @@ func (c *clientManager) CreateVolume(location string, size int, iops int) (datat
 	}
 
 	if receipt.OrderId == nil {
-		return datatypes.Network_Storage{}, bosherr.Errorf("No order id returned after placing order with size of `%d`, iops of `%d`, location of `%s`", size, iops, location)
+		return datatypes.Network_Storage{}, bosherr.Errorf("No order id returned after placing order with size of '%d', iops of '%d', location of `%s`", size, iops, location)
 	}
 
 	until := time.Now().Add(time.Duration(1) * time.Hour)
@@ -654,7 +647,7 @@ func (c *clientManager) WaitVolumeProvisioningWithOrderId(orderId int, until tim
 	for {
 		volumes, err := c.getIscsiNetworkStorageWithOrderId(orderId)
 		if err != nil {
-			return datatypes.Network_Storage{}, bosherr.WrapErrorf(err, "Getting volumes with order id  of `%d`", orderId)
+			return datatypes.Network_Storage{}, bosherr.WrapErrorf(err, "Getting volumes with order id  of '%d'", orderId)
 		}
 
 		// if activeTxn != nil && activeTxn.TransactionStatus != nil && activeTxn.TransactionStatus.Name != nil {
@@ -667,7 +660,7 @@ func (c *clientManager) WaitVolumeProvisioningWithOrderId(orderId int, until tim
 
 		now := time.Now()
 		if now.After(until) {
-			return datatypes.Network_Storage{}, bosherr.Errorf("Waiting volume provisioning with order id of `%d` has time out", orderId)
+			return datatypes.Network_Storage{}, bosherr.Errorf("Waiting volume provisioning with order id of '%d' has time out", orderId)
 		}
 
 		min := math.Min(float64(5.0), float64(until.Sub(now)))
@@ -811,7 +804,7 @@ func (c *clientManager) AuthorizeHostToVolume(instance *datatypes.Virtual_Guest,
 		if err != nil {
 			apiErr := err.(sl.Error)
 			if apiErr.Exception == "SoftLayer_Exception_ObjectNotFound" {
-				return bosherr.WrapErrorf(err, "Unable to find object with id of `%d`", volumeId)
+				return bosherr.WrapErrorf(err, "Unable to find object with id of '%d'", volumeId)
 			}
 			if apiErr.Exception == "SoftLayer_Exception_Network_Storage_BlockingOperationInProgress" {
 				continue
@@ -825,7 +818,7 @@ func (c *clientManager) AuthorizeHostToVolume(instance *datatypes.Virtual_Guest,
 
 		now := time.Now()
 		if now.After(until) {
-			return bosherr.Errorf("Authorizing instance with id `%d` to volume with id `%d` time out after %v", *instance.Id, volumeId, until.String())
+			return bosherr.Errorf("Authorizing instance with id '%d' to volume with id '%d' time out after %v", *instance.Id, volumeId, until.String())
 		}
 
 		min := math.Min(float64(5.0), float64(until.Sub(now)))
@@ -839,7 +832,7 @@ func (c *clientManager) DeauthorizeHostToVolume(instance *datatypes.Virtual_Gues
 		if err != nil {
 			apiErr := err.(sl.Error)
 			if apiErr.Exception == "SoftLayer_Exception_ObjectNotFound" {
-				return bosherr.Errorf("Unable to find object with id of `%d`", volumeId)
+				return bosherr.Errorf("Unable to find object with id of '%d'", volumeId)
 			}
 			if apiErr.Exception == "SoftLayer_Exception_Network_Storage_BlockingOperationInProgress" {
 				continue
@@ -853,7 +846,7 @@ func (c *clientManager) DeauthorizeHostToVolume(instance *datatypes.Virtual_Gues
 
 		now := time.Now()
 		if now.After(until) {
-			return bosherr.Errorf("De-Authorizing instance with id `%d` to volume with id `%d` time out after %v", *instance.Id, volumeId, until.String())
+			return bosherr.Errorf("De-Authorizing instance with id '%d' to volume with id '%d' time out after %v", *instance.Id, volumeId, until.String())
 		}
 
 		min := math.Min(float64(5.0), float64(until.Sub(now)))
@@ -862,14 +855,36 @@ func (c *clientManager) DeauthorizeHostToVolume(instance *datatypes.Virtual_Gues
 }
 
 func (c *clientManager) AttachSecondDiskToInstance(id int, diskSize int) error {
-	_, err := c.UpgradeInstance(id, 0, 0, 0, false, diskSize)
+	var err error
+	until := time.Now().Add(time.Duration(1) * time.Hour)
+	if err = c.WaitInstanceHasNoneActiveTransaction(*sl.Int(id), until); err != nil {
+		return bosherr.WrapError(err, "Waiting until instance has none active transaction before os_reload")
+	}
+
+	_, err = c.UpgradeInstance(id, 0, 0, 0, false, diskSize)
 	if err != nil {
 		apiErr := err.(sl.Error)
 		if strings.Contains(apiErr.Message, "A current price was provided for the upgrade order") {
 			return nil
 		}
-		return bosherr.WrapErrorf(err, "Adding second disk with size `%d` to virutal guest of id `%d`", diskSize, id)
+		return bosherr.WrapErrorf(err, "Adding second disk with size '%d' to virutal guest of id '%d'", diskSize, id)
 	}
+
+	until = time.Now().Add(time.Duration(1) * time.Hour)
+	if err = c.WaitInstanceHasActiveTransaction(*sl.Int(id), until); err != nil {
+		return bosherr.WrapError(err, "Waiting until instance has active transaction after upgrading instance")
+	}
+
+	until = time.Now().Add(time.Duration(1) * time.Hour)
+	if err = c.WaitInstanceHasNoneActiveTransaction(*sl.Int(id), until); err != nil {
+		return bosherr.WrapError(err, "Waiting until instance has none active transaction after upgrading instance")
+	}
+
+	until = time.Now().Add(time.Duration(1) * time.Hour)
+	if err = c.WaitInstanceUntilReady(*sl.Int(id), until); err != nil {
+		return bosherr.WrapError(err, "Waiting until instance is ready after os_reload")
+	}
+
 	return nil
 }
 

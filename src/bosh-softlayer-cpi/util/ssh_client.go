@@ -11,26 +11,30 @@ import (
 
 //go:generate counterfeiter -o fakes/fake_ssh_client.go . SshClient
 type SshClient interface {
-	ExecCommand(username string, password string, ip string, command string) (string, error)
+	ExecCommand(command string) (string, error)
 
-	Download(username, password, ip, srcFile string, destination io.Writer) error
-	DownloadFile(username string, password string, ip string, srcFile string, destFile string) error
+	Download(srcFile string, destination io.Writer) error
+	DownloadFile(srcFile string, destFile string) error
 
-	Upload(username, password, ip string, source io.Reader, destFile string) error
-	UploadFile(username string, password string, ip string, srcFile string, destFile string) error
+	Upload(source io.Reader, destFile string) error
+	UploadFile(srcFile string, destFile string) error
 }
 
-type sshClientImpl struct{}
+type sshClientImpl struct {
+	ip       string
+	username string
+	password string
+}
 
-func (c *sshClientImpl) ExecCommand(username string, password string, ip string, command string) (string, error) {
+func (c *sshClientImpl) ExecCommand(command string) (string, error) {
 	config := &ssh.ClientConfig{
-		User: username,
+		User: c.username,
 		Auth: []ssh.AuthMethod{
-			ssh.Password(password),
+			ssh.Password(c.password),
 		},
 	}
 
-	client, err := ssh.Dial("tcp", address(ip), config)
+	client, err := ssh.Dial("tcp", address(c.ip), config)
 	if err != nil {
 		return "", err
 	}
@@ -50,25 +54,25 @@ func (c *sshClientImpl) ExecCommand(username string, password string, ip string,
 	return string(output), nil
 }
 
-func (c *sshClientImpl) UploadFile(username string, password string, ip string, srcFile string, destFile string) error {
+func (c *sshClientImpl) UploadFile(srcFile string, destFile string) error {
 	source, err := os.Open(srcFile)
 	if err != nil {
 		return err
 	}
 	defer source.Close()
 
-	return c.Upload(username, password, ip, source, destFile)
+	return c.Upload(source, destFile)
 }
 
-func (c *sshClientImpl) Upload(username, password, ip string, source io.Reader, destFile string) error {
+func (c *sshClientImpl) Upload(source io.Reader, destFile string) error {
 	config := &ssh.ClientConfig{
-		User: username,
+		User: c.username,
 		Auth: []ssh.AuthMethod{
-			ssh.Password(password),
+			ssh.Password(c.password),
 		},
 	}
 
-	client, err := ssh.Dial("tcp", address(ip), config)
+	client, err := ssh.Dial("tcp", address(c.ip), config)
 	if err != nil {
 		return err
 	}
@@ -94,25 +98,25 @@ func (c *sshClientImpl) Upload(username, password, ip string, source io.Reader, 
 	return nil
 }
 
-func (c *sshClientImpl) DownloadFile(username string, password string, ip string, srcFile string, destFile string) error {
+func (c *sshClientImpl) DownloadFile(srcFile string, destFile string) error {
 	writer, err := os.OpenFile(destFile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0755)
 	if err != nil {
 		return err
 	}
 	defer writer.Close()
 
-	return c.Download(username, password, ip, srcFile, writer)
+	return c.Download(srcFile, writer)
 }
 
-func (c *sshClientImpl) Download(username, password, ip, srcFile string, destination io.Writer) error {
+func (c *sshClientImpl) Download(srcFile string, destination io.Writer) error {
 	config := &ssh.ClientConfig{
-		User: username,
+		User: c.username,
 		Auth: []ssh.AuthMethod{
-			ssh.Password(password),
+			ssh.Password(c.password),
 		},
 	}
 
-	client, err := ssh.Dial("tcp", address(ip), config)
+	client, err := ssh.Dial("tcp", address(c.ip), config)
 	if err != nil {
 		return err
 	}
@@ -146,6 +150,10 @@ func address(a string) string {
 	return a
 }
 
-func GetSshClient() SshClient {
-	return &sshClientImpl{}
+func GetSshClient(username string, password string, ip string) SshClient {
+	return &sshClientImpl{
+		username: username,
+		password: password,
+		ip:       ip,
+	}
 }

@@ -21,18 +21,20 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"reflect"
 	"strconv"
 	"strings"
 
+	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	"github.com/softlayer/softlayer-go/datatypes"
 	"github.com/softlayer/softlayer-go/sl"
 )
 
-type RestTransport struct{}
+type RestTransport struct {
+	Logger boshlog.Logger
+}
 
 // DoRequest - Implementation of the TransportHandler interface for handling
 // calls to the REST endpoint.
@@ -56,7 +58,9 @@ func (r *RestTransport) DoRequest(sess *Session, service string, method string, 
 		path,
 		restMethod,
 		bytes.NewBuffer(parameters),
-		options)
+		options,
+		r.Logger,
+	)
 
 	if err != nil {
 		return sl.Error{Wrapped: err}
@@ -169,8 +173,16 @@ func encodeQuery(opts *sl.Options) string {
 	return query.Encode()
 }
 
-func makeHTTPRequest(session *Session, path string, requestType string, requestBody *bytes.Buffer, options *sl.Options) ([]byte, int, error) {
+func makeHTTPRequest(session *Session, path string, requestType string, requestBody *bytes.Buffer, options *sl.Options, logger boshlog.Logger) ([]byte, int, error) {
 	client := http.DefaultClient
+
+	// Custom RoundTripper for retries
+	computeRetrier := &RetryTransport{
+		Base:       http.DefaultTransport,
+		MaxRetries: 3,
+	}
+	client.Transport = computeRetrier
+
 	client.Timeout = DefaultTimeout
 	if session.Timeout != 0 {
 		client.Timeout = session.Timeout
@@ -193,8 +205,11 @@ func makeHTTPRequest(session *Session, path string, requestType string, requestB
 	req.URL.RawQuery = encodeQuery(options)
 
 	if session.Debug {
-		log.Println("[DEBUG] Request URL: ", requestType, req.URL)
-		log.Println("[DEBUG] Parameters: ", requestBody.String())
+		//log.Println("[DEBUG] Request URL: ", requestType, req.URL)
+		//log.Println("[DEBUG] Parameters: ", requestBody.String())
+
+		logger.Debug(SoftlayerGoLogTag, "Request URL: %s %s", requestType, req.URL.String())
+		logger.Debug(SoftlayerGoLogTag, " Parameters: %s", requestBody.String())
 	}
 
 	resp, err := client.Do(req)
@@ -210,7 +225,9 @@ func makeHTTPRequest(session *Session, path string, requestType string, requestB
 	}
 
 	if session.Debug {
-		log.Println("[DEBUG] Response: ", string(responseBody))
+		//log.Println("[DEBUG] Response: ", string(responseBody))
+
+		logger.Debug(SoftlayerGoLogTag, " Response: %s", string(responseBody))
 	}
 	return responseBody, resp.StatusCode, nil
 }

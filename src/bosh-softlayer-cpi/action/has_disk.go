@@ -1,30 +1,28 @@
 package action
 
 import (
-	. "bosh-softlayer-cpi/softlayer/disk"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
+
+	"bosh-softlayer-cpi/softlayer/disk_service"
 )
 
-type HasDiskAction struct {
-	diskFinder DiskFinder
+type HasDisk struct {
+	diskService disk.Service
 }
 
 func NewHasDisk(
-	diskFinder DiskFinder,
-) (action HasDiskAction) {
-	action.diskFinder = diskFinder
-	return
+	diskService disk.Service,
+) HasDisk {
+	return HasDisk{
+		diskService: diskService,
+	}
 }
 
-func (a HasDiskAction) Run(diskCID DiskCID) (bool, error) {
-	result, err := a.diskFinder.Find(int(diskCID))
+func (hd HasDisk) Run(diskCID DiskCID) (bool, error) {
+	_, found, err := hd.diskService.Find(diskCID.Int())
 	if err != nil {
-		return false, bosherr.WrapErrorf(err, "Finding disk with id `%d`", diskCID.Int())
+		return false, bosherr.WrapErrorf(err, "Finding disk '%s'", diskCID)
 	}
 
-	if result.ID() == 0 {
-		return false, bosherr.Errorf("Unable to find disk with id `%d`", diskCID.Int())
-	}
-
-	return true, nil
+	return found, nil
 }

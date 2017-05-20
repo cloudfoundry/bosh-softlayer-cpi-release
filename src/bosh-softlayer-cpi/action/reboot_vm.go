@@ -1,31 +1,30 @@
 package action
 
 import (
+	"bosh-softlayer-cpi/api"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 
-	. "bosh-softlayer-cpi/softlayer/common"
+	instance "bosh-softlayer-cpi/softlayer/virtual_guest_service"
 )
 
-type RebootVMAction struct {
-	vmFinder VMFinder
+type RebootVM struct {
+	vmService instance.Service
 }
 
 func NewRebootVM(
-	vmFinder VMFinder,
-) (action RebootVMAction) {
-	action.vmFinder = vmFinder
-	return
+	vmService instance.Service,
+) RebootVM {
+	return RebootVM{
+		vmService: vmService,
+	}
 }
 
-func (a RebootVMAction) Run(vmCID VMCID) (interface{}, error) {
-	vm, err := a.vmFinder.Find(int(vmCID))
-	if err != nil {
-		return nil, bosherr.WrapErrorf(err, "Finding vm with id '%d'", vmCID.Int())
-	}
-
-	err = vm.Reboot()
-	if err != nil {
-		return nil, bosherr.WrapErrorf(err, "Rebooting vm with id '%d'", vmCID.Int())
+func (rv RebootVM) Run(vmCID VMCID) (interface{}, error) {
+	if err := rv.vmService.Reboot(vmCID.Int()); err != nil {
+		if _, ok := err.(api.CloudError); ok {
+			return nil, err
+		}
+		return nil, bosherr.WrapErrorf(err, "Rebooting vm '%s'", vmCID)
 	}
 
 	return nil, nil

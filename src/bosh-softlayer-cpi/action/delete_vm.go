@@ -1,29 +1,38 @@
 package action
 
 import (
+	"bosh-softlayer-cpi/api"
+	"bosh-softlayer-cpi/registry"
+	vgs "bosh-softlayer-cpi/softlayer/virtual_guest_service"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 )
 
 type DeleteVMAction struct {
-	vmDeleterProvider DeleterProvider
-	options           ConcreteFactoryOptions
+	vmService      vgs.SoftlayerVirtualGuestService
+	registryClient registry.Client
 }
 
 func NewDeleteVM(
-	vmDeleterProvider DeleterProvider,
-	options ConcreteFactoryOptions,
+	vmDeleterProvider vgs.SoftlayerVirtualGuestService,
+	registryClient registry.Client,
 ) (action DeleteVMAction) {
-	action.vmDeleterProvider = vmDeleterProvider
-	action.options = options
+	action.vmService = vmDeleterProvider
+	action.registryClient = registryClient
 	return
 }
 
-func (a DeleteVMAction) Run(vmCID VMCID) (interface{}, error) {
-	vmDeleter := a.vmDeleterProvider.Get("virtualguest")
+func (dv DeleteVMAction) Run(vmCID VMCID) (interface{}, error) {
+	// Delete the VM
+	if err := dv.vmService.Delete(vmCID.Int()); err != nil {
+		if _, ok := err.(api.CloudError); ok {
+			return nil, err
+		}
+		return nil, bosherr.WrapErrorf(err, "Deleting vm '%s'", vmCID)
+	}
 
-	err := vmDeleter.Delete(int(vmCID))
-	if err != nil {
-		return nil, bosherr.WrapErrorf(err, "Deleting vm with id %d", int(vmCID))
+	// Delete the VM agent settings
+	if err := dv.registryClient.Delete(string(vmCID)); err != nil {
+		return nil, bosherr.WrapErrorf(err, "Deleting vm '%s'", vmCID)
 	}
 
 	return nil, nil

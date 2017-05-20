@@ -1,31 +1,27 @@
 package action
 
 import (
-	. "bosh-softlayer-cpi/softlayer/common"
-
+	instance "bosh-softlayer-cpi/softlayer/virtual_guest_service"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 )
 
-type HasVMAction struct {
-	vmFinder VMFinder
+type HasVM struct {
+	vmService instance.Service
 }
 
 func NewHasVM(
-	vmFinder VMFinder,
-) (action HasVMAction) {
-	action.vmFinder = vmFinder
-	return
+	vmService instance.Service,
+) HasVM {
+	return HasVM{
+		vmService: vmService,
+	}
 }
 
-func (a HasVMAction) Run(vmCID VMCID) (bool, error) {
-	vm, err := a.vmFinder.Find(int(vmCID))
+func (hv HasVM) Run(vmCID VMCID) (bool, error) {
+	_, found, err := hv.vmService.Find(vmCID.Int())
 	if err != nil {
-		return false, bosherr.WrapErrorf(err, "Finding VM with id `%d`", vmCID.Int())
+		return false, bosherr.WrapErrorf(err, "Finding vm '%s'", vmCID)
 	}
 
-	if vm.ID() == nil {
-		return false, bosherr.Errorf("Unable to find VM with id `%d`", vmCID.Int())
-	}
-
-	return true, nil
+	return found, nil
 }

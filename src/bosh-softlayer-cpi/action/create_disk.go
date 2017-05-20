@@ -3,34 +3,48 @@ package action
 import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 
-	. "bosh-softlayer-cpi/softlayer/common"
-	bslcdisk "bosh-softlayer-cpi/softlayer/disk"
+	"bosh-softlayer-cpi/api"
+	"bosh-softlayer-cpi/softlayer/disk_service"
+	instance "bosh-softlayer-cpi/softlayer/virtual_guest_service"
 )
 
-type CreateDiskAction struct {
-	diskCreator bslcdisk.DiskCreator
-	vmFinder    VMFinder
+type CreateDisk struct {
+	diskService disk.Service
+	vmService   instance.Service
 }
 
 func NewCreateDisk(
-	vmFinder VMFinder,
-	diskCreator bslcdisk.DiskCreator,
-) (action CreateDiskAction) {
-	action.diskCreator = diskCreator
-	action.vmFinder = vmFinder
-	return
+	diskService disk.Service,
+	vmService instance.Service,
+) CreateDisk {
+	return CreateDisk{
+		diskService: diskService,
+		vmService:   vmService,
+	}
 }
 
-func (a CreateDiskAction) Run(size int, cloudProps bslcdisk.DiskCloudProperties, instanceId VMCID) (string, error) {
-	vm, err := a.vmFinder.Find(int(instanceId))
-	if err != nil {
-		return "", bosherr.WrapErrorf(err, "Finding VM with cid '%s'", instanceId)
+func (cd CreateDisk) Run(size int, cloudProps DiskCloudProperties, vmCID VMCID) (DiskCID, error) {
+	// Find the VM (if provided) so we can create the disk in the same datacenter
+	var zone string
+	zone = cloudProps.DataCenter
+	if vmCID != 0 {
+		vm, found, err := cd.vmService.Find(vmCID.Int())
+		if err != nil {
+			return 0, bosherr.WrapError(err, "Creating disk")
+		}
+		if !found {
+			return 0, api.NewVMNotFoundError(string(vmCID))
+		}
+
+		zone = *vm.Datacenter.Name
+
 	}
 
-	disk, err := a.diskCreator.Create(size, cloudProps, *vm.GetDataCenter())
+	// Create the Disk
+	disk, err := cd.diskService.Create(size, cloudProps.Iops, zone)
 	if err != nil {
-		return "", bosherr.WrapErrorf(err, "Creating disk of size '%d'", size)
+		return 0, bosherr.WrapError(err, "Creating disk")
 	}
 
-	return DiskCID(disk.ID()).String(), nil
+	return DiskCID(disk), nil
 }

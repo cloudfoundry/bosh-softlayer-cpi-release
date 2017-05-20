@@ -1,24 +1,29 @@
 package main
 
 import (
+	"bufio"
+	"bytes"
 	"flag"
+	"io"
 	"os"
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	boshsys "github.com/cloudfoundry/bosh-utils/system"
 
-	bslcaction "bosh-softlayer-cpi/action"
-	bslcdisp "bosh-softlayer-cpi/api/dispatcher"
-	bslctrans "bosh-softlayer-cpi/api/transport"
-
+	"bosh-softlayer-cpi/action"
+	"bosh-softlayer-cpi/api"
+	"bosh-softlayer-cpi/api/dispatcher"
+	"bosh-softlayer-cpi/api/transport"
 	"bosh-softlayer-cpi/config"
+	"bosh-softlayer-cpi/softlayer/client"
 )
 
 const mainLogTag = "main"
 
 var (
-	configPathOpt = flag.String("configPath", "", "Path to configuration file")
-	cpiVersion    = flag.Bool("version", false, "The version of CPI release")
+	configFileOpt = flag.String("configFile", "", "Path to configuration file")
+	input         io.Reader
+	output        io.Writer
 )
 
 func main() {
@@ -28,19 +33,15 @@ func main() {
 
 	flag.Parse()
 
-	if *cpiVersion {
-		os.Exit(0)
-	}
-
-	config, err := config.NewConfigFromPath(*configPathOpt, fs)
+	cfg, err := config.NewConfigFromPath(*configFileOpt, fs)
 	if err != nil {
-		logger.Error(mainLogTag, "Loading config %s", err.Error())
+		logger.Error(mainLogTag, "Loading config - %s", err.Error())
 		os.Exit(1)
 	}
 
-	dispatcher := buildDispatcher(config, logger, cmdRunner)
+	dispatcher := buildDispatcher(cfg, logger, cmdRunner)
 
-	cli := bslctrans.NewCLI(os.Stdin, os.Stdout, dispatcher, logger)
+	cli := transport.NewCLI(os.Stdin, os.Stdout, dispatcher, logger)
 
 	err = cli.ServeOnce()
 	if err != nil {
@@ -49,23 +50,40 @@ func main() {
 	}
 }
 
-func basicDeps() (boshlog.Logger, boshsys.FileSystem, boshsys.CmdRunner) {
-	logger := boshlog.NewWriterLogger(boshlog.LevelDebug, os.Stderr, os.Stderr)
+func basicDeps() (api.MultiLogger, boshsys.FileSystem, boshsys.CmdRunner) {
+	var logBuff bytes.Buffer
+	multiWriter := io.MultiWriter(os.Stderr, bufio.NewWriter(&logBuff))
+	logger := boshlog.NewWriterLogger(boshlog.LevelDebug, multiWriter, os.Stderr)
+	multiLogger := api.MultiLogger{Logger: logger, LogBuff: &logBuff}
+	fs := boshsys.NewOsFileSystem(multiLogger)
 
-	fs := boshsys.NewOsFileSystem(logger)
+	cmdRunner := boshsys.NewExecCmdRunner(multiLogger)
 
-	cmdRunner := boshsys.NewExecCmdRunner(logger)
-
-	return logger, fs, cmdRunner
+	return multiLogger, fs, cmdRunner
 }
 
-func buildDispatcher(config config.Config, logger boshlog.Logger, cmdRunner boshsys.CmdRunner) bslcdisp.Dispatcher {
-	actionFactory := bslcaction.NewConcreteFactory(
-		config.Cloud.Properties,
+func buildDispatcher(
+	cfg config.Config,
+	logger api.MultiLogger,
+	cmdRunner boshsys.CmdRunner,
+) dispatcher.Dispatcher {
+	var softlayerAPIEndpoint string
+	if cfg.Cloud.Properties.SoftLayer.ApiEndpoint != "" {
+		softlayerAPIEndpoint = cfg.Cloud.Properties.SoftLayer.ApiEndpoint
+	} else {
+		softlayerAPIEndpoint = client.SoftlayerAPIEndpointPublicDefault
+	}
+	softLayerClient := client.NewSoftlayerClientSession(softlayerAPIEndpoint, cfg.Cloud.Properties.SoftLayer.Username, cfg.Cloud.Properties.SoftLayer.ApiKey, true, 300, logger)
+	repClientFactory := client.NewClientFactory(client.NewSoftLayerClientManager(softLayerClient))
+	client := repClientFactory.CreateClient()
+
+	actionFactory := action.NewConcreteFactory(
+		client,
+		cfg,
 		logger,
 	)
 
-	caller := bslcdisp.NewJSONCaller()
+	caller := dispatcher.NewJSONCaller()
 
-	return bslcdisp.NewJSON(actionFactory, caller, logger)
+	return dispatcher.NewJSON(actionFactory, caller, logger)
 }

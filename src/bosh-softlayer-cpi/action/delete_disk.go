@@ -3,28 +3,27 @@ package action
 import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 
-	bslcdisk "bosh-softlayer-cpi/softlayer/disk"
+	"bosh-softlayer-cpi/api"
+	"bosh-softlayer-cpi/softlayer/disk_service"
 )
 
-type DeleteDiskAction struct {
-	diskFinder bslcdisk.DiskFinder
+type DeleteDisk struct {
+	diskService disk.Service
 }
 
 func NewDeleteDisk(
-	diskFinder bslcdisk.DiskFinder,
-) (action DeleteDiskAction) {
-	action.diskFinder = diskFinder
-	return
+	diskService disk.Service,
+) DeleteDisk {
+	return DeleteDisk{
+		diskService: diskService,
+	}
 }
 
-func (a DeleteDiskAction) Run(diskCID DiskCID) (interface{}, error) {
-	disk, err := a.diskFinder.Find(int(diskCID))
-	if err != nil {
-		return nil, bosherr.WrapErrorf(err, "Finding disk '%s'", diskCID)
-	}
-
-	err = disk.Delete()
-	if err != nil {
+func (dd DeleteDisk) Run(diskCID DiskCID) (interface{}, error) {
+	if err := dd.diskService.Delete(diskCID.Int()); err != nil {
+		if _, ok := err.(api.CloudError); ok {
+			return nil, err
+		}
 		return nil, bosherr.WrapErrorf(err, "Deleting disk '%s'", diskCID)
 	}
 

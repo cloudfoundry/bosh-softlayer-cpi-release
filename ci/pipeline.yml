@@ -48,7 +48,7 @@ jobs:
     plan:
     - aggregate:
       - {trigger: false, get: bosh-cpi-release, resource: bosh-cpi-release-in}
-      - {trigger: false, get: version-semver, params: {bump: {{cpi-release-bump}}}}
+      - {trigger: false, get: version-semver, params: {bump: patch}}
       - {trigger: false, get: bosh-cli, resource: bosh-cli}
 
     - task: build
@@ -148,7 +148,7 @@ resources:
     type: git
     source:
       uri: git@github.com:cloudfoundry/bosh-softlayer-cpi-release.git
-      branch: master
+      branch: bosh_community
       private_key: {{github_private_key}}
       ignore_paths:
           - .final_builds/**/*.yml

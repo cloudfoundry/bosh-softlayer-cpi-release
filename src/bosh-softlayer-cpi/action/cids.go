@@ -11,6 +11,10 @@ type StemcellCID int
 type VMCID int
 type DiskCID int
 
+func (stemcellCID StemcellCID) Int() int {
+	return int(stemcellCID)
+}
+
 func (stemcellCID StemcellCID) String() string {
 	return strconv.Itoa(int(stemcellCID))
 }

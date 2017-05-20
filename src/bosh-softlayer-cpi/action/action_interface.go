@@ -6,7 +6,7 @@ type Action interface {
 	// and necessary for running the action
 	//
 	// It should return:
-	//  * cvm value, used as the response value. It will be converted to JSON
+	//  * cv value, used as the response value. It will be converted to JSON
 	//  * an error, used to return an error response instead
 	//
 	// Run(...) (interface{}, error)

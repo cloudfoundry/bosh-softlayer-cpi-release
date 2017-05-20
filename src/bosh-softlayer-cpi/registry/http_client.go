@@ -37,7 +37,12 @@ func NewHTTPClient(
 
 // Delete deletes the instance settings for a given instance ID.
 func (c HTTPClient) Delete(instanceID string) error {
-	endpoint := fmt.Sprintf("%s/instances/%s/settings", c.options.EndpointWithCredentials(), instanceID)
+	var endpoint string
+	if len(c.options.Endpoint) > 0 {
+		endpoint = fmt.Sprintf("%s/instances/%s/settings", c.options.Endpoint, instanceID)
+	} else {
+		endpoint = fmt.Sprintf("%s/instances/%s/settings", c.options.EndpointWithCredentials(), instanceID)
+	}
 	c.logger.Debug(httpClientLogTag, "Deleting agent settings from registry endpoint '%s'", endpoint)
 
 	request, err := http.NewRequest("DELETE", endpoint, nil)
@@ -62,7 +67,12 @@ func (c HTTPClient) Delete(instanceID string) error {
 
 // Fetch gets the agent settings for a given instance ID.
 func (c HTTPClient) Fetch(instanceID string) (AgentSettings, error) {
-	endpoint := fmt.Sprintf("%s/instances/%s/settings", c.options.EndpointWithCredentials(), instanceID)
+	var endpoint string
+	if len(c.options.Endpoint) > 0 {
+		endpoint = fmt.Sprintf("%s/instances/%s/settings", c.options.Endpoint, instanceID)
+	} else {
+		endpoint = fmt.Sprintf("%s/instances/%s/settings", c.options.EndpointWithCredentials(), instanceID)
+	}
 	c.logger.Debug(httpClientLogTag, "Fetching agent settings from registry endpoint '%s'", endpoint)
 
 	request, err := http.NewRequest("GET", endpoint, nil)
@@ -107,7 +117,12 @@ func (c HTTPClient) Update(instanceID string, agentSettings AgentSettings) error
 		return bosherr.WrapErrorf(err, "Marshalling agent settings, contents: '%#v", agentSettings)
 	}
 
-	endpoint := fmt.Sprintf("%s/instances/%s/settings", c.options.EndpointWithCredentials(), instanceID)
+	var endpoint string
+	if len(c.options.Endpoint) > 0 {
+		endpoint = fmt.Sprintf("%s/instances/%s/settings", c.options.Endpoint, instanceID)
+	} else {
+		endpoint = fmt.Sprintf("%s/instances/%s/settings", c.options.EndpointWithCredentials(), instanceID)
+	}
 	c.logger.Debug(httpClientLogTag, "Updating registry endpoint '%s' with agent settings '%s'", endpoint, settingsJSON)
 
 	putPayload := bytes.NewReader(settingsJSON)

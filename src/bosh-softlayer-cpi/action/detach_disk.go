@@ -3,38 +3,46 @@ package action
 import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 
-	. "bosh-softlayer-cpi/softlayer/common"
-	bslcdisk "bosh-softlayer-cpi/softlayer/disk"
+	"bosh-softlayer-cpi/api"
+	"bosh-softlayer-cpi/softlayer/virtual_guest_service"
+
+	"bosh-softlayer-cpi/registry"
 )
 
-type DetachDiskAction struct {
-	vmFinder   VMFinder
-	diskFinder bslcdisk.DiskFinder
+type DetachDisk struct {
+	vmService      instance.Service
+	registryClient registry.Client
 }
 
 func NewDetachDisk(
-	vmFinder VMFinder,
-	diskFinder bslcdisk.DiskFinder,
-) (action DetachDiskAction) {
-	action.vmFinder = vmFinder
-	action.diskFinder = diskFinder
-	return
+	vmService instance.Service,
+	registryClient registry.Client,
+) DetachDisk {
+	return DetachDisk{
+		vmService:      vmService,
+		registryClient: registryClient,
+	}
 }
 
-func (a DetachDiskAction) Run(vmCID VMCID, diskCID DiskCID) (interface{}, error) {
-	vm, err := a.vmFinder.Find(vmCID.Int())
-	if err != nil {
-		return nil, bosherr.WrapErrorf(err, "Finding VM '%s'", vmCID)
+func (dd DetachDisk) Run(vmCID VMCID, diskCID DiskCID) (interface{}, error) {
+	// Detach the disk
+	if err := dd.vmService.DetachDisk(vmCID.Int(), diskCID.Int()); err != nil {
+		if _, ok := err.(api.CloudError); ok {
+			return nil, err
+		}
+		return nil, bosherr.WrapErrorf(err, "Detaching disk '%s' from vm '%s", diskCID, vmCID)
 	}
 
-	disk, err := a.diskFinder.Find(diskCID.Int())
+	// Read VM agent settings
+	agentSettings, err := dd.registryClient.Fetch(string(vmCID))
 	if err != nil {
-		return nil, bosherr.WrapErrorf(err, "Finding disk '%s'", diskCID)
+		return nil, bosherr.WrapErrorf(err, "Detaching disk '%s' from vm '%s", diskCID, vmCID)
 	}
 
-	err = vm.DetachDisk(disk)
-	if err != nil {
-		return nil, bosherr.WrapErrorf(err, "Detaching disk '%s' from VM '%s'", diskCID, vmCID)
+	// Update VM agent settings
+	newAgentSettings := agentSettings.DetachPersistentDisk(string(diskCID))
+	if err = dd.registryClient.Update(string(vmCID), newAgentSettings); err != nil {
+		return nil, bosherr.WrapErrorf(err, "Detaching disk '%s' from vm '%s", diskCID, vmCID)
 	}
 
 	return nil, nil

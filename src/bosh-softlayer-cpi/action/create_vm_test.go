@@ -42,7 +42,7 @@ var _ = Describe("CreateVM", func() {
 			networks      Networks
 			diskLocality  []DiskCID
 			env           Environment
-			action        CreateVMAction
+			action        CreateVM
 			fakeCloudProp VMCloudProperties
 			fakeOptions   *ConcreteFactoryOptions
 		)
