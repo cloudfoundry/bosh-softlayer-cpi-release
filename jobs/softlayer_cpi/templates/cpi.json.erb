@@ -7,6 +7,16 @@
           'username' => p('softlayer.username'),
           'api_key' => p('softlayer.api_key'),
         },
+        'registry' => {
+          'user' => p('registry.username'),
+          'password' => p('registry.password'),
+          'address' => p('registry.host'),
+          'http' => {
+            'port' => p('registry.port'),
+            'user' => p('registry.username'),
+            'password' => p('registry.password')
+          }
+        },
         'agent' => {
           'ntp' => p('ntp')
         }
@@ -16,6 +26,13 @@
   if_p('softlayer.api_endpoint') do |endpoint|
     params['cloud']['properties']['softlayer']['api_endpoint'] = endpoint
   end
+  
+  if_p('registry.endpoint') do |endpoint|
+    params['cloud']['properties']['registry']['endpoint'] = endpoint
+  end.else do
+    params['cloud']['properties']['registry']['endpoint'] = "http://#{p('registry.username')}:#{ERB::Util.url_encode(p('registry.password'))}@#{p('registry.host')}:#{p('registry.port')}"
+  end
+  
   if_p('blobstore') do
     blobstore_params = {
       'provider' => p('blobstore.provider')
