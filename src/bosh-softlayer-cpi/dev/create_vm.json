@@ -11,7 +11,8 @@
       "hourlyBillingFlag": true,
       "maxMemory": 8192,
       "startCpus": 4,
-      "vmNamePrefix": "bosh-sl-test"
+      "vmNamePrefix": "bosh-sl-test",
+      "sshKey": 886121
     },
     {
       "lon02_private": {

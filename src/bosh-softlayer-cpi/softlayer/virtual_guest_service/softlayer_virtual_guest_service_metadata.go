@@ -22,19 +22,17 @@ func (vg SoftlayerVirtualGuestService) SetMetadata(id int, vmMetadata Metadata) 
 
 func (vg SoftlayerVirtualGuestService) extractTagsFromVMMetadata(vmMetadata Metadata) (string, error) {
 	var tagStringBuffer bytes.Buffer
-	var i int
+	i := 0
 	for key, value := range vmMetadata {
-		if key == "compiling" || key == "job" || key == "index" || key == "deployment" || key == "deleted" {
-			stringValue, err := value.(string)
-			if !err {
-				return "", bosherr.Errorf("Converting tags metadata value `%v` to string failed", value)
-			}
-			tagStringBuffer.WriteString(key + ":" + stringValue)
-			if i != len(vmMetadata)-1 {
-				tagStringBuffer.WriteString(", ")
-			}
+		stringValue, err := value.(string)
+		if !err {
+			return "", bosherr.Errorf("Converting tags metadata value `%v` to string failed", value)
 		}
-		i++
+		tagStringBuffer.WriteString(key + ":" + stringValue)
+		if i != len(vmMetadata)-1 {
+			tagStringBuffer.WriteString(", ")
+		}
+		i += 1
 	}
 
 	return tagStringBuffer.String(), nil

@@ -204,8 +204,6 @@ func (cv CreateVM) createVirtualGuestTemplate(stemcellUuid string, cloudProps VM
 			},
 		},
 
-		SshKeyCount: sl.Uint(1),
-
 		SshKeys: []datatypes.Security_Ssh_Key{
 			{Id: sl.Int(cloudProps.SshKey)},
 		},

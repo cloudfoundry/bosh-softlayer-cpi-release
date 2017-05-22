@@ -6,17 +6,31 @@
         "username": "bluemix_cpi_ys",
         "api_key": "50491aff8324503361718aeddd9256edce1013d713beb63f16d7a7026adea58f"
       },
+      "registry": {
+        "user": "registry",
+        "password": "1330c82d-4bc4-4544-4a90-c2c78fa66431",
+        "address": "127.0.0.1",
+        "http": {
+          "port": 6901,
+          "user": "registry",
+          "password": "1330c82d-4bc4-4544-4a90-c2c78fa66431"
+        },
+        "endpoint": "http://registry:1330c82d-4bc4-4544-4a90-c2c78fa66431@127.0.0.1:6901"
+      },
       "agent": {
-        "ntp": [],
+        "ntp": [
+          "time1.google.com",
+          "time2.google.com",
+          "time3.google.com",
+          "time4.google.com"
+        ],
         "blobstore": {
-          "provider": "dav",
+          "provider": "local",
           "options": {
-            "endpoint": "http://127.0.0.1:25250",
-            "user": "agent",
-            "password": "agent"
+            "blobstore_path": "/var/vcap/micro_bosh/data/cache"
           }
         },
-        "mbus": "nats://nats:nats@127.0.0.1:4222"
+        "mbus": "https://mbus:qaobml30cos7k715ek5q@0.0.0.0:6868"
       }
     }
   }
