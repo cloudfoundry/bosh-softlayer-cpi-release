@@ -45,6 +45,7 @@ type VMCloudProperties struct {
 	MaxMemory         int    `json:"maxMemory,omitempty"`
 	Datacenter        string `json:"datacenter"`
 	EphemeralDiskSize int    `json:"ephemeralDiskSize,omitempty"`
+	SshKey            int    `json:"sshKey,omitempty"`
 
 	HourlyBillingFlag            bool `json:"hourlyBillingFlag,omitempty"`
 	LocalDiskFlag                bool `json:"localDiskFlag,omitempty"`

@@ -203,6 +203,12 @@ func (cv CreateVM) createVirtualGuestTemplate(stemcellUuid string, cloudProps VM
 				Value: sl.String(userData),
 			},
 		},
+
+		SshKeyCount: sl.Uint(1),
+
+		SshKeys: []datatypes.Security_Ssh_Key{
+			{Id: sl.Int(cloudProps.SshKey)},
+		},
 	}
 }
 
@@ -211,10 +217,10 @@ func (cv CreateVM) createUserDataForInstance(agentID string, registryOptions reg
 	userDataContents := registry.UserDataContentsType{
 		Registry: registry.RegistryType{
 			Endpoint: fmt.Sprintf("http://%s:%s@%s:%d",
-				registryOptions.Username,
-				registryOptions.Password,
+				registryOptions.HTTPOptions.User,
+				registryOptions.HTTPOptions.Password,
 				registryOptions.Host,
-				registryOptions.Port),
+				registryOptions.HTTPOptions.Port),
 		},
 		Server: registry.ServerType{
 			Name: serverName,
