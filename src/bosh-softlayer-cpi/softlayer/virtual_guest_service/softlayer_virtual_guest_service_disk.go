@@ -19,7 +19,7 @@ import (
 )
 
 func (vg SoftlayerVirtualGuestService) getRootPassword(instance datatypes.Virtual_Guest) *string {
-	passwords := instance.OperatingSystem.Passwords
+	passwords := (*instance.OperatingSystem).Passwords
 	for _, password := range passwords {
 		if *password.Username == rootUser {
 			return password.Password
@@ -40,8 +40,8 @@ func (vg SoftlayerVirtualGuestService) AttachDisk(id int, diskID int) (string, s
 		return "", "", bosherr.WrapErrorf(err, "Fetching instance details with id '%d'", id)
 	}
 
-	var password *string
-	if password = vg.getRootPassword(instance); password != nil {
+	password := vg.getRootPassword(instance)
+	if password == nil {
 		return "", "", bosherr.WrapErrorf(err, "Failed to retrieve root password with id '%d'", id)
 	}
 

@@ -23,17 +23,17 @@ func NewCreateDisk(
 	}
 }
 
-func (cd CreateDisk) Run(size int, cloudProps DiskCloudProperties, vmCID VMCID) (DiskCID, error) {
+func (cd CreateDisk) Run(size int, cloudProps DiskCloudProperties, vmCID VMCID) (string, error) {
 	// Find the VM (if provided) so we can create the disk in the same datacenter
 	var zone string
 	zone = cloudProps.DataCenter
 	if vmCID != 0 {
 		vm, found, err := cd.vmService.Find(vmCID.Int())
 		if err != nil {
-			return 0, bosherr.WrapError(err, "Creating disk")
+			return "", bosherr.WrapError(err, "Creating disk")
 		}
 		if !found {
-			return 0, api.NewVMNotFoundError(string(vmCID))
+			return "", api.NewVMNotFoundError(string(vmCID))
 		}
 
 		zone = *vm.Datacenter.Name
@@ -43,8 +43,8 @@ func (cd CreateDisk) Run(size int, cloudProps DiskCloudProperties, vmCID VMCID) 
 	// Create the Disk
 	disk, err := cd.diskService.Create(size, cloudProps.Iops, zone)
 	if err != nil {
-		return 0, bosherr.WrapError(err, "Creating disk")
+		return "", bosherr.WrapError(err, "Creating disk")
 	}
 
-	return DiskCID(disk), nil
+	return DiskCID(disk).String(), nil
 }
