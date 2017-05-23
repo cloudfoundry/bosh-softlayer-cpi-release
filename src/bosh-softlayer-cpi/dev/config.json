@@ -3,8 +3,8 @@
     "plugin": "softlayer",
     "properties": {
       "softlayer": {
-        "username": "bluemix_cpi_ys",
-        "api_key": "50491aff8324503361718aeddd9256edce1013d713beb63f16d7a7026adea58f"
+        "username": "fake-user",
+        "api_key": "fake-api-key"
       },
       "registry": {
         "user": "registry",

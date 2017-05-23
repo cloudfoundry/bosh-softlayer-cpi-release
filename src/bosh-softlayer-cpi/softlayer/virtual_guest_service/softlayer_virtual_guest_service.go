@@ -53,20 +53,3 @@ type Mount struct {
 
 type DavConfig map[string]interface{}
 
-type GoogleUserData struct {
-	Server   GoogleUserDataServerName       `json:"server"`
-	Registry GoogleUserDataRegistryEndpoint `json:"registry"`
-	DNS      GoogleUserDataDNSItems         `json:"dns,omitempty"`
-}
-
-type GoogleUserDataServerName struct {
-	Name string `json:"name"`
-}
-
-type GoogleUserDataRegistryEndpoint struct {
-	Endpoint string `json:"endpoint"`
-}
-
-type GoogleUserDataDNSItems struct {
-	NameServer []string `json:"nameserver,omitempty"`
-}

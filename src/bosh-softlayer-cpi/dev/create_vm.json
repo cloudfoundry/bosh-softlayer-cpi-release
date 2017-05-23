@@ -11,7 +11,7 @@
       "hourlyBillingFlag": true,
       "maxMemory": 8192,
       "startCpus": 4,
-      "vmNamePrefix": "bosh-sl-test",
+      "vmNamePrefix": "bosh-sl-test-cpi",
       "sshKey": 886121
     },
     {

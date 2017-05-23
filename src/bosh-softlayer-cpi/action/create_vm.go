@@ -212,15 +212,15 @@ func (cv CreateVM) createVirtualGuestTemplate(stemcellUuid string, cloudProps VM
 
 func (cv CreateVM) createUserDataForInstance(agentID string, registryOptions registry.ClientOptions) (string, error) {
 	serverName := fmt.Sprintf("vm-%s", agentID)
-	userDataContents := registry.UserDataContentsType{
-		Registry: registry.RegistryType{
+	userDataContents := registry.SoftlayerUserData{
+		Registry: registry.SoftlayerUserDataRegistryEndpoint{
 			Endpoint: fmt.Sprintf("http://%s:%s@%s:%d",
 				registryOptions.HTTPOptions.User,
 				registryOptions.HTTPOptions.Password,
 				registryOptions.Host,
 				registryOptions.HTTPOptions.Port),
 		},
-		Server: registry.ServerType{
+		Server: registry.SoftlayerUserDataServerName{
 			Name: serverName,
 		},
 	}

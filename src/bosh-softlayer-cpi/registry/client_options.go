@@ -6,23 +6,24 @@ import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 )
 
-type UserDataContentsType struct {
-	Registry RegistryType `json:"registry,omitempty"`
-	Server   ServerType   `json:"server,omitempty"`
-	DNS      DNSType      `json:"dns,omitempty"`
+type SoftlayerUserData struct {
+	Server   SoftlayerUserDataServerName       `json:"server"`
+	Registry SoftlayerUserDataRegistryEndpoint `json:"registry"`
+	DNS      SoftlayerUserDataDNSItems         `json:"dns,omitempty"`
 }
 
-type RegistryType struct {
-	Endpoint string `json:"endpoint,omitempty"`
+type SoftlayerUserDataServerName struct {
+	Name string `json:"name"`
 }
 
-type ServerType struct {
-	Name string `json:"name,omitempty"` // Name given by CPI e.g. vm-384sd4-r7re9e...
+type SoftlayerUserDataRegistryEndpoint struct {
+	Endpoint string `json:"endpoint"`
 }
 
-type DNSType struct {
-	Nameserver []string `json:"nameserver,omitempty"`
+type SoftlayerUserDataDNSItems struct {
+	NameServer []string `json:"nameserver,omitempty"`
 }
+
 
 // ClientOptions are the options used to create a BOSH Registry client.
 type ClientOptions struct {
