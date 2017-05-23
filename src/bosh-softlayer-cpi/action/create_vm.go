@@ -47,7 +47,7 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 		return "", bosherr.WrapErrorf(err, "Creating VM")
 	}
 	if !found {
-		return "", api.NewStemcellkNotFoundError(string(stemcellCID), false)
+		return "", api.NewStemcellkNotFoundError(stemcellCID.String(), false)
 	}
 
 	cv.updateCloudProperties(&cloudProps)

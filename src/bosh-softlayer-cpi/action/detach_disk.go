@@ -34,13 +34,13 @@ func (dd DetachDisk) Run(vmCID VMCID, diskCID DiskCID) (interface{}, error) {
 	}
 
 	// Read VM agent settings
-	agentSettings, err := dd.registryClient.Fetch(string(vmCID))
+	agentSettings, err := dd.registryClient.Fetch(vmCID.String())
 	if err != nil {
 		return nil, bosherr.WrapErrorf(err, "Detaching disk '%s' from vm '%s", diskCID, vmCID)
 	}
 
 	// Update VM agent settings
-	newAgentSettings := agentSettings.DetachPersistentDisk(string(diskCID))
+	newAgentSettings := agentSettings.DetachPersistentDisk(diskCID.String())
 	if err = dd.registryClient.Update(string(vmCID), newAgentSettings); err != nil {
 		return nil, bosherr.WrapErrorf(err, "Detaching disk '%s' from vm '%s", diskCID, vmCID)
 	}

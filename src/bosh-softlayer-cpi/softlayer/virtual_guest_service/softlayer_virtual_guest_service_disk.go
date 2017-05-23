@@ -57,7 +57,8 @@ func (vg SoftlayerVirtualGuestService) AttachDisk(id int, diskID int) (string, s
 		return "", "", bosherr.WrapError(err, fmt.Sprintf("Failed to attach volume '%d' to virtual guest '%d'", diskID, id))
 	}
 
-	return deviceName, "", nil
+	vg.logger.Info("The volume device name '%s', device path '%s'", deviceName, fmt.Sprintf("%s/%s", volumePathPrefix, deviceName))
+	return deviceName, fmt.Sprintf("%s/%s", volumePathPrefix, deviceName), nil
 }
 
 func (vg SoftlayerVirtualGuestService) DetachDisk(id int, diskID int) error {
@@ -127,7 +128,7 @@ func (vg SoftlayerVirtualGuestService) waitForVolumeAttached(id int, volume data
 
 	_, err = vg.discoveryOpenIscsiTargetsBasedOnShellScript(volume, ssh)
 	if err != nil {
-		return "", bosherr.WrapErrorf(err, "Failed to attach volume with id %d to virtual guest with id: %d.", volume.Id, id)
+		return "", bosherr.WrapErrorf(err, "Failed to attach volume with id %d to virtual guest with id: %d.", *volume.Id, id)
 	}
 
 	var deviceName string
@@ -166,7 +167,7 @@ func (vg SoftlayerVirtualGuestService) waitForVolumeAttached(id int, volume data
 		time.Sleep(5 * time.Second)
 	}
 
-	return "", bosherr.Errorf("Failed to attach disk '%d' to virtual guest '%d'", volume.Id, id)
+	return "", bosherr.Errorf("Failed to attach disk '%d' to virtual guest '%d'", *volume.Id, id)
 }
 
 func (vg SoftlayerVirtualGuestService) getIscsiDeviceNamesBasedOnShellScript(ssh util.SshClient) ([]string, error) {
@@ -213,7 +214,7 @@ func (vg SoftlayerVirtualGuestService) restartOpenIscsiBasedOnShellScript(ssh ut
 }
 
 func (vg SoftlayerVirtualGuestService) discoveryOpenIscsiTargetsBasedOnShellScript(volume datatypes.Network_Storage, ssh util.SshClient) (bool, error) {
-	command := fmt.Sprintf("sleep 5; iscsiadm -m discovery -t sendtargets -p %s", volume.ServiceResourceBackendIpAddress)
+	command := fmt.Sprintf("sleep 5; iscsiadm -m discovery -t sendtargets -p %s", *volume.ServiceResourceBackendIpAddress)
 	_, err := ssh.ExecCommand(command)
 	if err != nil {
 		return false, bosherr.WrapError(err, "discoverying open iscsi targets")
@@ -230,7 +231,7 @@ func (vg SoftlayerVirtualGuestService) discoveryOpenIscsiTargetsBasedOnShellScri
 
 func (vg SoftlayerVirtualGuestService) writeOpenIscsiInitiatornameBasedOnShellScript(credential datatypes.Network_Storage_Allowed_Host, ssh util.SshClient) (bool, error) {
 	if len(*credential.Name) > 0 {
-		command := fmt.Sprintf("echo 'InitiatorName=%s' > /etc/iscsi/initiatorname.iscsi", credential.Name)
+		command := fmt.Sprintf("echo 'InitiatorName=%s' > /etc/iscsi/initiatorname.iscsi", *credential.Name)
 		_, err := ssh.ExecCommand(command)
 		if err != nil {
 			return false, bosherr.WrapError(err, "Writing to /etc/iscsi/initiatorname.iscsi")

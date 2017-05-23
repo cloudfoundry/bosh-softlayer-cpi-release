@@ -35,7 +35,7 @@ func (ad AttachDisk) Run(vmCID VMCID, diskCID DiskCID) (interface{}, error) {
 		return nil, bosherr.WrapErrorf(err, "Attaching disk '%s' to vm '%s'", diskCID, vmCID)
 	}
 	if !found {
-		return nil, api.NewDiskNotFoundError(string(diskCID), false)
+		return nil, api.NewDiskNotFoundError(diskCID.String(), false)
 	}
 
 	// Atach the Disk to the VM
@@ -48,14 +48,14 @@ func (ad AttachDisk) Run(vmCID VMCID, diskCID DiskCID) (interface{}, error) {
 	}
 
 	// Read VM agent settings
-	agentSettings, err := ad.registryClient.Fetch(string(vmCID))
+	agentSettings, err := ad.registryClient.Fetch(vmCID.String())
 	if err != nil {
 		return nil, bosherr.WrapErrorf(err, "Attaching disk '%s' to vm '%s'", diskCID, vmCID)
 	}
 
 	// Update VM agent settings
-	newAgentSettings := agentSettings.AttachPersistentDisk(string(diskCID), deviceName, devicePath)
-	if err = ad.registryClient.Update(string(vmCID), newAgentSettings); err != nil {
+	newAgentSettings := agentSettings.AttachPersistentDisk(diskCID.String(), deviceName, devicePath)
+	if err = ad.registryClient.Update(vmCID.String(), newAgentSettings); err != nil {
 		return nil, bosherr.WrapErrorf(err, "Attaching disk '%s' to vm '%s'", diskCID, vmCID)
 	}
 
