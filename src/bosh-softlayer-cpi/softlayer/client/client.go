@@ -611,7 +611,8 @@ func (c *clientManager) OrderBlockVolume(storageType string, location string, si
 
 		order := datatypes.Container_Product_Order_Network_PerformanceStorage_Iscsi{
 			OsFormatType: &datatypes.Network_Storage_Iscsi_OS_Type{
-				KeyName: sl.String("Linux"),
+				KeyName: sl.String("LINUX"),
+				Id:      sl.Int(12),
 			},
 			Container_Product_Order_Network_PerformanceStorage: datatypes.Container_Product_Order_Network_PerformanceStorage{
 				Container_Product_Order: datatypes.Container_Product_Order{

@@ -54,6 +54,7 @@ func (u *Softlayer_Ubuntu_Net) FinalizedNetworkDefinitions(networkComponents dat
 				if networkComponentIpAddress.IpAddress != nil && *networkComponentIpAddress.IpAddress == nw.IP {
 					nw.Netmask = *networkComponentIpAddress.Subnet.Netmask
 					nw.Gateway = *networkComponentIpAddress.Subnet.Gateway
+					nw.MAC = *component.MacAddress
 					if component.NetworkVlan.Id == networkComponents.PrimaryBackendNetworkComponent.NetworkVlan.Id {
 						nw.Routes = SoftlayerPrivateRoutes(*networkComponentIpAddress.Subnet.Gateway)
 					}
@@ -72,8 +73,6 @@ func (u *Softlayer_Ubuntu_Net) FinalizedNetworkDefinitions(networkComponents dat
 			}
 		}
 		nw.Alias = alias
-
-		nw.MAC = *component.MacAddress
 
 		finalized[name] = nw
 	}
