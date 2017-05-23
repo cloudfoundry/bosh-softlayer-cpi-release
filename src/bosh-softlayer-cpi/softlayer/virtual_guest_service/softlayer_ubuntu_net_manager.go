@@ -57,6 +57,7 @@ func (u *Softlayer_Ubuntu_Net) FinalizedNetworkDefinitions(networkComponents dat
 					nw.MAC = *component.MacAddress
 					if component.NetworkVlan.Id == networkComponents.PrimaryBackendNetworkComponent.NetworkVlan.Id {
 						nw.Routes = SoftlayerPrivateRoutes(*networkComponentIpAddress.Subnet.Gateway)
+						nw.Gateway = ""
 					}
 				}
 			}
@@ -71,6 +72,7 @@ func (u *Softlayer_Ubuntu_Net) FinalizedNetworkDefinitions(networkComponents dat
 			if err != nil {
 				return networks, fmt.Errorf("Linking network with name `%s`: `%s`", name, err.Error())
 			}
+			nw.Gateway = ""
 		}
 		nw.Alias = alias
 
