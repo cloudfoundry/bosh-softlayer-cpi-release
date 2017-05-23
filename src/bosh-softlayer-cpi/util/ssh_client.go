@@ -32,6 +32,9 @@ func (c *sshClientImpl) ExecCommand(command string) (string, error) {
 		Auth: []ssh.AuthMethod{
 			ssh.Password(c.password),
 		},
+		HostKeyCallback: func(hostname string, remote net.Addr, key ssh.PublicKey) error {
+			return nil
+		},
 	}
 
 	client, err := ssh.Dial("tcp", address(c.ip), config)
@@ -69,6 +72,9 @@ func (c *sshClientImpl) Upload(source io.Reader, destFile string) error {
 		User: c.username,
 		Auth: []ssh.AuthMethod{
 			ssh.Password(c.password),
+		},
+		HostKeyCallback: func(hostname string, remote net.Addr, key ssh.PublicKey) error {
+			return nil
 		},
 	}
 
@@ -113,6 +119,9 @@ func (c *sshClientImpl) Download(srcFile string, destination io.Writer) error {
 		User: c.username,
 		Auth: []ssh.AuthMethod{
 			ssh.Password(c.password),
+		},
+		HostKeyCallback: func(hostname string, remote net.Addr, key ssh.PublicKey) error {
+			return nil
 		},
 	}
 
