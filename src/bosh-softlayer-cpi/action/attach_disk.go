@@ -38,7 +38,7 @@ func (ad AttachDisk) Run(vmCID VMCID, diskCID DiskCID) (interface{}, error) {
 		return nil, api.NewDiskNotFoundError(diskCID.String(), false)
 	}
 
-	// Atach the Disk to the VM
+	// Attach the Disk to the VM
 	deviceName, devicePath, err := ad.vmService.AttachDisk(vmCID.Int(), diskCID.Int())
 	if err != nil {
 		if _, ok := err.(api.CloudError); ok {

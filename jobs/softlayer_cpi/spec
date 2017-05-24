@@ -17,6 +17,8 @@ properties:
     description: "API key of the softlayer account"
   softlayer.api_endpoint:
     description: "Softlayer API endpoint"
+  softlayer.disable_os_reload:
+    description: "Disable OS reload function"
 
   registry.username:
     description: User to access the Registry

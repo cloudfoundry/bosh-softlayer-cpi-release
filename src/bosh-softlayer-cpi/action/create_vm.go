@@ -4,11 +4,15 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"net"
 	"time"
 
 	"bosh-softlayer-cpi/api"
 	"bosh-softlayer-cpi/registry"
+	"bosh-softlayer-cpi/util"
+
 	boslc "bosh-softlayer-cpi/softlayer/client"
+	boslconfig "bosh-softlayer-cpi/softlayer/config"
 
 	"bosh-softlayer-cpi/softlayer/stemcell_service"
 	"bosh-softlayer-cpi/softlayer/virtual_guest_service"
@@ -24,6 +28,7 @@ type CreateVM struct {
 	registryClient      registry.Client
 	registryOptions     registry.ClientOptions
 	agentOptions        registry.AgentOptions
+	softlayerOptions    boslconfig.Config
 }
 
 func NewCreateVM(
@@ -32,12 +37,14 @@ func NewCreateVM(
 	registryClient registry.Client,
 	registryOptions registry.ClientOptions,
 	agentOptions registry.AgentOptions,
+	softlayerOptions boslconfig.Config,
 ) (action CreateVM) {
 	action.stemcellService = stemcellService
 	action.virtualGuestService = virtualGuestService
 	action.registryClient = registryClient
 	action.registryOptions = registryOptions
 	action.agentOptions = agentOptions
+	action.softlayerOptions = softlayerOptions
 	return
 }
 
@@ -54,7 +61,7 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 
 	userDataTypeContents, err := cv.createUserDataForInstance(agentID, cv.registryOptions)
 	if err != nil {
-		return "", bosherr.WrapError(err, "Creating VM userData")
+		return "", bosherr.WrapError(err, "Creating VM UserData")
 	}
 
 	publicVlanId, privateVlanId, err := cv.getVlanIds(networks)
@@ -78,39 +85,59 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 	// Parse VM properties
 	vmProps := &instance.Properties{
 		VirtualGuestTemplate: *virtualGuestTemplate,
-		SecondDisk:           cloudProps.EphemeralDiskSize,
 		DeployedByBoshCLI:    cloudProps.DeployedByBoshCLI,
 	}
 
-	// Create VM
-	cid, err := cv.virtualGuestService.Create(vmProps, instanceNetworks, cv.registryOptions.EndpointWithCredentials())
-	if err != nil {
-		if _, ok := err.(api.CloudError); ok {
+	// CID for returned VM
+	cid := 0
+	osReloaded := false
+
+	if !cv.softlayerOptions.DisableOsReload {
+		cid, err = cv.createByOsReload(stemcellCID, cloudProps, instanceNetworks)
+		if err != nil {
 			return "", err
 		}
-		return "", bosherr.WrapError(err, "Creating VM")
+		osReloaded = true
+	}
+
+	if cid == 0 {
+		// Create VM
+		cid, err = cv.virtualGuestService.Create(vmProps, instanceNetworks, cv.registryOptions.EndpointWithCredentials())
+		if err != nil {
+			if _, ok := err.(api.CloudError); ok {
+				return "", err
+			}
+			return "", bosherr.WrapError(err, "Creating VM")
+		}
 	}
 
 	// If any of the below code fails, we must delete the created cid
 	defer func() {
-		if err != nil {
+		if err != nil && !osReloaded {
 			cv.virtualGuestService.CleanUp(cid)
 		}
 	}()
 
 	// Config VM network settings
-
 	instanceNetworks, err = cv.virtualGuestService.ConfigureNetworks(cid, instanceNetworks)
 	if err != nil {
 		return "", bosherr.WrapErrorf(err, "Configuring VM networks")
 	}
 
-	// Create VM settings
+	// Create VM agent settings
 	agentNetworks := instanceNetworks.AsRegistryNetworks()
 	agentSettings := registry.NewAgentSettings(agentID, VMCID(cid).String(), agentNetworks, registry.EnvSettings(env), cv.agentOptions)
+
+	// Attach Ephemeral Disk
 	if cloudProps.EphemeralDiskSize > 0 {
+		err = cv.virtualGuestService.AttachEphemeralDisk(cid, cloudProps.EphemeralDiskSize)
+		if err != nil {
+			return "", bosherr.WrapErrorf(err, "Attaching ephemeral disk to VM with id '%d'", cid)
+		}
+		//Update VM agent settings
 		agentSettings = agentSettings.AttachEphemeralDisk(registry.DefaultEphemeralDisk)
 	}
+
 	if err = cv.registryClient.Update(VMCID(cid).String(), agentSettings); err != nil {
 		return "", bosherr.WrapErrorf(err, "Creating VM")
 	}
@@ -208,6 +235,56 @@ func (cv CreateVM) createVirtualGuestTemplate(stemcellUuid string, cloudProps VM
 			{Id: sl.Int(cloudProps.SshKey)},
 		},
 	}
+}
+
+func (cv CreateVM) createByOsReload(stemcellCID StemcellCID, cloudProps VMCloudProperties, instanceNetworks instance.Networks) (int, error) {
+	cid := 0
+	for _, network := range instanceNetworks {
+		switch network.Type {
+		case "dynamic":
+			if len(network.IP) > 0 {
+				if util.IsPrivateSubnet(net.ParseIP(network.IP)) {
+					vm, found, err := cv.virtualGuestService.FindByPrimaryBackendIp(network.IP)
+					if err != nil {
+						return cid, bosherr.WrapErrorf(err, "Finding VM with IP Address '%s'", network.IP)
+					}
+					if !found {
+						return cid, api.NewVMCreationFailedError(fmt.Sprintf("Finding VM with IP Address '%s'", network.IP), true)
+					}
+
+					_, err = cv.virtualGuestService.ReloadOS(*vm.Id, stemcellCID.Int(), []int{cloudProps.SshKey})
+					if err != nil {
+						if apiErr, ok := err.(sl.Error); ok {
+							return cid, api.NewVMCreationFailedError(fmt.Sprintf("Failed to edit VM hostname after OS Reload with IP Address '%s' with error %s", network.IP, apiErr), false)
+						} else {
+							return cid, api.NewVMCreationFailedError(fmt.Sprintf("Failed to edit VM hostname after OS Reload with IP Address '%s' with error %s", network.IP, apiErr), true)
+						}
+					}
+
+					cid = *vm.Id
+
+					succeed, err := cv.virtualGuestService.Edit(*vm.Id, datatypes.Virtual_Guest{
+						Hostname: sl.String(cloudProps.VmNamePrefix),
+						Domain:   sl.String(cloudProps.Domain),
+					})
+					if err != nil {
+						return cid, api.NewVMCreationFailedError(fmt.Sprintf("Editing VM hostname after OS Reload with IP Address '%s' with error %s", network.IP, err), true)
+					}
+
+					if !succeed {
+
+						return cid, api.NewVMCreationFailedError(fmt.Sprintf("Failed to edit VM hostname after OS Reload with IP Address '%s'", network.IP), true)
+					}
+				}
+			}
+		case "vip":
+			return cid, bosherr.Error("SoftLayer Not Support VIP Networking")
+		default:
+			continue
+		}
+	}
+
+	return cid, nil
 }
 
 func (cv CreateVM) createUserDataForInstance(agentID string, registryOptions registry.ClientOptions) (string, error) {

@@ -53,7 +53,7 @@ const (
 	NETWORK_PERFORMANCE_STORAGE_PACKAGE_ID = 222
 )
 
-//go:generate counterfeiter -o repfakes/fake_client_factory.go . ClientFactory
+//go:generate counterfeiter -o fakes/fake_client_factory.go . ClientFactory
 type ClientFactory interface {
 	CreateClient() Client
 }
@@ -84,16 +84,16 @@ func NewSoftLayerClientManager(session *session.Session) *clientManager {
 	}
 }
 
-//go:generate counterfeiter -o repfakes/fake_client.go . Client
+//go:generate counterfeiter -o fakes/fake_client.go . Client
 type Client interface {
 	CancelInstance(id int) error
 	CreateInstance(template *datatypes.Virtual_Guest) (datatypes.Virtual_Guest, error)
-	EditInstance(template *datatypes.Virtual_Guest) (bool, error)
+	EditInstance(id int, template *datatypes.Virtual_Guest) (bool, error)
 	GetInstance(id int, mask string) (datatypes.Virtual_Guest, error)
 	GetInstanceByPrimaryBackendIpAddress(ip string) (datatypes.Virtual_Guest, error)
 	GetInstanceByPrimaryIpAddress(ip string) (datatypes.Virtual_Guest, error)
 	RebootInstance(id int, soft bool, hard bool) error
-	ReloadInstance(id int, stemcellId int) error
+	ReloadInstance(id int, stemcellId int, sshKeyIds []int) (string, error)
 	UpgradeInstance(id int, cpu int, memory int, network int, privateCPU bool, additional_diskSize int) (datatypes.Container_Product_Order_Receipt, error)
 	WaitInstanceUntilReady(id int, until time.Time) error
 	WaitInstanceHasActiveTransaction(id int, until time.Time) error
@@ -108,9 +108,9 @@ type Client interface {
 	CancelBlockVolume(volumeId int, reason string, immedicate bool) error
 	GetBlockVolumeDetails(volumeId int, mask string) (datatypes.Network_Storage, error)
 	GetImage(imageId int, mask string) (datatypes.Virtual_Guest_Block_Device_Template_Group, error)
-
 	GetVlan(id int, mask string) (datatypes.Network_Vlan, error)
 	GetAllowedHostCredential(id int) (datatypes.Network_Storage_Allowed_Host, error)
+	GetAllowedNetworkStorage(id int) ([]string, error)
 }
 
 type clientManager struct {
@@ -182,6 +182,20 @@ func (c *clientManager) GetAllowedHostCredential(id int) (datatypes.Network_Stor
 	return allowedHost, err
 }
 
+func (c *clientManager) GetAllowedNetworkStorage(id int) ([]string, error) {
+	var storages []string
+	networkStorages, err := c.VirtualGuestService.Id(id).GetAllowedNetworkStorage()
+	if err != nil {
+		return storages, err
+	}
+
+	for _, networkStorage := range networkStorages {
+		storages = append(storages, strconv.Itoa(*networkStorage.Id))
+	}
+
+	return storages, nil
+}
+
 func (c *clientManager) GetImage(imageId int, mask string) (datatypes.Virtual_Guest_Block_Device_Template_Group, error) {
 	if mask == "" {
 		mask = IMAGE_DETAIL_MASK
@@ -233,7 +247,7 @@ func (c *clientManager) WaitInstanceUntilReady(id int, until time.Time) error {
 
 func (c *clientManager) WaitInstanceHasActiveTransaction(id int, until time.Time) error {
 	for {
-		virtualGuest, err := c.GetInstance(id, "id, lastOperatingSystemReload[id,modifyDate], activeTransaction[id,transactionStatus.name], provisionDate, powerState.keyName")
+		virtualGuest, err := c.GetInstance(id, "id, activeTransaction[id,transactionStatus.name]")
 		if err != nil {
 			return bosherr.WrapErrorf(err, "Getting instance with id '%d'", id)
 		}
@@ -258,7 +272,7 @@ func (c *clientManager) WaitInstanceHasActiveTransaction(id int, until time.Time
 
 func (c *clientManager) WaitInstanceHasNoneActiveTransaction(id int, until time.Time) error {
 	for {
-		virtualGuest, err := c.GetInstance(id, "id, lastOperatingSystemReload[id,modifyDate], activeTransaction[id,transactionStatus.name], provisionDate, powerState.keyName")
+		virtualGuest, err := c.GetInstance(id, "id, activeTransaction[id,transactionStatus.name]")
 		if err != nil {
 			return bosherr.WrapErrorf(err, "Getting instance with id '%d'", id)
 		}
@@ -295,8 +309,8 @@ func (c *clientManager) CreateInstance(template *datatypes.Virtual_Guest) (datat
 	return virtualguest, nil
 }
 
-func (c *clientManager) EditInstance(template *datatypes.Virtual_Guest) (bool, error) {
-	resp, err := c.VirtualGuestService.EditObject(template)
+func (c *clientManager) EditInstance(id int, template *datatypes.Virtual_Guest) (bool, error) {
+	resp, err := c.VirtualGuestService.Id(id).EditObject(template)
 	if err != nil {
 		return resp, bosherr.WrapError(err, "Editing instance")
 	}
@@ -321,32 +335,33 @@ func (c *clientManager) RebootInstance(id int, soft bool, hard bool) error {
 	return err
 }
 
-func (c *clientManager) ReloadInstance(id int, stemcellId int) error {
+func (c *clientManager) ReloadInstance(id int, stemcellId int, sshKeyIds []int) (string, error) {
 	var err error
 	until := time.Now().Add(time.Duration(1) * time.Hour)
 	if err = c.WaitInstanceHasNoneActiveTransaction(*sl.Int(id), until); err != nil {
-		return bosherr.WrapError(err, "Waiting until instance has none active transaction before os_reload")
+		return "", bosherr.WrapError(err, "Waiting until instance has none active transaction before os_reload")
 	}
 
 	config := datatypes.Container_Hardware_Server_Configuration{
 		ImageTemplateId: sl.Int(stemcellId),
+		SshKeyIds:       sshKeyIds,
 	}
-	_, err = c.VirtualGuestService.Id(id).ReloadOperatingSystem(sl.String("FORCE"), &config)
+	resp, err := c.VirtualGuestService.Id(id).ReloadOperatingSystem(sl.String("FORCE"), &config)
 	if err != nil {
-		return err
+		return resp, err
 	}
 
 	until = time.Now().Add(time.Duration(1) * time.Hour)
 	if err = c.WaitInstanceHasActiveTransaction(*sl.Int(id), until); err != nil {
-		return bosherr.WrapError(err, "Waiting until instance has active transaction after launching os_reload")
+		return resp, bosherr.WrapError(err, "Waiting until instance has active transaction after launching os_reload")
 	}
 
 	until = time.Now().Add(time.Duration(4) * time.Hour)
 	if err = c.WaitInstanceUntilReady(*sl.Int(id), until); err != nil {
-		return bosherr.WrapError(err, "Waiting until instance is ready after os_reload")
+		return resp, bosherr.WrapError(err, "Waiting until instance is ready after os_reload")
 	}
 
-	return nil
+	return resp, nil
 }
 
 func (c *clientManager) CancelInstance(id int) error {
@@ -810,6 +825,11 @@ func (c *clientManager) AuthorizeHostToVolume(instance *datatypes.Virtual_Guest,
 			if apiErr.Exception == "SoftLayer_Exception_Network_Storage_BlockingOperationInProgress" {
 				continue
 			}
+			if apiErr.Exception == "SoftLayer_Exception_Network_Storage_Group_AccessControlError" &&
+				strings.Contains(apiErr.Message, "not yet ready for mount") {
+				continue
+			}
+
 			return err
 		}
 

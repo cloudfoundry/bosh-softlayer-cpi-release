@@ -31,7 +31,7 @@ func (dv DeleteVMAction) Run(vmCID VMCID) (interface{}, error) {
 	}
 
 	// Delete the VM agent settings
-	if err := dv.registryClient.Delete(string(vmCID)); err != nil {
+	if err := dv.registryClient.Delete(vmCID.String()); err != nil {
 		return nil, bosherr.WrapErrorf(err, "Deleting vm '%s'", vmCID)
 	}
 

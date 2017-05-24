@@ -33,7 +33,7 @@ func (cd CreateDisk) Run(size int, cloudProps DiskCloudProperties, vmCID VMCID) 
 			return "", bosherr.WrapError(err, "Creating disk")
 		}
 		if !found {
-			return "", api.NewVMNotFoundError(string(vmCID))
+			return "", api.NewVMNotFoundError(vmCID.String())
 		}
 
 		zone = *vm.Datacenter.Name

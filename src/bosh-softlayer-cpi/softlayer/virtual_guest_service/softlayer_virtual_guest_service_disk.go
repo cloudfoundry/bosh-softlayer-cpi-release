@@ -29,6 +29,10 @@ func (vg SoftlayerVirtualGuestService) getRootPassword(instance datatypes.Virtua
 	return nil
 }
 
+func (vg SoftlayerVirtualGuestService) AttachEphemeralDisk(id int, diskSize int) error {
+	return vg.softlayerClient.AttachSecondDiskToInstance(id, diskSize)
+}
+
 func (vg SoftlayerVirtualGuestService) AttachDisk(id int, diskID int) (string, string, error) {
 	volume, err := vg.softlayerClient.GetBlockVolumeDetails(diskID, bsl.VOLUME_DETAIL_MASK)
 	if err != nil {
@@ -60,6 +64,10 @@ func (vg SoftlayerVirtualGuestService) AttachDisk(id int, diskID int) (string, s
 
 	vg.logger.Info(softlayerVirtualGuestServiceLogTag, "The volume device name '%s', device path '%s'", deviceName, fmt.Sprintf("%s/%s", volumePathPrefix, deviceName))
 	return deviceName, fmt.Sprintf("%s/%s", volumePathPrefix, deviceName), nil
+}
+
+func (vg SoftlayerVirtualGuestService) AttachedDisks(id int) ([]string, error) {
+	return vg.softlayerClient.GetAllowedNetworkStorage(id)
 }
 
 func (vg SoftlayerVirtualGuestService) ReAttachLeftDisk(id int, devicePath string, diskID int) error {

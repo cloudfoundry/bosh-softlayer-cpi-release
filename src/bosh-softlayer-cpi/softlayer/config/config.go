@@ -20,9 +20,5 @@ func (c Config) Validate() error {
 		return bosherr.Error("Must provide non-empty ApiKey")
 	}
 
-	if c.ApiEndpoint == "" {
-		c.ApiEndpoint = "api.softlayer.com"
-	}
-
 	return nil
 }

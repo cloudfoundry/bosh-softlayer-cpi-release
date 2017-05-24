@@ -67,6 +67,4 @@ func (n VMCloudProperties) Validate() error {
 	return nil
 }
 
-type VMServiceScopes []string
-type VMServiceAccount string
 type VMMetadata map[string]interface{}

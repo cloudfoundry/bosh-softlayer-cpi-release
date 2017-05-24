@@ -42,7 +42,7 @@ func (dd DetachDisk) Run(vmCID VMCID, diskCID DiskCID) (interface{}, error) {
 
 	// Update VM agent settings
 	newAgentSettings := oldAgentSettings.DetachPersistentDisk(diskCID.String())
-	if err = dd.registryClient.Update(string(vmCID), newAgentSettings); err != nil {
+	if err = dd.registryClient.Update(vmCID.String(), newAgentSettings); err != nil {
 		return nil, bosherr.WrapErrorf(err, "Detaching disk '%s' from vm '%s", diskCID, vmCID)
 	}
 

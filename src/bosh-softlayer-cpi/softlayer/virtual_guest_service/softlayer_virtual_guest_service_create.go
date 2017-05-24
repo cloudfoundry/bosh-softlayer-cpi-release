@@ -20,13 +20,6 @@ func (vg SoftlayerVirtualGuestService) Create(vmProps *Properties, networks Netw
 		return 0, bosherr.WrapError(err, "Creating virtualGuest")
 	}
 
-	if vmProps.SecondDisk > 0 {
-		vg.softlayerClient.AttachSecondDiskToInstance(*virtualGuest.Id, vmProps.SecondDisk)
-		if err != nil {
-			return 0, bosherr.WrapError(err, fmt.Sprintf("Attaching second disk to virtualGuest with id '%d'", *virtualGuest.Id))
-		}
-	}
-
 	virtualGuest, err = vg.softlayerClient.GetInstance(*virtualGuest.Id, boslc.INSTANCE_DETAIL_MASK)
 	if err != nil {
 		return 0, bosherr.WrapError(err, "Getting virtualGuest")

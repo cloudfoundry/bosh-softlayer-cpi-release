@@ -1,22 +1,20 @@
-set -e -x
+set -e # exit immediately if a simple command exits with a non-zero status
+set -u # report the usage of uninitialized variables
 
-if [ -z "$BOSH_PACKAGES_DIR" ]; then
-	golang_pkg_dir=$(readlink -nf /var/vcap/packages/golang_1.7.1)
-else
-	golang_pkg_dir=$BOSH_PACKAGES_DIR/golang_1.7.1
-fi
+# Set package dependencies directory
+PACKAGES_DIR=${BOSH_PACKAGES_DIR:-/var/vcap/packages}
 
-export GOROOT=$golang_pkg_dir
-export PATH=$GOROOT/bin:$PATH
+# Set Golang dependency
+export GOROOT=$(cd "${PACKAGES_DIR}/golang_1.7.1" && pwd -P)
+export PATH=${GOROOT}/bin:${PATH}
 
-mkdir -p ${BOSH_INSTALL_TARGET}/src
-cp -a * ${BOSH_INSTALL_TARGET}/src
-export GOPATH=$BOSH_INSTALL_TARGET
+# Build BOSH SoftLayer CPI package
+mkdir -p ${BOSH_COMPILE_TARGET}/go/src
+mv ${BOSH_COMPILE_TARGET}/bosh-softlayer-cpi ${BOSH_COMPILE_TARGET}/go/src/
+cd ${BOSH_COMPILE_TARGET}/go/src/bosh-softlayer-cpi
+export GOPATH=${BOSH_COMPILE_TARGET}/go
+make build
 
-cd ${BOSH_INSTALL_TARGET}/src/bosh-softlayer-cpi
-bin/build-amd64
-
-mkdir -p $BOSH_INSTALL_TARGET/bin
-cp out/softlayer_cpi $BOSH_INSTALL_TARGET/bin/softlayer_cpi
-
-cp version ${BOSH_INSTALL_TARGET}
+# Copy BOSH SoftLayer CPI package
+mkdir -p ${BOSH_INSTALL_TARGET}/bin
+cp -a ${BOSH_COMPILE_TARGET}/go/src/bosh-softlayer-cpi/out/cpi ${BOSH_INSTALL_TARGET}/bin/
