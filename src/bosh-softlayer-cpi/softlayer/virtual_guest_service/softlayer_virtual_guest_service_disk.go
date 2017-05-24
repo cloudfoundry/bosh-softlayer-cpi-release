@@ -52,13 +52,48 @@ func (vg SoftlayerVirtualGuestService) AttachDisk(id int, diskID int) (string, s
 	}
 
 	ssh := util.GetSshClient(rootUser, *password, *instance.PrimaryBackendIpAddress)
+
 	deviceName, err := vg.waitForVolumeAttached(id, volume, ssh)
 	if err != nil {
 		return "", "", bosherr.WrapError(err, fmt.Sprintf("Failed to attach volume '%d' to virtual guest '%d'", diskID, id))
 	}
 
-	vg.logger.Info("The volume device name '%s', device path '%s'", deviceName, fmt.Sprintf("%s/%s", volumePathPrefix, deviceName))
+	vg.logger.Info(softlayerVirtualGuestServiceLogTag, "The volume device name '%s', device path '%s'", deviceName, fmt.Sprintf("%s/%s", volumePathPrefix, deviceName))
 	return deviceName, fmt.Sprintf("%s/%s", volumePathPrefix, deviceName), nil
+}
+
+func (vg SoftlayerVirtualGuestService) ReAttachLeftDisk(id int, devicePath string, diskID int) error {
+	vg.logger.Debug(softlayerVirtualGuestServiceLogTag, "Left Disk Id %d", diskID)
+	vg.logger.Debug(softlayerVirtualGuestServiceLogTag, "Left Disk device path %s", devicePath)
+
+	volume, err := vg.softlayerClient.GetBlockVolumeDetails(diskID, bsl.VOLUME_DETAIL_MASK)
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Fetching volume details with id '%d'", diskID)
+	}
+
+	instance, err := vg.softlayerClient.GetInstance(id, bsl.INSTANCE_DETAIL_MASK)
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Fetching instance details with id '%d'", id)
+	}
+
+	password := vg.getRootPassword(instance)
+	if password == nil {
+		return bosherr.WrapErrorf(err, "Retrieving root password with id '%d'", id)
+	}
+
+	ssh := util.GetSshClient(rootUser, *password, *instance.PrimaryBackendIpAddress)
+	_, err = vg.discoveryOpenIscsiTargetsBasedOnShellScript(volume, ssh)
+	if err != nil {
+		return bosherr.WrapError(err, fmt.Sprintf("Reattaching volume with id '%d' to instance with id '%d'", diskID, id))
+	}
+
+	command := fmt.Sprintf("sleep 5; mount %s-part1 /var/vcap/store", devicePath)
+	_, err = ssh.ExecCommand(command)
+	if err != nil {
+		return bosherr.WrapError(err, "Mounting /var/vcap/store")
+	}
+
+	return nil
 }
 
 func (vg SoftlayerVirtualGuestService) DetachDisk(id int, diskID int) error {
@@ -72,15 +107,16 @@ func (vg SoftlayerVirtualGuestService) DetachDisk(id int, diskID int) error {
 		return bosherr.WrapErrorf(err, "Fetching instance details with id '%d'", id)
 	}
 
-	var password *string
-	if password = vg.getRootPassword(instance); password != nil {
-		return bosherr.WrapErrorf(err, "Failed to retrieve root password with id '%d'", id)
+	password := vg.getRootPassword(instance)
+	if password == nil {
+		return bosherr.WrapErrorf(err, "Retrieving root password with id '%d'", id)
 	}
+
 	ssh := util.GetSshClient(rootUser, *password, *instance.PrimaryBackendIpAddress)
 
 	err = vg.detachVolumeBasedOnShellScript(volume, ssh)
 	if err != nil {
-		return bosherr.WrapErrorf(err, "Failed to detach volume with id %d from virtual guest with id: %d.", volume.Id, id)
+		return bosherr.WrapErrorf(err, "Detaching volume with id '%d' from virtual guest with id '%d'", diskID, id)
 	}
 
 	until := time.Now().Add(time.Duration(1) * time.Hour)
@@ -95,7 +131,7 @@ func (vg SoftlayerVirtualGuestService) DetachDisk(id int, diskID int) error {
 func (vg SoftlayerVirtualGuestService) waitForVolumeAttached(id int, volume datatypes.Network_Storage, ssh util.SshClient) (string, error) {
 	oldDisks, err := vg.getIscsiDeviceNamesBasedOnShellScript(ssh)
 	if err != nil {
-		return "", bosherr.WrapError(err, fmt.Sprintf("Failed to get devices names from virtual guest '%d'", id))
+		return "", bosherr.WrapError(err, fmt.Sprintf("Getting devices names from virtual guest '%d'", id))
 	}
 	if len(oldDisks) > 2 {
 		return "", bosherr.Error(fmt.Sprintf("Too manay persistent disks attached to virtual guest '%d'", id))
@@ -103,32 +139,32 @@ func (vg SoftlayerVirtualGuestService) waitForVolumeAttached(id int, volume data
 
 	credential, err := vg.softlayerClient.GetAllowedHostCredential(id)
 	if err != nil {
-		return "", bosherr.WrapError(err, fmt.Sprintf("Failed to get iscsi host auth from virtual guest '%d'", id))
+		return "", bosherr.WrapError(err, fmt.Sprintf("Getting iscsi host auth from virtual guest '%d'", id))
 	}
 
 	_, err = vg.backupOpenIscsiConfBasedOnShellScript(ssh)
 	if err != nil {
-		return "", bosherr.WrapError(err, fmt.Sprintf("Failed to backup open iscsi conf files from virtual guest '%d'", id))
+		return "", bosherr.WrapError(err, fmt.Sprintf("Backuping open iscsi conf files from virtual guest '%d'", id))
 	}
 
 	_, err = vg.writeOpenIscsiInitiatornameBasedOnShellScript(credential, ssh)
 	if err != nil {
-		return "", bosherr.WrapError(err, fmt.Sprintf("Failed to write open iscsi initiatorname from virtual guest '%d'", id))
+		return "", bosherr.WrapError(err, fmt.Sprintf("Writing open iscsi initiatorname from virtual guest '%d'", id))
 	}
 
 	_, err = vg.writeOpenIscsiConfBasedOnShellScript(volume, credential, ssh)
 	if err != nil {
-		return "", bosherr.WrapError(err, fmt.Sprintf("Failed to write open iscsi conf from virtual guest '%d'", id))
+		return "", bosherr.WrapError(err, fmt.Sprintf("Writing open iscsi conf from virtual guest '%d'", id))
 	}
 
 	_, err = vg.restartOpenIscsiBasedOnShellScript(ssh)
 	if err != nil {
-		return "", bosherr.WrapError(err, fmt.Sprintf("Failed to restart open iscsi from virtual guest '%d'", id))
+		return "", bosherr.WrapError(err, fmt.Sprintf("Restarting open iscsi from virtual guest '%d'", id))
 	}
 
 	_, err = vg.discoveryOpenIscsiTargetsBasedOnShellScript(volume, ssh)
 	if err != nil {
-		return "", bosherr.WrapErrorf(err, "Failed to attach volume with id %d to virtual guest with id: %d.", *volume.Id, id)
+		return "", bosherr.WrapErrorf(err, "Attaching volume with id %d to virtual guest with id: %d.", *volume.Id, id)
 	}
 
 	var deviceName string
@@ -136,7 +172,7 @@ func (vg SoftlayerVirtualGuestService) waitForVolumeAttached(id int, volume data
 	for totalTime < 5*time.Minute {
 		newDisks, err := vg.getIscsiDeviceNamesBasedOnShellScript(ssh)
 		if err != nil {
-			return "", bosherr.WrapError(err, fmt.Sprintf("Failed to get devices names from virtual guest '%d'", id))
+			return "", bosherr.WrapError(err, fmt.Sprintf("Getting devices names from virtual guest '%d'", id))
 		}
 
 		if len(oldDisks) == 0 {
@@ -167,7 +203,7 @@ func (vg SoftlayerVirtualGuestService) waitForVolumeAttached(id int, volume data
 		time.Sleep(5 * time.Second)
 	}
 
-	return "", bosherr.Errorf("Failed to attach disk '%d' to virtual guest '%d'", *volume.Id, id)
+	return "", bosherr.Errorf("Attaching disk '%d' to virtual guest '%d'", *volume.Id, id)
 }
 
 func (vg SoftlayerVirtualGuestService) getIscsiDeviceNamesBasedOnShellScript(ssh util.SshClient) ([]string, error) {
@@ -217,7 +253,7 @@ func (vg SoftlayerVirtualGuestService) discoveryOpenIscsiTargetsBasedOnShellScri
 	command := fmt.Sprintf("sleep 5; iscsiadm -m discovery -t sendtargets -p %s", *volume.ServiceResourceBackendIpAddress)
 	_, err := ssh.ExecCommand(command)
 	if err != nil {
-		return false, bosherr.WrapError(err, "discoverying open iscsi targets")
+		return false, bosherr.WrapError(err, "Discoverying open iscsi targets")
 	}
 
 	command = "sleep 5; echo `iscsiadm -m node -l`"
