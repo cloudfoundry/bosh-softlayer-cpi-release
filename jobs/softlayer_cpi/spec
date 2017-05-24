@@ -3,9 +3,8 @@ name: softlayer_cpi
 
 templates:
   cpi.erb: bin/cpi
+  pre-start.erb: bin/pre-start
   cpi.json.erb: config/cpi.json
-
-  cpi_ctl.erb:  bin/cpi_ctl
 
 packages:
 - bosh_softlayer_cpi

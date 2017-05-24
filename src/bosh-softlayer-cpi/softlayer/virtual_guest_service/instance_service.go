@@ -5,7 +5,7 @@ import (
 	"github.com/softlayer/softlayer-go/datatypes"
 )
 
-//go:generate counterfeiter -o fakes/fake_Instance_Service.go . InstanceService
+//go:generate counterfeiter -o fakes/fake_Instance_Service.go . Service
 type Service interface {
 	AttachDisk(id int, diskID int) (string, string, error)
 	AttachedDisks(id int) ([]string, error)

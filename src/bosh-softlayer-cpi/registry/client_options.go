@@ -24,7 +24,6 @@ type SoftlayerUserDataDNSItems struct {
 	NameServer []string `json:"nameserver,omitempty"`
 }
 
-
 // ClientOptions are the options used to create a BOSH Registry client.
 type ClientOptions struct {
 	// BOSH Registry protocol

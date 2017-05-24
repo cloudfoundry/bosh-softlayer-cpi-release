@@ -8,7 +8,7 @@ JOBS_DIR=${BOSH_JOBS_DIR:-/var/vcap/jobs}
 LOGS_DIR=/var/vcap/sys/log/softlayer_cpi
 
 # Invoke CPI
-cmd="${PACKAGES_DIR}/bosh-softlayer-cpi/bin/softlayer_cpi -configFile=${JOBS_DIR}/softlayer_cpi/config/cpi.json"
+cmd="${PACKAGES_DIR}/bosh_softlayer_cpi/bin/cpi -configFile=${JOBS_DIR}/softlayer_cpi/config/cpi.json"
 
 if [ -d ${LOGS_DIR} ]; then
   exec $cmd 2>>${LOGS_DIR}/cpi.stderr.log <&0
