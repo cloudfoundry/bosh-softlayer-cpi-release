@@ -62,8 +62,12 @@ type VMCloudProperties struct {
 
 func (vmprop *VMCloudProperties) UnmarshalJSON(data []byte) error {
 	type vmCloudProperties VMCloudProperties
+	err := json.Unmarshal(data, (*vmCloudProperties)(vmprop))
+	if err != nil {
+		return err
+	}
 	var oriProps map[string]interface{}
-	err := json.Unmarshal(data, &oriProps)
+	err = json.Unmarshal(data, &oriProps)
 	if err != nil {
 		return err
 	}

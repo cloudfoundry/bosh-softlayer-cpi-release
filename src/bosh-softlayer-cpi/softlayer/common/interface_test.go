@@ -34,6 +34,7 @@ var _ = Describe("Interfaces", func() {
 				PostInstallScriptUri:         "",
 				DedicatedAccountHostOnlyFlag: true,
 				SshKeys: []sldatatypes.SshKey{{Id: 74826}},
+				BoshIp: "1.2.3.4",
 				BlockDevices: []sldatatypes.BlockDevice{{
 					Device:    "0",
 					DiskImage: sldatatypes.DiskImage{Capacity: 100}}},
@@ -59,6 +60,7 @@ var _ = Describe("Interfaces", func() {
 			      "id":74826
 			      }
 			  ],
+			  "bosh_ip":"1.2.3.4",
 			  "rootDiskSize":25,
 			  "ephemeralDiskSize":25,
 			  "hourlyBillingFlag":true,
@@ -100,6 +102,7 @@ var _ = Describe("Interfaces", func() {
 			      "id": 74826
 			    }
 			  ],
+			  "bosh_ip":"1.2.3.4",
 			  "root_disk_size": 25,
 			  "ephemeral_disk_size": 25,
 			  "hourly_billing_flag": true,
