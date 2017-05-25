@@ -66,12 +66,12 @@ var _ = Describe("HasDisk", func() {
 			diskService.FindReturns(
 				datatypes.Network_Storage{},
 				false,
-				errors.New("fake-vm-service-error"),
+				errors.New("fake-disk-service-error"),
 			)
 
 			_, err = hasDisk.Run(1234567)
 			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring("fake-vm-service-error"))
+			Expect(err.Error()).To(ContainSubstring("fake-disk-service-error"))
 
 			Expect(diskService.FindCallCount()).To(Equal(1))
 			Expect(diskService.FindArgsForCall(0)).To(Equal(1234567))
