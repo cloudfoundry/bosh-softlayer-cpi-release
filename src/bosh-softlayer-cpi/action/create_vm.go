@@ -57,6 +57,15 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 		return "", api.NewStemcellkNotFoundError(stemcellCID.String(), false)
 	}
 
+	var sshKey int
+	if len(cv.softlayerOptions.PublicKey) > 0 {
+		sshKey, err = cv.virtualGuestService.CreateSshKey("bosh_cpi", cv.softlayerOptions.PublicKey, cv.softlayerOptions.PublicKeyFingerPrint)
+		if err != nil {
+			return "", bosherr.WrapErrorf(err, "Creating Public Key with content '%s'", cv.softlayerOptions.PublicKey)
+		}
+		cloudProps.SshKey = sshKey
+	}
+
 	cv.updateCloudProperties(&cloudProps)
 
 	userDataTypeContents, err := cv.createUserDataForInstance(agentID, cv.registryOptions)

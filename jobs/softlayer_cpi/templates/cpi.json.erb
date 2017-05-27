@@ -30,7 +30,15 @@
   if_p('softlayer.disable_os_reload') do |osreload|
     params['cloud']['properties']['softlayer']['disable_os_reload'] = osreload
   end
-  
+
+  if_p('softlayer.ssh_public_key') do |ssh_public_key|
+    params['cloud']['properties']['softlayer']['ssh_public_key'] = ssh_public_key
+  end
+
+  if_p('softlayer.ssh_public_key_fingerprint') do |ssh_public_key_fingerprint|
+    params['cloud']['properties']['softlayer']['ssh_public_key_fingerprint'] = ssh_public_key_fingerprint
+  end
+
   if_p('registry.endpoint') do |endpoint|
     params['cloud']['properties']['registry']['endpoint'] = endpoint
   end.else do

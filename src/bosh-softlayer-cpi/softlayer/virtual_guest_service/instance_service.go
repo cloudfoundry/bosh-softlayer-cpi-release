@@ -24,6 +24,8 @@ type Service interface {
 	Reboot(id int) error
 	ReloadOS(id int, stemcellID int, sshKeyIds []int) (string, error)
 	SetMetadata(id int, vmMetadata Metadata) error
+	CreateSshKey(label string, key string, fingerPrint string) (int, error)
+	DeleteSshKey(id int) error
 }
 
 type Metadata map[string]interface{}

@@ -9,6 +9,7 @@ import (
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	boshsys "github.com/cloudfoundry/bosh-utils/system"
+	boshuuid "github.com/cloudfoundry/bosh-utils/uuid"
 
 	"bosh-softlayer-cpi/action"
 	"bosh-softlayer-cpi/api"
@@ -27,7 +28,7 @@ var (
 )
 
 func main() {
-	logger, fs, cmdRunner := basicDeps()
+	logger, fs, cmdRunner, uuid := basicDeps()
 
 	defer logger.HandlePanic("Main")
 
@@ -39,7 +40,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	dispatcher := buildDispatcher(cfg, logger, cmdRunner)
+	dispatcher := buildDispatcher(cfg, logger, cmdRunner, uuid)
 
 	cli := transport.NewCLI(os.Stdin, os.Stdout, dispatcher, logger)
 
@@ -50,7 +51,7 @@ func main() {
 	}
 }
 
-func basicDeps() (api.MultiLogger, boshsys.FileSystem, boshsys.CmdRunner) {
+func basicDeps() (api.MultiLogger, boshsys.FileSystem, boshsys.CmdRunner, boshuuid.Generator) {
 	var logBuff bytes.Buffer
 	multiWriter := io.MultiWriter(os.Stderr, bufio.NewWriter(&logBuff))
 	logger := boshlog.NewWriterLogger(boshlog.LevelDebug, multiWriter, os.Stderr)
@@ -59,13 +60,16 @@ func basicDeps() (api.MultiLogger, boshsys.FileSystem, boshsys.CmdRunner) {
 
 	cmdRunner := boshsys.NewExecCmdRunner(multiLogger)
 
-	return multiLogger, fs, cmdRunner
+	uuidGen := boshuuid.NewGenerator()
+
+	return multiLogger, fs, cmdRunner, uuidGen
 }
 
 func buildDispatcher(
 	cfg config.Config,
 	logger api.MultiLogger,
 	cmdRunner boshsys.CmdRunner,
+	uuidGen boshuuid.Generator,
 ) dispatcher.Dispatcher {
 	var softlayerAPIEndpoint string
 	if cfg.Cloud.Properties.SoftLayer.ApiEndpoint != "" {
@@ -79,6 +83,7 @@ func buildDispatcher(
 
 	actionFactory := action.NewConcreteFactory(
 		client,
+		uuidGen,
 		cfg,
 		logger,
 	)

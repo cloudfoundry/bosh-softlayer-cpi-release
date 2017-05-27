@@ -81,6 +81,7 @@ func NewSoftLayerClientManager(session *session.Session) *clientManager {
 		services.GetLocationDatacenterService(session),
 		services.GetNetworkVlanService(session),
 		services.GetVirtualGuestBlockDeviceTemplateGroupService(session),
+		services.GetSecuritySshKeyService(session),
 	}
 }
 
@@ -111,18 +112,21 @@ type Client interface {
 	GetVlan(id int, mask string) (datatypes.Network_Vlan, error)
 	GetAllowedHostCredential(id int) (datatypes.Network_Storage_Allowed_Host, error)
 	GetAllowedNetworkStorage(id int) ([]string, error)
+	CreateSshKey(label *string, key *string, fingerPrint *string) (datatypes.Security_Ssh_Key, error)
+	DeleteSshKey(id int) (bool, error)
 }
 
 type clientManager struct {
-	VirtualGuestService services.Virtual_Guest
-	AccountService      services.Account
-	PackageService      services.Product_Package
-	OrderService        services.Product_Order
-	StorageService      services.Network_Storage
-	BillingService      services.Billing_Item
-	LocationService     services.Location_Datacenter
-	NetworkVlanService  services.Network_Vlan
-	ImageService        services.Virtual_Guest_Block_Device_Template_Group
+	VirtualGuestService   services.Virtual_Guest
+	AccountService        services.Account
+	PackageService        services.Product_Package
+	OrderService          services.Product_Order
+	StorageService        services.Network_Storage
+	BillingService        services.Billing_Item
+	LocationService       services.Location_Datacenter
+	NetworkVlanService    services.Network_Vlan
+	ImageService          services.Virtual_Guest_Block_Device_Template_Group
+	SecuritySshKeyService services.Security_Ssh_Key
 }
 
 func (c *clientManager) GetInstance(id int, mask string) (datatypes.Virtual_Guest, error) {
@@ -907,6 +911,36 @@ func (c *clientManager) AttachSecondDiskToInstance(id int, diskSize int) error {
 	}
 
 	return nil
+}
+
+func (c *clientManager) CreateSshKey(label *string, key *string, fingerPrint *string) (datatypes.Security_Ssh_Key, error) {
+	var err error
+
+	templateObject := &datatypes.Security_Ssh_Key{
+		Label:       label,
+		Key:         key,
+		Fingerprint: fingerPrint,
+	}
+
+	sshKey, err := c.SecuritySshKeyService.CreateObject(templateObject)
+	if err != nil {
+		if apiErr, ok := err.(sl.Error); ok {
+			if apiErr.Exception == "SoftLayer_Exception_Public" && strings.Contains(apiErr.Message, "SSH key already exists") {
+				sshkeys, err := c.AccountService.Mask("id, key").Filter(filter.Path("sshKeys.key").Eq(*key).Build()).GetSshKeys()
+				if err != nil {
+					return datatypes.Security_Ssh_Key{}, err
+				} else {
+					return sshkeys[0], nil
+				}
+			}
+		}
+	}
+
+	return sshKey, nil
+}
+
+func (c *clientManager) DeleteSshKey(id int) (bool, error) {
+	return c.SecuritySshKeyService.Id(id).DeleteObject()
 }
 
 func (c *clientManager) selectMaximunIopsItemPriceIdOnSize(size int) (datatypes.Product_Item_Price, error) {

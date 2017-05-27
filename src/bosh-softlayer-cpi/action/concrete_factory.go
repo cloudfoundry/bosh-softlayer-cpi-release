@@ -3,6 +3,7 @@ package action
 import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
+	boshuuid "github.com/cloudfoundry/bosh-utils/uuid"
 
 	"bosh-softlayer-cpi/config"
 	"bosh-softlayer-cpi/softlayer/client"
@@ -19,6 +20,7 @@ type concreteFactory struct {
 
 func NewConcreteFactory(
 	softlayerClient client.Client,
+	uuidGen boshuuid.Generator,
 	cfg config.Config,
 	logger boshlog.Logger,
 ) concreteFactory {
@@ -40,6 +42,7 @@ func NewConcreteFactory(
 
 	vmService := instance.NewSoftLayerVirtualGuestService(
 		softlayerClient,
+		uuidGen,
 		logger,
 	)
 

@@ -3,11 +3,10 @@ package instance
 import (
 	bosl "bosh-softlayer-cpi/softlayer/client"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
+	boshuuid "github.com/cloudfoundry/bosh-utils/uuid"
 )
 
 const softlayerVirtualGuestServiceLogTag = "SoftlayerVirtualGuestService"
-const googleInstanceNamePrefix = "vm"
-const googleInstanceDescription = "Instance managed by BOSH"
 const blobstoreTypeDav = "dav"
 const rootUser = "root"
 const volumePathPrefix = "/dev/mapper"
@@ -34,15 +33,18 @@ node.conn[0].iscsi.MaxRecvDataSegmentLength = 65536
 
 type SoftlayerVirtualGuestService struct {
 	softlayerClient bosl.Client
+	uuidGen         boshuuid.Generator
 	logger          boshlog.Logger
 }
 
 func NewSoftLayerVirtualGuestService(
 	softlayerClient bosl.Client,
+	uuidGen boshuuid.Generator,
 	logger boshlog.Logger,
 ) SoftlayerVirtualGuestService {
 	return SoftlayerVirtualGuestService{
 		softlayerClient: softlayerClient,
+		uuidGen:         uuidGen,
 		logger:          logger,
 	}
 }

@@ -5,10 +5,12 @@ import (
 )
 
 type Config struct {
-	Username        string `json:"username"`
-	ApiKey          string `json:"api_key"`
-	ApiEndpoint     string `json:"api_endpoint"`
-	DisableOsReload bool   `json:"disable_os_reload"`
+	Username             string `json:"username"`
+	ApiKey               string `json:"api_key"`
+	ApiEndpoint          string `json:"api_endpoint"`
+	DisableOsReload      bool   `json:"disable_os_reload"`
+	PublicKey            string `json:"ssh_public_key"`
+	PublicKeyFingerPrint string `json:"ssh_public_key_fingerprint"`
 }
 
 func (c Config) Validate() error {

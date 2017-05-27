@@ -18,6 +18,10 @@ properties:
     description: "Softlayer API endpoint"
   softlayer.disable_os_reload:
     description: "Disable OS reload function"
+  softlayer.ssh_public_key:
+    description: The content of the SSH public key to use when spinning up new vms
+  softlayer.ssh_public_key_fingerprint:
+      description: The Finger Print content of the SSH public key
 
   registry.username:
     description: User to access the Registry

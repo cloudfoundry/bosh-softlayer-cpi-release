@@ -1,0 +1,85 @@
+jobs:
+  - name: build-candidate
+    serial: true
+    plan:
+    - aggregate:
+      - {trigger: false, get: bosh-cpi-release, resource: bosh-cpi-release-in}
+      - {trigger: false, get: version-semver, params: {bump: major}}
+      - {trigger: false, get: bosh-cli, resource: bosh-cli}
+
+    - task: build
+      file: bosh-cpi-release/ci/tasks/build-candidate.yml
+
+    - put: version-semver
+      params: {file: version-semver/number}
+
+    - put: bosh-cpi-dev-artifacts
+      params: {file: candidate/*.tgz}
+
+  - name: promote-candidate
+    plan:
+    - aggregate:
+      - {trigger: true,  get: bosh-cpi-dev-artifacts, passed: [build-candidate]}
+      - {trigger: false, get: bosh-cpi-release, resource: bosh-cpi-release-in}
+      - {trigger: false, get: version-semver,  resource: version-semver}
+
+    - task: promote
+      file: bosh-cpi-release/ci/tasks/promote-candidate.yml
+      params:
+        S3_ACCESS_KEY_ID:     {{stemcell-aws-access-key}}
+        S3_SECRET_ACCESS_KEY: {{stemcell-aws-secret-key}}
+
+    - put: bosh-cpi-release-out
+      params: {repository: promoted/repo, rebase: true, tag_prefix: "v", tag: promoted/integer_version}
+
+    - put: bosh-cpi-final-artifacts
+      params: {file: promoted/repo/releases/bosh-softlayer-cpi/*.tgz}
+
+resources:
+  - name: bosh-cli
+    type: s3
+    source:
+      regexp: bosh-cli-([0-9.]+)-linux-amd64
+      bucket: bosh-cli-artifacts
+      region_name: us-east-1
+
+  - name: bosh-cpi-release-in
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/bosh-softlayer-cpi-release.git
+      branch: bosh_community
+      private_key: {{github_private_key}}
+      ignore_paths:
+          - .final_builds/**/*.yml
+          - releases/**/*.yml
+
+  - name: version-semver
+    type: semver
+    source:
+      key:               current-version
+      bucket:            {{s3_pipeline_bucket_lite}}
+      access_key_id:     {{stemcell-aws-access-key}}
+      secret_access_key: {{stemcell-aws-secret-key}}
+
+  - name: bosh-cpi-dev-artifacts
+    type: s3
+    source:
+      regexp: bosh-softlayer-cpi-(\d+\.\d+\.\d+)\.tgz
+      bucket: {{s3_pipeline_bucket_lite}}
+      access_key_id: {{stemcell-aws-access-key}}
+      secret_access_key: {{stemcell-aws-secret-key}}
+
+  - name: bosh-cpi-release-out
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/bosh-softlayer-cpi-release.git
+      branch: bosh_community
+      private_key: {{github_private_key}}
+
+  - name: bosh-cpi-final-artifacts
+    type: s3
+    source:
+      regexp: bosh-softlayer-cpi-([0-9.]+)\.tgz
+      bucket: {{s3_pipeline_bucket_lite}}
+      access_key_id: {{stemcell-aws-access-key}}
+      secret_access_key: {{stemcell-aws-secret-key}}
