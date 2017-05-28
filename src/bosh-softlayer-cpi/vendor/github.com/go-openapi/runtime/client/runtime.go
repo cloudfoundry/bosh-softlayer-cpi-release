@@ -17,7 +17,6 @@ package client
 import (
 	"fmt"
 	"mime"
-	"net/http"
 	"net/http/httputil"
 	"os"
 	"path"
@@ -28,8 +27,12 @@ import (
 	"golang.org/x/net/context"
 	"golang.org/x/net/context/ctxhttp"
 
+	"crypto/tls"
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/strfmt"
+	"net"
+
+	"net/http"
 )
 
 // DefaultTimeout the default request timeout
@@ -75,7 +78,23 @@ func New(host, basePath string, schemes []string) *Runtime {
 		runtime.TextMime:    runtime.TextProducer(),
 		runtime.DefaultMime: runtime.ByteStreamProducer(),
 	}
-	rt.Transport = http.DefaultTransport
+
+	tr := &http.Transport{
+		Proxy: http.ProxyFromEnvironment,
+		DialContext: (&net.Dialer{
+			Timeout:   30 * time.Second,
+			KeepAlive: 30 * time.Second,
+		}).DialContext,
+		MaxIdleConns:          100,
+		IdleConnTimeout:       90 * time.Second,
+		TLSHandshakeTimeout:   10 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
+
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+
+	rt.Transport = tr
+
 	rt.Jar = nil
 	rt.Host = host
 	rt.BasePath = basePath
