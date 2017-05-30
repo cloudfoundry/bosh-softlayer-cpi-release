@@ -9,9 +9,6 @@ import (
 	. "bosh-softlayer-cpi/action"
 
 	diskfakes "bosh-softlayer-cpi/softlayer/disk_service/fakes"
-	//"github.com/softlayer/softlayer-go/datatypes"
-	//"github.com/softlayer/softlayer-go/sl"
-	//"bosh-softlayer-cpi/api"
 )
 
 var _ = Describe("DeleteDisk", func() {

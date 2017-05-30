@@ -8,12 +8,8 @@ import (
 
 	. "bosh-softlayer-cpi/action"
 
-	//diskfakes "bosh-softlayer-cpi/softlayer/disk_service/fakes"
 	instancefakes "bosh-softlayer-cpi/softlayer/virtual_guest_service/fakes"
 	registryfakes "bosh-softlayer-cpi/registry/fakes"
-	//"github.com/softlayer/softlayer-go/datatypes"
-	//"github.com/softlayer/softlayer-go/sl"
-	//"bosh-softlayer-cpi/api"
 	"bosh-softlayer-cpi/registry"
 )
 
