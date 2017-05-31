@@ -264,9 +264,9 @@ func (cv CreateVM) createByOsReload(stemcellCID StemcellCID, cloudProps VMCloudP
 					_, err = cv.virtualGuestService.ReloadOS(*vm.Id, stemcellCID.Int(), []int{cloudProps.SshKey})
 					if err != nil {
 						if apiErr, ok := err.(sl.Error); ok {
-							return cid, api.NewVMCreationFailedError(fmt.Sprintf("Failed to edit VM hostname after OS Reload with IP Address '%s' with error %s", network.IP, apiErr), false)
+							return cid, api.NewVMCreationFailedError(fmt.Sprintf("Failed to do OS Reload with IP Address '%s' with error %s", network.IP, apiErr), false)
 						} else {
-							return cid, api.NewVMCreationFailedError(fmt.Sprintf("Failed to edit VM hostname after OS Reload with IP Address '%s' with error %s", network.IP, apiErr), true)
+							return cid, api.NewVMCreationFailedError(fmt.Sprintf("Failed to do OS Reload with IP Address '%s' with error %s", network.IP, apiErr), true)
 						}
 					}
 

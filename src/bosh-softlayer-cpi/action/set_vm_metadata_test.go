@@ -35,7 +35,7 @@ var _ = Describe("SetVMMetadata", func() {
 		setVMMetadata = NewSetVMMetadata(vmService)
 	})
 
-	FDescribe("Run", func() {
+	Describe("Run", func() {
 		It("set the vm metadata", func() {
 			_, err = setVMMetadata.Run(vmCID, vmMetadata)
 			Expect(err).NotTo(HaveOccurred())
