@@ -8,12 +8,12 @@ import (
 )
 
 type DeleteVMAction struct {
-	vmService      vgs.SoftlayerVirtualGuestService
+	vmService      vgs.Service
 	registryClient registry.Client
 }
 
 func NewDeleteVM(
-	vmDeleterProvider vgs.SoftlayerVirtualGuestService,
+	vmDeleterProvider vgs.Service,
 	registryClient registry.Client,
 ) (action DeleteVMAction) {
 	action.vmService = vmDeleterProvider

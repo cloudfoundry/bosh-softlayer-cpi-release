@@ -7,7 +7,7 @@ import (
 )
 
 type CreateStemcellAction struct {
-	stemcellService stemcell.SoftlayerStemcellService
+	stemcellService stemcell.Service
 }
 
 type CreateStemcellCloudProps struct {
@@ -17,7 +17,7 @@ type CreateStemcellCloudProps struct {
 }
 
 func NewCreateStemcell(
-	stemcellFinder stemcell.SoftlayerStemcellService,
+	stemcellFinder stemcell.Service,
 ) (action CreateStemcellAction) {
 	action.stemcellService = stemcellFinder
 	return
