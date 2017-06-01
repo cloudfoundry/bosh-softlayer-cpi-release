@@ -2,9 +2,9 @@
 	"method": "create_vm",
 	"arguments": [
 		"45632666-9fb1-422a-af35-2ab6102c5c1b",
-		"879741",
+		"1621321",
 		{
-			"vmNamePrefix": "ecpi-test",
+			"vmNamePrefix": "sl-ecpi-test",
 			"domain": "softlayer.com",
 			"startCpus": 1,
 			"maxMemory": 1024,
@@ -14,6 +14,7 @@
 			"datacenter": {
 				"name": "lon02"
 			},
+			"deployedByBoshCli": false,
 			"bosh_ip": "10.112.116.127",
 			"primaryNetworkComponent": {
 				"networkVlan": {
