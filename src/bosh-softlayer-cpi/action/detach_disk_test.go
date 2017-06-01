@@ -8,9 +8,9 @@ import (
 
 	. "bosh-softlayer-cpi/action"
 
-	instancefakes "bosh-softlayer-cpi/softlayer/virtual_guest_service/fakes"
-	registryfakes "bosh-softlayer-cpi/registry/fakes"
 	"bosh-softlayer-cpi/registry"
+	registryfakes "bosh-softlayer-cpi/registry/fakes"
+	instancefakes "bosh-softlayer-cpi/softlayer/virtual_guest_service/fakes"
 )
 
 var _ = Describe("DetachDisk", func() {

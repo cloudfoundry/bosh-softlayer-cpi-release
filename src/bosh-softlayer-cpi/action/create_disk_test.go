@@ -8,11 +8,11 @@ import (
 
 	. "bosh-softlayer-cpi/action"
 
+	"bosh-softlayer-cpi/api"
 	diskfakes "bosh-softlayer-cpi/softlayer/disk_service/fakes"
 	instancefakes "bosh-softlayer-cpi/softlayer/virtual_guest_service/fakes"
 	"github.com/softlayer/softlayer-go/datatypes"
 	"github.com/softlayer/softlayer-go/sl"
-	"bosh-softlayer-cpi/api"
 )
 
 var _ = Describe("CreateDisk", func() {
@@ -108,8 +108,7 @@ var _ = Describe("CreateDisk", func() {
 
 			It("returns an error if vmService find call returns an error", func() {
 				vmService.FindReturns(
-					datatypes.Virtual_Guest{
-					},
+					datatypes.Virtual_Guest{},
 					false,
 					errors.New("fake-instance-service-error"),
 				)
@@ -123,8 +122,7 @@ var _ = Describe("CreateDisk", func() {
 
 			It("returns an error if instance is not found", func() {
 				vmService.FindReturns(
-					datatypes.Virtual_Guest{
-					},
+					datatypes.Virtual_Guest{},
 					false,
 					nil,
 				)

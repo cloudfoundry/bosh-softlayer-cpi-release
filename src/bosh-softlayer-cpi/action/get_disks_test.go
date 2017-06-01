@@ -12,12 +12,12 @@ import (
 
 var _ = Describe("GetDisks", func() {
 	var (
-		err               error
-		vmCID             VMCID
-		disks             []string
+		err   error
+		vmCID VMCID
+		disks []string
 
 		vmService *instancefakes.FakeService
-		getDisks GetDisks
+		getDisks  GetDisks
 	)
 
 	BeforeEach(func() {

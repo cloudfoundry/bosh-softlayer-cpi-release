@@ -11,7 +11,7 @@ import (
 
 var _ = Describe("DeleteStemcell", func() {
 	var (
-		err error
+		err        error
 		stemcellID StemcellCID
 
 		imageService *imagefakes.FakeService

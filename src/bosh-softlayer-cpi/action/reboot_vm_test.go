@@ -13,8 +13,8 @@ import (
 
 var _ = Describe("RebootVM", func() {
 	var (
-		err error
-		vmCID VMCID
+		err       error
+		vmCID     VMCID
 		vmService *instancefakes.FakeService
 
 		rebootVM RebootVM

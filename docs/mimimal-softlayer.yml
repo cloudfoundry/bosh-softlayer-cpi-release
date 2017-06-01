@@ -13,22 +13,17 @@ networks:
   type: dynamic
   dns: [ REPLACE_WITH_DIRECTOR_IP, 10.0.80.11, 10.0.80.12 ]
   cloud_properties:
-    PrimaryBackendNetworkComponent:
-      NetworkVlan:
-        Id: REPLACE_WITH_PRIVATE_VLAN_ID # take it from the URL https://control.softlayer.com/network/vlans/<vlan-id>
-    PrivateNetworkOnlyFlag: true
+    vlan: REPLACE_WITH_PRIVATE_VLAN_ID # take it from the URL https://control.softlayer.com/network/vlans/<vlan-id>
 
 resource_pools:
 - cloud_properties:
-    Bosh_ip: REPLACE_WITH_DIRECTOR_IP
-    Datacenter:
-      Name: REPLACE_WITH_DATACENTER_NAME # such as dal09
-    Domain: REPLACE_WITH_DOMAIN # this is not a real domain. It's used for VM name suffixes. Arbitrary
-    EphemeralDiskSize: 100
-    HourlyBillingFlag: true
-    MaxMemory: 2048
-    StartCpus: 2
-    VmNamePrefix: REPLACE_WITH_VM_PREFIX
+    datacenter: REPLACE_WITH_DATACENTER_NAME # such as dal09
+    domain: REPLACE_WITH_DOMAIN # this is not a real domain. It's used for VM name suffixes. Arbitrary
+    ephemeralDiskSize: 100
+    hourlyBillingFlag: true
+    maxMemory: 2048
+    startCpus: 2
+    vmNamePrefix: REPLACE_WITH_VM_PREFIX
   env:
     bosh:
       keep_root_password: true
@@ -39,15 +34,13 @@ resource_pools:
     name: bosh-softlayer-xen-ubuntu-trusty-go_agent
     version: latest
 - cloud_properties:
-    Bosh_ip: REPLACE_WITH_DIRECTOR_IP
-    Datacenter:
-      Name: REPLACE_WITH_DATACENTER_NAME
-    Domain: REPLACE_WITH_DOMAIN
-    EphemeralDiskSize: 100
-    HourlyBillingFlag: true
-    MaxMemory: 2048
-    StartCpus: 2
-    VmNamePrefix: REPLACE_WITH_VM_PREFIX
+    datacenter: REPLACE_WITH_DATACENTER_NAME # such as dal09
+    domain: REPLACE_WITH_DOMAIN
+    ephemeralDiskSize: 100
+    hourlyBillingFlag: true
+    maxMemory: 2048
+    startCpus: 2
+    vmNamePrefix: REPLACE_WITH_VM_PREFIX
   env:
     bosh:
       keep_root_password: true
@@ -60,15 +53,13 @@ resource_pools:
 
 compilation:
   cloud_properties:
-    Bosh_ip: REPLACE_WITH_DIRECTOR_IP
-    Datacenter:
-      Name: REPLACE_WITH_DATACENTER_NAME
-    Domain: REPLACE_WITH_DOMAIN
-    EphemeralDiskSize: 100
-    HourlyBillingFlag: true
-    MaxMemory: 4096
-    StartCpus: 4
-    VmNamePrefix: REPLACE_WITH_VM_PREFIX-compilation-
+    datacenter: REPLACE_WITH_DATACENTER_NAME # such as dal09
+    domain: REPLACE_WITH_DOMAIN
+    ephemeralDiskSize: 100
+    hourlyBillingFlag: true
+    maxMemory: 4096
+    startCpus: 4
+    vmNamePrefix: REPLACE_WITH_VM_PREFIX-compilation-
   network: cf_dynamic
   reuse_compilation_vms: true
   workers: 6

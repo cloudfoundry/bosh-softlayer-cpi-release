@@ -18,11 +18,11 @@ import (
 	"bosh-softlayer-cpi/softlayer/virtual_guest_service"
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
+	"github.com/lextoumbourou/goodhosts"
 	"github.com/softlayer/softlayer-go/datatypes"
 	"github.com/softlayer/softlayer-go/sl"
-	"os"
-	"github.com/lextoumbourou/goodhosts"
 	"net/url"
+	"os"
 )
 
 type CreateVM struct {
@@ -133,12 +133,12 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 	// Config VM network settings
 	instanceNetworks, err = cv.virtualGuestService.ConfigureNetworks(cid, instanceNetworks)
 	if err != nil {
-		return "", bosherr.WrapErrorf(err, "Configuring VM networks")
+		return "", bosherr.WrapError(err, "Configuring VM networks")
 	}
 
-	// Update /etc/hosts
-	if err = cv.updateEtcHosts(vmProps, cid); err != nil {
-		return "", bosherr.WrapErrorf(err, "Updating /etc/hosts")
+	// Post config
+	if err = cv.postConfig(cid, vmProps); err != nil {
+		return "", bosherr.WrapError(err, "Post config")
 	}
 
 	// Create VM agent settings
@@ -156,7 +156,7 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 	}
 
 	if err = cv.registryClient.Update(VMCID(cid).String(), agentSettings); err != nil {
-		return "", bosherr.WrapErrorf(err, "Updating registryClient")
+		return "", bosherr.WrapError(err, "Updating registryClient")
 	}
 
 	return VMCID(cid).String(), nil
@@ -190,11 +190,11 @@ func (cv CreateVM) updateHostNameInCloudProps(cloudProps *VMCloudProperties, tim
 	if len(timeStampPostfix) == 0 {
 		return cloudProps.VmNamePrefix
 	} else {
-		return cloudProps.VmNamePrefix + "." + timeStampPostfix
+		return cloudProps.VmNamePrefix + "-" + timeStampPostfix
 	}
 }
 
-func (cv CreateVM) updateEtcHosts(vmProps *instance.Properties, virtualGuestId int) (error) {
+func (cv CreateVM) postConfig(virtualGuestId int, vmProps *instance.Properties) error {
 	virtualGuest, found, err := cv.virtualGuestService.Find(virtualGuestId)
 	if err != nil {
 		return bosherr.WrapErrorf(err, "Creating VM")
@@ -206,7 +206,7 @@ func (cv CreateVM) updateEtcHosts(vmProps *instance.Properties, virtualGuestId i
 	if vmProps.DeployedByBoshCLI {
 		err := cv.updateHosts("/etc/hosts", *virtualGuest.PrimaryBackendIpAddress, *virtualGuest.FullyQualifiedDomainName)
 		if err != nil {
-			return bosherr.WrapErrorf(err, "Updating BOSH director hostname/IP mapping entry in /etc/hosts")
+			return bosherr.WrapError(err, "Updating BOSH director hostname/IP mapping entry in /etc/hosts")
 		}
 	} else {
 		boshIP, err := cv.getLocalIPAddress()
@@ -216,7 +216,7 @@ func (cv CreateVM) updateEtcHosts(vmProps *instance.Properties, virtualGuestId i
 
 		mbus, err := cv.parseMbusURL(vmProps.AgentOption.Mbus, boshIP)
 		if err != nil {
-			return bosherr.WrapErrorf(err, "Cannot construct mbus url.")
+			return bosherr.WrapError(err, "Cannot construct mbus url.")
 		}
 		vmProps.AgentOption.Mbus = mbus
 
@@ -245,6 +245,13 @@ func (cv CreateVM) createVirtualGuestTemplate(stemcellUuid string, cloudProps VM
 		NetworkVlan: &datatypes.Network_Vlan{
 			Id: sl.Int(privateVlanId),
 		},
+	}
+
+	var sshKey *int
+	if cloudProps.SshKey == 0 {
+		sshKey = nil
+	} else {
+		sshKey = sl.Int(cloudProps.SshKey)
 	}
 
 	return &datatypes.Virtual_Guest{
@@ -285,7 +292,7 @@ func (cv CreateVM) createVirtualGuestTemplate(stemcellUuid string, cloudProps VM
 		},
 
 		SshKeys: []datatypes.Security_Ssh_Key{
-			{Id: sl.Int(cloudProps.SshKey)},
+			{Id: sshKey},
 		},
 	}
 }

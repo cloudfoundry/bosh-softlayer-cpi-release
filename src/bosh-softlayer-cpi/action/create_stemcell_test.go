@@ -8,8 +8,8 @@ import (
 
 	. "bosh-softlayer-cpi/action"
 
-	stemcellfakes "bosh-softlayer-cpi/softlayer/stemcell_service/fakes"
 	"bosh-softlayer-cpi/api"
+	stemcellfakes "bosh-softlayer-cpi/softlayer/stemcell_service/fakes"
 )
 
 var _ = Describe("CreateStemcell", func() {

@@ -8,18 +8,18 @@ import (
 
 	. "bosh-softlayer-cpi/action"
 
+	"bosh-softlayer-cpi/api"
+	"bosh-softlayer-cpi/registry"
+	registryfakes "bosh-softlayer-cpi/registry/fakes"
 	diskfakes "bosh-softlayer-cpi/softlayer/disk_service/fakes"
 	instancefakes "bosh-softlayer-cpi/softlayer/virtual_guest_service/fakes"
-	registryfakes "bosh-softlayer-cpi/registry/fakes"
 	"github.com/softlayer/softlayer-go/datatypes"
 	"github.com/softlayer/softlayer-go/sl"
-	"bosh-softlayer-cpi/registry"
-	"bosh-softlayer-cpi/api"
 )
 
 var _ = Describe("AttachDisk", func() {
 	var (
-		err error
+		err                   error
 		expectedAgentSettings registry.AgentSettings
 
 		diskService    *diskfakes.FakeService

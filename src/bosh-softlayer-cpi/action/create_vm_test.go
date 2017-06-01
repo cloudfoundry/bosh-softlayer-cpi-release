@@ -8,14 +8,14 @@ import (
 
 	. "bosh-softlayer-cpi/action"
 
+	registryfakes "bosh-softlayer-cpi/registry/fakes"
 	diskfakes "bosh-softlayer-cpi/softlayer/disk_service/fakes"
 	imagefakes "bosh-softlayer-cpi/softlayer/stemcell_service/fakes"
 	instancefakes "bosh-softlayer-cpi/softlayer/virtual_guest_service/fakes"
-	registryfakes "bosh-softlayer-cpi/registry/fakes"
 
-	"bosh-softlayer-cpi/softlayer/virtual_guest_service"
 	"bosh-softlayer-cpi/registry"
 	boslconfig "bosh-softlayer-cpi/softlayer/config"
+	"bosh-softlayer-cpi/softlayer/virtual_guest_service"
 
 	"github.com/softlayer/softlayer-go/datatypes"
 	"github.com/softlayer/softlayer-go/sl"
@@ -209,7 +209,7 @@ var _ = Describe("CreateVM", func() {
 					Datacenter: &datatypes.Location{
 						Name: sl.String("fake-datacenter-name"),
 					},
-					PrimaryBackendIpAddress: sl.String("10.10.10.11"),
+					PrimaryBackendIpAddress:  sl.String("10.10.10.11"),
 					FullyQualifiedDomainName: sl.String("fake-domain-name"),
 				},
 				true,
@@ -239,17 +239,7 @@ var _ = Describe("CreateVM", func() {
 			Expect(actualInstanceNetworks).To(Equal(expectedInstanceNetworks))
 		})
 
-		It("After creates the vm, /etc/hosts", func() {
-			cloudProps = VMCloudProperties{
-				VmNamePrefix:      "fake-hostname",
-				Domain:            "fake-domain.com",
-				StartCpus:         2,
-				MaxMemory:         2048,
-				Datacenter:        "fake-datacenter",
-				SshKey:            32345678,
-				DeployedByBoshCLI: true,
-			}
-
+		It("After creating the vm, /etc/hosts updated", func() {
 			vmCID, err = createVM.Run(agentID, stemcellCID, cloudProps, networks, disks, env)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(imageService.FindCallCount()).To(Equal(1))
@@ -268,6 +258,7 @@ var _ = Describe("CreateVM", func() {
 			Expect(vmCID).To(Equal(VMCID(actualCid).String()))
 			_, actualInstanceNetworks := vmService.ConfigureNetworksArgsForCall(0)
 			Expect(actualInstanceNetworks).To(Equal(expectedInstanceNetworks))
+
 		})
 
 		It("returns an error if imageService find call returns an error", func() {

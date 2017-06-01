@@ -15,7 +15,7 @@ import (
 
 var _ = Describe("DeleteVM", func() {
 	var (
-		err error
+		err   error
 		vmCID VMCID
 
 		vmService      *instancefakes.FakeService

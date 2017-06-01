@@ -1,10 +1,10 @@
 package action_test
 
 import (
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
 	. "bosh-softlayer-cpi/action"
 	"bosh-softlayer-cpi/registry"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("ConcreteFactoryOptions", func() {

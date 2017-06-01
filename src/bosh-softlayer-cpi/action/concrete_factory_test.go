@@ -9,12 +9,12 @@ import (
 	. "bosh-softlayer-cpi/action"
 
 	"bosh-softlayer-cpi/config"
+	"bosh-softlayer-cpi/registry"
 	bosl "bosh-softlayer-cpi/softlayer/client"
 	boslconfig "bosh-softlayer-cpi/softlayer/config"
 	"bosh-softlayer-cpi/softlayer/disk_service"
 	"bosh-softlayer-cpi/softlayer/stemcell_service"
 	"bosh-softlayer-cpi/softlayer/virtual_guest_service"
-	"bosh-softlayer-cpi/registry"
 )
 
 var _ = Describe("ConcreteFactory", func() {

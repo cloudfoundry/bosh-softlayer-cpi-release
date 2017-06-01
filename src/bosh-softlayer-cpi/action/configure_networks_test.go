@@ -1,12 +1,12 @@
 package action_test
 
 import (
+	. "bosh-softlayer-cpi/action"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	. "bosh-softlayer-cpi/action"
 
-	instancefakes "bosh-softlayer-cpi/softlayer/virtual_guest_service/fakes"
 	registryfakes "bosh-softlayer-cpi/registry/fakes"
+	instancefakes "bosh-softlayer-cpi/softlayer/virtual_guest_service/fakes"
 )
 
 var _ = Describe("ConfigureNetworks", func() {
