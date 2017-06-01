@@ -42,32 +42,17 @@ var _ = Describe("CreateDisk", func() {
 			vmCID = VMCID(0)
 		})
 
-		It("creates the disk", func() {
+		It("returns an error when vmCID is not set", func() {
 			diskService.CreateReturns(
 				22345678,
 				nil,
 			)
 
 			diskCID, err = createDisk.Run(size, cloudProps, vmCID)
-			Expect(err).NotTo(HaveOccurred())
-			Expect(vmService.FindCallCount()).To(Equal(0))
-			Expect(diskService.CreateCallCount()).To(Equal(1))
-			actualSize, _, _ := diskService.CreateArgsForCall(0)
-			Expect(actualSize).To(Equal(32768))
-			Expect(diskCID).To(Equal("22345678"))
-		})
-
-		It("returns an error if diskService create call returns an error", func() {
-			diskService.CreateReturns(
-				0,
-				errors.New("fake-disk-service-error"),
-			)
-
-			_, err = createDisk.Run(32768, cloudProps, vmCID)
 			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring("fake-disk-service-error"))
+			Expect(err.Error()).To(ContainSubstring("vmCID is not setting"))
 			Expect(vmService.FindCallCount()).To(Equal(0))
-			Expect(diskService.CreateCallCount()).To(Equal(1))
+			Expect(diskService.CreateCallCount()).To(Equal(0))
 		})
 
 		Context("when vmCID is set", func() {

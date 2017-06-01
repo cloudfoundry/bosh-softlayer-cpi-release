@@ -32,10 +32,10 @@
 
 if [ -z "$1" ]; then
   echo -e "\n Integration Testing ALL CPI methods"
-  ginkgo -r -p -v --noisyPendings integration
+  ginkgo -r -v --noisyPendings integration
 else
   echo -e "\n Integration Testing for $1 methods"
-  ginkgo -r -p -v --noisyPendings integration/$1
+  ginkgo -r -v --noisyPendings integration/$1
 fi
 
   echo -e "\n Vetting packages for potential issues..."

@@ -6,6 +6,7 @@ import (
 	"bosh-softlayer-cpi/api"
 	"bosh-softlayer-cpi/softlayer/disk_service"
 	instance "bosh-softlayer-cpi/softlayer/virtual_guest_service"
+	"fmt"
 )
 
 type CreateDisk struct {
@@ -38,6 +39,8 @@ func (cd CreateDisk) Run(size int, cloudProps DiskCloudProperties, vmCID VMCID) 
 
 		zone = *vm.Datacenter.Name
 
+	} else {
+		return "", api.NewDiskCreationFailedError(fmt.Sprint("vmCID is not setting"), false)
 	}
 
 	// Create the Disk

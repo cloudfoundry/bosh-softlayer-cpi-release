@@ -38,6 +38,10 @@ type ResponseError struct {
 	CanRetry bool `json:"ok_to_retry"`
 }
 
+func (r ResponseError) Error() string {
+	return r.Message
+}
+
 type JSON struct {
 	actionFactory bslaction.Factory
 	caller        Caller
