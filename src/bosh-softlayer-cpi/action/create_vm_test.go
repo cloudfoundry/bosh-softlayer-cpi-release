@@ -639,7 +639,7 @@ var _ = Describe("CreateVM", func() {
 			})
 		})
 
-		Context("when cloud propertys options EphemeralDiskSize is set", func() {
+		Context("when cloud property options EphemeralDiskSize is set", func() {
 			BeforeEach(func() {
 				expectedAgentSettings = registry.AgentSettings{
 					AgentID: "fake-agent-id",
