@@ -55,9 +55,7 @@ var _ = Describe("AttachDisk", func() {
 					},
 				},
 			}
-		})
 
-		It("attaches the disk", func() {
 			diskService.FindReturns(
 				datatypes.Network_Storage{
 					Id: sl.Int(1234567),
@@ -70,7 +68,9 @@ var _ = Describe("AttachDisk", func() {
 				"fake-volume-path",
 				nil,
 			)
+		})
 
+		It("attaches the disk", func() {
 			_, err = attachDisk.Run(vmCID, diskCID)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(diskService.FindCallCount()).To(Equal(1))
@@ -113,13 +113,6 @@ var _ = Describe("AttachDisk", func() {
 		})
 
 		It("returns an error if vmService attach disk call returns an error", func() {
-			diskService.FindReturns(
-				datatypes.Network_Storage{
-					Id: sl.Int(1234567),
-				},
-				true,
-				nil,
-			)
 			vmService.AttachDiskReturns(
 				"",
 				"",
@@ -136,18 +129,6 @@ var _ = Describe("AttachDisk", func() {
 		})
 
 		It("returns an error if registryClient fetch call returns an error", func() {
-			diskService.FindReturns(
-				datatypes.Network_Storage{
-					Id: sl.Int(1234567),
-				},
-				true,
-				nil,
-			)
-			vmService.AttachDiskReturns(
-				"fake-device-name",
-				"fake-volume-path",
-				nil,
-			)
 			registryClient.FetchErr = errors.New("fake-registry-client-error")
 
 			_, err = attachDisk.Run(vmCID, diskCID)
@@ -160,18 +141,6 @@ var _ = Describe("AttachDisk", func() {
 		})
 
 		It("returns an error if registryClient update call returns an error", func() {
-			diskService.FindReturns(
-				datatypes.Network_Storage{
-					Id: sl.Int(1234567),
-				},
-				true,
-				nil,
-			)
-			vmService.AttachDiskReturns(
-				"fake-device-name",
-				"fake-volume-path",
-				nil,
-			)
 			registryClient.UpdateErr = errors.New("fake-registry-client-error")
 
 			_, err = attachDisk.Run(vmCID, diskCID)

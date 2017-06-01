@@ -5,11 +5,11 @@ import (
 )
 
 type DeleteStemcellAction struct {
-	stemcellService stemcell_service.SoftlayerStemcellService
+	stemcellService stemcell_service.Service
 }
 
 func NewDeleteStemcell(
-	stemcellService stemcell_service.SoftlayerStemcellService,
+	stemcellService stemcell_service.Service,
 ) (action DeleteStemcellAction) {
 	action.stemcellService = stemcellService
 	return
