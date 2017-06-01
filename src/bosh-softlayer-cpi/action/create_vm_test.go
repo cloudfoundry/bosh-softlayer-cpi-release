@@ -203,11 +203,53 @@ var _ = Describe("CreateVM", func() {
 				nil,
 			)
 
+			vmService.FindReturns(
+				datatypes.Virtual_Guest{
+					Id: sl.Int(52345678),
+					Datacenter: &datatypes.Location{
+						Name: sl.String("fake-datacenter-name"),
+					},
+					PrimaryBackendIpAddress: sl.String("10.10.10.11"),
+					FullyQualifiedDomainName: sl.String("fake-domain-name"),
+				},
+				true,
+				nil,
+			)
 		})
 
-		// AttachEphemeralDiskCallCount
-
 		It("creates the vm", func() {
+			vmCID, err = createVM.Run(agentID, stemcellCID, cloudProps, networks, disks, env)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(imageService.FindCallCount()).To(Equal(1))
+			Expect(vmService.CreateSshKeyCallCount()).To(Equal(0))
+			Expect(vmService.GetVlanCallCount()).To(Equal(1))
+			Expect(vmService.FindByPrimaryBackendIpCallCount()).To(Equal(1))
+			Expect(vmService.ReloadOSCallCount()).To(Equal(1))
+			Expect(vmService.EditCallCount()).To(Equal(1))
+			Expect(vmService.CreateCallCount()).To(Equal(0))
+			Expect(vmService.ConfigureNetworksCallCount()).To(Equal(1))
+			Expect(vmService.AttachEphemeralDiskCallCount()).To(Equal(0))
+			Expect(vmService.CleanUpCallCount()).To(Equal(0))
+			Expect(registryClient.UpdateCalled).To(BeTrue())
+			Expect(vmService.FindCallCount()).To(Equal(1))
+			Expect(registryClient.UpdateSettings).To(Equal(expectedAgentSettings))
+			actualCid, _ := vmService.ConfigureNetworksArgsForCall(0)
+			Expect(vmCID).To(Equal(VMCID(actualCid).String()))
+			_, actualInstanceNetworks := vmService.ConfigureNetworksArgsForCall(0)
+			Expect(actualInstanceNetworks).To(Equal(expectedInstanceNetworks))
+		})
+
+		It("After creates the vm, /etc/hosts", func() {
+			cloudProps = VMCloudProperties{
+				VmNamePrefix:      "fake-hostname",
+				Domain:            "fake-domain.com",
+				StartCpus:         2,
+				MaxMemory:         2048,
+				Datacenter:        "fake-datacenter",
+				SshKey:            32345678,
+				DeployedByBoshCLI: true,
+			}
+
 			vmCID, err = createVM.Run(agentID, stemcellCID, cloudProps, networks, disks, env)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(imageService.FindCallCount()).To(Equal(1))

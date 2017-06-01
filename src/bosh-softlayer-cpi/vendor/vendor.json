@@ -71,6 +71,12 @@
 			"revisionTime": "2013-11-06T22:25:44Z"
 		},
 		{
+			"checksumSHA1": "rsCG8Pz7aguftxB+j8CHVsdCod8=",
+			"path": "github.com/lextoumbourou/goodhosts",
+			"revision": "40053a4f5ad05a3de3a97ea05c2f17c07e89b0ea",
+			"revisionTime": "2017-03-11T06:53:42Z"
+		},
+		{
 			"checksumSHA1": "gcLub3oB+u4QrOJZcYmk/y2AP4k=",
 			"origin": "github.com/cloudfoundry/bosh-utils/vendor/github.com/nu7hatch/gouuid",
 			"path": "github.com/nu7hatch/gouuid",

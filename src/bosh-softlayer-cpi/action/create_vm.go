@@ -20,6 +20,9 @@ import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	"github.com/softlayer/softlayer-go/datatypes"
 	"github.com/softlayer/softlayer-go/sl"
+	"os"
+	"github.com/lextoumbourou/goodhosts"
+	"net/url"
 )
 
 type CreateVM struct {
@@ -133,6 +136,11 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 		return "", bosherr.WrapErrorf(err, "Configuring VM networks")
 	}
 
+	// Update /etc/hosts
+	if err = cv.updateEtcHosts(vmProps, cid); err != nil {
+		return "", bosherr.WrapErrorf(err, "Updating /etc/hosts")
+	}
+
 	// Create VM agent settings
 	agentNetworks := instanceNetworks.AsRegistryNetworks()
 	agentSettings := registry.NewAgentSettings(agentID, VMCID(cid).String(), agentNetworks, registry.EnvSettings(env), cv.agentOptions)
@@ -148,7 +156,7 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 	}
 
 	if err = cv.registryClient.Update(VMCID(cid).String(), agentSettings); err != nil {
-		return "", bosherr.WrapErrorf(err, "Creating VM")
+		return "", bosherr.WrapErrorf(err, "Updating registryClient")
 	}
 
 	return VMCID(cid).String(), nil
@@ -156,9 +164,9 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 
 func (cv CreateVM) updateCloudProperties(cloudProps *VMCloudProperties) {
 	if cloudProps.DeployedByBoshCLI {
-		cloudProps.VmNamePrefix = updateHostNameInCloudProps(cloudProps, "")
+		cloudProps.VmNamePrefix = cv.updateHostNameInCloudProps(cloudProps, "")
 	} else {
-		cloudProps.VmNamePrefix = updateHostNameInCloudProps(cloudProps, cv.timeStampForTime(time.Now().UTC()))
+		cloudProps.VmNamePrefix = cv.updateHostNameInCloudProps(cloudProps, cv.timeStampForTime(time.Now().UTC()))
 	}
 
 	if cloudProps.StartCpus == 0 {
@@ -178,12 +186,48 @@ func (cv CreateVM) updateCloudProperties(cloudProps *VMCloudProperties) {
 	}
 }
 
-func updateHostNameInCloudProps(cloudProps *VMCloudProperties, timeStampPostfix string) string {
+func (cv CreateVM) updateHostNameInCloudProps(cloudProps *VMCloudProperties, timeStampPostfix string) string {
 	if len(timeStampPostfix) == 0 {
 		return cloudProps.VmNamePrefix
 	} else {
 		return cloudProps.VmNamePrefix + "." + timeStampPostfix
 	}
+}
+
+func (cv CreateVM) updateEtcHosts(vmProps *instance.Properties, virtualGuestId int) (error) {
+	virtualGuest, found, err := cv.virtualGuestService.Find(virtualGuestId)
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Creating VM")
+	}
+	if !found {
+		return api.NewVMNotFoundError(string(virtualGuestId))
+	}
+
+	if vmProps.DeployedByBoshCLI {
+		err := cv.updateHosts("/etc/hosts", *virtualGuest.PrimaryBackendIpAddress, *virtualGuest.FullyQualifiedDomainName)
+		if err != nil {
+			return bosherr.WrapErrorf(err, "Updating BOSH director hostname/IP mapping entry in /etc/hosts")
+		}
+	} else {
+		boshIP, err := cv.getLocalIPAddress()
+		if err != nil {
+			return bosherr.WrapError(err, "Failed to get IP address in local")
+		}
+
+		mbus, err := cv.parseMbusURL(vmProps.AgentOption.Mbus, boshIP)
+		if err != nil {
+			return bosherr.WrapErrorf(err, "Cannot construct mbus url.")
+		}
+		vmProps.AgentOption.Mbus = mbus
+
+		switch vmProps.AgentOption.Blobstore.Provider {
+		case "dav":
+			davConf := instance.DavConfig(vmProps.AgentOption.Blobstore.Options)
+			cv.updateDavConfig(&davConf, boshIP)
+		}
+	}
+
+	return nil
 }
 
 func (cv CreateVM) createVirtualGuestTemplate(stemcellUuid string, cloudProps VMCloudProperties, userData string, publicVlanId int, privateVlanId int) *datatypes.Virtual_Guest {
@@ -367,4 +411,81 @@ func (cv CreateVM) getNetworkSpace(vlanID int) (string, error) {
 func (cv CreateVM) timeStampForTime(now time.Time) string {
 	//utilize the constants list in the http://golang.org/src/time/format.go file to get the expect time formats
 	return now.Format("20060102-030405-") + fmt.Sprintf("%03d", int(now.UnixNano()/1e6-now.Unix()*1e3))
+}
+
+func (cv CreateVM) updateHosts(path string, newIpAddress string, targetHostname string) (err error) {
+	err = os.Setenv("HOSTS_PATH", path)
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Set '%s' to env variable 'HOSTS_PATH'", path)
+	}
+	hosts, err := goodhosts.NewHosts()
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Load hosts file")
+	}
+	matchedAddresses, err := net.LookupHost(targetHostname)
+	for _, address := range matchedAddresses {
+		if hosts.Has(address, targetHostname) {
+			err := hosts.Remove(address, targetHostname)
+			if err != nil {
+				return bosherr.WrapErrorf(err, "Remove '%s %s' in hosts", address, targetHostname)
+			}
+		}
+	}
+
+	err = hosts.Add(newIpAddress, targetHostname)
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Add '%s %s' in hosts", newIpAddress, targetHostname)
+	}
+
+	if err := hosts.Flush(); err != nil {
+		return bosherr.WrapErrorf(err, "Flush hosts file")
+	}
+
+	return nil
+}
+
+func (cv CreateVM) getLocalIPAddress() (string, error) {
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		return "", bosherr.WrapErrorf(err, "Failed to get network interfaces")
+	}
+
+	for _, addr := range addrs {
+		if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			if ipnet.IP.To4() != nil {
+				return ipnet.IP.String(), nil
+			}
+		}
+	}
+
+	return "", bosherr.Error(fmt.Sprintf("Failed to get IP address"))
+}
+
+func (cv CreateVM) parseMbusURL(mbusURL string, primaryBackendIpAddress string) (string, error) {
+	parsedURL, err := url.Parse(mbusURL)
+	if err != nil {
+		return "", bosherr.WrapError(err, "Parsing Mbus URL")
+	}
+	var username, password, port string
+	_, port, _ = net.SplitHostPort(parsedURL.Host)
+	userInfo := parsedURL.User
+	if userInfo != nil {
+		username = userInfo.Username()
+		password, _ = userInfo.Password()
+		return fmt.Sprintf("%s://%s:%s@%s:%s", parsedURL.Scheme, username, password, primaryBackendIpAddress, port), nil
+	}
+
+	return fmt.Sprintf("%s://%s:%s", parsedURL.Scheme, primaryBackendIpAddress, port), nil
+}
+
+func (cv CreateVM) updateDavConfig(config *instance.DavConfig, directorIP string) (err error) {
+	url := (*config)["endpoint"].(string)
+	mbus, err := cv.parseMbusURL(url, directorIP)
+	if err != nil {
+		return bosherr.WrapError(err, "Parsing Mbus URL")
+	}
+
+	(*config)["endpoint"] = mbus
+
+	return nil
 }
