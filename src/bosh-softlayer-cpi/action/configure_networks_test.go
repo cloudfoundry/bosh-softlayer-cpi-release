@@ -5,10 +5,8 @@ import (
 	. "github.com/onsi/gomega"
 	. "bosh-softlayer-cpi/action"
 
-	//instance "bosh-softlayer-cpi/softlayer/virtual_guest_service"
 	instancefakes "bosh-softlayer-cpi/softlayer/virtual_guest_service/fakes"
 	registryfakes "bosh-softlayer-cpi/registry/fakes"
-	//"bosh-softlayer-cpi/softlayer/virtual_guest_service"
 )
 
 var _ = Describe("ConfigureNetworks", func() {

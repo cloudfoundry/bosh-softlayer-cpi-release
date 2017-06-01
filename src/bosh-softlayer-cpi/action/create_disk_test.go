@@ -76,9 +76,7 @@ var _ = Describe("CreateDisk", func() {
 				cloudProps = DiskCloudProperties{
 					DataCenter: "fake-datacenter-name",
 				}
-			})
 
-			It("creates the disk at the vm zone", func() {
 				diskService.CreateReturns(
 					22345678,
 					nil,
@@ -93,7 +91,9 @@ var _ = Describe("CreateDisk", func() {
 					true,
 					nil,
 				)
+			})
 
+			It("creates the disk at the vm zone", func() {
 				diskCID, err = createDisk.Run(32768, cloudProps, vmCID)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(vmService.FindCallCount()).To(Equal(1))
