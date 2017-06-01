@@ -1,23 +1,39 @@
 # BOSH Softlayer CPI Release
 
-| Concourse Job      | Sub Job | Status                                                                                                                                                                                                                               |
-| ---                | ---     | ---                                                                                                                                                                                                                             |
-| BATS               | bats-ubuntu-managed-disks | [![bosh-azure-cpi.ci.cf-app.com](https://bosh-azure-cpi.ci.cf-app.com/api/v1/pipelines/azure-cpi/jobs/bats-ubuntu-managed-disks/badge)](https://bosh-azure-cpi.ci.cf-app.com/pipelines/azure-cpi/jobs/bats-ubuntu-managed-disks) |
-|                    | bats-ubuntu-unmanaged-disks | [![bosh-azure-cpi.ci.cf-app.com](https://bosh-azure-cpi.ci.cf-app.com/api/v1/pipelines/azure-cpi/jobs/bats-ubuntu-unmanaged-disks/badge)](https://bosh-azure-cpi.ci.cf-app.com/pipelines/azure-cpi/jobs/bats-ubuntu-unmanaged-disks) |
-| integration        | lifecycle-managed-disks | [![bosh-azure-cpi.ci.cf-app.com](https://bosh-azure-cpi.ci.cf-app.com/api/v1/pipelines/azure-cpi/jobs/lifecycle-managed-disks/badge)](https://bosh-azure-cpi.ci.cf-app.com/pipelines/azure-cpi/jobs/lifecycle-managed-disks) |
-|                    | lifecycle-unmanaged-disks | [![bosh-azure-cpi.ci.cf-app.com](https://bosh-azure-cpi.ci.cf-app.com/api/v1/pipelines/azure-cpi/jobs/lifecycle-unmanaged-disks/badge)](https://bosh-azure-cpi.ci.cf-app.com/pipelines/azure-cpi/jobs/lifecycle-unmanaged-disks) |
-| unit tests         | | [![bosh-azure-cpi.ci.cf-app.com](https://bosh-azure-cpi.ci.cf-app.com/api/v1/pipelines/azure-cpi/jobs/build-candidate/badge)](https://bosh-azure-cpi.ci.cf-app.com/pipelines/azure-cpi/jobs/build-candidate) |
-
 * Documentation: [bosh.io/docs](https://bosh.io/docs)
-* Slack: #bosh-azure-cpi on <https://slack.cloudfoundry.org>
+* BOSH SoftLayer CPI Slack channel: #bosh-softlayer-cpi on [https://cloudfoundry.slack.com/](https://cloudfoundry.slack.com/)
 * Mailing list: [cf-bosh](https://lists.cloudfoundry.org/pipermail/cf-bosh)
-* CI: <https://bosh-sl-ci.bluemix.com/>
-* Roadmap: [Pivotal Tracker](https://www.pivotaltracker.com/n/projects/1133984) (label:softlayer)
+* CI: <https://bosh-sl-ci.bluemix.net/teams/main/pipelines/bosh-softlayer-cpi-release-v4>
+* Roadmap: [Pivotal Tracker](https://www.pivotaltracker.com/n/projects/1344876)
 
-This is a BOSH release for the Azure CPI.
+## Releases
 
-See [Initializing a BOSH environment on SoftLayer](https://bosh.io/docs/init-softlayer.html) for example usage.
+This is a BOSH release for the Softlayer CPI.
 
-## Development
+The latest version for the SoftlLayer CPI release is here. Also, it is already available on [bosh.io](http://bosh.io).
 
-See [development doc](docs/development.md).
+To use this CPI you will need to use the SoftLayer light stemcell. it's also available on [bosh.io](http://bosh.io).
+
+## Bootstrap on SoftLayer
+
+You can use bosh-init from community to bootstrap an environment.
+
+See [bosh-init-usage](docs/bosh-init-usage.md). Use the CPI and stemcells releases above to do so.
+
+## Deployment Manifests Samples
+
+For Cloud Config, see [sl-cloud-config](docs/sl-cloud-config.yml)
+
+For Concourse, follow the guide of [Cluster with BOSH](http://concourse.ci/clusters-with-bosh.html) and reference the deployment manifest sample in ```Deploying Concourse``` section.
+
+For a minimalistic deployment of Cloud Foundry (diego architecture), follow the introduction  [minimalistic_cf_deployment.md](docs/minimalistic_cf_deployment.md).
+
+## Frequently Asked Questions and Answers
+
+1. Q: How do I specify a dynamic network through subnet instead of vlan id?
+
+   A: We don't support it currently.
+
+2. Q: Is there any restrictions about the hostname supported by Softlayer?
+
+   A: Yes. The hostname length can't be exactly 64. Otherwise there will be problems with ssh login.
