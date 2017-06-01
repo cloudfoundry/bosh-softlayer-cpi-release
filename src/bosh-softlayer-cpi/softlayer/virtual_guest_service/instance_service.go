@@ -33,5 +33,7 @@ type Metadata map[string]interface{}
 type Properties struct {
 	VirtualGuestTemplate datatypes.Virtual_Guest
 	DeployedByBoshCLI    bool
-	agentOption          registry.AgentOptions
+	AgentOption          registry.AgentOptions
 }
+
+type DavConfig map[string]interface{}

@@ -7,7 +7,6 @@ import (
 )
 
 const softlayerVirtualGuestServiceLogTag = "SoftlayerVirtualGuestService"
-const blobstoreTypeDav = "dav"
 const rootUser = "root"
 const volumePathPrefix = "/dev/mapper"
 
@@ -53,5 +52,3 @@ type Mount struct {
 	PartitionPath string
 	MountPoint    string
 }
-
-type DavConfig map[string]interface{}
