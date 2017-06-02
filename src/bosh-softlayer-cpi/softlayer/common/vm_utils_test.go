@@ -179,7 +179,7 @@ var _ = Describe("VM Utils", func() {
 						CloudProperties: map[string]interface{}{
 							"PrimaryNetworkComponent": map[string]interface{}{
 								"NetworkVlan": map[string]interface{}{
-									"Id":              float64(524954),
+									"Id": float64(524954),
 								},
 							},
 							"PrimaryBackendNetworkComponent": map[string]interface{}{
@@ -222,7 +222,7 @@ var _ = Describe("VM Utils", func() {
 
 					PrimaryNetworkComponent: &sldatatypes.PrimaryNetworkComponent{
 						NetworkVlan: sldatatypes.NetworkVlan{
-							Id:              524954,
+							Id: 524954,
 						},
 					},
 
@@ -527,7 +527,7 @@ var _ = Describe("VM Utils", func() {
 					PostInstallScriptUri:         "",
 					DedicatedAccountHostOnlyFlag: true,
 					PrivateNetworkOnlyFlag:       true,
-					SshKeys: []sldatatypes.SshKey{{Id: 74826}},
+					SshKeys:                      []sldatatypes.SshKey{{Id: 74826}},
 					BlockDevices: []sldatatypes.BlockDevice{{
 						Device:    "0",
 						DiskImage: sldatatypes.DiskImage{Capacity: 100}}},
@@ -625,7 +625,6 @@ var _ = Describe("VM Utils", func() {
 				Expect(vgt).To(Equal(expectedVgt))
 			})
 		})
-
 
 		// Setting in cloudProps
 		Context("when PrimaryNetworkComponent_Id, PrimaryBackendNetworkComponent_Id_PSId exist in cloudProps", func() {
@@ -1001,7 +1000,7 @@ var _ = Describe("VM Utils", func() {
 
 					PrimaryBackendNetworkComponent: &sldatatypes.PrimaryBackendNetworkComponent{
 						NetworkVlan: sldatatypes.NetworkVlan{
-							Id:              524956,
+							Id: 524956,
 						},
 					},
 
@@ -1033,7 +1032,6 @@ var _ = Describe("VM Utils", func() {
 				Expect(vgt).To(Equal(expectedVgt))
 			})
 		})
-
 
 		// Setting in both network and cloudProps
 		Context("when PrimaryNetworkComponent and PrimaryBackendNetworkComponent contain Id and PSId in cloudProps but only Id in network settings ", func() {
@@ -1183,7 +1181,7 @@ var _ = Describe("VM Utils", func() {
 					VmNamePrefix:                 "bosh-",
 					PostInstallScriptUri:         "",
 					DedicatedAccountHostOnlyFlag: true,
-					SshKeys:                      []sldatatypes.SshKey{{Id: 74826}},
+					SshKeys: []sldatatypes.SshKey{{Id: 74826}},
 					BlockDevices: []sldatatypes.BlockDevice{{
 						Device:    "0",
 						DiskImage: sldatatypes.DiskImage{Capacity: 100}}},
@@ -1442,7 +1440,7 @@ var _ = Describe("VM Utils", func() {
 					VmNamePrefix:                 "bosh-",
 					PostInstallScriptUri:         "",
 					DedicatedAccountHostOnlyFlag: true,
-					SshKeys:                      []sldatatypes.SshKey{{Id: 74826}},
+					SshKeys: []sldatatypes.SshKey{{Id: 74826}},
 					BlockDevices: []sldatatypes.BlockDevice{{
 						Device:    "0",
 						DiskImage: sldatatypes.DiskImage{Capacity: 100}}},
