@@ -10,10 +10,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"log"
-
 	testhelperscpi "bosh-softlayer-cpi/test_helpers"
-	"fmt"
 	slclient "github.com/maximilien/softlayer-go/client"
 	softlayer "github.com/maximilien/softlayer-go/softlayer"
 	testhelpers "github.com/maximilien/softlayer-go/test_helpers"
@@ -77,13 +74,10 @@ var _ = Describe("BOSH Director Level Integration for create_vm", func() {
 			tmpConfigPath, err = testhelperscpi.CreateTmpConfigPath(rootTemplatePath, configPathWithVps, username, apiKey)
 			Expect(err).ToNot(HaveOccurred())
 
-			fmt.Printf("####################: tmpConfigPath: %s \n", tmpConfigPath)
-
 			jsonPayload, err := testhelperscpi.GenerateCpiJsonPayload("create_vm", rootTemplatePath, replacementMap)
 			Expect(err).ToNot(HaveOccurred())
 
 			outputBytes, err := testhelperscpi.RunCpi(rootTemplatePath, tmpConfigPath, jsonPayload)
-			log.Println("outputBytes=" + string(outputBytes))
 			Expect(err).ToNot(HaveOccurred())
 
 			err = json.Unmarshal(outputBytes, &resultOutput)

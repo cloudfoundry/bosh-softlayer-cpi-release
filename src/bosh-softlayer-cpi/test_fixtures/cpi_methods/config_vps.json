@@ -3,8 +3,8 @@
     "plugin": "softlayer",
     "properties": {
       "softlayer": {
-        "username": "fake-username",
-        "apiKey": "fake-apikey",
+        "username": "{{ .Username }}",
+        "apiKey": "{{ .ApiKey }}",
         "featureOptions":{
           "enablePool": true
         }

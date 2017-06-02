@@ -20,9 +20,8 @@ type CpiTemplate struct {
 }
 
 type ConfigTemplate struct {
-	Username      string
-	ApiKey        string
-	FeatureOption FeatureOption
+	Username string
+	ApiKey   string
 }
 
 type FeatureOption struct {
@@ -91,13 +90,9 @@ func CreateTmpConfigPath(rootTemplatePath string, configPath string, username st
 	configTemplate := ConfigTemplate{
 		Username: username,
 		ApiKey:   apiKey,
-		FeatureOption: FeatureOption{
-			EnablePool: true,
-		},
 	}
 
 	t := template.New(filepath.Base(configPath))
-
 	t, err := t.ParseFiles(filepath.Join(rootTemplatePath, configPath))
 	if err != nil {
 		return "", err
