@@ -107,7 +107,7 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 	if !cv.softlayerOptions.DisableOsReload {
 		cid, err = cv.createByOsReload(stemcellCID, cloudProps, instanceNetworks)
 		if err != nil {
-			return "", err
+			return "", bosherr.WrapError(err, "OS reloading VM")
 		}
 		osReloaded = true
 	}

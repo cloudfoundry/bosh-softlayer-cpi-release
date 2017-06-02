@@ -43,7 +43,7 @@ type VMCloudProperties struct {
 	Domain            string `json:"domain,omitempty"`
 	StartCpus         int    `json:"startCpus,omitempty"`
 	MaxMemory         int    `json:"maxMemory,omitempty"`
-	Datacenter        string `json:"datacenter"`
+	Datacenter        string `json:"dataCenter"`
 	EphemeralDiskSize int    `json:"ephemeralDiskSize,omitempty"`
 	SshKey            int    `json:"sshKey,omitempty"`
 
@@ -52,7 +52,7 @@ type VMCloudProperties struct {
 	DedicatedAccountHostOnlyFlag bool `json:"dedicatedAccountHostOnlyFlag,omitempty"`
 	PrivateNetworkOnlyFlag       bool `json:"privateNetworkOnlyFlag,omitempty"`
 
-	DeployedByBoshCLI bool `json:"deployedByBoshcli,omitempty"`
+	DeployedByBoshCLI bool `json:"deployedByBoshCli,omitempty"`
 
 	MaxNetworkSpeed int `json:"maxNetworkSpeed,omitempty"`
 
