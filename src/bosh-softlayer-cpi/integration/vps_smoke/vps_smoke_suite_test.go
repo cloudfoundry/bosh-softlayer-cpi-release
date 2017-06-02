@@ -3,7 +3,7 @@ package vps_smoke_test
 import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	. "github.com/onsi/gomega/gexec"
+	"github.com/onsi/gomega/gexec"
 
 	"errors"
 	"os"
@@ -22,12 +22,12 @@ var _ = BeforeSuite(func() {
 	Expect(err).ToNot(HaveOccurred())
 
 	command := exec.Command(VPSExec, "--scheme=https", "--tls-host=0.0.0.0", "--tls-port=1443", "--tls-certificate=./../test_assets/server.pem", "--tls-key=./../test_assets/server.key", "--databaseDriver", "postgres", "--databaseConnectionString", postgresURL)
-	_, err = Start(command, GinkgoWriter, GinkgoWriter)
+	_, err = gexec.Start(command, GinkgoWriter, GinkgoWriter)
 	Expect(err).ShouldNot(HaveOccurred())
 })
 
 var _ = AfterSuite(func() {
-	//KillAndWait()
+	gexec.KillAndWait()
 })
 
 func GetPostgresURL() (string, error) {

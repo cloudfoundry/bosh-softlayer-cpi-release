@@ -93,6 +93,5 @@ var _ = Describe("BOSH Director Level Integration for create_vm", func() {
 			testhelpers.WaitForVirtualGuestToHaveNoActiveTransactions(vmId)
 			testhelpers.DeleteVirtualGuest(vmId)
 		})
-
 	})
 })
