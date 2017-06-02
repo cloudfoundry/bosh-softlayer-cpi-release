@@ -4,7 +4,7 @@
     "properties": {
       "softlayer": {
         "username": "fake-username",
-        "apiKey": "fake-api-key",
+        "apiKey": "fake-apikey",
         "featureOptions":{
           "enablePool": true
         }

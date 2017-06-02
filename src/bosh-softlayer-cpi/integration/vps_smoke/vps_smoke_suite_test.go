@@ -17,11 +17,11 @@ func TestVpsSmoke(t *testing.T) {
 }
 
 var _ = BeforeSuite(func() {
-	VPSExec := "test_assets/vps"
+	vps := "test_assets/vps"
 	postgresURL, err := GetPostgresURL()
 	Expect(err).ToNot(HaveOccurred())
 
-	command := exec.Command(VPSExec, "--scheme=https", "--tls-host=0.0.0.0", "--tls-port=1443", "--tls-certificate=./../test_assets/server.pem", "--tls-key=./../test_assets/server.key", "--databaseDriver", "postgres", "--databaseConnectionString", postgresURL)
+	command := exec.Command(vps, "--scheme=https", "--tls-host=0.0.0.0", "--tls-port=1443", "--tls-certificate=test_assets/server.pem", "--tls-key=test_assets/server.key", "--databaseDriver", "postgres", "--databaseConnectionString", postgresURL)
 	_, err = gexec.Start(command, GinkgoWriter, GinkgoWriter)
 	Expect(err).ShouldNot(HaveOccurred())
 })

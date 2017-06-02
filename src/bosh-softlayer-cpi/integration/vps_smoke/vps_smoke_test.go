@@ -13,12 +13,14 @@ import (
 	"log"
 
 	testhelperscpi "bosh-softlayer-cpi/test_helpers"
+	"fmt"
 	slclient "github.com/maximilien/softlayer-go/client"
 	softlayer "github.com/maximilien/softlayer-go/softlayer"
 	testhelpers "github.com/maximilien/softlayer-go/test_helpers"
 )
 
-const configPath = "test_fixtures/cpi_methods/config_vps.json"
+const configPathWithVps = "test_fixtures/cpi_methods/config_vps.json"
+const configPathWithoutVps = "test_fixtures/cpi_methods/config.json"
 
 var _ = Describe("BOSH Director Level Integration for create_vm", func() {
 	var (
@@ -52,10 +54,6 @@ var _ = Describe("BOSH Director Level Integration for create_vm", func() {
 		virtualGuestService, err = testhelpers.CreateVirtualGuestService()
 		Expect(err).ToNot(HaveOccurred())
 
-		replacementMap = map[string]string{
-			"Datacenter": testhelpers.GetDatacenter(),
-		}
-
 		testhelpers.TIMEOUT = 35 * time.Minute
 		testhelpers.POLLING_INTERVAL = 10 * time.Second
 
@@ -63,8 +61,6 @@ var _ = Describe("BOSH Director Level Integration for create_vm", func() {
 		Expect(err).ToNot(HaveOccurred())
 		rootTemplatePath = filepath.Join(pwd, "..", "..")
 
-		tmpConfigPath, err = testhelperscpi.CreateTmpConfigPath(rootTemplatePath, configPath, username, apiKey)
-		Expect(err).ToNot(HaveOccurred())
 	})
 
 	AfterEach(func() {
@@ -74,6 +70,15 @@ var _ = Describe("BOSH Director Level Integration for create_vm", func() {
 
 	Context("create_vm in SoftLayer", func() {
 		It("returns valid result because valid parameters", func() {
+			replacementMap = map[string]string{
+				"Datacenter": testhelpers.GetDatacenter(),
+			}
+
+			tmpConfigPath, err = testhelperscpi.CreateTmpConfigPath(rootTemplatePath, configPathWithVps, username, apiKey)
+			Expect(err).ToNot(HaveOccurred())
+
+			fmt.Printf("####################: tmpConfigPath: %s \n", tmpConfigPath)
+
 			jsonPayload, err := testhelperscpi.GenerateCpiJsonPayload("create_vm", rootTemplatePath, replacementMap)
 			Expect(err).ToNot(HaveOccurred())
 
@@ -92,6 +97,23 @@ var _ = Describe("BOSH Director Level Integration for create_vm", func() {
 			Expect(vmId).ToNot(BeNil())
 			testhelpers.WaitForVirtualGuestToHaveNoActiveTransactions(vmId)
 			testhelpers.DeleteVirtualGuest(vmId)
+
+			replacementMap = map[string]string{
+				"ID": id,
+			}
+
+			tmpConfigPath, err = testhelperscpi.CreateTmpConfigPath(rootTemplatePath, configPathWithoutVps, username, apiKey)
+			Expect(err).ToNot(HaveOccurred())
+
+			jsonPayload, err = testhelperscpi.GenerateCpiJsonPayload("delete_vm", rootTemplatePath, replacementMap)
+			Expect(err).ToNot(HaveOccurred())
+
+			outputBytes, err = testhelperscpi.RunCpi(rootTemplatePath, tmpConfigPath, jsonPayload)
+			Expect(err).ToNot(HaveOccurred())
+
+			err = json.Unmarshal(outputBytes, &resultOutput)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(resultOutput["error"]).To(BeNil())
 		})
 	})
 })
