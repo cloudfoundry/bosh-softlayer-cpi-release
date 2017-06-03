@@ -71,6 +71,7 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 
 	cv.updateCloudProperties(&cloudProps)
 
+	// create VM user data
 	userDataTypeContents, err := cv.createUserDataForInstance(agentID, cv.registryOptions)
 	if err != nil {
 		return "", bosherr.WrapError(err, "Creating VM UserData")
@@ -376,27 +377,28 @@ func (cv CreateVM) getVlanIds(networks Networks) (int, int, error) {
 		if nw.Type == "manual" {
 			continue
 		}
-
-		networkSpace, err := cv.getNetworkSpace(nw.CloudProperties.VlanID)
-		if err != nil {
-			return 0, 0, bosherr.WrapErrorf(err, "Network: %q, vlan id: %d", name, nw.CloudProperties.VlanID)
-		}
-
-		switch networkSpace {
-		case "PRIVATE":
-			if privateVlanID == 0 {
-				privateVlanID = nw.CloudProperties.VlanID
-			} else if privateVlanID != nw.CloudProperties.VlanID {
-				return 0, 0, bosherr.Error("Only one private VLAN is supported")
+		for _, vlanId := range nw.CloudProperties.VlanIds {
+			networkSpace, err := cv.getNetworkSpace(vlanId)
+			if err != nil {
+				return 0, 0, bosherr.WrapErrorf(err, "Network: %q, vlan id: %d", name, vlanId)
 			}
-		case "PUBLIC":
-			if publicVlanID == 0 {
-				publicVlanID = nw.CloudProperties.VlanID
-			} else if publicVlanID != nw.CloudProperties.VlanID {
-				return 0, 0, bosherr.Error("Only one public VLAN is supported")
+
+			switch networkSpace {
+			case "PRIVATE":
+				if privateVlanID == 0 {
+					privateVlanID = vlanId
+				} else if privateVlanID != vlanId {
+					return 0, 0, bosherr.Error("Only one private VLAN is supported")
+				}
+			case "PUBLIC":
+				if publicVlanID == 0 {
+					publicVlanID = vlanId
+				} else if publicVlanID != vlanId {
+					return 0, 0, bosherr.Error("Only one public VLAN is supported")
+				}
+			default:
+				return 0, 0, bosherr.Errorf("Vlan id %d: unknown network type '%s'", vlanId, networkSpace)
 			}
-		default:
-			return 0, 0, bosherr.Errorf("Vlan id %d: unknown network type '%s'", nw.CloudProperties.VlanID, networkSpace)
 		}
 	}
 

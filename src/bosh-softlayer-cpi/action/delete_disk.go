@@ -22,7 +22,7 @@ func NewDeleteDisk(
 func (dd DeleteDisk) Run(diskCID DiskCID) (interface{}, error) {
 	if err := dd.diskService.Delete(diskCID.Int()); err != nil {
 		if _, ok := err.(api.CloudError); ok {
-			return nil, err
+			return nil, nil
 		}
 		return nil, bosherr.WrapErrorf(err, "Deleting disk '%s'", diskCID)
 	}

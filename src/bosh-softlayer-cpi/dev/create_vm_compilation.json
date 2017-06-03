@@ -15,24 +15,14 @@
       "sshKey": 886121
     },
     {
-      "lon02_private": {
+      "dynamic": {
         "cloud_properties": {
-          "vlanIds": [1292651]
+          "vlanIds": [1292651, 1292653]
         },
         "dns": [
           "8.8.8.8",
           "10.0.80.11",
           "10.0.80.12"
-        ],
-        "type": "dynamic"
-      },
-      "lon02_public": {
-        "cloud_properties": {
-          "vlanIds": [1292653]
-        },
-        "default": [
-          "dns",
-          "gateway"
         ],
         "type": "dynamic"
       }

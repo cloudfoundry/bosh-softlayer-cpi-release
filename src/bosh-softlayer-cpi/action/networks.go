@@ -4,6 +4,7 @@ import (
 	"bosh-softlayer-cpi/registry"
 
 	"bosh-softlayer-cpi/softlayer/virtual_guest_service"
+	"fmt"
 )
 
 type Networks map[string]Network
@@ -26,17 +27,35 @@ func (ns Networks) AsInstanceServiceNetworks() instance.Networks {
 	networks := instance.Networks{}
 
 	for netName, network := range ns {
-		networks[netName] = instance.Network{
-			Type:    network.Type,
-			IP:      network.IP,
-			Gateway: network.Gateway,
-			Netmask: network.Netmask,
-			DNS:     network.DNS,
-			Default: network.Default,
-			CloudProperties: instance.NetworkCloudProperties{
-				VlanID:              network.CloudProperties.VlanID,
-				SourcePolicyRouting: network.CloudProperties.SourcePolicyRouting,
-			},
+		for index, vlanId := range network.CloudProperties.VlanIds {
+			var newNetName string
+			if index > 0 {
+				newNetName = fmt.Sprintf("%s_%d", netName, index)
+				networks[newNetName] = instance.Network{
+					Type:    network.Type,
+					IP:      network.IP,
+					Gateway: network.Gateway,
+					Netmask: network.Netmask,
+					DNS:     network.DNS,
+					CloudProperties: instance.NetworkCloudProperties{
+						VlanID: vlanId,
+					},
+				}
+			} else {
+				newNetName = netName
+				networks[newNetName] = instance.Network{
+					Type:    network.Type,
+					IP:      network.IP,
+					Gateway: network.Gateway,
+					Netmask: network.Netmask,
+					DNS:     network.DNS,
+					Default: network.Default,
+					CloudProperties: instance.NetworkCloudProperties{
+						VlanID:              vlanId,
+						SourcePolicyRouting: network.CloudProperties.SourcePolicyRouting,
+					},
+				}
+			}
 		}
 	}
 

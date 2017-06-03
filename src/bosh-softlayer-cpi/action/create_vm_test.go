@@ -111,7 +111,7 @@ var _ = Describe("CreateVM", func() {
 					DHCP:    true,
 					Default: []string{"fake-network-default"},
 					CloudProperties: NetworkCloudProperties{
-						VlanID:              42345678,
+						VlanIds:             []int{42345678},
 						SourcePolicyRouting: true,
 						Tags:                []string{"fake-network-cloud-network-tag"},
 					},

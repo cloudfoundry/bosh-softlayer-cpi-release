@@ -278,7 +278,7 @@ func (c *clientManager) WaitInstanceHasNoneActiveTransaction(id int, until time.
 	for {
 		virtualGuest, err := c.GetInstance(id, "id, activeTransaction[id,transactionStatus.name]")
 		if err != nil {
-			return bosherr.WrapErrorf(err, "Getting instance with id '%d'", id)
+			return err
 		}
 
 		// if activeTxn != nil && activeTxn.TransactionStatus != nil && activeTxn.TransactionStatus.Name != nil {
@@ -372,6 +372,11 @@ func (c *clientManager) CancelInstance(id int) error {
 	var err error
 	until := time.Now().Add(time.Duration(30) * time.Minute)
 	if err = c.WaitInstanceHasNoneActiveTransaction(*sl.Int(id), until); err != nil {
+		if apiErr, ok := err.(sl.Error); ok {
+			if apiErr.Exception == "SoftLayer_Exception_ObjectNotFound" {
+				return nil
+			}
+		}
 		return bosherr.WrapError(err, "Waiting until instance has none active transaction before canceling")
 	}
 

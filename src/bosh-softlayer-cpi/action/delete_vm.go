@@ -25,7 +25,7 @@ func (dv DeleteVMAction) Run(vmCID VMCID) (interface{}, error) {
 	// Delete the VM
 	if err := dv.vmService.Delete(vmCID.Int()); err != nil {
 		if _, ok := err.(api.CloudError); ok {
-			return nil, err
+			return nil, nil
 		}
 		return nil, bosherr.WrapErrorf(err, "Deleting vm '%s'", vmCID)
 	}
