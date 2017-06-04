@@ -3,8 +3,8 @@
     "plugin": "softlayer",
     "properties": {
       "softlayer": {
-        "username": "fake-username",
-        "apiKey": "fake-api-key"
+        "username": "cuixuex@cn.ibm.com",
+        "apiKey": "7eab8fbfcdda3249e780dce0b10c7e4794e5ccd0fc9af7221b9fa9b40924ba8a"
       },
       "agent": {
         "ntp": [],

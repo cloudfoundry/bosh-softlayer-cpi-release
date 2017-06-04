@@ -2,9 +2,9 @@
 	"method": "create_vm",
 	"arguments": [
 		"45632666-9fb1-422a-af35-2ab6102c5c1b",
-		"879741",
+		"1633201",
 		{
-			"vmNamePrefix": "ecpi-test",
+			"vmNamePrefix": "vps-slcpi-test",
 			"domain": "softlayer.com",
 			"startCpus": 1,
 			"maxMemory": 1024,
