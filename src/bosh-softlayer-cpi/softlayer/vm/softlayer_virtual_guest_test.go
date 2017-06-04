@@ -249,7 +249,7 @@ var _ = Describe("SoftLayerVirtualGuest", func() {
 		BeforeEach(func() {
 			disk = &fakedisk.FakeDisk{}
 			fileNames := []string{
-				"SoftLayer_Network_Storage_Service_getIscsiVolume.json",
+				"SoftLayer_Account_Service_getIscsiVolume.json",
 				"SoftLayer_Network_Storage_Service_getAllowedVirtualGuests_None.json",
 				"SoftLayer_Network_Storage_Service_allowAccessFromVirtualGuest.json",
 				"SoftLayer_Virtual_Guest_Service_getAllowedHost.json",
@@ -377,7 +377,7 @@ iscsiadm: No records found
 		BeforeEach(func() {
 			disk = &fakedisk.FakeDisk{}
 			fileNames := []string{
-				"SoftLayer_Network_Storage_Service_getIscsiVolume.json",
+				"SoftLayer_Account_Service_getIscsiVolume.json",
 				"SoftLayer_Network_Storage_Service_getAllowedVirtualGuests.json",
 				"SoftLayer_Network_Storage_Service_removeAccessFromVirtualGuest.json",
 				"SoftLayer_Virtual_Guest_Service_getUserData_With_PersistentDisk.json",
