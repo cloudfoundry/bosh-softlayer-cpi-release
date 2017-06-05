@@ -144,6 +144,10 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 
 	// Create VM agent settings
 	agentNetworks := instanceNetworks.AsRegistryNetworks()
+
+	// Keep root password
+	env["bosh"].(map[string]interface{})["keep_root_password"] = true
+
 	agentSettings := registry.NewAgentSettings(agentID, VMCID(cid).String(), agentNetworks, registry.EnvSettings(env), cv.agentOptions)
 
 	// Attach Ephemeral Disk

@@ -28,7 +28,7 @@ func (vg SoftlayerVirtualGuestService) extractTagsFromVMMetadata(vmMetadata Meta
 		if !err {
 			return "", bosherr.Errorf("Converting tags metadata value `%v` to string failed", value)
 		}
-		if key != "name" {
+		if key != "name" && key != "id" && key != "created_at" {
 			tagStringBuffer.WriteString(key + ":" + stringValue)
 			if i != len(vmMetadata)-1 {
 				tagStringBuffer.WriteString(", ")

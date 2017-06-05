@@ -77,6 +77,8 @@ var _ = Describe("CreateVM", func() {
 			DisableOsReload: false,
 		}
 
+		env = Environment(map[string]interface{}{"bosh": map[string]interface{}{"keep_root_password": false}})
+
 		createVM = NewCreateVM(
 			imageService,
 			vmService,
@@ -129,6 +131,7 @@ var _ = Describe("CreateVM", func() {
 			}
 
 			expectedInstanceNetworks = networks.AsInstanceServiceNetworks()
+
 			expectedAgentSettings = registry.AgentSettings{
 				AgentID: "fake-agent-id",
 				Blobstore: registry.BlobstoreSettings{
@@ -149,6 +152,12 @@ var _ = Describe("CreateVM", func() {
 						Default: []string{"fake-network-default"},
 					},
 				},
+				Env: registry.EnvSettings(map[string]interface{}{
+					"bosh": map[string]interface{}{
+						"keep_root_password": true,
+					},
+				}),
+
 				VM: registry.VMSettings{
 					Name: "52345678",
 				},
@@ -563,6 +572,11 @@ var _ = Describe("CreateVM", func() {
 							Default: []string{"fake-network-default"},
 						},
 					},
+					Env: registry.EnvSettings(map[string]interface{}{
+						"bosh": map[string]interface{}{
+							"keep_root_password": true,
+						},
+					}),
 					VM: registry.VMSettings{
 						Name: "62345678",
 					},
@@ -695,6 +709,7 @@ var _ = Describe("CreateVM", func() {
 							Default: []string{"fake-network-default"},
 						},
 					},
+					Env: registry.EnvSettings(map[string]interface{}{"bosh": map[string]interface{}{"keep_root_password": true}}),
 					VM: registry.VMSettings{
 						Name: "52345678",
 					},
