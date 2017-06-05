@@ -95,12 +95,6 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 		return "", bosherr.WrapError(err, "Creating VM")
 	}
 
-	// Parse VM properties
-	vmProps := &instance.Properties{
-		VirtualGuestTemplate: *virtualGuestTemplate,
-		DeployedByBoshCLI:    cloudProps.DeployedByBoshCLI,
-	}
-
 	// CID for returned VM
 	cid := 0
 	osReloaded := false
@@ -115,7 +109,7 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 
 	if cid == 0 {
 		// Create VM
-		cid, err = cv.virtualGuestService.Create(vmProps, instanceNetworks, cv.registryOptions.EndpointWithCredentials())
+		cid, err = cv.virtualGuestService.Create(*virtualGuestTemplate, instanceNetworks, cv.registryOptions.EndpointWithCredentials())
 		if err != nil {
 			if _, ok := err.(api.CloudError); ok {
 				return "", err
@@ -137,16 +131,32 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 		return "", bosherr.WrapError(err, "Configuring VM networks")
 	}
 
-	// Post config
-	if err = cv.postConfig(cid, vmProps); err != nil {
-		return "", bosherr.WrapError(err, "Post config")
-	}
-
 	// Create VM agent settings
 	agentNetworks := instanceNetworks.AsRegistryNetworks()
 
 	// Keep root password
 	env["bosh"].(map[string]interface{})["keep_root_password"] = true
+
+	// Get object details of new VM
+	virtualGuest, found, err := cv.virtualGuestService.Find(cid)
+	if err != nil {
+		return "", bosherr.WrapErrorf(err, "Creating VM")
+	}
+	if !found {
+		return "", api.NewVMNotFoundError(string(cid))
+	}
+
+	if cloudProps.DeployedByBoshCLI {
+		err := cv.updateHosts("/etc/hosts", *virtualGuest.PrimaryBackendIpAddress, *virtualGuest.FullyQualifiedDomainName)
+		if err != nil {
+			return "", bosherr.WrapError(err, "Updating BOSH director hostname/IP mapping entry in /etc/hosts")
+		}
+	} else {
+		// Post config
+		if err = cv.postConfig(cid, &cv.agentOptions); err != nil {
+			return "", bosherr.WrapError(err, "Post config")
+		}
+	}
 
 	agentSettings := registry.NewAgentSettings(agentID, VMCID(cid).String(), agentNetworks, registry.EnvSettings(env), cv.agentOptions)
 
@@ -199,39 +209,23 @@ func (cv CreateVM) updateHostNameInCloudProps(cloudProps *VMCloudProperties, tim
 	}
 }
 
-func (cv CreateVM) postConfig(virtualGuestId int, vmProps *instance.Properties) error {
-	virtualGuest, found, err := cv.virtualGuestService.Find(virtualGuestId)
+func (cv CreateVM) postConfig(virtualGuestId int, agentOptions *registry.AgentOptions) error {
+	boshIP, err := cv.getLocalIPAddress()
 	if err != nil {
-		return bosherr.WrapErrorf(err, "Creating VM")
-	}
-	if !found {
-		return api.NewVMNotFoundError(string(virtualGuestId))
+		return bosherr.WrapError(err, "Failed to get IP address in local")
 	}
 
-	if vmProps.DeployedByBoshCLI {
-		err := cv.updateHosts("/etc/hosts", *virtualGuest.PrimaryBackendIpAddress, *virtualGuest.FullyQualifiedDomainName)
-		if err != nil {
-			return bosherr.WrapError(err, "Updating BOSH director hostname/IP mapping entry in /etc/hosts")
-		}
-	} else {
-		boshIP, err := cv.getLocalIPAddress()
-		if err != nil {
-			return bosherr.WrapError(err, "Failed to get IP address in local")
-		}
-
-		mbus, err := cv.parseMbusURL(vmProps.AgentOption.Mbus, boshIP)
-		if err != nil {
-			return bosherr.WrapError(err, "Cannot construct mbus url.")
-		}
-		vmProps.AgentOption.Mbus = mbus
-
-		switch vmProps.AgentOption.Blobstore.Provider {
-		case "dav":
-			davConf := instance.DavConfig(vmProps.AgentOption.Blobstore.Options)
-			cv.updateDavConfig(&davConf, boshIP)
-		}
+	mbus, err := cv.parseMbusURL(agentOptions.Mbus, boshIP)
+	if err != nil {
+		return bosherr.WrapError(err, "Cannot construct mbus url.")
 	}
+	agentOptions.Mbus = mbus
 
+	switch agentOptions.Blobstore.Provider {
+	case "dav":
+		davConf := instance.DavConfig(agentOptions.Blobstore.Options)
+		cv.updateDavConfig(&davConf, boshIP)
+	}
 	return nil
 }
 
@@ -479,6 +473,7 @@ func (cv CreateVM) parseMbusURL(mbusURL string, primaryBackendIpAddress string) 
 	if err != nil {
 		return "", bosherr.WrapError(err, "Parsing Mbus URL")
 	}
+
 	var username, password, port string
 	_, port, _ = net.SplitHostPort(parsedURL.Host)
 	userInfo := parsedURL.User

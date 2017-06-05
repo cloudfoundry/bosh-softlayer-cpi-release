@@ -1,7 +1,6 @@
 package instance
 
 import (
-	"bosh-softlayer-cpi/registry"
 	"github.com/softlayer/softlayer-go/datatypes"
 )
 
@@ -10,7 +9,7 @@ type Service interface {
 	AttachDisk(id int, diskID int) (string, string, error)
 	AttachedDisks(id int) ([]string, error)
 	AttachEphemeralDisk(id int, diskSize int) error
-	Create(vmProps *Properties, networks Networks, registryEndpoint string) (int, error)
+	Create(virtualGuest datatypes.Virtual_Guest, networks Networks, registryEndpoint string) (int, error)
 	ConfigureNetworks(id int, networks Networks) (Networks, error)
 	CleanUp(id int)
 	Delete(id int) error
@@ -29,11 +28,5 @@ type Service interface {
 }
 
 type Metadata map[string]interface{}
-
-type Properties struct {
-	VirtualGuestTemplate datatypes.Virtual_Guest
-	DeployedByBoshCLI    bool
-	AgentOption          registry.AgentOptions
-}
 
 type DavConfig map[string]interface{}

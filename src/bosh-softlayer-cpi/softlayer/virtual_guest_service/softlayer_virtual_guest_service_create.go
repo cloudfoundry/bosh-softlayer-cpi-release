@@ -4,10 +4,11 @@ import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 
 	boslc "bosh-softlayer-cpi/softlayer/client"
+	"github.com/softlayer/softlayer-go/datatypes"
 )
 
-func (vg SoftlayerVirtualGuestService) Create(vmProps *Properties, networks Networks, registryEndpoint string) (int, error) {
-	virtualGuest, err := vg.softlayerClient.CreateInstance(&vmProps.VirtualGuestTemplate)
+func (vg SoftlayerVirtualGuestService) Create(virtualGuest datatypes.Virtual_Guest, networks Networks, registryEndpoint string) (int, error) {
+	virtualGuest, err := vg.softlayerClient.CreateInstance(&virtualGuest)
 	if err != nil {
 		return 0, bosherr.WrapError(err, "Creating virtualGuest")
 	}

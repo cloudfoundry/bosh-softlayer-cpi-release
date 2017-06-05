@@ -17,8 +17,10 @@ import (
 	boslconfig "bosh-softlayer-cpi/softlayer/config"
 	"bosh-softlayer-cpi/softlayer/virtual_guest_service"
 
+	"fmt"
 	"github.com/softlayer/softlayer-go/datatypes"
 	"github.com/softlayer/softlayer-go/sl"
+	"net"
 )
 
 var _ = Describe("CreateVM", func() {
@@ -34,7 +36,6 @@ var _ = Describe("CreateVM", func() {
 		registryOptions          registry.ClientOptions
 		agentOptions             registry.AgentOptions
 		softlayerOptions         boslconfig.Config
-		expectedVMProps          *instance.Properties
 		expectedInstanceNetworks instance.Networks
 		expectedAgentSettings    registry.AgentSettings
 
@@ -63,10 +64,12 @@ var _ = Describe("CreateVM", func() {
 				Password: "fake-registry-password",
 			},
 		}
+
 		agentOptions = registry.AgentOptions{
-			Mbus: "http://fake-mbus",
+			Mbus: "nats://nats:nats@fake-mbus:fake-port",
 			Blobstore: registry.BlobstoreOptions{
-				Provider: "fake-blobstore-type",
+				Provider: "dav",
+				Options:  map[string]interface{}{"endpoint": "http://fake-blobstore:fake-port"},
 			},
 		}
 
@@ -95,12 +98,13 @@ var _ = Describe("CreateVM", func() {
 			stemcellCID = StemcellCID(12345678)
 
 			cloudProps = VMCloudProperties{
-				VmNamePrefix: "fake-hostname",
-				Domain:       "fake-domain.com",
-				StartCpus:    2,
-				MaxMemory:    2048,
-				Datacenter:   "fake-datacenter",
-				SshKey:       32345678,
+				VmNamePrefix:      "fake-hostname",
+				Domain:            "fake-domain.com",
+				StartCpus:         2,
+				MaxMemory:         2048,
+				Datacenter:        "fake-datacenter",
+				SshKey:            32345678,
+				DeployedByBoshCLI: true,
 			}
 
 			networks = Networks{
@@ -120,28 +124,19 @@ var _ = Describe("CreateVM", func() {
 				},
 			}
 
-			expectedVMProps = &instance.Properties{
-				VirtualGuestTemplate: datatypes.Virtual_Guest{
-					Id: sl.Int(52345678),
-					Datacenter: &datatypes.Location{
-						Name: sl.String("fake-datacenter-name"),
-					},
-				},
-				DeployedByBoshCLI: true,
-			}
-
 			expectedInstanceNetworks = networks.AsInstanceServiceNetworks()
 
 			expectedAgentSettings = registry.AgentSettings{
 				AgentID: "fake-agent-id",
 				Blobstore: registry.BlobstoreSettings{
-					Provider: "fake-blobstore-type",
+					Provider: "dav",
+					Options:  map[string]interface{}{"endpoint": "http://fake-blobstore:fake-port"},
 				},
 				Disks: registry.DisksSettings{
 					System:     "",
 					Persistent: map[string]registry.PersistentSettings{},
 				},
-				Mbus: "http://fake-mbus",
+				Mbus: "nats://nats:nats@fake-mbus:fake-port",
 				Networks: registry.NetworksSettings{
 					"fake-network-name": registry.NetworkSettings{
 						Type:    "dynamic",
@@ -226,7 +221,7 @@ var _ = Describe("CreateVM", func() {
 			)
 		})
 
-		It("creates the vm", func() {
+		It("creates the vm when deployByBoshCli=true", func() {
 			vmCID, err = createVM.Run(agentID, stemcellCID, cloudProps, networks, disks, env)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(imageService.FindCallCount()).To(Equal(1))
@@ -268,6 +263,83 @@ var _ = Describe("CreateVM", func() {
 			_, actualInstanceNetworks := vmService.ConfigureNetworksArgsForCall(0)
 			Expect(actualInstanceNetworks).To(Equal(expectedInstanceNetworks))
 
+		})
+
+		It("creates the vm when deployByBoshCli=false", func() {
+			cloudProps = VMCloudProperties{
+				VmNamePrefix: "fake-hostname",
+				Domain:       "fake-domain.com",
+				StartCpus:    2,
+				MaxMemory:    2048,
+				Datacenter:   "fake-datacenter",
+				SshKey:       32345678,
+			}
+
+			addrs, err := net.InterfaceAddrs()
+			Expect(err).NotTo(HaveOccurred())
+
+			var localIpAddr string
+
+			for _, addr := range addrs {
+				if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+					if ipnet.IP.To4() != nil {
+						localIpAddr = ipnet.IP.String()
+						break
+					}
+				}
+			}
+
+			expectedAgentSettings = registry.AgentSettings{
+				AgentID: "fake-agent-id",
+				Blobstore: registry.BlobstoreSettings{
+					Provider: "dav",
+					Options:  map[string]interface{}{"endpoint": fmt.Sprintf("http://%s:fake-port", localIpAddr)},
+				},
+				Disks: registry.DisksSettings{
+					System:     "",
+					Persistent: map[string]registry.PersistentSettings{},
+				},
+				Mbus: fmt.Sprintf("nats://nats:nats@%s:fake-port", localIpAddr),
+				Networks: registry.NetworksSettings{
+					"fake-network-name": registry.NetworkSettings{
+						Type:    "dynamic",
+						IP:      "10.10.10.10",
+						Gateway: "fake-network-gateway",
+						Netmask: "fake-network-netmask",
+						DNS:     []string{"fake-network-dns"},
+						Default: []string{"fake-network-default"},
+					},
+				},
+				Env: registry.EnvSettings(map[string]interface{}{
+					"bosh": map[string]interface{}{
+						"keep_root_password": true,
+					},
+				}),
+
+				VM: registry.VMSettings{
+					Name: "52345678",
+				},
+			}
+
+			vmCID, err = createVM.Run(agentID, stemcellCID, cloudProps, networks, disks, env)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(imageService.FindCallCount()).To(Equal(1))
+			Expect(vmService.CreateSshKeyCallCount()).To(Equal(0))
+			Expect(vmService.GetVlanCallCount()).To(Equal(1))
+			Expect(vmService.FindByPrimaryBackendIpCallCount()).To(Equal(1))
+			Expect(vmService.ReloadOSCallCount()).To(Equal(1))
+			Expect(vmService.EditCallCount()).To(Equal(1))
+			Expect(vmService.CreateCallCount()).To(Equal(0))
+			Expect(vmService.ConfigureNetworksCallCount()).To(Equal(1))
+			Expect(vmService.AttachEphemeralDiskCallCount()).To(Equal(0))
+			Expect(vmService.CleanUpCallCount()).To(Equal(0))
+			Expect(registryClient.UpdateCalled).To(BeTrue())
+			Expect(vmService.FindCallCount()).To(Equal(1))
+			Expect(registryClient.UpdateSettings).To(Equal(expectedAgentSettings))
+			actualCid, _ := vmService.ConfigureNetworksArgsForCall(0)
+			Expect(vmCID).To(Equal(VMCID(actualCid).String()))
+			_, actualInstanceNetworks := vmService.ConfigureNetworksArgsForCall(0)
+			Expect(actualInstanceNetworks).To(Equal(expectedInstanceNetworks))
 		})
 
 		It("returns an error if imageService find call returns an error", func() {
@@ -555,13 +627,14 @@ var _ = Describe("CreateVM", func() {
 				expectedAgentSettings = registry.AgentSettings{
 					AgentID: "fake-agent-id",
 					Blobstore: registry.BlobstoreSettings{
-						Provider: "fake-blobstore-type",
+						Provider: "dav",
+						Options:  map[string]interface{}{"endpoint": "http://fake-blobstore:fake-port"},
 					},
 					Disks: registry.DisksSettings{
 						System:     "",
 						Persistent: map[string]registry.PersistentSettings{},
 					},
-					Mbus: "http://fake-mbus",
+					Mbus: "nats://nats:nats@fake-mbus:fake-port",
 					Networks: registry.NetworksSettings{
 						"fake-network-name": registry.NetworkSettings{
 							Type:    "dynamic",
@@ -580,17 +653,6 @@ var _ = Describe("CreateVM", func() {
 					VM: registry.VMSettings{
 						Name: "62345678",
 					},
-				}
-				expectedVMProps = &instance.Properties{
-					VirtualGuestTemplate: datatypes.Virtual_Guest{
-						Id: sl.Int(52345678),
-						Datacenter: &datatypes.Location{
-							Name: sl.String("fake-datacenter-name"),
-						},
-						BlockDeviceTemplateGroup: &datatypes.Virtual_Guest_Block_Device_Template_Group{},
-						Hostname:                 sl.String("fake-hostname"),
-					},
-					DeployedByBoshCLI: true,
 				}
 
 				vmService.CreateReturns(
@@ -691,14 +753,15 @@ var _ = Describe("CreateVM", func() {
 				expectedAgentSettings = registry.AgentSettings{
 					AgentID: "fake-agent-id",
 					Blobstore: registry.BlobstoreSettings{
-						Provider: "fake-blobstore-type",
+						Provider: "dav",
+						Options:  map[string]interface{}{"endpoint": "http://fake-blobstore:fake-port"},
 					},
 					Disks: registry.DisksSettings{
 						System:     "",
 						Ephemeral:  "/dev/xvdc",
 						Persistent: map[string]registry.PersistentSettings{},
 					},
-					Mbus: "http://fake-mbus",
+					Mbus: "nats://nats:nats@fake-mbus:fake-port",
 					Networks: registry.NetworksSettings{
 						"fake-network-name": registry.NetworkSettings{
 							Type:    "dynamic",
@@ -723,6 +786,7 @@ var _ = Describe("CreateVM", func() {
 					Datacenter:        "fake-datacenter",
 					SshKey:            32345678,
 					EphemeralDiskSize: 2048,
+					DeployedByBoshCLI: true,
 				}
 			})
 
