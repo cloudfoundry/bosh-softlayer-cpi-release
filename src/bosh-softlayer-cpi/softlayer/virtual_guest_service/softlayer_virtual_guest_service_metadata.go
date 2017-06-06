@@ -2,7 +2,6 @@ package instance
 
 import (
 	"bytes"
-
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 )
 
@@ -22,19 +21,17 @@ func (vg SoftlayerVirtualGuestService) SetMetadata(id int, vmMetadata Metadata) 
 
 func (vg SoftlayerVirtualGuestService) extractTagsFromVMMetadata(vmMetadata Metadata) (string, error) {
 	var tagStringBuffer bytes.Buffer
-	i := 0
-	for key, value := range vmMetadata {
-		stringValue, err := value.(string)
-		if !err {
-			return "", bosherr.Errorf("Converting tags metadata value `%v` to string failed", value)
-		}
-		if key != "name" && key != "id" && key != "created_at" {
-			tagStringBuffer.WriteString(key + ":" + stringValue)
-			if i != len(vmMetadata)-1 {
-				tagStringBuffer.WriteString(", ")
-			}
-		}
-		i += 1
+	tagStringBuffer.WriteString("deployment" + ":" + vmMetadata["deployment"].(string))
+	tagStringBuffer.WriteString(", ")
+	tagStringBuffer.WriteString("director" + ":" + vmMetadata["director"].(string))
+	tagStringBuffer.WriteString(", ")
+
+	if val, ok := vmMetadata["compiling"]; ok {
+		tagStringBuffer.WriteString("compiling" + ":" + val.(string))
+	} else {
+		tagStringBuffer.WriteString("job" + ":" + vmMetadata["job"].(string))
+		tagStringBuffer.WriteString(", ")
+		tagStringBuffer.WriteString("index" + ":" + vmMetadata["index"].(string))
 	}
 
 	return tagStringBuffer.String(), nil

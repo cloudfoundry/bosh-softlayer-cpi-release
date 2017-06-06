@@ -30,6 +30,10 @@ var _ = Describe("SetVMMetadata", func() {
 			"deployment": "fake-deployment",
 			"job":        "fake-job",
 			"index":      "fake-index",
+			"director":   "fake-director",
+			"id":         "fake-id",
+			"name":       "fake-name/fake-uuid",
+			"created_at": "2017-06-05T14:54:44Z",
 		}
 		vmService = &instancefakes.FakeService{}
 		setVMMetadata = NewSetVMMetadata(vmService)

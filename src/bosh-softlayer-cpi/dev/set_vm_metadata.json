@@ -3,7 +3,8 @@
   "arguments": [
 	"10498259",
     {
-      "director": "5276b588-1016-4023-acae-9a0d797168be",
+      "director": "fake-director",
+      "deployment": "fake-deployment",
       "name": "fake-director",
       "compiling": "nats"
     }
