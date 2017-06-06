@@ -246,14 +246,7 @@ func (cv CreateVM) createVirtualGuestTemplate(stemcellUuid string, cloudProps VM
 		},
 	}
 
-	var sshKey *int
-	if cloudProps.SshKey == 0 {
-		sshKey = nil
-	} else {
-		sshKey = sl.Int(cloudProps.SshKey)
-	}
-
-	return &datatypes.Virtual_Guest{
+	virtualGuestTemplate := &datatypes.Virtual_Guest{
 		// instance type
 		Hostname:  sl.String(cloudProps.VmNamePrefix),
 		Domain:    sl.String(cloudProps.Domain),
@@ -289,11 +282,13 @@ func (cv CreateVM) createVirtualGuestTemplate(stemcellUuid string, cloudProps VM
 				Value: sl.String(userData),
 			},
 		},
-
-		SshKeys: []datatypes.Security_Ssh_Key{
-			{Id: sshKey},
-		},
 	}
+
+	if cloudProps.SshKey != 0 {
+		virtualGuestTemplate.SshKeys = []datatypes.Security_Ssh_Key{{Id: sl.Int(cloudProps.SshKey)}}
+	}
+
+	return virtualGuestTemplate
 }
 
 func (cv CreateVM) createByOsReload(stemcellCID StemcellCID, cloudProps VMCloudProperties, instanceNetworks instance.Networks) (int, error) {
