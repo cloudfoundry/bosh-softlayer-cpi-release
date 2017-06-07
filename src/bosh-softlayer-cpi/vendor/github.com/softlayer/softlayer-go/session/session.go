@@ -104,7 +104,6 @@ type Session struct {
 	Timeout time.Duration
 
 	// Access logger
-
 	Logger boshlog.Logger
 }
 

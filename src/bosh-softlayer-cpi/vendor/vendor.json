@@ -276,46 +276,40 @@
 			"revisionTime": "2017-05-11T00:00:41Z"
 		},
 		{
-			"checksumSHA1": "lNeF+lMbaxJQie8PEtQk6C//SCA=",
-			"path": "github.com/renier/xmlrpc",
-			"revision": "7d436dc07264b7a4d36b78998a378acc81c33a91",
-			"revisionTime": "2017-04-17T19:42:56Z"
-		},
-		{
 			"checksumSHA1": "KeNIYJQUdE6o196SaYuLMmjEPZM=",
 			"path": "github.com/softlayer/softlayer-go/config",
-			"revision": "dfabd73fd71795bf05b392a36581075be8ba1d12",
-			"revisionTime": "2017-05-02T23:05:11Z"
+			"revision": "3675eea10a9ffac5b1cfb0a817c92d384cbadd1d",
+			"revisionTime": "2017-06-06T16:23:11Z"
 		},
 		{
-			"checksumSHA1": "yCIryelA4K1pdLqbV0btM0XSp94=",
+			"checksumSHA1": "qSUuEMHDRGuPq2nlpxN7ITP5YCs=",
 			"path": "github.com/softlayer/softlayer-go/datatypes",
-			"revision": "dfabd73fd71795bf05b392a36581075be8ba1d12",
-			"revisionTime": "2017-05-02T23:05:11Z"
+			"revision": "3675eea10a9ffac5b1cfb0a817c92d384cbadd1d",
+			"revisionTime": "2017-06-06T16:23:11Z"
 		},
 		{
 			"checksumSHA1": "2UnaaOo4TreSegFy3tNtQ3NRv18=",
 			"path": "github.com/softlayer/softlayer-go/filter",
-			"revision": "dfabd73fd71795bf05b392a36581075be8ba1d12",
-			"revisionTime": "2017-05-02T23:05:11Z"
+			"revision": "3675eea10a9ffac5b1cfb0a817c92d384cbadd1d",
+			"revisionTime": "2017-06-06T16:23:11Z"
 		},
 		{
-			"checksumSHA1": "1GZ3vJI1qXV76b931naR1RU6LAQ=",
+			"checksumSHA1": "HCYbQNnl9DijuLPcq5swO0zDUgU=",
 			"path": "github.com/softlayer/softlayer-go/services",
-			"revision": "dfabd73fd71795bf05b392a36581075be8ba1d12",
-			"revisionTime": "2017-05-02T23:05:11Z"
+			"revision": "3675eea10a9ffac5b1cfb0a817c92d384cbadd1d",
+			"revisionTime": "2017-06-06T16:23:11Z"
 		},
 		{
 			"checksumSHA1": "NCsAyI22tDXFBF9A4CCbTitLwvc=",
 			"path": "github.com/softlayer/softlayer-go/session",
-			"revision": "dfabd73fd71795bf05b392a36581075be8ba1d12",
-			"revisionTime": "2017-05-02T23:05:11Z"
+			"revision": "3675eea10a9ffac5b1cfb0a817c92d384cbadd1d",
+			"revisionTime": "2017-06-06T16:23:11Z"
 		},
 		{
 			"checksumSHA1": "ezx/hLd9la9B/UwbBLCmq7LPobU=",
 			"path": "github.com/softlayer/softlayer-go/sl",
-			"revision": "dfabd73fd71795bf05b392a36581075be8ba1d12",
-			"revisionTime": "2017-05-02T23:05:11Z"
+			"revision": "3675eea10a9ffac5b1cfb0a817c92d384cbadd1d",
+			"revisionTime": "2017-06-06T16:23:11Z"
 		},
 		{
 			"checksumSHA1": "nAu0XmCeC6WnUySyI8R7w4cxAqU=",
