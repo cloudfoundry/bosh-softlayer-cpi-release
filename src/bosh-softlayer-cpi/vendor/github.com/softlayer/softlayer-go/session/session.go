@@ -227,6 +227,7 @@ func getDefaultTransport(endpointURL string, logger boshlog.Logger) TransportHan
 	} else {
 		transportHandler = &RestTransport{
 			Logger: logger,
+			MaxRetries: 3,
 		}
 	}
 

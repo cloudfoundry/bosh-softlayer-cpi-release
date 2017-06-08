@@ -31,9 +31,11 @@ import (
 	"github.com/softlayer/softlayer-go/sl"
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
+	"time"
 )
 
 type RestTransport struct {
+	MaxRetries      int
 	Logger boshlog.Logger
 }
 
@@ -54,30 +56,48 @@ func (r *RestTransport) DoRequest(sess *Session, service string, method string, 
 
 	path := buildPath(service, method, options)
 
-	resp, code, err := makeHTTPRequest(
-		sess,
-		path,
-		restMethod,
-		bytes.NewBuffer(parameters),
-		options,
-		r.Logger)
+	var (
+		resp []byte
+		code int
+		err error
+	)
 
-	if err != nil {
-		return sl.Error{Wrapped: err}
-	}
+	for try := 0; try <= r.MaxRetries; try++ {
+		resp, code, err = makeHTTPRequest(
+			sess,
+			path,
+			restMethod,
+			bytes.NewBuffer(parameters),
+			options,
+			r.Logger)
 
-	if code < 200 || code > 299 {
-		e := sl.Error{StatusCode: code}
-
-		err = json.Unmarshal(resp, &e)
-
-		// If unparseable, wrap the json error
 		if err != nil {
-			e.Wrapped = err
-			e.Message = err.Error()
+			return sl.Error{Wrapped: err}
 		}
 
-		return e
+		sleep := func() {
+			time.Sleep(200 * time.Millisecond << uint64(try*2))
+		}
+
+		if code < 200 || code > 299 {
+			e := sl.Error{StatusCode: code}
+
+			err = json.Unmarshal(resp, &e)
+
+			// If unparseable, wrap the json error
+			if err != nil {
+				e.Wrapped = err
+				e.Message = err.Error()
+
+				if e.Exception == "SoftLayer_Exception_WebService_RateLimitExceeded" {
+					sleep()
+					continue
+				}
+			}
+			return e
+		}
+
+		break
 	}
 
 	// Some APIs that normally return a collection, omit the []'s when the API returns a single value
@@ -198,7 +218,7 @@ func makeHTTPRequest(session *Session, path string, requestType string, requestB
 	req.Close = true
 
 	if session.Debug {
-		logger.Debug(SoftlayerGoLogTag, "Request URL: %s %s", requestType, *req.URL)
+		logger.Debug(SoftlayerGoLogTag, "Request URL: %s %s", requestType, req.URL.String())
 		logger.Debug(SoftlayerGoLogTag, "Parameters: %s", requestBody.String())
 	}
 

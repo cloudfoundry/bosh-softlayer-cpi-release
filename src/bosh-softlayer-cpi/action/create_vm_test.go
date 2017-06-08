@@ -264,7 +264,7 @@ var _ = Describe("CreateVM", func() {
 
 		})
 
-		It("creates the vm when deployByBoshCli=false, and without manual network", func() {
+		It("creates the vm when deployByBoshCli=false, and mbus host 0.0.0.0", func() {
 			cloudProps = VMCloudProperties{
 				VmNamePrefix: "fake-hostname",
 				Domain:       "fake-domain.com",
@@ -272,6 +272,14 @@ var _ = Describe("CreateVM", func() {
 				MaxMemory:    2048,
 				Datacenter:   "fake-datacenter",
 				SshKey:       32345678,
+			}
+
+			agentOptions = registry.AgentOptions{
+				Mbus: "nats://nats:nats@0.0.0.0:fake-port",
+				Blobstore: registry.BlobstoreOptions{
+					Provider: "dav",
+					Options:  map[string]interface{}{"endpoint": "http://0.0.0.0:fake-port"},
+				},
 			}
 
 			addrs, err := net.InterfaceAddrs()
@@ -320,6 +328,15 @@ var _ = Describe("CreateVM", func() {
 				},
 			}
 
+			createVM = NewCreateVM(
+				imageService,
+				vmService,
+				registryClient,
+				registryOptions,
+				agentOptions,
+				softlayerOptions,
+			)
+
 			vmCID, err = createVM.Run(agentID, stemcellCID, cloudProps, networks, disks, env)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(imageService.FindCallCount()).To(Equal(1))
@@ -341,7 +358,7 @@ var _ = Describe("CreateVM", func() {
 			Expect(actualInstanceNetworks).To(Equal(expectedInstanceNetworks))
 		})
 
-		It("creates the vm when deployByBoshCli=false, and with manual network", func() {
+		It("creates the vm when deployByBoshCli=false, and with mbus host not 0.0.0.0", func() {
 			cloudProps = VMCloudProperties{
 				VmNamePrefix: "fake-hostname",
 				Domain:       "fake-domain.com",
@@ -349,6 +366,14 @@ var _ = Describe("CreateVM", func() {
 				MaxMemory:    2048,
 				Datacenter:   "fake-datacenter",
 				SshKey:       32345678,
+			}
+
+			agentOptions = registry.AgentOptions{
+				Mbus: "nats://nats:nats@fake-mbus:fake-port",
+				Blobstore: registry.BlobstoreOptions{
+					Provider: "dav",
+					Options:  map[string]interface{}{"endpoint": "http://fake-blobstore:fake-port"},
+				},
 			}
 
 			networks = Networks{

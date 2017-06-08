@@ -152,11 +152,9 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 			return "", bosherr.WrapError(err, "Updating BOSH director hostname/IP mapping entry in /etc/hosts")
 		}
 	} else {
-		// Post config
-		if !networks.HasManualNetwork() {
-			if err = cv.postConfig(cid, &cv.agentOptions); err != nil {
-				return "", bosherr.WrapError(err, "Post config")
-			}
+		// Config mbus and blobstore options if needed
+		if err = cv.postConfig(cid, &cv.agentOptions); err != nil {
+			return "", bosherr.WrapError(err, "Post config")
 		}
 	}
 
@@ -209,26 +207,6 @@ func (cv CreateVM) updateHostNameInCloudProps(cloudProps *VMCloudProperties, tim
 	} else {
 		return cloudProps.VmNamePrefix + "-" + timeStampPostfix
 	}
-}
-
-func (cv CreateVM) postConfig(virtualGuestId int, agentOptions *registry.AgentOptions) error {
-	boshIP, err := cv.getLocalIPAddress()
-	if err != nil {
-		return bosherr.WrapError(err, "Failed to get IP address in local")
-	}
-
-	mbus, err := cv.parseMbusURL(agentOptions.Mbus, boshIP)
-	if err != nil {
-		return bosherr.WrapError(err, "Cannot construct mbus url.")
-	}
-	agentOptions.Mbus = mbus
-
-	switch agentOptions.Blobstore.Provider {
-	case "dav":
-		davConf := instance.DavConfig(agentOptions.Blobstore.Options)
-		cv.updateDavConfig(&davConf, boshIP)
-	}
-	return nil
 }
 
 func (cv CreateVM) createVirtualGuestTemplate(stemcellUuid string, cloudProps VMCloudProperties, userData string, publicVlanId int, privateVlanId int) *datatypes.Virtual_Guest {
@@ -465,6 +443,26 @@ func (cv CreateVM) getLocalIPAddress() (string, error) {
 	return "", bosherr.Error(fmt.Sprintf("Failed to get IP address"))
 }
 
+func (cv CreateVM) postConfig(virtualGuestId int, agentOptions *registry.AgentOptions) error {
+	boshIP, err := cv.getLocalIPAddress()
+	if err != nil {
+		return bosherr.WrapError(err, "Failed to get IP address in local")
+	}
+
+	mbus, err := cv.parseMbusURL(agentOptions.Mbus, boshIP)
+	if err != nil {
+		return bosherr.WrapError(err, "Cannot construct mbus url.")
+	}
+	agentOptions.Mbus = mbus
+
+	switch agentOptions.Blobstore.Provider {
+	case "dav":
+		davConf := instance.DavConfig(agentOptions.Blobstore.Options)
+		cv.updateDavConfig(&davConf, boshIP)
+	}
+	return nil
+}
+
 func (cv CreateVM) parseMbusURL(mbusURL string, primaryBackendIpAddress string) (string, error) {
 	parsedURL, err := url.Parse(mbusURL)
 	if err != nil {
@@ -472,7 +470,16 @@ func (cv CreateVM) parseMbusURL(mbusURL string, primaryBackendIpAddress string) 
 	}
 
 	var username, password, port string
-	_, port, _ = net.SplitHostPort(parsedURL.Host)
+	host, port, err := net.SplitHostPort(parsedURL.Host)
+	if err != nil {
+		return "", bosherr.WrapError(err, "Spliting host and port")
+	}
+
+	// when director using dynamic network, the mbus host should be "0.0.0.0"
+	if host != "0.0.0.0" {
+		return mbusURL, nil
+	}
+
 	userInfo := parsedURL.User
 	if userInfo != nil {
 		username = userInfo.Username()
