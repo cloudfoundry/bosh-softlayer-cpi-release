@@ -320,7 +320,7 @@ func (c *clientManager) EditInstance(id int, template *datatypes.Virtual_Guest) 
 	}
 
 	until := time.Now().Add(time.Duration(30) * time.Minute)
-	if err := c.WaitInstanceUntilReady(*template.Id, until); err != nil {
+	if err := c.WaitInstanceUntilReady(id, until); err != nil {
 		return false, bosherr.WrapError(err, "Waiting until instance is ready")
 	}
 
