@@ -348,8 +348,12 @@ func (c *clientManager) ReloadInstance(id int, stemcellId int, sshKeyIds []int) 
 
 	config := datatypes.Container_Hardware_Server_Configuration{
 		ImageTemplateId: sl.Int(stemcellId),
-		SshKeyIds:       sshKeyIds,
 	}
+
+	if sshKeyIds[0] != 0 {
+		config.SshKeyIds = sshKeyIds
+	}
+
 	resp, err := c.VirtualGuestService.Id(id).ReloadOperatingSystem(sl.String("FORCE"), &config)
 	if err != nil {
 		return resp, err
