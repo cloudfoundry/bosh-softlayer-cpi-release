@@ -276,39 +276,48 @@ func (cv CreateVM) createByOsReload(stemcellCID StemcellCID, cloudProps VMCloudP
 	for _, network := range instanceNetworks {
 		switch network.Type {
 		case "dynamic":
-			if len(network.IP) > 0 {
+			if len(network.IP) > 0 && cid == 0 {
+				var (
+					vm    datatypes.Virtual_Guest
+					found bool
+					err   error
+				)
+
 				if util.IsPrivateSubnet(net.ParseIP(network.IP)) {
-					vm, found, err := cv.virtualGuestService.FindByPrimaryBackendIp(network.IP)
-					if err != nil {
-						return cid, bosherr.WrapErrorf(err, "Finding VM with IP Address '%s'", network.IP)
-					}
-					if !found {
-						return cid, api.NewVMCreationFailedError(fmt.Sprintf("Finding VM with IP Address '%s'", network.IP), true)
-					}
+					vm, found, err = cv.virtualGuestService.FindByPrimaryBackendIp(network.IP)
 
-					_, err = cv.virtualGuestService.ReloadOS(*vm.Id, stemcellCID.Int(), []int{cloudProps.SshKey})
-					if err != nil {
-						if apiErr, ok := err.(sl.Error); ok {
-							return cid, api.NewVMCreationFailedError(fmt.Sprintf("Failed to do OS Reload with IP Address '%s' with error %s", network.IP, apiErr), false)
-						} else {
-							return cid, api.NewVMCreationFailedError(fmt.Sprintf("Failed to do OS Reload with IP Address '%s' with error %s", network.IP, apiErr), true)
-						}
+				} else {
+					vm, found, err = cv.virtualGuestService.FindByPrimaryIp(network.IP)
+				}
+
+				if err != nil {
+					return cid, bosherr.WrapErrorf(err, "Finding VM with IP Address '%s'", network.IP)
+				}
+				if !found {
+					return cid, api.NewVMCreationFailedError(fmt.Sprintf("Finding VM with IP Address '%s'", network.IP), true)
+				}
+
+				_, err = cv.virtualGuestService.ReloadOS(*vm.Id, stemcellCID.Int(), []int{cloudProps.SshKey})
+				if err != nil {
+					if apiErr, ok := err.(sl.Error); ok {
+						return cid, api.NewVMCreationFailedError(fmt.Sprintf("Failed to do OS Reload with IP Address '%s' with error %s", network.IP, apiErr), false)
+					} else {
+						return cid, api.NewVMCreationFailedError(fmt.Sprintf("Failed to do OS Reload with IP Address '%s' with error %s", network.IP, apiErr), true)
 					}
+				}
 
-					cid = *vm.Id
+				cid = *vm.Id
 
-					succeed, err := cv.virtualGuestService.Edit(*vm.Id, datatypes.Virtual_Guest{
-						Hostname: sl.String(cloudProps.VmNamePrefix),
-						Domain:   sl.String(cloudProps.Domain),
-					})
-					if err != nil {
-						return cid, api.NewVMCreationFailedError(fmt.Sprintf("Editing VM hostname after OS Reload with IP Address '%s' with error %s", network.IP, err), true)
-					}
+				succeed, err := cv.virtualGuestService.Edit(*vm.Id, datatypes.Virtual_Guest{
+					Hostname: sl.String(cloudProps.VmNamePrefix),
+					Domain:   sl.String(cloudProps.Domain),
+				})
+				if err != nil {
+					return cid, api.NewVMCreationFailedError(fmt.Sprintf("Editing VM hostname after OS Reload with IP Address '%s' with error %s", network.IP, err), true)
+				}
 
-					if !succeed {
-
-						return cid, api.NewVMCreationFailedError(fmt.Sprintf("Failed to edit VM hostname after OS Reload with IP Address '%s'", network.IP), true)
-					}
+				if !succeed {
+					return cid, api.NewVMCreationFailedError(fmt.Sprintf("Failed to edit VM hostname after OS Reload with IP Address '%s'", network.IP), true)
 				}
 			}
 		case "vip":

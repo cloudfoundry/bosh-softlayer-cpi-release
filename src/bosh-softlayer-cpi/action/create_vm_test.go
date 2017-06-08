@@ -180,7 +180,7 @@ var _ = Describe("CreateVM", func() {
 				nil,
 			)
 			vmService.ReloadOSReturns(
-				"fake-token",
+				"true",
 				nil,
 			)
 			vmService.EditReturns(
