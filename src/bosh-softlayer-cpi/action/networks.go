@@ -7,6 +7,10 @@ import (
 	"fmt"
 )
 
+const (
+	NetworkTypeManual string = "manual"
+)
+
 type Networks map[string]Network
 
 type Network struct {
@@ -60,4 +64,18 @@ func (ns Networks) AsInstanceServiceNetworks() instance.Networks {
 	}
 
 	return networks
+}
+
+func (ns Networks) HasManualNetwork() bool {
+	for _, network := range ns {
+		if network.IsManual() {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (n Network) IsManual() bool {
+	return n.Type == NetworkTypeManual
 }

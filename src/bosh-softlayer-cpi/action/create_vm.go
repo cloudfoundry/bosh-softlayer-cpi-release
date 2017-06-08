@@ -153,8 +153,10 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 		}
 	} else {
 		// Post config
-		if err = cv.postConfig(cid, &cv.agentOptions); err != nil {
-			return "", bosherr.WrapError(err, "Post config")
+		if !networks.HasManualNetwork() {
+			if err = cv.postConfig(cid, &cv.agentOptions); err != nil {
+				return "", bosherr.WrapError(err, "Post config")
+			}
 		}
 	}
 

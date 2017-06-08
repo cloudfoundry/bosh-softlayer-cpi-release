@@ -114,7 +114,6 @@ var _ = Describe("CreateVM", func() {
 					Gateway: "fake-network-gateway",
 					Netmask: "fake-network-netmask",
 					DNS:     []string{"fake-network-dns"},
-					DHCP:    true,
 					Default: []string{"fake-network-default"},
 					CloudProperties: NetworkCloudProperties{
 						VlanIds:             []int{42345678},
@@ -265,7 +264,7 @@ var _ = Describe("CreateVM", func() {
 
 		})
 
-		It("creates the vm when deployByBoshCli=false", func() {
+		It("creates the vm when deployByBoshCli=false, and without manual network", func() {
 			cloudProps = VMCloudProperties{
 				VmNamePrefix: "fake-hostname",
 				Domain:       "fake-domain.com",
@@ -320,6 +319,123 @@ var _ = Describe("CreateVM", func() {
 					Name: "52345678",
 				},
 			}
+
+			vmCID, err = createVM.Run(agentID, stemcellCID, cloudProps, networks, disks, env)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(imageService.FindCallCount()).To(Equal(1))
+			Expect(vmService.CreateSshKeyCallCount()).To(Equal(0))
+			Expect(vmService.GetVlanCallCount()).To(Equal(1))
+			Expect(vmService.FindByPrimaryBackendIpCallCount()).To(Equal(1))
+			Expect(vmService.ReloadOSCallCount()).To(Equal(1))
+			Expect(vmService.EditCallCount()).To(Equal(1))
+			Expect(vmService.CreateCallCount()).To(Equal(0))
+			Expect(vmService.ConfigureNetworksCallCount()).To(Equal(1))
+			Expect(vmService.AttachEphemeralDiskCallCount()).To(Equal(0))
+			Expect(vmService.CleanUpCallCount()).To(Equal(0))
+			Expect(registryClient.UpdateCalled).To(BeTrue())
+			Expect(vmService.FindCallCount()).To(Equal(1))
+			Expect(registryClient.UpdateSettings).To(Equal(expectedAgentSettings))
+			actualCid, _ := vmService.ConfigureNetworksArgsForCall(0)
+			Expect(vmCID).To(Equal(VMCID(actualCid).String()))
+			_, actualInstanceNetworks := vmService.ConfigureNetworksArgsForCall(0)
+			Expect(actualInstanceNetworks).To(Equal(expectedInstanceNetworks))
+		})
+
+		It("creates the vm when deployByBoshCli=false, and with manual network", func() {
+			cloudProps = VMCloudProperties{
+				VmNamePrefix: "fake-hostname",
+				Domain:       "fake-domain.com",
+				StartCpus:    2,
+				MaxMemory:    2048,
+				Datacenter:   "fake-datacenter",
+				SshKey:       32345678,
+			}
+
+			networks = Networks{
+				"fake-network-1": Network{
+					Type:    "manual",
+					IP:      "10.10.10.10",
+					Gateway: "fake-network-gateway",
+					Netmask: "fake-network-netmask",
+					DNS:     []string{"fake-network-dns"},
+					CloudProperties: NetworkCloudProperties{
+						VlanIds: []int{42345678},
+					},
+				},
+				"fake-network-2": Network{
+					Type:    "dynamic",
+					IP:      "10.10.10.10",
+					Gateway: "fake-network-gateway",
+					Netmask: "fake-network-netmask",
+					DNS:     []string{"fake-network-dns"},
+					Default: []string{"fake-network-default"},
+					CloudProperties: NetworkCloudProperties{
+						VlanIds: []int{42345678},
+					},
+				},
+			}
+
+			expectedInstanceNetworks = networks.AsInstanceServiceNetworks()
+
+			expectedAgentSettings = registry.AgentSettings{
+				AgentID: "fake-agent-id",
+				Blobstore: registry.BlobstoreSettings{
+					Provider: "dav",
+					Options:  map[string]interface{}{"endpoint": "http://fake-blobstore:fake-port"},
+				},
+				Disks: registry.DisksSettings{
+					System:     "",
+					Persistent: map[string]registry.PersistentSettings{},
+				},
+				Mbus: "nats://nats:nats@fake-mbus:fake-port",
+				Networks: registry.NetworksSettings{
+					"fake-network-1": registry.NetworkSettings{
+						Type:    "manual",
+						IP:      "10.10.10.10",
+						Gateway: "fake-network-gateway",
+						Netmask: "fake-network-netmask",
+						DNS:     []string{"fake-network-dns"},
+					},
+					"fake-network-2": registry.NetworkSettings{
+						Type:    "dynamic",
+						IP:      "10.10.10.10",
+						Gateway: "fake-network-gateway",
+						Netmask: "fake-network-netmask",
+						DNS:     []string{"fake-network-dns"},
+						Default: []string{"fake-network-default"},
+					},
+				},
+				Env: registry.EnvSettings(map[string]interface{}{
+					"bosh": map[string]interface{}{
+						"keep_root_password": true,
+					},
+				}),
+
+				VM: registry.VMSettings{
+					Name: "52345678",
+				},
+			}
+
+			vmService.ConfigureNetworksReturns(
+				instance.Networks{
+					"fake-network-1": instance.Network{
+						Type:    "manual",
+						IP:      "10.10.10.10",
+						Gateway: "fake-network-gateway",
+						Netmask: "fake-network-netmask",
+						DNS:     []string{"fake-network-dns"},
+					},
+					"fake-network-2": instance.Network{
+						Type:    "dynamic",
+						IP:      "10.10.10.10",
+						Gateway: "fake-network-gateway",
+						Netmask: "fake-network-netmask",
+						DNS:     []string{"fake-network-dns"},
+						Default: []string{"fake-network-default"},
+					},
+				},
+				nil,
+			)
 
 			vmCID, err = createVM.Run(agentID, stemcellCID, cloudProps, networks, disks, env)
 			Expect(err).NotTo(HaveOccurred())
