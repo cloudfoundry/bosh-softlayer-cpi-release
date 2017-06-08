@@ -198,8 +198,8 @@ func makeHTTPRequest(session *Session, path string, requestType string, requestB
 	req.Close = true
 
 	if session.Debug {
-		logger.Debug(SoftlayerGoLogTag, "Request URL: ", requestType, req.URL)
-		logger.Debug(SoftlayerGoLogTag, "Parameters: ", requestBody.String())
+		logger.Debug(SoftlayerGoLogTag, "Request URL: %s %s", requestType, *req.URL)
+		logger.Debug(SoftlayerGoLogTag, "Parameters: %s", requestBody.String())
 	}
 
 	resp, err := client.Do(req)
@@ -215,7 +215,7 @@ func makeHTTPRequest(session *Session, path string, requestType string, requestB
 	}
 
 	if session.Debug {
-		logger.Debug(SoftlayerGoLogTag, "Response: ", string(responseBody))
+		logger.Debug(SoftlayerGoLogTag, "Response: %s", string(responseBody))
 	}
 	return responseBody, resp.StatusCode, nil
 }
