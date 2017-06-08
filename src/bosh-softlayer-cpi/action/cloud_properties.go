@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 
 	instance "bosh-softlayer-cpi/softlayer/virtual_guest_service"
+	"fmt"
+	"time"
 )
 
 type DiskCloudProperties struct {
@@ -59,12 +61,51 @@ type VMCloudProperties struct {
 	Tags instance.Tags `json:"tags,omitempty"`
 }
 
-func (n VMCloudProperties) Validate() error {
-	if err := n.Tags.Validate(); err != nil {
+func (vmProps *VMCloudProperties) Validate() error {
+	if err := vmProps.Tags.Validate(); err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func (vmProps *VMCloudProperties) AsInstanceProperties() *VMCloudProperties {
+	if vmProps.DeployedByBoshCLI {
+		vmProps.VmNamePrefix = vmProps.updateHostNameInCloudProps(vmProps, "")
+	} else {
+		vmProps.VmNamePrefix = vmProps.updateHostNameInCloudProps(vmProps, timeStampForTime(time.Now().UTC()))
+	}
+
+	if vmProps.StartCpus == 0 {
+		vmProps.StartCpus = 4
+	}
+
+	if vmProps.MaxMemory == 0 {
+		vmProps.MaxMemory = 8192
+	}
+
+	if len(vmProps.Domain) == 0 {
+		vmProps.Domain = "softlayer.com"
+	}
+
+	if vmProps.MaxNetworkSpeed == 0 {
+		vmProps.MaxNetworkSpeed = 1000
+	}
+
+	return vmProps
+}
+
+func (vmProps VMCloudProperties) updateHostNameInCloudProps(cloudProps *VMCloudProperties, timeStampPostfix string) string {
+	if len(timeStampPostfix) == 0 {
+		return cloudProps.VmNamePrefix
+	} else {
+		return cloudProps.VmNamePrefix + "-" + timeStampPostfix
+	}
+}
+
+func timeStampForTime(now time.Time) string {
+	//utilize the constants list in the http://golang.org/src/time/format.go file to get the expect time formats
+	return now.Format("20060102-030405-") + fmt.Sprintf("%03d", int(now.UnixNano()/1e6-now.Unix()*1e3))
 }
 
 type VMMetadata map[string]interface{}

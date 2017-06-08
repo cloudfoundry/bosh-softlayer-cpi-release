@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net"
-	"time"
 
 	"bosh-softlayer-cpi/api"
 	"bosh-softlayer-cpi/registry"
@@ -69,8 +68,6 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 		cloudProps.SshKey = sshKey
 	}
 
-	cv.updateCloudProperties(&cloudProps)
-
 	// create VM user data
 	userDataTypeContents, err := cv.createUserDataForInstance(agentID, cv.registryOptions)
 	if err != nil {
@@ -82,7 +79,7 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 		return "", bosherr.WrapError(err, "Getting vlan ids from networks settings")
 	}
 
-	virtualGuestTemplate := cv.createVirtualGuestTemplate(globalIdentifier, cloudProps, userDataTypeContents, publicVlanId, privateVlanId)
+	virtualGuestTemplate := cv.createVirtualGuestTemplate(globalIdentifier, *cloudProps.AsInstanceProperties(), userDataTypeContents, publicVlanId, privateVlanId)
 
 	// Parse networks
 	instanceNetworks := networks.AsInstanceServiceNetworks()
@@ -175,38 +172,6 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 	}
 
 	return VMCID(cid).String(), nil
-}
-
-func (cv CreateVM) updateCloudProperties(cloudProps *VMCloudProperties) {
-	if cloudProps.DeployedByBoshCLI {
-		cloudProps.VmNamePrefix = cv.updateHostNameInCloudProps(cloudProps, "")
-	} else {
-		cloudProps.VmNamePrefix = cv.updateHostNameInCloudProps(cloudProps, cv.timeStampForTime(time.Now().UTC()))
-	}
-
-	if cloudProps.StartCpus == 0 {
-		cloudProps.StartCpus = 4
-	}
-
-	if cloudProps.MaxMemory == 0 {
-		cloudProps.MaxMemory = 8192
-	}
-
-	if len(cloudProps.Domain) == 0 {
-		cloudProps.Domain = "softlayer.com"
-	}
-
-	if cloudProps.MaxNetworkSpeed == 0 {
-		cloudProps.MaxNetworkSpeed = 1000
-	}
-}
-
-func (cv CreateVM) updateHostNameInCloudProps(cloudProps *VMCloudProperties, timeStampPostfix string) string {
-	if len(timeStampPostfix) == 0 {
-		return cloudProps.VmNamePrefix
-	} else {
-		return cloudProps.VmNamePrefix + "-" + timeStampPostfix
-	}
 }
 
 func (cv CreateVM) createVirtualGuestTemplate(stemcellUuid string, cloudProps VMCloudProperties, userData string, publicVlanId int, privateVlanId int) *datatypes.Virtual_Guest {
@@ -397,11 +362,6 @@ func (cv CreateVM) getNetworkSpace(vlanID int) (string, error) {
 		return "", bosherr.WrapErrorf(err, "Getting vlan info with id '%d'", vlanID)
 	}
 	return *networkVlan.NetworkSpace, nil
-}
-
-func (cv CreateVM) timeStampForTime(now time.Time) string {
-	//utilize the constants list in the http://golang.org/src/time/format.go file to get the expect time formats
-	return now.Format("20060102-030405-") + fmt.Sprintf("%03d", int(now.UnixNano()/1e6-now.Unix()*1e3))
 }
 
 func (cv CreateVM) updateHosts(path string, newIpAddress string, targetHostname string) (err error) {
