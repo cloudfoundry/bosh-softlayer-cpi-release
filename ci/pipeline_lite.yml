@@ -16,10 +16,23 @@ jobs:
     - put: bosh-cpi-dev-artifacts
       params: {file: candidate/*.tgz}
 
+  - name: run-lifecycle
+    serial: true
+    plan:
+    - aggregate:
+      - {trigger: true,  passed: [build-candidate], get: bosh-cpi-dev-artifacts}
+      - {trigger: false, passed: [build-candidate], get: bosh-cpi-release, resource: bosh-cpi-release-in}
+
+    - task: test
+      file: bosh-cpi-src/ci/tasks/run-lifecycle.yml
+      params:
+        SL_USERNAME: {{sl_username}}
+        SL_API_KEY:  {{sl_api_key}}
+
   - name: promote-candidate
     plan:
     - aggregate:
-      - {trigger: true,  get: bosh-cpi-dev-artifacts, passed: [build-candidate]}
+      - {trigger: true,  get: bosh-cpi-dev-artifacts, passed: [run-lifecycle]}
       - {trigger: false, get: bosh-cpi-release, resource: bosh-cpi-release-in}
       - {trigger: false, get: version-semver,  resource: version-semver}
 
