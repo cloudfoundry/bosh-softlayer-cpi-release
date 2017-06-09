@@ -16,8 +16,8 @@ import (
 	"bosh-softlayer-cpi/softlayer/stemcell_service"
 	"bosh-softlayer-cpi/softlayer/virtual_guest_service"
 
+	"github.com/bluebosh/goodhosts"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
-	"github.com/lextoumbourou/goodhosts"
 	"github.com/softlayer/softlayer-go/datatypes"
 	"github.com/softlayer/softlayer-go/sl"
 	"net/url"
@@ -51,7 +51,7 @@ func NewCreateVM(
 }
 
 func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMCloudProperties, networks Networks, diskIDs []DiskCID, env Environment) (string, error) {
-	globalIdentifier, found, err := cv.stemcellService.Find(stemcellCID.Int())
+	globalIdentifier, found, err := cv.stemcellService.Find(int(stemcellCID))
 	if err != nil {
 		return "", bosherr.WrapErrorf(err, "Creating VM")
 	}
@@ -132,6 +132,11 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 	agentNetworks := instanceNetworks.AsRegistryNetworks()
 
 	// Keep root password
+	if len(env) == 0 {
+		env = Environment{
+			"bosh": map[string]interface{}{},
+		}
+	}
 	env["bosh"].(map[string]interface{})["keep_root_password"] = true
 
 	// Get object details of new VM
@@ -373,16 +378,10 @@ func (cv CreateVM) updateHosts(path string, newIpAddress string, targetHostname 
 	if err != nil {
 		return bosherr.WrapErrorf(err, "Load hosts file")
 	}
-	matchedAddresses, err := net.LookupHost(targetHostname)
-	for _, address := range matchedAddresses {
-		if hosts.Has(address, targetHostname) {
-			err := hosts.Remove(address, targetHostname)
-			if err != nil {
-				return bosherr.WrapErrorf(err, "Remove '%s %s' in hosts", address, targetHostname)
-			}
-		}
+	err = hosts.RemoveByHostname(targetHostname)
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Remove '%s' in hosts", targetHostname)
 	}
-
 	err = hosts.Add(newIpAddress, targetHostname)
 	if err != nil {
 		return bosherr.WrapErrorf(err, "Add '%s %s' in hosts", newIpAddress, targetHostname)

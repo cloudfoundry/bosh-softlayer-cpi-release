@@ -45,6 +45,21 @@ func (e VMCreationFailedError) Type() string   { return "Bosh::Clouds::VMCreatio
 func (e VMCreationFailedError) Error() string  { return fmt.Sprintf("VM failed to create: %v", e.reason) }
 func (e VMCreationFailedError) CanRetry() bool { return e.canRetry }
 
+type DiskCreationFailedError struct {
+	reason   string
+	canRetry bool
+}
+
+func NewDiskCreationFailedError(reason string, canRetry bool) DiskCreationFailedError {
+	return DiskCreationFailedError{reason: reason, canRetry: canRetry}
+}
+
+func (e DiskCreationFailedError) Type() string { return "Bosh::Clouds::DiskCreationFailed" }
+func (e DiskCreationFailedError) Error() string {
+	return fmt.Sprintf("Disk failed to create: %v", e.reason)
+}
+func (e DiskCreationFailedError) CanRetry() bool { return e.canRetry }
+
 type NoDiskSpaceError struct {
 	diskID   string
 	canRetry bool
