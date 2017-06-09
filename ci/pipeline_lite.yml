@@ -24,10 +24,10 @@ jobs:
       - {trigger: false, passed: [build-candidate], get: bosh-cpi-release, resource: bosh-cpi-release-in}
 
     - task: test
-      file: bosh-cpi-src/ci/tasks/run-lifecycle.yml
+      file: bosh-cpi-release/ci/tasks/run-lifecycle.yml
       params:
-        SL_USERNAME: {{sl_username}}
-        SL_API_KEY:  {{sl_api_key}}
+        SL_USERNAME: {{softlayer-username}}
+        SL_API_KEY:  {{softlayer-api-key}}
 
   - name: promote-candidate
     plan:

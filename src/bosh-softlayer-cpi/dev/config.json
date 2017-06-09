@@ -5,7 +5,6 @@
       "softlayer": {
         "username": "fake-user",
         "api_key": "fake-api-key"
-        "ssh_public_key":
       },
       "registry": {
         "user": "registry",
