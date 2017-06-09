@@ -1,9 +1,0 @@
-{
-  "method": "delete_stemcell",
-  "arguments": [
-    {{.ID}}
-  ],
-  "context": {
-    "director_uuid": "fake-director-uuid"
-  }
-}

@@ -141,8 +141,8 @@ resources:
   - name: bats
     type: git
     source:
-      uri: https://github.com/bluebosh/bosh-acceptance-tests
-      branch: master
+      uri: https://github.com/bluebosh/bosh-acceptance-tests.git
+      branch: gocli-bats
 
   - name: bosh-cpi-release-in
     type: git

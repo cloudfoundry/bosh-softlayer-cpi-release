@@ -1,9 +1,0 @@
-{
-  "method": "delete_disk",
-  "arguments": [
-    "{{.ID}}"
-  ],
-  "context": {
-    "director_uuid": "c37383cd-d5a8-43d7-b595-2ede9513c858"
-  }
-}
