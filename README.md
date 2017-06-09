@@ -2,8 +2,8 @@
 
 | Concourse Job      | Sub Job | Status                                                                                                                                                                                                                               |
 | ---                | ---     | ---                                                                                                                                                                                                                             |
-| BATS               | TBD | |
-| integration        | run-lifecycle | [![bosh-sl-ci.bluemix.net](https://bosh-sl-ci.bluemix.net/api/v1/pipelines/wip:lite:bosh:softlayer:cpi:release/jobs/run-lifecycle/badge)](https://bosh-sl-ci.bluemix.net/pipelines/wip:lite:bosh:softlayer:cpi:release/jobs/run-lifecycle) |
+| BATS               | TBD     |
+| integration        | run-lifecycle | [![bosh-sl-ci.bluemix.net](https://bosh-azure-cpi.ci.cf-app.com/api/v1/pipelines/azure-cpi/jobs/bats-ubuntu-managed-disks/badge)](https://bosh-sl-ci.bluemix.net/pipelines/wip:lite:bosh:softlayer:cpi:release/jobs/run-lifecycle) |
 | unit tests         | build-candidate | [![bosh-sl-ci.bluemix.net](https://bosh-sl-ci.bluemix.net/api/v1/pipelines/wip:lite:bosh:softlayer:cpi:release/jobs/build-candidate/badge)](https://bosh-sl-ci.bluemix.net/pipelines/wip:lite:bosh:softlayer:cpi:release/jobs/build-candidate) |
 
 * Documentation: [bosh.io/docs](https://bosh.io/docs)
