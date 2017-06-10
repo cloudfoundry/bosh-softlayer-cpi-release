@@ -130,14 +130,14 @@ func cleanVMs() {
 	accountService := softlayerClient.AccountService
 
 	// Clean up any VMs left behind from failed tests. Instances with the 'blusbosh-slcpi-integration-test' prefix will be deleted.
-	toDelete := make([]*datatypes.Virtual_Guest, 0)
+	toDelete := make([]datatypes.Virtual_Guest, 0)
 	GinkgoWriter.Write([]byte("Looking for VMs with 'blusbosh-slcpi-integration-test' prefix. Matches will be deleted\n"))
 	// Clean up VMs with 'blusbosh-slcpi-integration-test' prefix hostname
 	vgs, err := accountService.GetVirtualGuests()
 	Expect(err).To(BeNil())
 	for _, instance := range vgs {
 		if strings.Contains(*instance.Hostname, "blusbosh-slcpi-integration-test") && true {
-			toDelete = append(toDelete, &instance)
+			toDelete = append(toDelete, instance)
 		}
 	}
 
