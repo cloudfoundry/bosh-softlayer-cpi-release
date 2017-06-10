@@ -8,18 +8,13 @@ import (
 	"reflect"
 	"time"
 
-	sldatatypes "github.com/maximilien/softlayer-go/data_types"
-
 	bslcstem "bosh-softlayer-cpi/softlayer/stemcell"
-
-	boshlog "github.com/cloudfoundry/bosh-utils/logger"
-	boshsys "github.com/cloudfoundry/bosh-utils/system"
-
-	"bufio"
+	sldatatypes "github.com/maximilien/softlayer-go/data_types"
+	sl "github.com/maximilien/softlayer-go/softlayer"
 
 	"encoding/json"
+	"github.com/bluebosh/goodhosts"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
-	sl "github.com/maximilien/softlayer-go/softlayer"
 )
 
 func CreateDisksSpec(ephemeralDiskSize int) DisksSpec {
@@ -153,36 +148,28 @@ func ParseMbusURL(mbusURL string, primaryBackendIpAddress string) (string, error
 	return fmt.Sprintf("%s://%s:%s", parsedURL.Scheme, primaryBackendIpAddress, port), nil
 }
 
-func UpdateEtcHostsOfBoshInit(path string, record string) (err error) {
-	logger := boshlog.NewWriterLogger(boshlog.LevelError, os.Stderr, os.Stderr)
-	fs := boshsys.NewOsFileSystem(logger)
-
-	if !fs.FileExists(path) {
-		err := fs.WriteFile(path, []byte{})
-		if err != nil {
-			return bosherr.WrapErrorf(err, "Creating the new file %s if it does not exist", path)
-		}
-	}
-
-	fileHandle, err := fs.OpenFile(path, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
+func UpdateEtcHostsByBOSHCLI(path string, newIpAddress string, targetHostname string) (err error) {
+	err = os.Setenv("HOSTS_PATH", path)
 	if err != nil {
-		return bosherr.WrapErrorf(err, "Opening file %s", path)
+		return bosherr.WrapErrorf(err, "Set '%s' to env variable 'HOSTS_PATH'", path)
 	}
-
-	writer := bufio.NewWriter(fileHandle)
-	defer fileHandle.Close()
-
-	length, err := fmt.Fprintln(writer, "\n"+record)
+	hosts, err := goodhosts.NewHosts()
 	if err != nil {
-		return bosherr.WrapErrorf(err, "Writing '%s' to Writer", record)
-	}
-	if length != len(record)+2 {
-		return bosherr.Errorf("The number (%d) of bytes written in Writer is not equal to the length (%d) of string", length, len(record)+2)
+		return bosherr.WrapErrorf(err, "Load hosts file")
 	}
 
-	err = writer.Flush()
+	err = hosts.RemoveByHostname(targetHostname)
 	if err != nil {
-		return bosherr.WrapErrorf(err, "Writing '%s' to file %s", record, path)
+		return bosherr.WrapErrorf(err, "Remove '%s' in hosts", targetHostname)
+	}
+
+	err = hosts.Add(newIpAddress, targetHostname)
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Add '%s %s' in hosts", newIpAddress, targetHostname)
+	}
+
+	if err := hosts.Flush(); err != nil {
+		return bosherr.WrapErrorf(err, "Flush hosts file")
 	}
 
 	return nil
