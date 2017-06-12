@@ -41,7 +41,7 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 			w.WriteHeader(http.StatusOK)
 		}
 	})
-	ts := httptest.NewServer(handler)
+	ts = httptest.NewServer(handler)
 	url, err := url.Parse(ts.URL)
 	Expect(err).To(BeNil())
 	registerPort, err := strconv.Atoi(strings.Split(url.Host, ":")[1])
@@ -91,13 +91,11 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 	sess = client.NewSoftlayerClientSession(client.SoftlayerAPIEndpointPublicDefault, username, apiKey, false, timeout, logger)
 
 	cleanVMs()
-	stemcellId := 1633205
-	stemcellUuid := "ea065435-f7ec-4f1c-8f3f-2987086b1427"
 
 	request := fmt.Sprintf(`{
 			  "method": "create_stemcell",
 			  "arguments": ["%s", {
-			    "virtual-disk-image-id": %d,
+			    "virtual-disk-image-id": %s,
 			    "virtual-disk-image-uuid": "%s",
 			    "datacenter-name": "%s"
 			  }]
@@ -121,7 +119,7 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 
 var _ = SynchronizedAfterSuite(func() {}, func() {
 	cleanVMs()
-	//ts.Close()
+	ts.Close()
 })
 
 func cleanVMs() {
@@ -144,9 +142,9 @@ func cleanVMs() {
 	for _, vm := range toDelete {
 		vmStatus, _ := softlayerClient.VirtualGuestService.Id(int(*vm.Id)).GetStatus()
 		if *vmStatus.KeyName != "DISCONNECTED" {
-			GinkgoWriter.Write([]byte(fmt.Sprintf("Deleting VM %s\n", *vm.Uuid)))
-			_, err := softlayerClient.VirtualGuestService.Id(int(*vm.Id)).DeleteObject()
-			Expect(err).ToNot(HaveOccurred())
+			GinkgoWriter.Write([]byte(fmt.Sprintf("Deleting VM %s \n", *vm.FullyQualifiedDomainName)))
+			//_, err := softlayerClient.VirtualGuestService.Id(int(*vm.Id)).DeleteObject()
+			//Expect(err).ToNot(HaveOccurred())
 		}
 	}
 }

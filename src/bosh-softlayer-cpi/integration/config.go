@@ -28,7 +28,9 @@ var (
 	apiKey                     = envRequired("SL_API_KEY")
 
 	// Configurable defaults
+	stemcellId   = envOrDefault("STEMCELL_ID", "1633205")
 	stemcellFile = envOrDefault("STEMCELL_FILE", "")
+	stemcellUuid = envOrDefault("DATACENTER", "ea065435-f7ec-4f1c-8f3f-2987086b1427")
 	datacenter   = envOrDefault("DATACENTER", "lon02")
 	ipAddrs      = strings.Split(envOrDefault("PRIVATE_IP", "192.168.100.102,192.168.100.103,192.168.100.104"), ",")
 

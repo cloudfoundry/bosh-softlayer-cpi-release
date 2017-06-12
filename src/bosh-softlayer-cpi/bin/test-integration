@@ -39,5 +39,5 @@ else
 fi
 
   echo -e "\n Vetting packages for potential issues..."
-  go tool vet action api integration main test_helpers
+  go tool vet action api integration main
 )
