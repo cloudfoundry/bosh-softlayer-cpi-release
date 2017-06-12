@@ -21,7 +21,7 @@ type Service interface {
 	GetVlan(id int, mask string) (datatypes.Network_Vlan, error)
 	ReAttachLeftDisk(id int, devicePath string, diskID int) error
 	Reboot(id int) error
-	ReloadOS(id int, stemcellID int, sshKeyIds []int) (string, error)
+	ReloadOS(id int, stemcellID int, sshKeyIds []int, vmNamePrefix string, domain string) (string, error)
 	SetMetadata(id int, vmMetadata Metadata) error
 	CreateSshKey(label string, key string, fingerPrint string) (int, error)
 	DeleteSshKey(id int) error

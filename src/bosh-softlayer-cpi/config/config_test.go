@@ -6,43 +6,62 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	. "bosh-softlayer-cpi/softlayer/common"
 	fakesys "github.com/cloudfoundry/bosh-utils/system/fakes"
 
 	bslcaction "bosh-softlayer-cpi/action"
+	boslconfig "bosh-softlayer-cpi/softlayer/config"
 
 	"bosh-softlayer-cpi/config"
+	"bosh-softlayer-cpi/registry"
 )
 
 var validProperties = bslcaction.ConcreteFactoryOptions{
-	Softlayer:    validSoftLayerConfig,
-	StemcellsDir: "/tmp/stemcells",
-	Agent:        validAgentOption,
+	Agent:    validAgentOption,
+	Registry: validRegistryOptions,
 }
 
-var validAgentOption = AgentOptions{
-	Mbus:         "fake-mubus",
-	NTP:          []string{""},
-	Blobstore:    validBlobstoreOptions,
-	VcapPassword: "fake-vcappassword",
+var validAgentOption = registry.AgentOptions{
+	Mbus:      "fake-mubus",
+	Ntp:       []string{""},
+	Blobstore: validBlobstoreOptions,
 }
 
-var validBlobstoreOptions = BlobstoreOptions{
+var validBlobstoreOptions = registry.BlobstoreOptions{
 	Provider: "local",
 }
 
-var validSoftLayerConfig = bslcaction.SoftLayerConfig{
-	Username: "fake-username",
-	ApiKey:   "fake-api-key",
-}
-
-var validCloudConfig = config.CloudConfig{
-	Plugin:     "softlayer",
-	Properties: validProperties,
+var validRegistryOptions = registry.ClientOptions{
+	Protocol: "http",
+	Host:     "fake-registry-host",
+	Port:     25777,
+	Username: "fake-registry-username",
+	Password: "fake-registry-password",
+	HTTPOptions: registry.HttpRegistryOptions{
+		Port:     25777,
+		User:     "fake-registry-username",
+		Password: "fake-registry-password",
+	},
 }
 
 var validConfig = config.Config{
 	Cloud: validCloudConfig,
+}
+
+var validCloudConfig = config.Cloud{
+	Plugin: "softlayer",
+	Properties: config.CPIProperties{
+		SoftLayer: boslconfig.Config{
+			Username:             "fake-username",
+			ApiKey:               "fake-api-key",
+			ApiEndpoint:          "fake-api-endpoint",
+			DisableOsReload:      true,
+			PublicKey:            "fake-ssh-public-key",
+			PublicKeyFingerPrint: "fake-ssh-public-key-fingerprint",
+			VpsEndpoint:          "fake-vps-endpoint",
+		},
+		Agent:    validAgentOption,
+		Registry: validRegistryOptions,
+	},
 }
 
 var _ = Describe("NewConfigFromPath", func() {
@@ -100,11 +119,11 @@ var _ = Describe("Config", func() {
 		})
 
 		It("returns error if softlayer section is not valid", func() {
-			config.Cloud.Properties.Softlayer.Username = ""
+			config.Cloud.Properties.SoftLayer.Username = ""
 
 			err := config.Validate()
 			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring("Validating Cloud Properties"))
+			Expect(err.Error()).To(ContainSubstring("Validating SoftLayer configuration"))
 		})
 	})
 })

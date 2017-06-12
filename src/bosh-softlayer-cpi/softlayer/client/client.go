@@ -7,13 +7,16 @@ import (
 	"strings"
 	"time"
 
+	poolclient "bosh-softlayer-cpi/softlayer/pool/client"
+	poolvm "bosh-softlayer-cpi/softlayer/pool/client/vm"
+	"bosh-softlayer-cpi/softlayer/pool/models"
+	bosherr "github.com/cloudfoundry/bosh-utils/errors"
+	"github.com/go-openapi/strfmt"
 	"github.com/softlayer/softlayer-go/datatypes"
 	"github.com/softlayer/softlayer-go/filter"
 	"github.com/softlayer/softlayer-go/services"
 	"github.com/softlayer/softlayer-go/session"
 	"github.com/softlayer/softlayer-go/sl"
-
-	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 )
 
 const (
@@ -82,6 +85,7 @@ func NewSoftLayerClientManager(session *session.Session) *clientManager {
 		services.GetNetworkVlanService(session),
 		services.GetVirtualGuestBlockDeviceTemplateGroupService(session),
 		services.GetSecuritySshKeyService(session),
+		NewSoftLayerVmPoolClient(),
 	}
 }
 
@@ -94,7 +98,7 @@ type Client interface {
 	GetInstanceByPrimaryBackendIpAddress(ip string) (datatypes.Virtual_Guest, error)
 	GetInstanceByPrimaryIpAddress(ip string) (datatypes.Virtual_Guest, error)
 	RebootInstance(id int, soft bool, hard bool) error
-	ReloadInstance(id int, stemcellId int, sshKeyIds []int) (string, error)
+	ReloadInstance(id int, stemcellId int, sshKeyIds []int, vmNamePrefix string, domain string) (string, error)
 	UpgradeInstance(id int, cpu int, memory int, network int, privateCPU bool, additional_diskSize int) (datatypes.Container_Product_Order_Receipt, error)
 	WaitInstanceUntilReady(id int, until time.Time) error
 	WaitInstanceHasActiveTransaction(id int, until time.Time) error
@@ -114,6 +118,7 @@ type Client interface {
 	GetAllowedNetworkStorage(id int) ([]string, error)
 	CreateSshKey(label *string, key *string, fingerPrint *string) (datatypes.Security_Ssh_Key, error)
 	DeleteSshKey(id int) (bool, error)
+	CreateInstanceFromVMPool(template *datatypes.Virtual_Guest, stemcellID int, sshKeys []int) (datatypes.Virtual_Guest, error)
 }
 
 type clientManager struct {
@@ -127,6 +132,7 @@ type clientManager struct {
 	NetworkVlanService    services.Network_Vlan
 	ImageService          services.Virtual_Guest_Block_Device_Template_Group
 	SecuritySshKeyService services.Security_Ssh_Key
+	SoftLayerPoolClient   poolclient.SoftLayerVMPool
 }
 
 func (c *clientManager) GetInstance(id int, mask string) (datatypes.Virtual_Guest, error) {
@@ -313,6 +319,78 @@ func (c *clientManager) CreateInstance(template *datatypes.Virtual_Guest) (datat
 	return virtualguest, nil
 }
 
+func (c *clientManager) CreateInstanceFromVMPool(template *datatypes.Virtual_Guest, stemcellID int, sshKeys []int) (datatypes.Virtual_Guest, error) {
+	reqFilter := &models.VMFilter{
+		CPU:         int32(*template.StartCpus),
+		MemoryMb:    int32(*template.MaxMemory),
+		PrivateVlan: int32(*template.PrimaryBackendNetworkComponent.NetworkVlan.Id),
+		PublicVlan:  int32(*template.PrimaryNetworkComponent.NetworkVlan.Id),
+		State:       models.StateFree,
+	}
+	orderVmResp, err := c.SoftLayerPoolClient.VM.OrderVMByFilter(poolvm.NewOrderVMByFilterParams().WithBody(reqFilter))
+	if err != nil {
+		_, ok := err.(*poolvm.OrderVMByFilterNotFound)
+		if !ok {
+			return datatypes.Virtual_Guest{}, bosherr.WrapError(err, "Ordering vm from pool")
+		} else {
+			// From createBySoftlayer implement run in cpi action
+			virtualGuest, err := c.CreateInstance(template)
+			if err != nil {
+				return datatypes.Virtual_Guest{}, bosherr.WrapError(err, "Creating VirtualGuest from SoftLayer client")
+			}
+
+			slPoolVm := &models.VM{
+				Cid:         int32(*virtualGuest.Id),
+				CPU:         int32(*template.StartCpus),
+				MemoryMb:    int32(*template.MaxMemory),
+				IP:          strfmt.IPv4(*template.PrimaryBackendIpAddress),
+				Hostname:    *virtualGuest.Hostname,
+				PrivateVlan: int32(*template.PrimaryBackendNetworkComponent.NetworkVlan.Id),
+				PublicVlan:  int32(*template.PrimaryNetworkComponent.NetworkVlan.Id),
+				State:       models.StateUsing,
+			}
+			_, err = c.SoftLayerPoolClient.VM.AddVM(poolvm.NewAddVMParams().WithBody(slPoolVm))
+			if err != nil {
+				return datatypes.Virtual_Guest{}, bosherr.WrapError(err, "Adding vm into pool")
+			}
+
+			return virtualGuest, nil
+		}
+	}
+	var vm *models.VM
+	var virtualGuestId int
+
+	vm = orderVmResp.Payload.VM
+	virtualGuestId = int((*vm).Cid)
+
+	_, err = c.ReloadInstance(virtualGuestId, stemcellID, sshKeys, *template.Hostname, *template.Domain)
+	if err != nil {
+		return datatypes.Virtual_Guest{}, bosherr.WrapError(err, "Reloading vm from pool")
+	}
+
+	virtualGuest, err := c.GetInstance(virtualGuestId, INSTANCE_DEFAULT_MASK)
+	if err != nil {
+		return datatypes.Virtual_Guest{}, bosherr.WrapError(err, "Reloading vm from pool")
+	}
+
+	deviceName := &models.VM{
+		Cid:         int32(virtualGuestId),
+		CPU:         int32(*virtualGuest.StartCpus),
+		MemoryMb:    int32(*virtualGuest.MaxMemory),
+		IP:          strfmt.IPv4(*virtualGuest.PrimaryBackendIpAddress),
+		Hostname:    *virtualGuest.Hostname,
+		PrivateVlan: int32(*virtualGuest.PrimaryBackendNetworkComponent.NetworkVlan.Id),
+		PublicVlan:  int32(*virtualGuest.PrimaryNetworkComponent.NetworkVlan.Id),
+		State:       models.StateUsing,
+	}
+	_, err = c.SoftLayerPoolClient.VM.UpdateVM(poolvm.NewUpdateVMParams().WithBody(deviceName))
+	if err != nil {
+		return datatypes.Virtual_Guest{}, bosherr.WrapErrorf(err, "Updating the hostname of vm %d in pool to using", virtualGuestId)
+	}
+
+	return virtualGuest, nil
+}
+
 func (c *clientManager) EditInstance(id int, template *datatypes.Virtual_Guest) (bool, error) {
 	resp, err := c.VirtualGuestService.Id(id).EditObject(template)
 	if err != nil {
@@ -339,7 +417,7 @@ func (c *clientManager) RebootInstance(id int, soft bool, hard bool) error {
 	return err
 }
 
-func (c *clientManager) ReloadInstance(id int, stemcellId int, sshKeyIds []int) (string, error) {
+func (c *clientManager) ReloadInstance(id int, stemcellId int, sshKeyIds []int, vmNamePrefix string, domain string) (string, error) {
 	var err error
 	until := time.Now().Add(time.Duration(1) * time.Hour)
 	if err = c.WaitInstanceHasNoneActiveTransaction(*sl.Int(id), until); err != nil {
@@ -367,6 +445,19 @@ func (c *clientManager) ReloadInstance(id int, stemcellId int, sshKeyIds []int) 
 	until = time.Now().Add(time.Duration(4) * time.Hour)
 	if err = c.WaitInstanceUntilReady(*sl.Int(id), until); err != nil {
 		return resp, bosherr.WrapError(err, "Waiting until instance is ready after os_reload")
+	}
+
+	succeed, err := c.EditInstance(id, &datatypes.Virtual_Guest{
+		Hostname: sl.String(vmNamePrefix),
+		Domain:   sl.String(domain),
+	})
+
+	if err != nil {
+		return "", bosherr.WrapError(err, "Editing VM hostname after OS Reload")
+	}
+
+	if !succeed {
+		return "", bosherr.WrapError(err, "Failed to edit VM hostname after OS Reload")
 	}
 
 	return resp, nil
@@ -648,7 +739,7 @@ func (c *clientManager) OrderBlockVolume(storageType string, location string, si
 					PackageId:   productPacakge.Id,
 					Prices:      prices,
 					Quantity:    sl.Int(1),
-					Location:    sl.String(strconv.Itoa((locationId))),
+					Location:    sl.String(strconv.Itoa(locationId)),
 				},
 			},
 		}
@@ -721,8 +812,8 @@ func (c *clientManager) GetPackage(categoryCode string) (datatypes.Product_Packa
 }
 
 func (c *clientManager) GetLocationId(location string) (int, error) {
-	filter := filter.New(filter.Path("name").Eq(location))
-	datacenters, err := c.LocationService.Mask("longName,id,name").Filter(filter.Build()).GetDatacenters()
+	reqFilter := filter.New(filter.Path("name").Eq(location))
+	datacenters, err := c.LocationService.Mask("longName,id,name").Filter(reqFilter.Build()).GetDatacenters()
 	if err != nil {
 		return 0, err
 	}
