@@ -51,6 +51,7 @@ func NewCreateVM(
 }
 
 func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMCloudProperties, networks Networks, diskIDs []DiskCID, env Environment) (string, error) {
+	// Find stemcell uuid
 	globalIdentifier, found, err := cv.stemcellService.Find(int(stemcellCID))
 	if err != nil {
 		return "", bosherr.WrapErrorf(err, "Creating VM")
@@ -59,6 +60,7 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 		return "", api.NewStemcellkNotFoundError(stemcellCID.String(), false)
 	}
 
+	// Set public key
 	var sshKey int
 	if len(cv.softlayerOptions.PublicKey) > 0 {
 		sshKey, err = cv.virtualGuestService.CreateSshKey("bosh_cpi", cv.softlayerOptions.PublicKey, cv.softlayerOptions.PublicKeyFingerPrint)
@@ -68,23 +70,37 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 		cloudProps.SshKey = sshKey
 	}
 
-	// create VM user data
+	// Create VM user data
 	userDataTypeContents, err := cv.createUserDataForInstance(agentID, cv.registryOptions)
 	if err != nil {
 		return "", bosherr.WrapError(err, "Creating VM UserData")
 	}
 
+	// Get public vlanId, private vlanId
 	publicVlanId, privateVlanId, err := cv.getVlanIds(networks)
 	if err != nil {
 		return "", bosherr.WrapError(err, "Getting vlan ids from networks settings")
 	}
 
+	// Create Virtual Guest template
 	virtualGuestTemplate := cv.createVirtualGuestTemplate(globalIdentifier, *cloudProps.AsInstanceProperties(), userDataTypeContents, publicVlanId, privateVlanId)
 
 	// Parse networks
 	instanceNetworks := networks.AsInstanceServiceNetworks()
 	if err = instanceNetworks.Validate(); err != nil {
 		return "", bosherr.WrapError(err, "Creating VM")
+	}
+
+	// Extract any tags from env.bosh.groups
+	if boshenv, ok := env["bosh"]; ok {
+		if boshgroups, ok := boshenv.(map[string]interface{})["groups"]; ok {
+			for _, tag := range boshgroups.([]interface{}) {
+				// Ignore error as labels will be validated later
+				cloudProps.Tags = append(cloudProps.Tags, tag.(string))
+			}
+		}
+
+		boshenv.(map[string]interface{})["keep_root_password"] = true
 	}
 
 	// Validate VM tags and labels
@@ -130,14 +146,6 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 
 	// Create VM agent settings
 	agentNetworks := instanceNetworks.AsRegistryNetworks()
-
-	// Keep root password
-	if len(env) == 0 {
-		env = Environment{
-			"bosh": map[string]interface{}{},
-		}
-	}
-	env["bosh"].(map[string]interface{})["keep_root_password"] = true
 
 	// Get object details of new VM
 	virtualGuest, found, err := cv.virtualGuestService.Find(cid)
