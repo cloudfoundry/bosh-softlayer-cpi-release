@@ -8,6 +8,7 @@ import (
 
 	. "bosh-softlayer-cpi/action"
 
+	boslconfig "bosh-softlayer-cpi/softlayer/config"
 	instancefakes "bosh-softlayer-cpi/softlayer/virtual_guest_service/fakes"
 
 	registryfakes "bosh-softlayer-cpi/registry/fakes"
@@ -21,6 +22,8 @@ var _ = Describe("DeleteVM", func() {
 		vmService      *instancefakes.FakeService
 		registryClient *registryfakes.FakeClient
 
+		softlayerOptions boslconfig.Config
+
 		deleteVM DeleteVMAction
 	)
 
@@ -28,7 +31,14 @@ var _ = Describe("DeleteVM", func() {
 		vmCID = VMCID(12345678)
 		vmService = &instancefakes.FakeService{}
 		registryClient = &registryfakes.FakeClient{}
-		deleteVM = NewDeleteVM(vmService, registryClient)
+		softlayerOptions = boslconfig.Config{
+			Username:        "fake-username",
+			ApiKey:          "fake-api-key",
+			ApiEndpoint:     "fake-api-endpoint",
+			DisableOsReload: false,
+		}
+
+		deleteVM = NewDeleteVM(vmService, registryClient, softlayerOptions)
 	})
 
 	Describe("Run", func() {

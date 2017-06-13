@@ -61,7 +61,7 @@ func NewConcreteFactory(
 				cfg.Cloud.Properties.Agent,
 				cfg.Cloud.Properties.SoftLayer,
 			),
-			"delete_vm":          NewDeleteVM(vmService, registryClient),
+			"delete_vm":          NewDeleteVM(vmService, registryClient, cfg.Cloud.Properties.SoftLayer),
 			"has_vm":             NewHasVM(vmService),
 			"reboot_vm":          NewRebootVM(vmService),
 			"set_vm_metadata":    NewSetVMMetadata(vmService),

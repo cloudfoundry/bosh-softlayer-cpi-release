@@ -17,6 +17,11 @@ import (
 	"bosh-softlayer-cpi/api/transport"
 	"bosh-softlayer-cpi/config"
 	"bosh-softlayer-cpi/softlayer/client"
+	vpsClient "bosh-softlayer-cpi/softlayer/vps_service/client"
+	"bosh-softlayer-cpi/softlayer/vps_service/client/vm"
+	"fmt"
+	httptransport "github.com/go-openapi/runtime/client"
+	"github.com/go-openapi/strfmt"
 )
 
 const mainLogTag = "main"
@@ -77,8 +82,23 @@ func buildDispatcher(
 	} else {
 		softlayerAPIEndpoint = client.SoftlayerAPIEndpointPublicDefault
 	}
+
 	softLayerClient := client.NewSoftlayerClientSession(softlayerAPIEndpoint, cfg.Cloud.Properties.SoftLayer.Username, cfg.Cloud.Properties.SoftLayer.ApiKey, true, 300, logger)
-	repClientFactory := client.NewClientFactory(client.NewSoftLayerClientManager(softLayerClient))
+
+	var vps *vm.Client
+	if cfg.Cloud.Properties.SoftLayer.EnableVps {
+		if cfg.Cloud.Properties.SoftLayer.VpsUseSsl {
+			vps = vpsClient.New(httptransport.New(fmt.Sprintf("%s:%d", cfg.Cloud.Properties.SoftLayer.VpsHost, cfg.Cloud.Properties.SoftLayer.VpsPort),
+				"v2", []string{"https"}), strfmt.Default).VM
+		} else {
+
+			vps = vpsClient.New(httptransport.New(fmt.Sprintf("%s:%d", cfg.Cloud.Properties.SoftLayer.VpsHost, cfg.Cloud.Properties.SoftLayer.VpsPort),
+				"v2", []string{"http"}), strfmt.Default).VM
+		}
+
+	}
+
+	repClientFactory := client.NewClientFactory(client.NewSoftLayerClientManager(softLayerClient, vps))
 	client := repClientFactory.CreateClient()
 
 	actionFactory := action.NewConcreteFactory(

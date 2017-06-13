@@ -106,7 +106,7 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 
 	if cid == 0 {
 		// Create VM
-		cid, err = cv.virtualGuestService.Create(*virtualGuestTemplate, instanceNetworks, cv.registryOptions.EndpointWithCredentials())
+		cid, err = cv.virtualGuestService.Create(*virtualGuestTemplate, cv.softlayerOptions.EnableVps, stemcellCID.Int(), []int{cloudProps.SshKey})
 		if err != nil {
 			if _, ok := err.(api.CloudError); ok {
 				return "", err
@@ -267,7 +267,7 @@ func (cv CreateVM) createByOsReload(stemcellCID StemcellCID, cloudProps VMCloudP
 					return cid, api.NewVMCreationFailedError(fmt.Sprintf("Finding VM with IP Address '%s'", network.IP), true)
 				}
 
-				_, err = cv.virtualGuestService.ReloadOS(*vm.Id, stemcellCID.Int(), []int{cloudProps.SshKey})
+				_, err = cv.virtualGuestService.ReloadOS(*vm.Id, stemcellCID.Int(), []int{cloudProps.SshKey}, cloudProps.VmNamePrefix, cloudProps.Domain)
 				if err != nil {
 					if apiErr, ok := err.(sl.Error); ok {
 						return cid, api.NewVMCreationFailedError(fmt.Sprintf("Failed to do OS Reload with IP Address '%s' with error %s", network.IP, apiErr), false)
@@ -277,18 +277,6 @@ func (cv CreateVM) createByOsReload(stemcellCID StemcellCID, cloudProps VMCloudP
 				}
 
 				cid = *vm.Id
-
-				succeed, err := cv.virtualGuestService.Edit(*vm.Id, datatypes.Virtual_Guest{
-					Hostname: sl.String(cloudProps.VmNamePrefix),
-					Domain:   sl.String(cloudProps.Domain),
-				})
-				if err != nil {
-					return cid, api.NewVMCreationFailedError(fmt.Sprintf("Editing VM hostname after OS Reload with IP Address '%s' with error %s", network.IP, err), true)
-				}
-
-				if !succeed {
-					return cid, api.NewVMCreationFailedError(fmt.Sprintf("Failed to edit VM hostname after OS Reload with IP Address '%s'", network.IP), true)
-				}
 			}
 		case "vip":
 			return cid, bosherr.Error("SoftLayer Not Support VIP Networking")

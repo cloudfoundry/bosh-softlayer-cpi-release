@@ -101,12 +101,14 @@ type FakeClient struct {
 	rebootInstanceReturnsOnCall map[int]struct {
 		result1 error
 	}
-	ReloadInstanceStub        func(id int, stemcellId int, sshKeyIds []int) (string, error)
+	ReloadInstanceStub        func(id int, stemcellId int, sshKeyIds []int, hostname string, domain string) (string, error)
 	reloadInstanceMutex       sync.RWMutex
 	reloadInstanceArgsForCall []struct {
 		id         int
 		stemcellId int
 		sshKeyIds  []int
+		hostname   string
+		domain     string
 	}
 	reloadInstanceReturns struct {
 		result1 string
@@ -344,6 +346,60 @@ type FakeClient struct {
 	getAllowedNetworkStorageReturnsOnCall map[int]struct {
 		result1 []string
 		result2 error
+	}
+	CreateSshKeyStub        func(label *string, key *string, fingerPrint *string) (datatypes.Security_Ssh_Key, error)
+	createSshKeyMutex       sync.RWMutex
+	createSshKeyArgsForCall []struct {
+		label       *string
+		key         *string
+		fingerPrint *string
+	}
+	createSshKeyReturns struct {
+		result1 datatypes.Security_Ssh_Key
+		result2 error
+	}
+	createSshKeyReturnsOnCall map[int]struct {
+		result1 datatypes.Security_Ssh_Key
+		result2 error
+	}
+	DeleteSshKeyStub        func(id int) (bool, error)
+	deleteSshKeyMutex       sync.RWMutex
+	deleteSshKeyArgsForCall []struct {
+		id int
+	}
+	deleteSshKeyReturns struct {
+		result1 bool
+		result2 error
+	}
+	deleteSshKeyReturnsOnCall map[int]struct {
+		result1 bool
+		result2 error
+	}
+	CreateInstanceFromVPSStub        func(template *datatypes.Virtual_Guest, stemcellID int, sshKeys []int) (datatypes.Virtual_Guest, error)
+	createInstanceFromVPSMutex       sync.RWMutex
+	createInstanceFromVPSArgsForCall []struct {
+		template   *datatypes.Virtual_Guest
+		stemcellID int
+		sshKeys    []int
+	}
+	createInstanceFromVPSReturns struct {
+		result1 datatypes.Virtual_Guest
+		result2 error
+	}
+	createInstanceFromVPSReturnsOnCall map[int]struct {
+		result1 datatypes.Virtual_Guest
+		result2 error
+	}
+	DeleteInstanceFromVPSStub        func(id int) error
+	deleteInstanceFromVPSMutex       sync.RWMutex
+	deleteInstanceFromVPSArgsForCall []struct {
+		id int
+	}
+	deleteInstanceFromVPSReturns struct {
+		result1 error
+	}
+	deleteInstanceFromVPSReturnsOnCall map[int]struct {
+		result1 error
 	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
@@ -704,7 +760,7 @@ func (fake *FakeClient) RebootInstanceReturnsOnCall(i int, result1 error) {
 	}{result1}
 }
 
-func (fake *FakeClient) ReloadInstance(id int, stemcellId int, sshKeyIds []int) (string, error) {
+func (fake *FakeClient) ReloadInstance(id int, stemcellId int, sshKeyIds []int, hostname string, domain string) (string, error) {
 	var sshKeyIdsCopy []int
 	if sshKeyIds != nil {
 		sshKeyIdsCopy = make([]int, len(sshKeyIds))
@@ -716,11 +772,13 @@ func (fake *FakeClient) ReloadInstance(id int, stemcellId int, sshKeyIds []int) 
 		id         int
 		stemcellId int
 		sshKeyIds  []int
-	}{id, stemcellId, sshKeyIdsCopy})
-	fake.recordInvocation("ReloadInstance", []interface{}{id, stemcellId, sshKeyIdsCopy})
+		hostname   string
+		domain     string
+	}{id, stemcellId, sshKeyIdsCopy, hostname, domain})
+	fake.recordInvocation("ReloadInstance", []interface{}{id, stemcellId, sshKeyIdsCopy, hostname, domain})
 	fake.reloadInstanceMutex.Unlock()
 	if fake.ReloadInstanceStub != nil {
-		return fake.ReloadInstanceStub(id, stemcellId, sshKeyIds)
+		return fake.ReloadInstanceStub(id, stemcellId, sshKeyIds, hostname, domain)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
@@ -734,10 +792,10 @@ func (fake *FakeClient) ReloadInstanceCallCount() int {
 	return len(fake.reloadInstanceArgsForCall)
 }
 
-func (fake *FakeClient) ReloadInstanceArgsForCall(i int) (int, int, []int) {
+func (fake *FakeClient) ReloadInstanceArgsForCall(i int) (int, int, []int, string, string) {
 	fake.reloadInstanceMutex.RLock()
 	defer fake.reloadInstanceMutex.RUnlock()
-	return fake.reloadInstanceArgsForCall[i].id, fake.reloadInstanceArgsForCall[i].stemcellId, fake.reloadInstanceArgsForCall[i].sshKeyIds
+	return fake.reloadInstanceArgsForCall[i].id, fake.reloadInstanceArgsForCall[i].stemcellId, fake.reloadInstanceArgsForCall[i].sshKeyIds, fake.reloadInstanceArgsForCall[i].hostname, fake.reloadInstanceArgsForCall[i].domain
 }
 
 func (fake *FakeClient) ReloadInstanceReturns(result1 string, result2 error) {
@@ -1629,6 +1687,216 @@ func (fake *FakeClient) GetAllowedNetworkStorageReturnsOnCall(i int, result1 []s
 	}{result1, result2}
 }
 
+func (fake *FakeClient) CreateSshKey(label *string, key *string, fingerPrint *string) (datatypes.Security_Ssh_Key, error) {
+	fake.createSshKeyMutex.Lock()
+	ret, specificReturn := fake.createSshKeyReturnsOnCall[len(fake.createSshKeyArgsForCall)]
+	fake.createSshKeyArgsForCall = append(fake.createSshKeyArgsForCall, struct {
+		label       *string
+		key         *string
+		fingerPrint *string
+	}{label, key, fingerPrint})
+	fake.recordInvocation("CreateSshKey", []interface{}{label, key, fingerPrint})
+	fake.createSshKeyMutex.Unlock()
+	if fake.CreateSshKeyStub != nil {
+		return fake.CreateSshKeyStub(label, key, fingerPrint)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	return fake.createSshKeyReturns.result1, fake.createSshKeyReturns.result2
+}
+
+func (fake *FakeClient) CreateSshKeyCallCount() int {
+	fake.createSshKeyMutex.RLock()
+	defer fake.createSshKeyMutex.RUnlock()
+	return len(fake.createSshKeyArgsForCall)
+}
+
+func (fake *FakeClient) CreateSshKeyArgsForCall(i int) (*string, *string, *string) {
+	fake.createSshKeyMutex.RLock()
+	defer fake.createSshKeyMutex.RUnlock()
+	return fake.createSshKeyArgsForCall[i].label, fake.createSshKeyArgsForCall[i].key, fake.createSshKeyArgsForCall[i].fingerPrint
+}
+
+func (fake *FakeClient) CreateSshKeyReturns(result1 datatypes.Security_Ssh_Key, result2 error) {
+	fake.CreateSshKeyStub = nil
+	fake.createSshKeyReturns = struct {
+		result1 datatypes.Security_Ssh_Key
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeClient) CreateSshKeyReturnsOnCall(i int, result1 datatypes.Security_Ssh_Key, result2 error) {
+	fake.CreateSshKeyStub = nil
+	if fake.createSshKeyReturnsOnCall == nil {
+		fake.createSshKeyReturnsOnCall = make(map[int]struct {
+			result1 datatypes.Security_Ssh_Key
+			result2 error
+		})
+	}
+	fake.createSshKeyReturnsOnCall[i] = struct {
+		result1 datatypes.Security_Ssh_Key
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeClient) DeleteSshKey(id int) (bool, error) {
+	fake.deleteSshKeyMutex.Lock()
+	ret, specificReturn := fake.deleteSshKeyReturnsOnCall[len(fake.deleteSshKeyArgsForCall)]
+	fake.deleteSshKeyArgsForCall = append(fake.deleteSshKeyArgsForCall, struct {
+		id int
+	}{id})
+	fake.recordInvocation("DeleteSshKey", []interface{}{id})
+	fake.deleteSshKeyMutex.Unlock()
+	if fake.DeleteSshKeyStub != nil {
+		return fake.DeleteSshKeyStub(id)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	return fake.deleteSshKeyReturns.result1, fake.deleteSshKeyReturns.result2
+}
+
+func (fake *FakeClient) DeleteSshKeyCallCount() int {
+	fake.deleteSshKeyMutex.RLock()
+	defer fake.deleteSshKeyMutex.RUnlock()
+	return len(fake.deleteSshKeyArgsForCall)
+}
+
+func (fake *FakeClient) DeleteSshKeyArgsForCall(i int) int {
+	fake.deleteSshKeyMutex.RLock()
+	defer fake.deleteSshKeyMutex.RUnlock()
+	return fake.deleteSshKeyArgsForCall[i].id
+}
+
+func (fake *FakeClient) DeleteSshKeyReturns(result1 bool, result2 error) {
+	fake.DeleteSshKeyStub = nil
+	fake.deleteSshKeyReturns = struct {
+		result1 bool
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeClient) DeleteSshKeyReturnsOnCall(i int, result1 bool, result2 error) {
+	fake.DeleteSshKeyStub = nil
+	if fake.deleteSshKeyReturnsOnCall == nil {
+		fake.deleteSshKeyReturnsOnCall = make(map[int]struct {
+			result1 bool
+			result2 error
+		})
+	}
+	fake.deleteSshKeyReturnsOnCall[i] = struct {
+		result1 bool
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeClient) CreateInstanceFromVPS(template *datatypes.Virtual_Guest, stemcellID int, sshKeys []int) (datatypes.Virtual_Guest, error) {
+	var sshKeysCopy []int
+	if sshKeys != nil {
+		sshKeysCopy = make([]int, len(sshKeys))
+		copy(sshKeysCopy, sshKeys)
+	}
+	fake.createInstanceFromVPSMutex.Lock()
+	ret, specificReturn := fake.createInstanceFromVPSReturnsOnCall[len(fake.createInstanceFromVPSArgsForCall)]
+	fake.createInstanceFromVPSArgsForCall = append(fake.createInstanceFromVPSArgsForCall, struct {
+		template   *datatypes.Virtual_Guest
+		stemcellID int
+		sshKeys    []int
+	}{template, stemcellID, sshKeysCopy})
+	fake.recordInvocation("CreateInstanceFromVPS", []interface{}{template, stemcellID, sshKeysCopy})
+	fake.createInstanceFromVPSMutex.Unlock()
+	if fake.CreateInstanceFromVPSStub != nil {
+		return fake.CreateInstanceFromVPSStub(template, stemcellID, sshKeys)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	return fake.createInstanceFromVPSReturns.result1, fake.createInstanceFromVPSReturns.result2
+}
+
+func (fake *FakeClient) CreateInstanceFromVPSCallCount() int {
+	fake.createInstanceFromVPSMutex.RLock()
+	defer fake.createInstanceFromVPSMutex.RUnlock()
+	return len(fake.createInstanceFromVPSArgsForCall)
+}
+
+func (fake *FakeClient) CreateInstanceFromVPSArgsForCall(i int) (*datatypes.Virtual_Guest, int, []int) {
+	fake.createInstanceFromVPSMutex.RLock()
+	defer fake.createInstanceFromVPSMutex.RUnlock()
+	return fake.createInstanceFromVPSArgsForCall[i].template, fake.createInstanceFromVPSArgsForCall[i].stemcellID, fake.createInstanceFromVPSArgsForCall[i].sshKeys
+}
+
+func (fake *FakeClient) CreateInstanceFromVPSReturns(result1 datatypes.Virtual_Guest, result2 error) {
+	fake.CreateInstanceFromVPSStub = nil
+	fake.createInstanceFromVPSReturns = struct {
+		result1 datatypes.Virtual_Guest
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeClient) CreateInstanceFromVPSReturnsOnCall(i int, result1 datatypes.Virtual_Guest, result2 error) {
+	fake.CreateInstanceFromVPSStub = nil
+	if fake.createInstanceFromVPSReturnsOnCall == nil {
+		fake.createInstanceFromVPSReturnsOnCall = make(map[int]struct {
+			result1 datatypes.Virtual_Guest
+			result2 error
+		})
+	}
+	fake.createInstanceFromVPSReturnsOnCall[i] = struct {
+		result1 datatypes.Virtual_Guest
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeClient) DeleteInstanceFromVPS(id int) error {
+	fake.deleteInstanceFromVPSMutex.Lock()
+	ret, specificReturn := fake.deleteInstanceFromVPSReturnsOnCall[len(fake.deleteInstanceFromVPSArgsForCall)]
+	fake.deleteInstanceFromVPSArgsForCall = append(fake.deleteInstanceFromVPSArgsForCall, struct {
+		id int
+	}{id})
+	fake.recordInvocation("DeleteInstanceFromVPS", []interface{}{id})
+	fake.deleteInstanceFromVPSMutex.Unlock()
+	if fake.DeleteInstanceFromVPSStub != nil {
+		return fake.DeleteInstanceFromVPSStub(id)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fake.deleteInstanceFromVPSReturns.result1
+}
+
+func (fake *FakeClient) DeleteInstanceFromVPSCallCount() int {
+	fake.deleteInstanceFromVPSMutex.RLock()
+	defer fake.deleteInstanceFromVPSMutex.RUnlock()
+	return len(fake.deleteInstanceFromVPSArgsForCall)
+}
+
+func (fake *FakeClient) DeleteInstanceFromVPSArgsForCall(i int) int {
+	fake.deleteInstanceFromVPSMutex.RLock()
+	defer fake.deleteInstanceFromVPSMutex.RUnlock()
+	return fake.deleteInstanceFromVPSArgsForCall[i].id
+}
+
+func (fake *FakeClient) DeleteInstanceFromVPSReturns(result1 error) {
+	fake.DeleteInstanceFromVPSStub = nil
+	fake.deleteInstanceFromVPSReturns = struct {
+		result1 error
+	}{result1}
+}
+
+func (fake *FakeClient) DeleteInstanceFromVPSReturnsOnCall(i int, result1 error) {
+	fake.DeleteInstanceFromVPSStub = nil
+	if fake.deleteInstanceFromVPSReturnsOnCall == nil {
+		fake.deleteInstanceFromVPSReturnsOnCall = make(map[int]struct {
+			result1 error
+		})
+	}
+	fake.deleteInstanceFromVPSReturnsOnCall[i] = struct {
+		result1 error
+	}{result1}
+}
+
 func (fake *FakeClient) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
@@ -1682,6 +1950,14 @@ func (fake *FakeClient) Invocations() map[string][][]interface{} {
 	defer fake.getAllowedHostCredentialMutex.RUnlock()
 	fake.getAllowedNetworkStorageMutex.RLock()
 	defer fake.getAllowedNetworkStorageMutex.RUnlock()
+	fake.createSshKeyMutex.RLock()
+	defer fake.createSshKeyMutex.RUnlock()
+	fake.deleteSshKeyMutex.RLock()
+	defer fake.deleteSshKeyMutex.RUnlock()
+	fake.createInstanceFromVPSMutex.RLock()
+	defer fake.createInstanceFromVPSMutex.RUnlock()
+	fake.deleteInstanceFromVPSMutex.RLock()
+	defer fake.deleteInstanceFromVPSMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}
 	for key, value := range fake.invocations {
 		copiedInvocations[key] = value

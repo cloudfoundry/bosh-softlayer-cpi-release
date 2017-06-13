@@ -160,7 +160,7 @@ var _ = Describe("ConcreteFactory", func() {
 	It("delete_vm", func() {
 		action, err := factory.Create("delete_vm")
 		Expect(err).ToNot(HaveOccurred())
-		Expect(action).To(Equal(NewDeleteVM(vmService, registryClient)))
+		Expect(action).To(Equal(NewDeleteVM(vmService, registryClient, softlayerOptions)))
 	})
 
 	It("reboot_vm", func() {

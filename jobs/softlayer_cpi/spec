@@ -11,17 +11,26 @@ packages:
 
 properties:
   softlayer.username:
-    description: "User name of the softlayer account"
+    description: User name of the SoftLayer account
   softlayer.api_key:
-    description: "API key of the softlayer account"
+    description: API key of the SoftLayer account
   softlayer.api_endpoint:
-    description: "Softlayer API endpoint"
+    description: SoftLayer API endpoint
   softlayer.disable_os_reload:
-    description: "Disable OS reload function"
+    description: Disable OS reload function
   softlayer.ssh_public_key:
     description: The content of the SSH public key to use when spinning up new vms
   softlayer.ssh_public_key_fingerprint:
-      description: The Finger Print content of the SSH public key
+    description: The Finger Print content of the SSH public key
+  softlayer.enable_vps:
+    description: Enable CPI to connect to the vps server
+  softlayer.vps_host:
+    description: Host of vps server
+  softlayer.vps_port:
+    description: Port of vps server
+  softlayer.vps_use_ssl:
+    description: Whether CPI should use SSL to connect to the vps server
+
 
   registry.username:
     description: User to access the Registry

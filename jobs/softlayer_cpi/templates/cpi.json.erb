@@ -39,6 +39,22 @@
     params['cloud']['properties']['softlayer']['ssh_public_key_fingerprint'] = ssh_public_key_fingerprint
   end
 
+  if_p('softlayer.enable_vps') do |enable_vps|
+      params['cloud']['properties']['softlayer']['enable_vps'] = enable_vps
+  end
+
+  if_p('softlayer.vps_host') do |vps_host|
+      params['cloud']['properties']['softlayer']['vps_host'] = vps_host
+  end
+
+  if_p('softlayer.vps_port') do |vps_port|
+      params['cloud']['properties']['softlayer']['vps_port'] = vps_port
+  end
+
+  if_p('softlayer.vps_use_ssl') do |vps_use_ssl|
+      params['cloud']['properties']['softlayer']['vps_use_ssl'] = vps_use_ssl
+  end
+
   if_p('registry.endpoint') do |endpoint|
     params['cloud']['properties']['registry']['endpoint'] = endpoint
   end.else do
