@@ -6,7 +6,7 @@ import (
 
 //go:generate counterfeiter -o fakes/fake_Instance_Service.go . Service
 type Service interface {
-	AttachDisk(id int, diskID int) (string, string, error)
+	AttachDisk(id int, diskID int) ([]byte, error)
 	AttachedDisks(id int) ([]string, error)
 	AttachEphemeralDisk(id int, diskSize int) error
 	Create(virtualGuest datatypes.Virtual_Guest, enableVps bool, stemcellID int, sshKeys []int) (int, error)

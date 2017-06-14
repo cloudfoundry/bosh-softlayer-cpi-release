@@ -113,6 +113,7 @@ type Client interface {
 	OrderBlockVolume(storageType string, location string, size int, iops int) (datatypes.Container_Product_Order_Receipt, error)
 	CancelBlockVolume(volumeId int, reason string, immedicate bool) error
 	GetBlockVolumeDetails(volumeId int, mask string) (datatypes.Network_Storage, error)
+	GetNetworkStorageTarget(volumeId int, mask string) (string, error)
 	GetImage(imageId int, mask string) (datatypes.Virtual_Guest_Block_Device_Template_Group, error)
 	GetVlan(id int, mask string) (datatypes.Network_Vlan, error)
 	GetAllowedHostCredential(id int) (datatypes.Network_Storage_Allowed_Host, error)
@@ -730,6 +731,19 @@ func (c *clientManager) GetBlockVolumeDetails(volumeId int, mask string) (dataty
 	}
 
 	return volume, nil
+}
+
+func (c *clientManager) GetNetworkStorageTarget(volumeId int, mask string) (string, error) {
+	if mask == "" {
+		mask = VOLUME_DETAIL_MASK
+	}
+
+	connectionInfo, err := c.StorageService.Id(volumeId).Mask(mask).GetNetworkConnectionDetails()
+	if err != nil {
+		return "", err
+	}
+
+	return *connectionInfo.IpAddress, nil
 }
 
 func (c *clientManager) OrderBlockVolume(storageType string, location string, size int, iops int) (datatypes.Container_Product_Order_Receipt, error) {

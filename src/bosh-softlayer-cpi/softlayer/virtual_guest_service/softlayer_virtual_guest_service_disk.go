@@ -33,37 +33,34 @@ func (vg SoftlayerVirtualGuestService) AttachEphemeralDisk(id int, diskSize int)
 	return vg.softlayerClient.AttachSecondDiskToInstance(id, diskSize)
 }
 
-func (vg SoftlayerVirtualGuestService) AttachDisk(id int, diskID int) (string, string, error) {
-	volume, err := vg.softlayerClient.GetBlockVolumeDetails(diskID, bsl.VOLUME_DETAIL_MASK)
+func (vg SoftlayerVirtualGuestService) AttachDisk(id int, diskID int) ([]byte, error) {
+	ipAddress, err := vg.softlayerClient.GetNetworkStorageTarget(diskID, bsl.VOLUME_DETAIL_MASK)
 	if err != nil {
-		return "", "", bosherr.WrapErrorf(err, "Fetching volume details with id '%d'", diskID)
+		return []byte{}, bosherr.WrapErrorf(err, "Fetching disk target address with id '%d'", diskID)
 	}
 
 	instance, err := vg.softlayerClient.GetInstance(id, bsl.INSTANCE_DETAIL_MASK)
 	if err != nil {
-		return "", "", bosherr.WrapErrorf(err, "Fetching instance details with id '%d'", id)
-	}
-
-	password := vg.getRootPassword(instance)
-	if password == nil {
-		return "", "", bosherr.WrapErrorf(err, "Failed to retrieve root password with id '%d'", id)
+		return []byte{}, bosherr.WrapErrorf(err, "Fetching instance details with id '%d'", id)
 	}
 
 	until := time.Now().Add(time.Duration(1) * time.Hour)
 	err = vg.softlayerClient.AuthorizeHostToVolume(&instance, diskID, until)
 	if err != nil {
-		return "", "", bosherr.WrapErrorf(err, "Authorizing vm with id '%d' to disk with id '%d'", id, diskID)
+		return []byte{}, bosherr.WrapErrorf(err, "Authorizing vm with id '%d' to disk with id '%d'", id, diskID)
 	}
 
-	ssh := util.GetSshClient(rootUser, *password, *instance.PrimaryBackendIpAddress)
-
-	deviceName, err := vg.waitForVolumeAttached(id, volume, ssh)
+	credential, err := vg.softlayerClient.GetAllowedHostCredential(id)
 	if err != nil {
-		return "", "", bosherr.WrapError(err, fmt.Sprintf("Failed to attach volume '%d' to virtual guest '%d'", diskID, id))
+		return []byte{}, bosherr.WrapError(err, fmt.Sprintf("Getting iscsi host auth from virtual guest '%d'", id))
 	}
 
-	vg.logger.Info(softlayerVirtualGuestServiceLogTag, "The volume device name '%s', device path '%s'", deviceName, fmt.Sprintf("%s/%s", volumePathPrefix, deviceName))
-	return deviceName, fmt.Sprintf("%s/%s", volumePathPrefix, deviceName), nil
+	initiatorName := *credential.Name
+	username := *credential.Credential.Username
+	password := *credential.Credential.Password
+
+	return []byte(fmt.Sprintf(`{"initiator_name":"%s","target":"%s","username":"%s","password":"%s" }`, initiatorName, ipAddress, username, password)),
+		nil
 }
 
 func (vg SoftlayerVirtualGuestService) AttachedDisks(id int) ([]string, error) {
@@ -105,27 +102,27 @@ func (vg SoftlayerVirtualGuestService) ReAttachLeftDisk(id int, devicePath strin
 }
 
 func (vg SoftlayerVirtualGuestService) DetachDisk(id int, diskID int) error {
-	volume, err := vg.softlayerClient.GetBlockVolumeDetails(diskID, bsl.VOLUME_DETAIL_MASK)
-	if err != nil {
-		return bosherr.WrapErrorf(err, "Fetching volume details with id '%d'", diskID)
-	}
+	//volume, err := vg.softlayerClient.GetBlockVolumeDetails(diskID, bsl.VOLUME_DETAIL_MASK)
+	//if err != nil {
+	//	return bosherr.WrapErrorf(err, "Fetching volume details with id '%d'", diskID)
+	//}
 
 	instance, err := vg.softlayerClient.GetInstance(id, bsl.INSTANCE_DETAIL_MASK)
 	if err != nil {
 		return bosherr.WrapErrorf(err, "Fetching instance details with id '%d'", id)
 	}
 
-	password := vg.getRootPassword(instance)
-	if password == nil {
-		return bosherr.WrapErrorf(err, "Retrieving root password with id '%d'", id)
-	}
-
-	ssh := util.GetSshClient(rootUser, *password, *instance.PrimaryBackendIpAddress)
-
-	err = vg.detachVolumeBasedOnShellScript(volume, ssh)
-	if err != nil {
-		return bosherr.WrapErrorf(err, "Detaching volume with id '%d' from virtual guest with id '%d'", diskID, id)
-	}
+	//password := vg.getRootPassword(instance)
+	//if password == nil {
+	//	return bosherr.WrapErrorf(err, "Retrieving root password with id '%d'", id)
+	//}
+	//
+	//ssh := util.GetSshClient(rootUser, *password, *instance.PrimaryBackendIpAddress)
+	//
+	//err = vg.detachVolumeBasedOnShellScript(volume, ssh)
+	//if err != nil {
+	//	return bosherr.WrapErrorf(err, "Detaching volume with id '%d' from virtual guest with id '%d'", diskID, id)
+	//}
 
 	until := time.Now().Add(time.Duration(1) * time.Hour)
 	err = vg.softlayerClient.DeauthorizeHostToVolume(&instance, diskID, until)

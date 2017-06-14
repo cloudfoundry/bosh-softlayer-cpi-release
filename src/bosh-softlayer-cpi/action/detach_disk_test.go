@@ -43,9 +43,11 @@ var _ = Describe("DetachDisk", func() {
 				Disks: registry.DisksSettings{
 					Persistent: map[string]registry.PersistentSettings{
 						"22345678": {
-							ID:       "22345678",
-							VolumeID: "fake-device-name",
-							Path:     "fake-volume-path",
+							ID:            "22345678",
+							InitiatorName: "iqn.yyyy-mm.fake-domain:fake-username",
+							Target:        "10.1.22.170",
+							Username:      "fake-username",
+							Password:      "fake-password",
 						},
 					},
 				},
@@ -108,14 +110,18 @@ var _ = Describe("DetachDisk", func() {
 					Disks: registry.DisksSettings{
 						Persistent: map[string]registry.PersistentSettings{
 							"22345678": {
-								ID:       "22345678",
-								VolumeID: "fake-device-name1",
-								Path:     "fake-volume-path1",
+								ID:            "22345678",
+								InitiatorName: "iqn.yyyy-mm.fake-domain:fake-username",
+								Target:        "10.1.22.170",
+								Username:      "fake-username",
+								Password:      "fake-password",
 							},
 							"32345678": {
-								ID:       "32345678",
-								VolumeID: "fake-device-name2",
-								Path:     "fake-volume-path2",
+								ID:            "32345678",
+								InitiatorName: "iqn.yyyy-mm.fake-domain:fake-username",
+								Target:        "10.1.22.100",
+								Username:      "fake-username",
+								Password:      "fake-password",
 							},
 						},
 					},
@@ -125,37 +131,39 @@ var _ = Describe("DetachDisk", func() {
 					Disks: registry.DisksSettings{
 						Persistent: map[string]registry.PersistentSettings{
 							"32345678": {
-								ID:       "32345678",
-								VolumeID: "fake-device-name2",
-								Path:     "fake-volume-path2",
+								ID:            "32345678",
+								InitiatorName: "iqn.yyyy-mm.fake-domain:fake-username",
+								Target:        "10.1.22.100",
+								Username:      "fake-username",
+								Password:      "fake-password",
 							},
 						},
 					},
 				}
 			})
 
-			It("detaches the disk and re-attaches left disk", func() {
-				_, err = detachDisk.Run(vmCID, diskCID)
-				Expect(err).NotTo(HaveOccurred())
-				Expect(vmService.DetachDiskCallCount()).To(Equal(1))
-				Expect(registryClient.FetchCalled).To(BeTrue())
-				Expect(registryClient.UpdateCalled).To(BeTrue())
-				Expect(vmService.ReAttachLeftDiskCallCount()).To(Equal(1))
-				Expect(registryClient.UpdateSettings).To(Equal(expectedAgentSettings))
-			})
+			//It("detaches the disk and re-attaches left disk", func() {
+			//	_, err = detachDisk.Run(vmCID, diskCID)
+			//	Expect(err).NotTo(HaveOccurred())
+			//	Expect(vmService.DetachDiskCallCount()).To(Equal(1))
+			//	Expect(registryClient.FetchCalled).To(BeTrue())
+			//	Expect(registryClient.UpdateCalled).To(BeTrue())
+			//	Expect(vmService.ReAttachLeftDiskCallCount()).To(Equal(1))
+			//	Expect(registryClient.UpdateSettings).To(Equal(expectedAgentSettings))
+			//})
 
-			It("returns an error if vmService ReAttachLeftDisk call returns an error", func() {
-				vmService.ReAttachLeftDiskReturns(
-					errors.New("fake-vm-service-error"),
-				)
-
-				_, err = detachDisk.Run(vmCID, diskCID)
-				Expect(err.Error()).To(ContainSubstring("fake-vm-service-error"))
-				Expect(vmService.DetachDiskCallCount()).To(Equal(1))
-				Expect(registryClient.FetchCalled).To(BeTrue())
-				Expect(registryClient.UpdateCalled).To(BeTrue())
-				Expect(vmService.ReAttachLeftDiskCallCount()).To(Equal(1))
-			})
+			//It("returns an error if vmService ReAttachLeftDisk call returns an error", func() {
+			//	vmService.ReAttachLeftDiskReturns(
+			//		errors.New("fake-vm-service-error"),
+			//	)
+			//
+			//	_, err = detachDisk.Run(vmCID, diskCID)
+			//	Expect(err.Error()).To(ContainSubstring("fake-vm-service-error"))
+			//	Expect(vmService.DetachDiskCallCount()).To(Equal(1))
+			//	Expect(registryClient.FetchCalled).To(BeTrue())
+			//	Expect(registryClient.UpdateCalled).To(BeTrue())
+			//	Expect(vmService.ReAttachLeftDiskCallCount()).To(Equal(1))
+			//})
 		})
 	})
 })

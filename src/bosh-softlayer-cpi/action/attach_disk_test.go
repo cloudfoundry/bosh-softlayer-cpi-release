@@ -42,15 +42,17 @@ var _ = Describe("AttachDisk", func() {
 
 		BeforeEach(func() {
 			vmCID = VMCID(12345678)
-			diskCID = DiskCID(22345678)
+			diskCID = DiskCID(25667635)
 
 			expectedAgentSettings = registry.AgentSettings{
 				Disks: registry.DisksSettings{
 					Persistent: map[string]registry.PersistentSettings{
-						"22345678": {
-							ID:       "22345678",
-							VolumeID: "fake-device-name",
-							Path:     "fake-volume-path",
+						"25667635": {
+							ID:            "25667635",
+							InitiatorName: "iqn.yyyy-mm.fake-domain:fake-username",
+							Target:        "10.1.22.170",
+							Username:      "fake-username",
+							Password:      "fake-password",
 						},
 					},
 				},
@@ -64,8 +66,7 @@ var _ = Describe("AttachDisk", func() {
 				nil,
 			)
 			vmService.AttachDiskReturns(
-				"fake-device-name",
-				"fake-volume-path",
+				[]byte(`{"initiator_name":"iqn.yyyy-mm.fake-domain:fake-username","target":"10.1.22.170","username":"fake-username","password":"fake-password" }`),
 				nil,
 			)
 		})
@@ -114,8 +115,7 @@ var _ = Describe("AttachDisk", func() {
 
 		It("returns an error if vmService attach disk call returns an error", func() {
 			vmService.AttachDiskReturns(
-				"",
-				"",
+				[]byte{},
 				errors.New("fake-vm-service-error"),
 			)
 

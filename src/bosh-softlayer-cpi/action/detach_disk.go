@@ -7,7 +7,7 @@ import (
 	"bosh-softlayer-cpi/softlayer/virtual_guest_service"
 
 	"bosh-softlayer-cpi/registry"
-	"strconv"
+	//"strconv"
 )
 
 type DetachDisk struct {
@@ -46,19 +46,19 @@ func (dd DetachDisk) Run(vmCID VMCID, diskCID DiskCID) (interface{}, error) {
 		return nil, bosherr.WrapErrorf(err, "Detaching disk '%s' from vm '%s", diskCID, vmCID)
 	}
 
-	if len(newAgentSettings.Disks.Persistent) == 1 {
-		for _, persistent := range newAgentSettings.Disks.Persistent {
-			persistentId, err := strconv.Atoi(persistent.ID)
-			if err != nil {
-				return nil, bosherr.WrapErrorf(err, "Converting string '%s' to int type", persistent.ID)
-			}
-			err = dd.vmService.ReAttachLeftDisk(vmCID.Int(), persistent.Path, persistentId)
-			if err != nil {
-				return nil, bosherr.WrapErrorf(err, "Re-attaching left disk '%d' to vm '%d", diskCID, vmCID)
-			}
-		}
-
-	}
+	//if len(newAgentSettings.Disks.Persistent) == 1 {
+	//	for _, persistent := range newAgentSettings.Disks.Persistent {
+	//		persistentId, err := strconv.Atoi(persistent.ID)
+	//		if err != nil {
+	//			return nil, bosherr.WrapErrorf(err, "Converting string '%s' to int type", persistent.ID)
+	//		}
+	//		err = dd.vmService.ReAttachLeftDisk(vmCID.Int(), "", persistentId)
+	//		if err != nil {
+	//			return nil, bosherr.WrapErrorf(err, "Re-attaching left disk '%d' to vm '%d", diskCID, vmCID)
+	//		}
+	//	}
+	//
+	//}
 
 	return nil, nil
 }

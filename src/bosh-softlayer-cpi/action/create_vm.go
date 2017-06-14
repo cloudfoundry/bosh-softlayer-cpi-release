@@ -103,10 +103,10 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 		boshenv.(map[string]interface{})["keep_root_password"] = true
 	}
 
-	// Validate VM tags and labels
-	if err = cloudProps.Validate(); err != nil {
-		return "", bosherr.WrapError(err, "Creating VM")
-	}
+	//// Validate VM tags and labels
+	//if err = cloudProps.Validate(); err != nil {
+	//	return "", bosherr.WrapError(err, "Creating VM")
+	//}
 
 	// CID for returned VM
 	cid := 0
