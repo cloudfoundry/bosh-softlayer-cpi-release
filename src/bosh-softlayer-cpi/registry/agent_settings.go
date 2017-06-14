@@ -1,5 +1,7 @@
 package registry
 
+import "encoding/json"
+
 const DefaultEphemeralDisk = "/dev/xvdc"
 
 type agentSettingsResponse struct {
@@ -60,11 +62,11 @@ type PersistentSettings struct {
 	// Persistent disk ID
 	ID string `json:"id"`
 
-	// Persistent disk volume ID
-	VolumeID string `json:"volume_id"`
-
-	// Persistent disk path
-	Path string `json:"path"`
+	// For iscsi setup info
+	InitiatorName string `json:"initiator_name"`
+	Target        string `json:"target"`
+	Username      string `json:"username"`
+	Password      string `json:"password"`
 }
 
 // EnvSettings are the Environment settings for a particular VM.
@@ -146,16 +148,15 @@ func NewAgentSettings(agentID string, vmCID string, networksSettings NetworksSet
 }
 
 // AttachPersistentDisk updates the agent settings in order to add an attached persistent disk.
-func (as AgentSettings) AttachPersistentDisk(diskID string, volumeID string, path string) AgentSettings {
+func (as AgentSettings) AttachPersistentDisk(diskID string, updateSetting []byte) AgentSettings {
 	persistenDiskSettings := make(map[string]PersistentSettings)
 	if as.Disks.Persistent != nil {
 		persistenDiskSettings = as.Disks.Persistent
 	}
-	persistenDiskSettings[diskID] = PersistentSettings{
-		ID:       diskID,
-		VolumeID: volumeID,
-		Path:     path,
-	}
+	var persistentSetting PersistentSettings
+	json.Unmarshal(updateSetting, &persistentSetting)
+	persistentSetting.ID = diskID
+	persistenDiskSettings[diskID] = persistentSetting
 	as.Disks.Persistent = persistenDiskSettings
 
 	return as

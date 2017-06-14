@@ -29,7 +29,7 @@ var _ = Describe("Disk", func() {
 		      "datacenter": "lon02",
 		      "primaryNetworkComponent": {
 		        "networkVlan": {
-			  "id": 524956
+			      "id": 524956
 		        }
 		      },
 		      "primaryBackendNetworkComponent": {
