@@ -22,6 +22,7 @@ import (
 	"github.com/softlayer/softlayer-go/sl"
 	"net/url"
 	"os"
+	"strconv"
 )
 
 type CreateVM struct {
@@ -273,6 +274,10 @@ func (cv CreateVM) createByOsReload(stemcellCID StemcellCID, cloudProps VMCloudP
 				}
 				if !found {
 					return cid, api.NewVMCreationFailedError(fmt.Sprintf("Finding VM with IP Address '%s'", network.IP), true)
+				}
+
+				if err := cv.registryClient.Delete(strconv.Itoa(*vm.Id)); err != nil {
+					return cid, bosherr.WrapErrorf(err, "Cleaning registry record '%d' before os_reload", *vm.Id)
 				}
 
 				_, err = cv.virtualGuestService.ReloadOS(*vm.Id, stemcellCID.Int(), []int{cloudProps.SshKey}, cloudProps.VmNamePrefix, cloudProps.Domain)
