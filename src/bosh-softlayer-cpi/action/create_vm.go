@@ -118,6 +118,7 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 		if err != nil {
 			return "", bosherr.WrapError(err, "OS reloading VM")
 		}
+
 		osReloaded = true
 	}
 
@@ -278,6 +279,14 @@ func (cv CreateVM) createByOsReload(stemcellCID StemcellCID, cloudProps VMCloudP
 				}
 
 				cid = *vm.Id
+
+				if *vm.StartCpus != cloudProps.StartCpus || *vm.MaxMemory != cloudProps.MaxMemory ||
+					(vm.DedicatedAccountHostOnlyFlag != nil && *vm.DedicatedAccountHostOnlyFlag != cloudProps.DedicatedAccountHostOnlyFlag) {
+					err = cv.virtualGuestService.UpgradeInstance(cid,  cloudProps.StartCpus,  cloudProps.MaxMemory, 0, cloudProps.DedicatedAccountHostOnlyFlag)
+					if err != nil {
+						return cid, bosherr.WrapError(err, "Upgrading VM")
+					}
+				}
 			}
 		case "vip":
 			return cid, bosherr.Error("SoftLayer Not Support VIP Networking")

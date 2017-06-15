@@ -105,6 +105,7 @@ type Client interface {
 	GetInstanceByPrimaryIpAddress(ip string) (*datatypes.Virtual_Guest, bool, error)
 	RebootInstance(id int, soft bool, hard bool) error
 	ReloadInstance(id int, stemcellId int, sshKeyIds []int, hostname string, domain string) error
+	UpgradeInstanceConfig(id int, cpu int, memory int, network int, privateCPU bool) error
 	UpgradeInstance(id int, cpu int, memory int, network int, privateCPU bool, additional_diskSize int) (*datatypes.Container_Product_Order_Receipt, error)
 	WaitInstanceUntilReady(id int, until time.Time) error
 	WaitInstanceHasActiveTransaction(id int, until time.Time) error
@@ -119,6 +120,7 @@ type Client interface {
 	OrderBlockVolume(storageType string, location string, size int, iops int) (*datatypes.Container_Product_Order_Receipt, error)
 	CancelBlockVolume(volumeId int, reason string, immediate bool) (bool, error)
 	GetBlockVolumeDetails(volumeId int, mask string) (*datatypes.Network_Storage, bool, error)
+	GetBlockVolumeDetails2(volumeId int, mask string) (datatypes.Network_Storage, bool, error)
 	GetNetworkStorageTarget(volumeId int, mask string) (string, bool, error)
 	GetImage(imageId int, mask string) (*datatypes.Virtual_Guest_Block_Device_Template_Group, bool, error)
 	GetVlan(id int, mask string) (*datatypes.Network_Vlan, bool, error)
@@ -657,7 +659,7 @@ func (c *clientManager) UpgradeInstance(id int, cpu int, memory int, network int
 			},
 			{
 				Name:  sl.String("NOTE_GENERAL"),
-				Value: sl.String("addingdisks"),
+				Value: sl.String("Upgrade instance configuration."),
 			},
 		},
 		VirtualGuests: []datatypes.Virtual_Guest{
@@ -807,6 +809,22 @@ func (c *clientManager) GetBlockVolumeDetails(volumeId int, mask string) (*datat
 	}
 
 	return &volume, true, nil
+}
+
+func (c *clientManager) GetBlockVolumeDetails2(volumeId int, mask string) (datatypes.Network_Storage, bool, error) {
+	if mask == "" {
+		mask = VOLUME_DETAIL_MASK
+	}
+	volumes, err := c.AccountService.Mask(mask).Filter(filter.Path("iscsiNetworkStorage.id").Eq(volumeId).Build()).GetIscsiNetworkStorage()
+	if err != nil {
+		return datatypes.Network_Storage{}, false, err
+	}
+
+	if len(volumes) == 0 {
+		return datatypes.Network_Storage{}, false, bosherr.Errorf("Could not find volume with id %d", volumeId)
+	}
+
+	return volumes[0], true, nil
 }
 
 func (c *clientManager) GetNetworkStorageTarget(volumeId int, mask string) (string, bool, error) {
@@ -1056,7 +1074,7 @@ func FindPerformanceIOPSPrice(productPackage datatypes.Product_Package, size int
 }
 
 func (c *clientManager) CancelBlockVolume(volumeId int, reason string, immediate bool) (bool, error) {
-	blockVolume, found, err := c.GetBlockVolumeDetails(volumeId, "id,billingItem.id")
+	blockVolume, found, err := c.GetBlockVolumeDetails2(volumeId, "id,billingItem.id")
 	if err != nil {
 		return false, err
 	}
@@ -1147,6 +1165,40 @@ func (c *clientManager) AttachSecondDiskToInstance(id int, diskSize int) error {
 			return nil
 		}
 		return bosherr.WrapErrorf(err, "Adding second disk with size '%d' to virutal guest of id '%d'", diskSize, id)
+	}
+
+	until = time.Now().Add(time.Duration(1) * time.Hour)
+	if err = c.WaitInstanceHasActiveTransaction(*sl.Int(id), until); err != nil {
+		return bosherr.WrapError(err, "Waiting until instance has active transaction after upgrading instance")
+	}
+
+	until = time.Now().Add(time.Duration(1) * time.Hour)
+	if err = c.WaitInstanceHasNoneActiveTransaction(*sl.Int(id), until); err != nil {
+		return bosherr.WrapError(err, "Waiting until instance has none active transaction after upgrading instance")
+	}
+
+	until = time.Now().Add(time.Duration(1) * time.Hour)
+	if err = c.WaitInstanceUntilReady(*sl.Int(id), until); err != nil {
+		return bosherr.WrapError(err, "Waiting until instance is ready after os_reload")
+	}
+
+	return nil
+}
+
+func (c *clientManager) UpgradeInstanceConfig(id int, cpu int, memory int, network int, privateCPU bool) error {
+	var err error
+	until := time.Now().Add(time.Duration(1) * time.Hour)
+	if err = c.WaitInstanceHasNoneActiveTransaction(*sl.Int(id), until); err != nil {
+		return bosherr.WrapError(err, "Waiting until instance has none active transaction before os_reload")
+	}
+
+	_, err = c.UpgradeInstance(id, cpu, memory, network, privateCPU, 0)
+	if err != nil {
+		apiErr := err.(sl.Error)
+		if strings.Contains(apiErr.Message, "A current price was provided for the upgrade order") {
+			return nil
+		}
+		return bosherr.WrapErrorf(err, "Upgrading configuration to virutal guest of  id '%d'", id)
 	}
 
 	until = time.Now().Add(time.Duration(1) * time.Hour)

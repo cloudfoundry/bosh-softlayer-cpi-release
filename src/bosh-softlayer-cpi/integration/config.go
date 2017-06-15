@@ -7,6 +7,7 @@ import (
 	"bosh-softlayer-cpi/api/transport"
 	boshcfg "bosh-softlayer-cpi/config"
 	"bosh-softlayer-cpi/softlayer/client"
+	vpsVm "bosh-softlayer-cpi/softlayer/vps_service/client/vm"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -34,7 +35,11 @@ var (
 	datacenter   = envOrDefault("DATACENTER", "lon02")
 	ipAddrs      = strings.Split(envOrDefault("PRIVATE_IP", "192.168.100.102,192.168.100.103,192.168.100.104"), ",")
 
-	ts *httptest.Server
+	ts           *httptest.Server
+	cfg          boshcfg.Config
+	boshResponse boshdisp.Response
+	vps          *vpsVm.Client
+
 	// Channel that will be used to retrieve IPs to use
 	ips chan string
 
@@ -77,26 +82,19 @@ var (
 		  }
 		}`, username, apiKey)
 
-	// Set up logger of softlayer client
+	// Stuff of softlayer client
 	multiWriter = io.MultiWriter(&errOut, &errOutLog)
 	logger      = boshlogger.NewWriterLogger(boshlogger.LevelDebug, multiWriter, multiWriter)
+	multiLogger = boshapi.MultiLogger{Logger: logger, LogBuff: &errOutLog}
+	uuidGen     = uuid.NewGenerator()
 	sess        *session.Session
 )
 
 func execCPI(request string) (boshdisp.Response, error) {
 	var err error
-	var cfg boshcfg.Config
-	var boshResponse boshdisp.Response
 	var softlayerClient client.Client
 
-	if cfg, err = boshcfg.NewConfigFromString(cfgContent); err != nil {
-		return boshResponse, err
-	}
-
-	multiLogger := boshapi.MultiLogger{Logger: logger, LogBuff: &errOutLog}
-	uuidGen := uuid.NewGenerator()
-	softlayerClient = client.NewSoftLayerClientManager(sess)
-
+	softlayerClient = client.NewSoftLayerClientManager(sess, vps)
 	actionFactory := action.NewConcreteFactory(
 		softlayerClient,
 		uuidGen,

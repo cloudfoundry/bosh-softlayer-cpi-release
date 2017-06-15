@@ -9,8 +9,12 @@ import (
 
 	"bosh-softlayer-cpi/softlayer/client"
 
+	boshcfg "bosh-softlayer-cpi/config"
+	vpsClient "bosh-softlayer-cpi/softlayer/vps_service/client"
 	"bytes"
 	boshlogger "github.com/cloudfoundry/bosh-utils/logger"
+	httptransport "github.com/go-openapi/runtime/client"
+	"github.com/go-openapi/strfmt"
 	datatypes "github.com/softlayer/softlayer-go/datatypes"
 	"io"
 	"net/http"
@@ -83,15 +87,32 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 		    }
 		  }
 		}`, username, apiKey, registerPort, ts.URL)
+	cfg, err = boshcfg.NewConfigFromString(cfgContent)
+	Expect(err).To(BeNil())
 
-	// Initialize session of client
+	// Initialize session of softlayer client
 	var errOut, errOutLog bytes.Buffer
 	multiWriter := io.MultiWriter(&errOut, &errOutLog)
 	logger := boshlogger.NewWriterLogger(boshlogger.LevelDebug, multiWriter, multiWriter)
 	sess = client.NewSoftlayerClientSession(client.SoftlayerAPIEndpointPublicDefault, username, apiKey, false, timeout, logger)
 
+	// Setup vps client
+	if cfg.Cloud.Properties.SoftLayer.EnableVps {
+		if cfg.Cloud.Properties.SoftLayer.VpsUseSsl {
+			vps = vpsClient.New(httptransport.New(fmt.Sprintf("%s:%d", cfg.Cloud.Properties.SoftLayer.VpsHost, cfg.Cloud.Properties.SoftLayer.VpsPort),
+				"v2", []string{"https"}), strfmt.Default).VM
+		} else {
+
+			vps = vpsClient.New(httptransport.New(fmt.Sprintf("%s:%d", cfg.Cloud.Properties.SoftLayer.VpsHost, cfg.Cloud.Properties.SoftLayer.VpsPort),
+				"v2", []string{"http"}), strfmt.Default).VM
+		}
+
+	}
+
+	// Clean existing vms for integration test
 	cleanVMs()
 
+	// Create stemcell for integration test
 	request := fmt.Sprintf(`{
 			  "method": "create_stemcell",
 			  "arguments": ["%s", {
@@ -124,7 +145,7 @@ var _ = SynchronizedAfterSuite(func() {}, func() {
 
 func cleanVMs() {
 	// Initialize a compute API client ImageService
-	softlayerClient := client.NewSoftLayerClientManager(sess)
+	softlayerClient := client.NewSoftLayerClientManager(sess, vps)
 	accountService := softlayerClient.AccountService
 
 	// Clean up any VMs left behind from failed tests. Instances with the 'blusbosh-slcpi-integration-test' prefix will be deleted.
