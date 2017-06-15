@@ -16,7 +16,7 @@ func (vg SoftlayerVirtualGuestService) ConfigureNetworks(id int, networks Networ
 		return networks, api.NewVMNotFoundError(string(id))
 	}
 
-	vg.logger.Info(softlayerVirtualGuestServiceLogTag, "Configuring networks: %#v", networks)
+	vg.logger.Info(softlayerVirtualGuestServiceLogTag, "Configuring networks: %+v", networks)
 	ubuntu := Softlayer_Ubuntu_Net{
 		LinkNamer: NewIndexedNamer(networks),
 	}
@@ -25,31 +25,31 @@ func (vg SoftlayerVirtualGuestService) ConfigureNetworks(id int, networks Networ
 	if err != nil {
 		return networks, bosherr.WrapError(err, "Mapping network component and name")
 	}
-	vg.logger.Debug(softlayerVirtualGuestServiceLogTag, "ComponentByNetworkName: %#v", componentByNetwork)
+	vg.logger.Debug(softlayerVirtualGuestServiceLogTag, "ComponentByNetworkName: %+v", componentByNetwork)
 
 	networks, err = ubuntu.NormalizeNetworkDefinitions(networks, componentByNetwork)
 	if err != nil {
 		return networks, bosherr.WrapError(err, "Normalizing network definitions")
 	}
-	vg.logger.Debug(softlayerVirtualGuestServiceLogTag, "Normalized networks: %#v", networks)
+	vg.logger.Debug(softlayerVirtualGuestServiceLogTag, "Normalized networks: %+v", networks)
 
 	networks, err = ubuntu.NormalizeDynamics(instance, networks)
 	if err != nil {
 		return networks, bosherr.WrapError(err, "Normalizing dynamic networks definitions")
 	}
-	vg.logger.Debug(softlayerVirtualGuestServiceLogTag, "Normalized Dynamics: %#v", networks)
+	vg.logger.Debug(softlayerVirtualGuestServiceLogTag, "Normalized Dynamics: %+v", networks)
 
 	componentByNetwork, err = ubuntu.ComponentByNetworkName(instance, networks)
 	if err != nil {
 		return networks, bosherr.WrapError(err, "Mapping network component and name")
 	}
-	vg.logger.Debug(softlayerVirtualGuestServiceLogTag, "ComponentByNetworkName: %#v", componentByNetwork)
+	vg.logger.Debug(softlayerVirtualGuestServiceLogTag, "ComponentByNetworkName: %+v", componentByNetwork)
 
 	networks, err = ubuntu.FinalizedNetworkDefinitions(instance, networks, componentByNetwork)
 	if err != nil {
 		return networks, bosherr.WrapError(err, "Finalizing networks definitions")
 	}
-	vg.logger.Debug(softlayerVirtualGuestServiceLogTag, "Finalized network definition: %v", networks)
+	vg.logger.Debug(softlayerVirtualGuestServiceLogTag, "Finalized network definition: %+v", networks)
 
 	return networks, nil
 }
