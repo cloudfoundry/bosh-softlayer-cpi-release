@@ -10,23 +10,26 @@ import (
 
 	bosl "bosh-softlayer-cpi/softlayer/client"
 
+	"bosh-softlayer-cpi/api"
 	"github.com/softlayer/softlayer-go/datatypes"
-	"github.com/softlayer/softlayer-go/sl"
+	"strconv"
 )
 
-func (s SoftlayerStemcellService) Find(id int) (string, bool, error) {
-	var vgbdtg datatypes.Virtual_Guest_Block_Device_Template_Group
-	var err error
+func (s SoftlayerStemcellService) Find(id int) (string, error) {
+	var (
+		vgbdtg *datatypes.Virtual_Guest_Block_Device_Template_Group
+		err    error
+		found  bool
+	)
 	execStmtRetryable := boshretry.NewRetryable(
 		func() (bool, error) {
-			vgbdtg, err = s.softlayerClient.GetImage(id, bosl.IMAGE_DEFAULT_MASK)
+			vgbdtg, found, err = s.softlayerClient.GetImage(id, bosl.IMAGE_DEFAULT_MASK)
 			if err != nil {
-				apiErr := err.(sl.Error)
-				if apiErr.Exception == "SoftLayer_Exception_ObjectNotFound" {
-					return false, nil
-				} else {
-					return true, bosherr.WrapErrorf(err, fmt.Sprintf("Getting VirtualGuestBlockDeviceTemplateGroup with id '%d'", id))
-				}
+				return true, bosherr.WrapErrorf(err, fmt.Sprintf("Getting VirtualGuestBlockDeviceTemplateGroup with id '%d'", id))
+			}
+
+			if !found {
+				return false, api.NewStemcellkNotFoundError(strconv.Itoa(id), false)
 			}
 
 			return false, nil
@@ -35,12 +38,8 @@ func (s SoftlayerStemcellService) Find(id int) (string, bool, error) {
 	timeoutRetryStrategy := boshretry.NewTimeoutRetryStrategy(1*time.Minute, 5*time.Second, execStmtRetryable, timeService, s.logger)
 	err = timeoutRetryStrategy.Try()
 	if err != nil {
-		return "", false, bosherr.Error(fmt.Sprintf("Getting VirtualGuestBlockDeviceTemplateGroup with id '%d'", id))
+		return "", err
 	}
 
-	if vgbdtg.GlobalIdentifier == nil {
-		return "", false, nil
-	}
-
-	return *vgbdtg.GlobalIdentifier, true, nil
+	return *vgbdtg.GlobalIdentifier, nil
 }

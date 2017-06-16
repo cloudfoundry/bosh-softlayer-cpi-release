@@ -21,17 +21,17 @@ type FakeClient struct {
 	cancelInstanceReturnsOnCall map[int]struct {
 		result1 error
 	}
-	CreateInstanceStub        func(template *datatypes.Virtual_Guest) (datatypes.Virtual_Guest, error)
+	CreateInstanceStub        func(template *datatypes.Virtual_Guest) (*datatypes.Virtual_Guest, error)
 	createInstanceMutex       sync.RWMutex
 	createInstanceArgsForCall []struct {
 		template *datatypes.Virtual_Guest
 	}
 	createInstanceReturns struct {
-		result1 datatypes.Virtual_Guest
+		result1 *datatypes.Virtual_Guest
 		result2 error
 	}
 	createInstanceReturnsOnCall map[int]struct {
-		result1 datatypes.Virtual_Guest
+		result1 *datatypes.Virtual_Guest
 		result2 error
 	}
 	EditInstanceStub        func(id int, template *datatypes.Virtual_Guest) (bool, error)
@@ -48,45 +48,51 @@ type FakeClient struct {
 		result1 bool
 		result2 error
 	}
-	GetInstanceStub        func(id int, mask string) (datatypes.Virtual_Guest, error)
+	GetInstanceStub        func(id int, mask string) (*datatypes.Virtual_Guest, bool, error)
 	getInstanceMutex       sync.RWMutex
 	getInstanceArgsForCall []struct {
 		id   int
 		mask string
 	}
 	getInstanceReturns struct {
-		result1 datatypes.Virtual_Guest
-		result2 error
+		result1 *datatypes.Virtual_Guest
+		result2 bool
+		result3 error
 	}
 	getInstanceReturnsOnCall map[int]struct {
-		result1 datatypes.Virtual_Guest
-		result2 error
+		result1 *datatypes.Virtual_Guest
+		result2 bool
+		result3 error
 	}
-	GetInstanceByPrimaryBackendIpAddressStub        func(ip string) (datatypes.Virtual_Guest, error)
+	GetInstanceByPrimaryBackendIpAddressStub        func(ip string) (*datatypes.Virtual_Guest, bool, error)
 	getInstanceByPrimaryBackendIpAddressMutex       sync.RWMutex
 	getInstanceByPrimaryBackendIpAddressArgsForCall []struct {
 		ip string
 	}
 	getInstanceByPrimaryBackendIpAddressReturns struct {
-		result1 datatypes.Virtual_Guest
-		result2 error
+		result1 *datatypes.Virtual_Guest
+		result2 bool
+		result3 error
 	}
 	getInstanceByPrimaryBackendIpAddressReturnsOnCall map[int]struct {
-		result1 datatypes.Virtual_Guest
-		result2 error
+		result1 *datatypes.Virtual_Guest
+		result2 bool
+		result3 error
 	}
-	GetInstanceByPrimaryIpAddressStub        func(ip string) (datatypes.Virtual_Guest, error)
+	GetInstanceByPrimaryIpAddressStub        func(ip string) (*datatypes.Virtual_Guest, bool, error)
 	getInstanceByPrimaryIpAddressMutex       sync.RWMutex
 	getInstanceByPrimaryIpAddressArgsForCall []struct {
 		ip string
 	}
 	getInstanceByPrimaryIpAddressReturns struct {
-		result1 datatypes.Virtual_Guest
-		result2 error
+		result1 *datatypes.Virtual_Guest
+		result2 bool
+		result3 error
 	}
 	getInstanceByPrimaryIpAddressReturnsOnCall map[int]struct {
-		result1 datatypes.Virtual_Guest
-		result2 error
+		result1 *datatypes.Virtual_Guest
+		result2 bool
+		result3 error
 	}
 	RebootInstanceStub        func(id int, soft bool, hard bool) error
 	rebootInstanceMutex       sync.RWMutex
@@ -101,7 +107,7 @@ type FakeClient struct {
 	rebootInstanceReturnsOnCall map[int]struct {
 		result1 error
 	}
-	ReloadInstanceStub        func(id int, stemcellId int, sshKeyIds []int, hostname string, domain string) (string, error)
+	ReloadInstanceStub        func(id int, stemcellId int, sshKeyIds []int, hostname string, domain string) error
 	reloadInstanceMutex       sync.RWMutex
 	reloadInstanceArgsForCall []struct {
 		id         int
@@ -111,14 +117,12 @@ type FakeClient struct {
 		domain     string
 	}
 	reloadInstanceReturns struct {
-		result1 string
-		result2 error
+		result1 error
 	}
 	reloadInstanceReturnsOnCall map[int]struct {
-		result1 string
-		result2 error
+		result1 error
 	}
-	UpgradeInstanceStub        func(id int, cpu int, memory int, network int, privateCPU bool, additional_diskSize int) (datatypes.Container_Product_Order_Receipt, error)
+	UpgradeInstanceStub        func(id int, cpu int, memory int, network int, privateCPU bool, additional_diskSize int) (*datatypes.Container_Product_Order_Receipt, error)
 	upgradeInstanceMutex       sync.RWMutex
 	upgradeInstanceArgsForCall []struct {
 		id                  int
@@ -129,11 +133,11 @@ type FakeClient struct {
 		additional_diskSize int
 	}
 	upgradeInstanceReturns struct {
-		result1 datatypes.Container_Product_Order_Receipt
+		result1 *datatypes.Container_Product_Order_Receipt
 		result2 error
 	}
 	upgradeInstanceReturnsOnCall map[int]struct {
-		result1 datatypes.Container_Product_Order_Receipt
+		result1 *datatypes.Container_Product_Order_Receipt
 		result2 error
 	}
 	WaitInstanceUntilReadyStub        func(id int, until time.Time) error
@@ -172,17 +176,33 @@ type FakeClient struct {
 	waitInstanceHasNoneActiveTransactionReturnsOnCall map[int]struct {
 		result1 error
 	}
-	SetTagsStub        func(id int, tags string) error
+	WaitVolumeProvisioningWithOrderIdStub        func(orderId int, until time.Time) (*datatypes.Network_Storage, error)
+	waitVolumeProvisioningWithOrderIdMutex       sync.RWMutex
+	waitVolumeProvisioningWithOrderIdArgsForCall []struct {
+		orderId int
+		until   time.Time
+	}
+	waitVolumeProvisioningWithOrderIdReturns struct {
+		result1 *datatypes.Network_Storage
+		result2 error
+	}
+	waitVolumeProvisioningWithOrderIdReturnsOnCall map[int]struct {
+		result1 *datatypes.Network_Storage
+		result2 error
+	}
+	SetTagsStub        func(id int, tags string) (bool, error)
 	setTagsMutex       sync.RWMutex
 	setTagsArgsForCall []struct {
 		id   int
 		tags string
 	}
 	setTagsReturns struct {
-		result1 error
+		result1 bool
+		result2 error
 	}
 	setTagsReturnsOnCall map[int]struct {
-		result1 error
+		result1 bool
+		result2 error
 	}
 	AttachSecondDiskToInstanceStub        func(id int, diskSize int) error
 	attachSecondDiskToInstanceMutex       sync.RWMutex
@@ -196,20 +216,22 @@ type FakeClient struct {
 	attachSecondDiskToInstanceReturnsOnCall map[int]struct {
 		result1 error
 	}
-	GetInstanceAllowedHostStub        func(id int) (datatypes.Network_Storage_Allowed_Host, error)
+	GetInstanceAllowedHostStub        func(id int) (*datatypes.Network_Storage_Allowed_Host, bool, error)
 	getInstanceAllowedHostMutex       sync.RWMutex
 	getInstanceAllowedHostArgsForCall []struct {
 		id int
 	}
 	getInstanceAllowedHostReturns struct {
-		result1 datatypes.Network_Storage_Allowed_Host
-		result2 error
+		result1 *datatypes.Network_Storage_Allowed_Host
+		result2 bool
+		result3 error
 	}
 	getInstanceAllowedHostReturnsOnCall map[int]struct {
-		result1 datatypes.Network_Storage_Allowed_Host
-		result2 error
+		result1 *datatypes.Network_Storage_Allowed_Host
+		result2 bool
+		result3 error
 	}
-	AuthorizeHostToVolumeStub        func(instance *datatypes.Virtual_Guest, volumeId int, until time.Time) error
+	AuthorizeHostToVolumeStub        func(instance *datatypes.Virtual_Guest, volumeId int, until time.Time) (bool, error)
 	authorizeHostToVolumeMutex       sync.RWMutex
 	authorizeHostToVolumeArgsForCall []struct {
 		instance *datatypes.Virtual_Guest
@@ -217,12 +239,14 @@ type FakeClient struct {
 		until    time.Time
 	}
 	authorizeHostToVolumeReturns struct {
-		result1 error
+		result1 bool
+		result2 error
 	}
 	authorizeHostToVolumeReturnsOnCall map[int]struct {
-		result1 error
+		result1 bool
+		result2 error
 	}
-	DeauthorizeHostToVolumeStub        func(instance *datatypes.Virtual_Guest, volumeId int, until time.Time) error
+	DeauthorizeHostToVolumeStub        func(instance *datatypes.Virtual_Guest, volumeId int, until time.Time) (bool, error)
 	deauthorizeHostToVolumeMutex       sync.RWMutex
 	deauthorizeHostToVolumeArgsForCall []struct {
 		instance *datatypes.Virtual_Guest
@@ -230,12 +254,14 @@ type FakeClient struct {
 		until    time.Time
 	}
 	deauthorizeHostToVolumeReturns struct {
-		result1 error
+		result1 bool
+		result2 error
 	}
 	deauthorizeHostToVolumeReturnsOnCall map[int]struct {
-		result1 error
+		result1 bool
+		result2 error
 	}
-	CreateVolumeStub        func(location string, size int, iops int) (datatypes.Network_Storage, error)
+	CreateVolumeStub        func(location string, size int, iops int) (*datatypes.Network_Storage, error)
 	createVolumeMutex       sync.RWMutex
 	createVolumeArgsForCall []struct {
 		location string
@@ -243,14 +269,14 @@ type FakeClient struct {
 		iops     int
 	}
 	createVolumeReturns struct {
-		result1 datatypes.Network_Storage
+		result1 *datatypes.Network_Storage
 		result2 error
 	}
 	createVolumeReturnsOnCall map[int]struct {
-		result1 datatypes.Network_Storage
+		result1 *datatypes.Network_Storage
 		result2 error
 	}
-	OrderBlockVolumeStub        func(storageType string, location string, size int, iops int) (datatypes.Container_Product_Order_Receipt, error)
+	OrderBlockVolumeStub        func(storageType string, location string, size int, iops int) (*datatypes.Container_Product_Order_Receipt, error)
 	orderBlockVolumeMutex       sync.RWMutex
 	orderBlockVolumeArgsForCall []struct {
 		storageType string
@@ -259,95 +285,123 @@ type FakeClient struct {
 		iops        int
 	}
 	orderBlockVolumeReturns struct {
-		result1 datatypes.Container_Product_Order_Receipt
+		result1 *datatypes.Container_Product_Order_Receipt
 		result2 error
 	}
 	orderBlockVolumeReturnsOnCall map[int]struct {
-		result1 datatypes.Container_Product_Order_Receipt
+		result1 *datatypes.Container_Product_Order_Receipt
 		result2 error
 	}
-	CancelBlockVolumeStub        func(volumeId int, reason string, immedicate bool) error
+	CancelBlockVolumeStub        func(volumeId int, reason string, immediate bool) (bool, error)
 	cancelBlockVolumeMutex       sync.RWMutex
 	cancelBlockVolumeArgsForCall []struct {
-		volumeId   int
-		reason     string
-		immedicate bool
+		volumeId  int
+		reason    string
+		immediate bool
 	}
 	cancelBlockVolumeReturns struct {
-		result1 error
+		result1 bool
+		result2 error
 	}
 	cancelBlockVolumeReturnsOnCall map[int]struct {
-		result1 error
+		result1 bool
+		result2 error
 	}
-	GetBlockVolumeDetailsStub        func(volumeId int, mask string) (datatypes.Network_Storage, error)
+	GetBlockVolumeDetailsStub        func(volumeId int, mask string) (*datatypes.Network_Storage, bool, error)
 	getBlockVolumeDetailsMutex       sync.RWMutex
 	getBlockVolumeDetailsArgsForCall []struct {
 		volumeId int
 		mask     string
 	}
 	getBlockVolumeDetailsReturns struct {
-		result1 datatypes.Network_Storage
-		result2 error
+		result1 *datatypes.Network_Storage
+		result2 bool
+		result3 error
 	}
 	getBlockVolumeDetailsReturnsOnCall map[int]struct {
-		result1 datatypes.Network_Storage
-		result2 error
+		result1 *datatypes.Network_Storage
+		result2 bool
+		result3 error
 	}
-	GetImageStub        func(imageId int, mask string) (datatypes.Virtual_Guest_Block_Device_Template_Group, error)
+	GetNetworkStorageTargetStub        func(volumeId int, mask string) (string, bool, error)
+	getNetworkStorageTargetMutex       sync.RWMutex
+	getNetworkStorageTargetArgsForCall []struct {
+		volumeId int
+		mask     string
+	}
+	getNetworkStorageTargetReturns struct {
+		result1 string
+		result2 bool
+		result3 error
+	}
+	getNetworkStorageTargetReturnsOnCall map[int]struct {
+		result1 string
+		result2 bool
+		result3 error
+	}
+	GetImageStub        func(imageId int, mask string) (*datatypes.Virtual_Guest_Block_Device_Template_Group, bool, error)
 	getImageMutex       sync.RWMutex
 	getImageArgsForCall []struct {
 		imageId int
 		mask    string
 	}
 	getImageReturns struct {
-		result1 datatypes.Virtual_Guest_Block_Device_Template_Group
-		result2 error
+		result1 *datatypes.Virtual_Guest_Block_Device_Template_Group
+		result2 bool
+		result3 error
 	}
 	getImageReturnsOnCall map[int]struct {
-		result1 datatypes.Virtual_Guest_Block_Device_Template_Group
-		result2 error
+		result1 *datatypes.Virtual_Guest_Block_Device_Template_Group
+		result2 bool
+		result3 error
 	}
-	GetVlanStub        func(id int, mask string) (datatypes.Network_Vlan, error)
+	GetVlanStub        func(id int, mask string) (*datatypes.Network_Vlan, bool, error)
 	getVlanMutex       sync.RWMutex
 	getVlanArgsForCall []struct {
 		id   int
 		mask string
 	}
 	getVlanReturns struct {
-		result1 datatypes.Network_Vlan
-		result2 error
+		result1 *datatypes.Network_Vlan
+		result2 bool
+		result3 error
 	}
 	getVlanReturnsOnCall map[int]struct {
-		result1 datatypes.Network_Vlan
-		result2 error
+		result1 *datatypes.Network_Vlan
+		result2 bool
+		result3 error
 	}
-	GetAllowedHostCredentialStub        func(id int) (datatypes.Network_Storage_Allowed_Host, error)
+	GetAllowedHostCredentialStub        func(id int) (*datatypes.Network_Storage_Allowed_Host, bool, error)
 	getAllowedHostCredentialMutex       sync.RWMutex
 	getAllowedHostCredentialArgsForCall []struct {
 		id int
 	}
 	getAllowedHostCredentialReturns struct {
-		result1 datatypes.Network_Storage_Allowed_Host
-		result2 error
+		result1 *datatypes.Network_Storage_Allowed_Host
+		result2 bool
+		result3 error
 	}
 	getAllowedHostCredentialReturnsOnCall map[int]struct {
-		result1 datatypes.Network_Storage_Allowed_Host
-		result2 error
+		result1 *datatypes.Network_Storage_Allowed_Host
+		result2 bool
+		result3 error
 	}
-	GetAllowedNetworkStorageStub        func(id int) ([]string, error)
+	GetAllowedNetworkStorageStub        func(id int) ([]string, bool, error)
 	getAllowedNetworkStorageMutex       sync.RWMutex
 	getAllowedNetworkStorageArgsForCall []struct {
 		id int
 	}
 	getAllowedNetworkStorageReturns struct {
 		result1 []string
-		result2 error
+		result2 bool
+		result3 error
 	}
 	getAllowedNetworkStorageReturnsOnCall map[int]struct {
 		result1 []string
-		result2 error
+		result2 bool
+		result3 error
 	}
-	CreateSshKeyStub        func(label *string, key *string, fingerPrint *string) (datatypes.Security_Ssh_Key, error)
+	CreateSshKeyStub        func(label *string, key *string, fingerPrint *string) (*datatypes.Security_Ssh_Key, error)
 	createSshKeyMutex       sync.RWMutex
 	createSshKeyArgsForCall []struct {
 		label       *string
@@ -355,11 +409,11 @@ type FakeClient struct {
 		fingerPrint *string
 	}
 	createSshKeyReturns struct {
-		result1 datatypes.Security_Ssh_Key
+		result1 *datatypes.Security_Ssh_Key
 		result2 error
 	}
 	createSshKeyReturnsOnCall map[int]struct {
-		result1 datatypes.Security_Ssh_Key
+		result1 *datatypes.Security_Ssh_Key
 		result2 error
 	}
 	DeleteSshKeyStub        func(id int) (bool, error)
@@ -375,7 +429,7 @@ type FakeClient struct {
 		result1 bool
 		result2 error
 	}
-	CreateInstanceFromVPSStub        func(template *datatypes.Virtual_Guest, stemcellID int, sshKeys []int) (datatypes.Virtual_Guest, error)
+	CreateInstanceFromVPSStub        func(template *datatypes.Virtual_Guest, stemcellID int, sshKeys []int) (*datatypes.Virtual_Guest, error)
 	createInstanceFromVPSMutex       sync.RWMutex
 	createInstanceFromVPSArgsForCall []struct {
 		template   *datatypes.Virtual_Guest
@@ -383,11 +437,11 @@ type FakeClient struct {
 		sshKeys    []int
 	}
 	createInstanceFromVPSReturns struct {
-		result1 datatypes.Virtual_Guest
+		result1 *datatypes.Virtual_Guest
 		result2 error
 	}
 	createInstanceFromVPSReturnsOnCall map[int]struct {
-		result1 datatypes.Virtual_Guest
+		result1 *datatypes.Virtual_Guest
 		result2 error
 	}
 	DeleteInstanceFromVPSStub        func(id int) error
@@ -453,7 +507,7 @@ func (fake *FakeClient) CancelInstanceReturnsOnCall(i int, result1 error) {
 	}{result1}
 }
 
-func (fake *FakeClient) CreateInstance(template *datatypes.Virtual_Guest) (datatypes.Virtual_Guest, error) {
+func (fake *FakeClient) CreateInstance(template *datatypes.Virtual_Guest) (*datatypes.Virtual_Guest, error) {
 	fake.createInstanceMutex.Lock()
 	ret, specificReturn := fake.createInstanceReturnsOnCall[len(fake.createInstanceArgsForCall)]
 	fake.createInstanceArgsForCall = append(fake.createInstanceArgsForCall, struct {
@@ -482,24 +536,24 @@ func (fake *FakeClient) CreateInstanceArgsForCall(i int) *datatypes.Virtual_Gues
 	return fake.createInstanceArgsForCall[i].template
 }
 
-func (fake *FakeClient) CreateInstanceReturns(result1 datatypes.Virtual_Guest, result2 error) {
+func (fake *FakeClient) CreateInstanceReturns(result1 *datatypes.Virtual_Guest, result2 error) {
 	fake.CreateInstanceStub = nil
 	fake.createInstanceReturns = struct {
-		result1 datatypes.Virtual_Guest
+		result1 *datatypes.Virtual_Guest
 		result2 error
 	}{result1, result2}
 }
 
-func (fake *FakeClient) CreateInstanceReturnsOnCall(i int, result1 datatypes.Virtual_Guest, result2 error) {
+func (fake *FakeClient) CreateInstanceReturnsOnCall(i int, result1 *datatypes.Virtual_Guest, result2 error) {
 	fake.CreateInstanceStub = nil
 	if fake.createInstanceReturnsOnCall == nil {
 		fake.createInstanceReturnsOnCall = make(map[int]struct {
-			result1 datatypes.Virtual_Guest
+			result1 *datatypes.Virtual_Guest
 			result2 error
 		})
 	}
 	fake.createInstanceReturnsOnCall[i] = struct {
-		result1 datatypes.Virtual_Guest
+		result1 *datatypes.Virtual_Guest
 		result2 error
 	}{result1, result2}
 }
@@ -556,7 +610,7 @@ func (fake *FakeClient) EditInstanceReturnsOnCall(i int, result1 bool, result2 e
 	}{result1, result2}
 }
 
-func (fake *FakeClient) GetInstance(id int, mask string) (datatypes.Virtual_Guest, error) {
+func (fake *FakeClient) GetInstance(id int, mask string) (*datatypes.Virtual_Guest, bool, error) {
 	fake.getInstanceMutex.Lock()
 	ret, specificReturn := fake.getInstanceReturnsOnCall[len(fake.getInstanceArgsForCall)]
 	fake.getInstanceArgsForCall = append(fake.getInstanceArgsForCall, struct {
@@ -569,9 +623,9 @@ func (fake *FakeClient) GetInstance(id int, mask string) (datatypes.Virtual_Gues
 		return fake.GetInstanceStub(id, mask)
 	}
 	if specificReturn {
-		return ret.result1, ret.result2
+		return ret.result1, ret.result2, ret.result3
 	}
-	return fake.getInstanceReturns.result1, fake.getInstanceReturns.result2
+	return fake.getInstanceReturns.result1, fake.getInstanceReturns.result2, fake.getInstanceReturns.result3
 }
 
 func (fake *FakeClient) GetInstanceCallCount() int {
@@ -586,29 +640,32 @@ func (fake *FakeClient) GetInstanceArgsForCall(i int) (int, string) {
 	return fake.getInstanceArgsForCall[i].id, fake.getInstanceArgsForCall[i].mask
 }
 
-func (fake *FakeClient) GetInstanceReturns(result1 datatypes.Virtual_Guest, result2 error) {
+func (fake *FakeClient) GetInstanceReturns(result1 *datatypes.Virtual_Guest, result2 bool, result3 error) {
 	fake.GetInstanceStub = nil
 	fake.getInstanceReturns = struct {
-		result1 datatypes.Virtual_Guest
-		result2 error
-	}{result1, result2}
+		result1 *datatypes.Virtual_Guest
+		result2 bool
+		result3 error
+	}{result1, result2, result3}
 }
 
-func (fake *FakeClient) GetInstanceReturnsOnCall(i int, result1 datatypes.Virtual_Guest, result2 error) {
+func (fake *FakeClient) GetInstanceReturnsOnCall(i int, result1 *datatypes.Virtual_Guest, result2 bool, result3 error) {
 	fake.GetInstanceStub = nil
 	if fake.getInstanceReturnsOnCall == nil {
 		fake.getInstanceReturnsOnCall = make(map[int]struct {
-			result1 datatypes.Virtual_Guest
-			result2 error
+			result1 *datatypes.Virtual_Guest
+			result2 bool
+			result3 error
 		})
 	}
 	fake.getInstanceReturnsOnCall[i] = struct {
-		result1 datatypes.Virtual_Guest
-		result2 error
-	}{result1, result2}
+		result1 *datatypes.Virtual_Guest
+		result2 bool
+		result3 error
+	}{result1, result2, result3}
 }
 
-func (fake *FakeClient) GetInstanceByPrimaryBackendIpAddress(ip string) (datatypes.Virtual_Guest, error) {
+func (fake *FakeClient) GetInstanceByPrimaryBackendIpAddress(ip string) (*datatypes.Virtual_Guest, bool, error) {
 	fake.getInstanceByPrimaryBackendIpAddressMutex.Lock()
 	ret, specificReturn := fake.getInstanceByPrimaryBackendIpAddressReturnsOnCall[len(fake.getInstanceByPrimaryBackendIpAddressArgsForCall)]
 	fake.getInstanceByPrimaryBackendIpAddressArgsForCall = append(fake.getInstanceByPrimaryBackendIpAddressArgsForCall, struct {
@@ -620,9 +677,9 @@ func (fake *FakeClient) GetInstanceByPrimaryBackendIpAddress(ip string) (datatyp
 		return fake.GetInstanceByPrimaryBackendIpAddressStub(ip)
 	}
 	if specificReturn {
-		return ret.result1, ret.result2
+		return ret.result1, ret.result2, ret.result3
 	}
-	return fake.getInstanceByPrimaryBackendIpAddressReturns.result1, fake.getInstanceByPrimaryBackendIpAddressReturns.result2
+	return fake.getInstanceByPrimaryBackendIpAddressReturns.result1, fake.getInstanceByPrimaryBackendIpAddressReturns.result2, fake.getInstanceByPrimaryBackendIpAddressReturns.result3
 }
 
 func (fake *FakeClient) GetInstanceByPrimaryBackendIpAddressCallCount() int {
@@ -637,29 +694,32 @@ func (fake *FakeClient) GetInstanceByPrimaryBackendIpAddressArgsForCall(i int) s
 	return fake.getInstanceByPrimaryBackendIpAddressArgsForCall[i].ip
 }
 
-func (fake *FakeClient) GetInstanceByPrimaryBackendIpAddressReturns(result1 datatypes.Virtual_Guest, result2 error) {
+func (fake *FakeClient) GetInstanceByPrimaryBackendIpAddressReturns(result1 *datatypes.Virtual_Guest, result2 bool, result3 error) {
 	fake.GetInstanceByPrimaryBackendIpAddressStub = nil
 	fake.getInstanceByPrimaryBackendIpAddressReturns = struct {
-		result1 datatypes.Virtual_Guest
-		result2 error
-	}{result1, result2}
+		result1 *datatypes.Virtual_Guest
+		result2 bool
+		result3 error
+	}{result1, result2, result3}
 }
 
-func (fake *FakeClient) GetInstanceByPrimaryBackendIpAddressReturnsOnCall(i int, result1 datatypes.Virtual_Guest, result2 error) {
+func (fake *FakeClient) GetInstanceByPrimaryBackendIpAddressReturnsOnCall(i int, result1 *datatypes.Virtual_Guest, result2 bool, result3 error) {
 	fake.GetInstanceByPrimaryBackendIpAddressStub = nil
 	if fake.getInstanceByPrimaryBackendIpAddressReturnsOnCall == nil {
 		fake.getInstanceByPrimaryBackendIpAddressReturnsOnCall = make(map[int]struct {
-			result1 datatypes.Virtual_Guest
-			result2 error
+			result1 *datatypes.Virtual_Guest
+			result2 bool
+			result3 error
 		})
 	}
 	fake.getInstanceByPrimaryBackendIpAddressReturnsOnCall[i] = struct {
-		result1 datatypes.Virtual_Guest
-		result2 error
-	}{result1, result2}
+		result1 *datatypes.Virtual_Guest
+		result2 bool
+		result3 error
+	}{result1, result2, result3}
 }
 
-func (fake *FakeClient) GetInstanceByPrimaryIpAddress(ip string) (datatypes.Virtual_Guest, error) {
+func (fake *FakeClient) GetInstanceByPrimaryIpAddress(ip string) (*datatypes.Virtual_Guest, bool, error) {
 	fake.getInstanceByPrimaryIpAddressMutex.Lock()
 	ret, specificReturn := fake.getInstanceByPrimaryIpAddressReturnsOnCall[len(fake.getInstanceByPrimaryIpAddressArgsForCall)]
 	fake.getInstanceByPrimaryIpAddressArgsForCall = append(fake.getInstanceByPrimaryIpAddressArgsForCall, struct {
@@ -671,9 +731,9 @@ func (fake *FakeClient) GetInstanceByPrimaryIpAddress(ip string) (datatypes.Virt
 		return fake.GetInstanceByPrimaryIpAddressStub(ip)
 	}
 	if specificReturn {
-		return ret.result1, ret.result2
+		return ret.result1, ret.result2, ret.result3
 	}
-	return fake.getInstanceByPrimaryIpAddressReturns.result1, fake.getInstanceByPrimaryIpAddressReturns.result2
+	return fake.getInstanceByPrimaryIpAddressReturns.result1, fake.getInstanceByPrimaryIpAddressReturns.result2, fake.getInstanceByPrimaryIpAddressReturns.result3
 }
 
 func (fake *FakeClient) GetInstanceByPrimaryIpAddressCallCount() int {
@@ -688,26 +748,29 @@ func (fake *FakeClient) GetInstanceByPrimaryIpAddressArgsForCall(i int) string {
 	return fake.getInstanceByPrimaryIpAddressArgsForCall[i].ip
 }
 
-func (fake *FakeClient) GetInstanceByPrimaryIpAddressReturns(result1 datatypes.Virtual_Guest, result2 error) {
+func (fake *FakeClient) GetInstanceByPrimaryIpAddressReturns(result1 *datatypes.Virtual_Guest, result2 bool, result3 error) {
 	fake.GetInstanceByPrimaryIpAddressStub = nil
 	fake.getInstanceByPrimaryIpAddressReturns = struct {
-		result1 datatypes.Virtual_Guest
-		result2 error
-	}{result1, result2}
+		result1 *datatypes.Virtual_Guest
+		result2 bool
+		result3 error
+	}{result1, result2, result3}
 }
 
-func (fake *FakeClient) GetInstanceByPrimaryIpAddressReturnsOnCall(i int, result1 datatypes.Virtual_Guest, result2 error) {
+func (fake *FakeClient) GetInstanceByPrimaryIpAddressReturnsOnCall(i int, result1 *datatypes.Virtual_Guest, result2 bool, result3 error) {
 	fake.GetInstanceByPrimaryIpAddressStub = nil
 	if fake.getInstanceByPrimaryIpAddressReturnsOnCall == nil {
 		fake.getInstanceByPrimaryIpAddressReturnsOnCall = make(map[int]struct {
-			result1 datatypes.Virtual_Guest
-			result2 error
+			result1 *datatypes.Virtual_Guest
+			result2 bool
+			result3 error
 		})
 	}
 	fake.getInstanceByPrimaryIpAddressReturnsOnCall[i] = struct {
-		result1 datatypes.Virtual_Guest
-		result2 error
-	}{result1, result2}
+		result1 *datatypes.Virtual_Guest
+		result2 bool
+		result3 error
+	}{result1, result2, result3}
 }
 
 func (fake *FakeClient) RebootInstance(id int, soft bool, hard bool) error {
@@ -760,7 +823,7 @@ func (fake *FakeClient) RebootInstanceReturnsOnCall(i int, result1 error) {
 	}{result1}
 }
 
-func (fake *FakeClient) ReloadInstance(id int, stemcellId int, sshKeyIds []int, hostname string, domain string) (string, error) {
+func (fake *FakeClient) ReloadInstance(id int, stemcellId int, sshKeyIds []int, hostname string, domain string) error {
 	var sshKeyIdsCopy []int
 	if sshKeyIds != nil {
 		sshKeyIdsCopy = make([]int, len(sshKeyIds))
@@ -781,9 +844,9 @@ func (fake *FakeClient) ReloadInstance(id int, stemcellId int, sshKeyIds []int, 
 		return fake.ReloadInstanceStub(id, stemcellId, sshKeyIds, hostname, domain)
 	}
 	if specificReturn {
-		return ret.result1, ret.result2
+		return ret.result1
 	}
-	return fake.reloadInstanceReturns.result1, fake.reloadInstanceReturns.result2
+	return fake.reloadInstanceReturns.result1
 }
 
 func (fake *FakeClient) ReloadInstanceCallCount() int {
@@ -798,29 +861,26 @@ func (fake *FakeClient) ReloadInstanceArgsForCall(i int) (int, int, []int, strin
 	return fake.reloadInstanceArgsForCall[i].id, fake.reloadInstanceArgsForCall[i].stemcellId, fake.reloadInstanceArgsForCall[i].sshKeyIds, fake.reloadInstanceArgsForCall[i].hostname, fake.reloadInstanceArgsForCall[i].domain
 }
 
-func (fake *FakeClient) ReloadInstanceReturns(result1 string, result2 error) {
+func (fake *FakeClient) ReloadInstanceReturns(result1 error) {
 	fake.ReloadInstanceStub = nil
 	fake.reloadInstanceReturns = struct {
-		result1 string
-		result2 error
-	}{result1, result2}
+		result1 error
+	}{result1}
 }
 
-func (fake *FakeClient) ReloadInstanceReturnsOnCall(i int, result1 string, result2 error) {
+func (fake *FakeClient) ReloadInstanceReturnsOnCall(i int, result1 error) {
 	fake.ReloadInstanceStub = nil
 	if fake.reloadInstanceReturnsOnCall == nil {
 		fake.reloadInstanceReturnsOnCall = make(map[int]struct {
-			result1 string
-			result2 error
+			result1 error
 		})
 	}
 	fake.reloadInstanceReturnsOnCall[i] = struct {
-		result1 string
-		result2 error
-	}{result1, result2}
+		result1 error
+	}{result1}
 }
 
-func (fake *FakeClient) UpgradeInstance(id int, cpu int, memory int, network int, privateCPU bool, additional_diskSize int) (datatypes.Container_Product_Order_Receipt, error) {
+func (fake *FakeClient) UpgradeInstance(id int, cpu int, memory int, network int, privateCPU bool, additional_diskSize int) (*datatypes.Container_Product_Order_Receipt, error) {
 	fake.upgradeInstanceMutex.Lock()
 	ret, specificReturn := fake.upgradeInstanceReturnsOnCall[len(fake.upgradeInstanceArgsForCall)]
 	fake.upgradeInstanceArgsForCall = append(fake.upgradeInstanceArgsForCall, struct {
@@ -854,24 +914,24 @@ func (fake *FakeClient) UpgradeInstanceArgsForCall(i int) (int, int, int, int, b
 	return fake.upgradeInstanceArgsForCall[i].id, fake.upgradeInstanceArgsForCall[i].cpu, fake.upgradeInstanceArgsForCall[i].memory, fake.upgradeInstanceArgsForCall[i].network, fake.upgradeInstanceArgsForCall[i].privateCPU, fake.upgradeInstanceArgsForCall[i].additional_diskSize
 }
 
-func (fake *FakeClient) UpgradeInstanceReturns(result1 datatypes.Container_Product_Order_Receipt, result2 error) {
+func (fake *FakeClient) UpgradeInstanceReturns(result1 *datatypes.Container_Product_Order_Receipt, result2 error) {
 	fake.UpgradeInstanceStub = nil
 	fake.upgradeInstanceReturns = struct {
-		result1 datatypes.Container_Product_Order_Receipt
+		result1 *datatypes.Container_Product_Order_Receipt
 		result2 error
 	}{result1, result2}
 }
 
-func (fake *FakeClient) UpgradeInstanceReturnsOnCall(i int, result1 datatypes.Container_Product_Order_Receipt, result2 error) {
+func (fake *FakeClient) UpgradeInstanceReturnsOnCall(i int, result1 *datatypes.Container_Product_Order_Receipt, result2 error) {
 	fake.UpgradeInstanceStub = nil
 	if fake.upgradeInstanceReturnsOnCall == nil {
 		fake.upgradeInstanceReturnsOnCall = make(map[int]struct {
-			result1 datatypes.Container_Product_Order_Receipt
+			result1 *datatypes.Container_Product_Order_Receipt
 			result2 error
 		})
 	}
 	fake.upgradeInstanceReturnsOnCall[i] = struct {
-		result1 datatypes.Container_Product_Order_Receipt
+		result1 *datatypes.Container_Product_Order_Receipt
 		result2 error
 	}{result1, result2}
 }
@@ -1023,7 +1083,59 @@ func (fake *FakeClient) WaitInstanceHasNoneActiveTransactionReturnsOnCall(i int,
 	}{result1}
 }
 
-func (fake *FakeClient) SetTags(id int, tags string) error {
+func (fake *FakeClient) WaitVolumeProvisioningWithOrderId(orderId int, until time.Time) (*datatypes.Network_Storage, error) {
+	fake.waitVolumeProvisioningWithOrderIdMutex.Lock()
+	ret, specificReturn := fake.waitVolumeProvisioningWithOrderIdReturnsOnCall[len(fake.waitVolumeProvisioningWithOrderIdArgsForCall)]
+	fake.waitVolumeProvisioningWithOrderIdArgsForCall = append(fake.waitVolumeProvisioningWithOrderIdArgsForCall, struct {
+		orderId int
+		until   time.Time
+	}{orderId, until})
+	fake.recordInvocation("WaitVolumeProvisioningWithOrderId", []interface{}{orderId, until})
+	fake.waitVolumeProvisioningWithOrderIdMutex.Unlock()
+	if fake.WaitVolumeProvisioningWithOrderIdStub != nil {
+		return fake.WaitVolumeProvisioningWithOrderIdStub(orderId, until)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	return fake.waitVolumeProvisioningWithOrderIdReturns.result1, fake.waitVolumeProvisioningWithOrderIdReturns.result2
+}
+
+func (fake *FakeClient) WaitVolumeProvisioningWithOrderIdCallCount() int {
+	fake.waitVolumeProvisioningWithOrderIdMutex.RLock()
+	defer fake.waitVolumeProvisioningWithOrderIdMutex.RUnlock()
+	return len(fake.waitVolumeProvisioningWithOrderIdArgsForCall)
+}
+
+func (fake *FakeClient) WaitVolumeProvisioningWithOrderIdArgsForCall(i int) (int, time.Time) {
+	fake.waitVolumeProvisioningWithOrderIdMutex.RLock()
+	defer fake.waitVolumeProvisioningWithOrderIdMutex.RUnlock()
+	return fake.waitVolumeProvisioningWithOrderIdArgsForCall[i].orderId, fake.waitVolumeProvisioningWithOrderIdArgsForCall[i].until
+}
+
+func (fake *FakeClient) WaitVolumeProvisioningWithOrderIdReturns(result1 *datatypes.Network_Storage, result2 error) {
+	fake.WaitVolumeProvisioningWithOrderIdStub = nil
+	fake.waitVolumeProvisioningWithOrderIdReturns = struct {
+		result1 *datatypes.Network_Storage
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeClient) WaitVolumeProvisioningWithOrderIdReturnsOnCall(i int, result1 *datatypes.Network_Storage, result2 error) {
+	fake.WaitVolumeProvisioningWithOrderIdStub = nil
+	if fake.waitVolumeProvisioningWithOrderIdReturnsOnCall == nil {
+		fake.waitVolumeProvisioningWithOrderIdReturnsOnCall = make(map[int]struct {
+			result1 *datatypes.Network_Storage
+			result2 error
+		})
+	}
+	fake.waitVolumeProvisioningWithOrderIdReturnsOnCall[i] = struct {
+		result1 *datatypes.Network_Storage
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeClient) SetTags(id int, tags string) (bool, error) {
 	fake.setTagsMutex.Lock()
 	ret, specificReturn := fake.setTagsReturnsOnCall[len(fake.setTagsArgsForCall)]
 	fake.setTagsArgsForCall = append(fake.setTagsArgsForCall, struct {
@@ -1036,9 +1148,9 @@ func (fake *FakeClient) SetTags(id int, tags string) error {
 		return fake.SetTagsStub(id, tags)
 	}
 	if specificReturn {
-		return ret.result1
+		return ret.result1, ret.result2
 	}
-	return fake.setTagsReturns.result1
+	return fake.setTagsReturns.result1, fake.setTagsReturns.result2
 }
 
 func (fake *FakeClient) SetTagsCallCount() int {
@@ -1053,23 +1165,26 @@ func (fake *FakeClient) SetTagsArgsForCall(i int) (int, string) {
 	return fake.setTagsArgsForCall[i].id, fake.setTagsArgsForCall[i].tags
 }
 
-func (fake *FakeClient) SetTagsReturns(result1 error) {
+func (fake *FakeClient) SetTagsReturns(result1 bool, result2 error) {
 	fake.SetTagsStub = nil
 	fake.setTagsReturns = struct {
-		result1 error
-	}{result1}
+		result1 bool
+		result2 error
+	}{result1, result2}
 }
 
-func (fake *FakeClient) SetTagsReturnsOnCall(i int, result1 error) {
+func (fake *FakeClient) SetTagsReturnsOnCall(i int, result1 bool, result2 error) {
 	fake.SetTagsStub = nil
 	if fake.setTagsReturnsOnCall == nil {
 		fake.setTagsReturnsOnCall = make(map[int]struct {
-			result1 error
+			result1 bool
+			result2 error
 		})
 	}
 	fake.setTagsReturnsOnCall[i] = struct {
-		result1 error
-	}{result1}
+		result1 bool
+		result2 error
+	}{result1, result2}
 }
 
 func (fake *FakeClient) AttachSecondDiskToInstance(id int, diskSize int) error {
@@ -1121,7 +1236,7 @@ func (fake *FakeClient) AttachSecondDiskToInstanceReturnsOnCall(i int, result1 e
 	}{result1}
 }
 
-func (fake *FakeClient) GetInstanceAllowedHost(id int) (datatypes.Network_Storage_Allowed_Host, error) {
+func (fake *FakeClient) GetInstanceAllowedHost(id int) (*datatypes.Network_Storage_Allowed_Host, bool, error) {
 	fake.getInstanceAllowedHostMutex.Lock()
 	ret, specificReturn := fake.getInstanceAllowedHostReturnsOnCall[len(fake.getInstanceAllowedHostArgsForCall)]
 	fake.getInstanceAllowedHostArgsForCall = append(fake.getInstanceAllowedHostArgsForCall, struct {
@@ -1133,9 +1248,9 @@ func (fake *FakeClient) GetInstanceAllowedHost(id int) (datatypes.Network_Storag
 		return fake.GetInstanceAllowedHostStub(id)
 	}
 	if specificReturn {
-		return ret.result1, ret.result2
+		return ret.result1, ret.result2, ret.result3
 	}
-	return fake.getInstanceAllowedHostReturns.result1, fake.getInstanceAllowedHostReturns.result2
+	return fake.getInstanceAllowedHostReturns.result1, fake.getInstanceAllowedHostReturns.result2, fake.getInstanceAllowedHostReturns.result3
 }
 
 func (fake *FakeClient) GetInstanceAllowedHostCallCount() int {
@@ -1150,29 +1265,32 @@ func (fake *FakeClient) GetInstanceAllowedHostArgsForCall(i int) int {
 	return fake.getInstanceAllowedHostArgsForCall[i].id
 }
 
-func (fake *FakeClient) GetInstanceAllowedHostReturns(result1 datatypes.Network_Storage_Allowed_Host, result2 error) {
+func (fake *FakeClient) GetInstanceAllowedHostReturns(result1 *datatypes.Network_Storage_Allowed_Host, result2 bool, result3 error) {
 	fake.GetInstanceAllowedHostStub = nil
 	fake.getInstanceAllowedHostReturns = struct {
-		result1 datatypes.Network_Storage_Allowed_Host
-		result2 error
-	}{result1, result2}
+		result1 *datatypes.Network_Storage_Allowed_Host
+		result2 bool
+		result3 error
+	}{result1, result2, result3}
 }
 
-func (fake *FakeClient) GetInstanceAllowedHostReturnsOnCall(i int, result1 datatypes.Network_Storage_Allowed_Host, result2 error) {
+func (fake *FakeClient) GetInstanceAllowedHostReturnsOnCall(i int, result1 *datatypes.Network_Storage_Allowed_Host, result2 bool, result3 error) {
 	fake.GetInstanceAllowedHostStub = nil
 	if fake.getInstanceAllowedHostReturnsOnCall == nil {
 		fake.getInstanceAllowedHostReturnsOnCall = make(map[int]struct {
-			result1 datatypes.Network_Storage_Allowed_Host
-			result2 error
+			result1 *datatypes.Network_Storage_Allowed_Host
+			result2 bool
+			result3 error
 		})
 	}
 	fake.getInstanceAllowedHostReturnsOnCall[i] = struct {
-		result1 datatypes.Network_Storage_Allowed_Host
-		result2 error
-	}{result1, result2}
+		result1 *datatypes.Network_Storage_Allowed_Host
+		result2 bool
+		result3 error
+	}{result1, result2, result3}
 }
 
-func (fake *FakeClient) AuthorizeHostToVolume(instance *datatypes.Virtual_Guest, volumeId int, until time.Time) error {
+func (fake *FakeClient) AuthorizeHostToVolume(instance *datatypes.Virtual_Guest, volumeId int, until time.Time) (bool, error) {
 	fake.authorizeHostToVolumeMutex.Lock()
 	ret, specificReturn := fake.authorizeHostToVolumeReturnsOnCall[len(fake.authorizeHostToVolumeArgsForCall)]
 	fake.authorizeHostToVolumeArgsForCall = append(fake.authorizeHostToVolumeArgsForCall, struct {
@@ -1186,9 +1304,9 @@ func (fake *FakeClient) AuthorizeHostToVolume(instance *datatypes.Virtual_Guest,
 		return fake.AuthorizeHostToVolumeStub(instance, volumeId, until)
 	}
 	if specificReturn {
-		return ret.result1
+		return ret.result1, ret.result2
 	}
-	return fake.authorizeHostToVolumeReturns.result1
+	return fake.authorizeHostToVolumeReturns.result1, fake.authorizeHostToVolumeReturns.result2
 }
 
 func (fake *FakeClient) AuthorizeHostToVolumeCallCount() int {
@@ -1203,26 +1321,29 @@ func (fake *FakeClient) AuthorizeHostToVolumeArgsForCall(i int) (*datatypes.Virt
 	return fake.authorizeHostToVolumeArgsForCall[i].instance, fake.authorizeHostToVolumeArgsForCall[i].volumeId, fake.authorizeHostToVolumeArgsForCall[i].until
 }
 
-func (fake *FakeClient) AuthorizeHostToVolumeReturns(result1 error) {
+func (fake *FakeClient) AuthorizeHostToVolumeReturns(result1 bool, result2 error) {
 	fake.AuthorizeHostToVolumeStub = nil
 	fake.authorizeHostToVolumeReturns = struct {
-		result1 error
-	}{result1}
+		result1 bool
+		result2 error
+	}{result1, result2}
 }
 
-func (fake *FakeClient) AuthorizeHostToVolumeReturnsOnCall(i int, result1 error) {
+func (fake *FakeClient) AuthorizeHostToVolumeReturnsOnCall(i int, result1 bool, result2 error) {
 	fake.AuthorizeHostToVolumeStub = nil
 	if fake.authorizeHostToVolumeReturnsOnCall == nil {
 		fake.authorizeHostToVolumeReturnsOnCall = make(map[int]struct {
-			result1 error
+			result1 bool
+			result2 error
 		})
 	}
 	fake.authorizeHostToVolumeReturnsOnCall[i] = struct {
-		result1 error
-	}{result1}
+		result1 bool
+		result2 error
+	}{result1, result2}
 }
 
-func (fake *FakeClient) DeauthorizeHostToVolume(instance *datatypes.Virtual_Guest, volumeId int, until time.Time) error {
+func (fake *FakeClient) DeauthorizeHostToVolume(instance *datatypes.Virtual_Guest, volumeId int, until time.Time) (bool, error) {
 	fake.deauthorizeHostToVolumeMutex.Lock()
 	ret, specificReturn := fake.deauthorizeHostToVolumeReturnsOnCall[len(fake.deauthorizeHostToVolumeArgsForCall)]
 	fake.deauthorizeHostToVolumeArgsForCall = append(fake.deauthorizeHostToVolumeArgsForCall, struct {
@@ -1236,9 +1357,9 @@ func (fake *FakeClient) DeauthorizeHostToVolume(instance *datatypes.Virtual_Gues
 		return fake.DeauthorizeHostToVolumeStub(instance, volumeId, until)
 	}
 	if specificReturn {
-		return ret.result1
+		return ret.result1, ret.result2
 	}
-	return fake.deauthorizeHostToVolumeReturns.result1
+	return fake.deauthorizeHostToVolumeReturns.result1, fake.deauthorizeHostToVolumeReturns.result2
 }
 
 func (fake *FakeClient) DeauthorizeHostToVolumeCallCount() int {
@@ -1253,26 +1374,29 @@ func (fake *FakeClient) DeauthorizeHostToVolumeArgsForCall(i int) (*datatypes.Vi
 	return fake.deauthorizeHostToVolumeArgsForCall[i].instance, fake.deauthorizeHostToVolumeArgsForCall[i].volumeId, fake.deauthorizeHostToVolumeArgsForCall[i].until
 }
 
-func (fake *FakeClient) DeauthorizeHostToVolumeReturns(result1 error) {
+func (fake *FakeClient) DeauthorizeHostToVolumeReturns(result1 bool, result2 error) {
 	fake.DeauthorizeHostToVolumeStub = nil
 	fake.deauthorizeHostToVolumeReturns = struct {
-		result1 error
-	}{result1}
+		result1 bool
+		result2 error
+	}{result1, result2}
 }
 
-func (fake *FakeClient) DeauthorizeHostToVolumeReturnsOnCall(i int, result1 error) {
+func (fake *FakeClient) DeauthorizeHostToVolumeReturnsOnCall(i int, result1 bool, result2 error) {
 	fake.DeauthorizeHostToVolumeStub = nil
 	if fake.deauthorizeHostToVolumeReturnsOnCall == nil {
 		fake.deauthorizeHostToVolumeReturnsOnCall = make(map[int]struct {
-			result1 error
+			result1 bool
+			result2 error
 		})
 	}
 	fake.deauthorizeHostToVolumeReturnsOnCall[i] = struct {
-		result1 error
-	}{result1}
+		result1 bool
+		result2 error
+	}{result1, result2}
 }
 
-func (fake *FakeClient) CreateVolume(location string, size int, iops int) (datatypes.Network_Storage, error) {
+func (fake *FakeClient) CreateVolume(location string, size int, iops int) (*datatypes.Network_Storage, error) {
 	fake.createVolumeMutex.Lock()
 	ret, specificReturn := fake.createVolumeReturnsOnCall[len(fake.createVolumeArgsForCall)]
 	fake.createVolumeArgsForCall = append(fake.createVolumeArgsForCall, struct {
@@ -1303,29 +1427,29 @@ func (fake *FakeClient) CreateVolumeArgsForCall(i int) (string, int, int) {
 	return fake.createVolumeArgsForCall[i].location, fake.createVolumeArgsForCall[i].size, fake.createVolumeArgsForCall[i].iops
 }
 
-func (fake *FakeClient) CreateVolumeReturns(result1 datatypes.Network_Storage, result2 error) {
+func (fake *FakeClient) CreateVolumeReturns(result1 *datatypes.Network_Storage, result2 error) {
 	fake.CreateVolumeStub = nil
 	fake.createVolumeReturns = struct {
-		result1 datatypes.Network_Storage
+		result1 *datatypes.Network_Storage
 		result2 error
 	}{result1, result2}
 }
 
-func (fake *FakeClient) CreateVolumeReturnsOnCall(i int, result1 datatypes.Network_Storage, result2 error) {
+func (fake *FakeClient) CreateVolumeReturnsOnCall(i int, result1 *datatypes.Network_Storage, result2 error) {
 	fake.CreateVolumeStub = nil
 	if fake.createVolumeReturnsOnCall == nil {
 		fake.createVolumeReturnsOnCall = make(map[int]struct {
-			result1 datatypes.Network_Storage
+			result1 *datatypes.Network_Storage
 			result2 error
 		})
 	}
 	fake.createVolumeReturnsOnCall[i] = struct {
-		result1 datatypes.Network_Storage
+		result1 *datatypes.Network_Storage
 		result2 error
 	}{result1, result2}
 }
 
-func (fake *FakeClient) OrderBlockVolume(storageType string, location string, size int, iops int) (datatypes.Container_Product_Order_Receipt, error) {
+func (fake *FakeClient) OrderBlockVolume(storageType string, location string, size int, iops int) (*datatypes.Container_Product_Order_Receipt, error) {
 	fake.orderBlockVolumeMutex.Lock()
 	ret, specificReturn := fake.orderBlockVolumeReturnsOnCall[len(fake.orderBlockVolumeArgsForCall)]
 	fake.orderBlockVolumeArgsForCall = append(fake.orderBlockVolumeArgsForCall, struct {
@@ -1357,45 +1481,45 @@ func (fake *FakeClient) OrderBlockVolumeArgsForCall(i int) (string, string, int,
 	return fake.orderBlockVolumeArgsForCall[i].storageType, fake.orderBlockVolumeArgsForCall[i].location, fake.orderBlockVolumeArgsForCall[i].size, fake.orderBlockVolumeArgsForCall[i].iops
 }
 
-func (fake *FakeClient) OrderBlockVolumeReturns(result1 datatypes.Container_Product_Order_Receipt, result2 error) {
+func (fake *FakeClient) OrderBlockVolumeReturns(result1 *datatypes.Container_Product_Order_Receipt, result2 error) {
 	fake.OrderBlockVolumeStub = nil
 	fake.orderBlockVolumeReturns = struct {
-		result1 datatypes.Container_Product_Order_Receipt
+		result1 *datatypes.Container_Product_Order_Receipt
 		result2 error
 	}{result1, result2}
 }
 
-func (fake *FakeClient) OrderBlockVolumeReturnsOnCall(i int, result1 datatypes.Container_Product_Order_Receipt, result2 error) {
+func (fake *FakeClient) OrderBlockVolumeReturnsOnCall(i int, result1 *datatypes.Container_Product_Order_Receipt, result2 error) {
 	fake.OrderBlockVolumeStub = nil
 	if fake.orderBlockVolumeReturnsOnCall == nil {
 		fake.orderBlockVolumeReturnsOnCall = make(map[int]struct {
-			result1 datatypes.Container_Product_Order_Receipt
+			result1 *datatypes.Container_Product_Order_Receipt
 			result2 error
 		})
 	}
 	fake.orderBlockVolumeReturnsOnCall[i] = struct {
-		result1 datatypes.Container_Product_Order_Receipt
+		result1 *datatypes.Container_Product_Order_Receipt
 		result2 error
 	}{result1, result2}
 }
 
-func (fake *FakeClient) CancelBlockVolume(volumeId int, reason string, immedicate bool) error {
+func (fake *FakeClient) CancelBlockVolume(volumeId int, reason string, immediate bool) (bool, error) {
 	fake.cancelBlockVolumeMutex.Lock()
 	ret, specificReturn := fake.cancelBlockVolumeReturnsOnCall[len(fake.cancelBlockVolumeArgsForCall)]
 	fake.cancelBlockVolumeArgsForCall = append(fake.cancelBlockVolumeArgsForCall, struct {
-		volumeId   int
-		reason     string
-		immedicate bool
-	}{volumeId, reason, immedicate})
-	fake.recordInvocation("CancelBlockVolume", []interface{}{volumeId, reason, immedicate})
+		volumeId  int
+		reason    string
+		immediate bool
+	}{volumeId, reason, immediate})
+	fake.recordInvocation("CancelBlockVolume", []interface{}{volumeId, reason, immediate})
 	fake.cancelBlockVolumeMutex.Unlock()
 	if fake.CancelBlockVolumeStub != nil {
-		return fake.CancelBlockVolumeStub(volumeId, reason, immedicate)
+		return fake.CancelBlockVolumeStub(volumeId, reason, immediate)
 	}
 	if specificReturn {
-		return ret.result1
+		return ret.result1, ret.result2
 	}
-	return fake.cancelBlockVolumeReturns.result1
+	return fake.cancelBlockVolumeReturns.result1, fake.cancelBlockVolumeReturns.result2
 }
 
 func (fake *FakeClient) CancelBlockVolumeCallCount() int {
@@ -1407,29 +1531,32 @@ func (fake *FakeClient) CancelBlockVolumeCallCount() int {
 func (fake *FakeClient) CancelBlockVolumeArgsForCall(i int) (int, string, bool) {
 	fake.cancelBlockVolumeMutex.RLock()
 	defer fake.cancelBlockVolumeMutex.RUnlock()
-	return fake.cancelBlockVolumeArgsForCall[i].volumeId, fake.cancelBlockVolumeArgsForCall[i].reason, fake.cancelBlockVolumeArgsForCall[i].immedicate
+	return fake.cancelBlockVolumeArgsForCall[i].volumeId, fake.cancelBlockVolumeArgsForCall[i].reason, fake.cancelBlockVolumeArgsForCall[i].immediate
 }
 
-func (fake *FakeClient) CancelBlockVolumeReturns(result1 error) {
+func (fake *FakeClient) CancelBlockVolumeReturns(result1 bool, result2 error) {
 	fake.CancelBlockVolumeStub = nil
 	fake.cancelBlockVolumeReturns = struct {
-		result1 error
-	}{result1}
+		result1 bool
+		result2 error
+	}{result1, result2}
 }
 
-func (fake *FakeClient) CancelBlockVolumeReturnsOnCall(i int, result1 error) {
+func (fake *FakeClient) CancelBlockVolumeReturnsOnCall(i int, result1 bool, result2 error) {
 	fake.CancelBlockVolumeStub = nil
 	if fake.cancelBlockVolumeReturnsOnCall == nil {
 		fake.cancelBlockVolumeReturnsOnCall = make(map[int]struct {
-			result1 error
+			result1 bool
+			result2 error
 		})
 	}
 	fake.cancelBlockVolumeReturnsOnCall[i] = struct {
-		result1 error
-	}{result1}
+		result1 bool
+		result2 error
+	}{result1, result2}
 }
 
-func (fake *FakeClient) GetBlockVolumeDetails(volumeId int, mask string) (datatypes.Network_Storage, error) {
+func (fake *FakeClient) GetBlockVolumeDetails(volumeId int, mask string) (*datatypes.Network_Storage, bool, error) {
 	fake.getBlockVolumeDetailsMutex.Lock()
 	ret, specificReturn := fake.getBlockVolumeDetailsReturnsOnCall[len(fake.getBlockVolumeDetailsArgsForCall)]
 	fake.getBlockVolumeDetailsArgsForCall = append(fake.getBlockVolumeDetailsArgsForCall, struct {
@@ -1442,9 +1569,9 @@ func (fake *FakeClient) GetBlockVolumeDetails(volumeId int, mask string) (dataty
 		return fake.GetBlockVolumeDetailsStub(volumeId, mask)
 	}
 	if specificReturn {
-		return ret.result1, ret.result2
+		return ret.result1, ret.result2, ret.result3
 	}
-	return fake.getBlockVolumeDetailsReturns.result1, fake.getBlockVolumeDetailsReturns.result2
+	return fake.getBlockVolumeDetailsReturns.result1, fake.getBlockVolumeDetailsReturns.result2, fake.getBlockVolumeDetailsReturns.result3
 }
 
 func (fake *FakeClient) GetBlockVolumeDetailsCallCount() int {
@@ -1459,29 +1586,87 @@ func (fake *FakeClient) GetBlockVolumeDetailsArgsForCall(i int) (int, string) {
 	return fake.getBlockVolumeDetailsArgsForCall[i].volumeId, fake.getBlockVolumeDetailsArgsForCall[i].mask
 }
 
-func (fake *FakeClient) GetBlockVolumeDetailsReturns(result1 datatypes.Network_Storage, result2 error) {
+func (fake *FakeClient) GetBlockVolumeDetailsReturns(result1 *datatypes.Network_Storage, result2 bool, result3 error) {
 	fake.GetBlockVolumeDetailsStub = nil
 	fake.getBlockVolumeDetailsReturns = struct {
-		result1 datatypes.Network_Storage
-		result2 error
-	}{result1, result2}
+		result1 *datatypes.Network_Storage
+		result2 bool
+		result3 error
+	}{result1, result2, result3}
 }
 
-func (fake *FakeClient) GetBlockVolumeDetailsReturnsOnCall(i int, result1 datatypes.Network_Storage, result2 error) {
+func (fake *FakeClient) GetBlockVolumeDetailsReturnsOnCall(i int, result1 *datatypes.Network_Storage, result2 bool, result3 error) {
 	fake.GetBlockVolumeDetailsStub = nil
 	if fake.getBlockVolumeDetailsReturnsOnCall == nil {
 		fake.getBlockVolumeDetailsReturnsOnCall = make(map[int]struct {
-			result1 datatypes.Network_Storage
-			result2 error
+			result1 *datatypes.Network_Storage
+			result2 bool
+			result3 error
 		})
 	}
 	fake.getBlockVolumeDetailsReturnsOnCall[i] = struct {
-		result1 datatypes.Network_Storage
-		result2 error
-	}{result1, result2}
+		result1 *datatypes.Network_Storage
+		result2 bool
+		result3 error
+	}{result1, result2, result3}
 }
 
-func (fake *FakeClient) GetImage(imageId int, mask string) (datatypes.Virtual_Guest_Block_Device_Template_Group, error) {
+func (fake *FakeClient) GetNetworkStorageTarget(volumeId int, mask string) (string, bool, error) {
+	fake.getNetworkStorageTargetMutex.Lock()
+	ret, specificReturn := fake.getNetworkStorageTargetReturnsOnCall[len(fake.getNetworkStorageTargetArgsForCall)]
+	fake.getNetworkStorageTargetArgsForCall = append(fake.getNetworkStorageTargetArgsForCall, struct {
+		volumeId int
+		mask     string
+	}{volumeId, mask})
+	fake.recordInvocation("GetNetworkStorageTarget", []interface{}{volumeId, mask})
+	fake.getNetworkStorageTargetMutex.Unlock()
+	if fake.GetNetworkStorageTargetStub != nil {
+		return fake.GetNetworkStorageTargetStub(volumeId, mask)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2, ret.result3
+	}
+	return fake.getNetworkStorageTargetReturns.result1, fake.getNetworkStorageTargetReturns.result2, fake.getNetworkStorageTargetReturns.result3
+}
+
+func (fake *FakeClient) GetNetworkStorageTargetCallCount() int {
+	fake.getNetworkStorageTargetMutex.RLock()
+	defer fake.getNetworkStorageTargetMutex.RUnlock()
+	return len(fake.getNetworkStorageTargetArgsForCall)
+}
+
+func (fake *FakeClient) GetNetworkStorageTargetArgsForCall(i int) (int, string) {
+	fake.getNetworkStorageTargetMutex.RLock()
+	defer fake.getNetworkStorageTargetMutex.RUnlock()
+	return fake.getNetworkStorageTargetArgsForCall[i].volumeId, fake.getNetworkStorageTargetArgsForCall[i].mask
+}
+
+func (fake *FakeClient) GetNetworkStorageTargetReturns(result1 string, result2 bool, result3 error) {
+	fake.GetNetworkStorageTargetStub = nil
+	fake.getNetworkStorageTargetReturns = struct {
+		result1 string
+		result2 bool
+		result3 error
+	}{result1, result2, result3}
+}
+
+func (fake *FakeClient) GetNetworkStorageTargetReturnsOnCall(i int, result1 string, result2 bool, result3 error) {
+	fake.GetNetworkStorageTargetStub = nil
+	if fake.getNetworkStorageTargetReturnsOnCall == nil {
+		fake.getNetworkStorageTargetReturnsOnCall = make(map[int]struct {
+			result1 string
+			result2 bool
+			result3 error
+		})
+	}
+	fake.getNetworkStorageTargetReturnsOnCall[i] = struct {
+		result1 string
+		result2 bool
+		result3 error
+	}{result1, result2, result3}
+}
+
+func (fake *FakeClient) GetImage(imageId int, mask string) (*datatypes.Virtual_Guest_Block_Device_Template_Group, bool, error) {
 	fake.getImageMutex.Lock()
 	ret, specificReturn := fake.getImageReturnsOnCall[len(fake.getImageArgsForCall)]
 	fake.getImageArgsForCall = append(fake.getImageArgsForCall, struct {
@@ -1494,9 +1679,9 @@ func (fake *FakeClient) GetImage(imageId int, mask string) (datatypes.Virtual_Gu
 		return fake.GetImageStub(imageId, mask)
 	}
 	if specificReturn {
-		return ret.result1, ret.result2
+		return ret.result1, ret.result2, ret.result3
 	}
-	return fake.getImageReturns.result1, fake.getImageReturns.result2
+	return fake.getImageReturns.result1, fake.getImageReturns.result2, fake.getImageReturns.result3
 }
 
 func (fake *FakeClient) GetImageCallCount() int {
@@ -1511,29 +1696,32 @@ func (fake *FakeClient) GetImageArgsForCall(i int) (int, string) {
 	return fake.getImageArgsForCall[i].imageId, fake.getImageArgsForCall[i].mask
 }
 
-func (fake *FakeClient) GetImageReturns(result1 datatypes.Virtual_Guest_Block_Device_Template_Group, result2 error) {
+func (fake *FakeClient) GetImageReturns(result1 *datatypes.Virtual_Guest_Block_Device_Template_Group, result2 bool, result3 error) {
 	fake.GetImageStub = nil
 	fake.getImageReturns = struct {
-		result1 datatypes.Virtual_Guest_Block_Device_Template_Group
-		result2 error
-	}{result1, result2}
+		result1 *datatypes.Virtual_Guest_Block_Device_Template_Group
+		result2 bool
+		result3 error
+	}{result1, result2, result3}
 }
 
-func (fake *FakeClient) GetImageReturnsOnCall(i int, result1 datatypes.Virtual_Guest_Block_Device_Template_Group, result2 error) {
+func (fake *FakeClient) GetImageReturnsOnCall(i int, result1 *datatypes.Virtual_Guest_Block_Device_Template_Group, result2 bool, result3 error) {
 	fake.GetImageStub = nil
 	if fake.getImageReturnsOnCall == nil {
 		fake.getImageReturnsOnCall = make(map[int]struct {
-			result1 datatypes.Virtual_Guest_Block_Device_Template_Group
-			result2 error
+			result1 *datatypes.Virtual_Guest_Block_Device_Template_Group
+			result2 bool
+			result3 error
 		})
 	}
 	fake.getImageReturnsOnCall[i] = struct {
-		result1 datatypes.Virtual_Guest_Block_Device_Template_Group
-		result2 error
-	}{result1, result2}
+		result1 *datatypes.Virtual_Guest_Block_Device_Template_Group
+		result2 bool
+		result3 error
+	}{result1, result2, result3}
 }
 
-func (fake *FakeClient) GetVlan(id int, mask string) (datatypes.Network_Vlan, error) {
+func (fake *FakeClient) GetVlan(id int, mask string) (*datatypes.Network_Vlan, bool, error) {
 	fake.getVlanMutex.Lock()
 	ret, specificReturn := fake.getVlanReturnsOnCall[len(fake.getVlanArgsForCall)]
 	fake.getVlanArgsForCall = append(fake.getVlanArgsForCall, struct {
@@ -1546,9 +1734,9 @@ func (fake *FakeClient) GetVlan(id int, mask string) (datatypes.Network_Vlan, er
 		return fake.GetVlanStub(id, mask)
 	}
 	if specificReturn {
-		return ret.result1, ret.result2
+		return ret.result1, ret.result2, ret.result3
 	}
-	return fake.getVlanReturns.result1, fake.getVlanReturns.result2
+	return fake.getVlanReturns.result1, fake.getVlanReturns.result2, fake.getVlanReturns.result3
 }
 
 func (fake *FakeClient) GetVlanCallCount() int {
@@ -1563,29 +1751,32 @@ func (fake *FakeClient) GetVlanArgsForCall(i int) (int, string) {
 	return fake.getVlanArgsForCall[i].id, fake.getVlanArgsForCall[i].mask
 }
 
-func (fake *FakeClient) GetVlanReturns(result1 datatypes.Network_Vlan, result2 error) {
+func (fake *FakeClient) GetVlanReturns(result1 *datatypes.Network_Vlan, result2 bool, result3 error) {
 	fake.GetVlanStub = nil
 	fake.getVlanReturns = struct {
-		result1 datatypes.Network_Vlan
-		result2 error
-	}{result1, result2}
+		result1 *datatypes.Network_Vlan
+		result2 bool
+		result3 error
+	}{result1, result2, result3}
 }
 
-func (fake *FakeClient) GetVlanReturnsOnCall(i int, result1 datatypes.Network_Vlan, result2 error) {
+func (fake *FakeClient) GetVlanReturnsOnCall(i int, result1 *datatypes.Network_Vlan, result2 bool, result3 error) {
 	fake.GetVlanStub = nil
 	if fake.getVlanReturnsOnCall == nil {
 		fake.getVlanReturnsOnCall = make(map[int]struct {
-			result1 datatypes.Network_Vlan
-			result2 error
+			result1 *datatypes.Network_Vlan
+			result2 bool
+			result3 error
 		})
 	}
 	fake.getVlanReturnsOnCall[i] = struct {
-		result1 datatypes.Network_Vlan
-		result2 error
-	}{result1, result2}
+		result1 *datatypes.Network_Vlan
+		result2 bool
+		result3 error
+	}{result1, result2, result3}
 }
 
-func (fake *FakeClient) GetAllowedHostCredential(id int) (datatypes.Network_Storage_Allowed_Host, error) {
+func (fake *FakeClient) GetAllowedHostCredential(id int) (*datatypes.Network_Storage_Allowed_Host, bool, error) {
 	fake.getAllowedHostCredentialMutex.Lock()
 	ret, specificReturn := fake.getAllowedHostCredentialReturnsOnCall[len(fake.getAllowedHostCredentialArgsForCall)]
 	fake.getAllowedHostCredentialArgsForCall = append(fake.getAllowedHostCredentialArgsForCall, struct {
@@ -1597,9 +1788,9 @@ func (fake *FakeClient) GetAllowedHostCredential(id int) (datatypes.Network_Stor
 		return fake.GetAllowedHostCredentialStub(id)
 	}
 	if specificReturn {
-		return ret.result1, ret.result2
+		return ret.result1, ret.result2, ret.result3
 	}
-	return fake.getAllowedHostCredentialReturns.result1, fake.getAllowedHostCredentialReturns.result2
+	return fake.getAllowedHostCredentialReturns.result1, fake.getAllowedHostCredentialReturns.result2, fake.getAllowedHostCredentialReturns.result3
 }
 
 func (fake *FakeClient) GetAllowedHostCredentialCallCount() int {
@@ -1614,29 +1805,32 @@ func (fake *FakeClient) GetAllowedHostCredentialArgsForCall(i int) int {
 	return fake.getAllowedHostCredentialArgsForCall[i].id
 }
 
-func (fake *FakeClient) GetAllowedHostCredentialReturns(result1 datatypes.Network_Storage_Allowed_Host, result2 error) {
+func (fake *FakeClient) GetAllowedHostCredentialReturns(result1 *datatypes.Network_Storage_Allowed_Host, result2 bool, result3 error) {
 	fake.GetAllowedHostCredentialStub = nil
 	fake.getAllowedHostCredentialReturns = struct {
-		result1 datatypes.Network_Storage_Allowed_Host
-		result2 error
-	}{result1, result2}
+		result1 *datatypes.Network_Storage_Allowed_Host
+		result2 bool
+		result3 error
+	}{result1, result2, result3}
 }
 
-func (fake *FakeClient) GetAllowedHostCredentialReturnsOnCall(i int, result1 datatypes.Network_Storage_Allowed_Host, result2 error) {
+func (fake *FakeClient) GetAllowedHostCredentialReturnsOnCall(i int, result1 *datatypes.Network_Storage_Allowed_Host, result2 bool, result3 error) {
 	fake.GetAllowedHostCredentialStub = nil
 	if fake.getAllowedHostCredentialReturnsOnCall == nil {
 		fake.getAllowedHostCredentialReturnsOnCall = make(map[int]struct {
-			result1 datatypes.Network_Storage_Allowed_Host
-			result2 error
+			result1 *datatypes.Network_Storage_Allowed_Host
+			result2 bool
+			result3 error
 		})
 	}
 	fake.getAllowedHostCredentialReturnsOnCall[i] = struct {
-		result1 datatypes.Network_Storage_Allowed_Host
-		result2 error
-	}{result1, result2}
+		result1 *datatypes.Network_Storage_Allowed_Host
+		result2 bool
+		result3 error
+	}{result1, result2, result3}
 }
 
-func (fake *FakeClient) GetAllowedNetworkStorage(id int) ([]string, error) {
+func (fake *FakeClient) GetAllowedNetworkStorage(id int) ([]string, bool, error) {
 	fake.getAllowedNetworkStorageMutex.Lock()
 	ret, specificReturn := fake.getAllowedNetworkStorageReturnsOnCall[len(fake.getAllowedNetworkStorageArgsForCall)]
 	fake.getAllowedNetworkStorageArgsForCall = append(fake.getAllowedNetworkStorageArgsForCall, struct {
@@ -1648,9 +1842,9 @@ func (fake *FakeClient) GetAllowedNetworkStorage(id int) ([]string, error) {
 		return fake.GetAllowedNetworkStorageStub(id)
 	}
 	if specificReturn {
-		return ret.result1, ret.result2
+		return ret.result1, ret.result2, ret.result3
 	}
-	return fake.getAllowedNetworkStorageReturns.result1, fake.getAllowedNetworkStorageReturns.result2
+	return fake.getAllowedNetworkStorageReturns.result1, fake.getAllowedNetworkStorageReturns.result2, fake.getAllowedNetworkStorageReturns.result3
 }
 
 func (fake *FakeClient) GetAllowedNetworkStorageCallCount() int {
@@ -1665,29 +1859,32 @@ func (fake *FakeClient) GetAllowedNetworkStorageArgsForCall(i int) int {
 	return fake.getAllowedNetworkStorageArgsForCall[i].id
 }
 
-func (fake *FakeClient) GetAllowedNetworkStorageReturns(result1 []string, result2 error) {
+func (fake *FakeClient) GetAllowedNetworkStorageReturns(result1 []string, result2 bool, result3 error) {
 	fake.GetAllowedNetworkStorageStub = nil
 	fake.getAllowedNetworkStorageReturns = struct {
 		result1 []string
-		result2 error
-	}{result1, result2}
+		result2 bool
+		result3 error
+	}{result1, result2, result3}
 }
 
-func (fake *FakeClient) GetAllowedNetworkStorageReturnsOnCall(i int, result1 []string, result2 error) {
+func (fake *FakeClient) GetAllowedNetworkStorageReturnsOnCall(i int, result1 []string, result2 bool, result3 error) {
 	fake.GetAllowedNetworkStorageStub = nil
 	if fake.getAllowedNetworkStorageReturnsOnCall == nil {
 		fake.getAllowedNetworkStorageReturnsOnCall = make(map[int]struct {
 			result1 []string
-			result2 error
+			result2 bool
+			result3 error
 		})
 	}
 	fake.getAllowedNetworkStorageReturnsOnCall[i] = struct {
 		result1 []string
-		result2 error
-	}{result1, result2}
+		result2 bool
+		result3 error
+	}{result1, result2, result3}
 }
 
-func (fake *FakeClient) CreateSshKey(label *string, key *string, fingerPrint *string) (datatypes.Security_Ssh_Key, error) {
+func (fake *FakeClient) CreateSshKey(label *string, key *string, fingerPrint *string) (*datatypes.Security_Ssh_Key, error) {
 	fake.createSshKeyMutex.Lock()
 	ret, specificReturn := fake.createSshKeyReturnsOnCall[len(fake.createSshKeyArgsForCall)]
 	fake.createSshKeyArgsForCall = append(fake.createSshKeyArgsForCall, struct {
@@ -1718,24 +1915,24 @@ func (fake *FakeClient) CreateSshKeyArgsForCall(i int) (*string, *string, *strin
 	return fake.createSshKeyArgsForCall[i].label, fake.createSshKeyArgsForCall[i].key, fake.createSshKeyArgsForCall[i].fingerPrint
 }
 
-func (fake *FakeClient) CreateSshKeyReturns(result1 datatypes.Security_Ssh_Key, result2 error) {
+func (fake *FakeClient) CreateSshKeyReturns(result1 *datatypes.Security_Ssh_Key, result2 error) {
 	fake.CreateSshKeyStub = nil
 	fake.createSshKeyReturns = struct {
-		result1 datatypes.Security_Ssh_Key
+		result1 *datatypes.Security_Ssh_Key
 		result2 error
 	}{result1, result2}
 }
 
-func (fake *FakeClient) CreateSshKeyReturnsOnCall(i int, result1 datatypes.Security_Ssh_Key, result2 error) {
+func (fake *FakeClient) CreateSshKeyReturnsOnCall(i int, result1 *datatypes.Security_Ssh_Key, result2 error) {
 	fake.CreateSshKeyStub = nil
 	if fake.createSshKeyReturnsOnCall == nil {
 		fake.createSshKeyReturnsOnCall = make(map[int]struct {
-			result1 datatypes.Security_Ssh_Key
+			result1 *datatypes.Security_Ssh_Key
 			result2 error
 		})
 	}
 	fake.createSshKeyReturnsOnCall[i] = struct {
-		result1 datatypes.Security_Ssh_Key
+		result1 *datatypes.Security_Ssh_Key
 		result2 error
 	}{result1, result2}
 }
@@ -1791,7 +1988,7 @@ func (fake *FakeClient) DeleteSshKeyReturnsOnCall(i int, result1 bool, result2 e
 	}{result1, result2}
 }
 
-func (fake *FakeClient) CreateInstanceFromVPS(template *datatypes.Virtual_Guest, stemcellID int, sshKeys []int) (datatypes.Virtual_Guest, error) {
+func (fake *FakeClient) CreateInstanceFromVPS(template *datatypes.Virtual_Guest, stemcellID int, sshKeys []int) (*datatypes.Virtual_Guest, error) {
 	var sshKeysCopy []int
 	if sshKeys != nil {
 		sshKeysCopy = make([]int, len(sshKeys))
@@ -1827,24 +2024,24 @@ func (fake *FakeClient) CreateInstanceFromVPSArgsForCall(i int) (*datatypes.Virt
 	return fake.createInstanceFromVPSArgsForCall[i].template, fake.createInstanceFromVPSArgsForCall[i].stemcellID, fake.createInstanceFromVPSArgsForCall[i].sshKeys
 }
 
-func (fake *FakeClient) CreateInstanceFromVPSReturns(result1 datatypes.Virtual_Guest, result2 error) {
+func (fake *FakeClient) CreateInstanceFromVPSReturns(result1 *datatypes.Virtual_Guest, result2 error) {
 	fake.CreateInstanceFromVPSStub = nil
 	fake.createInstanceFromVPSReturns = struct {
-		result1 datatypes.Virtual_Guest
+		result1 *datatypes.Virtual_Guest
 		result2 error
 	}{result1, result2}
 }
 
-func (fake *FakeClient) CreateInstanceFromVPSReturnsOnCall(i int, result1 datatypes.Virtual_Guest, result2 error) {
+func (fake *FakeClient) CreateInstanceFromVPSReturnsOnCall(i int, result1 *datatypes.Virtual_Guest, result2 error) {
 	fake.CreateInstanceFromVPSStub = nil
 	if fake.createInstanceFromVPSReturnsOnCall == nil {
 		fake.createInstanceFromVPSReturnsOnCall = make(map[int]struct {
-			result1 datatypes.Virtual_Guest
+			result1 *datatypes.Virtual_Guest
 			result2 error
 		})
 	}
 	fake.createInstanceFromVPSReturnsOnCall[i] = struct {
-		result1 datatypes.Virtual_Guest
+		result1 *datatypes.Virtual_Guest
 		result2 error
 	}{result1, result2}
 }
@@ -1924,6 +2121,8 @@ func (fake *FakeClient) Invocations() map[string][][]interface{} {
 	defer fake.waitInstanceHasActiveTransactionMutex.RUnlock()
 	fake.waitInstanceHasNoneActiveTransactionMutex.RLock()
 	defer fake.waitInstanceHasNoneActiveTransactionMutex.RUnlock()
+	fake.waitVolumeProvisioningWithOrderIdMutex.RLock()
+	defer fake.waitVolumeProvisioningWithOrderIdMutex.RUnlock()
 	fake.setTagsMutex.RLock()
 	defer fake.setTagsMutex.RUnlock()
 	fake.attachSecondDiskToInstanceMutex.RLock()
@@ -1942,6 +2141,8 @@ func (fake *FakeClient) Invocations() map[string][][]interface{} {
 	defer fake.cancelBlockVolumeMutex.RUnlock()
 	fake.getBlockVolumeDetailsMutex.RLock()
 	defer fake.getBlockVolumeDetailsMutex.RUnlock()
+	fake.getNetworkStorageTargetMutex.RLock()
+	defer fake.getNetworkStorageTargetMutex.RUnlock()
 	fake.getImageMutex.RLock()
 	defer fake.getImageMutex.RUnlock()
 	fake.getVlanMutex.RLock()

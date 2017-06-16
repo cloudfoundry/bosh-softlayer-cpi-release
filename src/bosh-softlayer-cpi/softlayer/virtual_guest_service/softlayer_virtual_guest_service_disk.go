@@ -8,7 +8,9 @@ import (
 
 	bsl "bosh-softlayer-cpi/softlayer/client"
 
+	"bosh-softlayer-cpi/api"
 	datatypes "github.com/softlayer/softlayer-go/datatypes"
+	"strconv"
 )
 
 func (vg SoftlayerVirtualGuestService) getRootPassword(instance datatypes.Virtual_Guest) *string {
@@ -27,23 +29,31 @@ func (vg SoftlayerVirtualGuestService) AttachEphemeralDisk(id int, diskSize int)
 }
 
 func (vg SoftlayerVirtualGuestService) AttachDisk(id int, diskID int) ([]byte, error) {
-	ipAddress, err := vg.softlayerClient.GetNetworkStorageTarget(diskID, bsl.VOLUME_DETAIL_MASK)
+	ipAddress, found, err := vg.softlayerClient.GetNetworkStorageTarget(diskID, bsl.VOLUME_DETAIL_MASK)
 	if err != nil {
 		return []byte{}, bosherr.WrapErrorf(err, "Fetching disk target address with id '%d'", diskID)
 	}
 
-	instance, err := vg.softlayerClient.GetInstance(id, bsl.INSTANCE_DETAIL_MASK)
+	if !found {
+		return []byte{}, api.NewDiskNotFoundError(strconv.Itoa(diskID), false)
+	}
+
+	instance, found, err := vg.softlayerClient.GetInstance(id, bsl.INSTANCE_DETAIL_MASK)
 	if err != nil {
 		return []byte{}, bosherr.WrapErrorf(err, "Fetching instance details with id '%d'", id)
 	}
 
+	if !found {
+		return []byte{}, api.NewVMNotFoundError(strconv.Itoa(id))
+	}
+
 	until := time.Now().Add(time.Duration(1) * time.Hour)
-	err = vg.softlayerClient.AuthorizeHostToVolume(&instance, diskID, until)
+	_, err = vg.softlayerClient.AuthorizeHostToVolume(instance, diskID, until)
 	if err != nil {
 		return []byte{}, bosherr.WrapErrorf(err, "Authorizing vm with id '%d' to disk with id '%d'", id, diskID)
 	}
 
-	credential, err := vg.softlayerClient.GetAllowedHostCredential(id)
+	credential, found, err := vg.softlayerClient.GetAllowedHostCredential(id)
 	if err != nil {
 		return []byte{}, bosherr.WrapError(err, fmt.Sprintf("Getting iscsi host auth from virtual guest '%d'", id))
 	}
@@ -52,22 +62,40 @@ func (vg SoftlayerVirtualGuestService) AttachDisk(id int, diskID int) ([]byte, e
 	username := *credential.Credential.Username
 	password := *credential.Credential.Password
 
-	return []byte(fmt.Sprintf(`{"initiator_name":"%s","target":"%s","username":"%s","password":"%s" }`, initiatorName, ipAddress, username, password)),
-		nil
+	return []byte(fmt.Sprintf(`{"initiator_name":"%s","target":"%s","username":"%s","password":"%s" }`,
+		initiatorName,
+		ipAddress,
+		username,
+		password,
+	)), nil
 }
 
 func (vg SoftlayerVirtualGuestService) AttachedDisks(id int) ([]string, error) {
-	return vg.softlayerClient.GetAllowedNetworkStorage(id)
+	var attachedDisks []string
+	attachedDisks, found, err := vg.softlayerClient.GetAllowedNetworkStorage(id)
+	if err != nil {
+		return attachedDisks, err
+	}
+
+	if !found {
+		return attachedDisks, api.NewVMNotFoundError(strconv.Itoa(id))
+	}
+
+	return attachedDisks, nil
 }
 
 func (vg SoftlayerVirtualGuestService) DetachDisk(id int, diskID int) error {
-	instance, err := vg.softlayerClient.GetInstance(id, bsl.INSTANCE_DETAIL_MASK)
+	instance, found, err := vg.softlayerClient.GetInstance(id, bsl.INSTANCE_DETAIL_MASK)
 	if err != nil {
 		return bosherr.WrapErrorf(err, "Fetching instance details with id '%d'", id)
 	}
 
+	if !found {
+		return api.NewVMNotFoundError(strconv.Itoa(id))
+	}
+
 	until := time.Now().Add(time.Duration(1) * time.Hour)
-	err = vg.softlayerClient.DeauthorizeHostToVolume(&instance, diskID, until)
+	_, err = vg.softlayerClient.DeauthorizeHostToVolume(instance, diskID, until)
 	if err != nil {
 		return bosherr.WrapErrorf(err, "De-Authorizing vm with id '%d' to disk with id '%d'", id, diskID)
 	}

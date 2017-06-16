@@ -1,21 +1,21 @@
 package disk
 
 import (
+	"bosh-softlayer-cpi/api"
 	boslc "bosh-softlayer-cpi/softlayer/client"
 	"github.com/softlayer/softlayer-go/datatypes"
-	"github.com/softlayer/softlayer-go/sl"
+	"strconv"
 )
 
-func (d SoftlayerDiskService) Find(id int) (datatypes.Network_Storage, bool, error) {
-	volume, err := d.softlayerClient.GetBlockVolumeDetails(id, boslc.VOLUME_DEFAULT_MASK)
+func (d SoftlayerDiskService) Find(id int) (*datatypes.Network_Storage, error) {
+	volume, found, err := d.softlayerClient.GetBlockVolumeDetails(id, boslc.VOLUME_DEFAULT_MASK)
 	if err != nil {
-		apiErr := err.(sl.Error)
-		if apiErr.Exception == "SoftLayer_Exception_ObjectNotFound" {
-			return datatypes.Network_Storage{}, false, nil
-		}
-
-		return datatypes.Network_Storage{}, false, err
+		return &datatypes.Network_Storage{}, err
 	}
 
-	return volume, true, nil
+	if !found {
+		return &datatypes.Network_Storage{}, api.NewDiskNotFoundError(strconv.Itoa(id), false)
+	}
+
+	return volume, nil
 }

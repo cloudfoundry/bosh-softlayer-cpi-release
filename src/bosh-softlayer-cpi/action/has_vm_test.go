@@ -30,10 +30,10 @@ var _ = Describe("HasVM", func() {
 
 	Describe("Run", func() {
 		It("returns true if vm ID exist", func() {
-			vmService.FindReturns(datatypes.Virtual_Guest{
-				Id: sl.Int(1234567),
-			},
-				true,
+			vmService.FindReturns(
+				&datatypes.Virtual_Guest{
+					Id: sl.Int(1234567),
+				},
 				nil)
 
 			found, err = hasVM.Run(1234567)
@@ -44,22 +44,9 @@ var _ = Describe("HasVM", func() {
 			Expect(vmService.FindArgsForCall(0)).To(Equal(1234567))
 		})
 
-		It("returns false if vm ID does not exist", func() {
-			vmService.FindReturns(datatypes.Virtual_Guest{},
-				false,
-				nil)
-
-			found, err = hasVM.Run(1234567)
-			Expect(err).NotTo(HaveOccurred())
-			Expect(found).To(BeFalse())
-
-			Expect(vmService.FindCallCount()).To(Equal(1))
-			Expect(vmService.FindArgsForCall(0)).To(Equal(1234567))
-		})
-
 		It("returns an error if vmService find call returns an error", func() {
-			vmService.FindReturns(datatypes.Virtual_Guest{},
-				false,
+			vmService.FindReturns(
+				&datatypes.Virtual_Guest{},
 				errors.New("fake-vm-service-error"))
 
 			_, err = hasVM.Run(1234567)

@@ -8,7 +8,6 @@ import (
 
 	. "bosh-softlayer-cpi/action"
 
-	"bosh-softlayer-cpi/api"
 	stemcellfakes "bosh-softlayer-cpi/softlayer/stemcell_service/fakes"
 )
 
@@ -39,7 +38,6 @@ var _ = Describe("CreateStemcell", func() {
 		It("creates the stemcell", func() {
 			stemcellService.FindReturns(
 				"fake-global-identifier",
-				true,
 				nil,
 			)
 
@@ -52,7 +50,6 @@ var _ = Describe("CreateStemcell", func() {
 		It("returns an error if stemcellService find call returns an error", func() {
 			stemcellService.FindReturns(
 				"",
-				false,
 				errors.New("fake-stemcell-service-error"),
 			)
 
@@ -62,20 +59,5 @@ var _ = Describe("CreateStemcell", func() {
 			Expect(stemcellService.FindCallCount()).To(Equal(1))
 			Expect(stemcellCID).NotTo(Equal(StemcellCID(cloudProps.Id).String()))
 		})
-
-		It("returns an error if stemcell is not found", func() {
-			stemcellService.FindReturns(
-				"",
-				false,
-				nil,
-			)
-
-			stemcellCID, err = createStemcell.Run("fake-stemcell-imagePath", cloudProps)
-			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(Equal(api.NewStemcellkNotFoundError(string(cloudProps.Id), false).Error()))
-			Expect(stemcellService.FindCallCount()).To(Equal(1))
-			Expect(stemcellCID).NotTo(Equal(StemcellCID(cloudProps.Id).String()))
-		})
-
 	})
 })

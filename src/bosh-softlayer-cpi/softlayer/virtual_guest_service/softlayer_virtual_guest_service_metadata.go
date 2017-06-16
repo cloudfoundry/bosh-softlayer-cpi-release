@@ -1,8 +1,10 @@
 package instance
 
 import (
+	"bosh-softlayer-cpi/api"
 	"bytes"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
+	"strconv"
 )
 
 func (vg SoftlayerVirtualGuestService) SetMetadata(id int, vmMetadata Metadata) error {
@@ -11,9 +13,13 @@ func (vg SoftlayerVirtualGuestService) SetMetadata(id int, vmMetadata Metadata) 
 		return bosherr.WrapError(err, "Extracting tags from vm metadata")
 	}
 
-	err = vg.softlayerClient.SetTags(id, tags)
+	found, err := vg.softlayerClient.SetTags(id, tags)
 	if err != nil {
 		return bosherr.WrapErrorf(err, "Settings tags on virtualGuest '%d'", id)
+	}
+
+	if !found {
+		return api.NewVMNotFoundError(strconv.Itoa(id))
 	}
 
 	return nil

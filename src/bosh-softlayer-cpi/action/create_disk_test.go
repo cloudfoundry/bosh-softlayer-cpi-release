@@ -8,7 +8,6 @@ import (
 
 	. "bosh-softlayer-cpi/action"
 
-	"bosh-softlayer-cpi/api"
 	diskfakes "bosh-softlayer-cpi/softlayer/disk_service/fakes"
 	instancefakes "bosh-softlayer-cpi/softlayer/virtual_guest_service/fakes"
 	"github.com/softlayer/softlayer-go/datatypes"
@@ -42,19 +41,6 @@ var _ = Describe("CreateDisk", func() {
 			vmCID = VMCID(0)
 		})
 
-		It("returns an error when vmCID is not set", func() {
-			diskService.CreateReturns(
-				22345678,
-				nil,
-			)
-
-			diskCID, err = createDisk.Run(size, cloudProps, vmCID)
-			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring("vmCID is not setting"))
-			Expect(vmService.FindCallCount()).To(Equal(0))
-			Expect(diskService.CreateCallCount()).To(Equal(0))
-		})
-
 		Context("when vmCID is set", func() {
 			BeforeEach(func() {
 				vmCID = VMCID(12345678)
@@ -67,13 +53,12 @@ var _ = Describe("CreateDisk", func() {
 					nil,
 				)
 				vmService.FindReturns(
-					datatypes.Virtual_Guest{
+					&datatypes.Virtual_Guest{
 						Id: sl.Int(1234567),
 						Datacenter: &datatypes.Location{
 							Name: sl.String("fake-datacenter-name"),
 						},
 					},
-					true,
 					nil,
 				)
 			})
@@ -93,28 +78,13 @@ var _ = Describe("CreateDisk", func() {
 
 			It("returns an error if vmService find call returns an error", func() {
 				vmService.FindReturns(
-					datatypes.Virtual_Guest{},
-					false,
+					&datatypes.Virtual_Guest{},
 					errors.New("fake-instance-service-error"),
 				)
 
 				_, err = createDisk.Run(32768, cloudProps, vmCID)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("fake-instance-service-error"))
-				Expect(vmService.FindCallCount()).To(Equal(1))
-				Expect(diskService.CreateCallCount()).To(Equal(0))
-			})
-
-			It("returns an error if instance is not found", func() {
-				vmService.FindReturns(
-					datatypes.Virtual_Guest{},
-					false,
-					nil,
-				)
-
-				_, err = createDisk.Run(32768, cloudProps, vmCID)
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(Equal(api.NewVMNotFoundError(vmCID.String()).Error()))
 				Expect(vmService.FindCallCount()).To(Equal(1))
 				Expect(diskService.CreateCallCount()).To(Equal(0))
 			})

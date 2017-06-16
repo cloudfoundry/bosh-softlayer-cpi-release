@@ -6,7 +6,6 @@ import (
 	"bosh-softlayer-cpi/api"
 	"bosh-softlayer-cpi/softlayer/disk_service"
 	instance "bosh-softlayer-cpi/softlayer/virtual_guest_service"
-	"fmt"
 )
 
 type CreateDisk struct {
@@ -26,27 +25,18 @@ func NewCreateDisk(
 
 func (cd CreateDisk) Run(size int, cloudProps DiskCloudProperties, vmCID VMCID) (string, error) {
 	// Find the VM (if provided) so we can create the disk in the same datacenter
-	var zone string
-	zone = cloudProps.DataCenter
-	if vmCID != 0 {
-		vm, found, err := cd.vmService.Find(vmCID.Int())
-		if err != nil {
-			return "", bosherr.WrapError(err, "Creating disk")
+	vm, err := cd.vmService.Find(vmCID.Int())
+	if err != nil {
+		if _, ok := err.(api.CloudError); ok {
+			return "", err
 		}
-		if !found {
-			return "", api.NewVMNotFoundError(vmCID.String())
-		}
-
-		zone = *vm.Datacenter.Name
-
-	} else {
-		return "", api.NewDiskCreationFailedError(fmt.Sprint("vmCID is not setting"), false)
+		return "", bosherr.WrapErrorf(err, "Creating disk with size '%d'", size)
 	}
 
 	// Create the Disk
-	disk, err := cd.diskService.Create(size, cloudProps.Iops, zone)
+	disk, err := cd.diskService.Create(size, cloudProps.Iops, *vm.Datacenter.Name)
 	if err != nil {
-		return "", bosherr.WrapError(err, "Creating disk")
+		return "", bosherr.WrapErrorf(err, "Creating disk with size '%d'", size)
 	}
 
 	return DiskCID(disk).String(), nil

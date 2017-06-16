@@ -141,29 +141,6 @@ var _ = Describe("DetachDisk", func() {
 					},
 				}
 			})
-
-			//It("detaches the disk and re-attaches left disk", func() {
-			//	_, err = detachDisk.Run(vmCID, diskCID)
-			//	Expect(err).NotTo(HaveOccurred())
-			//	Expect(vmService.DetachDiskCallCount()).To(Equal(1))
-			//	Expect(registryClient.FetchCalled).To(BeTrue())
-			//	Expect(registryClient.UpdateCalled).To(BeTrue())
-			//	Expect(vmService.ReAttachLeftDiskCallCount()).To(Equal(1))
-			//	Expect(registryClient.UpdateSettings).To(Equal(expectedAgentSettings))
-			//})
-
-			//It("returns an error if vmService ReAttachLeftDisk call returns an error", func() {
-			//	vmService.ReAttachLeftDiskReturns(
-			//		errors.New("fake-vm-service-error"),
-			//	)
-			//
-			//	_, err = detachDisk.Run(vmCID, diskCID)
-			//	Expect(err.Error()).To(ContainSubstring("fake-vm-service-error"))
-			//	Expect(vmService.DetachDiskCallCount()).To(Equal(1))
-			//	Expect(registryClient.FetchCalled).To(BeTrue())
-			//	Expect(registryClient.UpdateCalled).To(BeTrue())
-			//	Expect(vmService.ReAttachLeftDiskCallCount()).To(Equal(1))
-			//})
 		})
 	})
 })

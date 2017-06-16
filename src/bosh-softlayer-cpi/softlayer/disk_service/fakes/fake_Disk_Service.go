@@ -35,20 +35,18 @@ type FakeService struct {
 	deleteReturnsOnCall map[int]struct {
 		result1 error
 	}
-	FindStub        func(id int) (datatypes.Network_Storage, bool, error)
+	FindStub        func(id int) (*datatypes.Network_Storage, error)
 	findMutex       sync.RWMutex
 	findArgsForCall []struct {
 		id int
 	}
 	findReturns struct {
-		result1 datatypes.Network_Storage
-		result2 bool
-		result3 error
+		result1 *datatypes.Network_Storage
+		result2 error
 	}
 	findReturnsOnCall map[int]struct {
-		result1 datatypes.Network_Storage
-		result2 bool
-		result3 error
+		result1 *datatypes.Network_Storage
+		result2 error
 	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
@@ -155,7 +153,7 @@ func (fake *FakeService) DeleteReturnsOnCall(i int, result1 error) {
 	}{result1}
 }
 
-func (fake *FakeService) Find(id int) (datatypes.Network_Storage, bool, error) {
+func (fake *FakeService) Find(id int) (*datatypes.Network_Storage, error) {
 	fake.findMutex.Lock()
 	ret, specificReturn := fake.findReturnsOnCall[len(fake.findArgsForCall)]
 	fake.findArgsForCall = append(fake.findArgsForCall, struct {
@@ -167,9 +165,9 @@ func (fake *FakeService) Find(id int) (datatypes.Network_Storage, bool, error) {
 		return fake.FindStub(id)
 	}
 	if specificReturn {
-		return ret.result1, ret.result2, ret.result3
+		return ret.result1, ret.result2
 	}
-	return fake.findReturns.result1, fake.findReturns.result2, fake.findReturns.result3
+	return fake.findReturns.result1, fake.findReturns.result2
 }
 
 func (fake *FakeService) FindCallCount() int {
@@ -184,29 +182,26 @@ func (fake *FakeService) FindArgsForCall(i int) int {
 	return fake.findArgsForCall[i].id
 }
 
-func (fake *FakeService) FindReturns(result1 datatypes.Network_Storage, result2 bool, result3 error) {
+func (fake *FakeService) FindReturns(result1 *datatypes.Network_Storage, result2 error) {
 	fake.FindStub = nil
 	fake.findReturns = struct {
-		result1 datatypes.Network_Storage
-		result2 bool
-		result3 error
-	}{result1, result2, result3}
+		result1 *datatypes.Network_Storage
+		result2 error
+	}{result1, result2}
 }
 
-func (fake *FakeService) FindReturnsOnCall(i int, result1 datatypes.Network_Storage, result2 bool, result3 error) {
+func (fake *FakeService) FindReturnsOnCall(i int, result1 *datatypes.Network_Storage, result2 error) {
 	fake.FindStub = nil
 	if fake.findReturnsOnCall == nil {
 		fake.findReturnsOnCall = make(map[int]struct {
-			result1 datatypes.Network_Storage
-			result2 bool
-			result3 error
+			result1 *datatypes.Network_Storage
+			result2 error
 		})
 	}
 	fake.findReturnsOnCall[i] = struct {
-		result1 datatypes.Network_Storage
-		result2 bool
-		result3 error
-	}{result1, result2, result3}
+		result1 *datatypes.Network_Storage
+		result2 error
+	}{result1, result2}
 }
 
 func (fake *FakeService) Invocations() map[string][][]interface{} {

@@ -8,7 +8,6 @@ import (
 
 	. "bosh-softlayer-cpi/action"
 
-	"bosh-softlayer-cpi/api"
 	"bosh-softlayer-cpi/registry"
 	registryfakes "bosh-softlayer-cpi/registry/fakes"
 	diskfakes "bosh-softlayer-cpi/softlayer/disk_service/fakes"
@@ -59,10 +58,9 @@ var _ = Describe("AttachDisk", func() {
 			}
 
 			diskService.FindReturns(
-				datatypes.Network_Storage{
+				&datatypes.Network_Storage{
 					Id: sl.Int(1234567),
 				},
-				true,
 				nil,
 			)
 			vmService.AttachDiskReturns(
@@ -83,30 +81,13 @@ var _ = Describe("AttachDisk", func() {
 
 		It("returns an error if diskService find call returns an error", func() {
 			diskService.FindReturns(
-				datatypes.Network_Storage{},
-				false,
+				&datatypes.Network_Storage{},
 				errors.New("fake-disk-service-error"),
 			)
 
 			_, err = attachDisk.Run(vmCID, diskCID)
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("fake-disk-service-error"))
-			Expect(diskService.FindCallCount()).To(Equal(1))
-			Expect(vmService.AttachDiskCallCount()).To(Equal(0))
-			Expect(registryClient.FetchCalled).To(BeFalse())
-			Expect(registryClient.UpdateCalled).To(BeFalse())
-		})
-
-		It("returns an error if disk is not found", func() {
-			diskService.FindReturns(
-				datatypes.Network_Storage{},
-				false,
-				nil,
-			)
-
-			_, err = attachDisk.Run(vmCID, diskCID)
-			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(Equal(api.NewDiskNotFoundError(diskCID.String(), false).Error()))
 			Expect(diskService.FindCallCount()).To(Equal(1))
 			Expect(vmService.AttachDiskCallCount()).To(Equal(0))
 			Expect(registryClient.FetchCalled).To(BeFalse())

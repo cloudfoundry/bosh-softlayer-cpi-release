@@ -30,12 +30,12 @@ func NewAttachDisk(
 
 func (ad AttachDisk) Run(vmCID VMCID, diskCID DiskCID) (interface{}, error) {
 	// Find the disk
-	_, found, err := ad.diskService.Find(diskCID.Int())
+	_, err := ad.diskService.Find(diskCID.Int())
 	if err != nil {
-		return nil, bosherr.WrapErrorf(err, "Attaching disk '%s' to vm '%s'", diskCID, vmCID)
-	}
-	if !found {
-		return nil, api.NewDiskNotFoundError(diskCID.String(), false)
+		if _, ok := err.(api.CloudError); ok {
+			return nil, err
+		}
+		return nil, bosherr.WrapErrorf(err, "Attaching disk '%s' to vm '%s", diskCID, vmCID)
 	}
 
 	// Attach the Disk to the VM
@@ -44,7 +44,7 @@ func (ad AttachDisk) Run(vmCID VMCID, diskCID DiskCID) (interface{}, error) {
 		if _, ok := err.(api.CloudError); ok {
 			return nil, err
 		}
-		return nil, bosherr.WrapErrorf(err, "Attaching disk '%s' to vm '%s'", diskCID, vmCID)
+		return nil, bosherr.WrapErrorf(err, "Attaching disk '%s' to vm '%s", diskCID, vmCID)
 	}
 
 	// Read VM agent settings

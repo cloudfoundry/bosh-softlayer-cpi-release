@@ -24,13 +24,12 @@ func NewCreateStemcell(
 }
 
 func (a CreateStemcellAction) Run(imagePath string, stemcellCloudProps CreateStemcellCloudProps) (string, error) {
-	_, found, err := a.stemcellService.Find(stemcellCloudProps.Id)
+	_, err := a.stemcellService.Find(stemcellCloudProps.Id)
 	if err != nil {
-		return "", bosherr.WrapErrorf(err, "Finding stemcell with id '%d'", stemcellCloudProps.Id)
-	}
-
-	if !found {
-		return "", api.NewStemcellkNotFoundError(string(stemcellCloudProps.Id), false)
+		if _, ok := err.(api.CloudError); ok {
+			return "", err
+		}
+		return "", bosherr.WrapErrorf(err, "Creating stemcell")
 	}
 
 	return StemcellCID(stemcellCloudProps.Id).String(), nil

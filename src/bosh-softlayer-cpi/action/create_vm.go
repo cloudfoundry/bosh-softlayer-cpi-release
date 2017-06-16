@@ -53,12 +53,12 @@ func NewCreateVM(
 
 func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMCloudProperties, networks Networks, diskIDs []DiskCID, env Environment) (string, error) {
 	// Find stemcell uuid
-	globalIdentifier, found, err := cv.stemcellService.Find(int(stemcellCID))
+	globalIdentifier, err := cv.stemcellService.Find(int(stemcellCID))
 	if err != nil {
-		return "", bosherr.WrapErrorf(err, "Creating VM")
-	}
-	if !found {
-		return "", api.NewStemcellkNotFoundError(stemcellCID.String(), false)
+		if _, ok := err.(api.CloudError); ok {
+			return "", err
+		}
+		return "", bosherr.WrapErrorf(err, "Finding stemcell uuid with id '%d'", stemcellCID.Int())
 	}
 
 	// Set public key
@@ -123,7 +123,7 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 
 	if cid == 0 {
 		// Create VM
-		cid, err = cv.virtualGuestService.Create(*virtualGuestTemplate, cv.softlayerOptions.EnableVps, stemcellCID.Int(), []int{cloudProps.SshKey})
+		cid, err = cv.virtualGuestService.Create(virtualGuestTemplate, cv.softlayerOptions.EnableVps, stemcellCID.Int(), []int{cloudProps.SshKey})
 		if err != nil {
 			if _, ok := err.(api.CloudError); ok {
 				return "", err
@@ -149,12 +149,9 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 	agentNetworks := instanceNetworks.AsRegistryNetworks()
 
 	// Get object details of new VM
-	virtualGuest, found, err := cv.virtualGuestService.Find(cid)
+	virtualGuest, err := cv.virtualGuestService.Find(cid)
 	if err != nil {
-		return "", bosherr.WrapErrorf(err, "Creating VM")
-	}
-	if !found {
-		return "", api.NewVMNotFoundError(string(cid))
+		return "", err
 	}
 
 	if cloudProps.DeployedByBoshCLI {
@@ -257,36 +254,27 @@ func (cv CreateVM) createByOsReload(stemcellCID StemcellCID, cloudProps VMCloudP
 		case "dynamic":
 			if len(network.IP) > 0 && cid == 0 {
 				var (
-					vm    datatypes.Virtual_Guest
-					found bool
-					err   error
+					vm  *datatypes.Virtual_Guest
+					err error
 				)
 
 				if IsPrivateSubnet(net.ParseIP(network.IP)) {
-					vm, found, err = cv.virtualGuestService.FindByPrimaryBackendIp(network.IP)
+					vm, err = cv.virtualGuestService.FindByPrimaryBackendIp(network.IP)
 
 				} else {
-					vm, found, err = cv.virtualGuestService.FindByPrimaryIp(network.IP)
+					vm, err = cv.virtualGuestService.FindByPrimaryIp(network.IP)
 				}
-
 				if err != nil {
-					return cid, bosherr.WrapErrorf(err, "Finding VM with IP Address '%s'", network.IP)
-				}
-				if !found {
-					return cid, api.NewVMCreationFailedError(fmt.Sprintf("Finding VM with IP Address '%s'", network.IP), true)
+					return cid, err
 				}
 
 				if err := cv.registryClient.Delete(strconv.Itoa(*vm.Id)); err != nil {
 					return cid, bosherr.WrapErrorf(err, "Cleaning registry record '%d' before os_reload", *vm.Id)
 				}
 
-				_, err = cv.virtualGuestService.ReloadOS(*vm.Id, stemcellCID.Int(), []int{cloudProps.SshKey}, cloudProps.VmNamePrefix, cloudProps.Domain)
+				err = cv.virtualGuestService.ReloadOS(*vm.Id, stemcellCID.Int(), []int{cloudProps.SshKey}, cloudProps.VmNamePrefix, cloudProps.Domain)
 				if err != nil {
-					if apiErr, ok := err.(sl.Error); ok {
-						return cid, api.NewVMCreationFailedError(fmt.Sprintf("Failed to do OS Reload with IP Address '%s' with error %s", network.IP, apiErr), false)
-					} else {
-						return cid, api.NewVMCreationFailedError(fmt.Sprintf("Failed to do OS Reload with IP Address '%s' with error %s", network.IP, apiErr), true)
-					}
+					return cid, err
 				}
 
 				cid = *vm.Id

@@ -55,6 +55,11 @@ const (
 	UPGRADE_VIRTUAL_SERVER_ORDER_TYPE = "SoftLayer_Container_Product_Order_Virtual_Guest_Upgrade"
 
 	NETWORK_PERFORMANCE_STORAGE_PACKAGE_ID = 222
+
+	SOFTLAYER_PUBLIC_EXCEPTION                      = "SoftLayer_Exception_Public"
+	SOFTLAYER_OBJECTNOTFOUND_EXCEPTION              = "SoftLayer_Exception_ObjectNotFound"
+	SOFTLAYER_BLOCKINGOPERATIONINPROGRESS_EXCEPTION = "SoftLayer_Exception_Network_Storage_BlockingOperationInProgress"
+	SOFTLAYER_GROUP_ACCESSCONTROLERROR_EXCEPTION    = "SoftLayer_Exception_Network_Storage_Group_AccessControlError"
 )
 
 //go:generate counterfeiter -o fakes/fake_client_factory.go . ClientFactory
@@ -93,35 +98,36 @@ func NewSoftLayerClientManager(session *session.Session, vps *vpsVm.Client) *cli
 //go:generate counterfeiter -o fakes/fake_client.go . Client
 type Client interface {
 	CancelInstance(id int) error
-	CreateInstance(template *datatypes.Virtual_Guest) (datatypes.Virtual_Guest, error)
+	CreateInstance(template *datatypes.Virtual_Guest) (*datatypes.Virtual_Guest, error)
 	EditInstance(id int, template *datatypes.Virtual_Guest) (bool, error)
-	GetInstance(id int, mask string) (datatypes.Virtual_Guest, error)
-	GetInstanceByPrimaryBackendIpAddress(ip string) (datatypes.Virtual_Guest, error)
-	GetInstanceByPrimaryIpAddress(ip string) (datatypes.Virtual_Guest, error)
+	GetInstance(id int, mask string) (*datatypes.Virtual_Guest, bool, error)
+	GetInstanceByPrimaryBackendIpAddress(ip string) (*datatypes.Virtual_Guest, bool, error)
+	GetInstanceByPrimaryIpAddress(ip string) (*datatypes.Virtual_Guest, bool, error)
 	RebootInstance(id int, soft bool, hard bool) error
-	ReloadInstance(id int, stemcellId int, sshKeyIds []int, hostname string, domain string) (string, error)
-	UpgradeInstance(id int, cpu int, memory int, network int, privateCPU bool, additional_diskSize int) (datatypes.Container_Product_Order_Receipt, error)
+	ReloadInstance(id int, stemcellId int, sshKeyIds []int, hostname string, domain string) error
+	UpgradeInstance(id int, cpu int, memory int, network int, privateCPU bool, additional_diskSize int) (*datatypes.Container_Product_Order_Receipt, error)
 	WaitInstanceUntilReady(id int, until time.Time) error
 	WaitInstanceHasActiveTransaction(id int, until time.Time) error
 	WaitInstanceHasNoneActiveTransaction(id int, until time.Time) error
-	SetTags(id int, tags string) error
+	WaitVolumeProvisioningWithOrderId(orderId int, until time.Time) (*datatypes.Network_Storage, error)
+	SetTags(id int, tags string) (bool, error)
 	AttachSecondDiskToInstance(id int, diskSize int) error
-	GetInstanceAllowedHost(id int) (datatypes.Network_Storage_Allowed_Host, error)
-	AuthorizeHostToVolume(instance *datatypes.Virtual_Guest, volumeId int, until time.Time) error
-	DeauthorizeHostToVolume(instance *datatypes.Virtual_Guest, volumeId int, until time.Time) error
-	CreateVolume(location string, size int, iops int) (datatypes.Network_Storage, error)
-	OrderBlockVolume(storageType string, location string, size int, iops int) (datatypes.Container_Product_Order_Receipt, error)
-	CancelBlockVolume(volumeId int, reason string, immedicate bool) error
-	GetBlockVolumeDetails(volumeId int, mask string) (datatypes.Network_Storage, error)
-	GetNetworkStorageTarget(volumeId int, mask string) (string, error)
-	GetImage(imageId int, mask string) (datatypes.Virtual_Guest_Block_Device_Template_Group, error)
-	GetVlan(id int, mask string) (datatypes.Network_Vlan, error)
-	GetAllowedHostCredential(id int) (datatypes.Network_Storage_Allowed_Host, error)
-	GetAllowedNetworkStorage(id int) ([]string, error)
-	CreateSshKey(label *string, key *string, fingerPrint *string) (datatypes.Security_Ssh_Key, error)
+	GetInstanceAllowedHost(id int) (*datatypes.Network_Storage_Allowed_Host, bool, error)
+	AuthorizeHostToVolume(instance *datatypes.Virtual_Guest, volumeId int, until time.Time) (bool, error)
+	DeauthorizeHostToVolume(instance *datatypes.Virtual_Guest, volumeId int, until time.Time) (bool, error)
+	CreateVolume(location string, size int, iops int) (*datatypes.Network_Storage, error)
+	OrderBlockVolume(storageType string, location string, size int, iops int) (*datatypes.Container_Product_Order_Receipt, error)
+	CancelBlockVolume(volumeId int, reason string, immediate bool) (bool, error)
+	GetBlockVolumeDetails(volumeId int, mask string) (*datatypes.Network_Storage, bool, error)
+	GetNetworkStorageTarget(volumeId int, mask string) (string, bool, error)
+	GetImage(imageId int, mask string) (*datatypes.Virtual_Guest_Block_Device_Template_Group, bool, error)
+	GetVlan(id int, mask string) (*datatypes.Network_Vlan, bool, error)
+	GetAllowedHostCredential(id int) (*datatypes.Network_Storage_Allowed_Host, bool, error)
+	GetAllowedNetworkStorage(id int) ([]string, bool, error)
+	CreateSshKey(label *string, key *string, fingerPrint *string) (*datatypes.Security_Ssh_Key, error)
 	DeleteSshKey(id int) (bool, error)
 
-	CreateInstanceFromVPS(template *datatypes.Virtual_Guest, stemcellID int, sshKeys []int) (datatypes.Virtual_Guest, error)
+	CreateInstanceFromVPS(template *datatypes.Virtual_Guest, stemcellID int, sshKeys []int) (*datatypes.Virtual_Guest, error)
 	DeleteInstanceFromVPS(id int) error
 }
 
@@ -139,82 +145,120 @@ type clientManager struct {
 	vpsService            *vpsVm.Client
 }
 
-func (c *clientManager) GetInstance(id int, mask string) (datatypes.Virtual_Guest, error) {
+func (c *clientManager) GetInstance(id int, mask string) (*datatypes.Virtual_Guest, bool, error) {
 	if mask == "" {
 		mask = INSTANCE_DEFAULT_MASK
 	}
-	return c.VirtualGuestService.Id(id).Mask(mask).GetObject()
+	virtualGuest, err := c.VirtualGuestService.Id(id).Mask(mask).GetObject()
+	if err != nil {
+		if apiErr, ok := err.(sl.Error); ok {
+			if apiErr.Exception == SOFTLAYER_OBJECTNOTFOUND_EXCEPTION {
+				return &datatypes.Virtual_Guest{}, false, nil
+			}
+			return &datatypes.Virtual_Guest{}, false, err
+		}
+	}
+
+	return &virtualGuest, true, err
 }
 
-func (c *clientManager) GetVlan(id int, mask string) (datatypes.Network_Vlan, error) {
+func (c *clientManager) GetVlan(id int, mask string) (*datatypes.Network_Vlan, bool, error) {
 	if mask == "" {
 		mask = NETWORK_DEFAULT_VLAN
 	}
-	return c.NetworkVlanService.Id(id).Mask(mask).GetObject()
+	vlan, err := c.NetworkVlanService.Id(id).Mask(mask).GetObject()
+	if err != nil {
+		if apiErr, ok := err.(sl.Error); ok {
+			if apiErr.Exception == SOFTLAYER_OBJECTNOTFOUND_EXCEPTION {
+				return &datatypes.Network_Vlan{}, false, nil
+			}
+			return &datatypes.Network_Vlan{}, false, err
+		}
+	}
+
+	return &vlan, true, err
 }
 
-func (c *clientManager) GetInstanceByPrimaryBackendIpAddress(ip string) (datatypes.Virtual_Guest, error) {
+func (c *clientManager) GetInstanceByPrimaryBackendIpAddress(ip string) (*datatypes.Virtual_Guest, bool, error) {
 	filters := filter.New()
 	filters = append(filters, filter.Path("virtualGuests.primaryBackendIpAddress").Eq(ip))
 	virtualguests, err := c.AccountService.Mask(INSTANCE_DEFAULT_MASK).Filter(filters.Build()).GetVirtualGuests()
 	if err != nil {
-		return datatypes.Virtual_Guest{}, nil
+		return &datatypes.Virtual_Guest{}, false, nil
 	}
 
-	if len(virtualguests) > 0 {
-		return virtualguests[0], nil
+	for _, virtualguest := range virtualguests {
+		// Return the first instance (it can only be 1 instance with the same primary backend ip addresss)
+		return &virtualguest, true, nil
 	}
 
-	return datatypes.Virtual_Guest{}, nil
+	return &datatypes.Virtual_Guest{}, false, err
 }
 
-func (c *clientManager) GetInstanceByPrimaryIpAddress(ip string) (datatypes.Virtual_Guest, error) {
+func (c *clientManager) GetInstanceByPrimaryIpAddress(ip string) (*datatypes.Virtual_Guest, bool, error) {
 	filters := filter.New()
 	filters = append(filters, filter.Path("virtualGuests.primaryIpAddress").Eq(ip))
 	virtualguests, err := c.AccountService.Mask(INSTANCE_DEFAULT_MASK).Filter(filters.Build()).GetVirtualGuests()
 	if err != nil {
-		return datatypes.Virtual_Guest{}, nil
+		return &datatypes.Virtual_Guest{}, false, nil
 	}
 
-	if len(virtualguests) > 0 {
-		return virtualguests[0], nil
+	for _, virtualguest := range virtualguests {
+		// Return the first instance (it can only be 1 instance with the same primary ip addresss)
+		return &virtualguest, true, nil
 	}
 
-	return datatypes.Virtual_Guest{}, nil
+	return &datatypes.Virtual_Guest{}, false, err
 }
 
-func (c *clientManager) GetAllowedHostCredential(id int) (datatypes.Network_Storage_Allowed_Host, error) {
+func (c *clientManager) GetAllowedHostCredential(id int) (*datatypes.Network_Storage_Allowed_Host, bool, error) {
 	allowedHost, err := c.VirtualGuestService.Id(id).Mask(ALLOWD_HOST_DEFAULT_MASK).GetAllowedHost()
 	if err != nil {
-		return datatypes.Network_Storage_Allowed_Host{}, bosherr.WrapErrorf(err, "Getting allowed host with instance id '%d'", id)
+		if apiErr, ok := err.(sl.Error); ok {
+			if apiErr.Exception == SOFTLAYER_OBJECTNOTFOUND_EXCEPTION {
+				return &datatypes.Network_Storage_Allowed_Host{}, false, nil
+			}
+			return &datatypes.Network_Storage_Allowed_Host{}, false, err
+		}
 	}
 
-	if allowedHost.Id == nil {
-		return datatypes.Network_Storage_Allowed_Host{}, bosherr.Errorf("Unable to getting allowed host with instance id '%d'", id)
-	}
-
-	return allowedHost, err
+	return &allowedHost, true, err
 }
 
-func (c *clientManager) GetAllowedNetworkStorage(id int) ([]string, error) {
-	var storages []string
+func (c *clientManager) GetAllowedNetworkStorage(id int) ([]string, bool, error) {
+	var storages = make([]string, 1)
 	networkStorages, err := c.VirtualGuestService.Id(id).GetAllowedNetworkStorage()
 	if err != nil {
-		return storages, err
+		if apiErr, ok := err.(sl.Error); ok {
+			if apiErr.Exception == SOFTLAYER_OBJECTNOTFOUND_EXCEPTION {
+				return storages, false, nil
+			}
+			return storages, false, err
+		}
 	}
 
 	for _, networkStorage := range networkStorages {
 		storages = append(storages, strconv.Itoa(*networkStorage.Id))
 	}
 
-	return storages, nil
+	return storages, true, err
 }
 
-func (c *clientManager) GetImage(imageId int, mask string) (datatypes.Virtual_Guest_Block_Device_Template_Group, error) {
+func (c *clientManager) GetImage(imageId int, mask string) (*datatypes.Virtual_Guest_Block_Device_Template_Group, bool, error) {
 	if mask == "" {
 		mask = IMAGE_DETAIL_MASK
 	}
-	return c.ImageService.Id(imageId).Mask(mask).GetObject()
+	image, err := c.ImageService.Id(imageId).Mask(mask).GetObject()
+	if err != nil {
+		if apiErr, ok := err.(sl.Error); ok {
+			if apiErr.Exception == SOFTLAYER_OBJECTNOTFOUND_EXCEPTION {
+				return &datatypes.Virtual_Guest_Block_Device_Template_Group{}, false, nil
+			}
+			return &datatypes.Virtual_Guest_Block_Device_Template_Group{}, false, err
+		}
+	}
+
+	return &image, true, err
 }
 
 //Check the virtual server instance is ready for use
@@ -222,9 +266,12 @@ func (c *clientManager) GetImage(imageId int, mask string) (datatypes.Virtual_Gu
 //param2: error, any error may happen when getting the status of the instance
 func (c *clientManager) WaitInstanceUntilReady(id int, until time.Time) error {
 	for {
-		virtualGuest, err := c.GetInstance(id, "id, lastOperatingSystemReload[id,modifyDate], activeTransaction[id,transactionStatus.name], provisionDate, powerState.keyName")
+		virtualGuest, found, err := c.GetInstance(id, "id, lastOperatingSystemReload[id,modifyDate], activeTransaction[id,transactionStatus.name], provisionDate, powerState.keyName")
 		if err != nil {
-			return bosherr.WrapErrorf(err, "Getting instance with id '%d'", id)
+			return err
+		}
+		if !found {
+			return bosherr.WrapErrorf(err, "SoftLayer virtual guest '%d' does not exists", id)
 		}
 
 		lastReload := virtualGuest.LastOperatingSystemReload
@@ -261,9 +308,12 @@ func (c *clientManager) WaitInstanceUntilReady(id int, until time.Time) error {
 
 func (c *clientManager) WaitInstanceHasActiveTransaction(id int, until time.Time) error {
 	for {
-		virtualGuest, err := c.GetInstance(id, "id, activeTransaction[id,transactionStatus.name]")
+		virtualGuest, found, err := c.GetInstance(id, "id, activeTransaction[id,transactionStatus.name]")
 		if err != nil {
-			return bosherr.WrapErrorf(err, "Getting instance with id '%d'", id)
+			return err
+		}
+		if !found {
+			return bosherr.WrapErrorf(err, "SoftLayer virtual guest '%d' does not exist", id)
 		}
 
 		// if activeTxn != nil && activeTxn.TransactionStatus != nil && activeTxn.TransactionStatus.Name != nil {
@@ -286,9 +336,12 @@ func (c *clientManager) WaitInstanceHasActiveTransaction(id int, until time.Time
 
 func (c *clientManager) WaitInstanceHasNoneActiveTransaction(id int, until time.Time) error {
 	for {
-		virtualGuest, err := c.GetInstance(id, "id, activeTransaction[id,transactionStatus.name]")
+		virtualGuest, found, err := c.GetInstance(id, "id, activeTransaction[id,transactionStatus.name]")
 		if err != nil {
 			return err
+		}
+		if !found {
+			return bosherr.WrapErrorf(err, "SoftLayer virtual guest '%d' does not exist", id)
 		}
 
 		// if activeTxn != nil && activeTxn.TransactionStatus != nil && activeTxn.TransactionStatus.Name != nil {
@@ -309,21 +362,21 @@ func (c *clientManager) WaitInstanceHasNoneActiveTransaction(id int, until time.
 	}
 }
 
-func (c *clientManager) CreateInstance(template *datatypes.Virtual_Guest) (datatypes.Virtual_Guest, error) {
+func (c *clientManager) CreateInstance(template *datatypes.Virtual_Guest) (*datatypes.Virtual_Guest, error) {
 	virtualguest, err := c.VirtualGuestService.CreateObject(template)
 	if err != nil {
-		return datatypes.Virtual_Guest{}, bosherr.WrapError(err, "Creating instance")
+		return &datatypes.Virtual_Guest{}, bosherr.WrapError(err, "Creating instance")
 	}
 
 	until := time.Now().Add(time.Duration(4) * time.Hour)
 	if err := c.WaitInstanceUntilReady(*virtualguest.Id, until); err != nil {
-		return datatypes.Virtual_Guest{}, bosherr.WrapError(err, "Waiting until instance is ready")
+		return &datatypes.Virtual_Guest{}, bosherr.WrapError(err, "Waiting until instance is ready")
 	}
 
-	return virtualguest, nil
+	return &virtualguest, nil
 }
 
-func (c *clientManager) CreateInstanceFromVPS(template *datatypes.Virtual_Guest, stemcellID int, sshKeys []int) (datatypes.Virtual_Guest, error) {
+func (c *clientManager) CreateInstanceFromVPS(template *datatypes.Virtual_Guest, stemcellID int, sshKeys []int) (*datatypes.Virtual_Guest, error) {
 	reqFilter := &models.VMFilter{
 		CPU:         int32(*template.StartCpus),
 		MemoryMb:    int32(*template.MaxMemory),
@@ -335,12 +388,12 @@ func (c *clientManager) CreateInstanceFromVPS(template *datatypes.Virtual_Guest,
 	if err != nil {
 		_, ok := err.(*vpsVm.OrderVMByFilterNotFound)
 		if !ok {
-			return datatypes.Virtual_Guest{}, bosherr.WrapError(err, "Ordering vm from pool")
+			return &datatypes.Virtual_Guest{}, bosherr.WrapError(err, "Ordering vm from pool")
 		} else {
 			// From createBySoftlayer implement run in cpi action
 			virtualGuest, err := c.CreateInstance(template)
 			if err != nil {
-				return datatypes.Virtual_Guest{}, bosherr.WrapError(err, "Creating VirtualGuest from SoftLayer client")
+				return &datatypes.Virtual_Guest{}, bosherr.WrapError(err, "Creating VirtualGuest from SoftLayer client")
 			}
 
 			slPoolVm := &models.VM{
@@ -355,7 +408,7 @@ func (c *clientManager) CreateInstanceFromVPS(template *datatypes.Virtual_Guest,
 			}
 			_, err = c.vpsService.AddVM(vpsVm.NewAddVMParams().WithBody(slPoolVm))
 			if err != nil {
-				return datatypes.Virtual_Guest{}, bosherr.WrapError(err, "Adding vm into pool")
+				return &datatypes.Virtual_Guest{}, bosherr.WrapError(err, "Adding vm into pool")
 			}
 
 			return virtualGuest, nil
@@ -367,14 +420,17 @@ func (c *clientManager) CreateInstanceFromVPS(template *datatypes.Virtual_Guest,
 	vm = orderVmResp.Payload.VM
 	virtualGuestId = int((*vm).Cid)
 
-	_, err = c.ReloadInstance(virtualGuestId, stemcellID, sshKeys, *template.Hostname, *template.Domain)
+	err = c.ReloadInstance(virtualGuestId, stemcellID, sshKeys, *template.Hostname, *template.Domain)
 	if err != nil {
-		return datatypes.Virtual_Guest{}, bosherr.WrapError(err, "Reloading vm from pool")
+		return &datatypes.Virtual_Guest{}, bosherr.WrapError(err, "Reloading vm from pool")
 	}
 
-	virtualGuest, err := c.GetInstance(virtualGuestId, INSTANCE_DEFAULT_MASK)
+	virtualGuest, found, err := c.GetInstance(virtualGuestId, INSTANCE_DEFAULT_MASK)
 	if err != nil {
-		return datatypes.Virtual_Guest{}, bosherr.WrapError(err, "Reloading vm from pool")
+		return &datatypes.Virtual_Guest{}, err
+	}
+	if !found {
+		return &datatypes.Virtual_Guest{}, bosherr.WrapErrorf(err, "SoftLayer virtual guest '%d' does not exists", virtualGuestId)
 	}
 
 	deviceName := &models.VM{
@@ -389,16 +445,21 @@ func (c *clientManager) CreateInstanceFromVPS(template *datatypes.Virtual_Guest,
 	}
 	_, err = c.vpsService.UpdateVM(vpsVm.NewUpdateVMParams().WithBody(deviceName))
 	if err != nil {
-		return datatypes.Virtual_Guest{}, bosherr.WrapErrorf(err, "Updating the hostname of vm %d in pool to using", virtualGuestId)
+		return &datatypes.Virtual_Guest{}, bosherr.WrapErrorf(err, "Updating the hostname of vm %d in pool to using", virtualGuestId)
 	}
 
 	return virtualGuest, nil
 }
 
 func (c *clientManager) EditInstance(id int, template *datatypes.Virtual_Guest) (bool, error) {
-	resp, err := c.VirtualGuestService.Id(id).EditObject(template)
+	_, err := c.VirtualGuestService.Id(id).EditObject(template)
 	if err != nil {
-		return resp, bosherr.WrapError(err, "Editing instance")
+		if apiErr, ok := err.(sl.Error); ok {
+			if apiErr.Exception == SOFTLAYER_OBJECTNOTFOUND_EXCEPTION {
+				return false, nil
+			}
+			return false, err
+		}
 	}
 
 	until := time.Now().Add(time.Duration(30) * time.Minute)
@@ -406,7 +467,7 @@ func (c *clientManager) EditInstance(id int, template *datatypes.Virtual_Guest) 
 		return false, bosherr.WrapError(err, "Waiting until instance is ready")
 	}
 
-	return true, nil
+	return true, err
 }
 
 func (c *clientManager) RebootInstance(id int, soft bool, hard bool) error {
@@ -421,11 +482,11 @@ func (c *clientManager) RebootInstance(id int, soft bool, hard bool) error {
 	return err
 }
 
-func (c *clientManager) ReloadInstance(id int, stemcellId int, sshKeyIds []int, hostname string, domain string) (string, error) {
+func (c *clientManager) ReloadInstance(id int, stemcellId int, sshKeyIds []int, hostname string, domain string) error {
 	var err error
 	until := time.Now().Add(time.Duration(1) * time.Hour)
 	if err = c.WaitInstanceHasNoneActiveTransaction(*sl.Int(id), until); err != nil {
-		return "", bosherr.WrapError(err, "Waiting until instance has none active transaction before os_reload")
+		return bosherr.WrapError(err, "Waiting until instance has none active transaction before os_reload")
 	}
 
 	config := datatypes.Container_Hardware_Server_Configuration{
@@ -436,19 +497,19 @@ func (c *clientManager) ReloadInstance(id int, stemcellId int, sshKeyIds []int, 
 		config.SshKeyIds = sshKeyIds
 	}
 
-	resp, err := c.VirtualGuestService.Id(id).ReloadOperatingSystem(sl.String("FORCE"), &config)
+	_, err = c.VirtualGuestService.Id(id).ReloadOperatingSystem(sl.String("FORCE"), &config)
 	if err != nil {
-		return resp, err
+		return err
 	}
 
 	until = time.Now().Add(time.Duration(1) * time.Hour)
 	if err = c.WaitInstanceHasActiveTransaction(*sl.Int(id), until); err != nil {
-		return resp, bosherr.WrapError(err, "Waiting until instance has active transaction after launching os_reload")
+		return bosherr.WrapError(err, "Waiting until instance has active transaction after launching os_reload")
 	}
 
 	until = time.Now().Add(time.Duration(4) * time.Hour)
 	if err = c.WaitInstanceUntilReady(*sl.Int(id), until); err != nil {
-		return resp, bosherr.WrapError(err, "Waiting until instance is ready after os_reload")
+		return bosherr.WrapError(err, "Waiting until instance is ready after os_reload")
 	}
 
 	succeed, err := c.EditInstance(id, &datatypes.Virtual_Guest{
@@ -457,14 +518,14 @@ func (c *clientManager) ReloadInstance(id int, stemcellId int, sshKeyIds []int, 
 	})
 
 	if err != nil {
-		return "", bosherr.WrapError(err, "Editing VM hostname after OS Reload")
+		return bosherr.WrapError(err, "Editing VM hostname after OS Reload")
 	}
 
 	if !succeed {
-		return "", bosherr.WrapError(err, "Failed to edit VM hostname after OS Reload")
+		return bosherr.WrapError(err, "Failed to edit VM hostname after OS Reload")
 	}
 
-	return resp, nil
+	return nil
 }
 
 func (c *clientManager) CancelInstance(id int) error {
@@ -472,7 +533,7 @@ func (c *clientManager) CancelInstance(id int) error {
 	until := time.Now().Add(time.Duration(30) * time.Minute)
 	if err = c.WaitInstanceHasNoneActiveTransaction(*sl.Int(id), until); err != nil {
 		if apiErr, ok := err.(sl.Error); ok {
-			if apiErr.Exception == "SoftLayer_Exception_ObjectNotFound" {
+			if apiErr.Exception == SOFTLAYER_OBJECTNOTFOUND_EXCEPTION {
 				return nil
 			}
 		}
@@ -490,18 +551,18 @@ func (c *clientManager) CancelInstance(id int) error {
 	return nil
 }
 
-func (c *clientManager) DeleteInstanceFromVPS(cid int) error {
-	_, err := c.vpsService.GetVMByCid(vpsVm.NewGetVMByCidParams().WithCid(int32(cid)))
+func (c *clientManager) DeleteInstanceFromVPS(id int) error {
+	_, err := c.vpsService.GetVMByCid(vpsVm.NewGetVMByCidParams().WithCid(int32(id)))
 	if err != nil {
 		_, ok := err.(*vpsVm.GetVMByCidNotFound)
 		if ok {
-			virtualGuest, err := c.VirtualGuestService.Id(cid).GetObject()
+			virtualGuest, err := c.VirtualGuestService.Id(id).GetObject()
 			if err != nil {
-				return bosherr.WrapError(err, fmt.Sprintf("Getting virtual guest %d details from SoftLayer", cid))
+				return bosherr.WrapError(err, fmt.Sprintf("Getting virtual guest %d details from SoftLayer", id))
 			}
 
 			slPoolVm := &models.VM{
-				Cid:         int32(cid),
+				Cid:         int32(id),
 				CPU:         int32(*virtualGuest.StartCpus),
 				MemoryMb:    int32(*virtualGuest.MaxMemory),
 				IP:          strfmt.IPv4(*virtualGuest.PrimaryBackendIpAddress),
@@ -512,7 +573,7 @@ func (c *clientManager) DeleteInstanceFromVPS(cid int) error {
 			}
 			_, err = c.vpsService.AddVM(vpsVm.NewAddVMParams().WithBody(slPoolVm))
 			if err != nil {
-				return bosherr.WrapError(err, fmt.Sprintf("Adding vm %d to pool", cid))
+				return bosherr.WrapError(err, fmt.Sprintf("Adding vm %d to pool", id))
 			}
 			return nil
 		}
@@ -522,19 +583,15 @@ func (c *clientManager) DeleteInstanceFromVPS(cid int) error {
 	free := models.VMState{
 		State: models.StateFree,
 	}
-	_, err = c.vpsService.UpdateVMWithState(vpsVm.NewUpdateVMWithStateParams().WithBody(&free).WithCid(int32(cid)))
+	_, err = c.vpsService.UpdateVMWithState(vpsVm.NewUpdateVMWithStateParams().WithBody(&free).WithCid(int32(id)))
 	if err != nil {
-		return bosherr.WrapErrorf(err, "Updating state of vm %d in pool to free", cid)
+		return bosherr.WrapErrorf(err, "Updating state of vm %d in pool to free", id)
 	}
 
 	return nil
 }
 
-func (c *clientManager) GenerateInstanceCreationTemplate(virtualGuest *datatypes.Virtual_Guest, params map[string]interface{}) (*datatypes.Virtual_Guest, error) {
-	return &datatypes.Virtual_Guest{}, nil
-}
-
-func (c *clientManager) UpgradeInstance(id int, cpu int, memory int, network int, privateCPU bool, additional_diskSize int) (datatypes.Container_Product_Order_Receipt, error) {
+func (c *clientManager) UpgradeInstance(id int, cpu int, memory int, network int, privateCPU bool, additional_diskSize int) (*datatypes.Container_Product_Order_Receipt, error) {
 	upgradeOptions := make(map[string]int)
 	public := true
 	if cpu != 0 {
@@ -556,10 +613,10 @@ func (c *clientManager) UpgradeInstance(id int, cpu int, memory int, network int
 		Filter(filter.New(filter.Path("type.keyName").Eq(packageType)).Build()).
 		GetAllObjects()
 	if err != nil {
-		return datatypes.Container_Product_Order_Receipt{}, err
+		return &datatypes.Container_Product_Order_Receipt{}, err
 	}
 	if len(productPackages) == 0 {
-		return datatypes.Container_Product_Order_Receipt{}, bosherr.Errorf("No package found for type: %s", packageType)
+		return &datatypes.Container_Product_Order_Receipt{}, bosherr.Errorf("No package found for type: %s", packageType)
 	}
 	packageID := *productPackages[0].Id
 	packageItems, err := c.PackageService.
@@ -567,13 +624,13 @@ func (c *clientManager) UpgradeInstance(id int, cpu int, memory int, network int
 		Mask("description,capacity,prices[id,locationGroupId,categories]").
 		GetItems()
 	if err != nil {
-		return datatypes.Container_Product_Order_Receipt{}, err
+		return &datatypes.Container_Product_Order_Receipt{}, err
 	}
-	prices := []datatypes.Product_Item_Price{}
+	var prices = make([]datatypes.Product_Item_Price, 0)
 	for option, value := range upgradeOptions {
 		priceID := getPriceIdForUpgrade(packageItems, option, value, public)
 		if priceID == -1 {
-			return datatypes.Container_Product_Order_Receipt{},
+			return &datatypes.Container_Product_Order_Receipt{},
 				bosherr.Errorf("Unable to find %s option with %d", option, value)
 		}
 		prices = append(prices, datatypes.Product_Item_Price{Id: &priceID})
@@ -582,13 +639,13 @@ func (c *clientManager) UpgradeInstance(id int, cpu int, memory int, network int
 	if additional_diskSize != 0 {
 		diskItemPrice, err := c.getUpgradeItemPriceForSecondDisk(id, additional_diskSize)
 		if err != nil {
-			return datatypes.Container_Product_Order_Receipt{}, err
+			return &datatypes.Container_Product_Order_Receipt{}, err
 		}
-		prices = append(prices, diskItemPrice)
+		prices = append(prices, *diskItemPrice)
 	}
 
 	if len(prices) == 0 {
-		return datatypes.Container_Product_Order_Receipt{}, bosherr.Error("Unable to find price for upgrade")
+		return &datatypes.Container_Product_Order_Receipt{}, bosherr.Error("Unable to find price for upgrade")
 	}
 	order := datatypes.Container_Product_Order{
 		ComplexType: sl.String(UPGRADE_VIRTUAL_SERVER_ORDER_TYPE),
@@ -617,32 +674,46 @@ func (c *clientManager) UpgradeInstance(id int, cpu int, memory int, network int
 			},
 		},
 	}
-	return c.OrderService.PlaceOrder(&upgradeOrder, sl.Bool(false))
+	orderReceipt, err := c.OrderService.PlaceOrder(&upgradeOrder, sl.Bool(false))
+	if err != nil {
+		return &datatypes.Container_Product_Order_Receipt{}, err
+	}
+
+	return &orderReceipt, nil
 }
 
-func (c *clientManager) SetTags(id int, tags string) error {
+func (c *clientManager) SetTags(id int, tags string) (bool, error) {
 	_, err := c.VirtualGuestService.Id(id).SetTags(&tags)
-	return err
+	if err != nil {
+		if apiErr, ok := err.(sl.Error); ok {
+			if apiErr.Exception == SOFTLAYER_OBJECTNOTFOUND_EXCEPTION {
+				return false, nil
+			}
+			return false, err
+		}
+	}
+
+	return true, err
 }
 
-func (c *clientManager) GetInstanceAllowedHost(id int) (datatypes.Network_Storage_Allowed_Host, error) {
+func (c *clientManager) GetInstanceAllowedHost(id int) (*datatypes.Network_Storage_Allowed_Host, bool, error) {
 	mask := "id, name, credential[username, password]"
 	allowedHost, err := c.VirtualGuestService.Id(id).Mask(mask).GetAllowedHost()
 	if err != nil {
-		return datatypes.Network_Storage_Allowed_Host{}, err
+		return &datatypes.Network_Storage_Allowed_Host{}, false, err
 	}
 
 	if allowedHost.Id == nil {
-		return datatypes.Network_Storage_Allowed_Host{}, bosherr.Errorf("Unable to get allowed host with instance id: %d", id)
+		return &datatypes.Network_Storage_Allowed_Host{}, false, bosherr.Errorf("Unable to get allowed host with instance id: %d", id)
 	}
 
-	return allowedHost, nil
+	return &allowedHost, true, nil
 }
 
-func (c *clientManager) getUpgradeItemPriceForSecondDisk(id int, diskSize int) (datatypes.Product_Item_Price, error) {
+func (c *clientManager) getUpgradeItemPriceForSecondDisk(id int, diskSize int) (*datatypes.Product_Item_Price, error) {
 	itemPrices, err := c.VirtualGuestService.Id(id).GetUpgradeItemPrices(sl.Bool(true))
 	if err != nil {
-		return datatypes.Product_Item_Price{}, err
+		return &datatypes.Product_Item_Price{}, err
 	}
 
 	var currentDiskCapacity int
@@ -651,7 +722,7 @@ func (c *clientManager) getUpgradeItemPriceForSecondDisk(id int, diskSize int) (
 
 	diskTypeBool, err := c.VirtualGuestService.Id(id).GetLocalDiskFlag()
 	if err != nil {
-		return datatypes.Product_Item_Price{}, err
+		return &datatypes.Product_Item_Price{}, err
 	}
 
 	if diskTypeBool {
@@ -680,10 +751,10 @@ func (c *clientManager) getUpgradeItemPriceForSecondDisk(id int, diskSize int) (
 	}
 
 	if currentItemPrice.Id == nil {
-		return datatypes.Product_Item_Price{}, bosherr.Errorf("No proper %s disk for size %d", diskType, diskSize)
+		return &datatypes.Product_Item_Price{}, bosherr.Errorf("No proper %s disk for size %d", diskType, diskSize)
 	}
 
-	return currentItemPrice, nil
+	return &currentItemPrice, nil
 }
 
 func getPriceIdForUpgrade(packageItems []datatypes.Product_Item, option string, value int, public bool) int {
@@ -721,53 +792,63 @@ func getPriceIdForUpgrade(packageItems []datatypes.Product_Item, option string, 
 	return -1
 }
 
-func (c *clientManager) GetBlockVolumeDetails(volumeId int, mask string) (datatypes.Network_Storage, error) {
+func (c *clientManager) GetBlockVolumeDetails(volumeId int, mask string) (*datatypes.Network_Storage, bool, error) {
 	if mask == "" {
 		mask = VOLUME_DETAIL_MASK
 	}
 	volume, err := c.StorageService.Id(volumeId).Mask(mask).GetObject()
 	if err != nil {
-		return datatypes.Network_Storage{}, err
+		if apiErr, ok := err.(sl.Error); ok {
+			if apiErr.Exception == SOFTLAYER_OBJECTNOTFOUND_EXCEPTION {
+				return &datatypes.Network_Storage{}, false, nil
+			}
+			return &datatypes.Network_Storage{}, false, err
+		}
 	}
 
-	return volume, nil
+	return &volume, true, nil
 }
 
-func (c *clientManager) GetNetworkStorageTarget(volumeId int, mask string) (string, error) {
+func (c *clientManager) GetNetworkStorageTarget(volumeId int, mask string) (string, bool, error) {
 	if mask == "" {
 		mask = VOLUME_DETAIL_MASK
 	}
-
+	var targetPortal string
 	connectionInfo, err := c.StorageService.Id(volumeId).Mask(mask).GetNetworkConnectionDetails()
 	if err != nil {
-		return "", err
+		if apiErr, ok := err.(sl.Error); ok {
+			if apiErr.Exception == SOFTLAYER_OBJECTNOTFOUND_EXCEPTION {
+				return targetPortal, false, nil
+			}
+			return targetPortal, false, err
+		}
 	}
 
-	return *connectionInfo.IpAddress, nil
+	return *connectionInfo.IpAddress, true, nil
 }
 
-func (c *clientManager) OrderBlockVolume(storageType string, location string, size int, iops int) (datatypes.Container_Product_Order_Receipt, error) {
+func (c *clientManager) OrderBlockVolume(storageType string, location string, size int, iops int) (*datatypes.Container_Product_Order_Receipt, error) {
 	locationId, err := c.GetLocationId(location)
 	if err != nil {
-		return datatypes.Container_Product_Order_Receipt{}, bosherr.Error("Invalid datacenter name specified. Please provide the lower case short name (e.g.: dal09)")
+		return &datatypes.Container_Product_Order_Receipt{}, bosherr.Error("Invalid datacenter name specified. Please provide the lower case short name (e.g.: dal09)")
 	}
 	baseTypeName := "SoftLayer_Container_Product_Order_Network_"
-	prices := []datatypes.Product_Item_Price{}
+	var prices = make([]datatypes.Product_Item_Price, 0)
 	productPacakge, err := c.GetPackage(storageType)
 	if err != nil {
-		return datatypes.Container_Product_Order_Receipt{}, err
+		return &datatypes.Container_Product_Order_Receipt{}, err
 	}
 
 	if storageType == "performance_storage_iscsi" {
 		complexType := baseTypeName + "PerformanceStorage_Iscsi"
 		storagePrice, err := FindPerformancePrice(productPacakge, "performance_storage_iscsi")
 		if err != nil {
-			return datatypes.Container_Product_Order_Receipt{}, err
+			return &datatypes.Container_Product_Order_Receipt{}, err
 		}
 		prices = append(prices, storagePrice)
 		spacePrice, err := FindPerformanceSpacePrice(productPacakge, size)
 		if err != nil {
-			return datatypes.Container_Product_Order_Receipt{}, err
+			return &datatypes.Container_Product_Order_Receipt{}, err
 		}
 		prices = append(prices, spacePrice)
 
@@ -782,12 +863,12 @@ func (c *clientManager) OrderBlockVolume(storageType string, location string, si
 				iopsPrice, err = c.selectMaximunIopsItemPriceIdOnSize(size)
 			}
 			if err != nil {
-				return datatypes.Container_Product_Order_Receipt{}, err
+				return &datatypes.Container_Product_Order_Receipt{}, err
 			}
 		} else {
 			iopsPrice, err = FindPerformanceIOPSPrice(productPacakge, size, iops)
 			if err != nil {
-				return datatypes.Container_Product_Order_Receipt{}, err
+				return &datatypes.Container_Product_Order_Receipt{}, err
 			}
 		}
 		prices = append(prices, iopsPrice)
@@ -807,44 +888,49 @@ func (c *clientManager) OrderBlockVolume(storageType string, location string, si
 				},
 			},
 		}
-		return c.OrderService.PlaceOrder(&order, sl.Bool(false))
+		orderReceipt, err := c.OrderService.PlaceOrder(&order, sl.Bool(false))
+		if err != nil {
+			return &datatypes.Container_Product_Order_Receipt{}, err
+		}
+
+		return &orderReceipt, nil
 	} else {
-		return datatypes.Container_Product_Order_Receipt{}, bosherr.Error("Block volume storage_type must be either Performance or Endurance")
+		return &datatypes.Container_Product_Order_Receipt{}, bosherr.Error("Block volume storage_type must be either Performance or Endurance")
 	}
 }
 
-func (c *clientManager) CreateVolume(location string, size int, iops int) (datatypes.Network_Storage, error) {
+func (c *clientManager) CreateVolume(location string, size int, iops int) (*datatypes.Network_Storage, error) {
 	receipt, err := c.OrderBlockVolume("performance_storage_iscsi", location, size, iops)
 	if err != nil {
-		return datatypes.Network_Storage{}, err
+		return &datatypes.Network_Storage{}, err
 	}
 
 	if receipt.OrderId == nil {
-		return datatypes.Network_Storage{}, bosherr.Errorf("No order id returned after placing order with size of '%d', iops of '%d', location of `%s`", size, iops, location)
+		return &datatypes.Network_Storage{}, bosherr.Errorf("No order id returned after placing order with size of '%d', iops of '%d', location of `%s`", size, iops, location)
 	}
 
 	until := time.Now().Add(time.Duration(1) * time.Hour)
 	return c.WaitVolumeProvisioningWithOrderId(*receipt.OrderId, until)
 }
 
-func (c *clientManager) WaitVolumeProvisioningWithOrderId(orderId int, until time.Time) (datatypes.Network_Storage, error) {
+func (c *clientManager) WaitVolumeProvisioningWithOrderId(orderId int, until time.Time) (*datatypes.Network_Storage, error) {
 	for {
 		volumes, err := c.getIscsiNetworkStorageWithOrderId(orderId)
 		if err != nil {
-			return datatypes.Network_Storage{}, bosherr.WrapErrorf(err, "Getting volumes with order id  of '%d'", orderId)
+			return &datatypes.Network_Storage{}, bosherr.WrapErrorf(err, "Getting volumes with order id  of '%d'", orderId)
 		}
 
 		// if activeTxn != nil && activeTxn.TransactionStatus != nil && activeTxn.TransactionStatus.Name != nil {
 		// 	fmt.Println("activeTxn: ", *activeTxn.TransactionStatus.Name)
 		// }
 
-		if len(volumes) > 0 {
-			return volumes[0], nil
+		for _, volume := range volumes {
+			return &volume, nil
 		}
 
 		now := time.Now()
 		if now.After(until) {
-			return datatypes.Network_Storage{}, bosherr.Errorf("Waiting volume provisioning with order id of '%d' has time out", orderId)
+			return &datatypes.Network_Storage{}, bosherr.Errorf("Waiting volume provisioning with order id of '%d' has time out", orderId)
 		}
 
 		min := math.Min(float64(5.0), float64(until.Sub(now)))
@@ -969,45 +1055,49 @@ func FindPerformanceIOPSPrice(productPackage datatypes.Product_Package, size int
 	return datatypes.Product_Item_Price{}, bosherr.Error("Unable to find price for iops for the given volume")
 }
 
-func (c *clientManager) CancelBlockVolume(volumeId int, reason string, immediate bool) error {
-	blockVolume, err := c.GetBlockVolumeDetails(volumeId, "id,billingItem.id")
+func (c *clientManager) CancelBlockVolume(volumeId int, reason string, immediate bool) (bool, error) {
+	blockVolume, found, err := c.GetBlockVolumeDetails(volumeId, "id,billingItem.id")
 	if err != nil {
-		return err
+		return false, err
 	}
+
+	if !found {
+		return true, nil
+	}
+
 	if blockVolume.BillingItem == nil || blockVolume.BillingItem.Id == nil {
-		return bosherr.Error("No billing item is found to cancel")
+		return false, bosherr.Error("No billing item is found to cancel")
 	}
-	billitemId := *blockVolume.BillingItem.Id
-	_, err = c.BillingService.Id(billitemId).CancelItem(sl.Bool(immediate), sl.Bool(true), sl.String(reason), sl.String(""))
-	return err
+
+	return c.BillingService.Id(*blockVolume.BillingItem.Id).CancelItem(sl.Bool(immediate), sl.Bool(true), sl.String(reason), sl.String(""))
 }
 
-func (c *clientManager) AuthorizeHostToVolume(instance *datatypes.Virtual_Guest, volumeId int, until time.Time) error {
+func (c *clientManager) AuthorizeHostToVolume(instance *datatypes.Virtual_Guest, volumeId int, until time.Time) (bool, error) {
 	for {
 		allowable, err := c.StorageService.Id(volumeId).AllowAccessFromVirtualGuest(instance)
 		if err != nil {
 			apiErr := err.(sl.Error)
-			if apiErr.Exception == "SoftLayer_Exception_ObjectNotFound" {
-				return bosherr.WrapErrorf(err, "Unable to find object with id of '%d'", volumeId)
+			if apiErr.Exception == SOFTLAYER_OBJECTNOTFOUND_EXCEPTION {
+				return false, bosherr.WrapErrorf(err, "Unable to find object with id of '%d'", volumeId)
 			}
-			if apiErr.Exception == "SoftLayer_Exception_Network_Storage_BlockingOperationInProgress" {
+			if apiErr.Exception == SOFTLAYER_BLOCKINGOPERATIONINPROGRESS_EXCEPTION {
 				continue
 			}
-			if apiErr.Exception == "SoftLayer_Exception_Network_Storage_Group_AccessControlError" &&
+			if apiErr.Exception == SOFTLAYER_GROUP_ACCESSCONTROLERROR_EXCEPTION &&
 				strings.Contains(apiErr.Message, "not yet ready for mount") {
 				continue
 			}
 
-			return err
+			return false, err
 		}
 
 		if allowable {
-			return nil
+			return allowable, nil
 		}
 
 		now := time.Now()
 		if now.After(until) {
-			return bosherr.Errorf("Authorizing instance with id '%d' to volume with id '%d' time out after %v", *instance.Id, volumeId, until.String())
+			return false, bosherr.Errorf("Authorizing instance with id '%d' to volume with id '%d' time out after %v", *instance.Id, volumeId, until.String())
 		}
 
 		min := math.Min(float64(5.0), float64(until.Sub(now)))
@@ -1015,27 +1105,27 @@ func (c *clientManager) AuthorizeHostToVolume(instance *datatypes.Virtual_Guest,
 	}
 }
 
-func (c *clientManager) DeauthorizeHostToVolume(instance *datatypes.Virtual_Guest, volumeId int, until time.Time) error {
+func (c *clientManager) DeauthorizeHostToVolume(instance *datatypes.Virtual_Guest, volumeId int, until time.Time) (bool, error) {
 	for {
 		disAllowed, err := c.StorageService.Id(volumeId).RemoveAccessFromVirtualGuest(instance)
 		if err != nil {
 			apiErr := err.(sl.Error)
-			if apiErr.Exception == "SoftLayer_Exception_ObjectNotFound" {
-				return bosherr.Errorf("Unable to find object with id of '%d'", volumeId)
+			if apiErr.Exception == SOFTLAYER_OBJECTNOTFOUND_EXCEPTION {
+				return false, bosherr.Errorf("Unable to find object with id of '%d'", volumeId)
 			}
-			if apiErr.Exception == "SoftLayer_Exception_Network_Storage_BlockingOperationInProgress" {
+			if apiErr.Exception == SOFTLAYER_BLOCKINGOPERATIONINPROGRESS_EXCEPTION {
 				continue
 			}
-			return err
+			return false, err
 		}
 
 		if disAllowed {
-			return nil
+			return disAllowed, nil
 		}
 
 		now := time.Now()
 		if now.After(until) {
-			return bosherr.Errorf("De-Authorizing instance with id '%d' to volume with id '%d' time out after %v", *instance.Id, volumeId, until.String())
+			return false, bosherr.Errorf("De-Authorizing instance with id '%d' to volume with id '%d' time out after %v", *instance.Id, volumeId, until.String())
 		}
 
 		min := math.Min(float64(5.0), float64(until.Sub(now)))
@@ -1077,7 +1167,7 @@ func (c *clientManager) AttachSecondDiskToInstance(id int, diskSize int) error {
 	return nil
 }
 
-func (c *clientManager) CreateSshKey(label *string, key *string, fingerPrint *string) (datatypes.Security_Ssh_Key, error) {
+func (c *clientManager) CreateSshKey(label *string, key *string, fingerPrint *string) (*datatypes.Security_Ssh_Key, error) {
 	var err error
 
 	templateObject := &datatypes.Security_Ssh_Key{
@@ -1089,18 +1179,19 @@ func (c *clientManager) CreateSshKey(label *string, key *string, fingerPrint *st
 	sshKey, err := c.SecuritySshKeyService.CreateObject(templateObject)
 	if err != nil {
 		if apiErr, ok := err.(sl.Error); ok {
-			if apiErr.Exception == "SoftLayer_Exception_Public" && strings.Contains(apiErr.Message, "SSH key already exists") {
-				sshkeys, err := c.AccountService.Mask("id, key").Filter(filter.Path("sshKeys.key").Eq(*key).Build()).GetSshKeys()
+			if apiErr.Exception == SOFTLAYER_PUBLIC_EXCEPTION && strings.Contains(apiErr.Message, "SSH key already exists") {
+				sshKeys, err := c.AccountService.Mask("id, key").Filter(filter.Path("sshKeys.key").Eq(*key).Build()).GetSshKeys()
 				if err != nil {
-					return datatypes.Security_Ssh_Key{}, err
-				} else {
-					return sshkeys[0], nil
+					return &datatypes.Security_Ssh_Key{}, err
+				}
+				for _, sshKey := range sshKeys {
+					return &sshKey, nil
 				}
 			}
 		}
 	}
 
-	return sshKey, nil
+	return &sshKey, err
 }
 
 func (c *clientManager) DeleteSshKey(id int) (bool, error) {

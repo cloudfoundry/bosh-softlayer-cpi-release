@@ -159,28 +159,25 @@ var _ = Describe("CreateVM", func() {
 
 			imageService.FindReturns(
 				"12345678",
-				true,
 				nil,
 			)
 			vmService.GetVlanReturns(
-				datatypes.Network_Vlan{
+				&datatypes.Network_Vlan{
 					Id:           sl.Int(42345678),
 					NetworkSpace: sl.String("PRIVATE"),
 				},
 				nil,
 			)
 			vmService.FindByPrimaryBackendIpReturns(
-				datatypes.Virtual_Guest{
+				&datatypes.Virtual_Guest{
 					Id: sl.Int(52345678),
 					Datacenter: &datatypes.Location{
 						Name: sl.String("fake-datacenter-name"),
 					},
 				},
-				true,
 				nil,
 			)
 			vmService.ReloadOSReturns(
-				"true",
 				nil,
 			)
 			vmService.ConfigureNetworksReturns(
@@ -203,7 +200,7 @@ var _ = Describe("CreateVM", func() {
 			)
 
 			vmService.FindReturns(
-				datatypes.Virtual_Guest{
+				&datatypes.Virtual_Guest{
 					Id: sl.Int(52345678),
 					Datacenter: &datatypes.Location{
 						Name: sl.String("fake-datacenter-name"),
@@ -211,7 +208,6 @@ var _ = Describe("CreateVM", func() {
 					PrimaryBackendIpAddress:  sl.String("10.10.10.11"),
 					FullyQualifiedDomainName: sl.String("fake-domain-name"),
 				},
-				true,
 				nil,
 			)
 		})
@@ -478,7 +474,6 @@ var _ = Describe("CreateVM", func() {
 		It("returns an error if imageService find call returns an error", func() {
 			imageService.FindReturns(
 				"12345678",
-				false,
 				errors.New("fake-image-service-error"),
 			)
 
@@ -497,31 +492,9 @@ var _ = Describe("CreateVM", func() {
 			Expect(registryClient.UpdateCalled).To(BeFalse())
 		})
 
-		It("returns an error if stemcell is not found", func() {
-			imageService.FindReturns(
-				"12345678",
-				false,
-				nil,
-			)
-
-			vmCID, err = createVM.Run(agentID, stemcellCID, cloudProps, networks, disks, env)
-			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring("Stemcell '12345678' not found"))
-			Expect(imageService.FindCallCount()).To(Equal(1))
-			Expect(vmService.CreateSshKeyCallCount()).To(Equal(0))
-			Expect(vmService.GetVlanCallCount()).To(Equal(0))
-			Expect(vmService.FindByPrimaryBackendIpCallCount()).To(Equal(0))
-			Expect(vmService.ReloadOSCallCount()).To(Equal(0))
-			Expect(vmService.CreateCallCount()).To(Equal(0))
-			Expect(vmService.ConfigureNetworksCallCount()).To(Equal(0))
-			Expect(vmService.AttachEphemeralDiskCallCount()).To(Equal(0))
-			Expect(vmService.CleanUpCallCount()).To(Equal(0))
-			Expect(registryClient.UpdateCalled).To(BeFalse())
-		})
-
 		It("returns an error if vmService get vlan call returns an error", func() {
 			vmService.GetVlanReturns(
-				datatypes.Network_Vlan{},
+				&datatypes.Network_Vlan{},
 				errors.New("fake-vm-service-error"),
 			)
 
@@ -542,8 +515,7 @@ var _ = Describe("CreateVM", func() {
 
 		It("returns an error if vmService find by primary backend ip call returns an error", func() {
 			vmService.FindByPrimaryBackendIpReturns(
-				datatypes.Virtual_Guest{},
-				false,
+				&datatypes.Virtual_Guest{},
 				errors.New("fake-vm-service-error"),
 			)
 
@@ -562,37 +534,14 @@ var _ = Describe("CreateVM", func() {
 			Expect(registryClient.UpdateCalled).To(BeFalse())
 		})
 
-		It("returns an error if vm with IP address is not found", func() {
-			vmService.FindByPrimaryBackendIpReturns(
-				datatypes.Virtual_Guest{},
-				false,
-				nil,
-			)
-
-			vmCID, err = createVM.Run(agentID, stemcellCID, cloudProps, networks, disks, env)
-			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring("Finding VM with IP Address '10.10.10.10'"))
-			Expect(imageService.FindCallCount()).To(Equal(1))
-			Expect(vmService.CreateSshKeyCallCount()).To(Equal(0))
-			Expect(vmService.GetVlanCallCount()).To(Equal(1))
-			Expect(vmService.FindByPrimaryBackendIpCallCount()).To(Equal(1))
-			Expect(vmService.ReloadOSCallCount()).To(Equal(0))
-			Expect(vmService.CreateCallCount()).To(Equal(0))
-			Expect(vmService.ConfigureNetworksCallCount()).To(Equal(0))
-			Expect(vmService.AttachEphemeralDiskCallCount()).To(Equal(0))
-			Expect(vmService.CleanUpCallCount()).To(Equal(0))
-			Expect(registryClient.UpdateCalled).To(BeFalse())
-		})
-
 		It("returns an error if vmService reload os call returns an error", func() {
 			vmService.ReloadOSReturns(
-				"",
 				errors.New("fake-vm-service-error"),
 			)
 
 			vmCID, err = createVM.Run(agentID, stemcellCID, cloudProps, networks, disks, env)
 			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring("Failed to do OS Reload with IP Address '10.10.10.10' with error"))
+			Expect(err.Error()).To(ContainSubstring("OS reloading VM: fake-vm-service-error"))
 			Expect(imageService.FindCallCount()).To(Equal(1))
 			Expect(vmService.CreateSshKeyCallCount()).To(Equal(0))
 			Expect(vmService.GetVlanCallCount()).To(Equal(1))

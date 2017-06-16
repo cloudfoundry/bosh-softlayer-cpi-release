@@ -31,10 +31,9 @@ var _ = Describe("HasDisk", func() {
 	Describe("Run", func() {
 		It("returns true if disk ID exist", func() {
 			diskService.FindReturns(
-				datatypes.Network_Storage{
+				&datatypes.Network_Storage{
 					Id: sl.Int(1234567),
 				},
-				true,
 				nil,
 			)
 
@@ -47,25 +46,9 @@ var _ = Describe("HasDisk", func() {
 
 		})
 
-		It("returns false if disk ID does not exist", func() {
-			diskService.FindReturns(
-				datatypes.Network_Storage{},
-				false,
-				nil,
-			)
-
-			found, err = hasDisk.Run(1234567)
-			Expect(err).NotTo(HaveOccurred())
-			Expect(found).To(BeFalse())
-
-			Expect(diskService.FindCallCount()).To(Equal(1))
-			Expect(diskService.FindArgsForCall(0)).To(Equal(1234567))
-		})
-
 		It("returns an error if diskService find call returns an error", func() {
 			diskService.FindReturns(
-				datatypes.Network_Storage{},
-				false,
+				&datatypes.Network_Storage{},
 				errors.New("fake-disk-service-error"),
 			)
 

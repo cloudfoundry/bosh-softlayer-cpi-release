@@ -1,8 +1,6 @@
 package action
 
 import (
-	bosherr "github.com/cloudfoundry/bosh-utils/errors"
-
 	"bosh-softlayer-cpi/softlayer/disk_service"
 )
 
@@ -19,10 +17,10 @@ func NewHasDisk(
 }
 
 func (hd HasDisk) Run(diskCID DiskCID) (bool, error) {
-	_, found, err := hd.diskService.Find(diskCID.Int())
+	_, err := hd.diskService.Find(diskCID.Int())
 	if err != nil {
-		return false, bosherr.WrapErrorf(err, "Finding disk '%s'", diskCID)
+		return false, err
 	}
 
-	return found, nil
+	return true, nil
 }
