@@ -8,7 +8,6 @@ import (
 
 	"bosh-softlayer-cpi/api"
 	"bosh-softlayer-cpi/registry"
-	"bosh-softlayer-cpi/util"
 
 	boslc "bosh-softlayer-cpi/softlayer/client"
 	boslconfig "bosh-softlayer-cpi/softlayer/config"
@@ -16,6 +15,7 @@ import (
 	"bosh-softlayer-cpi/softlayer/stemcell_service"
 	"bosh-softlayer-cpi/softlayer/virtual_guest_service"
 
+	"bytes"
 	"github.com/bluebosh/goodhosts"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	"github.com/softlayer/softlayer-go/datatypes"
@@ -262,7 +262,7 @@ func (cv CreateVM) createByOsReload(stemcellCID StemcellCID, cloudProps VMCloudP
 					err   error
 				)
 
-				if util.IsPrivateSubnet(net.ParseIP(network.IP)) {
+				if IsPrivateSubnet(net.ParseIP(network.IP)) {
 					vm, found, err = cv.virtualGuestService.FindByPrimaryBackendIp(network.IP)
 
 				} else {
@@ -469,4 +469,54 @@ func (cv CreateVM) updateDavConfig(config *instance.DavConfig, directorIP string
 	(*config)["endpoint"] = mbus
 
 	return nil
+}
+
+type ipRange struct {
+	start net.IP
+	end   net.IP
+}
+
+var privateRanges = []ipRange{
+	ipRange{
+		start: net.ParseIP("10.0.0.0"),
+		end:   net.ParseIP("10.255.255.255"),
+	},
+	ipRange{
+		start: net.ParseIP("100.64.0.0"),
+		end:   net.ParseIP("100.127.255.255"),
+	},
+	ipRange{
+		start: net.ParseIP("172.16.0.0"),
+		end:   net.ParseIP("172.31.255.255"),
+	},
+	ipRange{
+		start: net.ParseIP("192.0.0.0"),
+		end:   net.ParseIP("192.0.0.255"),
+	},
+	ipRange{
+		start: net.ParseIP("192.168.0.0"),
+		end:   net.ParseIP("192.168.255.255"),
+	},
+	ipRange{
+		start: net.ParseIP("198.18.0.0"),
+		end:   net.ParseIP("198.19.255.255"),
+	},
+}
+
+func IsPrivateSubnet(ipAddress net.IP) bool {
+	if ipCheck := ipAddress.To4(); ipCheck != nil {
+		for _, r := range privateRanges {
+			if inRange(r, ipAddress) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func inRange(r ipRange, ipAddress net.IP) bool {
+	if bytes.Compare(ipAddress, r.start) >= 0 && bytes.Compare(ipAddress, r.end) <= 0 {
+		return true
+	}
+	return false
 }

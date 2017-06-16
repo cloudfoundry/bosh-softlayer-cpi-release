@@ -773,7 +773,14 @@ func (c *clientManager) OrderBlockVolume(storageType string, location string, si
 
 		var iopsPrice datatypes.Product_Item_Price
 		if iops == 0 {
-			iopsPrice, err = c.selectMaximunIopsItemPriceIdOnSize(size)
+			switch size {
+			case 250:
+				iopsPrice, err = c.selectMaximunIopsItemPriceIdOnSize(1000)
+			case 500:
+				iopsPrice, err = c.selectMaximunIopsItemPriceIdOnSize(1000)
+			default:
+				iopsPrice, err = c.selectMaximunIopsItemPriceIdOnSize(size)
+			}
 			if err != nil {
 				return datatypes.Container_Product_Order_Receipt{}, err
 			}
