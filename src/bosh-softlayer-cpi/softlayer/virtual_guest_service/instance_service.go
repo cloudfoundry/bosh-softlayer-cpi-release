@@ -10,6 +10,7 @@ type Service interface {
 	AttachedDisks(id int) ([]string, error)
 	AttachEphemeralDisk(id int, diskSize int) error
 	Create(virtualGuest *datatypes.Virtual_Guest, enableVps bool, stemcellID int, sshKeys []int) (int, error)
+	UpgradeInstance(id int, cpu int, memory int, network int, privateCPU bool) error
 	ConfigureNetworks(id int, networks Networks) (Networks, error)
 	CleanUp(id int)
 	CreateSshKey(label string, key string, fingerPrint string) (int, error)

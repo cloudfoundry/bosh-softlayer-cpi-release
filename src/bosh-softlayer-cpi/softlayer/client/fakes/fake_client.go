@@ -122,6 +122,21 @@ type FakeClient struct {
 	reloadInstanceReturnsOnCall map[int]struct {
 		result1 error
 	}
+	UpgradeInstanceConfigStub        func(id int, cpu int, memory int, network int, privateCPU bool) error
+	upgradeInstanceConfigMutex       sync.RWMutex
+	upgradeInstanceConfigArgsForCall []struct {
+		id         int
+		cpu        int
+		memory     int
+		network    int
+		privateCPU bool
+	}
+	upgradeInstanceConfigReturns struct {
+		result1 error
+	}
+	upgradeInstanceConfigReturnsOnCall map[int]struct {
+		result1 error
+	}
 	UpgradeInstanceStub        func(id int, cpu int, memory int, network int, privateCPU bool, additional_diskSize int) (*datatypes.Container_Product_Order_Receipt, error)
 	upgradeInstanceMutex       sync.RWMutex
 	upgradeInstanceArgsForCall []struct {
@@ -319,6 +334,22 @@ type FakeClient struct {
 		result3 error
 	}
 	getBlockVolumeDetailsReturnsOnCall map[int]struct {
+		result1 *datatypes.Network_Storage
+		result2 bool
+		result3 error
+	}
+	GetBlockVolumeDetails2Stub        func(volumeId int, mask string) (*datatypes.Network_Storage, bool, error)
+	getBlockVolumeDetails2Mutex       sync.RWMutex
+	getBlockVolumeDetails2ArgsForCall []struct {
+		volumeId int
+		mask     string
+	}
+	getBlockVolumeDetails2Returns struct {
+		result1 *datatypes.Network_Storage
+		result2 bool
+		result3 error
+	}
+	getBlockVolumeDetails2ReturnsOnCall map[int]struct {
 		result1 *datatypes.Network_Storage
 		result2 bool
 		result3 error
@@ -876,6 +907,58 @@ func (fake *FakeClient) ReloadInstanceReturnsOnCall(i int, result1 error) {
 		})
 	}
 	fake.reloadInstanceReturnsOnCall[i] = struct {
+		result1 error
+	}{result1}
+}
+
+func (fake *FakeClient) UpgradeInstanceConfig(id int, cpu int, memory int, network int, privateCPU bool) error {
+	fake.upgradeInstanceConfigMutex.Lock()
+	ret, specificReturn := fake.upgradeInstanceConfigReturnsOnCall[len(fake.upgradeInstanceConfigArgsForCall)]
+	fake.upgradeInstanceConfigArgsForCall = append(fake.upgradeInstanceConfigArgsForCall, struct {
+		id         int
+		cpu        int
+		memory     int
+		network    int
+		privateCPU bool
+	}{id, cpu, memory, network, privateCPU})
+	fake.recordInvocation("UpgradeInstanceConfig", []interface{}{id, cpu, memory, network, privateCPU})
+	fake.upgradeInstanceConfigMutex.Unlock()
+	if fake.UpgradeInstanceConfigStub != nil {
+		return fake.UpgradeInstanceConfigStub(id, cpu, memory, network, privateCPU)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fake.upgradeInstanceConfigReturns.result1
+}
+
+func (fake *FakeClient) UpgradeInstanceConfigCallCount() int {
+	fake.upgradeInstanceConfigMutex.RLock()
+	defer fake.upgradeInstanceConfigMutex.RUnlock()
+	return len(fake.upgradeInstanceConfigArgsForCall)
+}
+
+func (fake *FakeClient) UpgradeInstanceConfigArgsForCall(i int) (int, int, int, int, bool) {
+	fake.upgradeInstanceConfigMutex.RLock()
+	defer fake.upgradeInstanceConfigMutex.RUnlock()
+	return fake.upgradeInstanceConfigArgsForCall[i].id, fake.upgradeInstanceConfigArgsForCall[i].cpu, fake.upgradeInstanceConfigArgsForCall[i].memory, fake.upgradeInstanceConfigArgsForCall[i].network, fake.upgradeInstanceConfigArgsForCall[i].privateCPU
+}
+
+func (fake *FakeClient) UpgradeInstanceConfigReturns(result1 error) {
+	fake.UpgradeInstanceConfigStub = nil
+	fake.upgradeInstanceConfigReturns = struct {
+		result1 error
+	}{result1}
+}
+
+func (fake *FakeClient) UpgradeInstanceConfigReturnsOnCall(i int, result1 error) {
+	fake.UpgradeInstanceConfigStub = nil
+	if fake.upgradeInstanceConfigReturnsOnCall == nil {
+		fake.upgradeInstanceConfigReturnsOnCall = make(map[int]struct {
+			result1 error
+		})
+	}
+	fake.upgradeInstanceConfigReturnsOnCall[i] = struct {
 		result1 error
 	}{result1}
 }
@@ -1611,6 +1694,61 @@ func (fake *FakeClient) GetBlockVolumeDetailsReturnsOnCall(i int, result1 *datat
 	}{result1, result2, result3}
 }
 
+func (fake *FakeClient) GetBlockVolumeDetails2(volumeId int, mask string) (*datatypes.Network_Storage, bool, error) {
+	fake.getBlockVolumeDetails2Mutex.Lock()
+	ret, specificReturn := fake.getBlockVolumeDetails2ReturnsOnCall[len(fake.getBlockVolumeDetails2ArgsForCall)]
+	fake.getBlockVolumeDetails2ArgsForCall = append(fake.getBlockVolumeDetails2ArgsForCall, struct {
+		volumeId int
+		mask     string
+	}{volumeId, mask})
+	fake.recordInvocation("GetBlockVolumeDetails2", []interface{}{volumeId, mask})
+	fake.getBlockVolumeDetails2Mutex.Unlock()
+	if fake.GetBlockVolumeDetails2Stub != nil {
+		return fake.GetBlockVolumeDetails2Stub(volumeId, mask)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2, ret.result3
+	}
+	return fake.getBlockVolumeDetails2Returns.result1, fake.getBlockVolumeDetails2Returns.result2, fake.getBlockVolumeDetails2Returns.result3
+}
+
+func (fake *FakeClient) GetBlockVolumeDetails2CallCount() int {
+	fake.getBlockVolumeDetails2Mutex.RLock()
+	defer fake.getBlockVolumeDetails2Mutex.RUnlock()
+	return len(fake.getBlockVolumeDetails2ArgsForCall)
+}
+
+func (fake *FakeClient) GetBlockVolumeDetails2ArgsForCall(i int) (int, string) {
+	fake.getBlockVolumeDetails2Mutex.RLock()
+	defer fake.getBlockVolumeDetails2Mutex.RUnlock()
+	return fake.getBlockVolumeDetails2ArgsForCall[i].volumeId, fake.getBlockVolumeDetails2ArgsForCall[i].mask
+}
+
+func (fake *FakeClient) GetBlockVolumeDetails2Returns(result1 *datatypes.Network_Storage, result2 bool, result3 error) {
+	fake.GetBlockVolumeDetails2Stub = nil
+	fake.getBlockVolumeDetails2Returns = struct {
+		result1 *datatypes.Network_Storage
+		result2 bool
+		result3 error
+	}{result1, result2, result3}
+}
+
+func (fake *FakeClient) GetBlockVolumeDetails2ReturnsOnCall(i int, result1 *datatypes.Network_Storage, result2 bool, result3 error) {
+	fake.GetBlockVolumeDetails2Stub = nil
+	if fake.getBlockVolumeDetails2ReturnsOnCall == nil {
+		fake.getBlockVolumeDetails2ReturnsOnCall = make(map[int]struct {
+			result1 *datatypes.Network_Storage
+			result2 bool
+			result3 error
+		})
+	}
+	fake.getBlockVolumeDetails2ReturnsOnCall[i] = struct {
+		result1 *datatypes.Network_Storage
+		result2 bool
+		result3 error
+	}{result1, result2, result3}
+}
+
 func (fake *FakeClient) GetNetworkStorageTarget(volumeId int, mask string) (string, bool, error) {
 	fake.getNetworkStorageTargetMutex.Lock()
 	ret, specificReturn := fake.getNetworkStorageTargetReturnsOnCall[len(fake.getNetworkStorageTargetArgsForCall)]
@@ -2113,6 +2251,8 @@ func (fake *FakeClient) Invocations() map[string][][]interface{} {
 	defer fake.rebootInstanceMutex.RUnlock()
 	fake.reloadInstanceMutex.RLock()
 	defer fake.reloadInstanceMutex.RUnlock()
+	fake.upgradeInstanceConfigMutex.RLock()
+	defer fake.upgradeInstanceConfigMutex.RUnlock()
 	fake.upgradeInstanceMutex.RLock()
 	defer fake.upgradeInstanceMutex.RUnlock()
 	fake.waitInstanceUntilReadyMutex.RLock()
@@ -2141,6 +2281,8 @@ func (fake *FakeClient) Invocations() map[string][][]interface{} {
 	defer fake.cancelBlockVolumeMutex.RUnlock()
 	fake.getBlockVolumeDetailsMutex.RLock()
 	defer fake.getBlockVolumeDetailsMutex.RUnlock()
+	fake.getBlockVolumeDetails2Mutex.RLock()
+	defer fake.getBlockVolumeDetails2Mutex.RUnlock()
 	fake.getNetworkStorageTargetMutex.RLock()
 	defer fake.getNetworkStorageTargetMutex.RUnlock()
 	fake.getImageMutex.RLock()
