@@ -90,7 +90,7 @@ func (r *RestTransport) DoRequest(sess *Session, service string, method string, 
 				e.Wrapped = err
 				e.Message = err.Error()
 
-				if e.Exception == "SoftLayer_Exception_WebService_RateLimitExceeded" {
+				if e.Exception == SoftLayer_WebService_RateLimitExceeded_Exception {
 					sleep()
 					continue
 				}

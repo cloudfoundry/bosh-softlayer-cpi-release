@@ -22,6 +22,8 @@ properties:
     description: The content of the SSH public key to use when spinning up new vms
   softlayer.ssh_public_key_fingerprint:
     description: The Finger Print content of the SSH public key
+  softlayer.trace:
+    description: Enable trace the http roundtrip log message
   softlayer.enable_vps:
     description: Enable CPI to connect to the vps server
   softlayer.vps_host:

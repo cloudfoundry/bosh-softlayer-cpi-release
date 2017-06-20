@@ -12,6 +12,7 @@ type Config struct {
 	PublicKey            string `json:"ssh_public_key"`
 	PublicKeyFingerPrint string `json:"ssh_public_key_fingerprint"`
 	EnableVps            bool   `json:"enable_vps"`
+	Trace                bool   `json:"trace"`
 	VpsHost              string `json:"vps_host"`
 	VpsPort              int    `json:"vps_port"`
 	VpsUseSsl            bool   `json:"vps_use_ssl"`

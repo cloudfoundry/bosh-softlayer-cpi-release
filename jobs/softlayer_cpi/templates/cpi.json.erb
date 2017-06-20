@@ -39,6 +39,10 @@
     params['cloud']['properties']['softlayer']['ssh_public_key_fingerprint'] = ssh_public_key_fingerprint
   end
 
+  if_p('softlayer.trace') do |trace|
+    params['cloud']['properties']['softlayer']['trace'] = trace
+  end
+
   if_p('softlayer.enable_vps') do |enable_vps|
       params['cloud']['properties']['softlayer']['enable_vps'] = enable_vps
   end

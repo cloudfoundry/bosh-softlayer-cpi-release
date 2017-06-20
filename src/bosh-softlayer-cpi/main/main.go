@@ -83,7 +83,7 @@ func buildDispatcher(
 		softlayerAPIEndpoint = client.SoftlayerAPIEndpointPublicDefault
 	}
 
-	softLayerClient := client.NewSoftlayerClientSession(softlayerAPIEndpoint, cfg.Cloud.Properties.SoftLayer.Username, cfg.Cloud.Properties.SoftLayer.ApiKey, true, 300, logger)
+	softLayerClient := client.NewSoftlayerClientSession(softlayerAPIEndpoint, cfg.Cloud.Properties.SoftLayer.Username, cfg.Cloud.Properties.SoftLayer.ApiKey, cfg.Cloud.Properties.SoftLayer.Trace, 300, logger)
 
 	var vps *vm.Client
 	if cfg.Cloud.Properties.SoftLayer.EnableVps {

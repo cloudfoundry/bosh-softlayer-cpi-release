@@ -34,6 +34,7 @@ import (
 // is provided.
 const DefaultEndpoint = "https://api.softlayer.com/rest/v3"
 const SoftlayerGoLogTag = "softlayerGo"
+const SoftLayer_WebService_RateLimitExceeded_Exception = "SoftLayer_Exception_WebService_RateLimitExceeded"
 
 // TransportHandler
 type TransportHandler interface {
@@ -226,7 +227,7 @@ func getDefaultTransport(endpointURL string, logger boshlog.Logger) TransportHan
 		transportHandler = &XmlRpcTransport{}
 	} else {
 		transportHandler = &RestTransport{
-			Logger: logger,
+			Logger:     logger,
 			MaxRetries: 3,
 		}
 	}
