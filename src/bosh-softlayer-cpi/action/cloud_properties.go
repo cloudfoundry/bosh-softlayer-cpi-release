@@ -12,6 +12,7 @@ type DiskCloudProperties struct {
 	DiskType         string `json:"type,omitempty"`
 	DataCenter       string `json:"datacenter,omitempty"`
 	Iops             int    `json:"iops,omitempty"`
+	SnapShotSpace    int    `json:"snapshotSpace,omitempty"`
 	UseHourlyPricing bool   `json:"useHourlyPricing,omitempty"`
 }
 

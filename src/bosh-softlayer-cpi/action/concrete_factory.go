@@ -8,6 +8,7 @@ import (
 	"bosh-softlayer-cpi/config"
 	"bosh-softlayer-cpi/softlayer/client"
 	"bosh-softlayer-cpi/softlayer/disk_service"
+	"bosh-softlayer-cpi/softlayer/snapshot_service"
 	"bosh-softlayer-cpi/softlayer/virtual_guest_service"
 
 	"bosh-softlayer-cpi/registry"
@@ -46,6 +47,11 @@ func NewConcreteFactory(
 		logger,
 	)
 
+	snapshotService := snapshot.NewSoftlayerSnapshotService(
+		softlayerClient,
+		logger,
+	)
+
 	return concreteFactory{
 		availableActions: map[string]Action{
 			// Stemcell management
@@ -78,9 +84,9 @@ func NewConcreteFactory(
 			// Others:
 			"ping": NewPing(),
 
-			// Not implemented (disk related):
-			//   snapshot_disk
-			//   delete_snapshot
+			// Snapshot management
+			"snapshot_disk":   NewSnapshotDisk(snapshotService, diskService),
+			"delete_snapshot": NewDeleteSnapshot(snapshotService),
 
 			// Not implemented (others):
 			//   current_vm_id

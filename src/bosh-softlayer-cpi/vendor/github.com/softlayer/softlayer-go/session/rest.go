@@ -201,14 +201,14 @@ func makeHTTPRequest(session *Session, path string, requestType string, requestB
 		client.Timeout = session.Timeout
 	}
 
-	var url string
+	var queryUrl string
 	if session.Endpoint == "" {
-		url = url + DefaultEndpoint
+		queryUrl = queryUrl + DefaultEndpoint
 	} else {
-		url = url + session.Endpoint
+		queryUrl = queryUrl + session.Endpoint
 	}
-	url = fmt.Sprintf("%s/%s", strings.TrimRight(url, "/"), path)
-	req, err := http.NewRequest(requestType, url, requestBody)
+	queryUrl = fmt.Sprintf("%s/%s", strings.TrimRight(queryUrl, "/"), path)
+	req, err := http.NewRequest(requestType, queryUrl, requestBody)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -219,7 +219,8 @@ func makeHTTPRequest(session *Session, path string, requestType string, requestB
 	req.Close = true
 
 	if session.Debug {
-		logger.Debug(SoftlayerGoLogTag, "Request URL: %s %s", requestType, req.URL.String())
+		queryUnescapStr, _ := url.QueryUnescape(req.URL.String())
+		logger.Debug(SoftlayerGoLogTag, "Request URL: %s %s", requestType, queryUnescapStr)
 		logger.Debug(SoftlayerGoLogTag, "Parameters: %s", Sanitize(requestBody.String()))
 	}
 

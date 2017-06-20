@@ -112,7 +112,7 @@ type Product_Item struct {
 	// Some Product Items have capacity information such as RAM and bandwidth, and others. This provides the numerical representation of the capacity given in the description of this product item.
 	Capacity *Float64 `json:"capacity,omitempty" xmlrpc:"capacity,omitempty"`
 
-	// When the product capacity is best described as a range, this holds the ceiling of the range.
+	// When the product capacity is best described as a rangbest described as a range, this holds the ceiling of the range.
 	CapacityMaximum *string `json:"capacityMaximum,omitempty" xmlrpc:"capacityMaximum,omitempty"`
 
 	// When the product capacity is best described as a range, this holds the floor of the range.

@@ -5,11 +5,11 @@ import (
 	"math"
 )
 
-func (d SoftlayerDiskService) Create(size int, iops int, location string) (int, error) {
+func (d SoftlayerDiskService) Create(size int, iops int, location string, snapshotSpace int) (int, error) {
 	d.logger.Debug(softlayerDiskServiceLogTag, "Creating disk of size '%d'", size)
-	volume, err := d.softlayerClient.CreateVolume(location, d.getSoftLayerDiskSize(size), iops)
+	volume, err := d.softlayerClient.CreateVolume(location, d.getSoftLayerDiskSize(size), iops, snapshotSpace)
 	if err != nil {
-		return 0, bosherr.WrapErrorf(err, "Creating volume with size '%d', iops '%d', location `%sd`", d.getSoftLayerDiskSize(size), iops, location)
+		return 0, bosherr.WrapErrorf(err, "Creating volume with size '%d', iops '%d', snapshotSpace '%d' location `%s`", d.getSoftLayerDiskSize(size), iops, snapshotSpace, location)
 	}
 
 	return *volume.Id, nil
