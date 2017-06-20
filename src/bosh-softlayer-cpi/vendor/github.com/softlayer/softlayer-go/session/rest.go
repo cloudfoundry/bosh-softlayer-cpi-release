@@ -31,12 +31,13 @@ import (
 	"github.com/softlayer/softlayer-go/sl"
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
+	"regexp"
 	"time"
 )
 
 type RestTransport struct {
-	MaxRetries      int
-	Logger boshlog.Logger
+	MaxRetries int
+	Logger     boshlog.Logger
 }
 
 // DoRequest - Implementation of the TransportHandler interface for handling
@@ -59,7 +60,7 @@ func (r *RestTransport) DoRequest(sess *Session, service string, method string, 
 	var (
 		resp []byte
 		code int
-		err error
+		err  error
 	)
 
 	for try := 0; try <= r.MaxRetries; try++ {
@@ -219,7 +220,7 @@ func makeHTTPRequest(session *Session, path string, requestType string, requestB
 
 	if session.Debug {
 		logger.Debug(SoftlayerGoLogTag, "Request URL: %s %s", requestType, req.URL.String())
-		logger.Debug(SoftlayerGoLogTag, "Parameters: %s", requestBody.String())
+		logger.Debug(SoftlayerGoLogTag, "Parameters: %s", Sanitize(requestBody.String()))
 	}
 
 	resp, err := client.Do(req)
@@ -235,7 +236,7 @@ func makeHTTPRequest(session *Session, path string, requestType string, requestB
 	}
 
 	if session.Debug {
-		logger.Debug(SoftlayerGoLogTag, "Response: %s", string(responseBody))
+		logger.Debug(SoftlayerGoLogTag, "Response: %s", Sanitize(string(responseBody)))
 	}
 	return responseBody, resp.StatusCode, nil
 }
@@ -250,4 +251,23 @@ func httpMethod(name string, args []interface{}) string {
 	}
 
 	return "GET"
+}
+
+// Santitize returns a clean string with sentive user data in the input
+// replaced by PRIVATE_DATA_PLACEHOLDER.
+func Sanitize(input string) string {
+	sanitized := sanitizeJSON("password", input)
+	sanitized = sanitizeJSON("authenticationKey", sanitized)
+
+	return sanitized
+}
+
+func sanitizeJSON(propertySubstring string, json string) string {
+	regex := regexp.MustCompile(fmt.Sprintf(`(?i)"([^"]*%s[^"]*)":\s*"[^\,]*"`, propertySubstring))
+	return regex.ReplaceAllString(json, fmt.Sprintf(`"$1":"%s"`, privateDataPlaceholder()))
+}
+
+// privateDataPlaceholder returns the text to replace the sentive data.
+func privateDataPlaceholder() string {
+	return "[PRIVATE DATA HIDDEN]"
 }

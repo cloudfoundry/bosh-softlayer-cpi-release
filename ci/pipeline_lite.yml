@@ -49,7 +49,7 @@ jobs:
     plan:
     - aggregate:
       - {trigger: false, get: bosh-cpi-release, resource: bosh-cpi-release-in}
-      - {trigger: false, get: version-semver, params: {bump: major}}
+      - {trigger: false, get: version-semver, params: {bump: patch}}
       - {trigger: false, get: bosh-cli, resource: bosh-cli}
 
     - task: build
@@ -159,6 +159,7 @@ resources:
   - name: version-semver
     type: semver
     source:
+      initial_version: 0.0.0
       key:               current-version
       bucket:            {{s3_pipeline_bucket_lite}}
       access_key_id:     {{stemcell-aws-access-key}}

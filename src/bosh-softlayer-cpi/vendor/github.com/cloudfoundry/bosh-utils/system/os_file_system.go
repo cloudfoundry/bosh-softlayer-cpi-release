@@ -11,10 +11,12 @@ import (
 
 	"errors"
 
+	"fmt"
 	"github.com/bmatcuk/doublestar"
 	fsWrapper "github.com/charlievieth/fs"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
+	"regexp"
 )
 
 type osFileSystem struct {
@@ -187,7 +189,7 @@ func (fs *osFileSystem) ReadFile(path string) (content []byte, err error) {
 		return
 	}
 
-	fs.logger.DebugWithDetails(fs.logTag, "Read content", content)
+	fs.logger.DebugWithDetails(fs.logTag, "Read content", Sanitize(string(content)))
 	return
 }
 
@@ -380,4 +382,21 @@ func (fs *osFileSystem) runCommand(cmd string) (string, error) {
 	}
 
 	return strings.TrimSpace(stdout.String()), nil
+}
+
+// Santitize returns a clean string with sentive user data in the input
+// replaced by PRIVATE_DATA_PLACEHOLDER.
+func Sanitize(input string) string {
+	sanitized := sanitizeJSON("api_key", input)
+	return sanitized
+}
+
+func sanitizeJSON(propertySubstring string, json string) string {
+	regex := regexp.MustCompile(fmt.Sprintf(`(?i)"([^"]*%s[^"]*)":\s*"[^\,]*"`, propertySubstring))
+	return regex.ReplaceAllString(json, fmt.Sprintf(`"$1":"%s"`, privateDataPlaceholder()))
+}
+
+// privateDataPlaceholder returns the text to replace the sentive data.
+func privateDataPlaceholder() string {
+	return "[PRIVATE DATA HIDDEN]"
 }
