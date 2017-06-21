@@ -24,6 +24,7 @@ import (
 
 	"errors"
 	"os"
+	"regexp"
 	"strings"
 )
 
@@ -1619,12 +1620,14 @@ var _ = Describe("VM Utils", func() {
 		})
 	})
 
-	Describe("#UpdateEtcHostsOfBoshInit", func() {
+	Describe("#UpdateEtcHostsByBOSHCLI", func() {
 		const (
-			testFilePath1  = "/tmp/test_updateEtcHostsOfBoshInit1"
-			testFilePath2  = "/tmp/test_updateEtcHostsOfBoshInit2"
-			testFilePath3  = "/test_updateEtcHostsOfBoshInit3"
-			appendDNSEntry = "0.0.0.0    bosh-cpi-test.softlayer.com"
+			testFilePath1 = "/tmp/test_updateEtcHosts1"
+			testFilePath2 = "/tmp/test_updateEtcHosts2"
+			testFilePath3 = "/tmp/test_updateEtcHosts3"
+			ip            = "10.0.0.1"
+			ip2           = "10.0.0.1"
+			host          = "bosh-cpi-test.softlayer.com"
 		)
 		var (
 			logger boshlog.Logger
@@ -1640,34 +1643,55 @@ var _ = Describe("VM Utils", func() {
 			fs.RemoveAll(testFilePath2)
 		})
 
-		Context("when the target file does not exists", func() {
+		Context("when no specified host entry in hosts file", func() {
 			BeforeEach(func() {
 				fs.RemoveAll(testFilePath1)
+				fs.OpenFile(testFilePath1, os.O_RDONLY|os.O_CREATE, 0666)
 			})
-			It("create the file if the file does not exist", func() {
-				err := UpdateEtcHostsOfBoshInit(testFilePath1, appendDNSEntry)
+			It("add the host entry in the hosts file", func() {
+				err := UpdateEtcHostsByBOSHCLI(testFilePath1, ip, host)
 				Expect(err).ToNot(HaveOccurred())
 				fileContent, _ := fs.ReadFileString(testFilePath1)
-				Ω(fileContent).Should(ContainSubstring(appendDNSEntry))
+				Ω(fileContent).Should(ContainSubstring(host))
+				re := regexp.MustCompile(host)
+				matches := re.FindAllString(fileContent, -1)
+				Expect(1).To(Equal(len(matches)))
+
+			})
+			AfterEach(func() {
+				fs.RemoveAll(testFilePath1)
 			})
 		})
-		Context("when the target file exists", func() {
+		Context("when the specified host with the same IP entry is already in hosts file", func() {
 			BeforeEach(func() {
 				fs.RemoveAll(testFilePath2)
-				fs.WriteFileString(testFilePath2, "This is the first line")
+				fs.WriteFileString(testFilePath2, ip+"    "+host)
 			})
-			It("update file successfully", func() {
-				err := UpdateEtcHostsOfBoshInit(testFilePath2, appendDNSEntry)
+			It("do not create dup host entry in the hosts file", func() {
+				err := UpdateEtcHostsByBOSHCLI(testFilePath2, ip, host)
 				Expect(err).ToNot(HaveOccurred())
 				fileContent, _ := fs.ReadFileString(testFilePath2)
-				Ω(fileContent).Should(ContainSubstring(appendDNSEntry))
+				Ω(fileContent).Should(ContainSubstring(ip))
+				Ω(fileContent).Should(ContainSubstring(host))
+				re := regexp.MustCompile(host)
+				matches := re.FindAllString(fileContent, -1)
+				Expect(1).To(Equal(len(matches)))
 			})
 		})
-		Context("when the target file cannot be created", func() {
-			It("returns error due to no permission", func() {
-				err := UpdateEtcHostsOfBoshInit(testFilePath3, appendDNSEntry)
-				Expect(err).To(HaveOccurred())
-				Ω(err.Error()).Should(ContainSubstring("permission denied"))
+		Context("when the specified host with the different IP entry is already in hosts file", func() {
+			BeforeEach(func() {
+				fs.RemoveAll(testFilePath3)
+				fs.WriteFileString(testFilePath3, ip2+"    "+host)
+			})
+			It("change the IP to the new one", func() {
+				err := UpdateEtcHostsByBOSHCLI(testFilePath3, ip, host)
+				Expect(err).ToNot(HaveOccurred())
+				fileContent, _ := fs.ReadFileString(testFilePath3)
+				Ω(fileContent).Should(ContainSubstring(ip))
+				Ω(fileContent).Should(ContainSubstring(host))
+				re := regexp.MustCompile(host)
+				matches := re.FindAllString(fileContent, -1)
+				Expect(1).To(Equal(len(matches)))
 			})
 		})
 	})
