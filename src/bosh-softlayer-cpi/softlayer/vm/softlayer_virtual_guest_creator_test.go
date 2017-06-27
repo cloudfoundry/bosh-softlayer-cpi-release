@@ -46,7 +46,10 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 		agentOptions = AgentOptions{Mbus: "fake-mbus", VcapPassword: "fake-vcap-password"}
 		logger = boshlog.NewLogger(boshlog.LevelNone)
 		fakeVmFinder = &fakescommon.FakeVMFinder{}
+
 		fakeVm = &fakescommon.FakeVM{}
+		fakeVm.GetPrimaryBackendIPReturns("10.0.0.1")
+		fakeVm.GetFullyQualifiedDomainNameReturns("fake-full-hostname")
 
 		slh.TIMEOUT = 2 * time.Second
 		slh.POLLING_INTERVAL = 1 * time.Second
@@ -911,7 +914,6 @@ func setFakeSoftlayerClientCreateObjectTestFixturesWithoutBoshIP_OS_Reload(fakeS
 		"SoftLayer_Virtual_Guest_Service_getPowerState.json",
 		"SoftLayer_Virtual_Guest_Service_getBlockDevices.json",
 
-		"SoftLayer_Virtual_Guest_Service_getObject.json",
 		"SoftLayer_Virtual_Guest_Service_getObject.json",
 	}
 	testhelpers.SetTestFixturesForFakeSoftLayerClient(fakeSoftLayerClient, fileNames)
