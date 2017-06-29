@@ -58,6 +58,134 @@ var _ = Describe("CreateVM", func() {
 			vmCidString, err = action.Run("fake-agent-id", stemcellCID, fakeCloudProp, networks, diskLocality, env)
 		})
 
+		Context("when env.bosh does not exist", func() {
+			BeforeEach(func() {
+				fakeOptions = &ConcreteFactoryOptions{
+					Softlayer: SoftLayerConfig{FeatureOptions: FeatureOptions{EnablePool: false}},
+				}
+				fakeCloudProp = VMCloudProperties{
+					StartCpus:    2,
+					MaxMemory:    2048,
+					Datacenter:   sldatatypes.Datacenter{Name: "fake-datacenter"},
+					VmNamePrefix: "fake-hostname",
+					BoshIp:       "10.0.0.0",
+					SshKeys: []sldatatypes.SshKey{
+						sldatatypes.SshKey{Id: 1234},
+					},
+				}
+				action = NewCreateVM(fakeStemcellFinder, fakeCreatorProvider, *fakeOptions)
+
+				fakeVm.IDReturns(1234567)
+				fakeStemcellFinder.FindByIdReturns(fakeStemcell, nil)
+				fakeCreatorProvider.GetReturns(fakeVmCreator)
+				fakeVmCreator.CreateReturns(fakeVm, nil)
+			})
+
+			It("do not update env, keep it same as before", func() {
+				_, _, _, _, actualEnv := fakeVmCreator.CreateArgsForCall(0)
+				Expect(actualEnv).To(Equal(env))
+			})
+		})
+
+		Context("when env.bosh exists but empty, no vcap password in agent option", func() {
+			BeforeEach(func() {
+				fakeOptions = &ConcreteFactoryOptions{
+					Softlayer: SoftLayerConfig{FeatureOptions: FeatureOptions{EnablePool: false}},
+				}
+				fakeCloudProp = VMCloudProperties{
+					StartCpus:    2,
+					MaxMemory:    2048,
+					Datacenter:   sldatatypes.Datacenter{Name: "fake-datacenter"},
+					VmNamePrefix: "fake-hostname",
+					BoshIp:       "10.0.0.0",
+					SshKeys: []sldatatypes.SshKey{
+						sldatatypes.SshKey{Id: 1234},
+					},
+				}
+				action = NewCreateVM(fakeStemcellFinder, fakeCreatorProvider, *fakeOptions)
+
+				fakeVm.IDReturns(1234567)
+				fakeStemcellFinder.FindByIdReturns(fakeStemcell, nil)
+				fakeCreatorProvider.GetReturns(fakeVmCreator)
+				fakeVmCreator.CreateReturns(fakeVm, nil)
+				env["bosh"] = map[string]interface{}{}
+			})
+
+			It("set keep_root_password true in env.bosh", func() {
+				_, _, _, _, actualEnv := fakeVmCreator.CreateArgsForCall(0)
+				Expect(actualEnv).To(Equal(env))
+				Expect(actualEnv["bosh"].(map[string]interface{})["keep_root_password"]).To(Equal(true))
+				Expect(actualEnv["bosh"].(map[string]interface{})["password"]).To(BeNil())
+			})
+		})
+
+		Context("when env.bosh exists but empty, vcap password exists in agent option", func() {
+			BeforeEach(func() {
+				fakeOptions = &ConcreteFactoryOptions{
+					Softlayer: SoftLayerConfig{FeatureOptions: FeatureOptions{EnablePool: false}},
+					Agent:     AgentOptions{VcapPassword: "fake-vcap-password-in-agent"},
+				}
+				fakeCloudProp = VMCloudProperties{
+					StartCpus:    2,
+					MaxMemory:    2048,
+					Datacenter:   sldatatypes.Datacenter{Name: "fake-datacenter"},
+					VmNamePrefix: "fake-hostname",
+					BoshIp:       "10.0.0.0",
+					SshKeys: []sldatatypes.SshKey{
+						sldatatypes.SshKey{Id: 1234},
+					},
+				}
+				action = NewCreateVM(fakeStemcellFinder, fakeCreatorProvider, *fakeOptions)
+
+				fakeVm.IDReturns(1234567)
+				fakeStemcellFinder.FindByIdReturns(fakeStemcell, nil)
+				fakeCreatorProvider.GetReturns(fakeVmCreator)
+				fakeVmCreator.CreateReturns(fakeVm, nil)
+				env["bosh"] = map[string]interface{}{}
+			})
+
+			It("set vcap password in env.bosh", func() {
+				_, _, _, _, actualEnv := fakeVmCreator.CreateArgsForCall(0)
+				Expect(actualEnv).To(Equal(env))
+				Expect(actualEnv["bosh"].(map[string]interface{})["keep_root_password"]).To(Equal(true))
+				Expect(actualEnv["bosh"].(map[string]interface{})["password"]).To(Equal("fake-vcap-password-in-agent"))
+			})
+		})
+
+		Context("when vcap password exists in both env.bosh and agent option", func() {
+			BeforeEach(func() {
+				fakeOptions = &ConcreteFactoryOptions{
+					Softlayer: SoftLayerConfig{FeatureOptions: FeatureOptions{EnablePool: false}},
+					Agent:     AgentOptions{VcapPassword: "fake-vcap-password-in-agent"},
+				}
+				fakeCloudProp = VMCloudProperties{
+					StartCpus:    2,
+					MaxMemory:    2048,
+					Datacenter:   sldatatypes.Datacenter{Name: "fake-datacenter"},
+					VmNamePrefix: "fake-hostname",
+					BoshIp:       "10.0.0.0",
+					SshKeys: []sldatatypes.SshKey{
+						sldatatypes.SshKey{Id: 1234},
+					},
+				}
+				action = NewCreateVM(fakeStemcellFinder, fakeCreatorProvider, *fakeOptions)
+
+				fakeVm.IDReturns(1234567)
+				fakeStemcellFinder.FindByIdReturns(fakeStemcell, nil)
+				fakeCreatorProvider.GetReturns(fakeVmCreator)
+				fakeVmCreator.CreateReturns(fakeVm, nil)
+				env["bosh"] = map[string]interface{}{}
+				env["bosh"].(map[string]interface{})["password"] = "fake-vcap-password-in-env"
+			})
+
+			It("do not change vcap password in env.bosh", func() {
+				_, _, _, _, actualEnv := fakeVmCreator.CreateArgsForCall(0)
+				Expect(actualEnv).To(Equal(env))
+				Expect(actualEnv["bosh"].(map[string]interface{})["keep_root_password"]).To(Equal(true))
+				Expect(actualEnv["bosh"].(map[string]interface{})["password"]).To(Equal("fake-vcap-password-in-env"))
+			})
+		})
+
 		Context("when create vm with enabled pool succeeds", func() {
 			BeforeEach(func() {
 				fakeOptions = &ConcreteFactoryOptions{
