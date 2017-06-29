@@ -45,6 +45,13 @@ func (a CreateVMAction) Run(agentID string, stemcellCID StemcellCID, cloudProps 
 		return "0", bosherr.WrapErrorf(err, "Finding stemcell '%s'", stemcellCID)
 	}
 
+	if _, ok := env["bosh"]; ok {
+		env["bosh"].(map[string]interface{})["keep_root_password"] = true
+		if env["bosh"].(map[string]interface{})["password"] == nil && a.options.Agent.VcapPassword != "" {
+			env["bosh"].(map[string]interface{})["password"] = a.options.Agent.VcapPassword
+		}
+	}
+
 	if a.options.Softlayer.FeatureOptions.EnablePool {
 		a.vmCreator = a.vmCreatorProvider.Get("pool")
 		vm, err := a.vmCreator.Create(agentID, stemcell, cloudProps, networks, env)
