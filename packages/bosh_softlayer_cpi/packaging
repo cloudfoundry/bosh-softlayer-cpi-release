@@ -18,5 +18,7 @@ bin/build-amd64
 
 mkdir -p $BOSH_INSTALL_TARGET/bin
 cp out/softlayer_cpi $BOSH_INSTALL_TARGET/bin/softlayer_cpi
-
 cp version ${BOSH_INSTALL_TARGET}
+
+# clean up source artifacts
+rm -rf ${BOSH_INSTALL_TARGET}/src
