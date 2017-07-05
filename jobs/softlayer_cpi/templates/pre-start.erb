@@ -3,7 +3,5 @@
 # Set directories
 LOGS_DIR=/var/vcap/sys/log
 
-if [ -d ${LOGS_DIR} ]; then
-  mkdir -p ${LOGS_DIR}/softlayer_cpi
-fi
+mkdir -p ${LOGS_DIR}/softlayer_cpi
 chown -R vcap:vcap ${LOGS_DIR}/softlayer_cpi
