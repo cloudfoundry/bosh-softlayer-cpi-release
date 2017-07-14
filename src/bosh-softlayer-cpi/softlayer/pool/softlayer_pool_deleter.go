@@ -50,6 +50,17 @@ func (c *softLayerPoolDeleter) Delete(cid int) error {
 				PublicVlan:  int32(virtualGuest.PrimaryNetworkComponent.NetworkVlan.Id),
 				State:       models.StateFree,
 			}
+
+			service, err := c.softLayerClient.GetSoftLayer_Virtual_Guest_Service()
+			if err != nil {
+				return bosherr.WrapErrorf(err, "Powering off VirtualGuest `%d`", cid)
+			}
+
+			service.PowerOffSoft(cid)
+			if err != nil {
+				return bosherr.WrapErrorf(err, "Powering off VirtualGuest `%d`", cid)
+			}
+
 			_, err = c.softLayerVmPoolClient.AddVM(operations.NewAddVMParams().WithBody(slPoolVm))
 			if err != nil {
 				return bosherr.WrapError(err, fmt.Sprintf("Adding vm %d to pool", cid))
