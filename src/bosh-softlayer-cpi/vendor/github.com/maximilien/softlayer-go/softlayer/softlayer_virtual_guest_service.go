@@ -50,7 +50,6 @@ type SoftLayer_Virtual_Guest_Service interface {
 	GetPowerState(instanceId int) (datatypes.SoftLayer_Virtual_Guest_Power_State, error)
 	GetSshKeys(instanceId int) ([]datatypes.SoftLayer_Security_Ssh_Key, error)
 	GetTagReferences(instanceId int) ([]datatypes.SoftLayer_Tag_Reference, error)
-	GetTags(instanceId int) ([]string, error)
 	GetUpgradeItemPrices(instanceId int) ([]datatypes.SoftLayer_Product_Item_Price, error)
 	GetUserData(instanceId int) ([]datatypes.SoftLayer_Virtual_Guest_Attribute, error)
 	GetAvailableUpgradeItemPrices(upgradeOptions *UpgradeOptions) ([]datatypes.SoftLayer_Product_Item_Price, error)

@@ -143,9 +143,9 @@ func (c *softLayerPoolCreator) createFromVMPool(agentID string, stemcell bslcste
 		if err != nil {
 			return nil, bosherr.WrapErrorf(err, "Updating the hostname of vm %d in pool to using", virtualGuestId)
 		}
-	}
 
-	c.logger.Info(SOFTLAYER_POOL_CREATOR_LOG_TAG, fmt.Sprintf("vm %d using stemcell %d os reload completed", virtualGuestId, stemcell.ID()))
+		c.logger.Info(SOFTLAYER_POOL_CREATOR_LOG_TAG, fmt.Sprintf("vm %d using stemcell %d os reload completed", virtualGuestId, stemcell.ID()))
+	}
 
 	err = c.tagAsManage(virtualGuestId)
 	if err != nil {
@@ -437,12 +437,12 @@ func (c *softLayerPoolCreator) oSReloadVMInPool(cid int, agentID string, stemcel
 func (c *softLayerPoolCreator) tagAsManage(cid int) error {
 	service, err := c.softLayerClient.GetSoftLayer_Virtual_Guest_Service()
 	if err != nil {
-		return bosherr.WrapErrorf(err, "Settings tags on SoftLayer VirtualGuest `%d`", cid)
+		return bosherr.WrapErrorf(err, "Getting Service of SoftLayer VirtualGuest `%d`", cid)
 	}
 
 	tagReferences, err := service.GetTagReferences(cid)
 	if err != nil {
-		return bosherr.WrapErrorf(err, "Settings tags on SoftLayer VirtualGuest `%d`", cid)
+		return bosherr.WrapErrorf(err, "Getting TagReferences on SoftLayer VirtualGuest `%d`", cid)
 	}
 
 	existsTags := make([]string, len(tagReferences), len(tagReferences)+1)
@@ -459,11 +459,11 @@ func (c *softLayerPoolCreator) tagAsManage(cid int) error {
 	if !found {
 		success, err := service.SetTags(cid, append(existsTags, tag))
 		if !success {
-			return bosherr.WrapErrorf(err, "Settings tags on SoftLayer VirtualGuest `%d`", cid)
+			return bosherr.WrapErrorf(err, "Setting tags on SoftLayer VirtualGuest `%d`", cid)
 		}
 
 		if err != nil {
-			return bosherr.WrapErrorf(err, "Settings tags on SoftLayer VirtualGuest `%d`", cid)
+			return bosherr.WrapErrorf(err, "Setting tags on SoftLayer VirtualGuest `%d`", cid)
 		}
 	}
 

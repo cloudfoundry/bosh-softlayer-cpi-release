@@ -307,7 +307,8 @@ func setFakeSoftlayerClientCreateObjectTestFixturesWithEphemeralDiskSize_OS_Relo
 		"SoftLayer_Virtual_Guest_Service_getBlockDevices.json",
 
 		"SoftLayer_Virtual_Guest_Service_getObject.json",
-		"SoftLayer_Virtual_Guest_Service_getObject.json",
+		"SoftLayer_Virtual_Guest_Service_getTagReferences.json",
+		"SoftLayer_Virtual_Guest_Service_setTags.json",
 	}
 	testhelpers.SetTestFixturesForFakeSoftLayerClient(fakeSoftLayerClient, fileNames)
 }
@@ -347,7 +348,8 @@ func setFakeSoftlayerClientCreateObjectTestFixturesWithEphemeralDiskSize(fakeSof
 		"SoftLayer_Virtual_Guest_Service_getPowerState.json",
 		"SoftLayer_Virtual_Guest_Service_getBlockDevices.json",
 
-		"SoftLayer_Virtual_Guest_Service_getObject.json",
+		"SoftLayer_Virtual_Guest_Service_getTagReferences.json",
+		"SoftLayer_Virtual_Guest_Service_setTags.json",
 	}
 	testhelpers.SetTestFixturesForFakeSoftLayerClient(fakeSoftLayerClient, fileNames)
 }
