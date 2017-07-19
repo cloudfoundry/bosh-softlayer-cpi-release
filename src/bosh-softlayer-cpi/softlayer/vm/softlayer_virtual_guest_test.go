@@ -123,7 +123,7 @@ var _ = Describe("SoftLayerVirtualGuest", func() {
 		})
 	})
 
-	Describe("SetMetadata", func() {
+	FDescribe("SetMetadata", func() {
 		var (
 			metadata VMMetadata
 		)
@@ -140,7 +140,8 @@ var _ = Describe("SoftLayerVirtualGuest", func() {
 				Expect(err).ToNot(HaveOccurred())
 
 				fileNames := []string{
-					"SoftLayer_Virtual_Guest_Service_setMetadata.json",
+					"SoftLayer_Virtual_Guest_Service_getTagReferences_empty.json",
+					"SoftLayer_Virtual_Guest_Service_setTags.json",
 				}
 				testhelpers.SetTestFixturesForFakeSoftLayerClient(fakeSoftLayerClient, fileNames)
 			})
@@ -154,7 +155,8 @@ var _ = Describe("SoftLayerVirtualGuest", func() {
 		Context("found tags in metadata", func() {
 			BeforeEach(func() {
 				fileNames := []string{
-					"SoftLayer_Virtual_Guest_Service_setMetadata.json",
+					"SoftLayer_Virtual_Guest_Service_getTagReferences_empty.json",
+					"SoftLayer_Virtual_Guest_Service_setTags.json",
 				}
 				testhelpers.SetTestFixturesForFakeSoftLayerClient(fakeSoftLayerClient, fileNames)
 			})
@@ -172,6 +174,50 @@ var _ = Describe("SoftLayerVirtualGuest", func() {
 
 				err = vm.SetMetadata(metadata)
 				Expect(err).ToNot(HaveOccurred())
+			})
+		})
+
+		Context("when vm has TagReferences", func() {
+			BeforeEach(func() {
+				fileNames := []string{
+					"SoftLayer_Virtual_Guest_Service_getTagReferences.json",
+					"SoftLayer_Virtual_Guest_Service_setTags.json",
+				}
+				testhelpers.SetTestFixturesForFakeSoftLayerClient(fakeSoftLayerClient, fileNames)
+			})
+
+			It("found tags in metadata", func() {
+				metadataBytes := []byte(`{
+				  "director": "fake-director-uuid",
+				  "deployment": "fake-deployment",
+				  "compiling": "buildpack_python"
+				}`)
+
+				metadata = VMMetadata{}
+				err := json.Unmarshal(metadataBytes, &metadata)
+				Expect(err).ToNot(HaveOccurred())
+
+				err = vm.SetMetadata(metadata)
+				Expect(err).ToNot(HaveOccurred())
+			})
+
+			FIt("Return error when virtualGuestService GetTagReferences error", func() {
+				fileNames := []string{
+					"SoftLayer_Virtual_Guest_Service_getTagReferences_false.json",
+					"SoftLayer_Virtual_Guest_Service_setTags.json",
+				}
+				testhelpers.SetTestFixturesForFakeSoftLayerClient(fakeSoftLayerClient, fileNames)
+				metadataBytes := []byte(`{
+				  "director": "fake-director-uuid",
+				  "deployment": "fake-deployment",
+				  "compiling": "buildpack_python"
+				}`)
+				metadata = VMMetadata{}
+				err := json.Unmarshal(metadataBytes, &metadata)
+				Expect(err).ToNot(HaveOccurred())
+
+				err = vm.SetMetadata(metadata)
+				Expect(err).To(HaveOccurred())
 			})
 		})
 	})
