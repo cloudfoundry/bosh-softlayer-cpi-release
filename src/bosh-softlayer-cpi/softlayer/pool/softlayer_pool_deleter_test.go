@@ -34,21 +34,24 @@ var _ = Describe("SoftlayerPoolDeleter", func() {
 	Describe("Delete", func() {
 		var (
 			err error
+			cid int
 		)
 		JustBeforeEach(func() {
-			err = deleter.Delete(1234567)
+			err = deleter.Delete(cid)
 		})
 
 		Context("when operation vm in pool succeeds", func() {
 			BeforeEach(func() {
+				cid = 1234567
 				fakeSoftlayerPoolClient.GetVMByCidReturns(vm.NewGetVMByCidOK(), nil)
+				testhelpers.SetTestFixtureForFakeSoftLayerClient(softLayerClient, "SoftLayer_Virtual_Guest_Service_powerOffSoft.json")
 				fakeSoftlayerPoolClient.UpdateVMWithStateReturns(vm.NewUpdateVMWithStateOK(), nil)
 			})
 
 			It("get vm by cid", func() {
 				Expect(fakeSoftlayerPoolClient.GetVMByCidCallCount()).To(Equal(1))
 				getVmByCidParams := fakeSoftlayerPoolClient.GetVMByCidArgsForCall(0)
-				Expect(getVmByCidParams.Cid).To(Equal(int32(1234567)))
+				Expect(getVmByCidParams.Cid).To(Equal(int32(cid)))
 			})
 
 			It("update vm with state free", func() {
@@ -64,8 +67,12 @@ var _ = Describe("SoftlayerPoolDeleter", func() {
 
 		Context("when operation vm out of pool succeeds", func() {
 			BeforeEach(func() {
+				cid = 1234567
 				fakeSoftlayerPoolClient.GetVMByCidReturns(nil, vm.NewGetVMByCidNotFound())
-				testhelpers.SetTestFixtureForFakeSoftLayerClient(softLayerClient, "SoftLayer_Virtual_Guest_Service_getObject.json")
+				testhelpers.SetTestFixturesForFakeSoftLayerClient(softLayerClient, []string{
+					"SoftLayer_Virtual_Guest_Service_getObject.json",
+					"SoftLayer_Virtual_Guest_Service_powerOffSoft.json",
+				})
 				fakeSoftlayerPoolClient.AddVMReturns(vm.NewAddVMOK(), nil)
 			})
 
@@ -73,7 +80,7 @@ var _ = Describe("SoftlayerPoolDeleter", func() {
 				Expect(fakeSoftlayerPoolClient.AddVMCallCount()).To(Equal(1))
 				addVmParams := fakeSoftlayerPoolClient.AddVMArgsForCall(0)
 				Expect(addVmParams.Body.State).To(Equal(models.StateFree))
-				Expect(addVmParams.Body.Cid).To(Equal(int32(1234567)))
+				Expect(addVmParams.Body.Cid).To(Equal(int32(cid)))
 			})
 
 			It("no error return", func() {
@@ -95,12 +102,25 @@ var _ = Describe("SoftlayerPoolDeleter", func() {
 		Context("when update vm state to free error out", func() {
 			BeforeEach(func() {
 				fakeSoftlayerPoolClient.GetVMByCidReturns(vm.NewGetVMByCidOK(), nil)
+				testhelpers.SetTestFixtureForFakeSoftLayerClient(softLayerClient, "SoftLayer_Virtual_Guest_Service_powerOffSoft.json")
 				fakeSoftlayerPoolClient.UpdateVMWithStateReturns(nil, vm.NewUpdateVMWithStateDefault(500))
 			})
 
 			It("error return", func() {
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("Updating state of vm"))
+			})
+		})
+
+		Context("when power off vm by cid error out", func() {
+			BeforeEach(func() {
+				fakeSoftlayerPoolClient.GetVMByCidReturns(vm.NewGetVMByCidOK(), nil)
+				testhelpers.SetTestFixtureForFakeSoftLayerClient(softLayerClient, "SoftLayer_Virtual_Guest_Service_powerOffSoft_false.json")
+			})
+
+			It("error return", func() {
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("Powering off VirtualGuest"))
 			})
 		})
 	})

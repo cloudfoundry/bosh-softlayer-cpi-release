@@ -95,6 +95,7 @@ func (c *softLayerPoolCreator) createFromVMPool(agentID string, stemcell bslcste
 			if err != nil {
 				return nil, bosherr.WrapError(err, "Creating vm in SoftLayer")
 			}
+
 			virtualGuestId = slVm.ID()
 			slPoolVm := &models.VM{
 				Cid:         int32(slVm.ID()),
@@ -106,10 +107,12 @@ func (c *softLayerPoolCreator) createFromVMPool(agentID string, stemcell bslcste
 				PublicVlan:  int32(virtualGuestTemplate.PrimaryNetworkComponent.NetworkVlan.Id),
 				State:       models.StateUsing,
 			}
+
 			_, err = c.softLayerVmPoolClient.AddVM(operations.NewAddVMParams().WithBody(slPoolVm))
 			if err != nil {
 				return nil, bosherr.WrapError(err, "Adding vm into pool")
 			}
+
 			c.logger.Info(SOFTLAYER_POOL_CREATOR_LOG_TAG, fmt.Sprintf("Added vm %d to pool successfully", slVm.ID()))
 		}
 	}else {
@@ -458,11 +461,10 @@ func (c *softLayerPoolCreator) tagAsManage(cid int) error {
 
 	if !found {
 		success, err := service.SetTags(cid, append(existsTags, tag))
-		if !success {
+		if err != nil {
 			return bosherr.WrapErrorf(err, "Setting tags on SoftLayer VirtualGuest `%d`", cid)
 		}
-
-		if err != nil {
+		if !success {
 			return bosherr.WrapErrorf(err, "Setting tags on SoftLayer VirtualGuest `%d`", cid)
 		}
 	}

@@ -179,11 +179,10 @@ func (vm *softLayerVirtualGuest) SetMetadata(vmMetadata VMMetadata) error {
 	}
 
 	success, err := virtualGuestService.SetTags(vm.ID(), append(existsTags, tags...))
-	if !success {
+	if err != nil {
 		return bosherr.WrapErrorf(err, "Settings tags on SoftLayer VirtualGuest `%d`", vm.ID())
 	}
-
-	if err != nil {
+	if !success {
 		return bosherr.WrapErrorf(err, "Settings tags on SoftLayer VirtualGuest `%d`", vm.ID())
 	}
 
