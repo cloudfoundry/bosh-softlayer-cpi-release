@@ -101,7 +101,7 @@ func (c *softLayerVirtualGuestCreator) createBySoftlayer(agentID string, stemcel
 	}
 
 	if cloudProps.DeployedByBoshCLI {
-		err := UpdateEtcHostsByBOSHCLI(slhelper.LocalDNSConfigurationFile, vm.GetPrimaryBackendIP(), vm.GetFullyQualifiedDomainName())
+		err := UpdateEtcHostsOfBoshInit(slhelper.LocalDNSConfigurationFile, fmt.Sprintf("%s  %s", vm.GetPrimaryBackendIP(), vm.GetFullyQualifiedDomainName()))
 		if err != nil {
 			return nil, bosherr.WrapErrorf(err, "Updating BOSH director hostname/IP mapping entry in /etc/hosts")
 		}
@@ -205,7 +205,7 @@ func (c *softLayerVirtualGuestCreator) createByOSReload(agentID string, stemcell
 	}
 
 	if cloudProps.DeployedByBoshCLI {
-		err := UpdateEtcHostsByBOSHCLI(slhelper.LocalDNSConfigurationFile, vm.GetPrimaryBackendIP(), vm.GetFullyQualifiedDomainName())
+		err := UpdateEtcHostsOfBoshInit(slhelper.LocalDNSConfigurationFile, fmt.Sprintf("%s  %s", vm.GetPrimaryBackendIP(), vm.GetFullyQualifiedDomainName()))
 		if err != nil {
 			return nil, bosherr.WrapErrorf(err, "Updating BOSH director hostname/IP mapping entry in /etc/hosts")
 		}

@@ -7,6 +7,7 @@ import (
 	bmsclient "github.com/cloudfoundry-community/bosh-softlayer-tools/clients"
 	slclient "github.com/maximilien/softlayer-go/client"
 
+	"bosh-softlayer-cpi/softlayer/client"
 	bslcdisk "bosh-softlayer-cpi/softlayer/disk"
 	bslcstem "bosh-softlayer-cpi/softlayer/stemcell"
 	bslcvm "bosh-softlayer-cpi/softlayer/vm"
@@ -23,7 +24,11 @@ type concreteFactory struct {
 	availableActions map[string]Action
 }
 
-func NewConcreteFactory(options ConcreteFactoryOptions, logger boshlog.Logger) concreteFactory {
+func NewConcreteFactory(
+	softlayerClient client.Client,
+	options ConcreteFactoryOptions,
+	logger boshlog.Logger,
+) concreteFactory {
 	softLayerClient := slclient.NewSoftLayerClient(options.Softlayer.Username, options.Softlayer.ApiKey)
 	baremetalClient := bmsclient.NewBmpClient(options.Baremetal.Username, options.Baremetal.Password, options.Baremetal.EndPoint, nil, "")
 	poolClient := apiclient.New(httptransport.New(fmt.Sprintf("%s:%d", options.Pool.Host, options.Pool.Port), "v2", []string{"https"}), strfmt.Default).VM

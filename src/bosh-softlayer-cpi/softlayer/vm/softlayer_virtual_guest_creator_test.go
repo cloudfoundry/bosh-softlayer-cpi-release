@@ -19,11 +19,9 @@ import (
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
-	boshsys "github.com/cloudfoundry/bosh-utils/system"
 
 	slh "bosh-softlayer-cpi/softlayer/common/helper"
 	sldatatypes "github.com/maximilien/softlayer-go/data_types"
-	"os"
 )
 
 var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
@@ -37,7 +35,6 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 		creator         VMCreator
 		featureOptions  FeatureOptions
 		registryOptions RegistryOptions
-		fs              boshsys.FileSystem
 	)
 
 	BeforeEach(func() {
@@ -46,15 +43,10 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 		agentOptions = AgentOptions{Mbus: "fake-mbus", VcapPassword: "fake-vcap-password"}
 		logger = boshlog.NewLogger(boshlog.LevelNone)
 		fakeVmFinder = &fakescommon.FakeVMFinder{}
-
 		fakeVm = &fakescommon.FakeVM{}
-		fakeVm.GetPrimaryBackendIPReturns("10.0.0.1")
-		fakeVm.GetFullyQualifiedDomainNameReturns("fake-full-hostname")
 
 		slh.TIMEOUT = 2 * time.Second
 		slh.POLLING_INTERVAL = 1 * time.Second
-
-		fs = boshsys.NewOsFileSystem(logger)
 	})
 
 	Describe("#Create", func() {
@@ -232,7 +224,6 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 							slh.NetworkInterface = "eth0"
 						}
 						slh.LocalDNSConfigurationFile = "/tmp/hosts"
-						fs.OpenFile("/tmp/hosts", os.O_RDONLY|os.O_CREATE, 0666)
 
 						vm, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
 						Expect(err).ToNot(HaveOccurred())
@@ -519,7 +510,6 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 							slh.NetworkInterface = "eth0"
 						}
 						slh.LocalDNSConfigurationFile = "/tmp/hosts"
-						fs.OpenFile("/tmp/hosts", os.O_RDONLY|os.O_CREATE, 0777)
 
 						vm, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
 						Expect(err).ToNot(HaveOccurred())
@@ -571,7 +561,6 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 							slh.NetworkInterface = "eth0"
 						}
 						slh.LocalDNSConfigurationFile = "/tmp/hosts"
-						fs.OpenFile("/tmp/hosts", os.O_RDONLY|os.O_CREATE, 0666)
 
 						vm, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
 						Expect(err).ToNot(HaveOccurred())
@@ -750,7 +739,6 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 							slh.NetworkInterface = "eth0"
 						}
 						slh.LocalDNSConfigurationFile = "/tmp/hosts"
-						fs.OpenFile("/tmp/hosts", os.O_RDONLY|os.O_CREATE, 0666)
 
 						vm, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
 						Expect(err).ToNot(HaveOccurred())
@@ -803,8 +791,6 @@ var _ = Describe("SoftLayer_Virtual_Guest_Creator", func() {
 						}
 
 						slh.LocalDNSConfigurationFile = "/tmp/hosts"
-						fs.OpenFile("/tmp/hosts", os.O_RDONLY|os.O_CREATE, 0666)
-
 						_, err := creator.Create(agentID, stemcell, cloudProps, networks, env)
 						Expect(err).ToNot(HaveOccurred())
 					})
@@ -914,6 +900,7 @@ func setFakeSoftlayerClientCreateObjectTestFixturesWithoutBoshIP_OS_Reload(fakeS
 		"SoftLayer_Virtual_Guest_Service_getPowerState.json",
 		"SoftLayer_Virtual_Guest_Service_getBlockDevices.json",
 
+		"SoftLayer_Virtual_Guest_Service_getObject.json",
 		"SoftLayer_Virtual_Guest_Service_getObject.json",
 	}
 	testhelpers.SetTestFixturesForFakeSoftLayerClient(fakeSoftLayerClient, fileNames)

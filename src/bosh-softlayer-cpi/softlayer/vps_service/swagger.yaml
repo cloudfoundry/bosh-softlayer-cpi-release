@@ -1,0 +1,408 @@
+swagger: "2.0"
+info:
+  description: |
+    This is a SoftLayer VM Pool Server.
+    
+  version: "0.0.1"
+  title: SoftLayer VM Pool
+  termsOfService: http://helloreverb.com/terms/
+  contact:
+    name: apiteam@swagger.io
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+host: vps.swagger.io
+basePath: /v2
+schemes:
+  - http
+paths:
+  /vms:
+    post:
+      tags:
+        - vm
+      summary: Add a new vm to the pool
+      description: ""
+      operationId: addVm
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: Vm object that needs to be added to the pool
+          required: false
+          schema:
+            $ref: "#/definitions/Vm"
+      responses:
+        "200":
+          description: add a new vm into the pool
+          schema:
+            type: string
+        default:
+          description: unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+    get:
+      tags:
+        - vm
+      summary: List vms of the pool
+      description: ""
+      operationId: listVm
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: successful operation
+          schema:
+            $ref: "#/definitions/VmsResponse"
+        "404":
+          description: vm not found
+        default:
+          description: unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+    put:
+      tags:
+        - vm
+      summary: Update an existing vm
+      description: ""
+      operationId: updateVm
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: Vm object that needs to be added to the pool
+          required: true
+          schema:
+            $ref: "#/definitions/Vm"
+      responses:
+        "404":
+          description: vm not found
+        "200":
+          description: update vm in the pool
+          schema:
+            type: string
+        default:
+          description: unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /vms/findByFilters:
+    post:
+      tags:
+        - vm
+      summary: Finds Vms by filters (cpu, memory, private_vlan, public_vlan, state)
+      description: ""
+      operationId: findVmsByFilters
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: Vm object that needs to be added to the pool
+          required: false
+          schema:
+            $ref: "#/definitions/VmFilter"
+      responses:
+        "200":
+          description: successful operation
+          schema:
+            $ref: "#/definitions/VmsResponse"
+        "404":
+          description: vm not found
+        default:
+          description: unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /vms/order:
+    post:
+      tags:
+        - vm
+      summary: Order a free vm by filters (cpu, memory, private_vlan, public_vlan, state)
+      description: ""
+      operationId: orderVmByFilter
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: vm filter to order
+          required: false
+          schema:
+            $ref: "#/definitions/VmFilter"
+      responses:
+        "200":
+          description: successful operation
+          schema:
+            $ref: "#/definitions/VmResponse"
+        "404":
+          description: vm not found
+        default:
+          description: unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /vms/findByDeployment:
+    get:
+      tags:
+        - vm
+      summary: Finds Vms by deployment name
+      description: Multiple deployment values can be provided with comma seperated strings
+      operationId: findVmsByDeployment
+      produces:
+        - application/json
+      parameters:
+        - in: query
+          name: deployment
+          description: deployment values that need to be considered for filter
+          required: false
+          type: array
+          items:
+            type: string
+          collectionFormat: multi
+      responses:
+        "200":
+          description: successful operation
+          schema:
+            $ref: "#/definitions/VmsResponse"
+        "404":
+          description: vm not found
+        default:
+          description: unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /vms/findByState:
+    get:
+      tags:
+        - vm
+      summary: Finds Vms by states
+      description: ""
+      operationId: findVmsByStates
+      produces:
+        - application/json
+      parameters:
+        - in: query
+          name: states
+          description: States to filter by
+          required: false
+          type: array
+          items:
+            type: string
+          collectionFormat: multi
+      responses:
+        "200":
+          description: successful operation
+          schema:
+            $ref: "#/definitions/VmsResponse"
+        "404":
+          description: vm not found
+        default:
+          description: unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /vms/{cid}:
+    get:
+      tags:
+        - vm
+      summary: Find vm by ID
+      description: Returns a vm when ID < 10.  ID > 10 or nonintegers will simulate API error conditions
+      operationId: getVmByCid
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: cid
+          description: ID of vm that needs to be fetched
+          required: true
+          type: integer
+          format: int32
+      responses:
+        "404":
+          description: vm not found
+        "200":
+          description: successful operation
+          schema:
+            $ref: "#/definitions/VmResponse"
+        default:
+          description: unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+    put:
+      tags:
+        - vm
+      summary: Updates a vm in the pool with state
+      description: ""
+      operationId: updateVmWithState
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: cid
+          description: ID of vm that needs to be updated
+          required: true
+          type: integer
+          format: int32
+        - in: body
+          name: body
+          description: Vm state that needs to be updated
+          required: false
+          schema:
+            $ref: "#/definitions/VmState"
+      responses:
+        "404":
+          description: vm not found
+        "200":
+          description: state updated successfully
+          schema:
+            type: string
+        default:
+          description: unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+    delete:
+      tags:
+        - vm
+      summary: Deletes a vm from pool
+      description: ""
+      operationId: deleteVm
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: cid
+          description: vm id to delete
+          required: true
+          type: integer
+          format: int32
+      responses:
+        "404":
+          description: vm not found
+        "204":
+          description: vm removed successfully
+          schema:
+            type: string
+        default:
+          description: unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+definitions:
+  State:
+    type: string
+    description: Vm State
+    enum:
+    - free
+    - provisioning
+    - using
+    - unknown
+  VmState:
+    type: object
+    properties:
+      state:
+        $ref: "#/definitions/State"
+  Vm:
+    type: object
+    properties:
+      cid:
+        type: integer
+        format: int32
+      hostname:
+        type: string
+      cpu:
+        type: integer
+        format: int32
+      memory_mb:
+        type: integer
+        format: int32
+      public_vlan:
+        type: integer
+        format: int32
+      private_vlan:
+        type: integer
+        format: int32
+      ip:
+        type: string
+        format: ipv4
+      state:
+        $ref: "#/definitions/State"
+      deploymentName:
+        type: string
+      createDate:
+        type: string
+        format: date-time
+      modifyDate:
+        type: string
+        format: date-time
+  VmFilter:
+    type: object
+    properties:
+      cid:
+        type: integer
+        format: int32
+      cpu:
+        type: integer
+        format: int32
+      memory_mb:
+        type: integer
+        format: int32
+      public_vlan:
+        type: integer
+        format: int32
+      private_vlan:
+        type: integer
+        format: int32
+      ip:
+        type: string
+        format: ipv4
+      state:
+        $ref: "#/definitions/State"
+  ErrorType:
+    type: string
+    description: Error Types
+    enum:
+    - UnknownError
+    - InvalidDomain
+    - UnkownVersion
+    - InvalidRecord
+    - InvalidRequest
+    - InvalidResponse
+    - InvalidProtobufMessage
+    - InvalidJSON
+    - FailedToOpenEnvelope
+    - InvalidStateTransition
+    - Unauthorized
+    - ResourceConflict
+    - ResourceExist
+    - ResourceNotFound
+    - RouterError
+    - SoftLayerAPIError
+    - GUIDGeneration
+    - Deserialize
+    - Deadlock
+    - Unrecoverable
+  Error:
+    type: object
+    properties:
+      type:
+        $ref: "#/definitions/ErrorType"
+      message:
+        type: string
+  VmsResponse:
+    type: object
+    properties:
+      vms:
+        type: array
+        items:
+          $ref: "#/definitions/Vm"
+  VmResponse:
+    type: object
+    properties:
+      vm:
+        $ref: "#/definitions/Vm"
