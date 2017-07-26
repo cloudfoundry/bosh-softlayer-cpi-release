@@ -1,13 +1,13 @@
 package disk
 
-type DiskCloudProperties struct {
+type LegacyDiskCloudProperties struct {
 	Iops             int  `json:"iops,omitempty"`
 	UseHourlyPricing bool `json:"useHourlyPricing,omitempty"`
 }
 
 //go:generate counterfeiter -o fakes/fake_disk_creator.go . DiskCreator
 type DiskCreator interface {
-	Create(size int, cloudProp DiskCloudProperties, datacenter_id int) (Disk, error)
+	Create(size int, cloudProp LegacyDiskCloudProperties, datacenter_id int) (Disk, error)
 }
 
 //go:generate counterfeiter -o fakes/fake_disk_finder.go . DiskFinder

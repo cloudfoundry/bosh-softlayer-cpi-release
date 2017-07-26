@@ -8,83 +8,39 @@ import (
 
 	. "bosh-softlayer-cpi/action"
 
-	fakedisk "bosh-softlayer-cpi/softlayer/disk/fakes"
+	diskfakes "bosh-softlayer-cpi/softlayer/disk_service/fakes"
 )
 
 var _ = Describe("DeleteDisk", func() {
 	var (
-		fakeDiskFinder *fakedisk.FakeDiskFinder
-		fakeDisk       *fakedisk.FakeDisk
-		action         DeleteDiskAction
+		err     error
+		diskCID DiskCID
+
+		diskService *diskfakes.FakeService
+
+		deleteDisk DeleteDisk
 	)
 
 	BeforeEach(func() {
-		fakeDiskFinder = &fakedisk.FakeDiskFinder{}
-		fakeDisk = &fakedisk.FakeDisk{}
-		action = NewDeleteDisk(fakeDiskFinder)
+		diskCID = DiskCID(22345678)
+		diskService = &diskfakes.FakeService{}
+		deleteDisk = NewDeleteDisk(diskService)
 	})
 
 	Describe("Run", func() {
-		var (
-			diskCid DiskCID
-			err     error
-		)
-
-		BeforeEach(func() {
-			diskCid = DiskCID(123456)
+		It("deletes the disk", func() {
+			_, err = deleteDisk.Run(diskCID)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(diskService.DeleteCallCount()).To(Equal(1))
 		})
 
-		JustBeforeEach(func() {
-			_, err = action.Run(diskCid)
-		})
+		It("returns an error if diskService delete call returns an error", func() {
+			diskService.DeleteReturns(errors.New("fake-disk-service-error"))
 
-		Context("when delete disk succeeds", func() {
-			BeforeEach(func() {
-				fakeDisk.DeleteReturns(nil)
-				fakeDiskFinder.FindReturns(fakeDisk, true, nil)
-			})
-
-			It("find disk by diskCid", func() {
-				Expect(fakeDiskFinder.FindCallCount()).To(Equal(1))
-				actualDiskCid := fakeDiskFinder.FindArgsForCall(0)
-				Expect(actualDiskCid).To(Equal(int(diskCid)))
-			})
-
-			It("no err return", func() {
-				Expect(err).NotTo(HaveOccurred())
-			})
-		})
-
-		Context("when disk is not found", func() {
-			BeforeEach(func() {
-				fakeDiskFinder.FindReturns(nil, false, nil)
-			})
-
-			It("no err return", func() {
-				Expect(err).NotTo(HaveOccurred())
-			})
-		})
-
-		Context("when find disk error", func() {
-			BeforeEach(func() {
-				fakeDiskFinder.FindReturns(nil, false, errors.New("kaboom"))
-			})
-
-			It("provides relevant error information", func() {
-				Expect(err.Error()).To(ContainSubstring("kaboom"))
-			})
-		})
-
-		Context("when delete disk error out", func() {
-			BeforeEach(func() {
-				fakeDisk.DeleteReturns(errors.New("kaboom"))
-				fakeDiskFinder.FindReturns(fakeDisk, true, nil)
-			})
-
-			It("provides relevant error information", func() {
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("kaboom"))
-			})
+			_, err = deleteDisk.Run(diskCID)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("fake-disk-service-error"))
+			Expect(diskService.DeleteCallCount()).To(Equal(1))
 		})
 	})
 })

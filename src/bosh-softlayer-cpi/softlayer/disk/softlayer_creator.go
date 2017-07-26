@@ -22,7 +22,7 @@ func NewSoftLayerDiskCreator(client sl.Client, logger boshlog.Logger) SoftLayerC
 	}
 }
 
-func (c SoftLayerCreator) Create(size int, cloudProps DiskCloudProperties, datacenter_id int) (Disk, error) {
+func (c SoftLayerCreator) Create(size int, cloudProps LegacyDiskCloudProperties, datacenter_id int) (Disk, error) {
 	c.logger.Debug(SOFTLAYER_DISK_CREATOR_LOG_TAG, "Creating disk of size '%d'", size)
 
 	storageService, err := c.softLayerClient.GetSoftLayer_Network_Storage_Service()

@@ -2,135 +2,144 @@ package action_test
 
 import (
 	"errors"
-	"fmt"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
 	. "bosh-softlayer-cpi/action"
 
-	fakescommon "bosh-softlayer-cpi/softlayer/common/fakes"
-	fakedisk "bosh-softlayer-cpi/softlayer/disk/fakes"
+	"bosh-softlayer-cpi/registry"
+	registryfakes "bosh-softlayer-cpi/registry/fakes"
+	instancefakes "bosh-softlayer-cpi/softlayer/virtual_guest_service/fakes"
 )
 
 var _ = Describe("DetachDisk", func() {
 	var (
-		fakeVmFinder   *fakescommon.FakeVMFinder
-		fakeVm         *fakescommon.FakeVM
-		fakeDiskFinder *fakedisk.FakeDiskFinder
-		fakeDisk       *fakedisk.FakeDisk
-		action         DetachDiskAction
+		err                   error
+		expectedAgentSettings registry.AgentSettings
+
+		vmService      *instancefakes.FakeService
+		registryClient *registryfakes.FakeClient
+
+		detachDisk DetachDisk
 	)
-
 	BeforeEach(func() {
-		fakeVmFinder = &fakescommon.FakeVMFinder{}
-		fakeVm = &fakescommon.FakeVM{}
-		fakeDiskFinder = &fakedisk.FakeDiskFinder{}
-		fakeDisk = &fakedisk.FakeDisk{}
-		action = NewDetachDisk(fakeVmFinder, fakeDiskFinder)
-
+		vmService = &instancefakes.FakeService{}
+		registryClient = &registryfakes.FakeClient{}
+		detachDisk = NewDetachDisk(vmService, registryClient)
 	})
 
 	Describe("Run", func() {
 		var (
-			vmCid   VMCID
+			vmCID   VMCID
 			diskCID DiskCID
-
-			err error
 		)
 
 		BeforeEach(func() {
-			vmCid = VMCID(123456)
-			diskCID = DiskCID(123456)
+			vmCID = VMCID(12345678)
+			diskCID = DiskCID(22345678)
+
+			registryClient.FetchSettings = registry.AgentSettings{
+				Disks: registry.DisksSettings{
+					Persistent: map[string]registry.PersistentSettings{
+						"22345678": {
+							ID:            "22345678",
+							InitiatorName: "iqn.yyyy-mm.fake-domain:fake-username",
+							Target:        "10.1.22.170",
+							Username:      "fake-username",
+							Password:      "fake-password",
+						},
+					},
+				},
+			}
+
+			expectedAgentSettings = registry.AgentSettings{
+				Disks: registry.DisksSettings{
+					Persistent: map[string]registry.PersistentSettings{},
+				},
+			}
 		})
 
-		JustBeforeEach(func() {
-			_, err = action.Run(vmCid, diskCID)
+		It("detaches the disk", func() {
+			_, err = detachDisk.Run(vmCID, diskCID)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(vmService.DetachDiskCallCount()).To(Equal(1))
+			Expect(registryClient.FetchCalled).To(BeTrue())
+			Expect(registryClient.UpdateCalled).To(BeTrue())
+			Expect(registryClient.UpdateSettings).To(Equal(expectedAgentSettings))
 		})
 
-		Context("when detach disk succeeds", func() {
+		It("returns an error if vmService detach disk call returns an error", func() {
+			vmService.DetachDiskReturns(
+				errors.New("fake-vm-service-error"),
+			)
+
+			_, err = detachDisk.Run(vmCID, diskCID)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("fake-vm-service-error"))
+			Expect(vmService.DetachDiskCallCount()).To(Equal(1))
+			Expect(registryClient.FetchCalled).To(BeFalse())
+			Expect(registryClient.UpdateCalled).To(BeFalse())
+		})
+
+		It("returns an error if registryClient fetch call returns an error", func() {
+			registryClient.FetchErr = errors.New("fake-registry-client-error")
+
+			_, err = detachDisk.Run(vmCID, diskCID)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("fake-registry-client-error"))
+			Expect(vmService.DetachDiskCallCount()).To(Equal(1))
+			Expect(registryClient.FetchCalled).To(BeTrue())
+			Expect(registryClient.UpdateCalled).To(BeFalse())
+		})
+
+		It("returns an error if registryClient update call returns an error", func() {
+			registryClient.UpdateErr = errors.New("fake-registry-client-error")
+
+			_, err = detachDisk.Run(vmCID, diskCID)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("fake-registry-client-error"))
+			Expect(vmService.DetachDiskCallCount()).To(Equal(1))
+			Expect(registryClient.FetchCalled).To(BeTrue())
+			Expect(registryClient.UpdateCalled).To(BeTrue())
+		})
+
+		Context("when Persistent contains two Settings", func() {
 			BeforeEach(func() {
-				fakeVmFinder.FindReturns(fakeVm, true, nil)
-				fakeDiskFinder.FindReturns(fakeDisk, true, nil)
+				registryClient.FetchSettings = registry.AgentSettings{
+					Disks: registry.DisksSettings{
+						Persistent: map[string]registry.PersistentSettings{
+							"22345678": {
+								ID:            "22345678",
+								InitiatorName: "iqn.yyyy-mm.fake-domain:fake-username",
+								Target:        "10.1.22.170",
+								Username:      "fake-username",
+								Password:      "fake-password",
+							},
+							"32345678": {
+								ID:            "32345678",
+								InitiatorName: "iqn.yyyy-mm.fake-domain:fake-username",
+								Target:        "10.1.22.100",
+								Username:      "fake-username",
+								Password:      "fake-password",
+							},
+						},
+					},
+				}
 
-				fakeVm.DetachDiskReturns(nil)
-			})
-
-			It("fetches vm by cid", func() {
-				Expect(fakeVmFinder.FindCallCount()).To(Equal(1))
-				actualCid := fakeVmFinder.FindArgsForCall(0)
-				Expect(actualCid).To(Equal(123456))
-			})
-
-			It("fetches disk by cid", func() {
-				Expect(fakeDiskFinder.FindCallCount()).To(Equal(1))
-				actualCid := fakeDiskFinder.FindArgsForCall(0)
-				Expect(actualCid).To(Equal(123456))
-			})
-
-			It("no error return", func() {
-				Expect(fakeVm.DetachDiskCallCount()).To(Equal(1))
-				actualDisk := fakeVm.DetachDiskArgsForCall(0)
-				Expect(actualDisk).To(Equal(fakeDisk))
-				Expect(err).NotTo(HaveOccurred())
-			})
-		})
-
-		Context("when find vm error out", func() {
-			BeforeEach(func() {
-				fakeVmFinder.FindReturns(nil, false, errors.New("kaboom"))
-			})
-
-			It("provides relevant error information", func() {
-				Expect(err.Error()).To(ContainSubstring("kaboom"))
-			})
-		})
-
-		Context("when find vm return false", func() {
-			BeforeEach(func() {
-				fakeVmFinder.FindReturns(nil, false, nil)
-			})
-
-			It("provides relevant error information", func() {
-				Expect(err).To(HaveOccurred())
-				Expect(err).To(MatchError(fmt.Sprintf("Expected to find VM '%s'", vmCid)))
-			})
-		})
-
-		Context("when find disk error out", func() {
-			BeforeEach(func() {
-				fakeVmFinder.FindReturns(fakeVm, true, nil)
-				fakeDiskFinder.FindReturns(nil, false, errors.New("kaboom"))
-			})
-
-			It("provides relevant error information", func() {
-				Expect(err.Error()).To(ContainSubstring("kaboom"))
-			})
-		})
-
-		Context("when find disk return false", func() {
-			BeforeEach(func() {
-				fakeVmFinder.FindReturns(fakeVm, true, nil)
-				fakeDiskFinder.FindReturns(nil, false, nil)
-			})
-
-			It("provides relevant error information", func() {
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring(fmt.Sprintf("Expected to find disk '%s'", diskCID)))
-			})
-		})
-
-		Context("when detach disk error out", func() {
-			BeforeEach(func() {
-				fakeVmFinder.FindReturns(fakeVm, true, nil)
-				fakeDiskFinder.FindReturns(fakeDisk, true, nil)
-
-				fakeVm.DetachDiskReturns(errors.New("kaboom"))
-			})
-
-			It("provides relevant error information", func() {
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("kaboom"))
+				expectedAgentSettings = registry.AgentSettings{
+					Disks: registry.DisksSettings{
+						Persistent: map[string]registry.PersistentSettings{
+							"32345678": {
+								ID:            "32345678",
+								InitiatorName: "iqn.yyyy-mm.fake-domain:fake-username",
+								Target:        "10.1.22.100",
+								Username:      "fake-username",
+								Password:      "fake-password",
+							},
+						},
+					},
+				}
 			})
 		})
 	})

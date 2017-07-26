@@ -1,42 +1,43 @@
 package action
 
 import (
+	"bosh-softlayer-cpi/api"
+	"bosh-softlayer-cpi/registry"
+	vgs "bosh-softlayer-cpi/softlayer/virtual_guest_service"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 
-	. "bosh-softlayer-cpi/softlayer/common"
-	"fmt"
+	boslconfig "bosh-softlayer-cpi/softlayer/config"
 )
 
 type DeleteVMAction struct {
-	vmDeleterProvider DeleterProvider
-	options           ConcreteFactoryOptions
+	vmService        vgs.Service
+	registryClient   registry.Client
+	softlayerOptions boslconfig.Config
 }
 
 func NewDeleteVM(
-	vmDeleterProvider DeleterProvider,
-	options ConcreteFactoryOptions,
+	vmDeleterProvider vgs.Service,
+	registryClient registry.Client,
+	softlayerOptions boslconfig.Config,
 ) (action DeleteVMAction) {
-	action.vmDeleterProvider = vmDeleterProvider
-	action.options = options
+	action.vmService = vmDeleterProvider
+	action.registryClient = registryClient
+	action.softlayerOptions = softlayerOptions
 	return
 }
 
-func (a DeleteVMAction) Run(vmCID VMCID) (interface{}, error) {
-	var vmDeleter VMDeleter
-	if a.options.Softlayer.FeatureOptions.EnablePool {
-		vmDeleter = a.vmDeleterProvider.Get("pool")
-
-		err := vmDeleter.Delete(int(vmCID))
-		if err != nil {
-			return nil, bosherr.WrapError(err, fmt.Sprintf("Update vm %d to free in pool", int(vmCID)))
+func (dv DeleteVMAction) Run(vmCID VMCID) (interface{}, error) {
+	// Delete the VM
+	if err := dv.vmService.Delete(vmCID.Int(), dv.softlayerOptions.EnableVps); err != nil {
+		if _, ok := err.(api.CloudError); ok {
+			return nil, nil
 		}
-	} else {
-		vmDeleter = a.vmDeleterProvider.Get("virtualguest")
+		return nil, bosherr.WrapErrorf(err, "Deleting vm '%s'", vmCID)
+	}
 
-		err := vmDeleter.Delete(int(vmCID))
-		if err != nil {
-			return nil, bosherr.WrapError(err, fmt.Sprintf("Deleting vm %d", int(vmCID)))
-		}
+	// Delete the VM agent settings
+	if err := dv.registryClient.Delete(vmCID.String()); err != nil {
+		return nil, bosherr.WrapErrorf(err, "Deleting vm '%s'", vmCID)
 	}
 
 	return nil, nil

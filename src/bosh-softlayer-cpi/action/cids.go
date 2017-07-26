@@ -10,6 +10,11 @@ import (
 type StemcellCID int
 type VMCID int
 type DiskCID int
+type SnapshotCID int
+
+func (stemcellCID StemcellCID) Int() int {
+	return int(stemcellCID)
+}
 
 func (stemcellCID StemcellCID) String() string {
 	return strconv.Itoa(int(stemcellCID))
@@ -88,4 +93,32 @@ func (diskCID DiskCID) String() string {
 
 func (diskCID DiskCID) Int() int {
 	return int(diskCID)
+}
+
+func (snapshotCID *SnapshotCID) UnmarshalJSON(data []byte) error {
+	if snapshotCID == nil {
+		return errors.New("SnapshotCID: UnmarshalJSON on nil pointer")
+	}
+
+	dataString := strings.Trim(string(data), "\"")
+	intValue, err := strconv.Atoi(dataString)
+	if err != nil {
+		return err
+	}
+
+	*snapshotCID = SnapshotCID(intValue)
+
+	return nil
+}
+
+func (snapshotCID SnapshotCID) MarshalJSON() ([]byte, error) {
+	return json.Marshal(int(snapshotCID))
+}
+
+func (snapshotCID SnapshotCID) String() string {
+	return strconv.Itoa(int(snapshotCID))
+}
+
+func (snapshotCID SnapshotCID) Int() int {
+	return int(snapshotCID)
 }

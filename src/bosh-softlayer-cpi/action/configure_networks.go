@@ -1,34 +1,27 @@
 package action
 
 import (
-	bosherr "github.com/cloudfoundry/bosh-utils/errors"
+	"bosh-softlayer-cpi/api"
+	instance "bosh-softlayer-cpi/softlayer/virtual_guest_service"
 
-	. "bosh-softlayer-cpi/softlayer/common"
+	"bosh-softlayer-cpi/registry"
 )
 
-type ConfigureNetworksAction struct {
-	vmFinder VMFinder
+type ConfigureNetworks struct {
+	vmService      instance.Service
+	registryClient registry.Client
 }
 
 func NewConfigureNetworks(
-	vmFinder VMFinder,
-) (action ConfigureNetworksAction) {
-	action.vmFinder = vmFinder
-	return
+	vmService instance.Service,
+	registryClient registry.Client,
+) (action ConfigureNetworks) {
+	return ConfigureNetworks{
+		vmService:      vmService,
+		registryClient: registryClient,
+	}
 }
 
-func (a ConfigureNetworksAction) Run(vmCID VMCID, networks Networks) (interface{}, error) {
-	vm, found, err := a.vmFinder.Find(int(vmCID))
-	if err != nil {
-		return nil, bosherr.WrapErrorf(err, "Finding vm '%s'", vmCID)
-	}
-
-	if found {
-		err := vm.ConfigureNetworks(networks)
-		if err != nil {
-			return nil, bosherr.WrapErrorf(err, "Configuring networks vm '%s'", vmCID)
-		}
-	}
-
-	return nil, nil
+func (cn ConfigureNetworks) Run(vmCID VMCID, networks Networks) (interface{}, error) {
+	return nil, api.NotSupportedError{}
 }

@@ -1,25 +1,26 @@
 package action
 
 import (
-	. "bosh-softlayer-cpi/softlayer/common"
+	instance "bosh-softlayer-cpi/softlayer/virtual_guest_service"
 )
 
-type HasVMAction struct {
-	vmFinder VMFinder
+type HasVM struct {
+	vmService instance.Service
 }
 
 func NewHasVM(
-	vmFinder VMFinder,
-) (action HasVMAction) {
-	action.vmFinder = vmFinder
-	return
+	vmService instance.Service,
+) HasVM {
+	return HasVM{
+		vmService: vmService,
+	}
 }
 
-func (a HasVMAction) Run(vmCID VMCID) (bool, error) {
-	_, found, err := a.vmFinder.Find(int(vmCID))
+func (hv HasVM) Run(vmCID VMCID) (bool, error) {
+	_, err := hv.vmService.Find(vmCID.Int())
 	if err != nil {
-		return false, nil
+		return false, err
 	}
 
-	return found, nil
+	return true, nil
 }

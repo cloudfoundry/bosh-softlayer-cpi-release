@@ -6,7 +6,6 @@ import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshsys "github.com/cloudfoundry/bosh-utils/system"
 
-	bslcaction "bosh-softlayer-cpi/action"
 	"bosh-softlayer-cpi/registry"
 	boslconfig "bosh-softlayer-cpi/softlayer/config"
 )
@@ -16,9 +15,8 @@ type Config struct {
 }
 
 type Cloud struct {
-	Plugin       string                            `json:"plugin"`
-	Properties   CPIProperties                     `json:"properties"`
-	LegacyProperties bslcaction.ConcreteFactoryOptions `json:"properties"`
+	Plugin     string        `json:"plugin"`
+	Properties CPIProperties `json:"properties"`
 }
 
 type CPIProperties struct {

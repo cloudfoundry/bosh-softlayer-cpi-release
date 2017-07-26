@@ -3,33 +3,28 @@ package action
 import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 
-	. "bosh-softlayer-cpi/softlayer/common"
+	"bosh-softlayer-cpi/api"
+	instance "bosh-softlayer-cpi/softlayer/virtual_guest_service"
 )
 
-type SetVMMetadataAction struct {
-	vmFinder VMFinder
+type SetVMMetadata struct {
+	vmService instance.Service
 }
 
 func NewSetVMMetadata(
-	vmFinder VMFinder,
-) (action SetVMMetadataAction) {
-	action.vmFinder = vmFinder
-	return
+	vmService instance.Service,
+) SetVMMetadata {
+	return SetVMMetadata{
+		vmService: vmService,
+	}
 }
 
-func (a SetVMMetadataAction) Run(vmCID VMCID, metadata VMMetadata) (interface{}, error) {
-	vm, found, err := a.vmFinder.Find(int(vmCID))
-	if err != nil || !found {
-		return nil, bosherr.WrapErrorf(err, "Finding VM '%s'", vmCID)
-	}
-
-	if len(metadata) == 0 {
-		return nil, nil
-	}
-
-	err = vm.SetMetadata(metadata)
-	if err != nil {
-		return nil, bosherr.WrapErrorf(err, "Setting metadata '%#v' on VM '%s'", metadata, vmCID)
+func (svm SetVMMetadata) Run(vmCID VMCID, vmMetadata VMMetadata) (interface{}, error) {
+	if err := svm.vmService.SetMetadata(vmCID.Int(), instance.Metadata(vmMetadata)); err != nil {
+		if _, ok := err.(api.CloudError); ok {
+			return nil, err
+		}
+		return nil, bosherr.WrapErrorf(err, "Setting metadata for vm '%s'", vmCID)
 	}
 
 	return nil, nil

@@ -1,15 +1,13 @@
 package action
 
 import (
-	. "bosh-softlayer-cpi/softlayer/common/helper"
-	bslcstem "bosh-softlayer-cpi/softlayer/stemcell"
+	"bosh-softlayer-cpi/api"
+	stemcell "bosh-softlayer-cpi/softlayer/stemcell_service"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
-
-	"time"
 )
 
 type CreateStemcellAction struct {
-	stemcellFinder bslcstem.StemcellFinder
+	stemcellService stemcell.Service
 }
 
 type CreateStemcellCloudProps struct {
@@ -19,20 +17,20 @@ type CreateStemcellCloudProps struct {
 }
 
 func NewCreateStemcell(
-	stemcellFinder bslcstem.StemcellFinder,
+	stemcellFinder stemcell.Service,
 ) (action CreateStemcellAction) {
-	action.stemcellFinder = stemcellFinder
+	action.stemcellService = stemcellFinder
 	return
 }
 
 func (a CreateStemcellAction) Run(imagePath string, stemcellCloudProps CreateStemcellCloudProps) (string, error) {
-	TIMEOUT = 30 * time.Second
-	POLLING_INTERVAL = 5 * time.Second
-
-	stemcell, err := a.stemcellFinder.FindById(stemcellCloudProps.Id)
+	_, err := a.stemcellService.Find(stemcellCloudProps.Id)
 	if err != nil {
-		return "0", bosherr.WrapErrorf(err, "Finding stemcell with ID '%d'", stemcellCloudProps.Id)
+		if _, ok := err.(api.CloudError); ok {
+			return "", err
+		}
+		return "", bosherr.WrapErrorf(err, "Creating stemcell")
 	}
 
-	return StemcellCID(stemcell.ID()).String(), nil
+	return StemcellCID(stemcellCloudProps.Id).String(), nil
 }

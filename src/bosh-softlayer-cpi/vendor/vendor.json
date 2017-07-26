@@ -21,6 +21,12 @@
 			"revisionTime": "2017-05-29T11:00:29Z"
 		},
 		{
+			"checksumSHA1": "XcrCxsd7QvlMqQ1rZQL3uYXPkpI=",
+			"path": "github.com/bluebosh/goodhosts",
+			"revision": "a0216a00bdad6aa7b2b6c342d42b96241f239314",
+			"revisionTime": "2017-06-05T05:59:56Z"
+		},
+		{
 			"checksumSHA1": "I2DDeog8ML55A+drYgods2s4Y5Q=",
 			"origin": "github.com/cloudfoundry/bosh-utils/vendor/github.com/bmatcuk/doublestar",
 			"path": "github.com/bmatcuk/doublestar",

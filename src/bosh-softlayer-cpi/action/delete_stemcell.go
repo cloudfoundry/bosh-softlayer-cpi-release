@@ -1,21 +1,17 @@
 package action
 
 import (
-	bslcstem "bosh-softlayer-cpi/softlayer/stemcell"
-	boshlog "github.com/cloudfoundry/bosh-utils/logger"
+	stemcell_service "bosh-softlayer-cpi/softlayer/stemcell_service"
 )
 
 type DeleteStemcellAction struct {
-	stemcellFinder bslcstem.StemcellFinder
-	logger         boshlog.Logger
+	stemcellService stemcell_service.Service
 }
 
 func NewDeleteStemcell(
-	stemcellFinder bslcstem.StemcellFinder,
-	logger boshlog.Logger,
+	stemcellService stemcell_service.Service,
 ) (action DeleteStemcellAction) {
-	action.stemcellFinder = stemcellFinder
-	action.logger = logger
+	action.stemcellService = stemcellService
 	return
 }
 
