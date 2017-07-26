@@ -66,15 +66,30 @@ func (e diskNotAttachedError) Error() string {
 
 func (e diskNotAttachedError) CanRetry() bool { return false }
 
-// -
-type diskNotFoundError struct {
-	diskID string
+type DiskNotFoundError struct {
+	diskID   string
+	canRetry bool
 }
 
-func NewDiskNotFoundError(diskID string) diskNotFoundError {
-	return diskNotFoundError{diskID: diskID}
+func NewDiskNotFoundError(diskID string, canRetry bool) DiskNotFoundError {
+	return DiskNotFoundError{diskID: diskID, canRetry: canRetry}
 }
 
-func (e diskNotFoundError) Type() string   { return "Bosh::Clouds::DiskNotFound" }
-func (e diskNotFoundError) Error() string  { return fmt.Sprintf("Disk '%s' not found", e.diskID) }
-func (e diskNotFoundError) CanRetry() bool { return false }
+func (e DiskNotFoundError) Type() string   { return "Bosh::Clouds::DiskNotFound" }
+func (e DiskNotFoundError) Error() string  { return fmt.Sprintf("Disk '%s' not found", e.diskID) }
+func (e DiskNotFoundError) CanRetry() bool { return false }
+
+type StemcellNotFoundError struct {
+	stemcellID string
+	canRetry   bool
+}
+
+func NewStemcellkNotFoundError(stemcellID string, canRetry bool) StemcellNotFoundError {
+	return StemcellNotFoundError{stemcellID: stemcellID, canRetry: canRetry}
+}
+
+func (e StemcellNotFoundError) Type() string { return "Bosh::Clouds::StemcellNotFound" }
+func (e StemcellNotFoundError) Error() string {
+	return fmt.Sprintf("Stemcell '%s' not found", e.stemcellID)
+}
+func (e StemcellNotFoundError) CanRetry() bool { return e.canRetry }
