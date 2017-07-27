@@ -1,0 +1,46 @@
+[
+    {
+        "bareMetalInstanceFlag": 0,
+        "domain": "softlayer.com",
+        "fullyQualifiedDomainName": "bcr01a.ams01.softlayer.com",
+        "hostname": "bcr01a.ams01",
+        "id": 117917,
+        "notes": "",
+        "provisionDate": null,
+        "serviceProviderId": 1,
+        "serviceProviderResourceId": null
+    },
+    {
+        "bareMetalInstanceFlag": 0,
+        "domain": "softlayer.com",
+        "fullyQualifiedDomainName": "bcr02a.ams01.softlayer.com",
+        "hostname": "bcr02a.ams01",
+        "id": 190854,
+        "notes": "",
+        "provisionDate": null,
+        "serviceProviderId": 1,
+        "serviceProviderResourceId": null
+    },
+    {
+        "bareMetalInstanceFlag": 0,
+        "domain": "softlayer.com",
+        "fullyQualifiedDomainName": "fcr01a.ams01.softlayer.com",
+        "hostname": "fcr01a.ams01",
+        "id": 117960,
+        "notes": "",
+        "provisionDate": null,
+        "serviceProviderId": 1,
+        "serviceProviderResourceId": null
+    },
+    {
+        "bareMetalInstanceFlag": 0,
+        "domain": "softlayer.com",
+        "fullyQualifiedDomainName": "fcr02a.ams01.softlayer.com",
+        "hostname": "fcr02a.ams01",
+        "id": 190856,
+        "notes": "",
+        "provisionDate": null,
+        "serviceProviderId": 1,
+        "serviceProviderResourceId": null
+    }
+]

@@ -1,0 +1,39 @@
+{
+    "id": 1262125,
+    "vlanNumber": 956,
+    "firewallInterfaces": [],
+     "billingItem":{
+        "id":12345678
+    },
+    "hardware": [
+        {
+            "domain": "stage1.ng.bluemix.net",
+            "hostname": "datapowerips",
+            "primaryBackendIpAddress": "10.153.35.105",
+            "primaryIpAddress": "169.55.16.62"
+        }
+    ],
+    "primaryRouter": {
+        "fullyQualifiedDomainName": "fcr03a.dal09.softlayer.com",
+        "datacenterName": "Dallas 9"
+    },
+    "subnets": [
+        {
+            "gateway": "169.55.16.49",
+            "id": 888887,
+            "netmask": "255.255.255.240",
+            "networkIdentifier": "169.55.16.48",
+            "subnetType": "ADDITIONAL_PRIMARY",
+            "usableIpAddressCount": "13"
+        },
+        {
+            "gateway": "169.45.136.193",
+            "id": 1031039,
+            "netmask": "255.255.255.240",
+            "networkIdentifier": "169.45.136.192",
+            "subnetType": "SECONDARY_ON_VLAN",
+            "usableIpAddressCount": "13"
+        }
+    ],
+    "virtualGuests": []
+}

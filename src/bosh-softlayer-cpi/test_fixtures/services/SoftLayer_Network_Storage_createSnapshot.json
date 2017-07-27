@@ -1,0 +1,57 @@
+{
+    "accountId": 278444,
+    "capacityGb": 20,
+    "createDate": "2016-12-14T00:13:00-06:00",
+    "guestId": null,
+    "hardwareId": null,
+    "hostId": null,
+    "id": 17360371,
+    "nasType": "SNAPSHOT",
+    "serviceProviderId": 1,
+    "storageTypeId": "16",
+    "upgradableFlag": true,
+    "username": "IBM01SEVC278444_16",
+    "properties": [
+        {
+            "createDate": "2016-12-14T00:13:00-06:00",
+            "modifyDate": null,
+            "value": "0",
+            "volumeId": 17360371,
+            "type": {
+                "description": "Determines whether the volume is currently mountable",
+                "keyname": "MOUNTABLE",
+                "name": "Mountable"
+            }
+        },
+        {
+            "createDate": "2016-12-14T00:13:00-06:00",
+            "modifyDate": null,
+            "value": "manual.2016-12-14_0012",
+            "volumeId": 17360371,
+            "type": {
+                "description": "Volume name",
+                "keyname": "VOLUME_NAME",
+                "name": "Volume Name"
+            }
+        },
+        {
+            "createDate": "2016-12-14T00:13:00-06:00",
+            "modifyDate": null,
+            "value": "72000",
+            "volumeId": 17360371,
+            "type": {
+                "description": "The amount of space used by snapshots.",
+                "keyname": "SNAPSHOT_SPACE_USED",
+                "name": "Snapshot Used"
+            }
+        },
+        {
+            "createDate": "2016-12-14T00:13:00-06:00",
+            "modifyDate": null,
+            "value": "2016-12-14T00:12:57-06:00",
+            "volumeId": 17360371
+        }
+    ],
+    "serviceResourceBackendIpAddress": "nfstok0201a-fz.service.softlayer.com",
+    "serviceResourceName": "Consistent Performance aggr_staastok0201_hp01"
+}

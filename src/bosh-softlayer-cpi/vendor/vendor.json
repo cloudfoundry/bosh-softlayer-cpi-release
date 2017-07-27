@@ -155,6 +155,12 @@
 			"revisionTime": "2017-07-05T07:52:02Z"
 		},
 		{
+			"checksumSHA1": "yqF125xVSkmfLpIVGrLlfE05IUk=",
+			"path": "github.com/golang/protobuf/proto",
+			"revision": "748d386b5c1ea99658fd69fe9f03991ce86a90c1",
+			"revisionTime": "2017-07-26T21:28:29Z"
+		},
+		{
 			"checksumSHA1": "KQhA4EQp4Ldwj9nJZnEURlE6aQw=",
 			"path": "github.com/kr/fs",
 			"revision": "2788f0dbd16903de03cb8186e5c7d97b69ad387b",
@@ -364,6 +370,12 @@
 			"path": "github.com/onsi/gomega/gexec",
 			"revision": "42356cc3e61d6c2ed97d9b3cc819ae54fd2410dc",
 			"revisionTime": "2017-07-19T06:59:10Z"
+		},
+		{
+			"checksumSHA1": "irDwkmKQbjbfTyPy/FxQvnc/6po=",
+			"path": "github.com/onsi/gomega/ghttp",
+			"revision": "c893efa28eb45626cdaa76c9f653b62488858837",
+			"revisionTime": "2017-07-16T19:34:46Z"
 		},
 		{
 			"checksumSHA1": "H4RBR9kcEWh2lECAzBaOTSvgUuA=",
