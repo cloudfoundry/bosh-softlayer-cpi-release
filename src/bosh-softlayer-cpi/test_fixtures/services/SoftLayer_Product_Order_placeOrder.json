@@ -1,0 +1,133 @@
+{
+    "orderDate": "2016-11-21T00:48:12-06:00",
+    "orderDetails": {
+        "bigDataOrderFlag": false,
+        "billingInformation": {
+            "billingAddressLine1": "8200 Warden Ave",
+            "billingCity": "Markham",
+            "billingCountryCode": "CA",
+            "billingEmail": "sl-notification@bluemix.pagerduty.com",
+            "billingNameCompany": "IBM - BlueMix - Internal Dev",
+            "billingNameFirst": "Denis",
+            "billingNameLast": "Ducharme",
+            "billingPhoneVoice": "1-514-246-2455",
+            "billingPostalCode": "L6G1C7",
+            "billingState": "ON",
+            "cardExpirationMonth": null,
+            "cardExpirationYear": null,
+            "taxExempt": 0
+        },
+        "billingOrderItemId": null,
+        "containerSplHash": "000000006f2d23e700007f4f566a6c32",
+        "currencyShortName": "USD",
+        "extendedHardwareTesting": null,
+        "imageTemplateId": null,
+        "isManagedOrder": null,
+        "itemCategoryQuestionAnswers": [],
+        "location": "154820",
+        "locationObject": {
+            "id": 154820,
+            "longName": "Dallas 6",
+            "name": "dal06"
+        },
+        "message": "",
+        "packageId": 0,
+        "paymentType": "ADD_TO_BALANCE",
+        "postTaxRecurring": "8",
+        "postTaxRecurringHourly": "0",
+        "postTaxRecurringMonthly": "8",
+        "postTaxSetup": "0",
+        "preTaxRecurring": "8",
+        "preTaxRecurringHourly": "0",
+        "preTaxRecurringMonthly": "8",
+        "preTaxSetup": "0",
+        "presetId": null,
+        "prices": [
+            {
+                "hourlyRecurringFee": ".014",
+                "id": 29227,
+                "itemId": 3930,
+                "laborFee": "0",
+                "oneTimeFee": "0",
+                "recurringFee": "8",
+                "setupFee": "0",
+                "categories": [
+                    {
+                        "categoryCode": "sov_sec_ip_addresses_pub",
+                        "id": 313,
+                        "name": "Public (only) Secondary VLAN IP Addresses"
+                    }
+                ],
+                "item": {
+                    "capacity": "4",
+                    "description": "4 Portable Public IP Addresses",
+                    "id": 3930,
+                    "keyName": "4_PORTABLE_PUBLIC_IP_ADDRESSES",
+                    "units": "IPs",
+                    "bundle": [],
+                    "thirdPartyPolicyAssignments": []
+                }
+            }
+        ],
+        "primaryDiskPartitionId": null,
+        "privateCloudOrderFlag": false,
+        "properties": [],
+        "proratedInitialCharge": "2.67",
+        "proratedOrderTotal": "2.67",
+        "quantity": 1,
+        "resourceGroupId": null,
+        "resourceGroupTemplateId": null,
+        "sendQuoteEmailFlag": null,
+        "serverCoreCount": null,
+        "sourceVirtualGuestId": null,
+        "sshKeys": [],
+        "stepId": null,
+        "storageGroups": [],
+        "taxCacheHash": "8a26ebe766475cf7bdf30a5999dbb750e08b0ee4",
+        "taxCompletedFlag": true,
+        "totalRecurringTax": "0",
+        "totalSetupTax": "0",
+        "useHourlyPricing": false,
+        "endPointIpAddressId": null,
+        "endPointVlanId": 1407665,
+        "id": null
+    },
+    "orderId": 11493593,
+    "placedOrder": {
+        "accountId": 278444,
+        "id": 11493593,
+        "orderQuoteId": null,
+        "orderTypeId": 4,
+        "presaleEventId": null,
+        "status": "PENDING_AUTO_APPROVAL",
+        "userRecordId": 6445475,
+        "account": {
+            "brandId": 11290,
+            "companyName": "IBM - BlueMix - Internal Dev",
+            "id": 278444
+        },
+        "items": [
+            {
+                "categoryCode": "sov_sec_ip_addresses_pub",
+                "description": "4 Portable Public IP Addresses",
+                "id": 164487379,
+                "itemId": 3930,
+                "itemPriceId": "29227",
+                "laborFee": "0",
+                "oneTimeFee": "0",
+                "parentId": null,
+                "promoCodeId": null,
+                "recurringFee": "8",
+                "setupFee": "0",
+                "children": []
+            }
+        ],
+        "userRecord": {
+            "accountId": 278444,
+            "firstName": "JUN LI ",
+            "id": 6445475,
+            "lastName": "WANG",
+            "username": "278444_wangjunl@cn.ibm.com"
+        }
+    }
+}

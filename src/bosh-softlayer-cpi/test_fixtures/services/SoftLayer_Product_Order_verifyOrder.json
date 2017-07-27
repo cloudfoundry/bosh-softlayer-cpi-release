@@ -1,0 +1,74 @@
+{
+    "bigDataOrderFlag": false,
+    "billingOrderItemId": null,
+    "containerSplHash": "000000004ace8f7700007f94482b1435",
+    "currencyShortName": "USD",
+    "extendedHardwareTesting": null,
+    "imageTemplateId": null,
+    "isManagedOrder": null,
+    "location": "154820",
+    "locationObject": {
+        "id": 154820,
+        "longName": "Dallas 6",
+        "name": "dal06"
+    },
+    "message": "",
+    "packageId": 0,
+    "paymentType": "",
+    "postTaxRecurring": "8",
+    "postTaxRecurringHourly": "0",
+    "postTaxRecurringMonthly": "8",
+    "postTaxSetup": "0",
+    "preTaxRecurring": "8",
+    "preTaxRecurringHourly": "0",
+    "preTaxRecurringMonthly": "8",
+    "preTaxSetup": "0",
+    "presetId": null,
+    "prices": [
+        {
+            "hourlyRecurringFee": ".014",
+            "id": 29227,
+            "itemId": 3930,
+            "laborFee": "0",
+            "oneTimeFee": "0",
+            "recurringFee": "8",
+            "setupFee": "0",
+            "categories": [
+                {
+                    "categoryCode": "sov_sec_ip_addresses_pub",
+                    "id": 313,
+                    "name": "Public (only) Secondary VLAN IP Addresses"
+                }
+            ],
+            "item": {
+                "capacity": "4",
+                "description": "4 Portable Public IP Addresses",
+                "id": 3930,
+                "keyName": "4_PORTABLE_PUBLIC_IP_ADDRESSES",
+                "units": "IPs",
+                "bundle": [],
+                "thirdPartyPolicyAssignments": []
+            }
+        }
+    ],
+    "primaryDiskPartitionId": null,
+    "privateCloudOrderFlag": false,
+    "proratedInitialCharge": "2.67",
+    "proratedOrderTotal": "2.67",
+    "quantity": 1,
+    "resourceGroupId": null,
+    "resourceGroupTemplateId": null,
+    "sendQuoteEmailFlag": null,
+    "serverCoreCount": null,
+    "sourceVirtualGuestId": null,
+    "sshKeys": [],
+    "stepId": null,
+    "storageGroups": [],
+    "taxCompletedFlag": true,
+    "totalRecurringTax": "0",
+    "totalSetupTax": "0",
+    "useHourlyPricing": false,
+    "endPointIpAddressId": null,
+    "endPointVlanId": 1407665,
+    "id": null
+}

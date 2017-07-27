@@ -68,10 +68,10 @@ type ClientFactory interface {
 }
 
 type clientFactory struct {
-	slClient *clientManager
+	slClient *ClientManager
 }
 
-func NewClientFactory(slClient *clientManager) ClientFactory {
+func NewClientFactory(slClient *ClientManager) ClientFactory {
 	return &clientFactory{slClient}
 }
 
@@ -79,8 +79,8 @@ func (factory *clientFactory) CreateClient() Client {
 	return factory.slClient
 }
 
-func NewSoftLayerClientManager(session *session.Session, vps *vpsVm.Client) *clientManager {
-	return &clientManager{
+func NewSoftLayerClientManager(session *session.Session, vps *vpsVm.Client) *ClientManager {
+	return &ClientManager{
 		services.GetVirtualGuestService(session),
 		services.GetAccountService(session),
 		services.GetProductPackageService(session),
@@ -133,7 +133,7 @@ type Client interface {
 	DeleteInstanceFromVPS(id int) error
 }
 
-type clientManager struct {
+type ClientManager struct {
 	VirtualGuestService   services.Virtual_Guest
 	AccountService        services.Account
 	PackageService        services.Product_Package
@@ -147,7 +147,7 @@ type clientManager struct {
 	vpsService            *vpsVm.Client
 }
 
-func (c *clientManager) GetInstance(id int, mask string) (*datatypes.Virtual_Guest, bool, error) {
+func (c *ClientManager) GetInstance(id int, mask string) (*datatypes.Virtual_Guest, bool, error) {
 	if mask == "" {
 		mask = INSTANCE_DEFAULT_MASK
 	}
@@ -164,7 +164,7 @@ func (c *clientManager) GetInstance(id int, mask string) (*datatypes.Virtual_Gue
 	return &virtualGuest, true, err
 }
 
-func (c *clientManager) GetVlan(id int, mask string) (*datatypes.Network_Vlan, bool, error) {
+func (c *ClientManager) GetVlan(id int, mask string) (*datatypes.Network_Vlan, bool, error) {
 	if mask == "" {
 		mask = NETWORK_DEFAULT_VLAN
 	}
@@ -181,12 +181,12 @@ func (c *clientManager) GetVlan(id int, mask string) (*datatypes.Network_Vlan, b
 	return &vlan, true, err
 }
 
-func (c *clientManager) GetInstanceByPrimaryBackendIpAddress(ip string) (*datatypes.Virtual_Guest, bool, error) {
+func (c *ClientManager) GetInstanceByPrimaryBackendIpAddress(ip string) (*datatypes.Virtual_Guest, bool, error) {
 	filters := filter.New()
 	filters = append(filters, filter.Path("virtualGuests.primaryBackendIpAddress").Eq(ip))
 	virtualguests, err := c.AccountService.Mask(INSTANCE_DEFAULT_MASK).Filter(filters.Build()).GetVirtualGuests()
 	if err != nil {
-		return &datatypes.Virtual_Guest{}, false, nil
+		return &datatypes.Virtual_Guest{}, false, err
 	}
 
 	for _, virtualguest := range virtualguests {
@@ -197,12 +197,12 @@ func (c *clientManager) GetInstanceByPrimaryBackendIpAddress(ip string) (*dataty
 	return &datatypes.Virtual_Guest{}, false, err
 }
 
-func (c *clientManager) GetInstanceByPrimaryIpAddress(ip string) (*datatypes.Virtual_Guest, bool, error) {
+func (c *ClientManager) GetInstanceByPrimaryIpAddress(ip string) (*datatypes.Virtual_Guest, bool, error) {
 	filters := filter.New()
 	filters = append(filters, filter.Path("virtualGuests.primaryIpAddress").Eq(ip))
 	virtualguests, err := c.AccountService.Mask(INSTANCE_DEFAULT_MASK).Filter(filters.Build()).GetVirtualGuests()
 	if err != nil {
-		return &datatypes.Virtual_Guest{}, false, nil
+		return &datatypes.Virtual_Guest{}, false, err
 	}
 
 	for _, virtualguest := range virtualguests {
@@ -213,7 +213,7 @@ func (c *clientManager) GetInstanceByPrimaryIpAddress(ip string) (*datatypes.Vir
 	return &datatypes.Virtual_Guest{}, false, err
 }
 
-func (c *clientManager) GetAllowedHostCredential(id int) (*datatypes.Network_Storage_Allowed_Host, bool, error) {
+func (c *ClientManager) GetAllowedHostCredential(id int) (*datatypes.Network_Storage_Allowed_Host, bool, error) {
 	allowedHost, err := c.VirtualGuestService.Id(id).Mask(ALLOWD_HOST_DEFAULT_MASK).GetAllowedHost()
 	if err != nil {
 		if apiErr, ok := err.(sl.Error); ok {
@@ -227,7 +227,7 @@ func (c *clientManager) GetAllowedHostCredential(id int) (*datatypes.Network_Sto
 	return &allowedHost, true, err
 }
 
-func (c *clientManager) GetAllowedNetworkStorage(id int) ([]string, bool, error) {
+func (c *ClientManager) GetAllowedNetworkStorage(id int) ([]string, bool, error) {
 	var storages = make([]string, 1)
 	networkStorages, err := c.VirtualGuestService.Id(id).GetAllowedNetworkStorage()
 	if err != nil {
@@ -246,7 +246,7 @@ func (c *clientManager) GetAllowedNetworkStorage(id int) ([]string, bool, error)
 	return storages, true, err
 }
 
-func (c *clientManager) GetImage(imageId int, mask string) (*datatypes.Virtual_Guest_Block_Device_Template_Group, bool, error) {
+func (c *ClientManager) GetImage(imageId int, mask string) (*datatypes.Virtual_Guest_Block_Device_Template_Group, bool, error) {
 	if mask == "" {
 		mask = IMAGE_DETAIL_MASK
 	}
@@ -266,7 +266,7 @@ func (c *clientManager) GetImage(imageId int, mask string) (*datatypes.Virtual_G
 //Check the virtual server instance is ready for use
 //param1: bool, indicate whether the instance is ready
 //param2: error, any error may happen when getting the status of the instance
-func (c *clientManager) WaitInstanceUntilReady(id int, until time.Time) error {
+func (c *ClientManager) WaitInstanceUntilReady(id int, until time.Time) error {
 	for {
 		virtualGuest, found, err := c.GetInstance(id, "id, lastOperatingSystemReload[id,modifyDate], activeTransaction[id,transactionStatus.name], provisionDate, powerState.keyName")
 		if err != nil {
@@ -308,7 +308,7 @@ func (c *clientManager) WaitInstanceUntilReady(id int, until time.Time) error {
 	}
 }
 
-func (c *clientManager) WaitInstanceHasActiveTransaction(id int, until time.Time) error {
+func (c *ClientManager) WaitInstanceHasActiveTransaction(id int, until time.Time) error {
 	for {
 		virtualGuest, found, err := c.GetInstance(id, "id, activeTransaction[id,transactionStatus.name]")
 		if err != nil {
@@ -336,7 +336,7 @@ func (c *clientManager) WaitInstanceHasActiveTransaction(id int, until time.Time
 	}
 }
 
-func (c *clientManager) WaitInstanceHasNoneActiveTransaction(id int, until time.Time) error {
+func (c *ClientManager) WaitInstanceHasNoneActiveTransaction(id int, until time.Time) error {
 	for {
 		virtualGuest, found, err := c.GetInstance(id, "id, activeTransaction[id,transactionStatus.name]")
 		if err != nil {
@@ -364,7 +364,7 @@ func (c *clientManager) WaitInstanceHasNoneActiveTransaction(id int, until time.
 	}
 }
 
-func (c *clientManager) CreateInstance(template *datatypes.Virtual_Guest) (*datatypes.Virtual_Guest, error) {
+func (c *ClientManager) CreateInstance(template *datatypes.Virtual_Guest) (*datatypes.Virtual_Guest, error) {
 	virtualguest, err := c.VirtualGuestService.CreateObject(template)
 	if err != nil {
 		return &datatypes.Virtual_Guest{}, bosherr.WrapError(err, "Creating instance")
@@ -378,7 +378,7 @@ func (c *clientManager) CreateInstance(template *datatypes.Virtual_Guest) (*data
 	return &virtualguest, nil
 }
 
-func (c *clientManager) CreateInstanceFromVPS(template *datatypes.Virtual_Guest, stemcellID int, sshKeys []int) (*datatypes.Virtual_Guest, error) {
+func (c *ClientManager) CreateInstanceFromVPS(template *datatypes.Virtual_Guest, stemcellID int, sshKeys []int) (*datatypes.Virtual_Guest, error) {
 	reqFilter := &models.VMFilter{
 		CPU:         int32(*template.StartCpus),
 		MemoryMb:    int32(*template.MaxMemory),
@@ -453,7 +453,7 @@ func (c *clientManager) CreateInstanceFromVPS(template *datatypes.Virtual_Guest,
 	return virtualGuest, nil
 }
 
-func (c *clientManager) EditInstance(id int, template *datatypes.Virtual_Guest) (bool, error) {
+func (c *ClientManager) EditInstance(id int, template *datatypes.Virtual_Guest) (bool, error) {
 	_, err := c.VirtualGuestService.Id(id).EditObject(template)
 	if err != nil {
 		if apiErr, ok := err.(sl.Error); ok {
@@ -472,7 +472,7 @@ func (c *clientManager) EditInstance(id int, template *datatypes.Virtual_Guest) 
 	return true, err
 }
 
-func (c *clientManager) RebootInstance(id int, soft bool, hard bool) error {
+func (c *ClientManager) RebootInstance(id int, soft bool, hard bool) error {
 	var err error
 	if soft == false && hard == false {
 		_, err = c.VirtualGuestService.Id(id).RebootDefault()
@@ -480,11 +480,13 @@ func (c *clientManager) RebootInstance(id int, soft bool, hard bool) error {
 		_, err = c.VirtualGuestService.Id(id).RebootSoft()
 	} else if soft == false && hard == true {
 		_, err = c.VirtualGuestService.Id(id).RebootHard()
+	} else {
+		err = bosherr.Error("The reboot type is not existing")
 	}
 	return err
 }
 
-func (c *clientManager) ReloadInstance(id int, stemcellId int, sshKeyIds []int, hostname string, domain string) error {
+func (c *ClientManager) ReloadInstance(id int, stemcellId int, sshKeyIds []int, hostname string, domain string) error {
 	var err error
 	until := time.Now().Add(time.Duration(1) * time.Hour)
 	if err = c.WaitInstanceHasNoneActiveTransaction(*sl.Int(id), until); err != nil {
@@ -530,7 +532,7 @@ func (c *clientManager) ReloadInstance(id int, stemcellId int, sshKeyIds []int, 
 	return nil
 }
 
-func (c *clientManager) CancelInstance(id int) error {
+func (c *ClientManager) CancelInstance(id int) error {
 	var err error
 	until := time.Now().Add(time.Duration(30) * time.Minute)
 	if err = c.WaitInstanceHasNoneActiveTransaction(*sl.Int(id), until); err != nil {
@@ -553,7 +555,7 @@ func (c *clientManager) CancelInstance(id int) error {
 	return nil
 }
 
-func (c *clientManager) DeleteInstanceFromVPS(id int) error {
+func (c *ClientManager) DeleteInstanceFromVPS(id int) error {
 	_, err := c.vpsService.GetVMByCid(vpsVm.NewGetVMByCidParams().WithCid(int32(id)))
 	if err != nil {
 		_, ok := err.(*vpsVm.GetVMByCidNotFound)
@@ -593,7 +595,7 @@ func (c *clientManager) DeleteInstanceFromVPS(id int) error {
 	return nil
 }
 
-func (c *clientManager) UpgradeInstance(id int, cpu int, memory int, network int, privateCPU bool, additional_diskSize int) (*datatypes.Container_Product_Order_Receipt, error) {
+func (c *ClientManager) UpgradeInstance(id int, cpu int, memory int, network int, privateCPU bool, additional_diskSize int) (*datatypes.Container_Product_Order_Receipt, error) {
 	upgradeOptions := make(map[string]int)
 	public := true
 	if cpu != 0 {
@@ -684,7 +686,7 @@ func (c *clientManager) UpgradeInstance(id int, cpu int, memory int, network int
 	return &orderReceipt, nil
 }
 
-func (c *clientManager) SetTags(id int, tags string) (bool, error) {
+func (c *ClientManager) SetTags(id int, tags string) (bool, error) {
 	_, err := c.VirtualGuestService.Id(id).SetTags(&tags)
 	if err != nil {
 		if apiErr, ok := err.(sl.Error); ok {
@@ -698,7 +700,7 @@ func (c *clientManager) SetTags(id int, tags string) (bool, error) {
 	return true, err
 }
 
-func (c *clientManager) GetInstanceAllowedHost(id int) (*datatypes.Network_Storage_Allowed_Host, bool, error) {
+func (c *ClientManager) GetInstanceAllowedHost(id int) (*datatypes.Network_Storage_Allowed_Host, bool, error) {
 	mask := "id, name, credential[username, password]"
 	allowedHost, err := c.VirtualGuestService.Id(id).Mask(mask).GetAllowedHost()
 	if err != nil {
@@ -712,7 +714,7 @@ func (c *clientManager) GetInstanceAllowedHost(id int) (*datatypes.Network_Stora
 	return &allowedHost, true, nil
 }
 
-func (c *clientManager) getUpgradeItemPriceForSecondDisk(id int, diskSize int) (*datatypes.Product_Item_Price, error) {
+func (c *ClientManager) getUpgradeItemPriceForSecondDisk(id int, diskSize int) (*datatypes.Product_Item_Price, error) {
 	itemPrices, err := c.VirtualGuestService.Id(id).GetUpgradeItemPrices(sl.Bool(true))
 	if err != nil {
 		return &datatypes.Product_Item_Price{}, err
@@ -735,7 +737,7 @@ func (c *clientManager) getUpgradeItemPriceForSecondDisk(id int, diskSize int) (
 
 	for _, itemPrice := range itemPrices {
 		flag := false
-		for _, category := range itemPrice.Categories {
+		for _, category := range itemPrice.Item.Categories {
 			if *category.CategoryCode == EPHEMERAL_DISK_CATEGORY_CODE {
 				flag = true
 				break
@@ -794,7 +796,7 @@ func getPriceIdForUpgrade(packageItems []datatypes.Product_Item, option string, 
 	return -1
 }
 
-func (c *clientManager) GetBlockVolumeDetails(volumeId int, mask string) (*datatypes.Network_Storage, bool, error) {
+func (c *ClientManager) GetBlockVolumeDetails(volumeId int, mask string) (*datatypes.Network_Storage, bool, error) {
 	if mask == "" {
 		mask = VOLUME_DETAIL_MASK
 	}
@@ -811,7 +813,7 @@ func (c *clientManager) GetBlockVolumeDetails(volumeId int, mask string) (*datat
 	return &volume, true, nil
 }
 
-func (c *clientManager) GetBlockVolumeDetails2(volumeId int, mask string) (datatypes.Network_Storage, bool, error) {
+func (c *ClientManager) GetBlockVolumeDetails2(volumeId int, mask string) (datatypes.Network_Storage, bool, error) {
 	if mask == "" {
 		mask = VOLUME_DETAIL_MASK
 	}
@@ -827,7 +829,7 @@ func (c *clientManager) GetBlockVolumeDetails2(volumeId int, mask string) (datat
 	return volumes[0], true, nil
 }
 
-func (c *clientManager) GetNetworkStorageTarget(volumeId int, mask string) (string, bool, error) {
+func (c *ClientManager) GetNetworkStorageTarget(volumeId int, mask string) (string, bool, error) {
 	if mask == "" {
 		mask = VOLUME_DETAIL_MASK
 	}
@@ -845,14 +847,14 @@ func (c *clientManager) GetNetworkStorageTarget(volumeId int, mask string) (stri
 	return *connectionInfo.IpAddress, true, nil
 }
 
-func (c *clientManager) OrderBlockVolume(storageType string, location string, size int, iops int) (*datatypes.Container_Product_Order_Receipt, error) {
+func (c *ClientManager) OrderBlockVolume(storageType string, location string, size int, iops int) (*datatypes.Container_Product_Order_Receipt, error) {
 	locationId, err := c.GetLocationId(location)
 	if err != nil {
 		return &datatypes.Container_Product_Order_Receipt{}, bosherr.Error("Invalid datacenter name specified. Please provide the lower case short name (e.g.: dal09)")
 	}
 	baseTypeName := "SoftLayer_Container_Product_Order_Network_"
 	var prices = make([]datatypes.Product_Item_Price, 0)
-	productPacakge, err := c.GetPackage(storageType)
+	productPacakge, err := c.GetPackage(storageType) //PENDING
 	if err != nil {
 		return &datatypes.Container_Product_Order_Receipt{}, err
 	}
@@ -917,7 +919,7 @@ func (c *clientManager) OrderBlockVolume(storageType string, location string, si
 	}
 }
 
-func (c *clientManager) CreateVolume(location string, size int, iops int) (*datatypes.Network_Storage, error) {
+func (c *ClientManager) CreateVolume(location string, size int, iops int) (*datatypes.Network_Storage, error) {
 	receipt, err := c.OrderBlockVolume("performance_storage_iscsi", location, size, iops)
 	if err != nil {
 		return &datatypes.Network_Storage{}, err
@@ -931,7 +933,7 @@ func (c *clientManager) CreateVolume(location string, size int, iops int) (*data
 	return c.WaitVolumeProvisioningWithOrderId(*receipt.OrderId, until)
 }
 
-func (c *clientManager) WaitVolumeProvisioningWithOrderId(orderId int, until time.Time) (*datatypes.Network_Storage, error) {
+func (c *ClientManager) WaitVolumeProvisioningWithOrderId(orderId int, until time.Time) (*datatypes.Network_Storage, error) {
 	for {
 		volumes, err := c.getIscsiNetworkStorageWithOrderId(orderId)
 		if err != nil {
@@ -956,13 +958,13 @@ func (c *clientManager) WaitVolumeProvisioningWithOrderId(orderId int, until tim
 	}
 }
 
-func (c *clientManager) getIscsiNetworkStorageWithOrderId(orderId int) ([]datatypes.Network_Storage, error) {
+func (c *ClientManager) getIscsiNetworkStorageWithOrderId(orderId int) ([]datatypes.Network_Storage, error) {
 	filters := filter.New()
 	filters = append(filters, filter.Path("iscsiNetworkStorage.billingItem.orderItem.order.id").Eq(orderId))
 	return c.AccountService.Mask(VOLUME_DEFAULT_MASK).Filter(filters.Build()).GetIscsiNetworkStorage()
 }
 
-func (c *clientManager) GetPackage(categoryCode string) (datatypes.Product_Package, error) {
+func (c *ClientManager) GetPackage(categoryCode string) (datatypes.Product_Package, error) {
 	filters := filter.New()
 	filters = append(filters, filter.Path("categories.categoryCode").Eq(categoryCode))
 	filters = append(filters, filter.Path("statusCode").Eq("ACTIVE"))
@@ -979,7 +981,7 @@ func (c *clientManager) GetPackage(categoryCode string) (datatypes.Product_Packa
 	return packages[0], nil
 }
 
-func (c *clientManager) GetLocationId(location string) (int, error) {
+func (c *ClientManager) GetLocationId(location string) (int, error) {
 	reqFilter := filter.New(filter.Path("name").Eq(location))
 	datacenters, err := c.LocationService.Mask("longName,id,name").Filter(reqFilter.Build()).GetDatacenters()
 	if err != nil {
@@ -1073,7 +1075,7 @@ func FindPerformanceIOPSPrice(productPackage datatypes.Product_Package, size int
 	return datatypes.Product_Item_Price{}, bosherr.Error("Unable to find price for iops for the given volume")
 }
 
-func (c *clientManager) CancelBlockVolume(volumeId int, reason string, immediate bool) (bool, error) {
+func (c *ClientManager) CancelBlockVolume(volumeId int, reason string, immediate bool) (bool, error) {
 	blockVolume, found, err := c.GetBlockVolumeDetails2(volumeId, "id,billingItem.id")
 	if err != nil {
 		return false, err
@@ -1090,7 +1092,7 @@ func (c *clientManager) CancelBlockVolume(volumeId int, reason string, immediate
 	return c.BillingService.Id(*blockVolume.BillingItem.Id).CancelItem(sl.Bool(immediate), sl.Bool(true), sl.String(reason), sl.String(""))
 }
 
-func (c *clientManager) AuthorizeHostToVolume(instance *datatypes.Virtual_Guest, volumeId int, until time.Time) (bool, error) {
+func (c *ClientManager) AuthorizeHostToVolume(instance *datatypes.Virtual_Guest, volumeId int, until time.Time) (bool, error) {
 	for {
 		allowable, err := c.StorageService.Id(volumeId).AllowAccessFromVirtualGuest(instance)
 		if err != nil {
@@ -1123,7 +1125,7 @@ func (c *clientManager) AuthorizeHostToVolume(instance *datatypes.Virtual_Guest,
 	}
 }
 
-func (c *clientManager) DeauthorizeHostToVolume(instance *datatypes.Virtual_Guest, volumeId int, until time.Time) (bool, error) {
+func (c *ClientManager) DeauthorizeHostToVolume(instance *datatypes.Virtual_Guest, volumeId int, until time.Time) (bool, error) {
 	for {
 		disAllowed, err := c.StorageService.Id(volumeId).RemoveAccessFromVirtualGuest(instance)
 		if err != nil {
@@ -1151,7 +1153,7 @@ func (c *clientManager) DeauthorizeHostToVolume(instance *datatypes.Virtual_Gues
 	}
 }
 
-func (c *clientManager) AttachSecondDiskToInstance(id int, diskSize int) error {
+func (c *ClientManager) AttachSecondDiskToInstance(id int, diskSize int) error {
 	var err error
 	until := time.Now().Add(time.Duration(1) * time.Hour)
 	if err = c.WaitInstanceHasNoneActiveTransaction(*sl.Int(id), until); err != nil {
@@ -1185,7 +1187,7 @@ func (c *clientManager) AttachSecondDiskToInstance(id int, diskSize int) error {
 	return nil
 }
 
-func (c *clientManager) UpgradeInstanceConfig(id int, cpu int, memory int, network int, privateCPU bool) error {
+func (c *ClientManager) UpgradeInstanceConfig(id int, cpu int, memory int, network int, privateCPU bool) error {
 	var err error
 	until := time.Now().Add(time.Duration(1) * time.Hour)
 	if err = c.WaitInstanceHasNoneActiveTransaction(*sl.Int(id), until); err != nil {
@@ -1219,7 +1221,7 @@ func (c *clientManager) UpgradeInstanceConfig(id int, cpu int, memory int, netwo
 	return nil
 }
 
-func (c *clientManager) CreateSshKey(label *string, key *string, fingerPrint *string) (*datatypes.Security_Ssh_Key, error) {
+func (c *ClientManager) CreateSshKey(label *string, key *string, fingerPrint *string) (*datatypes.Security_Ssh_Key, error) {
 	var err error
 
 	templateObject := &datatypes.Security_Ssh_Key{
@@ -1246,11 +1248,11 @@ func (c *clientManager) CreateSshKey(label *string, key *string, fingerPrint *st
 	return &sshKey, err
 }
 
-func (c *clientManager) DeleteSshKey(id int) (bool, error) {
+func (c *ClientManager) DeleteSshKey(id int) (bool, error) {
 	return c.SecuritySshKeyService.Id(id).DeleteObject()
 }
 
-func (c *clientManager) selectMaximunIopsItemPriceIdOnSize(size int) (datatypes.Product_Item_Price, error) {
+func (c *ClientManager) selectMaximunIopsItemPriceIdOnSize(size int) (datatypes.Product_Item_Price, error) {
 	filters := filter.New()
 	filters = append(filters, filter.Path("itemPrices.attributes.value").Eq(size))
 	filters = append(filters, filter.Path("categories.categoryCode").Eq("performance_storage_iops"))
@@ -1275,7 +1277,7 @@ func (c *clientManager) selectMaximunIopsItemPriceIdOnSize(size int) (datatypes.
 	return datatypes.Product_Item_Price{}, bosherr.Errorf("No proper performance storage (iSCSI volume)for size %d", size)
 }
 
-func (c *clientManager) selectMediumIopsItemPriceIdOnSize(size int) (datatypes.Product_Item_Price, error) {
+func (c *ClientManager) selectMediumIopsItemPriceIdOnSize(size int) (datatypes.Product_Item_Price, error) {
 	filters := filter.New()
 	filters = append(filters, filter.Path("itemPrices.attributes.value").Eq(size))
 	filters = append(filters, filter.Path("categories.categoryCode").Eq("performance_storage_iops"))

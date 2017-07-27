@@ -1,0 +1,145 @@
+{
+    "orderDate": "2016-12-16T01:52:11-06:00",
+    "orderDetails": {
+        "bigDataOrderFlag": false,
+        "billingInformation": {
+            "billingAddressLine1": "8200 Warden Ave",
+            "billingCity": "Markham",
+            "billingCountryCode": "CA",
+            "billingEmail": "sl-notification@bluemix.pagerduty.com",
+            "billingNameCompany": "IBM-BlueMix-InternalDev",
+            "billingNameFirst": "Denis",
+            "billingNameLast": "Ducharme",
+            "billingPhoneVoice": "1 -514 -246 -2455",
+            "billingPostalCode": "L6G1C7",
+            "billingState": "ON",
+            "cardExpirationMonth": null,
+            "cardExpirationYear": null,
+            "taxExempt": 0
+        },
+        "billingOrderItemId": null,
+        "containerSplHash": "0 0 0 0 0 0 0 0 4d7ef0b200007f9e5309c5c1",
+        "currencyShortName": "USD",
+        "extendedHardwareTesting": null,
+        "imageTemplateId": null,
+        "isManagedOrder": null,
+        "itemCategoryQuestionAnswers": [],
+        "location": "449604",
+        "locationObject": {
+            "id": 449604,
+            "longName": "Tokyo2",
+            "name": "tok02"
+        },
+        "message": "",
+        "packageId": 0,
+        "paymentType": "ADD_TO_BALANCE",
+        "postTaxRecurring": "32.77",
+        "postTaxRecurringHourly": "0",
+        "postTaxRecurringMonthly": "32.77",
+        "postTaxSetup": "0",
+        "preTaxRecurring": "32.77",
+        "preTaxRecurringHourly": "0",
+        "preTaxRecurringMonthly": "32.77",
+        "preTaxSetup": "0",
+        "presetId": null,
+        "prices": [
+            {
+                "id": 99017,
+                "itemId": 299,
+                "laborFee": "0",
+                "oneTimeFee": "0",
+                "recurringFee": "32.77",
+                "setupFee": "0",
+                "categories": [
+                    {
+                        "categoryCode": "firewall",
+                        "id": 30,
+                        "name": "Hardware & Software Firewalls"
+                    }
+                ],
+                "item": {
+                    "capacity": "10",
+                    "description": "10MbpsHardwareFirewall",
+                    "id": 299,
+                    "keyName": "10MBPS_HARDWARE_FIREWALL",
+                    "units": "Mbps",
+                    "bundle": [],
+                    "thirdPartyPolicyAssignments": []
+                }
+            }
+        ],
+        "primaryDiskPartitionId": null,
+        "privateCloudOrderFlag": false,
+        "properties": [],
+        "proratedInitialCharge": "16.91",
+        "proratedOrderTotal": "16.91",
+        "quantity": 1,
+        "resourceGroupId": null,
+        "resourceGroupTemplateId": null,
+        "sendQuoteEmailFlag": null,
+        "serverCoreCount": null,
+        "sourceVirtualGuestId": null,
+        "sshKeys": [],
+        "stepId": null,
+        "storageGroups": [],
+        "taxCacheHash": "d4c8748b4ea6b739120adb3d6632435e41c52252",
+        "taxCompletedFlag": true,
+        "totalRecurringTax": "0",
+        "totalSetupTax": "0",
+        "useHourlyPricing": false,
+        "virtualGuests": [
+            {
+                "accountId": 278444,
+                "domain": "wilma.org",
+                "fullyQualifiedDomainName": "wilma-test.wilma.org",
+                "hostname": "wilma-test",
+                "id": 26853259,
+                "maxCpu": 2,
+                "maxCpuUnits": "CORE",
+                "maxMemory": 1024,
+                "startCpus": 2,
+                "statusId": 1001,
+                "uuid": "9f73661f-af5e-c2bf-e61c-8454607d1b46",
+                "globalIdentifier": "0 9258fc6-ce1a-4c8e-8f68-315875013a58"
+            }
+        ]
+    },
+    "orderId": 11813509,
+    "placedOrder": {
+        "accountId": 278444,
+        "id": 11813509,
+        "orderQuoteId": null,
+        "orderTypeId": 4,
+        "presaleEventId": null,
+        "status": "PENDING_AUTO_APPROVAL",
+        "userRecordId": 6445475,
+        "account": {
+            "brandId": 11290,
+            "companyName": "IBM-BlueMix-InternalDev",
+            "id": 278444
+        },
+        "items": [
+            {
+                "categoryCode": "firewall",
+                "description": "10MbpsHardwareFirewall",
+                "id": 168446933,
+                "itemId": 299,
+                "itemPriceId": "99017",
+                "laborFee": "0",
+                "oneTimeFee": "0",
+                "parentId": null,
+                "promoCodeId": null,
+                "recurringFee": "32.77",
+                "setupFee": "0",
+                "children": []
+            }
+        ],
+        "userRecord": {
+            "accountId": 278444,
+            "firstName": "JUN LI ",
+            "id": 6445475,
+            "lastName": "WANG",
+            "username": "278444_wangjunl@cn.ibm.com"
+        }
+    }
+}

@@ -1,0 +1,130 @@
+{
+    "orderDate": "2016-12-13T02:15:55-06:00",
+    "orderDetails": {
+        "bigDataOrderFlag": false,
+        "billingInformation": {
+            "billingAddressLine1": "8200 Warden Ave",
+            "billingCity": "Markham",
+            "billingCountryCode": "CA",
+            "billingEmail": "sl-notification@bluemix.pagerduty.com",
+            "billingNameCompany": "IBM - BlueMix - Internal Dev",
+            "billingNameFirst": "Denis",
+            "billingNameLast": "Ducharme",
+            "billingPhoneVoice": "1-514-246-2455",
+            "billingPostalCode": "L6G1C7",
+            "billingState": "ON",
+            "cardExpirationMonth": null,
+            "cardExpirationYear": null,
+            "taxExempt": 0
+        },
+        "billingOrderItemId": null,
+        "containerSplHash": "000000002199b0f300007f9e674d06a7",
+        "currencyShortName": "USD",
+        "extendedHardwareTesting": null,
+        "imageTemplateId": null,
+        "isManagedOrder": null,
+        "itemCategoryQuestionAnswers": [],
+        "location": "449604",
+        "locationObject": {
+            "id": 449604,
+            "longName": "Tokyo 2",
+            "name": "tok02"
+        },
+        "message": "",
+        "packageId": 240,
+        "paymentType": "ADD_TO_BALANCE",
+        "postTaxRecurring": "2.46",
+        "postTaxRecurringHourly": "0",
+        "postTaxRecurringMonthly": "2.46",
+        "postTaxSetup": "0",
+        "preTaxRecurring": "2.46",
+        "preTaxRecurringHourly": "0",
+        "preTaxRecurringMonthly": "2.46",
+        "preTaxSetup": "0",
+        "presetId": null,
+        "prices": [
+            {
+                "id": 147821,
+                "itemId": 5130,
+                "laborFee": "0",
+                "oneTimeFee": "0",
+                "recurringFee": "2.46",
+                "setupFee": "0",
+                "categories": [
+                    {
+                        "categoryCode": "storage_snapshot_space",
+                        "id": 402,
+                        "name": "Storage Snapshot Space"
+                    }
+                ],
+                "item": {
+                    "capacity": "20",
+                    "description": "20 GB Storage Space",
+                    "id": 5130,
+                    "keyName": "20_GB_PERFORMANCE_STORAGE_SPACE",
+                    "units": "GB",
+                    "bundle": [],
+                    "thirdPartyPolicyAssignments": []
+                }
+            }
+        ],
+        "primaryDiskPartitionId": null,
+        "privateCloudOrderFlag": false,
+        "properties": [],
+        "proratedInitialCharge": "1.51",
+        "proratedOrderTotal": "1.51",
+        "quantity": 1,
+        "resourceGroupId": null,
+        "resourceGroupTemplateId": null,
+        "sendQuoteEmailFlag": null,
+        "serverCoreCount": null,
+        "sourceVirtualGuestId": null,
+        "sshKeys": [],
+        "stepId": null,
+        "storageGroups": [],
+        "taxCacheHash": "e7278d5a16fc9cc7745ea38438291c3de98e82bd",
+        "taxCompletedFlag": true,
+        "totalRecurringTax": "0",
+        "totalSetupTax": "0",
+        "useHourlyPricing": false,
+        "volumeId": 17336531
+    },
+    "orderId": 11767621,
+    "placedOrder": {
+        "accountId": 278444,
+        "id": 11767621,
+        "orderQuoteId": null,
+        "orderTypeId": 4,
+        "presaleEventId": null,
+        "status": "PENDING_AUTO_APPROVAL",
+        "userRecordId": 6445475,
+        "account": {
+            "brandId": 11290,
+            "companyName": "IBM - BlueMix - Internal Dev",
+            "id": 278444
+        },
+        "items": [
+            {
+                "categoryCode": "storage_snapshot_space",
+                "description": "20 GB Storage Space (Snapshot Space)",
+                "id": 167891327,
+                "itemId": 5130,
+                "itemPriceId": "147821",
+                "laborFee": "0",
+                "oneTimeFee": "0",
+                "parentId": null,
+                "promoCodeId": null,
+                "recurringFee": "2.46",
+                "setupFee": "0",
+                "children": []
+            }
+        ],
+        "userRecord": {
+            "accountId": 278444,
+            "firstName": "JUN LI ",
+            "id": 6445475,
+            "lastName": "WANG",
+            "username": "278444_wangjunl@cn.ibm.com"
+        }
+    }
+}

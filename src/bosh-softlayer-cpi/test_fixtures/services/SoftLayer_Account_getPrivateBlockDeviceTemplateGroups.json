@@ -1,0 +1,3077 @@
+[
+    {
+        "accountId": 283639,
+        "id": 101214,
+        "name": "BLU Acceleration for Cloud v2.0.0-beta",
+        "imageType": {
+            "description": "a disk that was created from an image on a host",
+            "keyName": "DISK_CAPTURE",
+            "name": "Disk Image Capture"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1059665,
+        "name": "BMX-logstash-phase-3-A",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1133635,
+        "name": "BMX-logstash-phase-3-B",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 200150,
+        "name": "BOSH-eCPI-packer-centos-2014-08-12T15:54:16Z",
+        "imageType": {
+            "description": "a disk that was created from an image on a host",
+            "keyName": "DISK_CAPTURE",
+            "name": "Disk Image Capture"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 507009,
+        "name": "BOSHCLI-UCD-20150417",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 421436,
+        "id": 424864,
+        "name": "BOSHCLI-UCD-TEMPLATE",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 56634,
+        "name": "Backup template for disk migration of 'data01.bluemix.softlayer.com'.",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 933257,
+        "name": "Backup1",
+        "imageType": {
+            "description": "a disk that was created from an image on a host",
+            "keyName": "DISK_CAPTURE",
+            "name": "Disk Image Capture"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 92658,
+        "name": "BluemixJmeterVM",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 885217,
+        "name": "Bluemix_doctor_image_20151228",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 887565,
+        "name": "Bluemix_doctor_image_dedicated_20160103",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 496219,
+        "id": 503809,
+        "name": "Boshcli-image-20150415",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 366226,
+        "id": 311638,
+        "name": "CSF_BLUEMIX_EUREKA_1.1.140.20141112.112242",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 366226,
+        "id": 411892,
+        "name": "CSF_LDAP_0.5.20150202175957",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 366226,
+        "id": 543887,
+        "name": "CSF_LDAP_0.5.20150512125753",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 884453,
+        "name": "CSF_LDAP_Christophe",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 288698,
+        "id": 354700,
+        "name": "Centos6.5-base-image-template",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 856497,
+        "name": "Centos6.5-base-image-template-UCD",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 331072,
+        "name": "Datapower-Inception-v3",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 582347,
+        "name": "Doctor-Template-BOSHCLI2015.04.28-2015.06.09",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 821859,
+        "name": "ESXManagmentConsole",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 927873,
+        "name": "ESXiMgmtConsole1.2",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 808355,
+        "name": "GitHub Enterprise 2.4.0",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 314960,
+        "name": "Guest template created from 'marco-dea-temp.softlayer.com'.",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 105762,
+        "name": "James_PE_Shelltest",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 453923,
+        "name": "Logstash-template-20150312",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 280699,
+        "id": 322348,
+        "name": "OpsLogging_20141120-1225-trunk",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 390370,
+        "name": "PM_DB_Beta_Init",
+        "imageType": {
+            "description": "a disk that was created from an image on a host",
+            "keyName": "DISK_CAPTURE",
+            "name": "Disk Image Capture"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 390350,
+        "name": "PM_Service_Beta_Init",
+        "imageType": {
+            "description": "a disk that was created from an image on a host",
+            "keyName": "DISK_CAPTURE",
+            "name": "Disk Image Capture"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 338394,
+        "name": "QRadar-7.2.4-Deployment-Image",
+        "imageType": {
+            "description": "a disk that was created from an image on a host",
+            "keyName": "DISK_CAPTURE",
+            "name": "Disk Image Capture"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 433601,
+        "name": "RH_image_EoS_ITCS_IEM_20150227",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 38171,
+        "name": "SCAS-WAVE2-STEMCELL",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278181,
+        "id": 785743,
+        "name": "SOS-RHEL65_QRadarV7_2_5_20150605140117",
+        "imageType": {
+            "description": "a disk that was created from an image on a host",
+            "keyName": "DISK_CAPTURE",
+            "name": "Disk Image Capture"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 185074,
+        "name": "Stage 0 UAA LoginServer - Image",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 788577,
+        "name": "Tacacs.softlayer.com",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 890573,
+        "name": "Template created from imported bosh-stemcell-3169-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1147241,
+        "name": "Template created from imported bosh-stemcell-3169.1-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1384911,
+        "name": "Template created from imported bosh-stemcell-3169.1a-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1386801,
+        "name": "Template created from imported bosh-stemcell-3169.2-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1269603,
+        "name": "Template created from imported bosh-stemcell-3169.4-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1183835,
+        "name": "Template created from imported bosh-stemcell-3232.11-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1061129,
+        "name": "Template created from imported bosh-stemcell-3232.2-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1129059,
+        "name": "Template created from imported bosh-stemcell-3232.3-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1128931,
+        "name": "Template created from imported bosh-stemcell-3232.4-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1144683,
+        "name": "Template created from imported bosh-stemcell-3232.4-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1147465,
+        "name": "Template created from imported bosh-stemcell-3232.4-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1144949,
+        "name": "Template created from imported bosh-stemcell-3232.4-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1147461,
+        "name": "Template created from imported bosh-stemcell-3232.4-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1148853,
+        "name": "Template created from imported bosh-stemcell-3232.4-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1147441,
+        "name": "Template created from imported bosh-stemcell-3232.4-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1152921,
+        "name": "Template created from imported bosh-stemcell-3232.6-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1163747,
+        "name": "Template created from imported bosh-stemcell-3232.8-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1313267,
+        "name": "Template created from imported bosh-stemcell-3262.12-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1313277,
+        "name": "Template created from imported bosh-stemcell-3262.12-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1315423,
+        "name": "Template created from imported bosh-stemcell-3262.12-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1315497,
+        "name": "Template created from imported bosh-stemcell-3262.12-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1330877,
+        "name": "Template created from imported bosh-stemcell-3262.14-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1331417,
+        "name": "Template created from imported bosh-stemcell-3262.14-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1330865,
+        "name": "Template created from imported bosh-stemcell-3262.14-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1331849,
+        "name": "Template created from imported bosh-stemcell-3262.15-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1332365,
+        "name": "Template created from imported bosh-stemcell-3262.16-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1183955,
+        "name": "Template created from imported bosh-stemcell-3262.2-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1241977,
+        "name": "Template created from imported bosh-stemcell-3262.2-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1245779,
+        "name": "Template created from imported bosh-stemcell-3262.2-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1245655,
+        "name": "Template created from imported bosh-stemcell-3262.2-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1217077,
+        "name": "Template created from imported bosh-stemcell-3262.2-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1254381,
+        "name": "Template created from imported bosh-stemcell-3262.4-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1267585,
+        "name": "Template created from imported bosh-stemcell-3262.4-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1270343,
+        "name": "Template created from imported bosh-stemcell-3262.4-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1271753,
+        "name": "Template created from imported bosh-stemcell-3262.5-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1274907,
+        "name": "Template created from imported bosh-stemcell-3262.5-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1274721,
+        "name": "Template created from imported bosh-stemcell-3262.5-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1282755,
+        "name": "Template created from imported bosh-stemcell-3262.7-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1282649,
+        "name": "Template created from imported bosh-stemcell-3262.7-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1301725,
+        "name": "Template created from imported bosh-stemcell-3262.8-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1293189,
+        "name": "Template created from imported bosh-stemcell-3262.8-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1304109,
+        "name": "Template created from imported bosh-stemcell-3262.9-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1310523,
+        "name": "Template created from imported bosh-stemcell-3262.9-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1310605,
+        "name": "Template created from imported bosh-stemcell-3262.9-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1304121,
+        "name": "Template created from imported bosh-stemcell-3262.9-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1333743,
+        "name": "Template created from imported bosh-stemcell-3263-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1390505,
+        "name": "Template created from imported bosh-stemcell-3263.10-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1386771,
+        "name": "Template created from imported bosh-stemcell-3263.10-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1389279,
+        "name": "Template created from imported bosh-stemcell-3263.10-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1389385,
+        "name": "Template created from imported bosh-stemcell-3263.10.1-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1390617,
+        "name": "Template created from imported bosh-stemcell-3263.10.2-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1336729,
+        "name": "Template created from imported bosh-stemcell-3263.2-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1341609,
+        "name": "Template created from imported bosh-stemcell-3263.3-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1344117,
+        "name": "Template created from imported bosh-stemcell-3263.4-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1344215,
+        "name": "Template created from imported bosh-stemcell-3263.4-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1357399,
+        "name": "Template created from imported bosh-stemcell-3263.5-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1363333,
+        "name": "Template created from imported bosh-stemcell-3263.7-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1364221,
+        "name": "Template created from imported bosh-stemcell-3263.7-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1366879,
+        "name": "Template created from imported bosh-stemcell-3263.8-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1372347,
+        "name": "Template created from imported bosh-stemcell-3263.8-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1379991,
+        "name": "Template created from imported bosh-stemcell-3263.8.1-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1395763,
+        "name": "Template created from imported bosh-stemcell-3309-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1400251,
+        "name": "Template created from imported bosh-stemcell-3312-softlayer.vhd",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 188952,
+        "name": "Uaa LoginServer Stage 1 - Image Template",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 946963,
+        "name": "Ubuntu-14.04-base-include-openjdk7-zip-20160216-UCD",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1139413,
+        "name": "Ubuntu-14.04-base-include-openjdk7-zip-20160527-UCD",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 919547,
+        "name": "Ubuntu14.04-base-include-openjdk7-zip-20160126-UCD",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 689225,
+        "name": "Ubuntu14.04-bosh-cli-include-Doctor-20150813",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 745879,
+        "name": "Ubuntu14.04-bosh-cli-include-Doctor-20150922",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 758957,
+        "name": "Ubuntu14.04-bosh-cli-include-Doctor-java-20150922",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 771715,
+        "name": "Ubuntu14.04-bosh-cli-include-Doctor-java-mtu-1400-20151008",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 684013,
+        "name": "Ubuntu14.04-bosh-cli-include-Doctor-latest",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 791847,
+        "name": "Ubuntu14.04-boshcli-Doctor-Java-MTU-20151022-1032",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 604909,
+        "id": 823347,
+        "name": "Ubuntu14.04-boshcli-Doctor-Java-MTU-20151022-1032-UCD",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 41266,
+        "name": "UseResponse10192013",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 38540,
+        "name": "UseResponse_Tempalte_v1p0",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 709577,
+        "name": "WASPERF_RH_JMETER_DRIVER",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 211714,
+        "name": "[Deprecated!]ubuntu-10.04-bosh-2168-IEM-itcs104-dea-stemcell"
+    },
+    {
+        "accountId": 278444,
+        "id": 211578,
+        "name": "[Deprecated] ubuntu-10.04-bosh-2168-IEM-itcs104-dea-stemcell",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 211562,
+        "name": "[Deprecated]ubuntu-10.04-bosh-2168-IEM-itcs104-nondea-stemcell",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 288612,
+        "name": "[Deprecated]ubuntu-14.04-bosh-2719-boshcli-stemcell",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 206896,
+        "name": "[Temp]ubuntu-10.04-bosh-2168-sl-api-211-os-reload-dea-stemcell",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 126698,
+        "name": "adheer-env2a-test-auto-script-stemcell-image-20140415-052019-271",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278684,
+        "id": 425282,
+        "name": "api-harmony-template-20140211",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278684,
+        "id": 430884,
+        "name": "api-harmony-template-20150216",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278684,
+        "id": 432576,
+        "name": "api-harmony-template-20150217",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 163764,
+        "name": "blobstorebackup_snapshot",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 110506,
+        "name": "bluemixtestBaseImage",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 514577,
+        "name": "bmx-logstash-phase_1",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 583229,
+        "name": "bmx-logstash-phase_2",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 661267,
+        "name": "bmx-logstash-phase_2_A",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 665001,
+        "name": "bmx-logstash-phase_2_B",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 665493,
+        "name": "bmx-logstash-phase_2_S",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1052729,
+        "name": "bmx-security-remo_freddi-template",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 432060,
+        "id": 990523,
+        "name": "bmxres_Ubuntu1404",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 976757,
+        "name": "bmxt_Ubuntu1404_JMeter213",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 791749,
+        "name": "bosh-2751.3-dea-restore-matt",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 677071,
+        "name": "bosh-cli-latest",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 885711,
+        "name": "bosh-cli-ruby193-legacy",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 955065,
+        "name": "bosh-cli-yf-backup",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 927375,
+        "name": "bosh-final-release-builder-cli-template",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 900367,
+        "name": "bosh-init-and-bosh-cli-image-template",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 520197,
+        "name": "boshcli-cpi2751.2-2.template.20150428",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 957027,
+        "name": "boshcli-yf-ucd-image",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 105600,
+        "name": "c2atest-03-12-2014",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278684,
+        "id": 423738,
+        "name": "capstone-SG-TEMPLATE-20140210_A",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278684,
+        "id": 428484,
+        "name": "capstone-SG-TEMPLATE-20150213",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278684,
+        "id": 430967,
+        "name": "capstone-u1404-dkr15-20150225-base",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1035533,
+        "name": "carissimo02_backup",
+        "imageType": {
+            "description": "a disk that was created from an image on a host",
+            "keyName": "DISK_CAPTURE",
+            "name": "Disk Image Capture"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 792363,
+        "name": "carissimo04_1",
+        "imageType": {
+            "description": "a disk that was created from an image on a host",
+            "keyName": "DISK_CAPTURE",
+            "name": "Disk Image Capture"
+        }
+    },
+    {
+        "accountId": 288698,
+        "id": 797313,
+        "name": "cds-ucd-relayserver-20151027",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 730953,
+        "id": 771417,
+        "name": "celek-boshcli-mtu-image-template-20151008",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 295225,
+        "id": 152368,
+        "name": "chuan-mount-enable-stemcell",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 169350,
+        "name": "chuan-stemcell-integration-ww-libpq-dev-purged",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 54947,
+        "name": "clms-sl-0.2",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 53819,
+        "name": "clms20131119",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 60892,
+        "name": "clms402-sl",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 53827,
+        "name": "clmsnet",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 366226,
+        "id": 257360,
+        "name": "csf_zookeeper_v20140930_01",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 212280,
+        "name": "datapower-inception-template-v3",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 355850,
+        "name": "datapowerAdmin CCI from YS1",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 357028,
+        "name": "datapowerAdmin CCI from YS1 (12_17)",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 396802,
+        "name": "datapowerAdmin CCI from YS1 (1_17)",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 432060,
+        "id": 1045487,
+        "name": "doctor-agent-based-on-bosh-2751.4-stemcell-nondea-GM-bigtmp",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 710251,
+        "name": "doctor_v3_template",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 197496,
+        "name": "env2a-boshmicro-stemcell",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 166546,
+        "name": "env2a-test-auto-script-stemcell-image-20140623-043709-994",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 145488,
+        "name": "fabric-data-mig-stemcell-chuan",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 201056,
+        "name": "geo1.lon.aug13_2014",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 180814,
+        "name": "geo1_backup_july15",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 201136,
+        "name": "geo2.devbox.aug132014",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1260567,
+        "name": "gubin-boshcli-test-0728",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 469555,
+        "name": "image-40.41-2.1572-dea-mattcui-candidate3",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 473595,
+        "name": "image-40.41-2.1572-dea-mattcui-candidate4",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 84008,
+        "name": "jfrank-01-image-20140131",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 116740,
+        "name": "jfrank-sample-app-04.image.20140401",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 131194,
+        "name": "jfrank-sample-app-30.image.20140422",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 131208,
+        "name": "jfrank-sample-app-31.image.20140422",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 131932,
+        "name": "jfrank-sample-app-33.image.20140423",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 135526,
+        "name": "jfrank-sample-app-43.image.20140429",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 102966,
+        "name": "jfrank-taas-29-image-20140307",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 259812,
+        "name": "jfrank-test-01.image.20141002",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 259816,
+        "name": "jfrank-ts-002.image.20141002",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 259820,
+        "name": "jfrank-ts-003.image.20141002",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 244702,
+        "name": "jfrank-ts-004.image",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 259824,
+        "name": "jfrank-ts-004.image.20141002",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 105068,
+        "name": "jteoh-Flex-Image",
+        "imageType": {
+            "description": "a disk that was created from an image on a host",
+            "keyName": "DISK_CAPTURE",
+            "name": "Disk Image Capture"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1337937,
+        "name": "jumpboxwinvmwaredatapower",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 140134,
+        "name": "loadtest.appworkload.0508",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 105758,
+        "name": "loadtest.v2",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1022349,
+        "name": "martino-for-UCD-rh-template-20160408-IEM",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 579125,
+        "name": "martino-for-UCD-rh-template-IEM",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 390810,
+        "name": "martino-rh-template-IEM",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 40678,
+        "name": "mbaas-db2-stem",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 197640,
+        "name": "microbosh-lon-template-update",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 577073,
+        "name": "network-server-ys1",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 321922,
+        "name": "oliverrodev_2014-11-20",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 308196,
+        "id": 175288,
+        "name": "ops-uptime",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 200850,
+        "name": "packer-centos-2014-08-13T02:41:22Z",
+        "imageType": {
+            "description": "a disk that was created from an image on a host",
+            "keyName": "DISK_CAPTURE",
+            "name": "Disk Image Capture"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 200884,
+        "name": "packer-centos-2014-08-13T03:10:34Z",
+        "imageType": {
+            "description": "a disk that was created from an image on a host",
+            "keyName": "DISK_CAPTURE",
+            "name": "Disk Image Capture"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 243222,
+        "name": "packer-centos-bosh-stemcell-2014-09-18T21:04:20Z",
+        "imageType": {
+            "description": "a disk that was created from an image on a host",
+            "keyName": "DISK_CAPTURE",
+            "name": "Disk Image Capture"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 380214,
+        "name": "packer-ubuntu-2015-01-12T02:58:59Z",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 380298,
+        "name": "packer-ubuntu-2015-01-12T04:14:19Z",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 381478,
+        "name": "packer-ubuntu-2015-01-13T04:02:58Z",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 381532,
+        "name": "packer-ubuntu-2015-01-13T04:44:20Z",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1387569,
+        "name": "secboshtest.ng.bluemix.net",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 1035531,
+        "name": "secqradar_backup",
+        "imageType": {
+            "description": "a disk that was created from an image on a host",
+            "keyName": "DISK_CAPTURE",
+            "name": "Disk Image Capture"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 211832,
+        "name": "ubuntu-10.04-bosh-2168-IEM-ITCS104-dea-stemcell",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 286376,
+        "name": "ubuntu-10.04-bosh-2168-IEM-ITCS104-dea-stemcell-patched01",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 315004,
+        "name": "ubuntu-10.04-bosh-2168-IEM-ITCS104-dea-stemcell-patched02",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 351552,
+        "name": "ubuntu-10.04-bosh-2168-IEM-ITCS104-dea-stemcell-patched03",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 257672,
+        "name": "ubuntu-10.04-bosh-2168-IEM-ITCS104-dea-stemcell_patched",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 211798,
+        "name": "ubuntu-10.04-bosh-2168-IEM-ITCS104-nondea-stemcell",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 286380,
+        "name": "ubuntu-10.04-bosh-2168-IEM-ITCS104-nondea-stemcell-patched01",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 313724,
+        "name": "ubuntu-10.04-bosh-2168-IEM-ITCS104-nondea-stemcell-patched02",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 351556,
+        "name": "ubuntu-10.04-bosh-2168-IEM-ITCS104-nondea-stemcell-patched03",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 257678,
+        "name": "ubuntu-10.04-bosh-2168-IEM-ITCS104-nondea-stemcell_patched",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 196798,
+        "name": "ubuntu-10.04-bosh-2168-stemcell",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 290498,
+        "name": "ubuntu-14.04-bosh-2719-boshcli-stemcell",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 330324,
+        "name": "ubuntu-14.04-bosh-2719-boshcli-stemcell-latest",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 364798,
+        "name": "ubuntu-14.04-bosh-2719-boshcli-stemcell-latests",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 257160,
+        "name": "ubuntu-14.04-bosh-2719-src-only-20140930",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 268806,
+        "name": "ubuntu-14.04-bosh-2719-stemcellbuild1-20141010",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 271770,
+        "name": "ubuntu-14.04-bosh-2719-stemcellbuild1-20141013",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 257246,
+        "name": "ubuntu-14.04-bosh-2719-stemcellbuild2-20140930",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 269112,
+        "name": "ubuntu-14.04-bosh-2719-stemcellbuild2-20141010",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 257638,
+        "name": "ubuntu-14.04-bosh-2719-stemcellbuild3-20140930",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 467143,
+        "name": "ubuntu-14.04-bosh-2751-stemcell-GM-public-core-dea_patched01",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 517671,
+        "name": "ubuntu-14.04-bosh-2751-stemcell-GM-public-core-dea_patched02",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 569427,
+        "name": "ubuntu-14.04-bosh-2751-stemcell-GM-public-core-dea_patched04",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 467151,
+        "name": "ubuntu-14.04-bosh-2751-stemcell-GM-public-core-nondea_patched01",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 517679,
+        "name": "ubuntu-14.04-bosh-2751-stemcell-GM-public-core-nondea_patched02",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 569439,
+        "name": "ubuntu-14.04-bosh-2751-stemcell-GM-public-core-nondea_patched03",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 348410,
+        "name": "ubuntu-14.04-bosh-2751-stemcell-dea-GM",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 466219,
+        "name": "ubuntu-14.04-bosh-2751-stemcell-nondea-GM-restore",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 459015,
+        "name": "ubuntu-14.04-bosh-2751.2-100g-stemcell-nondea-candidate1",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 477759,
+        "name": "ubuntu-14.04-bosh-2751.2-stemcell-dea-GM",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 461889,
+        "name": "ubuntu-14.04-bosh-2751.2-stemcell-dea-GM-candidate2",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 465727,
+        "name": "ubuntu-14.04-bosh-2751.2-stemcell-dea-GM-candidate3",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 627659,
+        "name": "ubuntu-14.04-bosh-2751.2-stemcell-dea-GM_patched01",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 673009,
+        "name": "ubuntu-14.04-bosh-2751.2-stemcell-dea-GM_patched02",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 477767,
+        "name": "ubuntu-14.04-bosh-2751.2-stemcell-nondea-GM",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 627655,
+        "name": "ubuntu-14.04-bosh-2751.2-stemcell-nondea-GM_patched01",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 673005,
+        "name": "ubuntu-14.04-bosh-2751.2-stemcell-nondea-GM_patched02",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 459243,
+        "name": "ubuntu-14.04-bosh-2751.2-stemcell-nondea-candidate4",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 676981,
+        "name": "ubuntu-14.04-bosh-2751.3-stemcell-dea-GM",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 791967,
+        "name": "ubuntu-14.04-bosh-2751.3-stemcell-dea-GM-restore",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 668429,
+        "name": "ubuntu-14.04-bosh-2751.3-stemcell-dea-candidate2",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 670543,
+        "name": "ubuntu-14.04-bosh-2751.3-stemcell-dea-candidate3",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 676579,
+        "name": "ubuntu-14.04-bosh-2751.3-stemcell-nondea-GM",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 675705,
+        "name": "ubuntu-14.04-bosh-2751.3-stemcell-nondea-candidate1",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 932019,
+        "name": "ubuntu-14.04-bosh-2751.3-stemcell-nondea-new-bosh-agent",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 932057,
+        "name": "ubuntu-14.04-bosh-2751.3-stemcell-nondea-with-new-agent",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 850903,
+        "name": "ubuntu-14.04-bosh-2751.4-stemcell-dea-GM",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 853701,
+        "name": "ubuntu-14.04-bosh-2751.4-stemcell-dea-GM-bigtmp",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 778643,
+        "name": "ubuntu-14.04-bosh-2751.4-stemcell-dea-GM_old",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 772345,
+        "name": "ubuntu-14.04-bosh-2751.4-stemcell-dea-bigtmp",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 815773,
+        "name": "ubuntu-14.04-bosh-2751.4-stemcell-dea-bigtmp-postfix",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 778467,
+        "name": "ubuntu-14.04-bosh-2751.4-stemcell-dea-bigtmp_new",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 734047,
+        "name": "ubuntu-14.04-bosh-2751.4-stemcell-dea-candidate1",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 746039,
+        "name": "ubuntu-14.04-bosh-2751.4-stemcell-dea-candidate1",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 850947,
+        "name": "ubuntu-14.04-bosh-2751.4-stemcell-dea-security-bigtmp1",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 811691,
+        "name": "ubuntu-14.04-bosh-2751.4-stemcell-dea-security-issue",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 881405,
+        "name": "ubuntu-14.04-bosh-2751.4-stemcell-nondea-GM",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 850913,
+        "name": "ubuntu-14.04-bosh-2751.4-stemcell-nondea-GM-1s",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 882775,
+        "name": "ubuntu-14.04-bosh-2751.4-stemcell-nondea-GM-bigtmp",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 850943,
+        "name": "ubuntu-14.04-bosh-2751.4-stemcell-nondea-GM-bigtmp-1s",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 772269,
+        "name": "ubuntu-14.04-bosh-2751.4-stemcell-nondea-bigtmp",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 815721,
+        "name": "ubuntu-14.04-bosh-2751.4-stemcell-nondea-bigtmp-postfix",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 746007,
+        "name": "ubuntu-14.04-bosh-2751.4-stemcell-nondea-candidate1",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 728617,
+        "name": "ubuntu-14.04-bosh-2751.4-stemcell-nondea-candidate2",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 734003,
+        "name": "ubuntu-14.04-bosh-2751.4-stemcell-nondea-candidate3",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 811203,
+        "name": "ubuntu-14.04-bosh-2751.4-stemcell-nondea-security-issue",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 259828,
+        "name": "ubuntu-ts-004.image.20141002",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 204696,
+        "name": "ubuntu14.04-stemcell-bin-new-2014-08-15",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 213812,
+        "name": "ubuntu1404-stemcell-second-2168",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 213772,
+        "name": "ubuntu1404-stemcell-second-pre-software",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 34387,
+        "name": "udeploy-agt-tomcat-ant-svn",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 34134,
+        "name": "udeploy-srv",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 36641,
+        "name": "vinod-microboshstem-1",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 36802,
+        "name": "vinod-stem2",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 35685,
+        "name": "vinod-stembase",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 83694,
+        "name": "vinod-stemcell",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 694387,
+        "name": "whisk-deploy",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 788653,
+        "name": "whisk-deploy-yp",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 898749,
+        "name": "whisk-deploy-ys1",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 834305,
+        "name": "whisk-deploy-ys1-auto",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 68366,
+        "name": "yellowZoneStorage011014",
+        "imageType": {
+            "description": "a disk that was created from an image on a host",
+            "keyName": "DISK_CAPTURE",
+            "name": "Disk Image Capture"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 229254,
+        "name": "ys-boshcli-backup-20140910-ssf",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 330224,
+        "name": "yz-stage-bosh-cli-10.88.20.71-backup-20141127",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 42531,
+        "name": "yz-stage1-stemcell-20131022",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 58474,
+        "name": "yz-stemcell-20131203-1532",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 84362,
+        "name": "yz-stemcell-2014-0131-1600",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 119124,
+        "name": "yz-stemcell-20140404-1429",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 145996,
+        "name": "yz-stemcell-20140519-1300",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 154124,
+        "name": "yz-stemcell-20140603-1300",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 92636,
+        "name": "yz-stemcell-itcs104-20140217-wroot",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 93156,
+        "name": "yz-stemcell-itcs104-20140218-2220",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 146002,
+        "name": "yz-stemcell-itcs104-20140519-1300",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 154108,
+        "name": "yz-stemcell-itcs104-20140603-1300",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 210544,
+        "name": "yz-stemcell-lon-core-20140822",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 35740,
+        "name": "zhao-clm",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 49658,
+        "name": "zhao-clms-service-db",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 35572,
+        "name": "zhao-jenkins",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 98264,
+        "name": "zhao-liberty",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 52705,
+        "name": "zhao-testsvn",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 48156,
+        "name": "zhao-ucd6-agent-tomcat",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 36502,
+        "name": "zhao-ucd6-server",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 35580,
+        "name": "zhao-udeploy-snapshot",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 100930,
+        "name": "zhaodb2",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 48139,
+        "name": "zhaojenkins4internal",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 278444,
+        "id": 166680,
+        "name": "zjmtest",
+        "imageType": {
+            "description": "a disk that may be replaced on upgrade",
+            "keyName": "SYSTEM",
+            "name": "System"
+        }
+    },
+    {
+        "accountId": 311660,
+        "id": 112846,
+        "name": "zs-flex1",
+        "imageType": {
+            "description": "a disk that was created from an image on a host",
+            "keyName": "DISK_CAPTURE",
+            "name": "Disk Image Capture"
+        }
+    }
+]

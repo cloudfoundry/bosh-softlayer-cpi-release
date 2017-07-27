@@ -1,0 +1,17 @@
+[
+	{
+		"accountId": 12345678,
+		"nasType": "ISCSI",
+		"id": 123456,
+		"name": "fake-iqn",
+		"capacityGb": 100
+	},
+	{
+		"accountId": 12345678,
+		"nasType": "ISCSI",
+		"id": 1234567,
+		"name": "fake-iqn",
+		"capacityGb": 50
+	}
+]
+

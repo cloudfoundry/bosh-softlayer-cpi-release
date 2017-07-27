@@ -1,0 +1,235 @@
+{
+    "orderDate": "2016-12-14T01:13:28-06:00",
+    "orderDetails": {
+        "bigDataOrderFlag": false,
+        "billingInformation": {
+            "billingAddressLine1": "8200 Warden Ave",
+            "billingCity": "Markham",
+            "billingCountryCode": "CA",
+            "billingEmail": "sl-notification@bluemix.pagerduty.com",
+            "billingNameCompany": "IBM - BlueMix - Internal Dev",
+            "billingNameFirst": "Denis",
+            "billingNameLast": "Ducharme",
+            "billingPhoneVoice": "1-514-246-2455",
+            "billingPostalCode": "L6G1C7",
+            "billingState": "ON",
+            "cardExpirationMonth": null,
+            "cardExpirationYear": null,
+            "taxExempt": 0
+        },
+        "billingOrderItemId": null,
+        "containerSplHash": "000000004d6005fe00007f9e7115984e",
+        "currencyShortName": "USD",
+        "extendedHardwareTesting": null,
+        "imageTemplateId": null,
+        "isManagedOrder": null,
+        "itemCategoryQuestionAnswers": [],
+        "location": "449604",
+        "locationObject": {
+            "id": 449604,
+            "longName": "Tokyo 2",
+            "name": "tok02"
+        },
+        "message": "",
+        "packageId": 222,
+        "paymentType": "ADD_TO_BALANCE",
+        "postTaxRecurring": "155.66",
+        "postTaxRecurringHourly": "0",
+        "postTaxRecurringMonthly": "155.66",
+        "postTaxSetup": "0",
+        "preTaxRecurring": "155.66",
+        "preTaxRecurringHourly": "0",
+        "preTaxRecurringMonthly": "155.66",
+        "preTaxSetup": "0",
+        "presetId": null,
+        "prices": [
+            {
+                "id": 40678,
+                "itemId": 5128,
+                "laborFee": "0",
+                "oneTimeFee": "0",
+                "recurringFee": "0",
+                "setupFee": "0",
+                "categories": [
+                    {
+                        "categoryCode": "performance_storage_iscsi",
+                        "id": 380,
+                        "name": "Performance Storage iSCSI"
+                    }
+                ],
+                "item": {
+                    "capacity": "0",
+                    "description": "Block Storage (Performance)",
+                    "id": 5128,
+                    "keyName": "BLOCK_STORAGE_PERFORMANCE_ISCSI",
+                    "units": "N\/A",
+                    "bundle": [],
+                    "thirdPartyPolicyAssignments": []
+                }
+            },
+            {
+                "id": 99393,
+                "itemId": 5140,
+                "laborFee": "0",
+                "oneTimeFee": "0",
+                "recurringFee": "40.96",
+                "setupFee": "0",
+                "categories": [
+                    {
+                        "categoryCode": "performance_storage_space",
+                        "id": 382,
+                        "name": "Storage Space"
+                    }
+                ],
+                "item": {
+                    "capacity": "500",
+                    "description": "500 GB Storage Space",
+                    "id": 5140,
+                    "keyName": "500_GB_PERFORMANCE_STORAGE_SPACE",
+                    "units": "GB",
+                    "bundle": [],
+                    "thirdPartyPolicyAssignments": []
+                }
+            },
+            {
+                "id": 87711,
+                "itemId": 5330,
+                "laborFee": "0",
+                "oneTimeFee": "0",
+                "recurringFee": "114.7",
+                "setupFee": "0",
+                "categories": [
+                    {
+                        "categoryCode": "performance_storage_iops",
+                        "id": 384,
+                        "name": "Performance Storage IOPS"
+                    }
+                ],
+                "item": {
+                    "capacity": "2000",
+                    "description": "2000 IOPS",
+                    "id": 5330,
+                    "keyName": "2000_IOPS_3",
+                    "units": "IOPS",
+                    "bundle": [],
+                    "thirdPartyPolicyAssignments": []
+                }
+            }
+        ],
+        "primaryDiskPartitionId": null,
+        "privateCloudOrderFlag": false,
+        "properties": [],
+        "proratedInitialCharge": "90.38",
+        "proratedOrderTotal": "90.38",
+        "quantity": 1,
+        "resourceGroupId": null,
+        "resourceGroupTemplateId": null,
+        "sendQuoteEmailFlag": null,
+        "serverCoreCount": null,
+        "sourceVirtualGuestId": null,
+        "sshKeys": [],
+        "stepId": null,
+        "storageGroups": [],
+        "taxCacheHash": "d29753804d4e03fd0e2922326710ef2b5f3b95cb",
+        "taxCompletedFlag": true,
+        "totalRecurringTax": "0",
+        "totalSetupTax": "0",
+        "useHourlyPricing": false,
+        "osFormatType": {
+            "createDate": null,
+            "id": null,
+            "keyName": "LINUX"
+        }
+    },
+    "orderId": 11783175,
+    "placedOrder": {
+        "accountId": 278444,
+        "id": 11783175,
+        "orderQuoteId": null,
+        "orderTypeId": 4,
+        "presaleEventId": null,
+        "status": "PENDING_AUTO_APPROVAL",
+        "userRecordId": 6445475,
+        "account": {
+            "brandId": 11290,
+            "companyName": "IBM - BlueMix - Internal Dev",
+            "id": 278444
+        },
+        "items": [
+            {
+                "categoryCode": "performance_storage_iscsi",
+                "description": "Block Storage (Performance)",
+                "id": 168090337,
+                "itemId": 5128,
+                "itemPriceId": "40678",
+                "laborFee": "0",
+                "oneTimeFee": "0",
+                "parentId": null,
+                "promoCodeId": null,
+                "recurringFee": "0",
+                "setupFee": "0",
+                "children": [
+                    {
+                        "categoryCode": "performance_storage_space",
+                        "description": "500 GB Storage Space",
+                        "id": 168090339,
+                        "itemId": 5140,
+                        "itemPriceId": "99393",
+                        "laborFee": "0",
+                        "oneTimeFee": "0",
+                        "parentId": 168090337,
+                        "promoCodeId": null,
+                        "recurringFee": "40.96",
+                        "setupFee": "0"
+                    },
+                    {
+                        "categoryCode": "performance_storage_iops",
+                        "description": "2000 IOPS",
+                        "id": 168090341,
+                        "itemId": 5330,
+                        "itemPriceId": "87711",
+                        "laborFee": "0",
+                        "oneTimeFee": "0",
+                        "parentId": 168090337,
+                        "promoCodeId": null,
+                        "recurringFee": "114.7",
+                        "setupFee": "0"
+                    }
+                ]
+            },
+            {
+                "categoryCode": "performance_storage_space",
+                "description": "500 GB Storage Space",
+                "id": 168090339,
+                "itemId": 5140,
+                "itemPriceId": "99393",
+                "laborFee": "0",
+                "oneTimeFee": "0",
+                "parentId": 168090337,
+                "promoCodeId": null,
+                "recurringFee": "40.96",
+                "setupFee": "0"
+            },
+            {
+                "categoryCode": "performance_storage_iops",
+                "description": "2000 IOPS",
+                "id": 168090341,
+                "itemId": 5330,
+                "itemPriceId": "87711",
+                "laborFee": "0",
+                "oneTimeFee": "0",
+                "parentId": 168090337,
+                "promoCodeId": null,
+                "recurringFee": "114.7",
+                "setupFee": "0"
+            }
+        ],
+        "userRecord": {
+            "accountId": 278444,
+            "firstName": "JUN LI ",
+            "id": 6445475,
+            "lastName": "WANG",
+            "username": "278444_wangjunl@cn.ibm.com"
+        }
+    }
+}

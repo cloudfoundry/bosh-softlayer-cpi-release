@@ -1,0 +1,29 @@
+[
+    {
+        "id": 52703,
+        "ipAddress": {
+            "id": 65633607,
+            "ipAddress": "169.55.61.215",
+            "isBroadcast": false,
+            "isGateway": false,
+            "isNetwork": false,
+            "isReserved": false,
+            "subnetId": 882083,
+            "subnet": {
+                "broadcastAddress": "",
+                "cidr": 32,
+                "gateway": "",
+                "id": 882083,
+                "isCustomerOwned": false,
+                "isCustomerRoutable": false,
+                "modifyDate": "2016-11-21T01:05:01-06:00",
+                "netmask": "255.255.255.255",
+                "networkIdentifier": "169.55.61.215",
+                "networkVlanId": null,
+                "totalIpAddresses": "1",
+                "usableIpAddressCount": "1",
+                "version": 4
+            }
+        }
+    }
+]
