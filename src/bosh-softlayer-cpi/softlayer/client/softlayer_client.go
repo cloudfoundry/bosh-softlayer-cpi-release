@@ -15,10 +15,9 @@ const (
 )
 
 func NewSoftlayerClientSession(apiEndpoint string, username string, password string, trace bool, timeout int, writer io.Writer) *session.Session {
+	session.Logger = log.New(writer, SoftlayerGoLogTag, log.LstdFlags)
 	session := session.New(username, password, apiEndpoint)
 	session.Debug = trace
 	session.Timeout = time.Duration(timeout) * time.Second
-	logger := log.New(writer, SoftlayerGoLogTag, log.LstdFlags)
-	session.Logger = logger
 	return session
 }

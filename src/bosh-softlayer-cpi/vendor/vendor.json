@@ -460,40 +460,137 @@
 			"revision": ""
 		},
 		{
+			"checksumSHA1": "v0mZV7gCg2nH3p4OSHlZNstMP74=",
+			"path": "github.com/softlayer/softlayer-go",
+			"revision": "93eb88caac54a3eb32787d973f01c226b5c80eb4",
+			"revisionTime": "2017-08-03T21:20:42Z",
+			"version": "=custom-log",
+			"versionExact": "custom-log"
+		},
+		{
+			"path": "github.com/softlayer/softlayer-go...",
+			"revision": "custom-log",
+			"version": "=custom-log"
+		},
+		{
 			"checksumSHA1": "KeNIYJQUdE6o196SaYuLMmjEPZM=",
 			"path": "github.com/softlayer/softlayer-go/config",
-			"revision": "16162b803c70c88bda3ba343e480a1c91ed28ae9",
-			"revisionTime": "2017-07-10T14:31:53Z"
+			"revision": "93eb88caac54a3eb32787d973f01c226b5c80eb4",
+			"revisionTime": "2017-08-03T21:20:42Z",
+			"version": "=custom-log",
+			"versionExact": "custom-log"
 		},
 		{
 			"checksumSHA1": "MuNEBvc3lQsRvDc0yiDr1jzBNfo=",
 			"path": "github.com/softlayer/softlayer-go/datatypes",
-			"revision": "16162b803c70c88bda3ba343e480a1c91ed28ae9",
-			"revisionTime": "2017-07-10T14:31:53Z"
+			"revision": "93eb88caac54a3eb32787d973f01c226b5c80eb4",
+			"revisionTime": "2017-08-03T21:20:42Z",
+			"version": "=custom-log",
+			"versionExact": "custom-log"
+		},
+		{
+			"checksumSHA1": "4jZJFKT7jM0qZaxJT5DYSEDg0tI=",
+			"path": "github.com/softlayer/softlayer-go/examples",
+			"revision": "93eb88caac54a3eb32787d973f01c226b5c80eb4",
+			"revisionTime": "2017-08-03T21:20:42Z",
+			"version": "=custom-log",
+			"versionExact": "custom-log"
 		},
 		{
 			"checksumSHA1": "2UnaaOo4TreSegFy3tNtQ3NRv18=",
 			"path": "github.com/softlayer/softlayer-go/filter",
-			"revision": "16162b803c70c88bda3ba343e480a1c91ed28ae9",
-			"revisionTime": "2017-07-10T14:31:53Z"
+			"revision": "93eb88caac54a3eb32787d973f01c226b5c80eb4",
+			"revisionTime": "2017-08-03T21:20:42Z",
+			"version": "=custom-log",
+			"versionExact": "custom-log"
+		},
+		{
+			"checksumSHA1": "8w7mbrWkcP0yCAdX3BpPr1vndrY=",
+			"path": "github.com/softlayer/softlayer-go/helpers/hardware",
+			"revision": "93eb88caac54a3eb32787d973f01c226b5c80eb4",
+			"revisionTime": "2017-08-03T21:20:42Z",
+			"version": "=custom-log",
+			"versionExact": "custom-log"
+		},
+		{
+			"checksumSHA1": "iIil9KYj6J7ZEK4dG9UirsFuq1Y=",
+			"path": "github.com/softlayer/softlayer-go/helpers/location",
+			"revision": "93eb88caac54a3eb32787d973f01c226b5c80eb4",
+			"revisionTime": "2017-08-03T21:20:42Z",
+			"version": "=custom-log",
+			"versionExact": "custom-log"
+		},
+		{
+			"checksumSHA1": "r0ijpEVlR3yuirWa/4b6yCDIjEE=",
+			"path": "github.com/softlayer/softlayer-go/helpers/network",
+			"revision": "93eb88caac54a3eb32787d973f01c226b5c80eb4",
+			"revisionTime": "2017-08-03T21:20:42Z",
+			"version": "=custom-log",
+			"versionExact": "custom-log"
+		},
+		{
+			"checksumSHA1": "bGG9wihg55FY7q/kHVE5KQV8XmE=",
+			"path": "github.com/softlayer/softlayer-go/helpers/order",
+			"revision": "93eb88caac54a3eb32787d973f01c226b5c80eb4",
+			"revisionTime": "2017-08-03T21:20:42Z",
+			"version": "=custom-log",
+			"versionExact": "custom-log"
+		},
+		{
+			"checksumSHA1": "LX7V83DWKUCL2DBxiTCN30Bhm+U=",
+			"path": "github.com/softlayer/softlayer-go/helpers/product",
+			"revision": "93eb88caac54a3eb32787d973f01c226b5c80eb4",
+			"revisionTime": "2017-08-03T21:20:42Z",
+			"version": "=custom-log",
+			"versionExact": "custom-log"
+		},
+		{
+			"checksumSHA1": "6PpeMwmz39rCvqqn1a/xrNb6ER4=",
+			"path": "github.com/softlayer/softlayer-go/helpers/virtual",
+			"revision": "93eb88caac54a3eb32787d973f01c226b5c80eb4",
+			"revisionTime": "2017-08-03T21:20:42Z",
+			"version": "=custom-log",
+			"versionExact": "custom-log"
 		},
 		{
 			"checksumSHA1": "gCS7XyVNzhkJ3kFMmvMsIcWYBF8=",
 			"path": "github.com/softlayer/softlayer-go/services",
-			"revision": "16162b803c70c88bda3ba343e480a1c91ed28ae9",
-			"revisionTime": "2017-07-10T14:31:53Z"
+			"revision": "93eb88caac54a3eb32787d973f01c226b5c80eb4",
+			"revisionTime": "2017-08-03T21:20:42Z",
+			"version": "=custom-log",
+			"versionExact": "custom-log"
 		},
 		{
-			"checksumSHA1": "CIEs2F1l6b+d12/XK0LGiwTIc00=",
+			"checksumSHA1": "LQb5KAfCUO+lLcdddN3lQpRs0xE=",
 			"path": "github.com/softlayer/softlayer-go/session",
-			"revision": "16162b803c70c88bda3ba343e480a1c91ed28ae9",
-			"revisionTime": "2017-07-10T14:31:53Z"
+			"revision": "93eb88caac54a3eb32787d973f01c226b5c80eb4",
+			"revisionTime": "2017-08-03T21:20:42Z",
+			"version": "=custom-log",
+			"versionExact": "custom-log"
 		},
 		{
 			"checksumSHA1": "rRLFLMdzIFBSVSNDy34s01ZYGjs=",
 			"path": "github.com/softlayer/softlayer-go/sl",
-			"revision": "16162b803c70c88bda3ba343e480a1c91ed28ae9",
-			"revisionTime": "2017-07-10T14:31:53Z"
+			"revision": "93eb88caac54a3eb32787d973f01c226b5c80eb4",
+			"revisionTime": "2017-08-03T21:20:42Z",
+			"version": "=custom-log",
+			"versionExact": "custom-log"
+		},
+		{
+			"checksumSHA1": "VYFFSzXv12yqTNEMhTyUfm3+SVI=",
+			"path": "github.com/softlayer/softlayer-go/tests",
+			"revision": "93eb88caac54a3eb32787d973f01c226b5c80eb4",
+			"revisionTime": "2017-08-03T21:20:42Z",
+			"version": "=custom-log",
+			"versionExact": "custom-log"
+		},
+		{
+			"checksumSHA1": "mJzdXM8E84wEm1TPQZKv+Ry7Zx0=",
+			"path": "github.com/softlayer/softlayer-go/tools",
+			"revision": "93eb88caac54a3eb32787d973f01c226b5c80eb4",
+			"revisionTime": "2017-08-03T21:20:42Z",
+			"version": "=custom-log",
+			"versionExact": "custom-log"
 		},
 		{
 			"checksumSHA1": "dwOedwBJ1EIK9+S3t108Bx054Y8=",
@@ -692,26 +789,10 @@
 			"revisionTime": "2017-06-08T11:48:52Z"
 		},
 		{
-			"path": "gopkg.in/mgo.v2/bson",
-			"revision": ""
-		},
-		{
-			"path": "gopkg.in/mgo.v2/internal/json",
-			"revision": ""
-		},
-		{
 			"checksumSHA1": "12GqsW8PiRPnezDDy0v4brZrndM=",
 			"path": "gopkg.in/yaml.v2",
 			"revision": "a5b47d31c556af34a302ce5d659e6fea44d90de0",
 			"revisionTime": "2016-09-28T15:37:09Z"
-		},
-		{
-			"path": "https://github.com/maximilien/softlayer-go",
-			"revision": ""
-		},
-		{
-			"path": "https://github.com/maximilien/softlayer-go.git",
-			"revision": ""
 		}
 	],
 	"rootPath": "bosh-softlayer-cpi"
