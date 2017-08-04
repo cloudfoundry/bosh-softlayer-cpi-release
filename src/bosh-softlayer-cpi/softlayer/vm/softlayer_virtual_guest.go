@@ -245,7 +245,7 @@ func (vm *softLayerVirtualGuest) AttachDisk(disk bslcdisk.Disk) error {
 		for totalTime < slh.TIMEOUT {
 			allowable, err := networkStorageService.AttachNetworkStorageToVirtualGuest(vm.virtualGuest, disk.ID())
 			if err != nil {
-				if !strings.Contains(err.Error(), "please try again after Volume Provisioning is complete") {
+				if !strings.Contains(err.Error(), "A Volume Provisioning is currently in progress on volume") {
 					return bosherr.WrapError(err, fmt.Sprintf("Granting volume access to virtual guest %d", vm.ID()))
 				}
 			} else {
@@ -529,28 +529,17 @@ func (vm *softLayerVirtualGuest) getIscsiDeviceNamesBasedOnShellScript(hasMultiP
 }
 
 func (vm *softLayerVirtualGuest) fetchIscsiVolume(volumeId int) (datatypes.SoftLayer_Network_Storage, error) {
-	ObjectFilter := string(`{"iscsiNetworkStorage":{"id":{"operation":` + strconv.Itoa(volumeId) + `}}}`)
-
-	accountService, err := vm.softLayerClient.GetSoftLayer_Account_Service()
+	networkStorageService, err := vm.softLayerClient.GetSoftLayer_Network_Storage_Service()
 	if err != nil {
-		return datatypes.SoftLayer_Network_Storage{}, err
+		return datatypes.SoftLayer_Network_Storage{}, bosherr.WrapError(err, "Cannot get network storage service.")
 	}
 
-	iscsiStorages, err := accountService.GetIscsiNetworkStorageWithFilter(ObjectFilter)
+	volume, err := networkStorageService.GetNetworkStorage(volumeId)
 	if err != nil {
-		return datatypes.SoftLayer_Network_Storage{}, err
+		return datatypes.SoftLayer_Network_Storage{}, bosherr.WrapErrorf(err, "Cannot get iSCSI volume with id: %d", volumeId)
 	}
 
-	switch {
-	case len(iscsiStorages) == 0:
-		return datatypes.SoftLayer_Network_Storage{}, errors.New(fmt.Sprintf("No iSCSI volume found with volume id %d", volumeId))
-	case len(iscsiStorages) == 1:
-		return iscsiStorages[0], nil
-	case len(iscsiStorages) > 1:
-		return datatypes.SoftLayer_Network_Storage{}, errors.New(fmt.Sprintf("Found more than one iSCSI volume with volume id %d", volumeId))
-	}
-
-	return datatypes.SoftLayer_Network_Storage{}, errors.New(fmt.Sprintf("Failed to get the iSCSI volume with volume id %d", volumeId))
+	return volume, nil
 }
 
 func (vm *softLayerVirtualGuest) getAllowedHostCredential() (AllowedHostCredential, error) {

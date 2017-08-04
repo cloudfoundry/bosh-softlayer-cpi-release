@@ -1,0 +1,111 @@
+[
+      {
+        "capacity": "1000",
+        "description": "1000Mbps Hardware Firewall",
+        "id": 297,
+        "itemTaxCategoryId": 166,
+        "keyName": "1000MBPS_HARDWARE_FIREWALL",
+        "softwareDescriptionId": null,
+        "units": "Mbps",
+        "upgradeItemId": null,
+        "itemCategory": {
+            "categoryCode": "firewall",
+            "id": 30,
+            "name": "Hardware & Software Firewalls",
+            "quantityLimit": 0
+        },
+        "prices": [
+            {
+                "currentPriceFlag": null,
+                "id": 31214,
+                "itemId": 297,
+                "laborFee": "0",
+                "locationGroupId": null,
+                "onSaleFlag": null,
+                "oneTimeFee": "0",
+                "quantity": null,
+                "recurringFee": "99",
+                "setupFee": "0",
+                "sort": 0
+            },
+            {
+                "currentPriceFlag": null,
+                "id": 82093,
+                "itemId": 297,
+                "laborFee": "0",
+                "locationGroupId": 503,
+                "onSaleFlag": null,
+                "oneTimeFee": "0",
+                "quantity": null,
+                "recurringFee": "101.97",
+                "setupFee": "0",
+                "sort": 0
+            },
+            {
+                "currentPriceFlag": null,
+                "id": 82095,
+                "itemId": 297,
+                "laborFee": "0",
+                "locationGroupId": 505,
+                "onSaleFlag": null,
+                "oneTimeFee": "0",
+                "quantity": null,
+                "recurringFee": "105.93",
+                "setupFee": "0",
+                "sort": 0
+            },
+            {
+                "currentPriceFlag": null,
+                "id": 82097,
+                "itemId": 297,
+                "laborFee": "0",
+                "locationGroupId": 507,
+                "onSaleFlag": null,
+                "oneTimeFee": "0",
+                "quantity": null,
+                "recurringFee": "108.9",
+                "setupFee": "0",
+                "sort": 0
+            },
+            {
+                "currentPriceFlag": null,
+                "id": 82099,
+                "itemId": 297,
+                "laborFee": "0",
+                "locationGroupId": 509,
+                "onSaleFlag": null,
+                "oneTimeFee": "0",
+                "quantity": null,
+                "recurringFee": "111.87",
+                "setupFee": "0",
+                "sort": 0
+            },
+            {
+                "currentPriceFlag": null,
+                "id": 82101,
+                "itemId": 297,
+                "laborFee": "0",
+                "locationGroupId": 545,
+                "onSaleFlag": null,
+                "oneTimeFee": "0",
+                "quantity": null,
+                "recurringFee": "118.8",
+                "setupFee": "0",
+                "sort": 0
+            },
+            {
+                "currentPriceFlag": null,
+                "id": 154195,
+                "itemId": 297,
+                "laborFee": "0",
+                "locationGroupId": 583,
+                "onSaleFlag": null,
+                "oneTimeFee": "0",
+                "quantity": null,
+                "recurringFee": "136.62",
+                "setupFee": "0",
+                "sort": 0
+            }
+        ]
+    }
+]

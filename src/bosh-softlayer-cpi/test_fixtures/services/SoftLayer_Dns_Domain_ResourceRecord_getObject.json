@@ -1,0 +1,13 @@
+{
+    "data": "10.106.76.197",
+    "domainId": 1745153,
+    "expire": null,
+    "host": "zookeeper1",
+    "id": 50585394,
+    "minimum": null,
+    "mxPriority": null,
+    "refresh": null,
+    "retry": null,
+    "ttl": 900,
+    "type": "a"
+}

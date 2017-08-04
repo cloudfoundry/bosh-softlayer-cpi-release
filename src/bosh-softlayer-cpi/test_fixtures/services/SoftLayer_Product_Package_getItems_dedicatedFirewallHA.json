@@ -1,0 +1,160 @@
+[
+    {
+        "capacity": "2",
+        "description": "Hardware Firewall (High Availability)",
+        "id": 3896,
+        "itemTaxCategoryId": 166,
+        "keyName": "HARDWARE_FIREWALL_HIGH_AVAILABILITY",
+        "softwareDescriptionId": null,
+        "units": "N\/A",
+        "upgradeItemId": null,
+        "itemCategory": {
+            "categoryCode": "vlan_firewall",
+            "id": 140,
+            "name": "Dedicated Firewall",
+            "quantityLimit": 0
+        },
+        "prices": [
+            {
+                "currentPriceFlag": null,
+                "id": 26005,
+                "itemId": 3896,
+                "laborFee": "0",
+                "locationGroupId": null,
+                "onSaleFlag": null,
+                "oneTimeFee": "0",
+                "quantity": null,
+                "recurringFee": "1398",
+                "setupFee": "0",
+                "sort": 0,
+                "packageReferences": [
+                    {
+                        "id": 263153,
+                        "itemPriceId": 26005,
+                        "packageId": 0
+                    }
+                ]
+            },
+            {
+                "currentPriceFlag": null,
+                "id": 84003,
+                "itemId": 3896,
+                "laborFee": "0",
+                "locationGroupId": 503,
+                "onSaleFlag": null,
+                "oneTimeFee": "0",
+                "quantity": null,
+                "recurringFee": "1439.94",
+                "setupFee": "0",
+                "sort": 0,
+                "packageReferences": [
+                    {
+                        "id": 637359,
+                        "itemPriceId": 84003,
+                        "packageId": 0
+                    }
+                ]
+            },
+            {
+                "currentPriceFlag": null,
+                "id": 84005,
+                "itemId": 3896,
+                "laborFee": "0",
+                "locationGroupId": 505,
+                "onSaleFlag": null,
+                "oneTimeFee": "0",
+                "quantity": null,
+                "recurringFee": "1495.86",
+                "setupFee": "0",
+                "sort": 0,
+                "packageReferences": [
+                    {
+                        "id": 637361,
+                        "itemPriceId": 84005,
+                        "packageId": 0
+                    }
+                ]
+            },
+            {
+                "currentPriceFlag": null,
+                "id": 84007,
+                "itemId": 3896,
+                "laborFee": "0",
+                "locationGroupId": 507,
+                "onSaleFlag": null,
+                "oneTimeFee": "0",
+                "quantity": null,
+                "recurringFee": "1537.8",
+                "setupFee": "0",
+                "sort": 0,
+                "packageReferences": [
+                    {
+                        "id": 637363,
+                        "itemPriceId": 84007,
+                        "packageId": 0
+                    }
+                ]
+            },
+            {
+                "currentPriceFlag": null,
+                "id": 84009,
+                "itemId": 3896,
+                "laborFee": "0",
+                "locationGroupId": 509,
+                "onSaleFlag": null,
+                "oneTimeFee": "0",
+                "quantity": null,
+                "recurringFee": "1579.74",
+                "setupFee": "0",
+                "sort": 0,
+                "packageReferences": [
+                    {
+                        "id": 637365,
+                        "itemPriceId": 84009,
+                        "packageId": 0
+                    }
+                ]
+            },
+            {
+                "currentPriceFlag": null,
+                "id": 84011,
+                "itemId": 3896,
+                "laborFee": "0",
+                "locationGroupId": 545,
+                "onSaleFlag": null,
+                "oneTimeFee": "0",
+                "quantity": null,
+                "recurringFee": "1677.6",
+                "setupFee": "0",
+                "sort": 0,
+                "packageReferences": [
+                    {
+                        "id": 637367,
+                        "itemPriceId": 84011,
+                        "packageId": 0
+                    }
+                ]
+            },
+            {
+                "currentPriceFlag": null,
+                "id": 154469,
+                "itemId": 3896,
+                "laborFee": "0",
+                "locationGroupId": 583,
+                "onSaleFlag": null,
+                "oneTimeFee": "0",
+                "quantity": null,
+                "recurringFee": "1929.24",
+                "setupFee": "0",
+                "sort": 0,
+                "packageReferences": [
+                    {
+                        "id": 1191003,
+                        "itemPriceId": 154469,
+                        "packageId": 0
+                    }
+                ]
+            }
+        ]
+    }
+]

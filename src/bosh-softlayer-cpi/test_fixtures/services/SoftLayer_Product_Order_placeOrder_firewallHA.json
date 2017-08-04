@@ -1,0 +1,130 @@
+{
+    "orderDate": "2016-12-15T20:54:52-06:00",
+    "orderDetails": {
+        "bigDataOrderFlag": false,
+        "billingInformation": {
+            "billingAddressLine1": "8200 Warden Ave",
+            "billingCity": "Markham",
+            "billingCountryCode": "CA",
+            "billingEmail": "sl-notification@bluemix.pagerduty.com",
+            "billingNameCompany": "IBM - BlueMix - Internal Dev",
+            "billingNameFirst": "Denis",
+            "billingNameLast": "Ducharme",
+            "billingPhoneVoice": "1-514-246-2455",
+            "billingPostalCode": "L6G1C7",
+            "billingState": "ON",
+            "cardExpirationMonth": null,
+            "cardExpirationYear": null,
+            "taxExempt": 0
+        },
+        "billingOrderItemId": null,
+        "containerSplHash": "000000001de1af5900007f4f0038d436",
+        "currencyShortName": "USD",
+        "extendedHardwareTesting": null,
+        "imageTemplateId": null,
+        "isManagedOrder": null,
+        "itemCategoryQuestionAnswers": [],
+        "location": "449604",
+        "locationObject": {
+            "id": 449604,
+            "longName": "Tokyo 2",
+            "name": "tok02"
+        },
+        "message": "",
+        "packageId": 0,
+        "paymentType": "ADD_TO_BALANCE",
+        "postTaxRecurring": "1579.74",
+        "postTaxRecurringHourly": "0",
+        "postTaxRecurringMonthly": "1579.74",
+        "postTaxSetup": "0",
+        "preTaxRecurring": "1579.74",
+        "preTaxRecurringHourly": "0",
+        "preTaxRecurringMonthly": "1579.74",
+        "preTaxSetup": "0",
+        "presetId": null,
+        "prices": [
+            {
+                "id": 84009,
+                "itemId": 3896,
+                "laborFee": "0",
+                "oneTimeFee": "0",
+                "recurringFee": "1579.74",
+                "setupFee": "0",
+                "categories": [
+                    {
+                        "categoryCode": "vlan_firewall",
+                        "id": 140,
+                        "name": "Dedicated Firewall"
+                    }
+                ],
+                "item": {
+                    "capacity": "2",
+                    "description": "Hardware Firewall (High Availability)",
+                    "id": 3896,
+                    "keyName": "HARDWARE_FIREWALL_HIGH_AVAILABILITY",
+                    "units": "N\/A",
+                    "bundle": [],
+                    "thirdPartyPolicyAssignments": []
+                }
+            }
+        ],
+        "primaryDiskPartitionId": null,
+        "privateCloudOrderFlag": false,
+        "properties": [],
+        "proratedInitialCharge": "866.31",
+        "proratedOrderTotal": "866.31",
+        "quantity": 1,
+        "resourceGroupId": null,
+        "resourceGroupTemplateId": null,
+        "sendQuoteEmailFlag": null,
+        "serverCoreCount": null,
+        "sourceVirtualGuestId": null,
+        "sshKeys": [],
+        "stepId": null,
+        "storageGroups": [],
+        "taxCacheHash": "4ef73a88b0cc7eb30b4b10d0ead7e64aa214b6e4",
+        "taxCompletedFlag": true,
+        "totalRecurringTax": "0",
+        "totalSetupTax": "0",
+        "useHourlyPricing": false,
+        "vlanId": 1455489
+    },
+    "orderId": 11812353,
+    "placedOrder": {
+        "accountId": 278444,
+        "id": 11812353,
+        "orderQuoteId": null,
+        "orderTypeId": 4,
+        "presaleEventId": null,
+        "status": "PENDING_AUTO_APPROVAL",
+        "userRecordId": 6445475,
+        "account": {
+            "brandId": 11290,
+            "companyName": "IBM - BlueMix - Internal Dev",
+            "id": 278444
+        },
+        "items": [
+            {
+                "categoryCode": "vlan_firewall",
+                "description": "Hardware Firewall (High Availability)",
+                "id": 168424461,
+                "itemId": 3896,
+                "itemPriceId": "84009",
+                "laborFee": "0",
+                "oneTimeFee": "0",
+                "parentId": null,
+                "promoCodeId": null,
+                "recurringFee": "1579.74",
+                "setupFee": "0",
+                "children": []
+            }
+        ],
+        "userRecord": {
+            "accountId": 278444,
+            "firstName": "JUN LI ",
+            "id": 6445475,
+            "lastName": "WANG",
+            "username": "278444_wangjunl@cn.ibm.com"
+        }
+    }
+}

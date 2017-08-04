@@ -1,0 +1,77 @@
+[
+    {
+        "capacityGb": 20,
+        "id": 17336531,
+        "username": "IBM01SEL278444-16",
+        "activeTransactionCount": 0,
+        "billingItem": {
+            "allowCancellationFlag": 1,
+            "cancellationDate": null,
+            "categoryCode": "storage_service_enterprise",
+            "createDate": "2016-12-12T20:26:31-06:00",
+            "cycleStartDate": "2016-12-12T20:26:31-06:00",
+            "description": "Endurance Storage",
+            "id": 140952229,
+            "laborFee": "0",
+            "laborFeeTaxRate": "0",
+            "lastBillDate": "2016-12-12T20:26:31-06:00",
+            "modifyDate": "2016-12-12T20:26:55-06:00",
+            "nextBillDate": "2017-01-01T00:00:00-06:00",
+            "oneTimeFee": "0",
+            "oneTimeFeeTaxRate": "0",
+            "orderItemId": 167855699,
+            "parentId": null,
+            "recurringFee": "0",
+            "recurringFeeTaxRate": "0",
+            "recurringMonths": 1,
+            "serviceProviderId": 1,
+            "setupFee": "0",
+            "setupFeeTaxRate": "0",
+            "orderItem": {
+                "categoryCode": "storage_service_enterprise",
+                "description": "Endurance Storage",
+                "id": 167855699,
+                "itemId": 5936,
+                "itemPriceId": "45064",
+                "laborAfterTaxAmount": "0",
+                "laborFee": "0",
+                "laborFeeTaxRate": "0",
+                "laborTaxAmount": "0",
+                "oneTimeAfterTaxAmount": "0",
+                "oneTimeFee": "0",
+                "oneTimeFeeTaxRate": "0",
+                "oneTimeTaxAmount": "0",
+                "parentId": null,
+                "promoCodeId": null,
+                "quantity": null,
+                "recurringAfterTaxAmount": "0",
+                "recurringFee": "0",
+                "recurringTaxAmount": "0",
+                "setupAfterTaxAmount": "0",
+                "setupFee": "0",
+                "setupFeeDeferralMonths": 12,
+                "setupFeeTaxRate": "0",
+                "setupTaxAmount": "0",
+                "order": {
+                    "id": 11764035,
+                    "userRecord": {
+                        "username": "278444_wangjunl@cn.ibm.com"
+                    }
+                }
+            }
+        },
+        "lunId": "170",
+        "serviceResource": {
+            "backendIpAddress": "nfstok0201a-fz.service.softlayer.com",
+            "id": 3886,
+            "name": "Consistent Performance aggr_staastok0201_hp01",
+            "datacenter": {
+                "name": "tok02"
+            }
+        },
+        "serviceResourceBackendIpAddress": "10.3.78.67",
+        "storageType": {
+            "keyName": "ENDURANCE_BLOCK_STORAGE"
+        }
+    }
+]

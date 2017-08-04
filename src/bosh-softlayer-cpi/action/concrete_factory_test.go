@@ -7,6 +7,7 @@ import (
 	. "bosh-softlayer-cpi/action"
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
+	slcli "bosh-softlayer-cpi/softlayer/client/fakes"
 )
 
 var _ = Describe("ConcreteFactory", func() {
@@ -17,13 +18,15 @@ var _ = Describe("ConcreteFactory", func() {
 			StemcellsDir: "/tmp/stemcells",
 		}
 
+		client  *slcli.FakeClient
 		factory Factory
 	)
 
 	BeforeEach(func() {
 		logger = boshlog.NewLogger(boshlog.LevelNone)
-
+		client = &slcli.FakeClient{}
 		factory = NewConcreteFactory(
+			client,
 			options,
 			logger,
 		)

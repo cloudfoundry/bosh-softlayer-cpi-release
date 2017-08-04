@@ -1,0 +1,121 @@
+{
+    "imageTemplateId": null,
+    "location": "449604",
+    "packageId": 46,
+    "prices": [
+        {
+            "hourlyRecurringFee": ".017",
+            "id": 26125,
+            "recurringFee": "10.88",
+            "item": {
+                "description": "1 x 2.0 GHz Core"
+            }
+        },
+        {
+            "hourlyRecurringFee": ".011",
+            "id": 32597,
+            "recurringFee": "7.25",
+            "item": {
+                "description": "1 GB"
+            }
+        },
+        {
+            "hourlyRecurringFee": "0",
+            "id": 50479,
+            "recurringFee": "0",
+            "item": {
+                "description": "CoreOS Stable"
+            }
+        },
+        {
+            "hourlyRecurringFee": "0",
+            "id": 32578,
+            "recurringFee": "0",
+            "item": {
+                "description": "25 GB (SAN)"
+            }
+        },
+        {
+            "hourlyRecurringFee": "0",
+            "id": 23070,
+            "recurringFee": "0",
+            "item": {
+                "description": "Reboot \/ Remote Console"
+            }
+        },
+        {
+            "hourlyRecurringFee": "0",
+            "id": 22829,
+            "recurringFee": "0",
+            "item": {
+                "description": "10 Mbps Public & Private Network Uplinks"
+            }
+        },
+        {
+            "hourlyRecurringFee": "0",
+            "id": 34183,
+            "item": {
+                "description": "0 GB Bandwidth"
+            }
+        },
+        {
+            "hourlyRecurringFee": "0",
+            "id": 34807,
+            "recurringFee": "0",
+            "item": {
+                "description": "1 IP Address"
+            }
+        },
+        {
+            "hourlyRecurringFee": "0",
+            "id": 27023,
+            "recurringFee": "0",
+            "item": {
+                "description": "Host Ping"
+            }
+        },
+        {
+            "hourlyRecurringFee": "0",
+            "id": 32500,
+            "recurringFee": "0",
+            "item": {
+                "description": "Email and Ticket"
+            }
+        },
+        {
+            "hourlyRecurringFee": "0",
+            "id": 32627,
+            "recurringFee": "0",
+            "item": {
+                "description": "Automated Notification"
+            }
+        },
+        {
+            "hourlyRecurringFee": "0",
+            "id": 33483,
+            "recurringFee": "0",
+            "item": {
+                "description": "Unlimited SSL VPN Users & 1 PPTP VPN User per account"
+            }
+        },
+        {
+            "hourlyRecurringFee": "0",
+            "id": 35310,
+            "recurringFee": "0",
+            "item": {
+                "description": "Nessus Vulnerability Assessment & Reporting"
+            }
+        }
+    ],
+    "quantity": 1,
+    "sourceVirtualGuestId": null,
+    "sshKeys": [],
+    "useHourlyPricing": true,
+    "virtualGuests": [
+        {
+            "domain": "wilma.org",
+            "hostname": "wilma"
+        }
+    ],
+    "complexType": "SoftLayer_Container_Product_Order_Virtual_Guest"
+}
