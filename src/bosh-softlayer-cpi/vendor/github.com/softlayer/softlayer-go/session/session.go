@@ -18,14 +18,23 @@ package session
 
 import (
 	"fmt"
-	"github.com/softlayer/softlayer-go/config"
-	"github.com/softlayer/softlayer-go/sl"
 	"log"
 	"os"
 	"os/user"
 	"strings"
 	"time"
+
+	"github.com/softlayer/softlayer-go/config"
+	"github.com/softlayer/softlayer-go/sl"
 )
+
+// Logger is the logger used by the SoftLayer session package. Can be overridden by the user.
+var Logger *log.Logger
+
+func init() {
+	// initialize the logger used by the session package.
+	Logger = log.New(os.Stderr, "", log.LstdFlags)
+}
 
 // DefaultEndpoint is the default endpoint for API calls, when no override
 // is provided.
@@ -98,11 +107,6 @@ type Session struct {
 	// session. Requests that take longer that the specified timeout
 	// will result in an error.
 	Timeout time.Duration
-
-	// Logger specified a string format of log information.
-	// A Logger represents an active logging object that
-	// generates lines of output to an io.Writer.
-	Logger *log.Logger
 }
 
 // New creates and returns a pointer to a new session object.  It takes up to
@@ -180,13 +184,10 @@ func New(args ...interface{}) *Session {
 		endpointURL = DefaultEndpoint
 	}
 
-	logger := log.New(os.Stderr, "", log.LstdFlags)
-
 	sess := &Session{
 		UserName: values[keys["username"]],
 		APIKey:   values[keys["api_key"]],
 		Endpoint: endpointURL,
-		Logger:   logger,
 	}
 
 	timeout := values[keys["timeout"]]

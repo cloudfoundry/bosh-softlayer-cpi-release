@@ -53,6 +53,7 @@ var _ = Describe("SecurityHandler", func() {
 		Context("when ImageService createObject call successfully", func() {
 			It("create ssh key successfully", func() {
 				_, err := cli.CreateSshKey(&label, &key, &fingerPrint)
+
 				Expect(err).NotTo(HaveOccurred())
 			})
 		})
@@ -62,6 +63,7 @@ var _ = Describe("SecurityHandler", func() {
 		Context("when ImageService deleteObject call successfully", func() {
 			It("delete ssh key successfully", func() {
 				succeed, err := cli.DeleteSshKey(sshKeyId)
+
 				Expect(err).NotTo(HaveOccurred())
 				Expect(succeed).To(Equal(true))
 			})

@@ -47,6 +47,7 @@ var _ = Describe("ImageHandler", func() {
 		Context("when ImageService getObject call successfully", func() {
 			It("get image successfully", func() {
 				image, succ, err := cli.GetImage(imageID, boslc.IMAGE_DETAIL_MASK)
+
 				Expect(err).NotTo(HaveOccurred())
 				Expect(succ).To(Equal(true))
 				Expect(*image.Id).To(Equal(imageID))
@@ -56,6 +57,7 @@ var _ = Describe("ImageHandler", func() {
 		Context("when ImageService getObject call return an error", func() {
 			It("return an error", func() {
 				_, succ, err := cli.GetImage(imageID, "fake-client-error")
+
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("fake-client-error"))
 				Expect(succ).To(Equal(false))
