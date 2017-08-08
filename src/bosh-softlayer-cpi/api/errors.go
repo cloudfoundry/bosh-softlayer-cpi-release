@@ -93,3 +93,18 @@ func (e StemcellNotFoundError) Error() string {
 	return fmt.Sprintf("Stemcell '%s' not found", e.stemcellID)
 }
 func (e StemcellNotFoundError) CanRetry() bool { return e.canRetry }
+
+type HostHaveNotAllowedCredentialError struct {
+	vmID     string
+	canRetry bool
+}
+
+func NewHostHaveNotAllowedCredentialError(vmID string) HostHaveNotAllowedCredentialError {
+	return HostHaveNotAllowedCredentialError{vmID: vmID}
+}
+
+func (e HostHaveNotAllowedCredentialError) Type() string { return "Bosh::Clouds::HostHaveNotAllowedCredential" }
+func (e HostHaveNotAllowedCredentialError) Error() string {
+	return fmt.Sprintf("VM '%s' have not allowed access credential", e.vmID)
+}
+func (e HostHaveNotAllowedCredentialError) CanRetry() bool { return e.canRetry }

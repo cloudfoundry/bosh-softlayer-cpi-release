@@ -58,6 +58,10 @@ func (vg SoftlayerVirtualGuestService) AttachDisk(id int, diskID int) ([]byte, e
 		return []byte{}, bosherr.WrapError(err, fmt.Sprintf("Getting iscsi host auth from virtual guest '%d'", id))
 	}
 
+	if !found {
+		return []byte{}, api.NewHostHaveNotAllowedCredentialError(strconv.Itoa(id))
+	}
+
 	initiatorName := *credential.Name
 	username := *credential.Credential.Username
 	password := *credential.Credential.Password

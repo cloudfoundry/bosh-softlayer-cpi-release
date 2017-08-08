@@ -13,22 +13,22 @@ import (
 	. "bosh-softlayer-cpi/softlayer/virtual_guest_service"
 )
 
-var _ = Describe("SoftLayer_Virtual_Guest_Delete", func() {
+var _ = Describe("Virtual Guest Service", func() {
 	var (
-		softLayerClient     *fakeslclient.FakeClient
+		cli                 *fakeslclient.FakeClient
 		uuidGen             *fakeuuid.FakeGenerator
 		logger              boshlog.Logger
 		virtualGuestService SoftlayerVirtualGuestService
 	)
 
 	BeforeEach(func() {
-		softLayerClient = &fakeslclient.FakeClient{}
+		cli = &fakeslclient.FakeClient{}
 		uuidGen = &fakeuuid.FakeGenerator{}
-		logger = boshlog.NewLogger(boshlog.LevelNone)
-		virtualGuestService = NewSoftLayerVirtualGuestService(softLayerClient, uuidGen, logger)
+		logger = boshlog.NewLogger(boshlog.LevelDebug)
+		virtualGuestService = NewSoftLayerVirtualGuestService(cli, uuidGen, logger)
 	})
 
-	Describe("Delete", func() {
+	Describe("Call Delete", func() {
 		var (
 			vmID      int
 			enableVps bool
@@ -45,26 +45,26 @@ var _ = Describe("SoftLayer_Virtual_Guest_Delete", func() {
 			})
 
 			It("Clean up successfully", func() {
-				softLayerClient.DeleteInstanceFromVPSReturns(
+				cli.DeleteInstanceFromVPSReturns(
 					nil,
 				)
 
 				err := virtualGuestService.Delete(vmID, enableVps)
 				Expect(err).NotTo(HaveOccurred())
-				Expect(softLayerClient.DeleteInstanceFromVPSCallCount()).To(Equal(1))
-				Expect(softLayerClient.CancelInstanceCallCount()).To(Equal(0))
+				Expect(cli.DeleteInstanceFromVPSCallCount()).To(Equal(1))
+				Expect(cli.CancelInstanceCallCount()).To(Equal(0))
 			})
 
 			It("Return error if softLayerClient delete instance from VPS call returns an error", func() {
-				softLayerClient.DeleteInstanceFromVPSReturns(
+				cli.DeleteInstanceFromVPSReturns(
 					errors.New("fake-client-error"),
 				)
 
 				err := virtualGuestService.Delete(vmID, enableVps)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("fake-client-error"))
-				Expect(softLayerClient.DeleteInstanceFromVPSCallCount()).To(Equal(1))
-				Expect(softLayerClient.CancelInstanceCallCount()).To(Equal(0))
+				Expect(cli.DeleteInstanceFromVPSCallCount()).To(Equal(1))
+				Expect(cli.CancelInstanceCallCount()).To(Equal(0))
 			})
 		})
 
@@ -75,26 +75,26 @@ var _ = Describe("SoftLayer_Virtual_Guest_Delete", func() {
 			})
 
 			It("Clean up successfully", func() {
-				softLayerClient.CancelInstanceReturns(
+				cli.CancelInstanceReturns(
 					nil,
 				)
 
 				err := virtualGuestService.Delete(vmID, enableVps)
 				Expect(err).NotTo(HaveOccurred())
-				Expect(softLayerClient.DeleteInstanceFromVPSCallCount()).To(Equal(0))
-				Expect(softLayerClient.CancelInstanceCallCount()).To(Equal(1))
+				Expect(cli.DeleteInstanceFromVPSCallCount()).To(Equal(0))
+				Expect(cli.CancelInstanceCallCount()).To(Equal(1))
 			})
 
 			It("Return error if softLayerClient delete instance from VPS call returns an error", func() {
-				softLayerClient.CancelInstanceReturns(
+				cli.CancelInstanceReturns(
 					errors.New("fake-client-error"),
 				)
 
 				err := virtualGuestService.Delete(vmID, enableVps)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("fake-client-error"))
-				Expect(softLayerClient.DeleteInstanceFromVPSCallCount()).To(Equal(0))
-				Expect(softLayerClient.CancelInstanceCallCount()).To(Equal(1))
+				Expect(cli.DeleteInstanceFromVPSCallCount()).To(Equal(0))
+				Expect(cli.CancelInstanceCallCount()).To(Equal(1))
 			})
 		})
 	})

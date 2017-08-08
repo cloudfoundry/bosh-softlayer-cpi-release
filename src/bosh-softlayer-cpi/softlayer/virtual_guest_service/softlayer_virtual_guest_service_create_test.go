@@ -15,22 +15,22 @@ import (
 	"github.com/softlayer/softlayer-go/sl"
 )
 
-var _ = Describe("SoftLayer_Virtual_Guest_Create", func() {
+var _ = Describe("Virtual Guest Service", func() {
 	var (
-		softLayerClient     *fakeslclient.FakeClient
+		cli                 *fakeslclient.FakeClient
 		uuidGen             *fakeuuid.FakeGenerator
 		logger              boshlog.Logger
 		virtualGuestService SoftlayerVirtualGuestService
 	)
 
 	BeforeEach(func() {
-		softLayerClient = &fakeslclient.FakeClient{}
+		cli = &fakeslclient.FakeClient{}
 		uuidGen = &fakeuuid.FakeGenerator{}
-		logger = boshlog.NewLogger(boshlog.LevelNone)
-		virtualGuestService = NewSoftLayerVirtualGuestService(softLayerClient, uuidGen, logger)
+		logger = boshlog.NewLogger(boshlog.LevelDebug)
+		virtualGuestService = NewSoftLayerVirtualGuestService(cli, uuidGen, logger)
 	})
 
-	Describe("Create", func() {
+	Describe("Call Create", func() {
 		var (
 			virtualGuest            *datatypes.Virtual_Guest
 			enableVps               bool
@@ -88,7 +88,7 @@ var _ = Describe("SoftLayer_Virtual_Guest_Create", func() {
 			})
 
 			It("returns virtualGuest Id if create instance successful", func() {
-				softLayerClient.CreateInstanceFromVPSReturns(
+				cli.CreateInstanceFromVPSReturns(
 					&datatypes.Virtual_Guest{
 						Id: sl.Int(createVmID),
 					},
@@ -97,13 +97,13 @@ var _ = Describe("SoftLayer_Virtual_Guest_Create", func() {
 
 				vmID, err := virtualGuestService.Create(virtualGuest, enableVps, stemcellID, sshKeys)
 				Expect(err).NotTo(HaveOccurred())
-				Expect(softLayerClient.CreateInstanceFromVPSCallCount()).To(Equal(1))
-				Expect(softLayerClient.CreateInstanceCallCount()).To(Equal(0))
+				Expect(cli.CreateInstanceFromVPSCallCount()).To(Equal(1))
+				Expect(cli.CreateInstanceCallCount()).To(Equal(0))
 				Expect(vmID).To(Equal(createVmID))
 			})
 
 			It("returns error if softLayerClient create instance from VPS call", func() {
-				softLayerClient.CreateInstanceFromVPSReturns(
+				cli.CreateInstanceFromVPSReturns(
 					&datatypes.Virtual_Guest{},
 					errors.New("fake-client-error"),
 				)
@@ -111,8 +111,8 @@ var _ = Describe("SoftLayer_Virtual_Guest_Create", func() {
 				vmID, err := virtualGuestService.Create(virtualGuest, enableVps, stemcellID, sshKeys)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("fake-client-error"))
-				Expect(softLayerClient.CreateInstanceFromVPSCallCount()).To(Equal(1))
-				Expect(softLayerClient.CreateInstanceCallCount()).To(Equal(0))
+				Expect(cli.CreateInstanceFromVPSCallCount()).To(Equal(1))
+				Expect(cli.CreateInstanceCallCount()).To(Equal(0))
 				Expect(vmID).NotTo(Equal(createVmID))
 			})
 		})
@@ -123,7 +123,7 @@ var _ = Describe("SoftLayer_Virtual_Guest_Create", func() {
 			})
 
 			It("returns virtualGuest Id if create instance successful", func() {
-				softLayerClient.CreateInstanceReturns(
+				cli.CreateInstanceReturns(
 					&datatypes.Virtual_Guest{
 						Id: sl.Int(createVmID),
 					},
@@ -132,13 +132,13 @@ var _ = Describe("SoftLayer_Virtual_Guest_Create", func() {
 
 				vmID, err := virtualGuestService.Create(virtualGuest, enableVps, stemcellID, sshKeys)
 				Expect(err).NotTo(HaveOccurred())
-				Expect(softLayerClient.CreateInstanceFromVPSCallCount()).To(Equal(0))
-				Expect(softLayerClient.CreateInstanceCallCount()).To(Equal(1))
+				Expect(cli.CreateInstanceFromVPSCallCount()).To(Equal(0))
+				Expect(cli.CreateInstanceCallCount()).To(Equal(1))
 				Expect(vmID).To(Equal(createVmID))
 			})
 
 			It("returns error if softLayerClient create instance from VPS call", func() {
-				softLayerClient.CreateInstanceReturns(
+				cli.CreateInstanceReturns(
 					&datatypes.Virtual_Guest{},
 					errors.New("fake-client-error"),
 				)
@@ -146,8 +146,8 @@ var _ = Describe("SoftLayer_Virtual_Guest_Create", func() {
 				vmID, err := virtualGuestService.Create(virtualGuest, enableVps, stemcellID, sshKeys)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("fake-client-error"))
-				Expect(softLayerClient.CreateInstanceFromVPSCallCount()).To(Equal(0))
-				Expect(softLayerClient.CreateInstanceCallCount()).To(Equal(1))
+				Expect(cli.CreateInstanceFromVPSCallCount()).To(Equal(0))
+				Expect(cli.CreateInstanceCallCount()).To(Equal(1))
 				Expect(vmID).NotTo(Equal(createVmID))
 			})
 		})
