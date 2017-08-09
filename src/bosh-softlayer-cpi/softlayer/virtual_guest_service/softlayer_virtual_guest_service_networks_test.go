@@ -1,7 +1,7 @@
 package instance_test
 
 import (
-	//"errors"
+	"errors"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -13,9 +13,10 @@ import (
 	. "bosh-softlayer-cpi/softlayer/virtual_guest_service"
 	"github.com/softlayer/softlayer-go/datatypes"
 	"github.com/softlayer/softlayer-go/sl"
+	"bosh-softlayer-cpi/softlayer/client"
 )
 
-var _ = FDescribe("Virtual Guest Service", func() {
+var _ = Describe("Virtual Guest Service", func() {
 	var (
 		cli                 *fakeslclient.FakeClient
 		uuidGen             *fakeuuid.FakeGenerator
@@ -52,9 +53,7 @@ var _ = FDescribe("Virtual Guest Service", func() {
 					Type: "dynamic",
 				},
 			}
-		})
 
-		It("Configure networks successfully", func() {
 			cli.GetInstanceReturns(
 				&datatypes.Virtual_Guest{
 					PrimaryNetworkComponent: &datatypes.Virtual_Guest_Network_Component{
@@ -81,22 +80,177 @@ var _ = FDescribe("Virtual Guest Service", func() {
 				true,
 				nil,
 			)
+		})
+
+		It("Configure networks successfully", func() {
+			_, err := virtualGuestService.ConfigureNetworks(vmID, networks)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(cli.GetInstanceCallCount()).To(Equal(1))
+		})
+
+		It("Return error if softLayerClient ConfigureNetworks call returns an error", func() {
+			cli.GetInstanceReturns(
+				&datatypes.Virtual_Guest{},
+				false,
+				errors.New("fake-client-error"),
+			)
+
+			_, err := virtualGuestService.ConfigureNetworks(vmID, networks)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("fake-client-error"))
+			Expect(cli.GetInstanceCallCount()).To(Equal(1))
+		})
+
+		It("Return error if softLayerClient ConfigureNetworks call returns non-existing", func() {
+			cli.GetInstanceReturns(
+				&datatypes.Virtual_Guest{},
+				false,
+				nil,
+			)
+
+			_, err := virtualGuestService.ConfigureNetworks(vmID, networks)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("not found"))
+			Expect(cli.GetInstanceCallCount()).To(Equal(1))
+
+		})
+
+		It("Return error if ubuntu call ComponentByNetworkName return an error", func() {
+			networks = Networks{
+				"fake-network1": Network{
+					CloudProperties: NetworkCloudProperties{
+						VlanID: 223456,
+					},
+					Type: "dynamic",
+				},
+				"fake-network2": Network{
+					CloudProperties: NetworkCloudProperties{
+						VlanID: 32345,
+					},
+					Type: "dynamic",
+				},
+			}
+
+			_, err := virtualGuestService.ConfigureNetworks(vmID, networks)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("Mapping network component and name"))
+			Expect(cli.GetInstanceCallCount()).To(Equal(1))
+		})
+
+		It("Return error if using incorrect type field call NormalizeNetworkDefinitions return an error", func() {
+			networks = Networks{
+				"fake-network1": Network{
+					CloudProperties: NetworkCloudProperties{
+						VlanID: 32345,
+					},
+					Type: "dynamic",
+				},
+				"fake-network2": Network{
+					CloudProperties: NetworkCloudProperties{
+						VlanID: 32345,
+					},
+					Type: "static",
+				},
+			}
+
+			_, err := virtualGuestService.ConfigureNetworks(vmID, networks)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("Normalizing network definitions"))
+			Expect(cli.GetInstanceCallCount()).To(Equal(1))
+		})
+
+		It("Configure networks successfully if networks settings missing `Type` field", func() {
+			networks = Networks{
+				"fake-network1": Network{
+					CloudProperties: NetworkCloudProperties{
+						VlanID: 22345,
+					},
+				},
+				"fake-network2": Network{
+					CloudProperties: NetworkCloudProperties{
+						VlanID: 32345,
+					},
+					Type: "dynamic",
+				},
+			}
 
 			_, err := virtualGuestService.ConfigureNetworks(vmID, networks)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(cli.GetInstanceCallCount()).To(Equal(1))
 		})
 
-		//It("Return error if softLayerClient SetTags call returns an error", func() {
-		//	cli.SetTagsReturns(
-		//		false,
-		//		errors.New("fake-client-error"),
-		//	)
-		//
-		//	err := virtualGuestService.SetMetadata(vmID, metaData)
-		//	Expect(err).To(HaveOccurred())
-		//	Expect(err.Error()).To(ContainSubstring("fake-client-error"))
-		//	Expect(cli.SetTagsCallCount()).To(Equal(1))
-		//})
+		It("Return error if ubuntu call NormalizeDynamics return an error", func() {
+			networks = Networks{
+				"fake-network1": Network{
+					CloudProperties: NetworkCloudProperties{
+						VlanID: 32345,
+					},
+					Type: "dynamic",
+				},
+				"fake-network2": Network{
+					CloudProperties: NetworkCloudProperties{
+						VlanID: 32345,
+					},
+					Type: "dynamic",
+				},
+			}
+
+			_, err := virtualGuestService.ConfigureNetworks(vmID, networks)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("Normalizing dynamic networks definitions"))
+			Expect(cli.GetInstanceCallCount()).To(Equal(1))
+		})
+	})
+
+	Describe("Call GetVlan", func() {
+		var (
+			vlanID int
+			mask   string
+		)
+
+		BeforeEach(func() {
+			vlanID = 32345678
+			mask = client.NETWORK_DEFAULT_VLAN
+
+			cli.GetVlanReturns(
+				&datatypes.Network_Vlan{
+					Id: sl.Int(32345678),
+				},
+				true,
+				nil,
+			)
+		})
+
+		It("Get vlan successfully", func() {
+			_, err := virtualGuestService.GetVlan(vlanID, mask)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(cli.GetVlanCallCount()).To(Equal(1))
+		})
+
+		It("Return error if client call GetVlan returns an error", func() {
+			cli.GetVlanReturns(
+				&datatypes.Network_Vlan{},
+				false,
+				errors.New("fake-client-error"),
+			)
+
+			_, err := virtualGuestService.GetVlan(vlanID, mask)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("fake-client-error"))
+			Expect(cli.GetVlanCallCount()).To(Equal(1))
+		})
+
+		It("Return error if client call GetVlan returns non-existing", func() {
+			cli.GetVlanReturns(
+				&datatypes.Network_Vlan{},
+				false,
+				nil,
+			)
+
+			_, err := virtualGuestService.GetVlan(vlanID, mask)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("Failed to get vlan details with id"))
+			Expect(cli.GetVlanCallCount()).To(Equal(1))
+		})
 	})
 })
