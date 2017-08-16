@@ -46,9 +46,9 @@ The general way provided in [bosh-deployment](https://github.com/cloudfoundry/bo
 3. Login and verify the BOSH environment
 
     ```bash
-    bosh alias-env <alias_name> -e <director_hostname>.<director_domain> --ca-cert <(bosh int credentials.yml --path /director_ssl/ca)`
+    bosh alias-env <alias_name> -e <director_hostname>.<director_domain> --ca-cert <(bosh int credentials.yml --path /director_ssl/ca)
     export BOSH_CLIENT=admin
-    export BOSH_CLIENT_SECRET=`bosh int credentials.yml --path /admin_password`
+    export BOSH_CLIENT_SECRET=`bosh int credentials.yml --path /admin_password
 
     bosh -e <alias_name> login
     
