@@ -44,7 +44,14 @@ The general way provided in [bosh-deployment](https://github.com/cloudfoundry/bo
     Run `bosh create-env director_dynamic.yml` easily.  
 
 3. Login and verify the BOSH environment
+
     ```bash
-    bosh -e <director_name> l
+    bosh alias-env <alias_name> -e <director_hostname>.<director_domain> --ca-cert <(bosh int credentials.yml --path /director_ssl/ca)`
+    export BOSH_CLIENT=admin
+    export BOSH_CLIENT_SECRET=`bosh int credentials.yml --path /admin_password`
+
+    bosh -e <alias_name> login
+    
     bosh -e <director_name> vms
     ```
+    
