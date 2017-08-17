@@ -12,16 +12,16 @@ shared:
     task: deploy-director
     file: bosh-cpi-release/ci/bats/tasks/deploy-director-softlayer.yml
     params:
-      BAT_INFRASTRUCTURE: softlayer
-      BOSH_CLIENT:                          {{stemcell-test-director-username}}
-      BOSH_CLIENT_SECRET:                   {{stemcell-test-director-password}}
-      BOSH_SL_USERNAME:                          {{softlayer-username}}
-      BOSH_SL_API_KEY:                           {{softlayer-api-key}}
-      BOSH_SL_DATACENTER:                        {{softlayer-datacenter}}
-      BOSH_SL_VLAN_PUBLIC:                       {{softlayer-vlan-public}}
-      BOSH_SL_VLAN_PRIVATE:                      {{softlayer-vlan-private}}
-      BOSH_SL_VM_DOMAIN:                         {{softlayer-vm-domain}}
-      BOSH_SL_VM_NAME_PREFIX:                    {{softlayer-director-name-prefix}}
+      BAT_INFRASTRUCTURE:      softlayer
+      BOSH_CLIENT:             {{stemcell-test-director-username}}
+      BOSH_CLIENT_SECRET:      {{stemcell-test-director-password}}
+      BOSH_SL_USERNAME:        {{softlayer-username}}
+      BOSH_SL_API_KEY:         {{softlayer-api-key}}
+      BOSH_SL_DATACENTER:      {{softlayer-datacenter}}
+      BOSH_SL_VLAN_PUBLIC:     {{softlayer-vlan-public}}
+      BOSH_SL_VLAN_PRIVATE:    {{softlayer-vlan-private}}
+      BOSH_SL_VM_DOMAIN:       {{softlayer-vm-domain}}
+      BOSH_SL_VM_NAME_PREFIX:  {{softlayer-director-name-prefix}}
 
   - &prepare-bats-config
     task: prepare-bats
@@ -67,7 +67,7 @@ jobs:
     - aggregate:
       - {trigger: false, passed: [build-candidate], get: version-semver,  resource: version-semver}
       - {trigger: true,  passed: [build-candidate], get: bosh-cpi-dev-artifacts}
-      - {trigger: false, passed: [build-candidate], get: bosh-cpi-release, resource: bosh-cpi-release-in}
+      - {trigger: false, get: bosh-cpi-release, resource: bosh-cpi-release-in}
 
     - task: test
       file: bosh-cpi-release/ci/tasks/run-lifecycle.yml
@@ -78,7 +78,6 @@ jobs:
   - name: bats-ubuntu
     serial: true
     plan:
-    - do:
       - aggregate:
         - get: bosh-release
         - get: cpi-release
@@ -95,8 +94,7 @@ jobs:
           resource: version-semver
           passed:
             - run-lifecycle
-
-      - {put: environment, params: {acquire: true}}
+        - {put: environment, params: {acquire: true}}
 
       - do:
         - <<: *deploy-director
@@ -109,9 +107,7 @@ jobs:
         ensure:
           do:
           - <<: *teardown
-      ensure:
-        do:
-        - {put: environment, params: {release: environment}}
+          - {put: environment, params: {release: environment}}
 
   - name: promote-candidate
     plan:
@@ -142,7 +138,7 @@ resources:
     type: s3
     source:
       regexp: light-bosh-stemcell-(\d+\.\d+)-softlayer-xen-ubuntu-trusty-go_agent\.tgz
-      bucket: bosh-softlayer-stemcells-bluemix
+      bucket: bosh-softlayer-cpi-stemcells
       access_key_id: {{stemcell-aws-access-key}}
       secret_access_key: {{stemcell-aws-secret-key}}
 
@@ -192,19 +188,19 @@ resources:
     type: git
     source:
       uri: https://github.com/bluebosh/bosh-deployment
-      branch: new_softlayer_cpi
+      branch: softlayer
 
   - name: bosh-cli
     type: s3
     source:
-      regexp: bosh-cli-([0-9.]+)-linux-amd64
-      bucket: bosh-cli-artifacts
+      regexp: bosh-cli-([0-9.]+)-softlayer-linux-amd64
+      bucket: bosh-softlayer-artifacts
       region_name: us-east-1
 
   - name: bats
     type: git
     source:
-      uri: git@github.com:bluebosh/bosh-acceptance-tests.git
+      uri: https://github.com/bluebosh/bosh-acceptance-tests
       branch: gocli-bats
 
   - name: environment

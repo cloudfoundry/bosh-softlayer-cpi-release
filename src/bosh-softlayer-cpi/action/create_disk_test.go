@@ -70,7 +70,7 @@ var _ = Describe("CreateDisk", func() {
 				actualCid := vmService.FindArgsForCall(0)
 				Expect(actualCid).To(Equal(12345678))
 				Expect(diskService.CreateCallCount()).To(Equal(1))
-				actualSize, _, actualLocation := diskService.CreateArgsForCall(0)
+				actualSize, _, actualLocation, _ := diskService.CreateArgsForCall(0)
 				Expect(actualSize).To(Equal(32768))
 				Expect(actualLocation).To(Equal("fake-datacenter-name"))
 				Expect(diskCID).To(Equal("22345678"))

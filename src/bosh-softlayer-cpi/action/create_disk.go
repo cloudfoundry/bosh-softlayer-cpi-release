@@ -34,7 +34,7 @@ func (cd CreateDisk) Run(size int, cloudProps DiskCloudProperties, vmCID VMCID) 
 	}
 
 	// Create the Disk
-	disk, err := cd.diskService.Create(size, cloudProps.Iops, *vm.Datacenter.Name)
+	disk, err := cd.diskService.Create(size, cloudProps.Iops, *vm.Datacenter.Name, cloudProps.SnapShotSpace)
 	if err != nil {
 		return "", bosherr.WrapErrorf(err, "Creating disk with size '%d'", size)
 	}

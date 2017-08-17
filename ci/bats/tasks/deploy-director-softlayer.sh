@@ -19,11 +19,12 @@ bosh-cli interpolate bosh-deployment/bosh.yml \
   -o bosh-deployment/$BAT_INFRASTRUCTURE/cpi.yml \
   -o bosh-deployment/powerdns.yml \
   -o bosh-deployment/jumpbox-user.yml \
-  -o bosh-linux-stemcell-builder/ci/bats/ops/remove-health-monitor.yml \
+  -o bosh-cpi-release/ci/bats/ops/remove-health-monitor.yml \
   -v dns_recursor_ip=8.8.8.8 \
   -v director_name=bats-director \
   -v sl_director_fqn=$BOSH_SL_VM_NAME_PREFIX.$BOSH_SL_VM_DOMAIN \
   --vars-file <( bosh-cpi-release/ci/bats/iaas/$BAT_INFRASTRUCTURE/director-vars ) \
+  --vars-store credentials.yml \
   > director.yml
 
 bosh-cli create-env \

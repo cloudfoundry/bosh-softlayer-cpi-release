@@ -72,7 +72,7 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 	}
 
 	// Create VM user data
-	userDataTypeContents, err := cv.createUserDataForInstance(agentID, cv.registryOptions)
+	userDataContents, err := cv.createUserDataForInstance(agentID, cv.registryOptions)
 	if err != nil {
 		return "", bosherr.WrapError(err, "Creating VM UserData")
 	}
@@ -84,7 +84,7 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 	}
 
 	// Create Virtual Guest template
-	virtualGuestTemplate := cv.createVirtualGuestTemplate(globalIdentifier, *cloudProps.AsInstanceProperties(), userDataTypeContents, publicVlanId, privateVlanId)
+	virtualGuestTemplate := cv.createVirtualGuestTemplate(globalIdentifier, *cloudProps.AsInstanceProperties(), userDataContents, publicVlanId, privateVlanId)
 
 	// Parse networks
 	instanceNetworks := networks.AsInstanceServiceNetworks()
@@ -280,8 +280,9 @@ func (cv CreateVM) createByOsReload(stemcellCID StemcellCID, cloudProps VMCloudP
 
 				cid = *vm.Id
 
-				if *vm.StartCpus != cloudProps.StartCpus || *vm.MaxMemory != cloudProps.MaxMemory ||
-					(vm.DedicatedAccountHostOnlyFlag != nil && *vm.DedicatedAccountHostOnlyFlag != cloudProps.DedicatedAccountHostOnlyFlag) {
+				if *vm.MaxCpu != cloudProps.StartCpus ||
+					*vm.MaxMemory != cloudProps.MaxMemory ||
+					*vm.DedicatedAccountHostOnlyFlag != cloudProps.DedicatedAccountHostOnlyFlag {
 					err = cv.virtualGuestService.UpgradeInstance(cid, cloudProps.StartCpus, cloudProps.MaxMemory, 0, cloudProps.DedicatedAccountHostOnlyFlag)
 					if err != nil {
 						return cid, bosherr.WrapError(err, "Upgrading VM")

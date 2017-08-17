@@ -93,7 +93,7 @@ var _ = Describe("Virtual Guest Service", func() {
 		It("Find vm successfully", func() {
 			softLayerClient.GetInstanceByPrimaryBackendIpAddressReturns(
 				&datatypes.Virtual_Guest{
-					Id:                      sl.Int(12345678),
+					Id: sl.Int(12345678),
 					PrimaryBackendIpAddress: sl.String(vmIP),
 				},
 				true,
@@ -160,8 +160,7 @@ var _ = Describe("Virtual Guest Service", func() {
 
 		It("Return error if softLayerClient GetInstanceByPrimaryIpAddress returns an error", func() {
 			softLayerClient.GetInstanceByPrimaryIpAddressReturns(
-				&datatypes.Virtual_Guest{
-				},
+				&datatypes.Virtual_Guest{},
 				false,
 				errors.New("fake-client-error"),
 			)

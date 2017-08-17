@@ -5,13 +5,14 @@ import (
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	boshuuid "github.com/cloudfoundry/bosh-utils/uuid"
 
-	"bosh-softlayer-cpi/softlayer/client"
-
 	"bosh-softlayer-cpi/config"
-	"bosh-softlayer-cpi/registry"
+	"bosh-softlayer-cpi/softlayer/client"
 	"bosh-softlayer-cpi/softlayer/disk_service"
-	"bosh-softlayer-cpi/softlayer/stemcell_service"
+	"bosh-softlayer-cpi/softlayer/snapshot_service"
 	"bosh-softlayer-cpi/softlayer/virtual_guest_service"
+
+	"bosh-softlayer-cpi/registry"
+	"bosh-softlayer-cpi/softlayer/stemcell_service"
 )
 
 type concreteFactory struct {
@@ -46,6 +47,11 @@ func NewConcreteFactory(
 		logger,
 	)
 
+	snapshotService := snapshot.NewSoftlayerSnapshotService(
+		softlayerClient,
+		logger,
+	)
+
 	return concreteFactory{
 		availableActions: map[string]Action{
 			// Stemcell management
@@ -68,18 +74,19 @@ func NewConcreteFactory(
 			"configure_networks": NewConfigureNetworks(vmService, registryClient),
 
 			// Disk management
+			"has_disk":    NewHasDisk(diskService),
 			"create_disk": NewCreateDisk(diskService, vmService),
 			"delete_disk": NewDeleteDisk(diskService),
 			"attach_disk": NewAttachDisk(diskService, vmService, registryClient),
 			"detach_disk": NewDetachDisk(vmService, registryClient),
-			//"get_disks":   NewGetDisks(vmService),
+			"get_disks":   NewGetDisks(vmService),
 
 			// Others:
-			//"ping": NewPing(),
+			"ping": NewPing(),
 
-			// Not implemented (disk related):
-			//   snapshot_disk
-			//   delete_snapshot
+			// Snapshot management
+			"snapshot_disk":   NewSnapshotDisk(snapshotService, diskService),
+			"delete_snapshot": NewDeleteSnapshot(snapshotService),
 
 			// Not implemented (others):
 			//   current_vm_id

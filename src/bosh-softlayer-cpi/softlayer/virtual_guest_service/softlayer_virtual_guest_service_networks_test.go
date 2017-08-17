@@ -10,10 +10,10 @@ import (
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	fakeuuid "github.com/cloudfoundry/bosh-utils/uuid/fakes"
 
+	"bosh-softlayer-cpi/softlayer/client"
 	. "bosh-softlayer-cpi/softlayer/virtual_guest_service"
 	"github.com/softlayer/softlayer-go/datatypes"
 	"github.com/softlayer/softlayer-go/sl"
-	"bosh-softlayer-cpi/softlayer/client"
 )
 
 var _ = Describe("Virtual Guest Service", func() {

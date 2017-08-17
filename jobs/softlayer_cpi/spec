@@ -3,45 +3,36 @@ name: softlayer_cpi
 
 templates:
   cpi.erb: bin/cpi
+  pre-start.erb: bin/pre-start
   cpi.json.erb: config/cpi.json
-
-  cpi_ctl.erb:  bin/cpi_ctl
 
 packages:
 - bosh_softlayer_cpi
 
 properties:
   softlayer.username:
-    description: "User name of the softlayer account"
-  softlayer.apiKey:
-    description: "API key of the softlayer account"
-  softlayer.featureOptions.disableOsReload:
-    description: "Disable Os Reload flag"
-  softlayer.featureOptions.enablePool:
-    description: "enable pooling flag"
-  softlayer.featureOptions.apiEndpoint:
-    description: "Softlayer API endpoint"
-  softlayer.featureOptions.apiWaitTime:
-    description: "Retry interval of Softlayer API requests"
-  softlayer.featureOptions.apiRetryCount:
-    description: "Retry count of Softlayer API requests"
-  softlayer.featureOptions.createIscsiVolumeTimeout:
-    description: "Timeout of attaching iSCSI disk"
-  softlayer.featureOptions.createIscsiVolumePollingInterval:
-    description: "Interval of checking iSCSI disk ready"
+    description: User name of the SoftLayer account
+  softlayer.api_key:
+    description: API key of the SoftLayer account
+  softlayer.api_endpoint:
+    description: SoftLayer API endpoint
+  softlayer.disable_os_reload:
+    description: Disable OS reload function
+  softlayer.ssh_public_key:
+    description: The content of the SSH public key to use when spinning up new vms
+  softlayer.ssh_public_key_fingerprint:
+    description: The Finger Print content of the SSH public key
+  softlayer.trace:
+    description: Enable trace the http roundtrip log message
+  softlayer.enable_vps:
+    description: Enable CPI to connect to the vps server
+  softlayer.vps_host:
+    description: Host of vps server
+  softlayer.vps_port:
+    description: Port of vps server
+  softlayer.vps_use_ssl:
+    description: Whether CPI should use SSL to connect to the vps server
 
-  baremetal.username:
-    description: "User name of baremetal server account"
-  baremetal.password:
-    description: "Password of baremetal server account"
-  baremetal.endpoint:
-    description: "URL of baremetal server"
-    example: http://@some-ip:port
-
-  pool.host:
-    description: Address of the Pool Server to connect to
-  pool.port:
-    description: Port of the Pool Server to connect to
 
   registry.username:
     description: User to access the Registry

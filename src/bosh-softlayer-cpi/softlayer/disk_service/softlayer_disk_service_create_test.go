@@ -44,7 +44,7 @@ var _ = Describe("Disk Service Create", func() {
 					nil,
 				)
 
-				_, err = disk.Create(size, iops, location)
+				_, err = disk.Create(size, iops, location, 10)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(cli.CreateVolumeCallCount()).To(Equal(1))
 			})
@@ -57,7 +57,7 @@ var _ = Describe("Disk Service Create", func() {
 					errors.New("fake-client-error"),
 				)
 
-				_, err = disk.Create(size, iops, location)
+				_, err = disk.Create(size, iops, location, 10)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("fake-client-error"))
 				Expect(cli.CreateVolumeCallCount()).To(Equal(1))

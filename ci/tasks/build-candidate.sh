@@ -11,12 +11,12 @@ pushd bosh-cpi-release
 
   source .envrc
   pushd src/bosh-softlayer-cpi > /dev/null
-    echo "[build-candidate] Installing ginkgo"
+    echo "\n[INFO] Installing ginkgo"
     go get github.com/onsi/ginkgo/ginkgo
-    echo "[build-candidate] Set GO15VENDOREXPERIMENT=1 for using go1.5"
+    echo "\n[INFO] Set GO15VENDOREXPERIMENT=1 for using go1.5"
     export GO15VENDOREXPERIMENT=1
 
-    echo "[build-candidate] Running unit tests"
+    echo "\n[INFO] Running unit tests"
     ./bin/test-unit
   popd > /dev/null
 
@@ -24,7 +24,7 @@ pushd bosh-cpi-release
 
   cpi_release_name="bosh-softlayer-cpi"
   tarball_name="dev_releases/${cpi_release_name}/${cpi_release_name}-${semver}.tgz"
-  echo "[build-candidate] Building CPI release..."
+  echo "\n[INFO] Building CPI release..."
 
   $BOSH_CLI create-release --name $cpi_release_name --version $semver --tarball $tarball_name --force
 popd

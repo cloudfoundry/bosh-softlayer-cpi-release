@@ -12,7 +12,6 @@ import (
 	boshcfg "bosh-softlayer-cpi/config"
 	vpsClient "bosh-softlayer-cpi/softlayer/vps_service/client"
 	"bytes"
-	boshlogger "github.com/cloudfoundry/bosh-utils/logger"
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
 	datatypes "github.com/softlayer/softlayer-go/datatypes"
@@ -93,20 +92,12 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 	// Initialize session of softlayer client
 	var errOut, errOutLog bytes.Buffer
 	multiWriter := io.MultiWriter(&errOut, &errOutLog)
-	logger := boshlogger.NewWriterLogger(boshlogger.LevelDebug, multiWriter, multiWriter)
-	sess = client.NewSoftlayerClientSession(client.SoftlayerAPIEndpointPublicDefault, username, apiKey, false, timeout, logger)
+	sess = client.NewSoftlayerClientSession(client.SoftlayerAPIEndpointPublicDefault, username, apiKey, false, timeout, multiWriter)
 
 	// Setup vps client
 	if cfg.Cloud.Properties.SoftLayer.EnableVps {
-		if cfg.Cloud.Properties.SoftLayer.VpsUseSsl {
-			vps = vpsClient.New(httptransport.New(fmt.Sprintf("%s:%d", cfg.Cloud.Properties.SoftLayer.VpsHost, cfg.Cloud.Properties.SoftLayer.VpsPort),
-				"v2", []string{"https"}), strfmt.Default).VM
-		} else {
-
-			vps = vpsClient.New(httptransport.New(fmt.Sprintf("%s:%d", cfg.Cloud.Properties.SoftLayer.VpsHost, cfg.Cloud.Properties.SoftLayer.VpsPort),
-				"v2", []string{"http"}), strfmt.Default).VM
-		}
-
+		vps = vpsClient.New(httptransport.New(fmt.Sprintf("%s:%d", cfg.Cloud.Properties.SoftLayer.VpsHost, cfg.Cloud.Properties.SoftLayer.VpsPort),
+			"v2", []string{"https"}), strfmt.Default).VM
 	}
 
 	// Clean existing vms for integration test

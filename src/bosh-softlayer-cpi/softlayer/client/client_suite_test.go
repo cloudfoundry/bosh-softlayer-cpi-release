@@ -1,10 +1,10 @@
 package client_test
 
 import (
-. "github.com/onsi/ginkgo"
-. "github.com/onsi/gomega"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 
-"testing"
+	"testing"
 )
 
 func TestClient(t *testing.T) {

@@ -55,6 +55,7 @@ const (
 	UPGRADE_VIRTUAL_SERVER_ORDER_TYPE = "SoftLayer_Container_Product_Order_Virtual_Guest_Upgrade"
 
 	NETWORK_PERFORMANCE_STORAGE_PACKAGE_ID = 222
+	NETWORK_STORAGE_AS_SERVICE_PACKAGE_ID  = 759
 
 	SOFTLAYER_PUBLIC_EXCEPTION                      = "SoftLayer_Exception_Public"
 	SOFTLAYER_OBJECTNOTFOUND_EXCEPTION              = "SoftLayer_Exception_ObjectNotFound"
@@ -116,8 +117,9 @@ type Client interface {
 	GetInstanceAllowedHost(id int) (*datatypes.Network_Storage_Allowed_Host, bool, error)
 	AuthorizeHostToVolume(instance *datatypes.Virtual_Guest, volumeId int, until time.Time) (bool, error)
 	DeauthorizeHostToVolume(instance *datatypes.Virtual_Guest, volumeId int, until time.Time) (bool, error)
-	CreateVolume(location string, size int, iops int) (*datatypes.Network_Storage, error)
+	CreateVolume(location string, size int, iops int, snapshotSpace int) (*datatypes.Network_Storage, error)
 	OrderBlockVolume(storageType string, location string, size int, iops int) (*datatypes.Container_Product_Order_Receipt, error)
+	OrderBlockVolume2(storageType string, location string, size int, iops int, snapshotSpace int) (*datatypes.Container_Product_Order_Receipt, error)
 	CancelBlockVolume(volumeId int, reason string, immediate bool) (bool, error)
 	GetBlockVolumeDetails(volumeId int, mask string) (*datatypes.Network_Storage, bool, error)
 	GetBlockVolumeDetails2(volumeId int, mask string) (datatypes.Network_Storage, bool, error)
@@ -131,6 +133,9 @@ type Client interface {
 
 	CreateInstanceFromVPS(template *datatypes.Virtual_Guest, stemcellID int, sshKeys []int) (*datatypes.Virtual_Guest, error)
 	DeleteInstanceFromVPS(id int) error
+
+	CreateSnapshot(volumeId int, notes string) (datatypes.Network_Storage, error)
+	DeleteSnapshot(snapshotId int) error
 }
 
 type ClientManager struct {
@@ -854,12 +859,12 @@ func (c *ClientManager) OrderBlockVolume(storageType string, location string, si
 	}
 	baseTypeName := "SoftLayer_Container_Product_Order_Network_"
 	var prices = make([]datatypes.Product_Item_Price, 0)
-	productPacakge, err := c.GetPackage(storageType) //PENDING
-	if err != nil {
-		return &datatypes.Container_Product_Order_Receipt{}, err
-	}
 
 	if storageType == "performance_storage_iscsi" {
+		productPacakge, err := c.GetPerformanceIscsiPackage()
+		if err != nil {
+			return &datatypes.Container_Product_Order_Receipt{}, err
+		}
 		complexType := baseTypeName + "PerformanceStorage_Iscsi"
 		storagePrice, err := FindPerformancePrice(productPacakge, "performance_storage_iscsi")
 		if err != nil {
@@ -919,8 +924,86 @@ func (c *ClientManager) OrderBlockVolume(storageType string, location string, si
 	}
 }
 
-func (c *ClientManager) CreateVolume(location string, size int, iops int) (*datatypes.Network_Storage, error) {
-	receipt, err := c.OrderBlockVolume("performance_storage_iscsi", location, size, iops)
+func (c *ClientManager) OrderBlockVolume2(storageType string, location string, size int, iops int, snapshotSpace int) (*datatypes.Container_Product_Order_Receipt, error) {
+	locationId, err := c.GetLocationId(location)
+	if err != nil {
+		return &datatypes.Container_Product_Order_Receipt{}, bosherr.Error("Invalid datacenter name specified. Please provide the lower case short name (e.g.: dal09)")
+	}
+	var prices = make([]datatypes.Product_Item_Price, 0)
+
+	productPacakge, err := c.GetStorageAsServicePackage()
+	if err != nil {
+		return &datatypes.Container_Product_Order_Receipt{}, err
+	}
+
+	storagePrice, err := FindSaaSPriceByCategory(productPacakge, "storage_as_a_service")
+	if err != nil {
+		return &datatypes.Container_Product_Order_Receipt{}, err
+	}
+	prices = append(prices, storagePrice)
+
+	blockPrice, err := FindSaaSPriceByCategory(productPacakge, "storage_block")
+	if err != nil {
+		return &datatypes.Container_Product_Order_Receipt{}, err
+	}
+	prices = append(prices, blockPrice)
+
+	spacePrice, err := FindSaaSPerformSpacePrice(productPacakge, size)
+	if err != nil {
+		return &datatypes.Container_Product_Order_Receipt{}, err
+	}
+	prices = append(prices, spacePrice)
+
+	iopsPrice, err := FindSaaSPerformIopsPrice(productPacakge, size, iops)
+	if err != nil {
+		return &datatypes.Container_Product_Order_Receipt{}, err
+	}
+	prices = append(prices, iopsPrice)
+
+	if snapshotSpace > 0 {
+		snapshotSpacePrice, err := FindSaaSSnapshotSpacePrice(productPacakge, snapshotSpace, iops)
+		if err != nil {
+			return &datatypes.Container_Product_Order_Receipt{}, err
+		}
+		prices = append(prices, snapshotSpacePrice)
+	}
+
+	//baseTypeName := "SoftLayer_Container_Product_Order_Network_"
+	//complexType := baseTypeName + "Storage_AsAService"
+	order := datatypes.Container_Product_Order_Network_Storage_AsAService{
+		OsFormatType: &datatypes.Network_Storage_Iscsi_OS_Type{
+			KeyName: sl.String("LINUX"),
+			Id:      sl.Int(12),
+		},
+		Container_Product_Order: datatypes.Container_Product_Order{
+			ComplexType: sl.String(""),
+			PackageId:   productPacakge.Id,
+			Prices:      prices,
+			Quantity:    sl.Int(1),
+			Location:    sl.String(strconv.Itoa(locationId)),
+		},
+		Iops:       sl.Int(iops),
+		VolumeSize: sl.Int(size),
+	}
+	orderReceipt, err := c.OrderService.PlaceOrder(&order, sl.Bool(false))
+	if err != nil {
+		return &datatypes.Container_Product_Order_Receipt{}, err
+	}
+
+	return &orderReceipt, nil
+}
+
+func (c *ClientManager) CreateVolume(location string, size int, iops int, snapshotSpace int) (*datatypes.Network_Storage, error) {
+	var receipt *datatypes.Container_Product_Order_Receipt
+	var err error
+
+	// if iops not set, using package with id 222 to order performance iscsi, otherwise, using package 759 (Storage as Service) to order block storage
+	if iops == 0 {
+		receipt, err = c.OrderBlockVolume("performance_storage_iscsi", location, size, iops)
+	} else {
+		receipt, err = c.OrderBlockVolume2("performance_storage_iscsi", location, size, iops, snapshotSpace)
+	}
+
 	if err != nil {
 		return &datatypes.Network_Storage{}, err
 	}
@@ -931,6 +1014,48 @@ func (c *ClientManager) CreateVolume(location string, size int, iops int) (*data
 
 	until := time.Now().Add(time.Duration(1) * time.Hour)
 	return c.WaitVolumeProvisioningWithOrderId(*receipt.OrderId, until)
+}
+
+//Creates a snapshot on the given block volume.
+//volumeId: The id of the volume
+//notes: The notes or "name" to assign the snapshot
+func (c *ClientManager) CreateSnapshot(volumeId int, notes string) (datatypes.Network_Storage, error) {
+	return c.StorageService.Id(volumeId).CreateSnapshot(sl.String((notes)))
+}
+
+//Deletes the specified snapshot object.
+//snapshotId: The ID of the snapshot object to delete.
+func (c *ClientManager) DeleteSnapshot(snapshotId int) error {
+	_, err := c.StorageService.Id(snapshotId).DeleteObject()
+	return err
+}
+
+//Enables snapshots for a specific block volume at a given schedule.
+//volumeId: The id of the volume
+//scheduleType: 'HOURLY'|'DAILY'|'WEEKLY'
+//retentionCount: Number of snapshots to be kept
+//minute: Minute when to take snapshot
+//hour: Hour when to take snapshot
+//dayOfWeek: Day when to take snapshot
+func (c *ClientManager) EnableSnapshot(volumeId int, scheduleType string, retentionCount int, minute int, hour int, dayOfWeek string) error {
+	_, err := c.StorageService.Id(volumeId).EnableSnapshots(sl.String(scheduleType), sl.Int(retentionCount), sl.Int(minute), sl.Int(hour), sl.String(dayOfWeek))
+	return err
+}
+
+//Disables snapshots for a specific block volume at a given schedule.
+//volumeId: The id of the volume
+//scheduleType: 'HOURLY'|'DAILY'|'WEEKLY'
+func (c *ClientManager) DisableSnapshots(volumeId int, scheduleType string) error {
+	_, err := c.StorageService.Id(volumeId).DisableSnapshots(sl.String(scheduleType))
+	return err
+}
+
+//Restores a specific volume from a snapshot.
+//volumeId: The id of the volume
+//snapshotId: The id of the restore point
+func (c *ClientManager) RestoreFromSnapshot(volumeId int, snapshotId int) error {
+	_, err := c.StorageService.Id(volumeId).RestoreFromSnapshot(sl.Int(snapshotId))
+	return err
 }
 
 func (c *ClientManager) WaitVolumeProvisioningWithOrderId(orderId int, until time.Time) (*datatypes.Network_Storage, error) {
@@ -967,7 +1092,6 @@ func (c *ClientManager) getIscsiNetworkStorageWithOrderId(orderId int) ([]dataty
 func (c *ClientManager) GetPackage(categoryCode string) (datatypes.Product_Package, error) {
 	filters := filter.New()
 	filters = append(filters, filter.Path("categories.categoryCode").Eq(categoryCode))
-	filters = append(filters, filter.Path("statusCode").Eq("ACTIVE"))
 	packages, err := c.PackageService.Mask("id,name,items[prices[categories],attributes]").Filter(filters.Build()).GetAllObjects()
 	if err != nil {
 		return datatypes.Product_Package{}, err
@@ -979,6 +1103,14 @@ func (c *ClientManager) GetPackage(categoryCode string) (datatypes.Product_Packa
 		return datatypes.Product_Package{}, bosherr.Errorf("More than one packages were found for %s", categoryCode)
 	}
 	return packages[0], nil
+}
+
+func (c *ClientManager) GetPerformanceIscsiPackage() (datatypes.Product_Package, error) {
+	return c.PackageService.Id(222).Mask("id,name,items[prices[categories],attributes]").GetObject()
+}
+
+func (c *ClientManager) GetStorageAsServicePackage() (datatypes.Product_Package, error) {
+	return c.PackageService.Id(759).Mask("id,name,items[prices[categories],attributes]").GetObject()
 }
 
 func (c *ClientManager) GetLocationId(location string) (int, error) {
@@ -1002,6 +1134,122 @@ func hasCategory(categories []datatypes.Product_Item_Category, categoryCode stri
 		}
 	}
 	return false
+}
+func FindSaaSPriceByCategory(productPackage datatypes.Product_Package, price_category string) (datatypes.Product_Item_Price, error) {
+	for _, item := range productPackage.Items {
+		for _, price := range item.Prices {
+			if price.LocationGroupId != nil {
+				continue
+			}
+			if !hasCategory(price.Categories, price_category) {
+				continue
+			}
+			return price, nil
+		}
+	}
+	return datatypes.Product_Item_Price{}, bosherr.Errorf("Unable to find price storage category %s", price_category)
+}
+
+func FindSaaSPerformSpacePrice(productPackage datatypes.Product_Package, size int) (datatypes.Product_Item_Price, error) {
+	for _, item := range productPackage.Items {
+		if item.ItemCategory == nil || item.ItemCategory.CategoryCode == nil || *item.ItemCategory.CategoryCode != "performance_storage_space" {
+			continue
+		}
+
+		if item.CapacityMinimum == nil || item.CapacityMaximum == nil {
+			continue
+		}
+
+		capacityMin, _ := strconv.Atoi(*item.CapacityMinimum)
+		capacityMax, _ := strconv.Atoi(*item.CapacityMaximum)
+		if size < capacityMin || size > capacityMax {
+			continue
+		}
+
+		key_name := fmt.Sprintf("%s_%s_GBS", *item.CapacityMinimum, *item.CapacityMaximum)
+		if *item.KeyName != key_name {
+			continue
+		}
+
+		for _, price := range item.Prices {
+			// Only collect prices from valid location groups.
+			if price.LocationGroupId != nil {
+				continue
+			}
+			if !hasCategory(price.Categories, "performance_storage_space") {
+				continue
+			}
+			return price, nil
+		}
+	}
+	return datatypes.Product_Item_Price{}, bosherr.Errorf("Unable to find price storage size %d", size)
+}
+
+func FindSaaSPerformIopsPrice(productPackage datatypes.Product_Package, size int, iops int) (datatypes.Product_Item_Price, error) {
+	for _, item := range productPackage.Items {
+		if item.ItemCategory == nil || item.ItemCategory.CategoryCode == nil || *item.ItemCategory.CategoryCode != "performance_storage_iops" {
+			continue
+		}
+
+		if item.CapacityMinimum == nil || item.CapacityMaximum == nil {
+			continue
+		}
+
+		capacityMin, _ := strconv.Atoi(*item.CapacityMinimum)
+		capacityMax, _ := strconv.Atoi(*item.CapacityMaximum)
+		if iops < capacityMin || iops > capacityMax {
+			continue
+		}
+
+		for _, price := range item.Prices {
+			// Only collect prices from valid location groups.
+			if price.LocationGroupId != nil {
+				continue
+			}
+			if !hasCategory(price.Categories, "performance_storage_iops") {
+				continue
+			}
+
+			capacityMin, _ := strconv.Atoi(*price.CapacityRestrictionMinimum)
+			capacityMax, _ := strconv.Atoi(*price.CapacityRestrictionMaximum)
+
+			if *price.CapacityRestrictionType != "STORAGE_SPACE" || size < capacityMin || size > capacityMax {
+				continue
+			}
+
+			return price, nil
+		}
+	}
+
+	return datatypes.Product_Item_Price{}, bosherr.Errorf("Unable to find price for storage space size: %d, iops: %d", size, iops)
+}
+
+func FindSaaSSnapshotSpacePrice(productPackage datatypes.Product_Package, size int, iops int) (datatypes.Product_Item_Price, error) {
+	for _, item := range productPackage.Items {
+		if float64(*item.Capacity) != float64(size) {
+			continue
+		}
+
+		for _, price := range item.Prices {
+			// Only collect prices from valid location groups.
+			if price.LocationGroupId != nil {
+				continue
+			}
+			if !hasCategory(price.Categories, "storage_snapshot_space") {
+				continue
+			}
+
+			capacityMin, _ := strconv.Atoi(*price.CapacityRestrictionMinimum)
+			capacityMax, _ := strconv.Atoi(*price.CapacityRestrictionMaximum)
+
+			if *price.CapacityRestrictionType != "IOPS" || iops < capacityMin || iops > capacityMax {
+				continue
+			}
+
+			return price, nil
+		}
+	}
+	return datatypes.Product_Item_Price{}, bosherr.Errorf("Unable to find price snapshot space size: %d, iops: %d", size, iops)
 }
 
 //Find the price in the given package that has the specified category
@@ -1038,7 +1286,7 @@ func FindPerformanceSpacePrice(productPackage datatypes.Product_Package, size in
 			return price, nil
 		}
 	}
-	return datatypes.Product_Item_Price{}, bosherr.Error("Unable to find disk space price for the given volume")
+	return datatypes.Product_Item_Price{}, bosherr.Errorf("Unable to find disk space price with size of %d for the given volume", size)
 }
 
 //Find the price in the given package with the specified size and iops
@@ -1057,14 +1305,14 @@ func FindPerformanceIOPSPrice(productPackage datatypes.Product_Package, size int
 			}
 			min, err := strconv.Atoi(*price.CapacityRestrictionMinimum)
 			if err != nil {
-				return datatypes.Product_Item_Price{}, bosherr.Error("Unable to find price for iops for the given volume")
+				return datatypes.Product_Item_Price{}, bosherr.Errorf("Unable to find price for %d iops for the given volume", iops)
 			}
 			if size < int(min) {
 				continue
 			}
 			max, err := strconv.Atoi(*price.CapacityRestrictionMaximum)
 			if err != nil {
-				return datatypes.Product_Item_Price{}, bosherr.Error("Unable to find price for iops for the given volume")
+				return datatypes.Product_Item_Price{}, bosherr.Errorf("Unable to find price for %d iops for the given volume", iops)
 			}
 			if size > int(max) {
 				continue
@@ -1072,7 +1320,7 @@ func FindPerformanceIOPSPrice(productPackage datatypes.Product_Package, size int
 			return price, nil
 		}
 	}
-	return datatypes.Product_Item_Price{}, bosherr.Error("Unable to find price for iops for the given volume")
+	return datatypes.Product_Item_Price{}, bosherr.Errorf("Unable to find price for %d iops for the given volume", iops)
 }
 
 func (c *ClientManager) CancelBlockVolume(volumeId int, reason string, immediate bool) (bool, error) {
@@ -1258,6 +1506,31 @@ func (c *ClientManager) selectMaximunIopsItemPriceIdOnSize(size int) (datatypes.
 	filters = append(filters, filter.Path("categories.categoryCode").Eq("performance_storage_iops"))
 
 	itemPrices, err := c.PackageService.Id(NETWORK_PERFORMANCE_STORAGE_PACKAGE_ID).Filter(filters.Build()).GetItemPrices()
+	if err != nil {
+		return datatypes.Product_Item_Price{}, err
+	}
+
+	if len(itemPrices) > 0 {
+		candidates := itemsFilter(itemPrices, func(itemPrice datatypes.Product_Item_Price) bool {
+			return itemPrice.LocationGroupId == nil
+		})
+		if len(candidates) > 0 {
+			sort.Sort(Product_Item_Price_Sorted_Data(candidates))
+			return candidates[len(candidates)-1], nil
+		} else {
+			return datatypes.Product_Item_Price{}, bosherr.Errorf("No proper performance storage (iSCSI volume) for size %d", size)
+		}
+	}
+
+	return datatypes.Product_Item_Price{}, bosherr.Errorf("No proper performance storage (iSCSI volume)for size %d", size)
+}
+
+func (c *ClientManager) selectSaaSMaximunIopsItemPriceIdOnSize(size int) (datatypes.Product_Item_Price, error) {
+	filters := filter.New()
+	filters = append(filters, filter.Path("itemPrices.attributes.value").Eq(size))
+	filters = append(filters, filter.Path("categories.categoryCode").Eq("performance_storage_iops"))
+
+	itemPrices, err := c.PackageService.Id(NETWORK_STORAGE_AS_SERVICE_PACKAGE_ID).Filter(filters.Build()).GetItemPrices()
 	if err != nil {
 		return datatypes.Product_Item_Price{}, err
 	}

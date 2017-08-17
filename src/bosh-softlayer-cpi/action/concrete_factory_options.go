@@ -7,18 +7,16 @@ import (
 )
 
 type ConcreteFactoryOptions struct {
-	Agent    registry.AgentOptions  `json:"agent"`
-	Registry registry.ClientOptions `json:"registry,omitempty"`
+	Agent    registry.AgentOptions
+	Registry registry.ClientOptions
 }
 
 func (o ConcreteFactoryOptions) Validate() error {
-	err := o.Agent.Validate()
-	if err != nil {
+	if err := o.Agent.Validate(); err != nil {
 		return bosherr.WrapError(err, "Validating Agent configuration")
 	}
 
-	err = o.Registry.Validate()
-	if err != nil {
+	if err := o.Registry.Validate(); err != nil {
 		return bosherr.WrapError(err, "Validating Registry configuration")
 	}
 

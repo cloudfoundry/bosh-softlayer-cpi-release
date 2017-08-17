@@ -15,13 +15,13 @@ type ConfigureNetworks struct {
 func NewConfigureNetworks(
 	vmService instance.Service,
 	registryClient registry.Client,
-) (action ConfigureNetworks) {
+) ConfigureNetworks {
 	return ConfigureNetworks{
 		vmService:      vmService,
 		registryClient: registryClient,
 	}
 }
 
-func (cn ConfigureNetworks) Run(vmCID VMCID, networks Networks) (interface{}, error) {
+func (rv ConfigureNetworks) Run(vmCID VMCID, networks Networks) (interface{}, error) {
 	return nil, api.NotSupportedError{}
 }

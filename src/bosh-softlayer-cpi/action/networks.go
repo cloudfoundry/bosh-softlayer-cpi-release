@@ -2,6 +2,7 @@ package action
 
 import (
 	"bosh-softlayer-cpi/registry"
+
 	"bosh-softlayer-cpi/softlayer/virtual_guest_service"
 	"fmt"
 )

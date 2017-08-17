@@ -276,12 +276,13 @@ type FakeClient struct {
 		result1 bool
 		result2 error
 	}
-	CreateVolumeStub        func(location string, size int, iops int) (*datatypes.Network_Storage, error)
+	CreateVolumeStub        func(location string, size int, iops int, snapshotSpace int) (*datatypes.Network_Storage, error)
 	createVolumeMutex       sync.RWMutex
 	createVolumeArgsForCall []struct {
-		location string
-		size     int
-		iops     int
+		location      string
+		size          int
+		iops          int
+		snapshotSpace int
 	}
 	createVolumeReturns struct {
 		result1 *datatypes.Network_Storage
@@ -304,6 +305,23 @@ type FakeClient struct {
 		result2 error
 	}
 	orderBlockVolumeReturnsOnCall map[int]struct {
+		result1 *datatypes.Container_Product_Order_Receipt
+		result2 error
+	}
+	OrderBlockVolume2Stub        func(storageType string, location string, size int, iops int, snapshotSpace int) (*datatypes.Container_Product_Order_Receipt, error)
+	orderBlockVolume2Mutex       sync.RWMutex
+	orderBlockVolume2ArgsForCall []struct {
+		storageType   string
+		location      string
+		size          int
+		iops          int
+		snapshotSpace int
+	}
+	orderBlockVolume2Returns struct {
+		result1 *datatypes.Container_Product_Order_Receipt
+		result2 error
+	}
+	orderBlockVolume2ReturnsOnCall map[int]struct {
 		result1 *datatypes.Container_Product_Order_Receipt
 		result2 error
 	}
@@ -484,6 +502,31 @@ type FakeClient struct {
 		result1 error
 	}
 	deleteInstanceFromVPSReturnsOnCall map[int]struct {
+		result1 error
+	}
+	CreateSnapshotStub        func(volumeId int, notes string) (datatypes.Network_Storage, error)
+	createSnapshotMutex       sync.RWMutex
+	createSnapshotArgsForCall []struct {
+		volumeId int
+		notes    string
+	}
+	createSnapshotReturns struct {
+		result1 datatypes.Network_Storage
+		result2 error
+	}
+	createSnapshotReturnsOnCall map[int]struct {
+		result1 datatypes.Network_Storage
+		result2 error
+	}
+	DeleteSnapshotStub        func(snapshotId int) error
+	deleteSnapshotMutex       sync.RWMutex
+	deleteSnapshotArgsForCall []struct {
+		snapshotId int
+	}
+	deleteSnapshotReturns struct {
+		result1 error
+	}
+	deleteSnapshotReturnsOnCall map[int]struct {
 		result1 error
 	}
 	invocations      map[string][][]interface{}
@@ -1479,18 +1522,19 @@ func (fake *FakeClient) DeauthorizeHostToVolumeReturnsOnCall(i int, result1 bool
 	}{result1, result2}
 }
 
-func (fake *FakeClient) CreateVolume(location string, size int, iops int) (*datatypes.Network_Storage, error) {
+func (fake *FakeClient) CreateVolume(location string, size int, iops int, snapshotSpace int) (*datatypes.Network_Storage, error) {
 	fake.createVolumeMutex.Lock()
 	ret, specificReturn := fake.createVolumeReturnsOnCall[len(fake.createVolumeArgsForCall)]
 	fake.createVolumeArgsForCall = append(fake.createVolumeArgsForCall, struct {
-		location string
-		size     int
-		iops     int
-	}{location, size, iops})
-	fake.recordInvocation("CreateVolume", []interface{}{location, size, iops})
+		location      string
+		size          int
+		iops          int
+		snapshotSpace int
+	}{location, size, iops, snapshotSpace})
+	fake.recordInvocation("CreateVolume", []interface{}{location, size, iops, snapshotSpace})
 	fake.createVolumeMutex.Unlock()
 	if fake.CreateVolumeStub != nil {
-		return fake.CreateVolumeStub(location, size, iops)
+		return fake.CreateVolumeStub(location, size, iops, snapshotSpace)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
@@ -1504,10 +1548,10 @@ func (fake *FakeClient) CreateVolumeCallCount() int {
 	return len(fake.createVolumeArgsForCall)
 }
 
-func (fake *FakeClient) CreateVolumeArgsForCall(i int) (string, int, int) {
+func (fake *FakeClient) CreateVolumeArgsForCall(i int) (string, int, int, int) {
 	fake.createVolumeMutex.RLock()
 	defer fake.createVolumeMutex.RUnlock()
-	return fake.createVolumeArgsForCall[i].location, fake.createVolumeArgsForCall[i].size, fake.createVolumeArgsForCall[i].iops
+	return fake.createVolumeArgsForCall[i].location, fake.createVolumeArgsForCall[i].size, fake.createVolumeArgsForCall[i].iops, fake.createVolumeArgsForCall[i].snapshotSpace
 }
 
 func (fake *FakeClient) CreateVolumeReturns(result1 *datatypes.Network_Storage, result2 error) {
@@ -1581,6 +1625,61 @@ func (fake *FakeClient) OrderBlockVolumeReturnsOnCall(i int, result1 *datatypes.
 		})
 	}
 	fake.orderBlockVolumeReturnsOnCall[i] = struct {
+		result1 *datatypes.Container_Product_Order_Receipt
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeClient) OrderBlockVolume2(storageType string, location string, size int, iops int, snapshotSpace int) (*datatypes.Container_Product_Order_Receipt, error) {
+	fake.orderBlockVolume2Mutex.Lock()
+	ret, specificReturn := fake.orderBlockVolume2ReturnsOnCall[len(fake.orderBlockVolume2ArgsForCall)]
+	fake.orderBlockVolume2ArgsForCall = append(fake.orderBlockVolume2ArgsForCall, struct {
+		storageType   string
+		location      string
+		size          int
+		iops          int
+		snapshotSpace int
+	}{storageType, location, size, iops, snapshotSpace})
+	fake.recordInvocation("OrderBlockVolume2", []interface{}{storageType, location, size, iops, snapshotSpace})
+	fake.orderBlockVolume2Mutex.Unlock()
+	if fake.OrderBlockVolume2Stub != nil {
+		return fake.OrderBlockVolume2Stub(storageType, location, size, iops, snapshotSpace)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	return fake.orderBlockVolume2Returns.result1, fake.orderBlockVolume2Returns.result2
+}
+
+func (fake *FakeClient) OrderBlockVolume2CallCount() int {
+	fake.orderBlockVolume2Mutex.RLock()
+	defer fake.orderBlockVolume2Mutex.RUnlock()
+	return len(fake.orderBlockVolume2ArgsForCall)
+}
+
+func (fake *FakeClient) OrderBlockVolume2ArgsForCall(i int) (string, string, int, int, int) {
+	fake.orderBlockVolume2Mutex.RLock()
+	defer fake.orderBlockVolume2Mutex.RUnlock()
+	return fake.orderBlockVolume2ArgsForCall[i].storageType, fake.orderBlockVolume2ArgsForCall[i].location, fake.orderBlockVolume2ArgsForCall[i].size, fake.orderBlockVolume2ArgsForCall[i].iops, fake.orderBlockVolume2ArgsForCall[i].snapshotSpace
+}
+
+func (fake *FakeClient) OrderBlockVolume2Returns(result1 *datatypes.Container_Product_Order_Receipt, result2 error) {
+	fake.OrderBlockVolume2Stub = nil
+	fake.orderBlockVolume2Returns = struct {
+		result1 *datatypes.Container_Product_Order_Receipt
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeClient) OrderBlockVolume2ReturnsOnCall(i int, result1 *datatypes.Container_Product_Order_Receipt, result2 error) {
+	fake.OrderBlockVolume2Stub = nil
+	if fake.orderBlockVolume2ReturnsOnCall == nil {
+		fake.orderBlockVolume2ReturnsOnCall = make(map[int]struct {
+			result1 *datatypes.Container_Product_Order_Receipt
+			result2 error
+		})
+	}
+	fake.orderBlockVolume2ReturnsOnCall[i] = struct {
 		result1 *datatypes.Container_Product_Order_Receipt
 		result2 error
 	}{result1, result2}
@@ -2232,6 +2331,106 @@ func (fake *FakeClient) DeleteInstanceFromVPSReturnsOnCall(i int, result1 error)
 	}{result1}
 }
 
+func (fake *FakeClient) CreateSnapshot(volumeId int, notes string) (datatypes.Network_Storage, error) {
+	fake.createSnapshotMutex.Lock()
+	ret, specificReturn := fake.createSnapshotReturnsOnCall[len(fake.createSnapshotArgsForCall)]
+	fake.createSnapshotArgsForCall = append(fake.createSnapshotArgsForCall, struct {
+		volumeId int
+		notes    string
+	}{volumeId, notes})
+	fake.recordInvocation("CreateSnapshot", []interface{}{volumeId, notes})
+	fake.createSnapshotMutex.Unlock()
+	if fake.CreateSnapshotStub != nil {
+		return fake.CreateSnapshotStub(volumeId, notes)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	return fake.createSnapshotReturns.result1, fake.createSnapshotReturns.result2
+}
+
+func (fake *FakeClient) CreateSnapshotCallCount() int {
+	fake.createSnapshotMutex.RLock()
+	defer fake.createSnapshotMutex.RUnlock()
+	return len(fake.createSnapshotArgsForCall)
+}
+
+func (fake *FakeClient) CreateSnapshotArgsForCall(i int) (int, string) {
+	fake.createSnapshotMutex.RLock()
+	defer fake.createSnapshotMutex.RUnlock()
+	return fake.createSnapshotArgsForCall[i].volumeId, fake.createSnapshotArgsForCall[i].notes
+}
+
+func (fake *FakeClient) CreateSnapshotReturns(result1 datatypes.Network_Storage, result2 error) {
+	fake.CreateSnapshotStub = nil
+	fake.createSnapshotReturns = struct {
+		result1 datatypes.Network_Storage
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeClient) CreateSnapshotReturnsOnCall(i int, result1 datatypes.Network_Storage, result2 error) {
+	fake.CreateSnapshotStub = nil
+	if fake.createSnapshotReturnsOnCall == nil {
+		fake.createSnapshotReturnsOnCall = make(map[int]struct {
+			result1 datatypes.Network_Storage
+			result2 error
+		})
+	}
+	fake.createSnapshotReturnsOnCall[i] = struct {
+		result1 datatypes.Network_Storage
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeClient) DeleteSnapshot(snapshotId int) error {
+	fake.deleteSnapshotMutex.Lock()
+	ret, specificReturn := fake.deleteSnapshotReturnsOnCall[len(fake.deleteSnapshotArgsForCall)]
+	fake.deleteSnapshotArgsForCall = append(fake.deleteSnapshotArgsForCall, struct {
+		snapshotId int
+	}{snapshotId})
+	fake.recordInvocation("DeleteSnapshot", []interface{}{snapshotId})
+	fake.deleteSnapshotMutex.Unlock()
+	if fake.DeleteSnapshotStub != nil {
+		return fake.DeleteSnapshotStub(snapshotId)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fake.deleteSnapshotReturns.result1
+}
+
+func (fake *FakeClient) DeleteSnapshotCallCount() int {
+	fake.deleteSnapshotMutex.RLock()
+	defer fake.deleteSnapshotMutex.RUnlock()
+	return len(fake.deleteSnapshotArgsForCall)
+}
+
+func (fake *FakeClient) DeleteSnapshotArgsForCall(i int) int {
+	fake.deleteSnapshotMutex.RLock()
+	defer fake.deleteSnapshotMutex.RUnlock()
+	return fake.deleteSnapshotArgsForCall[i].snapshotId
+}
+
+func (fake *FakeClient) DeleteSnapshotReturns(result1 error) {
+	fake.DeleteSnapshotStub = nil
+	fake.deleteSnapshotReturns = struct {
+		result1 error
+	}{result1}
+}
+
+func (fake *FakeClient) DeleteSnapshotReturnsOnCall(i int, result1 error) {
+	fake.DeleteSnapshotStub = nil
+	if fake.deleteSnapshotReturnsOnCall == nil {
+		fake.deleteSnapshotReturnsOnCall = make(map[int]struct {
+			result1 error
+		})
+	}
+	fake.deleteSnapshotReturnsOnCall[i] = struct {
+		result1 error
+	}{result1}
+}
+
 func (fake *FakeClient) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
@@ -2277,6 +2476,8 @@ func (fake *FakeClient) Invocations() map[string][][]interface{} {
 	defer fake.createVolumeMutex.RUnlock()
 	fake.orderBlockVolumeMutex.RLock()
 	defer fake.orderBlockVolumeMutex.RUnlock()
+	fake.orderBlockVolume2Mutex.RLock()
+	defer fake.orderBlockVolume2Mutex.RUnlock()
 	fake.cancelBlockVolumeMutex.RLock()
 	defer fake.cancelBlockVolumeMutex.RUnlock()
 	fake.getBlockVolumeDetailsMutex.RLock()
@@ -2301,6 +2502,10 @@ func (fake *FakeClient) Invocations() map[string][][]interface{} {
 	defer fake.createInstanceFromVPSMutex.RUnlock()
 	fake.deleteInstanceFromVPSMutex.RLock()
 	defer fake.deleteInstanceFromVPSMutex.RUnlock()
+	fake.createSnapshotMutex.RLock()
+	defer fake.createSnapshotMutex.RUnlock()
+	fake.deleteSnapshotMutex.RLock()
+	defer fake.deleteSnapshotMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}
 	for key, value := range fake.invocations {
 		copiedInvocations[key] = value

@@ -3,7 +3,7 @@ package action
 import (
 	"encoding/json"
 
-	"bosh-softlayer-cpi/softlayer/virtual_guest_service"
+	instance "bosh-softlayer-cpi/softlayer/virtual_guest_service"
 	"fmt"
 	"time"
 )
@@ -12,6 +12,7 @@ type DiskCloudProperties struct {
 	DiskType         string `json:"type,omitempty"`
 	DataCenter       string `json:"datacenter,omitempty"`
 	Iops             int    `json:"iops,omitempty"`
+	SnapShotSpace    int    `json:"snapshotSpace,omitempty"`
 	UseHourlyPricing bool   `json:"useHourlyPricing,omitempty"`
 }
 

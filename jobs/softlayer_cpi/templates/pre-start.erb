@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# Set directories
+LOGS_DIR=/var/vcap/sys/log
+
+mkdir -p ${LOGS_DIR}/softlayer_cpi
+chown -R vcap:vcap ${LOGS_DIR}/softlayer_cpi

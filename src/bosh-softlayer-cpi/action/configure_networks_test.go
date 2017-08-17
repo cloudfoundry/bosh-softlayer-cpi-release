@@ -1,10 +1,9 @@
 package action_test
 
 import (
+	. "bosh-softlayer-cpi/action"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-
-	. "bosh-softlayer-cpi/action"
 
 	registryfakes "bosh-softlayer-cpi/registry/fakes"
 	instancefakes "bosh-softlayer-cpi/softlayer/virtual_guest_service/fakes"
@@ -12,13 +11,11 @@ import (
 
 var _ = Describe("ConfigureNetworks", func() {
 	var (
-		err error
+		err      error
+		networks Networks
 
 		vmService      *instancefakes.FakeService
 		registryClient *registryfakes.FakeClient
-
-		vmCID    VMCID
-		networks Networks
 
 		configureNetworks ConfigureNetworks
 	)
@@ -27,12 +24,14 @@ var _ = Describe("ConfigureNetworks", func() {
 		vmService = &instancefakes.FakeService{}
 		registryClient = &registryfakes.FakeClient{}
 		configureNetworks = NewConfigureNetworks(vmService, registryClient)
-
 	})
 
 	Describe("Run", func() {
+		var (
+			vmCID VMCID
+		)
 		BeforeEach(func() {
-			vmCID = VMCID(123456)
+			vmCID = VMCID(12345678)
 
 			networks = Networks{
 				"fake-network-name": Network{

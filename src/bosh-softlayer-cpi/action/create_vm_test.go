@@ -174,8 +174,9 @@ var _ = Describe("CreateVM", func() {
 					Datacenter: &datatypes.Location{
 						Name: sl.String("fake-datacenter-name"),
 					},
-					StartCpus: sl.Int(2),
-					MaxMemory: sl.Int(2048),
+					MaxCpu:                       sl.Int(2),
+					MaxMemory:                    sl.Int(2048),
+					DedicatedAccountHostOnlyFlag: sl.Bool(false),
 				},
 				nil,
 			)

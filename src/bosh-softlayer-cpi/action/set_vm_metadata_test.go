@@ -7,20 +7,21 @@ import (
 	. "github.com/onsi/gomega"
 
 	. "bosh-softlayer-cpi/action"
-	"bosh-softlayer-cpi/softlayer/virtual_guest_service"
+
 	instancefakes "bosh-softlayer-cpi/softlayer/virtual_guest_service/fakes"
+
+	"bosh-softlayer-cpi/softlayer/virtual_guest_service"
 )
 
 var _ = Describe("SetVMMetadata", func() {
 	var (
-		err error
-
+		err        error
 		vmCID      VMCID
 		vmMetadata VMMetadata
 
-		setVMMetadata SetVMMetadata
-
 		vmService *instancefakes.FakeService
+
+		setVMMetadata SetVMMetadata
 	)
 
 	BeforeEach(func() {

@@ -12,10 +12,10 @@ import (
 	vpsClient "bosh-softlayer-cpi/softlayer/vps_service/client"
 	vpsVm "bosh-softlayer-cpi/softlayer/vps_service/client/vm"
 	httptransport "github.com/go-openapi/runtime/client"
-	"github.com/softlayer/softlayer-go/session"
-	"time"
 	"github.com/softlayer/softlayer-go/datatypes"
+	"github.com/softlayer/softlayer-go/session"
 	"github.com/softlayer/softlayer-go/sl"
+	"time"
 )
 
 var _ = Describe("ImageHandler", func() {
@@ -48,9 +48,9 @@ var _ = Describe("ImageHandler", func() {
 		orderID = 11764035
 
 		vg = &datatypes.Virtual_Guest{
-			Domain:                       sl.String("wilma.org"),
-			Hostname:                     sl.String("wilma2"),
-			FullyQualifiedDomainName:     sl.String("wilma2.wilma.org"),
+			Domain:                   sl.String("wilma.org"),
+			Hostname:                 sl.String("wilma2"),
+			FullyQualifiedDomainName: sl.String("wilma2.wilma.org"),
 			MaxCpu:                       sl.Int(2),
 			StartCpus:                    sl.Int(2),
 			MaxMemory:                    sl.Int(2048),

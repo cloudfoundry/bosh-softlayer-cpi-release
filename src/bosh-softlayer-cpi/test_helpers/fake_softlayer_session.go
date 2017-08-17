@@ -9,16 +9,16 @@ import (
 	"github.com/softlayer/softlayer-go/session"
 	"github.com/softlayer/softlayer-go/sl"
 
+	"bytes"
+	"fmt"
 	"github.com/onsi/gomega/ghttp"
+	"github.com/softlayer/softlayer-go/datatypes"
 	"net/http"
 	"net/url"
-	"fmt"
-	"bytes"
+	"reflect"
+	"strconv"
 	"strings"
 	"time"
-	"strconv"
-	"reflect"
-	"github.com/softlayer/softlayer-go/datatypes"
 )
 
 const SoftLayer_WebService_RateLimitExceeded_Exception = "SoftLayer_Exception_WebService_RateLimitExceeded"
@@ -154,7 +154,7 @@ func (h FakeTransportHandler) DoRequest(sess *session.Session, service string, m
 	switch pResult.(type) {
 	case *[]uint8:
 		// exclude quotes
-		*pResult.(*[]uint8) = resp[1: len(resp)-1]
+		*pResult.(*[]uint8) = resp[1 : len(resp)-1]
 	case *datatypes.Void:
 	case *uint:
 		var val uint64

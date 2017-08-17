@@ -49,8 +49,7 @@ var _ = Describe("Disk Service Find", func() {
 		Context("return error when softlayerClient GetBlockVolumeDetails call return error", func() {
 			It("failed to find volume", func() {
 				cli.GetBlockVolumeDetailsReturns(
-					&datatypes.Network_Storage{
-					},
+					&datatypes.Network_Storage{},
 					false,
 					errors.New("fake-client-error"),
 				)
@@ -65,8 +64,7 @@ var _ = Describe("Disk Service Find", func() {
 		Context("return error when softlayerClient GetBlockVolumeDetails call find nothing", func() {
 			It("failed to find volume", func() {
 				cli.GetBlockVolumeDetailsReturns(
-					&datatypes.Network_Storage{
-					},
+					&datatypes.Network_Storage{},
 					false,
 					nil,
 				)

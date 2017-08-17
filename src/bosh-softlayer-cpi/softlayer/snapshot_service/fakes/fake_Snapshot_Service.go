@@ -2,20 +2,16 @@
 package fakes
 
 import (
-	disk "bosh-softlayer-cpi/softlayer/disk_service"
+	snapshot "bosh-softlayer-cpi/softlayer/snapshot_service"
 	"sync"
-
-	"github.com/softlayer/softlayer-go/datatypes"
 )
 
 type FakeService struct {
-	CreateStub        func(size int, iops int, location string, snapshotSpace int) (int, error)
+	CreateStub        func(diskID int, description string) (int, error)
 	createMutex       sync.RWMutex
 	createArgsForCall []struct {
-		size          int
-		iops          int
-		location      string
-		snapshotSpace int
+		diskID      int
+		description string
 	}
 	createReturns struct {
 		result1 int
@@ -36,36 +32,21 @@ type FakeService struct {
 	deleteReturnsOnCall map[int]struct {
 		result1 error
 	}
-	FindStub        func(id int) (*datatypes.Network_Storage, error)
-	findMutex       sync.RWMutex
-	findArgsForCall []struct {
-		id int
-	}
-	findReturns struct {
-		result1 *datatypes.Network_Storage
-		result2 error
-	}
-	findReturnsOnCall map[int]struct {
-		result1 *datatypes.Network_Storage
-		result2 error
-	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *FakeService) Create(size int, iops int, location string, snapshotSpace int) (int, error) {
+func (fake *FakeService) Create(diskID int, description string) (int, error) {
 	fake.createMutex.Lock()
 	ret, specificReturn := fake.createReturnsOnCall[len(fake.createArgsForCall)]
 	fake.createArgsForCall = append(fake.createArgsForCall, struct {
-		size          int
-		iops          int
-		location      string
-		snapshotSpace int
-	}{size, iops, location, snapshotSpace})
-	fake.recordInvocation("Create", []interface{}{size, iops, location, snapshotSpace})
+		diskID      int
+		description string
+	}{diskID, description})
+	fake.recordInvocation("Create", []interface{}{diskID, description})
 	fake.createMutex.Unlock()
 	if fake.CreateStub != nil {
-		return fake.CreateStub(size, iops, location, snapshotSpace)
+		return fake.CreateStub(diskID, description)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
@@ -79,10 +60,10 @@ func (fake *FakeService) CreateCallCount() int {
 	return len(fake.createArgsForCall)
 }
 
-func (fake *FakeService) CreateArgsForCall(i int) (int, int, string, int) {
+func (fake *FakeService) CreateArgsForCall(i int) (int, string) {
 	fake.createMutex.RLock()
 	defer fake.createMutex.RUnlock()
-	return fake.createArgsForCall[i].size, fake.createArgsForCall[i].iops, fake.createArgsForCall[i].location, fake.createArgsForCall[i].snapshotSpace
+	return fake.createArgsForCall[i].diskID, fake.createArgsForCall[i].description
 }
 
 func (fake *FakeService) CreateReturns(result1 int, result2 error) {
@@ -155,57 +136,6 @@ func (fake *FakeService) DeleteReturnsOnCall(i int, result1 error) {
 	}{result1}
 }
 
-func (fake *FakeService) Find(id int) (*datatypes.Network_Storage, error) {
-	fake.findMutex.Lock()
-	ret, specificReturn := fake.findReturnsOnCall[len(fake.findArgsForCall)]
-	fake.findArgsForCall = append(fake.findArgsForCall, struct {
-		id int
-	}{id})
-	fake.recordInvocation("Find", []interface{}{id})
-	fake.findMutex.Unlock()
-	if fake.FindStub != nil {
-		return fake.FindStub(id)
-	}
-	if specificReturn {
-		return ret.result1, ret.result2
-	}
-	return fake.findReturns.result1, fake.findReturns.result2
-}
-
-func (fake *FakeService) FindCallCount() int {
-	fake.findMutex.RLock()
-	defer fake.findMutex.RUnlock()
-	return len(fake.findArgsForCall)
-}
-
-func (fake *FakeService) FindArgsForCall(i int) int {
-	fake.findMutex.RLock()
-	defer fake.findMutex.RUnlock()
-	return fake.findArgsForCall[i].id
-}
-
-func (fake *FakeService) FindReturns(result1 *datatypes.Network_Storage, result2 error) {
-	fake.FindStub = nil
-	fake.findReturns = struct {
-		result1 *datatypes.Network_Storage
-		result2 error
-	}{result1, result2}
-}
-
-func (fake *FakeService) FindReturnsOnCall(i int, result1 *datatypes.Network_Storage, result2 error) {
-	fake.FindStub = nil
-	if fake.findReturnsOnCall == nil {
-		fake.findReturnsOnCall = make(map[int]struct {
-			result1 *datatypes.Network_Storage
-			result2 error
-		})
-	}
-	fake.findReturnsOnCall[i] = struct {
-		result1 *datatypes.Network_Storage
-		result2 error
-	}{result1, result2}
-}
-
 func (fake *FakeService) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
@@ -213,8 +143,6 @@ func (fake *FakeService) Invocations() map[string][][]interface{} {
 	defer fake.createMutex.RUnlock()
 	fake.deleteMutex.RLock()
 	defer fake.deleteMutex.RUnlock()
-	fake.findMutex.RLock()
-	defer fake.findMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}
 	for key, value := range fake.invocations {
 		copiedInvocations[key] = value
@@ -234,4 +162,4 @@ func (fake *FakeService) recordInvocation(key string, args []interface{}) {
 	fake.invocations[key] = append(fake.invocations[key], args)
 }
 
-var _ disk.Service = new(FakeService)
+var _ snapshot.Service = new(FakeService)
