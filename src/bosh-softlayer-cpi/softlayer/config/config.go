@@ -14,7 +14,6 @@ type Config struct {
 	EnableVps            bool   `json:"enable_vps"`
 	VpsHost              string `json:"vps_host"`
 	VpsPort              int    `json:"vps_port"`
-	VpsUseSsl            bool   `json:"vps_use_ssl"`
 }
 
 func (c Config) Validate() error {

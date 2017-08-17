@@ -88,15 +88,8 @@ func buildDispatcher(
 
 	var vps *vm.Client
 	if config.Cloud.Properties.SoftLayer.EnableVps {
-		if config.Cloud.Properties.SoftLayer.VpsUseSsl {
-			vps = vpsClient.New(httptransport.New(fmt.Sprintf("%s:%d", config.Cloud.Properties.SoftLayer.VpsHost, config.Cloud.Properties.SoftLayer.VpsPort),
-				"v2", []string{"https"}), strfmt.Default).VM
-		} else {
-
-			vps = vpsClient.New(httptransport.New(fmt.Sprintf("%s:%d", config.Cloud.Properties.SoftLayer.VpsHost, config.Cloud.Properties.SoftLayer.VpsPort),
-				"v2", []string{"http"}), strfmt.Default).VM
-		}
-
+		vps = vpsClient.New(httptransport.New(fmt.Sprintf("%s:%d", config.Cloud.Properties.SoftLayer.VpsHost, config.Cloud.Properties.SoftLayer.VpsPort),
+			"v2", []string{"https"}), strfmt.Default).VM
 	}
 
 	repClientFactory := client.NewClientFactory(client.NewSoftLayerClientManager(softLayerClient, vps))
