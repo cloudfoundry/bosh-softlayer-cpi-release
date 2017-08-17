@@ -15,8 +15,22 @@ trap cp_artifacts EXIT
 mv bosh-cli/bosh-cli-* /usr/local/bin/bosh-cli
 chmod +x /usr/local/bin/bosh-cli
 
+echo -e "\n[]"
+export CPI_RELEASE=$(echo cpi-release/*.tgz)
+
+cat > cpi-replace.yml <<EOF
+---
+- type: replace
+  path: /releases/name=bosh-softlayer-cpi?
+  value:
+    name: bosh-softlayer-cpi
+    url: file://$CPI_RELEASE
+
+EOF
+
 bosh-cli interpolate bosh-deployment/bosh.yml \
   -o bosh-deployment/$BAT_INFRASTRUCTURE/cpi.yml \
+  -o ./cpi-replace.yml \
   -o bosh-deployment/powerdns.yml \
   -o bosh-deployment/jumpbox-user.yml \
   -o bosh-cpi-release/ci/bats/ops/remove-health-monitor.yml \

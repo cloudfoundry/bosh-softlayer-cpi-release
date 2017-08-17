@@ -3,9 +3,10 @@ set -u # report the usage of uninitialized variables
 
 # Grab the latest versions that are in the directory
 PLATFORM=`uname | tr '[:upper:]' '[:lower:]'`
+GOLANG_VERSION=`ls -r golang_1.7.1/go*.${PLATFORM}-* | sed "s/golang_1.7.1\/go\(.*\)\.${PLATFORM}-amd64.tar.gz/\1/" | head -1`
 
 # Extract Go Programming Language package
-tar xzvf ${BOSH_COMPILE_TARGET}/golang_1.7.1/go1.7.1.${PLATFORM}-amd64.tar.gz
+tar xzvf ${BOSH_COMPILE_TARGET}/golang_1.7.1/go${GOLANG_VERSION}.${PLATFORM}-amd64.tar.gz
 
 # Copy Go Programming Language package
 mkdir -p ${BOSH_INSTALL_TARGET}/bin
