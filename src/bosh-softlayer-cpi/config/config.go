@@ -8,6 +8,7 @@ import (
 
 	"bosh-softlayer-cpi/registry"
 	boslconfig "bosh-softlayer-cpi/softlayer/config"
+	bscutil "bosh-softlayer-cpi/util"
 )
 
 type Config struct {
@@ -37,6 +38,7 @@ func NewConfigFromPath(configFile string, fs boshsys.FileSystem) (Config, error)
 		return config, bosherr.WrapErrorf(err, "Reading config file '%s'", configFile)
 	}
 
+	bytes = bscutil.ConvertJSONKeyCase(bytes)
 	if err = json.Unmarshal(bytes, &config); err != nil {
 		return config, bosherr.WrapError(err, "Unmarshalling config contents")
 	}
@@ -55,7 +57,8 @@ func NewConfigFromString(configString string) (Config, error) {
 		return config, bosherr.Errorf("Must provide a config")
 	}
 
-	if err = json.Unmarshal([]byte(configString), &config); err != nil {
+	configBytes := bscutil.ConvertJSONKeyCase([]byte(configString))
+	if err = json.Unmarshal(configBytes, &config); err != nil {
 		return config, bosherr.WrapError(err, "Unmarshalling config contents")
 	}
 
