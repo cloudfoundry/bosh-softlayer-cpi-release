@@ -22,6 +22,7 @@ shared:
       BOSH_SL_VLAN_PRIVATE:    {{softlayer-vlan-private}}
       BOSH_SL_VM_DOMAIN:       {{softlayer-vm-domain}}
       BOSH_SL_VM_NAME_PREFIX:  {{softlayer-director-name-prefix}}
+      REGISTRY_PASSWORD:       {{registry_password}}
 
   - &prepare-bats-config
     task: prepare-bats
@@ -137,7 +138,7 @@ resources:
   - name: light-stemcell
     type: s3
     source:
-      regexp: light-bosh-stemcell-(\d+\.\d+)-softlayer-xen-ubuntu-trusty-go_agent\.tgz
+      regexp: light-bosh-stemcell-(\d+(\.\d+){1,2})-softlayer-xen-ubuntu-trusty-go_agent\.tgz
       bucket: bosh-softlayer-cpi-stemcells
       access_key_id: {{stemcell-aws-access-key}}
       secret_access_key: {{stemcell-aws-secret-key}}
@@ -164,7 +165,7 @@ resources:
   - name: bosh-cpi-dev-artifacts
     type: s3
     source:
-      regexp: bosh-softlayer-cpi-(\d+\.\d+\.\d+)\.tgz
+      regexp: bosh-softlayer-cpi-(\d+(\.\d+){1,2})\.tgz
       bucket: {{s3_pipeline_bucket_lite}}
       access_key_id: {{stemcell-aws-access-key}}
       secret_access_key: {{stemcell-aws-secret-key}}

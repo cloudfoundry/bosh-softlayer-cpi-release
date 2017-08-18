@@ -4,8 +4,7 @@
       'plugin' => 'softlayer',
       'properties' => {
         'softlayer' => {
-          'username' => p('softlayer.username'),
-          'api_key' => p('softlayer.api_key'),
+          'username' => p('softlayer.username')
         },
         'registry' => {
           'user' => p('registry.username'),
@@ -23,6 +22,13 @@
       }
     }
   }
+
+  if_p('softlayer.api_key') do |api_key|
+    params['cloud']['properties']['softlayer']['api_key'] = api_key
+  elsif_p('softlayer.apiKey') do |api_key|
+    params['cloud']['properties']['softlayer']['api_key'] = api_key
+  end
+
   if_p('softlayer.api_endpoint') do |endpoint|
     params['cloud']['properties']['softlayer']['api_endpoint'] = endpoint
   end

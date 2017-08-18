@@ -51,32 +51,32 @@ var (
 		    "plugin": "softlayer",
 		    "properties": {
 		      "softlayer": {
-			"username": "%s",
-			"api_key": "%s"
+			    "username": "%s",
+			    "api_key": "%s"
 		      },
-		    "registry": {
-			"user": "registry",
-			"password": "1330c82d-4bc4-4544-4a90-c2c78fa66431",
-			"address": "127.0.0.1",
-			"http": {
-			  "port": 8000,
-			  "user": "registry",
-			  "password": "1330c82d-4bc4-4544-4a90-c2c78fa66431"
-			},
-			"endpoint": "http://registry:1330c82d-4bc4-4544-4a90-c2c78fa66431@127.0.0.1:8000"
+		      "registry": {
+			    "user": "registry",
+			    "password": "1330c82d-4bc4-4544-4a90-c2c78fa66431",
+			    "address": "127.0.0.1",
+			    "http": {
+			      "port": 8000,
+			      "user": "registry",
+			      "password": "1330c82d-4bc4-4544-4a90-c2c78fa66431"
+			    },
+			    "endpoint": "http://registry:1330c82d-4bc4-4544-4a90-c2c78fa66431@127.0.0.1:8000"
 		      },
 		      "agent": {
-			"ntp": [
-			],
-			"blobstore": {
-			  "provider": "dav",
-			  "options": {
-			    "endpoint": "http://127.0.0.1:25250",
-			    "user": "agent",
-			    "password": "agent"
-			  }
-			},
-			"mbus": "nats://nats:nats@127.0.0.1:4222"
+			    "ntp": [
+			    ],
+			    "blobstore": {
+			      "provider": "dav",
+			      "options": {
+			        "endpoint": "http://127.0.0.1:25250",
+			        "user": "agent",
+			        "password": "agent"
+			      }
+			    },
+			    "mbus": "nats://nats:nats@127.0.0.1:4222"
 		      }
 		    }
 		  }
