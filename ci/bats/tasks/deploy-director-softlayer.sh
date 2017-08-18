@@ -30,6 +30,7 @@ EOF
 
 bosh-cli interpolate bosh-deployment/bosh.yml \
   -o bosh-deployment/$BAT_INFRASTRUCTURE/cpi.yml \
+  -o bosh-deployment/$BAT_INFRASTRUCTURE/registry.yml \
   -o ./cpi-replace.yml \
   -o bosh-deployment/powerdns.yml \
   -o bosh-deployment/jumpbox-user.yml \

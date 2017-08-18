@@ -54,7 +54,7 @@ var (
 			"username": "%s",
 			"api_key": "%s"
 		      },
-		      "registry": {
+		    "registry": {
 			"user": "registry",
 			"password": "1330c82d-4bc4-4544-4a90-c2c78fa66431",
 			"address": "127.0.0.1",
