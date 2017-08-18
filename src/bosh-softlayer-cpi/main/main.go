@@ -27,8 +27,7 @@ import (
 const logTagMain = "main"
 
 var (
-	configPathOpt = flag.String("configPath", "", "Path to configuration file")
-	cpiVersion    = flag.Bool("version", false, "The version of CPI release")
+	configPathOpt = flag.String("configFile", "", "Path to configuration file")
 )
 
 func main() {
@@ -37,10 +36,6 @@ func main() {
 	defer logger.HandlePanic("Main")
 
 	flag.Parse()
-
-	if *cpiVersion {
-		os.Exit(0)
-	}
 
 	cfg, err := config.NewConfigFromPath(*configPathOpt, fs)
 	if err != nil {

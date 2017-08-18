@@ -1410,11 +1410,14 @@ func (c *ClientManager) AttachSecondDiskToInstance(id int, diskSize int) error {
 
 	_, err = c.UpgradeInstance(id, 0, 0, 0, false, diskSize)
 	if err != nil {
-		apiErr := err.(sl.Error)
-		if strings.Contains(apiErr.Message, "A current price was provided for the upgrade order") {
-			return nil
+		if apiErr, ok := err.(sl.Error); ok {
+			if strings.Contains(apiErr.Message, "A current price was provided for the upgrade order") {
+				return nil
+			}
+			return bosherr.WrapErrorf(err, "Adding second disk with size '%d' to virutal guest of id '%d'", diskSize, id)
+		} else {
+			return bosherr.WrapErrorf(err, "Adding second disk with size '%d' to virutal guest of id '%d'", diskSize, id)
 		}
-		return bosherr.WrapErrorf(err, "Adding second disk with size '%d' to virutal guest of id '%d'", diskSize, id)
 	}
 
 	until = time.Now().Add(time.Duration(1) * time.Hour)

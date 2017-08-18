@@ -25,7 +25,9 @@
 
   if_p('softlayer.api_key') do |api_key|
     params['cloud']['properties']['softlayer']['api_key'] = api_key
-  elsif_p('softlayer.apiKey') do |api_key|
+  end
+
+  if_p('softlayer.apiKey') do |api_key|
     params['cloud']['properties']['softlayer']['api_key'] = api_key
   end
 

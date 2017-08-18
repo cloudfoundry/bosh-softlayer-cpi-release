@@ -18,7 +18,7 @@ trap cp_artifacts EXIT
 mv bosh-cli/bosh-cli-* /usr/local/bin/bosh-cli
 chmod +x /usr/local/bin/bosh-cli
 
-echo -e "\n[]"
+echo -e "\n\033[32m[INFO] Generating local cpi release manifest.\033[0m"
 export CPI_RELEASE=$(echo cpi-release/*.tgz)
 
 cat > cpi-replace.yml <<EOF
@@ -31,9 +31,9 @@ cat > cpi-replace.yml <<EOF
 
 EOF
 
+echo -e "\n\033[32m[INFO] Generating manifest director.yml.\033[0m"
 bosh-cli interpolate bosh-deployment/bosh.yml \
   -o bosh-deployment/$BAT_INFRASTRUCTURE/cpi.yml \
-  -o bosh-deployment/$BAT_INFRASTRUCTURE/registry.yml \
   -o ./cpi-replace.yml \
   -o bosh-deployment/powerdns.yml \
   -o bosh-deployment/jumpbox-user.yml \
@@ -41,11 +41,11 @@ bosh-cli interpolate bosh-deployment/bosh.yml \
   -v dns_recursor_ip=8.8.8.8 \
   -v director_name=bats-director \
   -v sl_director_fqn=$BOSH_SL_VM_NAME_PREFIX.$BOSH_SL_VM_DOMAIN \
-  -v registry_password=$REGISTRY_PASSWORD \
   --vars-file <( bosh-cpi-release/ci/bats/iaas/$BAT_INFRASTRUCTURE/director-vars ) \
   --vars-store credentials.yml \
   > director.yml
 
+echo -e "\n\033[32m[INFO] Deploying director.\033[0m"
 bosh-cli create-env \
   --state director-state.json \
   --vars-store director-creds.yml \
