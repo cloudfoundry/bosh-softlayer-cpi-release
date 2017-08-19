@@ -10,8 +10,13 @@ inputs:
   - name: director-state
 
 params:
-  STEMCELL_NAME: null
-  BAT_VCAP_PASSWORD:      ""
+  BAT_VCAP_PASSWORD:  ""
+  SL_DATACENTER:      ""
+  SL_VLAN_PRIVATE:    ""
+  SL_VLAN_PUBLIC:     ""
+  SL_VM_DOMAIN:       ""
+  SL_VM_NAME_PREFIX:  ""
+  STEMCELL_NAME:      ""
 
 outputs:
   - name: bats-config

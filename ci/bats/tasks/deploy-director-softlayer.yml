@@ -24,7 +24,6 @@ params:
   BOSH_SL_VLAN_PRIVATE:    ""
   BOSH_SL_VM_DOMAIN:       ""
   BOSH_SL_VM_NAME_PREFIX:  ""
-  REGISTRY_PASSWORD:       ""
 
 outputs:
   - name: director-state

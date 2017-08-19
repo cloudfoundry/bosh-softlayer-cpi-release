@@ -742,8 +742,15 @@ func (c *ClientManager) getUpgradeItemPriceForSecondDisk(id int, diskSize int) (
 
 	for _, itemPrice := range itemPrices {
 		flag := false
-		for _, category := range itemPrice.Item.Categories {
+		for _, category := range itemPrice.Categories {
 			if *category.CategoryCode == EPHEMERAL_DISK_CATEGORY_CODE {
+				flag = true
+				break
+			}
+		}
+
+		for _, category := range itemPrice.Item.Categories {
+			if flag || *category.CategoryCode == EPHEMERAL_DISK_CATEGORY_CODE {
 				flag = true
 				break
 			}
@@ -954,9 +961,24 @@ func (c *ClientManager) OrderBlockVolume2(storageType string, location string, s
 	}
 	prices = append(prices, spacePrice)
 
-	iopsPrice, err := FindSaaSPerformIopsPrice(productPacakge, size, iops)
-	if err != nil {
-		return &datatypes.Container_Product_Order_Receipt{}, err
+	var iopsPrice datatypes.Product_Item_Price
+	if iops == 0 {
+		switch size {
+		case 250:
+			iopsPrice, err = c.selectMaximunIopsItemPriceIdOnSize(1000)
+		case 500:
+			iopsPrice, err = c.selectMaximunIopsItemPriceIdOnSize(1000)
+		default:
+			iopsPrice, err = c.selectMaximunIopsItemPriceIdOnSize(size)
+		}
+		if err != nil {
+			return &datatypes.Container_Product_Order_Receipt{}, err
+		}
+	} else {
+		iopsPrice, err = FindSaaSPerformIopsPrice(productPacakge, size, iops)
+		if err != nil {
+			return &datatypes.Container_Product_Order_Receipt{}, err
+		}
 	}
 	prices = append(prices, iopsPrice)
 
@@ -997,8 +1019,7 @@ func (c *ClientManager) CreateVolume(location string, size int, iops int, snapsh
 	var receipt *datatypes.Container_Product_Order_Receipt
 	var err error
 
-	// if iops not set, using package with id 222 to order performance iscsi, otherwise, using package 759 (Storage as Service) to order block storage
-	if iops == 0 {
+	if snapshotSpace == 0 {
 		receipt, err = c.OrderBlockVolume("performance_storage_iscsi", location, size, iops)
 	} else {
 		receipt, err = c.OrderBlockVolume2("performance_storage_iscsi", location, size, iops, snapshotSpace)

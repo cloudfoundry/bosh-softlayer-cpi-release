@@ -5,7 +5,7 @@ chruby 2.1.7
 
 function cp_artifacts {
   mv $HOME/.bosh director-state/
-  cp director.yml director-creds.yml director-state.json director-state/
+  cp -r director.yml director-creds.yml director-state.json cpi-release/ director-state/
 }
 
 trap cp_artifacts EXIT
@@ -13,7 +13,6 @@ trap cp_artifacts EXIT
 : ${BAT_INFRASTRUCTURE:?}
 : ${BOSH_SL_VM_NAME_PREFIX:?}
 : ${BOSH_SL_VM_DOMAIN:?}
-: ${REGISTRY_PASSWORD:?}
 
 mv bosh-cli/bosh-cli-* /usr/local/bin/bosh-cli
 chmod +x /usr/local/bin/bosh-cli
@@ -42,7 +41,7 @@ bosh-cli interpolate bosh-deployment/bosh.yml \
   -v director_name=bats-director \
   -v sl_director_fqn=$BOSH_SL_VM_NAME_PREFIX.$BOSH_SL_VM_DOMAIN \
   --vars-file <( bosh-cpi-release/ci/bats/iaas/$BAT_INFRASTRUCTURE/director-vars ) \
-  --vars-store credentials.yml \
+  --vars-store director-creds.yml \
   > director.yml
 
 echo -e "\n\033[32m[INFO] Deploying director.\033[0m"

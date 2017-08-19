@@ -9,7 +9,7 @@ func (d SoftlayerDiskService) Create(size int, iops int, location string, snapsh
 	d.logger.Debug(softlayerDiskServiceLogTag, "Creating disk of size '%d'", size)
 	volume, err := d.softlayerClient.CreateVolume(location, d.getSoftLayerDiskSize(size), iops, snapshotSpace)
 	if err != nil {
-		return 0, bosherr.WrapErrorf(err, "Failed to creating volume with size '%d', iops '%d', location `%sd`", d.getSoftLayerDiskSize(size), iops, location)
+		return 0, bosherr.WrapErrorf(err, "Failed to creating volume with size '%d', iops '%d', location `%s`", d.getSoftLayerDiskSize(size), iops, location)
 	}
 
 	return *volume.Id, nil

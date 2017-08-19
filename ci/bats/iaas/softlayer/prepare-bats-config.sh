@@ -2,13 +2,13 @@
 
 set -e -x
 
-BAT_VCAP_PASSWORD:      {{bat-vcap-password}}
-SL_DATACENTER:          {{softlayer-datacenter}}
-SL_VLAN_PRIVATE:        {{softlayer-vlan-private}}
-SL_VLAN_PUBLIC:         {{softlayer-vlan-public}}
-SL_VM_DOMAIN:           {{softlayer-vm-domain}}
-SL_VM_NAME_PREFIX:      bats-experimental
-STEMCELL_NAME:          bosh-softlayer-xen-ubuntu-trusty-go_agent
+: ${BAT_VCAP_PASSWORD:?}
+: ${SL_DATACENTER:?}
+: ${SL_VLAN_PRIVATE:?}
+: ${SL_VLAN_PUBLIC:?}
+: ${SL_VM_DOMAIN:?}
+: ${SL_VM_NAME_PREFIX:?}
+: ${STEMCELL_NAME:?}
 
 state_path() { bosh-cli int director-state/director.yml --path="$1" ; }
 creds_path() { bosh-cli int director-state/director-creds.yml --path="$1" ; }
@@ -62,6 +62,7 @@ properties:
   - 10.0.80.12
 EOF
 
+echo -e "\n\033[32m[INFO] Interpolating deployment manifest of bats.\033[0m"
 bosh-cli interpolate \
  --vars-file environment/metadata \
  -v STEMCELL_NAME=${STEMCELL_NAME} \
