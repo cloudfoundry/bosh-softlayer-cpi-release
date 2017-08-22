@@ -81,15 +81,16 @@ func NewConcreteFactory(
 			"detach_disk": NewDetachDisk(vmService, registryClient),
 			"get_disks":   NewGetDisks(vmService),
 
-			// Others:
-			"ping": NewPing(),
-
 			// Snapshot management
 			"snapshot_disk":   NewSnapshotDisk(snapshotService, diskService),
 			"delete_snapshot": NewDeleteSnapshot(snapshotService),
 
+			// Others:
+			"ping": NewPing(),
+
 			// Not implemented (others):
 			//   current_vm_id
+			//   calculate_vm_cloud_properties
 		},
 	}
 }

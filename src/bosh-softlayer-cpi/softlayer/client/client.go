@@ -1456,6 +1456,14 @@ func (c *ClientManager) AttachSecondDiskToInstance(id int, diskSize int) error {
 		return bosherr.WrapError(err, "Waiting until instance is ready after os_reload")
 	}
 
+	blockDevices, err := c.VirtualGuestService.Id(id).GetBlockDevices()
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Get the attached ephemeral disks of VirtualGuest `%d`", id)
+	}
+	if len(blockDevices) < 3 {
+		return bosherr.WrapErrorf(err, "The ephemeral disk is not attached on VirtualGuest `%d` properly, one possible reason is there is not enough disk resource.", id)
+	}
+
 	return nil
 }
 

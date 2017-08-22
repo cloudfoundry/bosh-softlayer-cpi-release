@@ -52,6 +52,12 @@ func NewCreateVM(
 }
 
 func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMCloudProperties, networks Networks, diskIDs []DiskCID, env Environment) (string, error) {
+	// A workaround for the issue #129 in bosh-softlayer-cpi
+	lengthOfHostName := len(cloudProps.VmNamePrefix + "." + cloudProps.Domain)
+	if lengthOfHostName == 64 {
+		cloudProps.VmNamePrefix = cloudProps.VmNamePrefix + "-1"
+	}
+
 	// Find stemcell uuid
 	globalIdentifier, err := cv.stemcellService.Find(int(stemcellCID))
 	if err != nil {

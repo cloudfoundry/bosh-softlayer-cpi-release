@@ -84,7 +84,7 @@ jobs:
           resource: bosh-cpi-dev-artifacts
           passed:
             - run-lifecycle
-        - {trigger: true, get: stemcell, resource: light-stemcell}
+        - {trigger: true, get: stemcell, resource: light-stemcell, version: {path: light-bosh-stemcell-3421.11-softlayer-xen-ubuntu-trusty-go_agent.tgz} }
         - get: bosh-cli
         - get: bats
         - get: bosh-deployment
@@ -138,7 +138,7 @@ resources:
     type: s3
     source:
       regexp: light-bosh-stemcell-(\d+(\.\d+){1,2})-softlayer-xen-ubuntu-trusty-go_agent\.tgz
-      bucket: bosh-softlayer-cpi-stemcells
+      bucket: bosh-softlayer-stemcells-candidate-container
       access_key_id: {{stemcell-aws-access-key}}
       secret_access_key: {{stemcell-aws-secret-key}}
 
