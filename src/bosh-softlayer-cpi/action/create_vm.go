@@ -52,10 +52,9 @@ func NewCreateVM(
 }
 
 func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMCloudProperties, networks Networks, diskIDs []DiskCID, env Environment) (string, error) {
-	// A workaround for the issue #129 in bosh-softlayer-cpi
-	lengthOfHostName := len(cloudProps.VmNamePrefix + "." + cloudProps.Domain)
-	if lengthOfHostName == 64 {
-		cloudProps.VmNamePrefix = cloudProps.VmNamePrefix + "-1"
+	// Validate VM properties
+	if err := cloudProps.Validate(); err != nil {
+		return "", bosherr.WrapError(err, "Creating VM")
 	}
 
 	// Find stemcell uuid
@@ -109,11 +108,6 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 
 		boshenv.(map[string]interface{})["keep_root_password"] = true
 	}
-
-	//// Validate VM tags and labels
-	//if err = cloudProps.Validate(); err != nil {
-	//	return "", bosherr.WrapError(err, "Creating VM")
-	//}
 
 	// CID for returned VM
 	cid := 0

@@ -5,6 +5,7 @@ import (
 
 	instance "bosh-softlayer-cpi/softlayer/virtual_guest_service"
 	"fmt"
+	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	"time"
 )
 
@@ -63,9 +64,28 @@ type VMCloudProperties struct {
 }
 
 func (vmProps *VMCloudProperties) Validate() error {
-	if err := vmProps.Tags.Validate(); err != nil {
-		return err
+	if vmProps.VmNamePrefix == "" {
+		return bosherr.Error("The property 'VmNamePrefix' must be set to create an instance")
 	}
+	if vmProps.Domain == "" {
+		return bosherr.Error("The property 'Domain' must be set to create an instance")
+	}
+	if vmProps.Datacenter == "" {
+		return bosherr.Error("The property 'Datacenter' must be set to create an instance")
+	}
+	if vmProps.MaxMemory == 0 {
+		return bosherr.Error("The property 'MaxMemory' must be set to create an instance")
+	}
+	if vmProps.StartCpus == 0 {
+		return bosherr.Error("The property 'StartCpus' must be set to create an instance")
+	}
+	if vmProps.MaxNetworkSpeed == 0 {
+		return bosherr.Error("The property 'MaxNetworkSpeed' must be set to create an instance")
+	}
+
+	//if err := vmProps.Tags.Validate(); err != nil {
+	//	return err
+	//}
 
 	return nil
 }
@@ -77,20 +97,10 @@ func (vmProps *VMCloudProperties) AsInstanceProperties() *VMCloudProperties {
 		vmProps.VmNamePrefix = vmProps.updateHostNameInCloudProps(vmProps, timeStampForTime(time.Now().UTC()))
 	}
 
-	if vmProps.StartCpus == 0 {
-		vmProps.StartCpus = 4
-	}
-
-	if vmProps.MaxMemory == 0 {
-		vmProps.MaxMemory = 8192
-	}
-
-	if len(vmProps.Domain) == 0 {
-		vmProps.Domain = "softlayer.com"
-	}
-
-	if vmProps.MaxNetworkSpeed == 0 {
-		vmProps.MaxNetworkSpeed = 1000
+	// A workaround for the issue #129 in bosh-softlayer-cpi
+	lengthOfHostName := len(vmProps.VmNamePrefix + "." + vmProps.Domain)
+	if lengthOfHostName == 64 {
+		vmProps.VmNamePrefix = vmProps.VmNamePrefix + "-1"
 	}
 
 	return vmProps

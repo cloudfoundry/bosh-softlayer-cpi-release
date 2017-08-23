@@ -474,9 +474,9 @@ var _ = Describe("CreateVM", func() {
 			Expect(actualInstanceNetworks).To(Equal(expectedInstanceNetworks))
 		})
 
-		It("creates the vm successfully when length of hostname is 64", func(){
+		It("creates the vm successfully when length of hostname is 64", func() {
 			cloudProps = VMCloudProperties{
-				VmNamePrefix:      "fake-34randomstring-6e9mlcy90i4n57oc0zk-hostname",
+				VmNamePrefix:      "fake-randomstring-346e9mlcy90i4n57oc0zk-hostname",
 				Domain:            "fake-domain.com",
 				StartCpus:         2,
 				MaxMemory:         2048,
@@ -910,6 +910,139 @@ var _ = Describe("CreateVM", func() {
 				Expect(vmService.AttachEphemeralDiskCallCount()).To(Equal(1))
 				Expect(registryClient.UpdateCalled).To(BeFalse())
 				Expect(vmService.CleanUpCallCount()).To(Equal(0))
+			})
+		})
+
+		Context("when required cloud properties is not set", func() {
+
+			It("returns an error if property 'vmNamePrefix' is not set", func() {
+				cloudProps = VMCloudProperties{
+					VmNamePrefix:      "",
+					Domain:            "fake-domain.com",
+					StartCpus:         2,
+					MaxMemory:         2048,
+					Datacenter:        "fake-datacenter",
+					SshKey:            32345678,
+					DeployedByBoshCLI: true,
+				}
+
+				vmCID, err = createVM.Run(agentID, stemcellCID, cloudProps, networks, disks, env)
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("The property 'vmNamePrefix' must be set to create an instance"))
+				Expect(imageService.FindCallCount()).To(Equal(0))
+				Expect(vmService.CreateSshKeyCallCount()).To(Equal(0))
+				Expect(vmService.GetVlanCallCount()).To(Equal(0))
+				Expect(vmService.FindByPrimaryBackendIpCallCount()).To(Equal(0))
+				Expect(vmService.ReloadOSCallCount()).To(Equal(0))
+				Expect(vmService.CreateCallCount()).To(Equal(0))
+				Expect(vmService.ConfigureNetworksCallCount()).To(Equal(0))
+				Expect(vmService.AttachEphemeralDiskCallCount()).To(Equal(0))
+				Expect(vmService.CleanUpCallCount()).To(Equal(0))
+				Expect(registryClient.UpdateCalled).To(BeFalse())
+			})
+
+			It("returns an error if property 'domain' is not set", func() {
+				cloudProps = VMCloudProperties{
+					VmNamePrefix:      "fake-hostname",
+					Domain:            "",
+					StartCpus:         2,
+					MaxMemory:         2048,
+					Datacenter:        "fake-datacenter",
+					SshKey:            32345678,
+					DeployedByBoshCLI: true,
+				}
+
+				vmCID, err = createVM.Run(agentID, stemcellCID, cloudProps, networks, disks, env)
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("The property 'domain' must be set to create an instance"))
+				Expect(imageService.FindCallCount()).To(Equal(0))
+				Expect(vmService.CreateSshKeyCallCount()).To(Equal(0))
+				Expect(vmService.GetVlanCallCount()).To(Equal(0))
+				Expect(vmService.FindByPrimaryBackendIpCallCount()).To(Equal(0))
+				Expect(vmService.ReloadOSCallCount()).To(Equal(0))
+				Expect(vmService.CreateCallCount()).To(Equal(0))
+				Expect(vmService.ConfigureNetworksCallCount()).To(Equal(0))
+				Expect(vmService.AttachEphemeralDiskCallCount()).To(Equal(0))
+				Expect(vmService.CleanUpCallCount()).To(Equal(0))
+				Expect(registryClient.UpdateCalled).To(BeFalse())
+			})
+
+			It("returns an error if property 'startCpus' is not set", func() {
+				cloudProps = VMCloudProperties{
+					VmNamePrefix:      "fake-hostname",
+					Domain:            "fake-domain.com",
+					StartCpus:         0,
+					MaxMemory:         2048,
+					Datacenter:        "fake-datacenter",
+					SshKey:            32345678,
+					DeployedByBoshCLI: true,
+				}
+
+				vmCID, err = createVM.Run(agentID, stemcellCID, cloudProps, networks, disks, env)
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("The property 'startCpus' must be set to create an instance"))
+				Expect(imageService.FindCallCount()).To(Equal(0))
+				Expect(vmService.CreateSshKeyCallCount()).To(Equal(0))
+				Expect(vmService.GetVlanCallCount()).To(Equal(0))
+				Expect(vmService.FindByPrimaryBackendIpCallCount()).To(Equal(0))
+				Expect(vmService.ReloadOSCallCount()).To(Equal(0))
+				Expect(vmService.CreateCallCount()).To(Equal(0))
+				Expect(vmService.ConfigureNetworksCallCount()).To(Equal(0))
+				Expect(vmService.AttachEphemeralDiskCallCount()).To(Equal(0))
+				Expect(vmService.CleanUpCallCount()).To(Equal(0))
+				Expect(registryClient.UpdateCalled).To(BeFalse())
+			})
+
+			It("returns an error if property 'maxMemory' is not set", func() {
+				cloudProps = VMCloudProperties{
+					VmNamePrefix:      "fake-hostname",
+					Domain:            "fake-domain.com",
+					StartCpus:         2,
+					MaxMemory:         0,
+					Datacenter:        "fake-datacenter",
+					SshKey:            32345678,
+					DeployedByBoshCLI: true,
+				}
+
+				vmCID, err = createVM.Run(agentID, stemcellCID, cloudProps, networks, disks, env)
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("The property 'maxMemory' must be set to create an instance"))
+				Expect(imageService.FindCallCount()).To(Equal(0))
+				Expect(vmService.CreateSshKeyCallCount()).To(Equal(0))
+				Expect(vmService.GetVlanCallCount()).To(Equal(0))
+				Expect(vmService.FindByPrimaryBackendIpCallCount()).To(Equal(0))
+				Expect(vmService.ReloadOSCallCount()).To(Equal(0))
+				Expect(vmService.CreateCallCount()).To(Equal(0))
+				Expect(vmService.ConfigureNetworksCallCount()).To(Equal(0))
+				Expect(vmService.AttachEphemeralDiskCallCount()).To(Equal(0))
+				Expect(vmService.CleanUpCallCount()).To(Equal(0))
+				Expect(registryClient.UpdateCalled).To(BeFalse())
+			})
+
+			It("returns an error if property 'datacenter' is not set", func() {
+				cloudProps = VMCloudProperties{
+					VmNamePrefix:      "fake-hostname",
+					Domain:            "fake-domain.com",
+					StartCpus:         2,
+					MaxMemory:         2048,
+					Datacenter:        "",
+					SshKey:            32345678,
+					DeployedByBoshCLI: true,
+				}
+
+				vmCID, err = createVM.Run(agentID, stemcellCID, cloudProps, networks, disks, env)
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("The property 'datacenter' must be set to create an instance"))
+				Expect(imageService.FindCallCount()).To(Equal(0))
+				Expect(vmService.CreateSshKeyCallCount()).To(Equal(0))
+				Expect(vmService.GetVlanCallCount()).To(Equal(0))
+				Expect(vmService.FindByPrimaryBackendIpCallCount()).To(Equal(0))
+				Expect(vmService.ReloadOSCallCount()).To(Equal(0))
+				Expect(vmService.CreateCallCount()).To(Equal(0))
+				Expect(vmService.ConfigureNetworksCallCount()).To(Equal(0))
+				Expect(vmService.AttachEphemeralDiskCallCount()).To(Equal(0))
+				Expect(vmService.CleanUpCallCount()).To(Equal(0))
+				Expect(registryClient.UpdateCalled).To(BeFalse())
 			})
 		})
 	})

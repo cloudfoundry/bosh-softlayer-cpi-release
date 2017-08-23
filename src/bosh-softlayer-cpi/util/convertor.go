@@ -1,8 +1,8 @@
 package util
 
 import (
-	"regexp"
 	"bytes"
+	"regexp"
 )
 
 // Regexp definitions
