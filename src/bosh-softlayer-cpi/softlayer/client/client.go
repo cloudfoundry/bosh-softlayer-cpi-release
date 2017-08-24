@@ -124,7 +124,7 @@ type Client interface {
 	OrderBlockVolume2(storageType string, location string, size int, iops int, snapshotSpace int) (*datatypes.Container_Product_Order_Receipt, error)
 	CancelBlockVolume(volumeId int, reason string, immediate bool) (bool, error)
 	GetBlockVolumeDetails(volumeId int, mask string) (*datatypes.Network_Storage, bool, error)
-	GetBlockVolumeDetails2(volumeId int, mask string) (datatypes.Network_Storage, bool, error)
+	GetBlockVolumeDetailsBySoftLayerAccount(volumeId int, mask string) (datatypes.Network_Storage, error)
 	GetNetworkStorageTarget(volumeId int, mask string) (string, bool, error)
 	GetImage(imageId int, mask string) (*datatypes.Virtual_Guest_Block_Device_Template_Group, bool, error)
 	GetVlan(id int, mask string) (*datatypes.Network_Vlan, bool, error)
@@ -341,7 +341,7 @@ func (c *ClientManager) WaitInstanceHasActiveTransaction(id int, until time.Time
 			return err
 		}
 		if !found {
-			return bosherr.WrapErrorf(err, "SoftLayer virtual guest '%d' does not exist", id)
+			return bosherr.WrapErrorf(err, "SoftLayer virtual guest '%d' does not exists", id)
 		}
 
 		// if activeTxn != nil && activeTxn.TransactionStatus != nil && activeTxn.TransactionStatus.Name != nil {
@@ -354,7 +354,7 @@ func (c *ClientManager) WaitInstanceHasActiveTransaction(id int, until time.Time
 
 		now := time.Now()
 		if now.After(until) {
-			return bosherr.Errorf("Wait instance with id of '%d' has active transaction time out", id)
+			return bosherr.Errorf("Waiting instance with id of '%d' has active transaction time out", id)
 		}
 
 		min := math.Min(float64(5.0), float64(until.Sub(now)))
@@ -369,7 +369,7 @@ func (c *ClientManager) WaitInstanceHasNoneActiveTransaction(id int, until time.
 			return err
 		}
 		if !found {
-			return bosherr.WrapErrorf(err, "SoftLayer virtual guest '%d' does not exist", id)
+			return bosherr.WrapErrorf(err, "SoftLayer virtual guest '%d' does not exists", id)
 		}
 
 		// if activeTxn != nil && activeTxn.TransactionStatus != nil && activeTxn.TransactionStatus.Name != nil {
@@ -575,7 +575,7 @@ func (c *ClientManager) CancelInstance(id int) error {
 		return bosherr.WrapErrorf(err, "Deleting instance with id '%d'", id)
 	}
 	if !resp {
-		return bosherr.WrapError(err, "Deleting instance with id '%d' failed")
+		return bosherr.WrapErrorf(err, "Deleting instance with id '%d' failed", id)
 	}
 
 	return nil
@@ -846,20 +846,23 @@ func (c *ClientManager) GetBlockVolumeDetails(volumeId int, mask string) (*datat
 	return &volume, true, nil
 }
 
-func (c *ClientManager) GetBlockVolumeDetails2(volumeId int, mask string) (datatypes.Network_Storage, bool, error) {
+func (c *ClientManager) GetBlockVolumeDetailsBySoftLayerAccount(volumeId int, mask string) (datatypes.Network_Storage, error) {
 	if mask == "" {
 		mask = VOLUME_DETAIL_MASK
 	}
 	volumes, err := c.AccountService.Mask(mask).Filter(filter.Path("iscsiNetworkStorage.id").Eq(volumeId).Build()).GetIscsiNetworkStorage()
 	if err != nil {
-		return datatypes.Network_Storage{}, false, err
+		return datatypes.Network_Storage{}, err
 	}
 
 	if len(volumes) == 0 {
-		return datatypes.Network_Storage{}, false, bosherr.Errorf("Could not find volume with id %d", volumeId)
+		return datatypes.Network_Storage{}, bosherr.Errorf("Could not find volume with id %d", volumeId)
+	}
+	if len(volumes) > 1 {
+		return datatypes.Network_Storage{}, bosherr.Errorf("Exist more than one volume with id %d", volumeId)
 	}
 
-	return volumes[0], true, nil
+	return volumes[0], nil
 }
 
 func (c *ClientManager) GetNetworkStorageTarget(volumeId int, mask string) (string, bool, error) {
@@ -1148,11 +1151,11 @@ func (c *ClientManager) GetPackage(categoryCode string) (datatypes.Product_Packa
 }
 
 func (c *ClientManager) GetPerformanceIscsiPackage() (datatypes.Product_Package, error) {
-	return c.PackageService.Id(222).Mask("id,name,items[prices[categories],attributes]").GetObject()
+	return c.PackageService.Id(NETWORK_PERFORMANCE_STORAGE_PACKAGE_ID).Mask("id,name,items[prices[categories],attributes]").GetObject()
 }
 
 func (c *ClientManager) GetStorageAsServicePackage() (datatypes.Product_Package, error) {
-	return c.PackageService.Id(759).Mask("id,name,items[prices[categories],attributes]").GetObject()
+	return c.PackageService.Id(NETWORK_STORAGE_AS_SERVICE_PACKAGE_ID).Mask("id,name,items[prices[categories],attributes]").GetObject()
 }
 
 func (c *ClientManager) GetLocationId(location string) (int, error) {
@@ -1366,13 +1369,9 @@ func FindPerformanceIOPSPrice(productPackage datatypes.Product_Package, size int
 }
 
 func (c *ClientManager) CancelBlockVolume(volumeId int, reason string, immediate bool) (bool, error) {
-	blockVolume, found, err := c.GetBlockVolumeDetails2(volumeId, "id,billingItem.id")
+	blockVolume, err := c.GetBlockVolumeDetailsBySoftLayerAccount(volumeId, "id,billingItem.id")
 	if err != nil {
 		return false, err
-	}
-
-	if !found {
-		return true, nil
 	}
 
 	if blockVolume.BillingItem == nil || blockVolume.BillingItem.Id == nil {
@@ -1501,7 +1500,7 @@ func (c *ClientManager) UpgradeInstanceConfig(id int, cpu int, memory int, netwo
 		if strings.Contains(apiErr.Message, "A current price was provided for the upgrade order") {
 			return nil
 		}
-		return bosherr.WrapErrorf(err, "Upgrading configuration to virutal guest of  id '%d'", id)
+		return bosherr.WrapErrorf(err, "Upgrading configuration to virutal guest of id '%d'", id)
 	}
 
 	until = time.Now().Add(time.Duration(1) * time.Hour)
@@ -1575,58 +1574,58 @@ func (c *ClientManager) selectMaximunIopsItemPriceIdOnSize(size int) (datatypes.
 		}
 	}
 
-	return datatypes.Product_Item_Price{}, bosherr.Errorf("No proper performance storage (iSCSI volume)for size %d", size)
+	return datatypes.Product_Item_Price{}, bosherr.Errorf("No proper performance storage (iSCSI volume) for size %d", size)
 }
 
-func (c *ClientManager) selectSaaSMaximunIopsItemPriceIdOnSize(size int) (datatypes.Product_Item_Price, error) {
-	filters := filter.New()
-	filters = append(filters, filter.Path("itemPrices.attributes.value").Eq(size))
-	filters = append(filters, filter.Path("categories.categoryCode").Eq("performance_storage_iops"))
+//func (c *ClientManager) selectSaaSMaximunIopsItemPriceIdOnSize(size int) (datatypes.Product_Item_Price, error) {
+//	filters := filter.New()
+//	filters = append(filters, filter.Path("itemPrices.attributes.value").Eq(size))
+//	filters = append(filters, filter.Path("categories.categoryCode").Eq("performance_storage_iops"))
+//
+//	itemPrices, err := c.PackageService.Id(NETWORK_STORAGE_AS_SERVICE_PACKAGE_ID).Filter(filters.Build()).GetItemPrices()
+//	if err != nil {
+//		return datatypes.Product_Item_Price{}, err
+//	}
+//
+//	if len(itemPrices) > 0 {
+//		candidates := itemsFilter(itemPrices, func(itemPrice datatypes.Product_Item_Price) bool {
+//			return itemPrice.LocationGroupId == nil
+//		})
+//		if len(candidates) > 0 {
+//			sort.Sort(Product_Item_Price_Sorted_Data(candidates))
+//			return candidates[len(candidates)-1], nil
+//		} else {
+//			return datatypes.Product_Item_Price{}, bosherr.Errorf("No proper performance storage (iSCSI volume) for size %d", size)
+//		}
+//	}
+//
+//	return datatypes.Product_Item_Price{}, bosherr.Errorf("No proper performance storage (iSCSI volume)for size %d", size)
+//}
 
-	itemPrices, err := c.PackageService.Id(NETWORK_STORAGE_AS_SERVICE_PACKAGE_ID).Filter(filters.Build()).GetItemPrices()
-	if err != nil {
-		return datatypes.Product_Item_Price{}, err
-	}
-
-	if len(itemPrices) > 0 {
-		candidates := itemsFilter(itemPrices, func(itemPrice datatypes.Product_Item_Price) bool {
-			return itemPrice.LocationGroupId == nil
-		})
-		if len(candidates) > 0 {
-			sort.Sort(Product_Item_Price_Sorted_Data(candidates))
-			return candidates[len(candidates)-1], nil
-		} else {
-			return datatypes.Product_Item_Price{}, bosherr.Errorf("No proper performance storage (iSCSI volume) for size %d", size)
-		}
-	}
-
-	return datatypes.Product_Item_Price{}, bosherr.Errorf("No proper performance storage (iSCSI volume)for size %d", size)
-}
-
-func (c *ClientManager) selectMediumIopsItemPriceIdOnSize(size int) (datatypes.Product_Item_Price, error) {
-	filters := filter.New()
-	filters = append(filters, filter.Path("itemPrices.attributes.value").Eq(size))
-	filters = append(filters, filter.Path("categories.categoryCode").Eq("performance_storage_iops"))
-
-	itemPrices, err := c.PackageService.Id(NETWORK_PERFORMANCE_STORAGE_PACKAGE_ID).Filter(filters.Build()).GetItemPrices()
-	if err != nil {
-		return datatypes.Product_Item_Price{}, err
-	}
-
-	if len(itemPrices) > 0 {
-		candidates := itemsFilter(itemPrices, func(itemPrice datatypes.Product_Item_Price) bool {
-			return itemPrice.LocationGroupId == nil
-		})
-		if len(candidates) > 0 {
-			sort.Sort(Product_Item_Price_Sorted_Data(candidates))
-			return candidates[len(candidates)/2], nil
-		} else {
-			return datatypes.Product_Item_Price{}, bosherr.Errorf("No proper performance storage (iSCSI volume) for size %d", size)
-		}
-	}
-
-	return datatypes.Product_Item_Price{}, bosherr.Errorf("No proper performance storage (iSCSI volume)for size %d", size)
-}
+//func (c *ClientManager) selectMediumIopsItemPriceIdOnSize(size int) (datatypes.Product_Item_Price, error) {
+//	filters := filter.New()
+//	filters = append(filters, filter.Path("itemPrices.attributes.value").Eq(size))
+//	filters = append(filters, filter.Path("categories.categoryCode").Eq("performance_storage_iops"))
+//
+//	itemPrices, err := c.PackageService.Id(NETWORK_PERFORMANCE_STORAGE_PACKAGE_ID).Filter(filters.Build()).GetItemPrices()
+//	if err != nil {
+//		return datatypes.Product_Item_Price{}, err
+//	}
+//
+//	if len(itemPrices) > 0 {
+//		candidates := itemsFilter(itemPrices, func(itemPrice datatypes.Product_Item_Price) bool {
+//			return itemPrice.LocationGroupId == nil
+//		})
+//		if len(candidates) > 0 {
+//			sort.Sort(Product_Item_Price_Sorted_Data(candidates))
+//			return candidates[len(candidates)/2], nil
+//		} else {
+//			return datatypes.Product_Item_Price{}, bosherr.Errorf("No proper performance storage (iSCSI volume) for size %d", size)
+//		}
+//	}
+//
+//	return datatypes.Product_Item_Price{}, bosherr.Errorf("No proper performance storage (iSCSI volume)for size %d", size)
+//}
 
 func itemsFilter(vs []datatypes.Product_Item_Price, f func(datatypes.Product_Item_Price) bool) []datatypes.Product_Item_Price {
 	vsf := make([]datatypes.Product_Item_Price, 0)

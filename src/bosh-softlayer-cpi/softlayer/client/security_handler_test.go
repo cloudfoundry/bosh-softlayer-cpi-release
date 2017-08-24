@@ -13,21 +13,27 @@ import (
 	vpsVm "bosh-softlayer-cpi/softlayer/vps_service/client/vm"
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/softlayer/softlayer-go/session"
+	"net/http"
 )
 
 var _ = Describe("SecurityHandler", func() {
 	var (
+		err error
+
 		server      *ghttp.Server
 		vpsEndPoint string
 		vps         *vpsVm.Client
 
-		sess *session.Session
-		cli  *boslc.ClientManager
+		transportHandler *test_helpers.FakeTransportHandler
+		sess             *session.Session
+		cli              *boslc.ClientManager
 
 		label       string
 		key         string
 		fingerPrint string
 		sshKeyId    int
+
+		respParas []map[string]interface{}
 	)
 	BeforeEach(func() {
 		// the fake server to setup VPS Server
@@ -36,12 +42,17 @@ var _ = Describe("SecurityHandler", func() {
 		vps = vpsClient.New(httptransport.New(vpsEndPoint,
 			"v2", []string{"http"}), strfmt.Default).VM
 
-		sess = test_helpers.NewFakeSoftlayerSession(server)
+		transportHandler = &test_helpers.FakeTransportHandler{
+			FakeServer:           server,
+			SoftlayerAPIEndpoint: server.URL(),
+			MaxRetries:           3,
+		}
+		sess = test_helpers.NewFakeSoftlayerSession(transportHandler)
 		cli = boslc.NewSoftLayerClientManager(sess, vps)
 
 		label = "fake-label"
 		key = "fake-key"
-		fingerPrint = "fakte-fingerPrint"
+		fingerPrint = "fake-fingerPrint"
 		sshKeyId = 12345678
 	})
 
@@ -50,24 +61,96 @@ var _ = Describe("SecurityHandler", func() {
 	})
 
 	Describe("CreateSshKey", func() {
-		Context("when ImageService createObject call successfully", func() {
-			It("create ssh key successfully", func() {
-				_, err := cli.CreateSshKey(&label, &key, &fingerPrint)
-
+		Context("when SoftLayerSecuritySshKey createObject call successfully", func() {
+			It("Create ssh key successfully", func() {
+				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Security_Ssh_Key_createObject.json",
+						"statusCode": http.StatusOK,
+					},
+				}
+				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
+
+				_, err := cli.CreateSshKey(&label, &key, &fingerPrint)
+				Expect(err).NotTo(HaveOccurred())
+			})
+
+			It("Create ssh key successfully when vgs has sshkeys", func() {
+				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Security_Ssh_Key_createObject_PublicException.json",
+						"statusCode": http.StatusInternalServerError,
+					},
+					{
+						"filename":   "SoftLayer_Account_getSshKeys.json",
+						"statusCode": http.StatusOK,
+					},
+				}
+				err = test_helpers.SpecifyServerResps(respParas, server)
+				Expect(err).NotTo(HaveOccurred())
+
+				_, err := cli.CreateSshKey(&label, &key, &fingerPrint)
+				Expect(err).NotTo(HaveOccurred())
+			})
+		})
+
+		Context("when SoftLayerSecuritySshKey createObject call return an error", func() {
+			It("Return error when ssh key successfully", func() {
+				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Security_Ssh_Key_createObject_PublicException.json",
+						"statusCode": http.StatusInternalServerError,
+					},
+					{
+						"filename":   "SoftLayer_Account_getSshKeys_InternalError.json",
+						"statusCode": http.StatusInternalServerError,
+					},
+				}
+				err = test_helpers.SpecifyServerResps(respParas, server)
+				Expect(err).NotTo(HaveOccurred())
+
+				_, err := cli.CreateSshKey(&label, &key, &fingerPrint)
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("fake-client-error"))
 			})
 		})
 	})
 
 	Describe("DeleteSshKey", func() {
-		Context("when ImageService deleteObject call successfully", func() {
-			It("delete ssh key successfully", func() {
-				succeed, err := cli.DeleteSshKey(sshKeyId)
+		Context("when SoftLayerSecuritySshKey deleteObject call successfully", func() {
+			It("Delete ssh key successfully", func() {
+				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Security_Ssh_Key_deleteObject.json",
+						"statusCode": http.StatusOK,
+					},
+				}
+				err = test_helpers.SpecifyServerResps(respParas, server)
+				Expect(err).NotTo(HaveOccurred())
 
+				succeed, err := cli.DeleteSshKey(sshKeyId)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(succeed).To(Equal(true))
 			})
 		})
-	})
 
+		Context("when SoftLayerSecuritySshKey deleteObject call return an error", func() {
+			It("Return error", func() {
+				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Security_Ssh_Key_deleteObject_InternalError.json",
+						"statusCode": http.StatusInternalServerError,
+					},
+				}
+				err = test_helpers.SpecifyServerResps(respParas, server)
+				Expect(err).NotTo(HaveOccurred())
+
+				succeed, err := cli.DeleteSshKey(sshKeyId)
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("fake-client-error"))
+				Expect(succeed).To(Equal(false))
+			})
+		})
+	})
 })

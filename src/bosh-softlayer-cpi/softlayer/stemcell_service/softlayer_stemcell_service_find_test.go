@@ -24,7 +24,7 @@ var _ = Describe("Stemcell Service", func() {
 	BeforeEach(func() {
 		stemcellID = 22345678
 		cli = &fakeslclient.FakeClient{}
-		logger = boshlog.NewLogger(boshlog.LevelDebug)
+		logger = boshlog.NewLogger(boshlog.LevelNone)
 		stemcell = stemcellService.NewSoftlayerStemcellService(cli, logger)
 	})
 

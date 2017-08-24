@@ -14,6 +14,9 @@ type AgentOptions struct {
 
 	// Blobstore options
 	Blobstore BlobstoreOptions
+
+	//The SHA-512 encrypted vcap password
+	VcapPassword string
 }
 
 // BlobstoreOptions are the blobstore options passed to the BOSH Agent (http://bosh.io/docs/bosh-components.html#agent).

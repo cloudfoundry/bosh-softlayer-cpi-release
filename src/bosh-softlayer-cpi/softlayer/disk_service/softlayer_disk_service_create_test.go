@@ -30,7 +30,7 @@ var _ = Describe("Disk Service Create", func() {
 		location = "lon02"
 
 		cli = &fakeslclient.FakeClient{}
-		logger = boshlog.NewLogger(boshlog.LevelDebug)
+		logger = boshlog.NewLogger(boshlog.LevelNone)
 		disk = diskService.NewSoftlayerDiskService(cli, logger)
 	})
 

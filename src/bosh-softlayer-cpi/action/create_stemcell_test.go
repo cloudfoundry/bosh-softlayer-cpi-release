@@ -8,6 +8,7 @@ import (
 
 	. "bosh-softlayer-cpi/action"
 
+	"bosh-softlayer-cpi/api"
 	stemcellfakes "bosh-softlayer-cpi/softlayer/stemcell_service/fakes"
 )
 
@@ -58,6 +59,18 @@ var _ = Describe("CreateStemcell", func() {
 			Expect(err.Error()).To(ContainSubstring("fake-stemcell-service-error"))
 			Expect(stemcellService.FindCallCount()).To(Equal(1))
 			Expect(stemcellCID).NotTo(Equal(StemcellCID(cloudProps.Id).String()))
+		})
+
+		It("returns an error if stemcellService find returns an api error", func() {
+			stemcellService.FindReturns(
+				"",
+				api.NewStemcellkNotFoundError("fake-stemcell-imagePath", false),
+			)
+
+			_, err = createStemcell.Run("fake-stemcell-imagePath", cloudProps)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("Stemcell 'fake-stemcell-imagePath' not found"))
+			Expect(stemcellService.FindCallCount()).To(Equal(1))
 		})
 	})
 })

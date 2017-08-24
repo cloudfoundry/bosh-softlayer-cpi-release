@@ -1,0 +1,27 @@
+{
+  "id": 222,
+  "isActive": 1,
+  "name": "Performance",
+  "items": [
+    {
+      "capacity": 500,
+      "prices": [
+        {
+          "categories": [
+            {
+              "categoryCode": "performance_storage_iscsi"
+            },
+            {
+              "categoryCode": "performance_storage_space"
+            }
+          ]
+        }
+      ],
+      "attributes": [
+        {
+          "id": 98364
+        }
+      ]
+    }
+  ]
+}

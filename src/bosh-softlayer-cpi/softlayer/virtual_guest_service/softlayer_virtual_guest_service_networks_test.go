@@ -27,7 +27,7 @@ var _ = Describe("Virtual Guest Service", func() {
 	BeforeEach(func() {
 		cli = &fakeslclient.FakeClient{}
 		uuidGen = &fakeuuid.FakeGenerator{}
-		logger = boshlog.NewLogger(boshlog.LevelDebug)
+		logger = boshlog.NewLogger(boshlog.LevelNone)
 		virtualGuestService = NewSoftLayerVirtualGuestService(cli, uuidGen, logger)
 	})
 
@@ -214,7 +214,9 @@ var _ = Describe("Virtual Guest Service", func() {
 
 			cli.GetVlanReturns(
 				&datatypes.Network_Vlan{
-					Id: sl.Int(32345678),
+					Id:              sl.Int(32345678),
+					PrimarySubnetId: sl.Int(658644),
+					NetworkSpace:    sl.String("PUBLIC"),
 				},
 				true,
 				nil,
@@ -251,6 +253,60 @@ var _ = Describe("Virtual Guest Service", func() {
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("Failed to get vlan details with id"))
 			Expect(cli.GetVlanCallCount()).To(Equal(1))
+		})
+	})
+
+	Describe("Call GetSubnet", func() {
+		var (
+			vlanID int
+			mask   string
+		)
+
+		BeforeEach(func() {
+			vlanID = 32345678
+			mask = client.NETWORK_DEFAULT_SUBNET_MASK
+
+			cli.GetSubnetReturns(
+				&datatypes.Network_Subnet{
+					Id:            sl.Int(658644),
+					NetworkVlanId: sl.Int(32345678),
+					AddressSpace:  sl.String("PUBLIC"),
+				},
+				true,
+				nil,
+			)
+		})
+
+		It("Get vlan successfully", func() {
+			_, err := virtualGuestService.GetSubnet(vlanID, mask)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(cli.GetSubnetCallCount()).To(Equal(1))
+		})
+
+		It("Return error if client call GetSubnet returns an error", func() {
+			cli.GetSubnetReturns(
+				&datatypes.Network_Subnet{},
+				false,
+				errors.New("fake-client-error"),
+			)
+
+			_, err := virtualGuestService.GetSubnet(vlanID, mask)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("fake-client-error"))
+			Expect(cli.GetSubnetCallCount()).To(Equal(1))
+		})
+
+		It("Return error if client call GetSubnet returns non-existing", func() {
+			cli.GetSubnetReturns(
+				&datatypes.Network_Subnet{},
+				false,
+				nil,
+			)
+
+			_, err := virtualGuestService.GetSubnet(vlanID, mask)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("Failed to get subnet details with id"))
+			Expect(cli.GetSubnetCallCount()).To(Equal(1))
 		})
 	})
 })

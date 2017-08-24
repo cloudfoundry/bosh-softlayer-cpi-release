@@ -8,10 +8,12 @@ import (
 
 	. "bosh-softlayer-cpi/action"
 
+	"bosh-softlayer-cpi/api"
 	"bosh-softlayer-cpi/registry"
 	registryfakes "bosh-softlayer-cpi/registry/fakes"
 	diskfakes "bosh-softlayer-cpi/softlayer/disk_service/fakes"
 	instancefakes "bosh-softlayer-cpi/softlayer/virtual_guest_service/fakes"
+	"fmt"
 	"github.com/softlayer/softlayer-go/datatypes"
 	"github.com/softlayer/softlayer-go/sl"
 )
@@ -94,6 +96,18 @@ var _ = Describe("AttachDisk", func() {
 			Expect(registryClient.UpdateCalled).To(BeFalse())
 		})
 
+		It("returns an error if diskService find returns an api error", func() {
+			diskService.FindReturns(
+				&datatypes.Network_Storage{},
+				api.NewVMNotFoundError(vmCID.String()),
+			)
+
+			_, err = attachDisk.Run(vmCID, diskCID)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring(fmt.Sprintf("VM '%d' not found", vmCID)))
+			Expect(diskService.FindCallCount()).To(Equal(1))
+		})
+
 		It("returns an error if vmService attach disk call returns an error", func() {
 			vmService.AttachDiskReturns(
 				[]byte{},
@@ -107,6 +121,19 @@ var _ = Describe("AttachDisk", func() {
 			Expect(vmService.AttachDiskCallCount()).To(Equal(1))
 			Expect(registryClient.FetchCalled).To(BeFalse())
 			Expect(registryClient.UpdateCalled).To(BeFalse())
+		})
+
+		It("returns an error if vmService attach disk returns an api error", func() {
+			vmService.AttachDiskReturns(
+				[]byte{},
+				api.NewVMNotFoundError(vmCID.String()),
+			)
+
+			_, err = attachDisk.Run(vmCID, diskCID)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring(fmt.Sprintf("VM '%d' not found", vmCID)))
+			Expect(diskService.FindCallCount()).To(Equal(1))
+			Expect(vmService.AttachDiskCallCount()).To(Equal(1))
 		})
 
 		It("returns an error if registryClient fetch call returns an error", func() {

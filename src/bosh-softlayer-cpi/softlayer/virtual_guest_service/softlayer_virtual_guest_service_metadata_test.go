@@ -11,6 +11,7 @@ import (
 	fakeuuid "github.com/cloudfoundry/bosh-utils/uuid/fakes"
 
 	. "bosh-softlayer-cpi/softlayer/virtual_guest_service"
+	"fmt"
 )
 
 var _ = Describe("Virtual Guest Service", func() {
@@ -24,7 +25,7 @@ var _ = Describe("Virtual Guest Service", func() {
 	BeforeEach(func() {
 		cli = &fakeslclient.FakeClient{}
 		uuidGen = &fakeuuid.FakeGenerator{}
-		logger = boshlog.NewLogger(boshlog.LevelDebug)
+		logger = boshlog.NewLogger(boshlog.LevelNone)
 		virtualGuestService = NewSoftLayerVirtualGuestService(cli, uuidGen, logger)
 	})
 
@@ -54,6 +55,24 @@ var _ = Describe("Virtual Guest Service", func() {
 			Expect(cli.SetTagsCallCount()).To(Equal(1))
 		})
 
+		It("Set tags successfully with 'job,index' tag and withou 'compiling' tag", func() {
+			metaData = Metadata{
+				"deployment": "fake=deployment",
+				"director":   "fake-director-uuid",
+				"job":        "fake-job",
+				"index":      "fake-index",
+			}
+
+			cli.SetTagsReturns(
+				true,
+				nil,
+			)
+
+			err := virtualGuestService.SetMetadata(vmID, metaData)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(cli.SetTagsCallCount()).To(Equal(1))
+		})
+
 		It("Return error if softLayerClient SetTags call returns an error", func() {
 			cli.SetTagsReturns(
 				false,
@@ -63,6 +82,31 @@ var _ = Describe("Virtual Guest Service", func() {
 			err := virtualGuestService.SetMetadata(vmID, metaData)
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("fake-client-error"))
+			Expect(cli.SetTagsCallCount()).To(Equal(1))
+		})
+
+		It("Return error if softLayerClient SetTags call returns an error", func() {
+			cli.SetTagsReturns(
+				false,
+				nil,
+			)
+
+			err := virtualGuestService.SetMetadata(vmID, metaData)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring(fmt.Sprintf("VM '%d' not found", vmID)))
+			Expect(cli.SetTagsCallCount()).To(Equal(1))
+		})
+
+		It("Return error if metaData is empty", func() {
+			metaData = Metadata{}
+
+			cli.SetTagsReturns(
+				true,
+				nil,
+			)
+
+			err := virtualGuestService.SetMetadata(vmID, metaData)
+			Expect(err).NotTo(HaveOccurred())
 			Expect(cli.SetTagsCallCount()).To(Equal(1))
 		})
 	})

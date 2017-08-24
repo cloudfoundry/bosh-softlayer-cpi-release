@@ -9,33 +9,18 @@ import (
 	bsl "bosh-softlayer-cpi/softlayer/client"
 
 	"bosh-softlayer-cpi/api"
-	datatypes "github.com/softlayer/softlayer-go/datatypes"
 	"strconv"
 )
-
-func (vg SoftlayerVirtualGuestService) getRootPassword(instance datatypes.Virtual_Guest) *string {
-	passwords := (*instance.OperatingSystem).Passwords
-	for _, password := range passwords {
-		if *password.Username == rootUser {
-			return password.Password
-		}
-	}
-
-	return nil
-}
 
 func (vg SoftlayerVirtualGuestService) AttachEphemeralDisk(id int, diskSize int) error {
 	return vg.softlayerClient.AttachSecondDiskToInstance(id, diskSize)
 }
 
 func (vg SoftlayerVirtualGuestService) AttachDisk(id int, diskID int) ([]byte, error) {
-	ipAddress, found, err := vg.softlayerClient.GetNetworkStorageTarget(diskID, bsl.VOLUME_DETAIL_MASK)
+	//ipAddress, found, err := vg.softlayerClient.GetNetworkStorageTarget(diskID, bsl.VOLUME_DETAIL_MASK)
+	volume, err := vg.softlayerClient.GetBlockVolumeDetailsBySoftLayerAccount(diskID, "serviceResourceBackendIpAddress")
 	if err != nil {
 		return []byte{}, bosherr.WrapErrorf(err, "Fetching disk target address with id '%d'", diskID)
-	}
-
-	if !found {
-		return []byte{}, api.NewDiskNotFoundError(strconv.Itoa(diskID), false)
 	}
 
 	instance, found, err := vg.softlayerClient.GetInstance(id, bsl.INSTANCE_DETAIL_MASK)
@@ -68,7 +53,7 @@ func (vg SoftlayerVirtualGuestService) AttachDisk(id int, diskID int) ([]byte, e
 
 	return []byte(fmt.Sprintf(`{"initiator_name":"%s","target":"%s","username":"%s","password":"%s" }`,
 		initiatorName,
-		ipAddress,
+		*(volume.ServiceResourceBackendIpAddress),
 		username,
 		password,
 	)), nil
@@ -106,3 +91,14 @@ func (vg SoftlayerVirtualGuestService) DetachDisk(id int, diskID int) error {
 
 	return nil
 }
+
+//func (vg SoftlayerVirtualGuestService) getRootPassword(instance datatypes.Virtual_Guest) *string {
+//	passwords := (*instance.OperatingSystem).Passwords
+//	for _, password := range passwords {
+//		if *password.Username == rootUser {
+//			return password.Password
+//		}
+//	}
+//
+//	return nil
+//}

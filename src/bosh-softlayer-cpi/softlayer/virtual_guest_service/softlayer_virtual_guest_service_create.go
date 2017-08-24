@@ -3,6 +3,7 @@ package instance
 import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 
+	"fmt"
 	"github.com/softlayer/softlayer-go/datatypes"
 )
 
@@ -21,8 +22,11 @@ func (vg SoftlayerVirtualGuestService) Create(virtualGuest *datatypes.Virtual_Gu
 	return *virtualGuest.Id, nil
 }
 
-func (vg SoftlayerVirtualGuestService) CleanUp(id int) {
+func (vg SoftlayerVirtualGuestService) CleanUp(id int) error {
 	if err := vg.Delete(id, false); err != nil {
-		vg.logger.Debug(softlayerVirtualGuestServiceLogTag, "Failed cleaning up Softlayer VirtualGuest '%s': %v", id, err)
+		vg.logger.Debug(softlayerVirtualGuestServiceLogTag, "Failed cleaning up Softlayer VirtualGuest '%s': %d", id, err)
+		return bosherr.WrapError(err, fmt.Sprintf("Failed cleaning up Softlayer VirtualGuest '%d'", id))
+	} else {
+		return nil
 	}
 }

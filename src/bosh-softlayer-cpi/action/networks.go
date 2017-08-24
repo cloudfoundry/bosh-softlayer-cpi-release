@@ -40,8 +40,8 @@ func (ns Networks) AsInstanceServiceNetworks() instance.Networks {
 			DNS:     network.DNS,
 		}
 
-		if len(network.CloudProperties.networkVlans) > 0 {
-			parseCloudProperties(networks, netName, netSlim, network.CloudProperties.networkVlans, network.CloudProperties.SourcePolicyRouting)
+		if len(network.CloudProperties.NetworkVlans) > 0 {
+			parseCloudProperties(networks, netName, netSlim, network.CloudProperties.NetworkVlans, network.CloudProperties.SourcePolicyRouting)
 		}
 	}
 
@@ -65,20 +65,25 @@ func (n Network) IsManual() bool {
 func parseCloudProperties(networks instance.Networks, netName string, network instance.Network, networkVlans []NetworkVlan, sourcePolicyRouting bool) {
 	for index, networkVlan := range networkVlans {
 		var newNetName string
-		if index > 0 {
-			newNetName = fmt.Sprintf("%s_%d", netName, index)
-			network.CloudProperties = instance.NetworkCloudProperties{
+		var cloudProps instance.NetworkCloudProperties
+		if networkVlan.SubnetId != 0 {
+			cloudProps = instance.NetworkCloudProperties{
 				VlanID:   networkVlan.VlanId,
 				SubnetID: networkVlan.SubnetId,
 			}
+		} else {
+			cloudProps = instance.NetworkCloudProperties{
+				VlanID: networkVlan.VlanId,
+			}
+		}
+
+		if index > 0 {
+			newNetName = fmt.Sprintf("%s_%d", netName, index)
+			network.CloudProperties = cloudProps
 			networks[newNetName] = network
 		} else {
 			newNetName = netName
-			network.CloudProperties = instance.NetworkCloudProperties{
-				VlanID:              networkVlan.VlanId,
-				SubnetID:            networkVlan.SubnetId,
-				SourcePolicyRouting: sourcePolicyRouting,
-			}
+			network.CloudProperties = cloudProps
 			networks[newNetName] = network
 		}
 	}

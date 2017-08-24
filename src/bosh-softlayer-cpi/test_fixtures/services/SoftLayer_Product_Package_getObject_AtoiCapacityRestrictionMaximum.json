@@ -1,0 +1,49 @@
+{
+  "id": 222,
+  "isActive": 1,
+  "name": "Performance",
+  "items": [
+    {
+      "capacity": 250,
+      "prices": [
+        {
+          "categories": [
+            {
+              "categoryCode": "performance_storage_iscsi"
+            },
+            {
+              "categoryCode": "performance_storage_space"
+            }
+          ]
+        }
+      ],
+      "attributes": [
+        {
+          "id": 98764
+        }
+      ]
+    },
+    {
+      "capacity": 1500,
+      "prices": [
+        {
+          "categories": [
+            {
+              "categoryCode": "performance_storage_iscsi"
+            },
+            {
+              "categoryCode": "performance_storage_iops"
+            }
+          ],
+          "capacityRestrictionMinimum": "200",
+          "capacityRestrictionMaximum": "error"
+        }
+      ],
+      "attributes": [
+        {
+          "id": 98764
+        }
+      ]
+    }
+  ]
+}

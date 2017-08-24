@@ -1,0 +1,15 @@
+{
+  "vm": {
+    "cid": 12345678,
+    "cpu": 2,
+    "createDate": "2016-11-07T21:03:36-06:00",
+    "deploymentName": "",
+    "hostname": "wilma2",
+    "ip": "10.127.94.175",
+    "memory_md": "2048",
+    "modifyDate": "2016-11-07T21:03:36-06:00",
+    "private_vlan": 1421725,
+    "public_vlan": 1421723,
+    "state": "free"
+  }
+}

@@ -27,17 +27,26 @@ func (vg SoftlayerVirtualGuestService) SetMetadata(id int, vmMetadata Metadata) 
 
 func (vg SoftlayerVirtualGuestService) extractTagsFromVMMetadata(vmMetadata Metadata) (string, error) {
 	var tagStringBuffer bytes.Buffer
-	tagStringBuffer.WriteString("deployment" + ":" + vmMetadata["deployment"].(string))
-	tagStringBuffer.WriteString(", ")
-	tagStringBuffer.WriteString("director" + ":" + vmMetadata["director"].(string))
-	tagStringBuffer.WriteString(", ")
+	if val, ok := vmMetadata["deployment"]; ok {
+		tagStringBuffer.WriteString("deployment" + ":" + val.(string))
+	}
+	if val, ok := vmMetadata["director"]; ok {
+		tagStringBuffer.WriteString(", ")
+		tagStringBuffer.WriteString("director" + ":" + val.(string))
+	}
 
 	if val, ok := vmMetadata["compiling"]; ok {
+		tagStringBuffer.WriteString(", ")
 		tagStringBuffer.WriteString("compiling" + ":" + val.(string))
 	} else {
-		tagStringBuffer.WriteString("job" + ":" + vmMetadata["job"].(string))
-		tagStringBuffer.WriteString(", ")
-		tagStringBuffer.WriteString("index" + ":" + vmMetadata["index"].(string))
+		if val, ok := vmMetadata["job"]; ok {
+			tagStringBuffer.WriteString(", ")
+			tagStringBuffer.WriteString("job" + ":" + val.(string))
+		}
+		if val, ok := vmMetadata["index"]; ok {
+			tagStringBuffer.WriteString(", ")
+			tagStringBuffer.WriteString("index" + ":" + val.(string))
+		}
 	}
 
 	return tagStringBuffer.String(), nil

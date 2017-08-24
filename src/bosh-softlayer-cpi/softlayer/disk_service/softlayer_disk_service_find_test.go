@@ -24,7 +24,7 @@ var _ = Describe("Disk Service Find", func() {
 	BeforeEach(func() {
 		diskID = 12345678
 		cli = &boslc.FakeClient{}
-		logger = boshlog.NewLogger(boshlog.LevelDebug)
+		logger = boshlog.NewLogger(boshlog.LevelNone)
 		disk = diskService.NewSoftlayerDiskService(cli, logger)
 	})
 

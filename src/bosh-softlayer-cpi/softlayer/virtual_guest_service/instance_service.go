@@ -12,7 +12,7 @@ type Service interface {
 	Create(virtualGuest *datatypes.Virtual_Guest, enableVps bool, stemcellID int, sshKeys []int) (int, error)
 	UpgradeInstance(id int, cpu int, memory int, network int, privateCPU bool) error
 	ConfigureNetworks(id int, networks Networks) (Networks, error)
-	CleanUp(id int)
+	CleanUp(id int) error
 	CreateSshKey(label string, key string, fingerPrint string) (int, error)
 	Delete(id int, enableVps bool) error
 	DetachDisk(id int, diskID int) error

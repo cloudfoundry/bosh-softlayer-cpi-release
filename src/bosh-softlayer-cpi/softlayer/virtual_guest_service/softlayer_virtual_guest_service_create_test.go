@@ -26,7 +26,7 @@ var _ = Describe("Virtual Guest Service", func() {
 	BeforeEach(func() {
 		cli = &fakeslclient.FakeClient{}
 		uuidGen = &fakeuuid.FakeGenerator{}
-		logger = boshlog.NewLogger(boshlog.LevelDebug)
+		logger = boshlog.NewLogger(boshlog.LevelNone)
 		virtualGuestService = NewSoftLayerVirtualGuestService(cli, uuidGen, logger)
 	})
 
@@ -151,5 +151,37 @@ var _ = Describe("Virtual Guest Service", func() {
 				Expect(vmID).NotTo(Equal(createVmID))
 			})
 		})
+	})
+
+	Describe("Call Cleanup", func() {
+		var (
+			vmID int
+		)
+
+		BeforeEach(func() {
+			vmID = 12345678
+		})
+
+		It("run successfully Id if create instance successful", func() {
+			cli.CancelInstanceReturns(
+				nil,
+			)
+
+			err := virtualGuestService.CleanUp(vmID)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(cli.CancelInstanceCallCount()).To(Equal(1))
+		})
+
+		It("returns error if softLayerClient create instance from VPS call", func() {
+			cli.CancelInstanceReturns(
+				errors.New("fake-client-error"),
+			)
+
+			err := virtualGuestService.CleanUp(vmID)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("fake-client-error"))
+			Expect(cli.CancelInstanceCallCount()).To(Equal(1))
+		})
+
 	})
 })

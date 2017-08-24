@@ -8,6 +8,7 @@ import (
 
 	. "bosh-softlayer-cpi/action"
 
+	"bosh-softlayer-cpi/api"
 	diskfakes "bosh-softlayer-cpi/softlayer/disk_service/fakes"
 	instancefakes "bosh-softlayer-cpi/softlayer/virtual_guest_service/fakes"
 	"github.com/softlayer/softlayer-go/datatypes"
@@ -87,6 +88,42 @@ var _ = Describe("CreateDisk", func() {
 				Expect(err.Error()).To(ContainSubstring("fake-instance-service-error"))
 				Expect(vmService.FindCallCount()).To(Equal(1))
 				Expect(diskService.CreateCallCount()).To(Equal(0))
+			})
+
+			It("returns an error if vmService find call returns an error", func() {
+				vmService.FindReturns(
+					&datatypes.Virtual_Guest{},
+					api.NewDiskCreationFailedError("Not supported", false),
+				)
+
+				_, err = createDisk.Run(32768, cloudProps, vmCID)
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("Disk failed to create: "))
+				Expect(vmService.FindCallCount()).To(Equal(1))
+				Expect(diskService.CreateCallCount()).To(Equal(0))
+			})
+
+			It("returns an error if vmService create call returns an error", func() {
+				vmService.FindReturns(
+					&datatypes.Virtual_Guest{
+						Id: sl.Int(1234567),
+						Datacenter: &datatypes.Location{
+							Name: sl.String("fake-datacenter-name"),
+						},
+					},
+					nil,
+				)
+
+				diskService.CreateReturns(
+					0,
+					errors.New("fake-instance-service-error"),
+				)
+
+				_, err = createDisk.Run(32768, cloudProps, vmCID)
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("fake-instance-service-error"))
+				Expect(vmService.FindCallCount()).To(Equal(1))
+				Expect(diskService.CreateCallCount()).To(Equal(1))
 			})
 		})
 	})

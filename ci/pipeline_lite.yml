@@ -146,7 +146,7 @@ resources:
     type: git
     source:
       uri: git@github.com:bluebosh/bosh-softlayer-cpi-release.git
-      branch: new_sl_with_actions
+      branch: wip_cpi_ng
       private_key: {{github_private_key}}
       ignore_paths:
           - .final_builds/**/*.yml

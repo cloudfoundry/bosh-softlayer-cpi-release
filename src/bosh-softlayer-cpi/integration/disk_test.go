@@ -23,20 +23,11 @@ var _ = Describe("Disk", func() {
 		      "domain": "softlayer.com",
 		      "startCpus": 1,
 		      "maxMemory": 1024,
+		      "maxNetworkSpeed": 100,
 		      "hourlyBillingFlag": true,
 		      "localDiskFlag": true,
 		      "dedicatedAccountHostOnlyFlag": false,
-		      "datacenter": "lon02",
-		      "primaryNetworkComponent": {
-		        "networkVlan": {
-			      "id": 524956
-		        }
-		      },
-		      "primaryBackendNetworkComponent": {
-		        "networkVlan": {
-		          "id": 524954
-		        }
-		      }
+		      "datacenter": "lon02"
 		    },
 		    {
 		      "default": {
@@ -49,7 +40,14 @@ var _ = Describe("Disk", func() {
 		          "gateway"
 		        ],
 		        "cloud_properties": {
-		          "vlanIds": [ 524956, 524954 ]
+		          "networkVlans":
+		          [
+		            {
+                      "vlanId": 524956
+		            },{
+		              "vlanId": 524954
+		            }
+		          ]
 		        }
 		      }
 		    },

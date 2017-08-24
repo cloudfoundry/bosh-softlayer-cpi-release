@@ -1,0 +1,14 @@
+{
+  "id": 25804753,
+  "lastOperatingSystemReload": {
+    "id": 1
+  },
+  "activeTransaction": {
+    "id": 2
+  },
+  "powerState": {
+    "name": "Provisioning",
+    "keyName": "PROVISIONING"
+  },
+  "provisionDate": "2016-11-07T21:06:41-06:00"
+}

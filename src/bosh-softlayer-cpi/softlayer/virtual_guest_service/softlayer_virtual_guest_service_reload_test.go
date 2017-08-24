@@ -11,6 +11,7 @@ import (
 	fakeuuid "github.com/cloudfoundry/bosh-utils/uuid/fakes"
 
 	. "bosh-softlayer-cpi/softlayer/virtual_guest_service"
+	"fmt"
 	"github.com/softlayer/softlayer-go/datatypes"
 	"github.com/softlayer/softlayer-go/sl"
 )
@@ -26,7 +27,7 @@ var _ = Describe("Virtual Guest Service", func() {
 	BeforeEach(func() {
 		cli = &fakeslclient.FakeClient{}
 		uuidGen = &fakeuuid.FakeGenerator{}
-		logger = boshlog.NewLogger(boshlog.LevelDebug)
+		logger = boshlog.NewLogger(boshlog.LevelNone)
 		virtualGuestService = NewSoftLayerVirtualGuestService(cli, uuidGen, logger)
 	})
 
@@ -97,7 +98,7 @@ var _ = Describe("Virtual Guest Service", func() {
 
 		It("Return error if softLayerClient EditInstance call returns an error", func() {
 			cli.EditInstanceReturns(
-				true,
+				false,
 				errors.New("fake-client-error"),
 			)
 
@@ -105,6 +106,17 @@ var _ = Describe("Virtual Guest Service", func() {
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("fake-client-error"))
 			Expect(cli.EditInstanceCallCount()).To(Equal(1))
+		})
+
+		It("Return error if softLayerClient EditInstance call returns NotFound", func() {
+			cli.EditInstanceReturns(
+				false,
+				nil,
+			)
+
+			err := virtualGuestService.Edit(vmID, updateVirtualGuest)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring(fmt.Sprintf("VM '%d' not found", vmID)))
 		})
 	})
 })

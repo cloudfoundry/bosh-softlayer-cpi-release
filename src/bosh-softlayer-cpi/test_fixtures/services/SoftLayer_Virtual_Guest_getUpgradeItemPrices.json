@@ -17,5 +17,24 @@
         }
       ]
     }
+  },
+  {
+    "id": 124,
+    "locationGroupId": null,
+    "item": {
+      "capacity": "300",
+      "description": "300 GB (SAN)",
+      "id": 456,
+      "keyName": "300_GB_PERFORMANCE_STORAGE_SPACE",
+      "units": "GB",
+      "categories": [
+        {
+          "categoryCode": "guest_disk1",
+          "id": 83,
+          "name": "Second Disk",
+          "quantityLimit": 0
+        }
+      ]
+    }
   }
 ]

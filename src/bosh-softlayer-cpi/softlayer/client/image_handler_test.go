@@ -13,18 +13,22 @@ import (
 	vpsVm "bosh-softlayer-cpi/softlayer/vps_service/client/vm"
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/softlayer/softlayer-go/session"
+	"net/http"
 )
 
 var _ = Describe("ImageHandler", func() {
 	var (
+		err         error
 		server      *ghttp.Server
 		vpsEndPoint string
 		vps         *vpsVm.Client
 
-		sess *session.Session
-		cli  *boslc.ClientManager
+		transportHandler *test_helpers.FakeTransportHandler
+		sess             *session.Session
+		cli              *boslc.ClientManager
 
-		imageID int
+		imageID   int
+		respParas []map[string]interface{}
 	)
 	BeforeEach(func() {
 		// the fake server to setup VPS Server
@@ -33,7 +37,12 @@ var _ = Describe("ImageHandler", func() {
 		vps = vpsClient.New(httptransport.New(vpsEndPoint,
 			"v2", []string{"http"}), strfmt.Default).VM
 
-		sess = test_helpers.NewFakeSoftlayerSession(server)
+		transportHandler = &test_helpers.FakeTransportHandler{
+			FakeServer:           server,
+			SoftlayerAPIEndpoint: server.URL(),
+			MaxRetries:           3,
+		}
+		sess = test_helpers.NewFakeSoftlayerSession(transportHandler)
 		cli = boslc.NewSoftLayerClientManager(sess, vps)
 
 		imageID = 1335057
@@ -46,8 +55,32 @@ var _ = Describe("ImageHandler", func() {
 	Describe("GetImage", func() {
 		Context("when ImageService getObject call successfully", func() {
 			It("get image successfully", func() {
-				image, succ, err := cli.GetImage(imageID, boslc.IMAGE_DETAIL_MASK)
+				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Virtual_Guest_Block_Device_Template_Group_getObject.json",
+						"statusCode": http.StatusOK,
+					},
+				}
+				err = test_helpers.SpecifyServerResps(respParas, server)
+				Expect(err).NotTo(HaveOccurred())
 
+				image, succ, err := cli.GetImage(imageID, boslc.IMAGE_DETAIL_MASK)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(succ).To(Equal(true))
+				Expect(*image.Id).To(Equal(imageID))
+			})
+
+			It("get image successfully when pass empty mask", func() {
+				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Virtual_Guest_Block_Device_Template_Group_getObject.json",
+						"statusCode": http.StatusOK,
+					},
+				}
+				err = test_helpers.SpecifyServerResps(respParas, server)
+				Expect(err).NotTo(HaveOccurred())
+
+				image, succ, err := cli.GetImage(imageID, "")
 				Expect(err).NotTo(HaveOccurred())
 				Expect(succ).To(Equal(true))
 				Expect(*image.Id).To(Equal(imageID))
@@ -56,10 +89,33 @@ var _ = Describe("ImageHandler", func() {
 
 		Context("when ImageService getObject call return an error", func() {
 			It("return an error", func() {
-				_, succ, err := cli.GetImage(imageID, "fake-client-error")
+				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Virtual_Guest_Block_Device_Template_Group_getObject_InternalError.json",
+						"statusCode": http.StatusInternalServerError,
+					},
+				}
+				err = test_helpers.SpecifyServerResps(respParas, server)
+				Expect(err).NotTo(HaveOccurred())
 
+				_, succ, err := cli.GetImage(imageID, "fake-client-error")
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("fake-client-error"))
+				Expect(succ).To(Equal(false))
+			})
+
+			It("return an empty image when ImageService getObject call return empty object", func() {
+				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Virtual_Guest_Block_Device_Template_Group_getObject_NotFound.json",
+						"statusCode": http.StatusInternalServerError,
+					},
+				}
+				err = test_helpers.SpecifyServerResps(respParas, server)
+				Expect(err).NotTo(HaveOccurred())
+
+				_, succ, err := cli.GetImage(imageID, boslc.IMAGE_DETAIL_MASK)
+				Expect(err).NotTo(HaveOccurred())
 				Expect(succ).To(Equal(false))
 			})
 		})

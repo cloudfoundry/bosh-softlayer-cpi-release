@@ -29,7 +29,7 @@ var _ = Describe("Virtual Guest Service", func() {
 	BeforeEach(func() {
 		cli = &fakeslclient.FakeClient{}
 		uuidGen = &fakeuuid.FakeGenerator{}
-		logger = boshlog.NewLogger(boshlog.LevelDebug)
+		logger = boshlog.NewLogger(boshlog.LevelNone)
 		virtualGuestService = NewSoftLayerVirtualGuestService(cli, uuidGen, logger)
 	})
 
@@ -86,9 +86,10 @@ var _ = Describe("Virtual Guest Service", func() {
 			fakeUsername = "fake-username"
 			fakePassword = "fake-password"
 
-			cli.GetNetworkStorageTargetReturns(
-				fakeIpAddrs,
-				true,
+			cli.GetBlockVolumeDetailsBySoftLayerAccountReturns(
+				datatypes.Network_Storage{
+					ServiceResourceBackendIpAddress: sl.String(fakeIpAddrs),
+				},
 				nil,
 			)
 			cli.GetInstanceReturns(
@@ -119,7 +120,7 @@ var _ = Describe("Virtual Guest Service", func() {
 			It("Attach successfully", func() {
 				targetInfo, err := virtualGuestService.AttachDisk(vmID, diskID)
 				Expect(err).NotTo(HaveOccurred())
-				Expect(cli.GetNetworkStorageTargetCallCount()).To(Equal(1))
+				Expect(cli.GetBlockVolumeDetailsBySoftLayerAccountCallCount()).To(Equal(1))
 				Expect(cli.GetInstanceCallCount()).To(Equal(1))
 				Expect(cli.AuthorizeHostToVolumeCallCount()).To(Equal(1))
 				Expect(cli.GetAllowedHostCredentialCallCount()).To(Equal(1))
@@ -135,33 +136,15 @@ var _ = Describe("Virtual Guest Service", func() {
 
 		Context("When softlayer client return error or non-existing", func() {
 			It("return error if softlayerClient call GetNetworkStorageTarget return error", func() {
-				cli.GetNetworkStorageTargetReturns(
-					"",
-					false,
+				cli.GetBlockVolumeDetailsBySoftLayerAccountReturns(
+					datatypes.Network_Storage{},
 					errors.New("fake-client-error"),
 				)
 
 				targetInfo, err := virtualGuestService.AttachDisk(vmID, diskID)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("fake-client-error"))
-				Expect(cli.GetNetworkStorageTargetCallCount()).To(Equal(1))
-				Expect(cli.GetInstanceCallCount()).To(Equal(0))
-				Expect(cli.AuthorizeHostToVolumeCallCount()).To(Equal(0))
-				Expect(cli.GetAllowedHostCredentialCallCount()).To(Equal(0))
-				Expect(string(targetInfo)).To(BeEquivalentTo(""))
-			})
-
-			It("return error if softlayerClient call GetNetworkStorageTarget return non-existing", func() {
-				cli.GetNetworkStorageTargetReturns(
-					"",
-					false,
-					nil,
-				)
-
-				targetInfo, err := virtualGuestService.AttachDisk(vmID, diskID)
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("not found"))
-				Expect(cli.GetNetworkStorageTargetCallCount()).To(Equal(1))
+				Expect(cli.GetBlockVolumeDetailsBySoftLayerAccountCallCount()).To(Equal(1))
 				Expect(cli.GetInstanceCallCount()).To(Equal(0))
 				Expect(cli.AuthorizeHostToVolumeCallCount()).To(Equal(0))
 				Expect(cli.GetAllowedHostCredentialCallCount()).To(Equal(0))
@@ -178,7 +161,7 @@ var _ = Describe("Virtual Guest Service", func() {
 				targetInfo, err := virtualGuestService.AttachDisk(vmID, diskID)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("fake-client-error"))
-				Expect(cli.GetNetworkStorageTargetCallCount()).To(Equal(1))
+				Expect(cli.GetBlockVolumeDetailsBySoftLayerAccountCallCount()).To(Equal(1))
 				Expect(cli.GetInstanceCallCount()).To(Equal(1))
 				Expect(cli.AuthorizeHostToVolumeCallCount()).To(Equal(0))
 				Expect(cli.GetAllowedHostCredentialCallCount()).To(Equal(0))
@@ -195,7 +178,7 @@ var _ = Describe("Virtual Guest Service", func() {
 				targetInfo, err := virtualGuestService.AttachDisk(vmID, diskID)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("not found"))
-				Expect(cli.GetNetworkStorageTargetCallCount()).To(Equal(1))
+				Expect(cli.GetBlockVolumeDetailsBySoftLayerAccountCallCount()).To(Equal(1))
 				Expect(cli.GetInstanceCallCount()).To(Equal(1))
 				Expect(cli.AuthorizeHostToVolumeCallCount()).To(Equal(0))
 				Expect(cli.GetAllowedHostCredentialCallCount()).To(Equal(0))
@@ -211,7 +194,7 @@ var _ = Describe("Virtual Guest Service", func() {
 				targetInfo, err := virtualGuestService.AttachDisk(vmID, diskID)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("fake-client-error"))
-				Expect(cli.GetNetworkStorageTargetCallCount()).To(Equal(1))
+				Expect(cli.GetBlockVolumeDetailsBySoftLayerAccountCallCount()).To(Equal(1))
 				Expect(cli.GetInstanceCallCount()).To(Equal(1))
 				Expect(cli.AuthorizeHostToVolumeCallCount()).To(Equal(1))
 				Expect(cli.GetAllowedHostCredentialCallCount()).To(Equal(0))
@@ -228,7 +211,7 @@ var _ = Describe("Virtual Guest Service", func() {
 				targetInfo, err := virtualGuestService.AttachDisk(vmID, diskID)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("fake-client-error"))
-				Expect(cli.GetNetworkStorageTargetCallCount()).To(Equal(1))
+				Expect(cli.GetBlockVolumeDetailsBySoftLayerAccountCallCount()).To(Equal(1))
 				Expect(cli.GetInstanceCallCount()).To(Equal(1))
 				Expect(cli.AuthorizeHostToVolumeCallCount()).To(Equal(1))
 				Expect(cli.GetAllowedHostCredentialCallCount()).To(Equal(1))
@@ -245,7 +228,7 @@ var _ = Describe("Virtual Guest Service", func() {
 				targetInfo, err := virtualGuestService.AttachDisk(vmID, diskID)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("have not allowed access credential"))
-				Expect(cli.GetNetworkStorageTargetCallCount()).To(Equal(1))
+				Expect(cli.GetBlockVolumeDetailsBySoftLayerAccountCallCount()).To(Equal(1))
 				Expect(cli.GetInstanceCallCount()).To(Equal(1))
 				Expect(cli.AuthorizeHostToVolumeCallCount()).To(Equal(1))
 				Expect(cli.GetAllowedHostCredentialCallCount()).To(Equal(1))

@@ -22,7 +22,7 @@ var _ = Describe("Disk Service Delete", func() {
 	BeforeEach(func() {
 		diskID = 2048
 		cli = &fakeslclient.FakeClient{}
-		logger = boshlog.NewLogger(boshlog.LevelDebug)
+		logger = boshlog.NewLogger(boshlog.LevelNone)
 		disk = diskService.NewSoftlayerDiskService(cli, logger)
 	})
 
@@ -50,6 +50,19 @@ var _ = Describe("Disk Service Delete", func() {
 				err = disk.Delete(diskID)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("fake-client-error"))
+				Expect(cli.CancelBlockVolumeCallCount()).To(Equal(1))
+			})
+		})
+
+		Context("return error when softlayerClient CancelBlockVolume call return billing item of volume is found", func() {
+			It("failed to delete volume", func() {
+				cli.CancelBlockVolumeReturns(
+					false,
+					errors.New("No billing item is found to cancel"),
+				)
+
+				err = disk.Delete(diskID)
+				Expect(err).ToNot(HaveOccurred())
 				Expect(cli.CancelBlockVolumeCallCount()).To(Equal(1))
 			})
 		})

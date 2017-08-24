@@ -11,6 +11,7 @@ import (
 	boslconfig "bosh-softlayer-cpi/softlayer/config"
 	instancefakes "bosh-softlayer-cpi/softlayer/virtual_guest_service/fakes"
 
+	"bosh-softlayer-cpi/api"
 	registryfakes "bosh-softlayer-cpi/registry/fakes"
 )
 
@@ -59,6 +60,16 @@ var _ = Describe("DeleteVM", func() {
 			Expect(err.Error()).To(ContainSubstring("fake-vm-service-error"))
 			Expect(vmService.DeleteCallCount()).To(Equal(1))
 			Expect(registryClient.DeleteCalled).To(BeFalse())
+		})
+
+		It("return nil if vmService delete call returns an api error", func() {
+			vmService.DeleteReturns(
+				api.NewVMNotFoundError(vmCID.String()),
+			)
+
+			_, err = deleteVM.Run(vmCID)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(vmService.DeleteCallCount()).To(Equal(1))
 		})
 
 		It("returns an error if registryClient delete call returns an error", func() {

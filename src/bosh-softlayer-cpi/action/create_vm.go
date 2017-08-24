@@ -82,8 +82,6 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 		return "", bosherr.WrapError(err, "Creating VM UserData")
 	}
 
-	// Check SubnetId and check vlanId
-
 	// Inspect networks to get NetworkComponents
 	//publicVlanId, privateVlanId, err := cv.getVlanIds(networks)
 	publicNetworkComponent, privateNetworkComponent, err := cv.getNetworkComponents(networks)
@@ -110,6 +108,11 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 		}
 
 		boshenv.(map[string]interface{})["keep_root_password"] = true
+
+		// #148050011: Set vcap password in env.bosh.password through CPI
+		if env["bosh"].(map[string]interface{})["password"] == nil && cv.agentOptions.VcapPassword != "" {
+			env["bosh"].(map[string]interface{})["password"] = cv.agentOptions.VcapPassword
+		}
 	}
 
 	// CID for returned VM
@@ -244,7 +247,7 @@ func (cv CreateVM) getNetworkComponents(networks Networks) (*datatypes.Virtual_G
 		if nw.Type == "manual" {
 			continue
 		}
-		for _, networkVlan := range nw.CloudProperties.networkVlans {
+		for _, networkVlan := range nw.CloudProperties.NetworkVlans {
 			networkSpace, networkComponent, err := cv.createNetworkComponents(networkVlan)
 			if err != nil {
 				return &datatypes.Virtual_Guest_Network_Component{},
@@ -308,8 +311,7 @@ func (cv CreateVM) createNetworkComponents(networkVlan NetworkVlan) (string, *da
 		return *(vlan.NetworkSpace),
 			&datatypes.Virtual_Guest_Network_Component{
 				NetworkVlan: &datatypes.Network_Vlan{
-					Id:              vlan.Id,
-					PrimarySubnetId: vlan.PrimarySubnetId,
+					Id: vlan.Id,
 				},
 			}, nil
 	}
@@ -330,7 +332,6 @@ func (cv CreateVM) createByOsReload(stemcellCID StemcellCID, cloudProps VMCloudP
 
 				if IsPrivateSubnet(net.ParseIP(network.IP)) {
 					vm, err = cv.virtualGuestService.FindByPrimaryBackendIp(network.IP)
-
 				} else {
 					vm, err = cv.virtualGuestService.FindByPrimaryIp(network.IP)
 				}

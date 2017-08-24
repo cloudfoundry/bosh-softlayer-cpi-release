@@ -10,7 +10,9 @@ import (
 
 	instancefakes "bosh-softlayer-cpi/softlayer/virtual_guest_service/fakes"
 
+	api "bosh-softlayer-cpi/api"
 	"bosh-softlayer-cpi/softlayer/virtual_guest_service"
+	"fmt"
 )
 
 var _ = Describe("SetVMMetadata", func() {
@@ -56,6 +58,17 @@ var _ = Describe("SetVMMetadata", func() {
 			_, err = setVMMetadata.Run(vmCID, vmMetadata)
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("fake-vm-service-error"))
+			Expect(vmService.SetMetadataCallCount()).To(Equal(1))
+		})
+
+		It("returns an error if vmService set metadata call returns an api error", func() {
+			vmService.SetMetadataReturns(
+				api.NewVMNotFoundError(vmCID.String()),
+			)
+
+			_, err = setVMMetadata.Run(vmCID, vmMetadata)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring(fmt.Sprintf("VM '%d' not found", vmCID)))
 			Expect(vmService.SetMetadataCallCount()).To(Equal(1))
 		})
 	})

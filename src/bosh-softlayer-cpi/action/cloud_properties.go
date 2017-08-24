@@ -20,14 +20,14 @@ type DiskCloudProperties struct {
 type Environment map[string]interface{}
 
 type NetworkCloudProperties struct {
-	networkVlans        []NetworkVlan `json:"networkVlans,omitempty"`
+	NetworkVlans        []NetworkVlan `json:"networkVlans,omitempty"`
 	SourcePolicyRouting bool          `json:"source_policy_routing,omitempty"`
 	Tags                instance.Tags `json:"tags,omitempty"`
 }
 
 type NetworkVlan struct {
-	SubnetId int `json:"subnetIds,omitempty"`
-	VlanId   int `json:"vlanIds,omitempty"`
+	SubnetId int `json:"subnetId,omitempty"`
+	VlanId   int `json:"vlanId,omitempty"`
 }
 
 type SnapshotMetadata struct {
@@ -85,7 +85,7 @@ func (vmProps *VMCloudProperties) Validate() error {
 		return bosherr.Error("The property 'StartCpus' must be set to create an instance")
 	}
 	if vmProps.MaxNetworkSpeed == 0 {
-		return bosherr.Error("The property 'MaxNetworkSpeed' must be set to create an instance")
+		vmProps.MaxNetworkSpeed = 10
 	}
 
 	//if err := vmProps.Tags.Validate(); err != nil {

@@ -33,15 +33,9 @@ type rawString struct {
 	Val string
 }
 
-func NewFakeSoftlayerSession(server *ghttp.Server) *session.Session {
-	softlayerAPIEndpoint := server.URL()
-
+func NewFakeSoftlayerSession(transportHandler *FakeTransportHandler) *session.Session {
 	return &session.Session{
-		TransportHandler: FakeTransportHandler{
-			FakeServer:           server,
-			SoftlayerAPIEndpoint: softlayerAPIEndpoint,
-			MaxRetries:           3,
-		},
+		TransportHandler: transportHandler,
 	}
 }
 
@@ -76,31 +70,6 @@ func (h FakeTransportHandler) DoRequest(sess *session.Session, service string, m
 
 	// Build request querystring
 	query := encodeQuery(options)
-
-	// Check fake error and generate response
-	if strings.Contains(options.Mask, "fake-client-error") || strings.Contains(options.Filter, "fake-client-error") {
-		h.FakeServer.AppendHandlers(
-			ghttp.CombineHandlers(
-				ghttp.VerifyRequest(restMethod, "/"+path, query),
-				ghttp.RespondWith(
-					http.StatusInternalServerError,
-					[]byte(`{"code": "UNKNOWN_ERROR","error": "REST server occur a fake-client-error"}`),
-				),
-			),
-		)
-	} else {
-		// Read json file
-		responseBody, err := readJsonTestFixtures(service, method)
-		if err != nil {
-			err = sl.Error{Message: err.Error(), Wrapped: err}
-		}
-		h.FakeServer.AppendHandlers(
-			ghttp.CombineHandlers(
-				ghttp.VerifyRequest(restMethod, "/"+path, query),
-				ghttp.RespondWith(http.StatusOK, responseBody),
-			),
-		)
-	}
 
 	//Do request
 	for try := 0; try <= h.MaxRetries; try++ {
@@ -250,7 +219,6 @@ func (h FakeTransportHandler) makeHTTPRequest(path string, querystring string, r
 	req.URL.RawQuery = querystring
 	req.Close = true
 
-	// replace by ghttp
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, 520, err

@@ -17,6 +17,7 @@ import (
 	boslconfig "bosh-softlayer-cpi/softlayer/config"
 	"bosh-softlayer-cpi/softlayer/virtual_guest_service"
 
+	"bosh-softlayer-cpi/api"
 	"fmt"
 	"github.com/softlayer/softlayer-go/datatypes"
 	"github.com/softlayer/softlayer-go/sl"
@@ -80,7 +81,7 @@ var _ = Describe("CreateVM", func() {
 			DisableOsReload: false,
 		}
 
-		env = Environment(map[string]interface{}{"bosh": map[string]interface{}{"keep_root_password": false}})
+		env = Environment(map[string]interface{}{"bosh": map[string]interface{}{"keep_root_password": false, "groups": []interface{}{"fake-tag"}}})
 
 		createVM = NewCreateVM(
 			imageService,
@@ -102,6 +103,7 @@ var _ = Describe("CreateVM", func() {
 				Domain:            "fake-domain.com",
 				StartCpus:         2,
 				MaxMemory:         2048,
+				MaxNetworkSpeed:   100,
 				Datacenter:        "fake-datacenter",
 				SshKey:            32345678,
 				DeployedByBoshCLI: true,
@@ -116,7 +118,11 @@ var _ = Describe("CreateVM", func() {
 					DNS:     []string{"fake-network-dns"},
 					Default: []string{"fake-network-default"},
 					CloudProperties: NetworkCloudProperties{
-						VlanIds:             []int{42345678},
+						NetworkVlans: []NetworkVlan{
+							{
+								VlanId: 42345678,
+							},
+						},
 						SourcePolicyRouting: true,
 						Tags:                []string{"fake-network-cloud-network-tag"},
 					},
@@ -149,6 +155,7 @@ var _ = Describe("CreateVM", func() {
 				Env: registry.EnvSettings(map[string]interface{}{
 					"bosh": map[string]interface{}{
 						"keep_root_password": true,
+						"groups":             []interface{}{"fake-tag"},
 					},
 				}),
 
@@ -259,12 +266,13 @@ var _ = Describe("CreateVM", func() {
 
 		It("creates the vm when deployByBoshCli=false, and mbus host 0.0.0.0", func() {
 			cloudProps = VMCloudProperties{
-				VmNamePrefix: "fake-hostname",
-				Domain:       "fake-domain.com",
-				StartCpus:    2,
-				MaxMemory:    2048,
-				Datacenter:   "fake-datacenter",
-				SshKey:       32345678,
+				VmNamePrefix:    "fake-hostname",
+				Domain:          "fake-domain.com",
+				StartCpus:       2,
+				MaxMemory:       2048,
+				MaxNetworkSpeed: 100,
+				Datacenter:      "fake-datacenter",
+				SshKey:          32345678,
 			}
 
 			agentOptions = registry.AgentOptions{
@@ -313,6 +321,7 @@ var _ = Describe("CreateVM", func() {
 				Env: registry.EnvSettings(map[string]interface{}{
 					"bosh": map[string]interface{}{
 						"keep_root_password": true,
+						"groups":             []interface{}{"fake-tag"},
 					},
 				}),
 
@@ -352,12 +361,13 @@ var _ = Describe("CreateVM", func() {
 
 		It("creates the vm when deployByBoshCli=false, and with mbus host not 0.0.0.0", func() {
 			cloudProps = VMCloudProperties{
-				VmNamePrefix: "fake-hostname",
-				Domain:       "fake-domain.com",
-				StartCpus:    2,
-				MaxMemory:    2048,
-				Datacenter:   "fake-datacenter",
-				SshKey:       32345678,
+				VmNamePrefix:    "fake-hostname",
+				Domain:          "fake-domain.com",
+				StartCpus:       2,
+				MaxMemory:       2048,
+				MaxNetworkSpeed: 100,
+				Datacenter:      "fake-datacenter",
+				SshKey:          32345678,
 			}
 
 			agentOptions = registry.AgentOptions{
@@ -376,7 +386,11 @@ var _ = Describe("CreateVM", func() {
 					Netmask: "fake-network-netmask",
 					DNS:     []string{"fake-network-dns"},
 					CloudProperties: NetworkCloudProperties{
-						VlanIds: []int{42345678},
+						NetworkVlans: []NetworkVlan{
+							{
+								VlanId: 42345678,
+							},
+						},
 					},
 				},
 				"fake-network-2": Network{
@@ -387,7 +401,11 @@ var _ = Describe("CreateVM", func() {
 					DNS:     []string{"fake-network-dns"},
 					Default: []string{"fake-network-default"},
 					CloudProperties: NetworkCloudProperties{
-						VlanIds: []int{42345678},
+						NetworkVlans: []NetworkVlan{
+							{
+								VlanId: 42345678,
+							},
+						},
 					},
 				},
 			}
@@ -425,6 +443,7 @@ var _ = Describe("CreateVM", func() {
 				Env: registry.EnvSettings(map[string]interface{}{
 					"bosh": map[string]interface{}{
 						"keep_root_password": true,
+						"groups":             []interface{}{"fake-tag"},
 					},
 				}),
 
@@ -480,6 +499,7 @@ var _ = Describe("CreateVM", func() {
 				Domain:            "fake-domain.com",
 				StartCpus:         2,
 				MaxMemory:         2048,
+				MaxNetworkSpeed:   100,
 				Datacenter:        "fake-datacenter",
 				SshKey:            32345678,
 				DeployedByBoshCLI: true,
@@ -514,6 +534,27 @@ var _ = Describe("CreateVM", func() {
 			vmCID, err = createVM.Run(agentID, stemcellCID, cloudProps, networks, disks, env)
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("fake-image-service-error"))
+			Expect(imageService.FindCallCount()).To(Equal(1))
+			Expect(vmService.CreateSshKeyCallCount()).To(Equal(0))
+			Expect(vmService.GetVlanCallCount()).To(Equal(0))
+			Expect(vmService.FindByPrimaryBackendIpCallCount()).To(Equal(0))
+			Expect(vmService.ReloadOSCallCount()).To(Equal(0))
+			Expect(vmService.CreateCallCount()).To(Equal(0))
+			Expect(vmService.ConfigureNetworksCallCount()).To(Equal(0))
+			Expect(vmService.AttachEphemeralDiskCallCount()).To(Equal(0))
+			Expect(vmService.CleanUpCallCount()).To(Equal(0))
+			Expect(registryClient.UpdateCalled).To(BeFalse())
+		})
+
+		It("returns an error if imageService find call returns an api error", func() {
+			imageService.FindReturns(
+				"12345678",
+				api.NewStemcellkNotFoundError(stemcellCID.String(), false),
+			)
+
+			vmCID, err = createVM.Run(agentID, stemcellCID, cloudProps, networks, disks, env)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring(fmt.Sprintf("Stemcell '%s' not found", stemcellCID.String())))
 			Expect(imageService.FindCallCount()).To(Equal(1))
 			Expect(vmService.CreateSshKeyCallCount()).To(Equal(0))
 			Expect(vmService.GetVlanCallCount()).To(Equal(0))
@@ -732,6 +773,7 @@ var _ = Describe("CreateVM", func() {
 					Env: registry.EnvSettings(map[string]interface{}{
 						"bosh": map[string]interface{}{
 							"keep_root_password": true,
+							"groups":             []interface{}{"fake-tag"},
 						},
 					}),
 					VM: registry.VMSettings{
@@ -774,6 +816,27 @@ var _ = Describe("CreateVM", func() {
 				vmCID, err = createVM.Run(agentID, stemcellCID, cloudProps, networks, disks, env)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("fake-vm-service-error"))
+				Expect(imageService.FindCallCount()).To(Equal(1))
+				Expect(vmService.CreateSshKeyCallCount()).To(Equal(0))
+				Expect(vmService.GetVlanCallCount()).To(Equal(1))
+				Expect(vmService.FindByPrimaryBackendIpCallCount()).To(Equal(0))
+				Expect(vmService.ReloadOSCallCount()).To(Equal(0))
+				Expect(vmService.CreateCallCount()).To(Equal(1))
+				Expect(vmService.ConfigureNetworksCallCount()).To(Equal(0))
+				Expect(vmService.AttachEphemeralDiskCallCount()).To(Equal(0))
+				Expect(vmService.CleanUpCallCount()).To(Equal(0))
+				Expect(registryClient.UpdateCalled).To(BeFalse())
+			})
+
+			It("returns an error if vmService create call returns an api error", func() {
+				vmService.CreateReturns(
+					0,
+					api.NewVMCreationFailedError("InternalError", false),
+				)
+
+				vmCID, err = createVM.Run(agentID, stemcellCID, cloudProps, networks, disks, env)
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("VM failed to create: InternalError"))
 				Expect(imageService.FindCallCount()).To(Equal(1))
 				Expect(vmService.CreateSshKeyCallCount()).To(Equal(0))
 				Expect(vmService.GetVlanCallCount()).To(Equal(1))
@@ -850,7 +913,7 @@ var _ = Describe("CreateVM", func() {
 							Default: []string{"fake-network-default"},
 						},
 					},
-					Env: registry.EnvSettings(map[string]interface{}{"bosh": map[string]interface{}{"keep_root_password": true}}),
+					Env: registry.EnvSettings(map[string]interface{}{"bosh": map[string]interface{}{"keep_root_password": true, "groups": []interface{}{"fake-tag"}}}),
 					VM: registry.VMSettings{
 						Name: "52345678",
 					},
@@ -861,6 +924,7 @@ var _ = Describe("CreateVM", func() {
 					Domain:            "fake-domain.com",
 					StartCpus:         2,
 					MaxMemory:         2048,
+					MaxNetworkSpeed:   100,
 					Datacenter:        "fake-datacenter",
 					SshKey:            32345678,
 					EphemeralDiskSize: 2048,
@@ -914,13 +978,13 @@ var _ = Describe("CreateVM", func() {
 		})
 
 		Context("when required cloud properties is not set", func() {
-
 			It("returns an error if property 'vmNamePrefix' is not set", func() {
 				cloudProps = VMCloudProperties{
 					VmNamePrefix:      "",
 					Domain:            "fake-domain.com",
 					StartCpus:         2,
 					MaxMemory:         2048,
+					MaxNetworkSpeed:   100,
 					Datacenter:        "fake-datacenter",
 					SshKey:            32345678,
 					DeployedByBoshCLI: true,
@@ -928,7 +992,7 @@ var _ = Describe("CreateVM", func() {
 
 				vmCID, err = createVM.Run(agentID, stemcellCID, cloudProps, networks, disks, env)
 				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("The property 'vmNamePrefix' must be set to create an instance"))
+				Expect(err.Error()).To(ContainSubstring("The property 'VmNamePrefix' must be set to create an instance"))
 				Expect(imageService.FindCallCount()).To(Equal(0))
 				Expect(vmService.CreateSshKeyCallCount()).To(Equal(0))
 				Expect(vmService.GetVlanCallCount()).To(Equal(0))
@@ -947,6 +1011,7 @@ var _ = Describe("CreateVM", func() {
 					Domain:            "",
 					StartCpus:         2,
 					MaxMemory:         2048,
+					MaxNetworkSpeed:   100,
 					Datacenter:        "fake-datacenter",
 					SshKey:            32345678,
 					DeployedByBoshCLI: true,
@@ -954,7 +1019,7 @@ var _ = Describe("CreateVM", func() {
 
 				vmCID, err = createVM.Run(agentID, stemcellCID, cloudProps, networks, disks, env)
 				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("The property 'domain' must be set to create an instance"))
+				Expect(err.Error()).To(ContainSubstring("The property 'Domain' must be set to create an instance"))
 				Expect(imageService.FindCallCount()).To(Equal(0))
 				Expect(vmService.CreateSshKeyCallCount()).To(Equal(0))
 				Expect(vmService.GetVlanCallCount()).To(Equal(0))
@@ -973,6 +1038,7 @@ var _ = Describe("CreateVM", func() {
 					Domain:            "fake-domain.com",
 					StartCpus:         0,
 					MaxMemory:         2048,
+					MaxNetworkSpeed:   100,
 					Datacenter:        "fake-datacenter",
 					SshKey:            32345678,
 					DeployedByBoshCLI: true,
@@ -980,7 +1046,7 @@ var _ = Describe("CreateVM", func() {
 
 				vmCID, err = createVM.Run(agentID, stemcellCID, cloudProps, networks, disks, env)
 				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("The property 'startCpus' must be set to create an instance"))
+				Expect(err.Error()).To(ContainSubstring("The property 'StartCpus' must be set to create an instance"))
 				Expect(imageService.FindCallCount()).To(Equal(0))
 				Expect(vmService.CreateSshKeyCallCount()).To(Equal(0))
 				Expect(vmService.GetVlanCallCount()).To(Equal(0))
@@ -999,6 +1065,7 @@ var _ = Describe("CreateVM", func() {
 					Domain:            "fake-domain.com",
 					StartCpus:         2,
 					MaxMemory:         0,
+					MaxNetworkSpeed:   100,
 					Datacenter:        "fake-datacenter",
 					SshKey:            32345678,
 					DeployedByBoshCLI: true,
@@ -1006,7 +1073,7 @@ var _ = Describe("CreateVM", func() {
 
 				vmCID, err = createVM.Run(agentID, stemcellCID, cloudProps, networks, disks, env)
 				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("The property 'maxMemory' must be set to create an instance"))
+				Expect(err.Error()).To(ContainSubstring("The property 'MaxMemory' must be set to create an instance"))
 				Expect(imageService.FindCallCount()).To(Equal(0))
 				Expect(vmService.CreateSshKeyCallCount()).To(Equal(0))
 				Expect(vmService.GetVlanCallCount()).To(Equal(0))
@@ -1025,6 +1092,7 @@ var _ = Describe("CreateVM", func() {
 					Domain:            "fake-domain.com",
 					StartCpus:         2,
 					MaxMemory:         2048,
+					MaxNetworkSpeed:   100,
 					Datacenter:        "",
 					SshKey:            32345678,
 					DeployedByBoshCLI: true,
@@ -1032,7 +1100,7 @@ var _ = Describe("CreateVM", func() {
 
 				vmCID, err = createVM.Run(agentID, stemcellCID, cloudProps, networks, disks, env)
 				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("The property 'datacenter' must be set to create an instance"))
+				Expect(err.Error()).To(ContainSubstring("The property 'Datacenter' must be set to create an instance"))
 				Expect(imageService.FindCallCount()).To(Equal(0))
 				Expect(vmService.CreateSshKeyCallCount()).To(Equal(0))
 				Expect(vmService.GetVlanCallCount()).To(Equal(0))
@@ -1043,6 +1111,166 @@ var _ = Describe("CreateVM", func() {
 				Expect(vmService.AttachEphemeralDiskCallCount()).To(Equal(0))
 				Expect(vmService.CleanUpCallCount()).To(Equal(0))
 				Expect(registryClient.UpdateCalled).To(BeFalse())
+			})
+		})
+
+		Context("when vcap password exists in both env.bosh and agent option", func() {
+			BeforeEach(func() {
+				agentOptions = registry.AgentOptions{
+					Mbus: "nats://nats:nats@fake-mbus:fake-port",
+					Blobstore: registry.BlobstoreOptions{
+						Provider: "dav",
+						Options:  map[string]interface{}{"endpoint": "http://fake-blobstore:fake-port"},
+					},
+					VcapPassword: "fake-vcap-password-in-agent",
+				}
+
+				env = Environment(map[string]interface{}{"bosh": map[string]interface{}{"keep_root_password": false, "groups": []interface{}{"fake-tag"}}})
+				env["bosh"].(map[string]interface{})["password"] = "fake-vcap-password-in-env"
+
+				createVM = NewCreateVM(
+					imageService,
+					vmService,
+					registryClient,
+					registryOptions,
+					agentOptions,
+					softlayerOptions,
+				)
+
+				expectedAgentSettings = registry.AgentSettings{
+					AgentID: "fake-agent-id",
+					Blobstore: registry.BlobstoreSettings{
+						Provider: "dav",
+						Options:  map[string]interface{}{"endpoint": "http://fake-blobstore:fake-port"},
+					},
+					Disks: registry.DisksSettings{
+						System:     "",
+						Persistent: map[string]registry.PersistentSettings{},
+					},
+					Mbus: "nats://nats:nats@fake-mbus:fake-port",
+					Networks: registry.NetworksSettings{
+						"fake-network-name": registry.NetworkSettings{
+							Type:    "dynamic",
+							IP:      "10.10.10.10",
+							Gateway: "fake-network-gateway",
+							Netmask: "fake-network-netmask",
+							DNS:     []string{"fake-network-dns"},
+							Default: []string{"fake-network-default"},
+						},
+					},
+					Env: registry.EnvSettings(map[string]interface{}{
+						"bosh": map[string]interface{}{
+							"keep_root_password": true,
+							"groups":             []interface{}{"fake-tag"},
+							"password":           "fake-vcap-password-in-env",
+						},
+					}),
+
+					VM: registry.VMSettings{
+						Name: "52345678",
+					},
+				}
+			})
+
+			It("do not change vcap password in env.bosh", func() {
+				vmCID, err = createVM.Run(agentID, stemcellCID, cloudProps, networks, disks, env)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(imageService.FindCallCount()).To(Equal(1))
+				Expect(vmService.CreateSshKeyCallCount()).To(Equal(0))
+				Expect(vmService.GetVlanCallCount()).To(Equal(1))
+				Expect(vmService.FindByPrimaryBackendIpCallCount()).To(Equal(1))
+				Expect(vmService.ReloadOSCallCount()).To(Equal(1))
+				Expect(vmService.CreateCallCount()).To(Equal(0))
+				Expect(vmService.ConfigureNetworksCallCount()).To(Equal(1))
+				Expect(vmService.AttachEphemeralDiskCallCount()).To(Equal(0))
+				Expect(vmService.CleanUpCallCount()).To(Equal(0))
+				Expect(registryClient.UpdateCalled).To(BeTrue())
+				Expect(vmService.FindCallCount()).To(Equal(1))
+				Expect(registryClient.UpdateSettings).To(BeEquivalentTo(expectedAgentSettings))
+				actualCid, _ := vmService.ConfigureNetworksArgsForCall(0)
+				Expect(vmCID).To(Equal(VMCID(actualCid).String()))
+				_, actualInstanceNetworks := vmService.ConfigureNetworksArgsForCall(0)
+				Expect(actualInstanceNetworks).To(BeEquivalentTo(expectedInstanceNetworks))
+			})
+		})
+
+		Context("when env.bosh exists but does not have vcap password, vcap password exists in agent option", func() {
+			BeforeEach(func() {
+				agentOptions = registry.AgentOptions{
+					Mbus: "nats://nats:nats@fake-mbus:fake-port",
+					Blobstore: registry.BlobstoreOptions{
+						Provider: "dav",
+						Options:  map[string]interface{}{"endpoint": "http://fake-blobstore:fake-port"},
+					},
+					VcapPassword: "fake-vcap-password-in-agent",
+				}
+
+				env = Environment(map[string]interface{}{"bosh": map[string]interface{}{"keep_root_password": false,
+					"groups": []interface{}{"fake-tag"}}})
+
+				createVM = NewCreateVM(
+					imageService,
+					vmService,
+					registryClient,
+					registryOptions,
+					agentOptions,
+					softlayerOptions,
+				)
+
+				expectedAgentSettings = registry.AgentSettings{
+					AgentID: "fake-agent-id",
+					Blobstore: registry.BlobstoreSettings{
+						Provider: "dav",
+						Options:  map[string]interface{}{"endpoint": "http://fake-blobstore:fake-port"},
+					},
+					Disks: registry.DisksSettings{
+						System:     "",
+						Persistent: map[string]registry.PersistentSettings{},
+					},
+					Mbus: "nats://nats:nats@fake-mbus:fake-port",
+					Networks: registry.NetworksSettings{
+						"fake-network-name": registry.NetworkSettings{
+							Type:    "dynamic",
+							IP:      "10.10.10.10",
+							Gateway: "fake-network-gateway",
+							Netmask: "fake-network-netmask",
+							DNS:     []string{"fake-network-dns"},
+							Default: []string{"fake-network-default"},
+						},
+					},
+					Env: registry.EnvSettings(map[string]interface{}{
+						"bosh": map[string]interface{}{
+							"keep_root_password": true,
+							"groups":             []interface{}{"fake-tag"},
+							"password":           "fake-vcap-password-in-agent",
+						},
+					}),
+
+					VM: registry.VMSettings{
+						Name: "52345678",
+					},
+				}
+			})
+
+			It("do not change vcap password in env.bosh", func() {
+				vmCID, err = createVM.Run(agentID, stemcellCID, cloudProps, networks, disks, env)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(imageService.FindCallCount()).To(Equal(1))
+				Expect(vmService.CreateSshKeyCallCount()).To(Equal(0))
+				Expect(vmService.GetVlanCallCount()).To(Equal(1))
+				Expect(vmService.FindByPrimaryBackendIpCallCount()).To(Equal(1))
+				Expect(vmService.ReloadOSCallCount()).To(Equal(1))
+				Expect(vmService.CreateCallCount()).To(Equal(0))
+				Expect(vmService.ConfigureNetworksCallCount()).To(Equal(1))
+				Expect(vmService.AttachEphemeralDiskCallCount()).To(Equal(0))
+				Expect(vmService.CleanUpCallCount()).To(Equal(0))
+				Expect(registryClient.UpdateCalled).To(BeTrue())
+				Expect(vmService.FindCallCount()).To(Equal(1))
+				Expect(registryClient.UpdateSettings).To(BeEquivalentTo(expectedAgentSettings))
+				actualCid, _ := vmService.ConfigureNetworksArgsForCall(0)
+				Expect(vmCID).To(Equal(VMCID(actualCid).String()))
+				_, actualInstanceNetworks := vmService.ConfigureNetworksArgsForCall(0)
+				Expect(actualInstanceNetworks).To(BeEquivalentTo(expectedInstanceNetworks))
 			})
 		})
 	})

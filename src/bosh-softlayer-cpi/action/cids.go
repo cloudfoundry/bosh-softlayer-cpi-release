@@ -2,7 +2,6 @@ package action
 
 import (
 	"encoding/json"
-	"errors"
 	"strconv"
 	"strings"
 )
@@ -21,10 +20,6 @@ func (stemcellCID StemcellCID) String() string {
 }
 
 func (stemcellCID *StemcellCID) UnmarshalJSON(data []byte) error {
-	if stemcellCID == nil {
-		return errors.New("StemcellCID: UnmarshalJSON on nil pointer")
-	}
-
 	dataString := strings.Trim(string(data), "\"")
 	intValue, err := strconv.Atoi(dataString)
 	if err != nil {
@@ -48,10 +43,6 @@ func (vmCID VMCID) Int() int {
 }
 
 func (vmCID *VMCID) UnmarshalJSON(data []byte) error {
-	if vmCID == nil {
-		return errors.New("VMCID: UnmarshalJSON on nil pointer")
-	}
-
 	dataString := strings.Trim(string(data), "\"")
 	intValue, err := strconv.Atoi(dataString)
 	if err != nil {
@@ -68,10 +59,6 @@ func (vmCID VMCID) MarshalJSON() ([]byte, error) {
 }
 
 func (diskCID *DiskCID) UnmarshalJSON(data []byte) error {
-	if diskCID == nil {
-		return errors.New("DiskCID: UnmarshalJSON on nil pointer")
-	}
-
 	dataString := strings.Trim(string(data), "\"")
 	intValue, err := strconv.Atoi(dataString)
 	if err != nil {
@@ -96,10 +83,6 @@ func (diskCID DiskCID) Int() int {
 }
 
 func (snapshotCID *SnapshotCID) UnmarshalJSON(data []byte) error {
-	if snapshotCID == nil {
-		return errors.New("SnapshotCID: UnmarshalJSON on nil pointer")
-	}
-
 	dataString := strings.Trim(string(data), "\"")
 	intValue, err := strconv.Atoi(dataString)
 	if err != nil {
