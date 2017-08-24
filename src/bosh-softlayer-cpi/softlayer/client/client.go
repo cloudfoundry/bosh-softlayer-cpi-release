@@ -35,7 +35,8 @@ const (
 		"billingItem[nextInvoiceTotalRecurringAmount, children[nextInvoiceTotalRecurringAmount]], notes, tagReferences.tag.name, networkVlans[id,vlanNumber,networkSpace], " +
 		"primaryBackendNetworkComponent[primaryIpAddress, networkVlan[id,name,vlanNumber,primaryRouter], subnets[netmask,networkIdentifier]], primaryNetworkComponent[primaryIpAddress, networkVlan[id,name,vlanNumber,primaryRouter], subnets[netmask,networkIdentifier]]"
 
-	NETWORK_DEFAULT_VLAN = "networkSpace"
+	NETWORK_DEFAULT_VLAN_MASK   = "id,primarySubnetId,networkSpace"
+	NETWORK_DEFAULT_SUBNET_MASK = "id,networkVlanId,addressSpace"
 
 	VOLUME_DEFAULT_MASK = "id,username,lunId,capacityGb,bytesUsed,serviceResource.datacenter.name,serviceResourceBackendIpAddress,activeTransactionCount,billingItem.orderItem.order[id,userRecord.username]"
 
@@ -90,6 +91,7 @@ func NewSoftLayerClientManager(session *session.Session, vps *vpsVm.Client) *Cli
 		services.GetBillingItemService(session),
 		services.GetLocationDatacenterService(session),
 		services.GetNetworkVlanService(session),
+		services.GetNetworkSubnetService(session),
 		services.GetVirtualGuestBlockDeviceTemplateGroupService(session),
 		services.GetSecuritySshKeyService(session),
 		vps,
@@ -126,6 +128,7 @@ type Client interface {
 	GetNetworkStorageTarget(volumeId int, mask string) (string, bool, error)
 	GetImage(imageId int, mask string) (*datatypes.Virtual_Guest_Block_Device_Template_Group, bool, error)
 	GetVlan(id int, mask string) (*datatypes.Network_Vlan, bool, error)
+	GetSubnet(id int, mask string) (*datatypes.Network_Subnet, bool, error)
 	GetAllowedHostCredential(id int) (*datatypes.Network_Storage_Allowed_Host, bool, error)
 	GetAllowedNetworkStorage(id int) ([]string, bool, error)
 	CreateSshKey(label *string, key *string, fingerPrint *string) (*datatypes.Security_Ssh_Key, error)
@@ -147,6 +150,7 @@ type ClientManager struct {
 	BillingService        services.Billing_Item
 	LocationService       services.Location_Datacenter
 	NetworkVlanService    services.Network_Vlan
+	NetworkSubnetService  services.Network_Subnet
 	ImageService          services.Virtual_Guest_Block_Device_Template_Group
 	SecuritySshKeyService services.Security_Ssh_Key
 	vpsService            *vpsVm.Client
@@ -171,7 +175,7 @@ func (c *ClientManager) GetInstance(id int, mask string) (*datatypes.Virtual_Gue
 
 func (c *ClientManager) GetVlan(id int, mask string) (*datatypes.Network_Vlan, bool, error) {
 	if mask == "" {
-		mask = NETWORK_DEFAULT_VLAN
+		mask = NETWORK_DEFAULT_VLAN_MASK
 	}
 	vlan, err := c.NetworkVlanService.Id(id).Mask(mask).GetObject()
 	if err != nil {
@@ -180,6 +184,23 @@ func (c *ClientManager) GetVlan(id int, mask string) (*datatypes.Network_Vlan, b
 				return &datatypes.Network_Vlan{}, false, nil
 			}
 			return &datatypes.Network_Vlan{}, false, err
+		}
+	}
+
+	return &vlan, true, err
+}
+
+func (c *ClientManager) GetSubnet(id int, mask string) (*datatypes.Network_Subnet, bool, error) {
+	if mask == "" {
+		mask = NETWORK_DEFAULT_SUBNET_MASK
+	}
+	vlan, err := c.NetworkSubnetService.Id(id).Mask(mask).GetObject()
+	if err != nil {
+		if apiErr, ok := err.(sl.Error); ok {
+			if apiErr.Exception == SOFTLAYER_OBJECTNOTFOUND_EXCEPTION {
+				return &datatypes.Network_Subnet{}, false, nil
+			}
+			return &datatypes.Network_Subnet{}, false, err
 		}
 	}
 

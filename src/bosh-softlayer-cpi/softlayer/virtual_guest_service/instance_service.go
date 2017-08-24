@@ -22,6 +22,7 @@ type Service interface {
 	FindByPrimaryBackendIp(ip string) (*datatypes.Virtual_Guest, error)
 	FindByPrimaryIp(ip string) (*datatypes.Virtual_Guest, error)
 	GetVlan(id int, mask string) (*datatypes.Network_Vlan, error)
+	GetSubnet(id int, mask string) (*datatypes.Network_Subnet, error)
 	Reboot(id int) error
 	ReloadOS(id int, stemcellID int, sshKeyIds []int, vmNamePrefix string, domain string) error
 	SetMetadata(id int, vmMetadata Metadata) error

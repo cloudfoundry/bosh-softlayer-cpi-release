@@ -20,9 +20,14 @@ type DiskCloudProperties struct {
 type Environment map[string]interface{}
 
 type NetworkCloudProperties struct {
-	VlanIds             []int         `json:"vlanIds,omitempty"`
+	networkVlans        []NetworkVlan `json:"networkVlans,omitempty"`
 	SourcePolicyRouting bool          `json:"source_policy_routing,omitempty"`
 	Tags                instance.Tags `json:"tags,omitempty"`
+}
+
+type NetworkVlan struct {
+	SubnetId int `json:"subnetIds,omitempty"`
+	VlanId   int `json:"vlanIds,omitempty"`
 }
 
 type SnapshotMetadata struct {

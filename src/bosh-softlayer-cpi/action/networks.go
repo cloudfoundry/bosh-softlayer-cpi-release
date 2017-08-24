@@ -30,36 +30,18 @@ type Network struct {
 func (ns Networks) AsInstanceServiceNetworks() instance.Networks {
 	networks := instance.Networks{}
 
+	// Need to think deep
 	for netName, network := range ns {
-		for index, vlanId := range network.CloudProperties.VlanIds {
-			var newNetName string
-			if index > 0 {
-				newNetName = fmt.Sprintf("%s_%d", netName, index)
-				networks[newNetName] = instance.Network{
-					Type:    network.Type,
-					IP:      network.IP,
-					Gateway: network.Gateway,
-					Netmask: network.Netmask,
-					DNS:     network.DNS,
-					CloudProperties: instance.NetworkCloudProperties{
-						VlanID: vlanId,
-					},
-				}
-			} else {
-				newNetName = netName
-				networks[newNetName] = instance.Network{
-					Type:    network.Type,
-					IP:      network.IP,
-					Gateway: network.Gateway,
-					Netmask: network.Netmask,
-					DNS:     network.DNS,
-					Default: network.Default,
-					CloudProperties: instance.NetworkCloudProperties{
-						VlanID:              vlanId,
-						SourcePolicyRouting: network.CloudProperties.SourcePolicyRouting,
-					},
-				}
-			}
+		netSlim := instance.Network{
+			Type:    network.Type,
+			IP:      network.IP,
+			Gateway: network.Gateway,
+			Netmask: network.Netmask,
+			DNS:     network.DNS,
+		}
+
+		if len(network.CloudProperties.networkVlans) > 0 {
+			parseCloudProperties(networks, netName, netSlim, network.CloudProperties.networkVlans, network.CloudProperties.SourcePolicyRouting)
 		}
 	}
 
@@ -78,4 +60,26 @@ func (ns Networks) HasManualNetwork() bool {
 
 func (n Network) IsManual() bool {
 	return n.Type == NetworkTypeManual
+}
+
+func parseCloudProperties(networks instance.Networks, netName string, network instance.Network, networkVlans []NetworkVlan, sourcePolicyRouting bool) {
+	for index, networkVlan := range networkVlans {
+		var newNetName string
+		if index > 0 {
+			newNetName = fmt.Sprintf("%s_%d", netName, index)
+			network.CloudProperties = instance.NetworkCloudProperties{
+				VlanID:   networkVlan.VlanId,
+				SubnetID: networkVlan.SubnetId,
+			}
+			networks[newNetName] = network
+		} else {
+			newNetName = netName
+			network.CloudProperties = instance.NetworkCloudProperties{
+				VlanID:              networkVlan.VlanId,
+				SubnetID:            networkVlan.SubnetId,
+				SourcePolicyRouting: sourcePolicyRouting,
+			}
+			networks[newNetName] = network
+		}
+	}
 }

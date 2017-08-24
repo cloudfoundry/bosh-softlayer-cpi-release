@@ -210,7 +210,7 @@ var _ = Describe("Virtual Guest Service", func() {
 
 		BeforeEach(func() {
 			vlanID = 32345678
-			mask = client.NETWORK_DEFAULT_VLAN
+			mask = client.NETWORK_DEFAULT_VLAN_MASK
 
 			cli.GetVlanReturns(
 				&datatypes.Network_Vlan{

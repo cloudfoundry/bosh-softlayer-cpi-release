@@ -70,3 +70,16 @@ func (vg SoftlayerVirtualGuestService) GetVlan(vlanID int, mask string) (*dataty
 
 	return vlan, nil
 }
+
+func (vg SoftlayerVirtualGuestService) GetSubnet(subnetID int, mask string) (*datatypes.Network_Subnet, error) {
+	subnet, found, err := vg.softlayerClient.GetSubnet(subnetID, mask)
+	if err != nil {
+		return &datatypes.Network_Subnet{}, bosherr.WrapErrorf(err, "Getting subnet details with id '%d'", subnetID)
+	}
+
+	if !found {
+		return &datatypes.Network_Subnet{}, bosherr.Errorf("Failed to get subnet details with id '%d'", subnetID)
+	}
+
+	return subnet, nil
+}
