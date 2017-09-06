@@ -30,7 +30,6 @@ type Network struct {
 func (ns Networks) AsInstanceServiceNetworks() instance.Networks {
 	networks := instance.Networks{}
 
-	// Need to think deep
 	for netName, network := range ns {
 		netSlim := instance.Network{
 			Type:    network.Type,
@@ -40,9 +39,8 @@ func (ns Networks) AsInstanceServiceNetworks() instance.Networks {
 			DNS:     network.DNS,
 		}
 
-		if len(network.CloudProperties.NetworkVlans) > 0 {
-			parseCloudProperties(networks, netName, netSlim, network.CloudProperties.NetworkVlans, network.CloudProperties.SourcePolicyRouting)
-		}
+		// set one by one
+		parseCloudProperties(networks, netName, netSlim, network.CloudProperties)
 	}
 
 	return networks
@@ -62,29 +60,46 @@ func (n Network) IsManual() bool {
 	return n.Type == NetworkTypeManual
 }
 
-func parseCloudProperties(networks instance.Networks, netName string, network instance.Network, networkVlans []NetworkVlan, sourcePolicyRouting bool) {
-	for index, networkVlan := range networkVlans {
-		var newNetName string
-		var cloudProps instance.NetworkCloudProperties
-		if networkVlan.SubnetId != 0 {
+func parseCloudProperties(networks instance.Networks, netName string, network instance.Network, cloudProperties NetworkCloudProperties) {
+	if len(cloudProperties.SubnetIds) > 0 {
+		for index, subnetId := range cloudProperties.SubnetIds {
+			var newNetName string
+			var cloudProps instance.NetworkCloudProperties
 			cloudProps = instance.NetworkCloudProperties{
-				VlanID:   networkVlan.VlanId,
-				SubnetID: networkVlan.SubnetId,
+				SubnetID: subnetId,
 			}
-		} else {
-			cloudProps = instance.NetworkCloudProperties{
-				VlanID: networkVlan.VlanId,
+
+			if index > 0 {
+				newNetName = fmt.Sprintf("%s_%d", netName, index)
+				network.CloudProperties = cloudProps
+				networks[newNetName] = network
+			} else {
+				newNetName = netName
+				cloudProps.SourcePolicyRouting = cloudProperties.SourcePolicyRouting
+				network.CloudProperties = cloudProps
+				networks[newNetName] = network
 			}
 		}
+	} else if len(cloudProperties.VlanIds) > 0 {
+		{
+			for index, vlanId := range cloudProperties.VlanIds {
+				var newNetName string
+				var cloudProps instance.NetworkCloudProperties
+				cloudProps = instance.NetworkCloudProperties{
+					VlanID: vlanId,
+				}
 
-		if index > 0 {
-			newNetName = fmt.Sprintf("%s_%d", netName, index)
-			network.CloudProperties = cloudProps
-			networks[newNetName] = network
-		} else {
-			newNetName = netName
-			network.CloudProperties = cloudProps
-			networks[newNetName] = network
+				if index > 0 {
+					newNetName = fmt.Sprintf("%s_%d", netName, index)
+					network.CloudProperties = cloudProps
+					networks[newNetName] = network
+				} else {
+					newNetName = netName
+					cloudProps.SourcePolicyRouting = cloudProperties.SourcePolicyRouting
+					network.CloudProperties = cloudProps
+					networks[newNetName] = network
+				}
+			}
 		}
 	}
 }

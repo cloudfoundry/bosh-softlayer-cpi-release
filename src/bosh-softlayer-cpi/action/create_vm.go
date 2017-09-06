@@ -221,7 +221,7 @@ func (cv CreateVM) createVirtualGuestTemplate(stemcellUuid string, cloudProps VM
 		NetworkComponents: []datatypes.Virtual_Guest_Network_Component{
 			{MaxSpeed: sl.Int(cloudProps.MaxNetworkSpeed)},
 		},
-		PrivateNetworkOnlyFlag:         sl.Bool(&publicNetworkComponent == nil),
+		PrivateNetworkOnlyFlag:         sl.Bool(publicNetworkComponent == nil),
 		PrimaryNetworkComponent:        publicNetworkComponent,
 		PrimaryBackendNetworkComponent: privateNetworkComponent,
 
@@ -247,35 +247,69 @@ func (cv CreateVM) getNetworkComponents(networks Networks) (*datatypes.Virtual_G
 		if nw.Type == "manual" {
 			continue
 		}
-		for _, networkVlan := range nw.CloudProperties.NetworkVlans {
-			networkSpace, networkComponent, err := cv.createNetworkComponents(networkVlan)
-			if err != nil {
-				return &datatypes.Virtual_Guest_Network_Component{},
-					&datatypes.Virtual_Guest_Network_Component{},
-					bosherr.WrapErrorf(err, "Network: %s, vlan id: %+v", name, networkVlan)
-			}
+		if len(nw.CloudProperties.SubnetIds) > 0 {
+			for _, subnetId := range nw.CloudProperties.SubnetIds {
+				networkSpace, networkComponent, err := cv.createNetworkComponentsBySubnetId(subnetId)
+				if err != nil {
+					return &datatypes.Virtual_Guest_Network_Component{},
+						&datatypes.Virtual_Guest_Network_Component{},
+						bosherr.WrapErrorf(err, "Network: %s, subnet id: %d", name, subnetId)
+				}
 
-			switch networkSpace {
-			case "PRIVATE":
-				if privateNetworkComponent == nil {
-					privateNetworkComponent = networkComponent
-				} else if privateNetworkComponent.NetworkVlan.Id != networkComponent.NetworkVlan.Id {
+				switch networkSpace {
+				case "PRIVATE":
+					if privateNetworkComponent == nil {
+						privateNetworkComponent = networkComponent
+					} else if privateNetworkComponent.NetworkVlan.PrimarySubnetId != networkComponent.NetworkVlan.PrimarySubnetId {
+						return &datatypes.Virtual_Guest_Network_Component{},
+							&datatypes.Virtual_Guest_Network_Component{},
+							bosherr.Error("Only one private VLAN is supported")
+					}
+				case "PUBLIC":
+					if publicNetworkComponent == nil {
+						publicNetworkComponent = networkComponent
+					} else if publicNetworkComponent.NetworkVlan.PrimarySubnetId != publicNetworkComponent.NetworkVlan.PrimarySubnetId {
+						return &datatypes.Virtual_Guest_Network_Component{},
+							&datatypes.Virtual_Guest_Network_Component{},
+							bosherr.Error("Only one public VLAN is supported")
+					}
+				default:
 					return &datatypes.Virtual_Guest_Network_Component{},
 						&datatypes.Virtual_Guest_Network_Component{},
-						bosherr.Error("Only one private VLAN is supported")
+						bosherr.Errorf("networkVlan %d: unknown network type '%s'", subnetId, networkSpace)
 				}
-			case "PUBLIC":
-				if publicNetworkComponent == nil {
-					publicNetworkComponent = networkComponent
-				} else if publicNetworkComponent.NetworkVlan.Id != publicNetworkComponent.NetworkVlan.Id {
+			}
+		} else if len(nw.CloudProperties.VlanIds) > 0 {
+			for _, vlanId := range nw.CloudProperties.VlanIds {
+				networkSpace, networkComponent, err := cv.createNetworkComponentsByVlanId(vlanId)
+				if err != nil {
 					return &datatypes.Virtual_Guest_Network_Component{},
 						&datatypes.Virtual_Guest_Network_Component{},
-						bosherr.Error("Only one public VLAN is supported")
+						bosherr.WrapErrorf(err, "Network: %s, vlan id: %d", name, vlanId)
 				}
-			default:
-				return &datatypes.Virtual_Guest_Network_Component{},
-					&datatypes.Virtual_Guest_Network_Component{},
-					bosherr.Errorf("networkVlan %d: unknown network type '%v'", networkVlan, networkSpace)
+
+				switch networkSpace {
+				case "PRIVATE":
+					if privateNetworkComponent == nil {
+						privateNetworkComponent = networkComponent
+					} else if privateNetworkComponent.NetworkVlan.Id != networkComponent.NetworkVlan.Id {
+						return &datatypes.Virtual_Guest_Network_Component{},
+							&datatypes.Virtual_Guest_Network_Component{},
+							bosherr.Error("Only one private VLAN is supported")
+					}
+				case "PUBLIC":
+					if publicNetworkComponent == nil {
+						publicNetworkComponent = networkComponent
+					} else if publicNetworkComponent.NetworkVlan.Id != publicNetworkComponent.NetworkVlan.Id {
+						return &datatypes.Virtual_Guest_Network_Component{},
+							&datatypes.Virtual_Guest_Network_Component{},
+							bosherr.Error("Only one public VLAN is supported")
+					}
+				default:
+					return &datatypes.Virtual_Guest_Network_Component{},
+						&datatypes.Virtual_Guest_Network_Component{},
+						bosherr.Errorf("networkVlan %d: unknown network type '%s'", vlanId, networkSpace)
+				}
 			}
 		}
 	}
@@ -283,40 +317,38 @@ func (cv CreateVM) getNetworkComponents(networks Networks) (*datatypes.Virtual_G
 	return publicNetworkComponent, privateNetworkComponent, nil
 }
 
-func (cv CreateVM) createNetworkComponents(networkVlan NetworkVlan) (string, *datatypes.Virtual_Guest_Network_Component, error) {
-	// Subnet has higher priority than vlan
-	if networkVlan.SubnetId != 0 {
-		subnet, err := cv.virtualGuestService.GetSubnet(networkVlan.SubnetId, boslc.NETWORK_DEFAULT_SUBNET_MASK)
-		if err != nil {
-			return "", &datatypes.Virtual_Guest_Network_Component{}, bosherr.WrapErrorf(err, "Getting subnet info with id '%d'", networkVlan.SubnetId)
-		}
-		if networkVlan.VlanId != *subnet.NetworkVlanId {
-			return "", &datatypes.Virtual_Guest_Network_Component{}, bosherr.WrapErrorf(err,
-				"VlanId '%d' is not suitable with vlanid '%d' of subnet '%d'", networkVlan.VlanId, subnet.NetworkVlanId, subnet.Id)
-		}
-		return *(subnet.AddressSpace),
-			&datatypes.Virtual_Guest_Network_Component{
-				NetworkVlan: &datatypes.Network_Vlan{
-					Id:              subnet.NetworkVlanId,
-					PrimarySubnetId: subnet.Id,
-				},
-			}, nil
+func (cv CreateVM) createNetworkComponentsBySubnetId(subnetId int) (string, *datatypes.Virtual_Guest_Network_Component, error) {
+	subnet, err := cv.virtualGuestService.GetSubnet(subnetId, boslc.NETWORK_DEFAULT_SUBNET_MASK)
+	if err != nil {
+		return "", &datatypes.Virtual_Guest_Network_Component{}, bosherr.WrapErrorf(err, "Getting subnet info with id '%d'", subnetId)
 	}
-
-	if networkVlan.VlanId != 0 {
-		vlan, err := cv.virtualGuestService.GetVlan(networkVlan.VlanId, boslc.NETWORK_DEFAULT_VLAN_MASK)
-		if err != nil {
-			return "", &datatypes.Virtual_Guest_Network_Component{}, bosherr.WrapErrorf(err, "Getting vlan info with id '%d'", networkVlan.VlanId)
-		}
-		return *(vlan.NetworkSpace),
-			&datatypes.Virtual_Guest_Network_Component{
-				NetworkVlan: &datatypes.Network_Vlan{
-					Id: vlan.Id,
-				},
-			}, nil
+	if subnetId != *subnet.Id {
+		return "", &datatypes.Virtual_Guest_Network_Component{}, bosherr.WrapErrorf(err,
+			"SubnetId '%d' is not suitable with subnet '%d'", subnetId, subnet.Id)
 	}
+	return *(subnet.AddressSpace),
+		&datatypes.Virtual_Guest_Network_Component{
+			NetworkVlan: &datatypes.Network_Vlan{
+				PrimarySubnetId: subnet.Id,
+			},
+		}, nil
+}
 
-	return "", &datatypes.Virtual_Guest_Network_Component{}, bosherr.Errorf("networkVlan has not required field: [SubnetId or VlanId]")
+func (cv CreateVM) createNetworkComponentsByVlanId(vlanId int) (string, *datatypes.Virtual_Guest_Network_Component, error) {
+	vlan, err := cv.virtualGuestService.GetVlan(vlanId, boslc.NETWORK_DEFAULT_VLAN_MASK)
+	if err != nil {
+		return "", &datatypes.Virtual_Guest_Network_Component{}, bosherr.WrapErrorf(err, "Getting vlan info with id '%d'", vlanId)
+	}
+	if vlanId != *(vlan.Id) {
+		return "", &datatypes.Virtual_Guest_Network_Component{}, bosherr.WrapErrorf(err,
+			"VlanId '%d' is not suitable with vlan '%d'", vlanId, *(vlan.Id))
+	}
+	return *(vlan.NetworkSpace),
+		&datatypes.Virtual_Guest_Network_Component{
+			NetworkVlan: &datatypes.Network_Vlan{
+				Id: vlan.Id,
+			},
+		}, nil
 }
 
 func (cv CreateVM) createByOsReload(stemcellCID StemcellCID, cloudProps VMCloudProperties, instanceNetworks instance.Networks) (int, error) {

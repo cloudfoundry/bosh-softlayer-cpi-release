@@ -24,11 +24,7 @@ var _ = Describe("Networks", func() {
 					DNS:     []string{"fake-network-dns"},
 					Default: []string{"fake-network-default"},
 					CloudProperties: NetworkCloudProperties{
-						NetworkVlans: []NetworkVlan{
-							{
-								VlanId: 42345678,
-							},
-						},
+						VlanIds:             []int{42345678},
 						SourcePolicyRouting: true,
 						Tags:                []string{"fake-network-cloud-network-tag"},
 					},
@@ -49,11 +45,7 @@ var _ = Describe("Networks", func() {
 					DNS:     []string{"fake-network-dns"},
 					Default: []string{"fake-network-default"},
 					CloudProperties: NetworkCloudProperties{
-						NetworkVlans: []NetworkVlan{
-							{
-								VlanId: 42345678,
-							},
-						},
+						VlanIds:             []int{42345678},
 						SourcePolicyRouting: true,
 						Tags:                []string{"fake-network-cloud-network-tag"},
 					},
@@ -66,11 +58,8 @@ var _ = Describe("Networks", func() {
 					DNS:     []string{"fake-network-dns"},
 					Default: []string{"fake-network-default"},
 					CloudProperties: NetworkCloudProperties{
-						NetworkVlans: []NetworkVlan{
-							{
-								VlanId: 42345680,
-							},
-						},
+
+						VlanIds:             []int{42345678},
 						SourcePolicyRouting: true,
 						Tags:                []string{"fake-network-cloud-network-tag"},
 					},
@@ -91,14 +80,7 @@ var _ = Describe("Networks", func() {
 					DNS:     []string{"fake-network-dns"},
 					Default: []string{"fake-network-default"},
 					CloudProperties: NetworkCloudProperties{
-						NetworkVlans: []NetworkVlan{
-							{
-								VlanId: 42345678,
-							},
-							{
-								VlanId: 42345680,
-							},
-						},
+						VlanIds:             []int{42345678, 42345680},
 						SourcePolicyRouting: true,
 						Tags:                []string{"fake-network-cloud-network-tag"},
 					},
@@ -119,14 +101,7 @@ var _ = Describe("Networks", func() {
 					DNS:     []string{"fake-network-dns"},
 					Default: []string{"fake-network-default"},
 					CloudProperties: NetworkCloudProperties{
-						NetworkVlans: []NetworkVlan{
-							{
-								SubnetId: 2345678,
-							},
-							{
-								SubnetId: 2345680,
-							},
-						},
+						VlanIds:             []int{42345678, 42345680},
 						SourcePolicyRouting: true,
 						Tags:                []string{"fake-network-cloud-network-tag"},
 					},

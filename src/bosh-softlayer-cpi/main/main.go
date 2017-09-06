@@ -32,7 +32,7 @@ var (
 
 func main() {
 	logger, fs, uuid, writer := basicDeps()
-
+	cmdRunner := boshsys.NewExecCmdRunner(logger)
 	defer logger.HandlePanic("Main")
 
 	flag.Parse()
@@ -43,7 +43,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	dispatch := buildDispatcher(cfg, logger, writer, uuid)
+	dispatch := buildDispatcher(cfg, logger, writer, uuid, cmdRunner)
 
 	cli := transport.NewCLI(os.Stdin, os.Stdout, dispatch, logger)
 
@@ -71,6 +71,7 @@ func buildDispatcher(
 	logger boshlog.Logger,
 	writer io.Writer,
 	uuidGen boshuuid.Generator,
+	cmdRunner boshsys.CmdRunner,
 ) dispatcher.Dispatcher {
 	var softlayerAPIEndpoint string
 	if config.Cloud.Properties.SoftLayer.ApiEndpoint != "" {

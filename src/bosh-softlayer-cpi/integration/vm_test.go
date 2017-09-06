@@ -39,14 +39,7 @@ var _ = Describe("VM", func() {
 		          "gateway"
 		        ],
 		        "cloud_properties": {
-		          "networkVlans":
-		          [
-		            {
-                      "vlanId": 524956
-		            },{
-		              "vlanId": 524954
-		            }
-		          ]
+		          "vlanIds": [524956, 524954]
 		        }
 		      }
 		    },

@@ -118,11 +118,7 @@ var _ = Describe("CreateVM", func() {
 					DNS:     []string{"fake-network-dns"},
 					Default: []string{"fake-network-default"},
 					CloudProperties: NetworkCloudProperties{
-						NetworkVlans: []NetworkVlan{
-							{
-								VlanId: 42345678,
-							},
-						},
+						VlanIds:             []int{42345678},
 						SourcePolicyRouting: true,
 						Tags:                []string{"fake-network-cloud-network-tag"},
 					},
@@ -386,11 +382,7 @@ var _ = Describe("CreateVM", func() {
 					Netmask: "fake-network-netmask",
 					DNS:     []string{"fake-network-dns"},
 					CloudProperties: NetworkCloudProperties{
-						NetworkVlans: []NetworkVlan{
-							{
-								VlanId: 42345678,
-							},
-						},
+						VlanIds: []int{423456990},
 					},
 				},
 				"fake-network-2": Network{
@@ -401,11 +393,7 @@ var _ = Describe("CreateVM", func() {
 					DNS:     []string{"fake-network-dns"},
 					Default: []string{"fake-network-default"},
 					CloudProperties: NetworkCloudProperties{
-						NetworkVlans: []NetworkVlan{
-							{
-								VlanId: 42345678,
-							},
-						},
+						VlanIds: []int{42345678},
 					},
 				},
 			}
@@ -787,24 +775,72 @@ var _ = Describe("CreateVM", func() {
 				)
 			})
 
-			It("creates the vm", func() {
+			It("creates the vm with only private network", func() {
 				vmCID, err = createVM.Run(agentID, stemcellCID, cloudProps, networks, disks, env)
+				virtualGuest, _, _, _ := vmService.CreateArgsForCall(0)
+				actualCid, _ := vmService.ConfigureNetworksArgsForCall(0)
+				_, actualInstanceNetworks := vmService.ConfigureNetworksArgsForCall(0)
+
 				Expect(err).NotTo(HaveOccurred())
 				Expect(imageService.FindCallCount()).To(Equal(1))
 				Expect(vmService.CreateSshKeyCallCount()).To(Equal(0))
 				Expect(vmService.GetVlanCallCount()).To(Equal(1))
 				Expect(vmService.FindByPrimaryBackendIpCallCount()).To(Equal(0))
 				Expect(vmService.ReloadOSCallCount()).To(Equal(0))
+				Expect(*virtualGuest.PrivateNetworkOnlyFlag).To(BeTrue())
 				Expect(vmService.CreateCallCount()).To(Equal(1))
 				Expect(vmService.ConfigureNetworksCallCount()).To(Equal(1))
 				Expect(vmService.AttachEphemeralDiskCallCount()).To(Equal(0))
 				Expect(vmService.CleanUpCallCount()).To(Equal(0))
 				Expect(registryClient.UpdateCalled).To(BeTrue())
 				Expect(registryClient.UpdateSettings).To(Equal(expectedAgentSettings))
-				actualCid, _ := vmService.ConfigureNetworksArgsForCall(0)
 				Expect(vmCID).To(Equal(VMCID(actualCid).String()))
-				_, actualInstanceNetworks := vmService.ConfigureNetworksArgsForCall(0)
 				Expect(actualInstanceNetworks).To(Equal(expectedInstanceNetworks))
+			})
+
+			It("Failted to create the vm with only public network", func() {
+				networks = Networks{
+					"fake-network-name": Network{
+						Type:    "dynamic",
+						IP:      "10.10.10.10",
+						Gateway: "fake-network-gateway",
+						Netmask: "fake-network-netmask",
+						DNS:     []string{"fake-network-dns"},
+						Default: []string{"fake-network-default"},
+						CloudProperties: NetworkCloudProperties{
+							VlanIds:             []int{42345680},
+							SourcePolicyRouting: true,
+							Tags:                []string{"fake-network-cloud-network-tag"},
+						},
+					},
+				}
+				vmService.GetVlanReturns(
+					&datatypes.Network_Vlan{
+						Id:           sl.Int(42345680),
+						NetworkSpace: sl.String("PUBLIC"),
+					},
+					nil,
+				)
+				vmService.CreateReturns(
+					0,
+					api.NewVMCreationFailedError("Only the frontend VLAN was specified.", false),
+				)
+				_, err = createVM.Run(agentID, stemcellCID, cloudProps, networks, disks, env)
+				virtualGuest, _, _, _ := vmService.CreateArgsForCall(0)
+
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("Only the frontend VLAN was specified."))
+				Expect(imageService.FindCallCount()).To(Equal(1))
+				Expect(vmService.CreateSshKeyCallCount()).To(Equal(0))
+				Expect(vmService.GetVlanCallCount()).To(Equal(1))
+				Expect(vmService.FindByPrimaryBackendIpCallCount()).To(Equal(0))
+				Expect(vmService.ReloadOSCallCount()).To(Equal(0))
+				Expect(*virtualGuest.PrivateNetworkOnlyFlag).To(BeFalse())
+				Expect(vmService.CreateCallCount()).To(Equal(1))
+				Expect(vmService.ConfigureNetworksCallCount()).To(Equal(0))
+				Expect(vmService.AttachEphemeralDiskCallCount()).To(Equal(0))
+				Expect(vmService.CleanUpCallCount()).To(Equal(0))
+				Expect(registryClient.UpdateCalled).To(BeFalse())
 			})
 
 			It("returns an error if vmService create call returns an error", func() {

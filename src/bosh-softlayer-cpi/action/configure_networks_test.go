@@ -42,11 +42,7 @@ var _ = Describe("ConfigureNetworks", func() {
 					DNS:     []string{"fake-network-dns"},
 					Default: []string{"fake-network-default"},
 					CloudProperties: NetworkCloudProperties{
-						NetworkVlans: []NetworkVlan{
-							{
-								VlanId: 42345678,
-							},
-						},
+						VlanIds:             []int{42345678},
 						SourcePolicyRouting: false,
 					},
 				},
