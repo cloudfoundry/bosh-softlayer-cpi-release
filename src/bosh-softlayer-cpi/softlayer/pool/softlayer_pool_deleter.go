@@ -50,21 +50,35 @@ func (c *softLayerPoolDeleter) Delete(cid int) error {
 				PublicVlan:  int32(virtualGuest.PrimaryNetworkComponent.NetworkVlan.Id),
 				State:       models.StateFree,
 			}
+
 			_, err = c.softLayerVmPoolClient.AddVM(operations.NewAddVMParams().WithBody(slPoolVm))
 			if err != nil {
 				return bosherr.WrapError(err, fmt.Sprintf("Adding vm %d to pool", cid))
 			}
-			return nil
+		}else {
+			return bosherr.WrapError(err, "Removing vm from pool")
 		}
-		return bosherr.WrapError(err, "Removing vm from pool")
+	} else {
+		free := models.VMState{
+			State: models.StateFree,
+		}
+		_, err = c.softLayerVmPoolClient.UpdateVMWithState(operations.NewUpdateVMWithStateParams().WithBody(&free).WithCid(int32(cid)))
+		if err != nil {
+			return bosherr.WrapErrorf(err, "Updating state of vm %d in pool to free", cid)
+		}
 	}
 
-	free := models.VMState{
-		State: models.StateFree,
-	}
-	_, err = c.softLayerVmPoolClient.UpdateVMWithState(operations.NewUpdateVMWithStateParams().WithBody(&free).WithCid(int32(cid)))
+	service, err := c.softLayerClient.GetSoftLayer_Virtual_Guest_Service()
 	if err != nil {
-		return bosherr.WrapErrorf(err, "Updating state of vm %d in pool to free", cid)
+		return bosherr.WrapErrorf(err, "Getting VirtualGuest of `%d`", cid)
+	}
+
+	success, err := service.PowerOffSoft(cid)
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Powering off VirtualGuest `%d`", cid)
+	}
+	if !success {
+		return bosherr.WrapErrorf(err, "Failed to power off VirtualGuest `%d`", cid)
 	}
 
 	return nil

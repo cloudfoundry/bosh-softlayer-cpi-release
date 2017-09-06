@@ -5,7 +5,7 @@ import (
 	"net"
 	"time"
 
-	strfmt "github.com/go-openapi/strfmt"
+	"github.com/go-openapi/strfmt"
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
@@ -17,7 +17,7 @@ import (
 	slhelper "bosh-softlayer-cpi/softlayer/common/helper"
 	operations "bosh-softlayer-cpi/softlayer/pool/client/vm"
 	bslcstem "bosh-softlayer-cpi/softlayer/stemcell"
-	util "bosh-softlayer-cpi/util"
+	"bosh-softlayer-cpi/util"
 
 	. "bosh-softlayer-cpi/softlayer/common"
 
@@ -75,6 +75,8 @@ func (c *softLayerPoolCreator) Create(agentID string, stemcell bslcstem.Stemcell
 // Private methods
 func (c *softLayerPoolCreator) createFromVMPool(agentID string, stemcell bslcstem.Stemcell, cloudProps VMCloudProperties, networks Networks, env Environment) (VM, error) {
 	var err error
+	var slVm VM
+	var virtualGuestId int
 	virtualGuestTemplate, err := CreateVirtualGuestTemplate(stemcell, cloudProps, networks, CreateUserDataForInstance(agentID, networks, c.registryOptions))
 	filter := &models.VMFilter{
 		CPU:         int32(virtualGuestTemplate.StartCpus),
@@ -89,64 +91,71 @@ func (c *softLayerPoolCreator) createFromVMPool(agentID string, stemcell bslcste
 		if !ok {
 			return nil, bosherr.WrapError(err, "Ordering vm from pool")
 		} else {
-			sl_vm, err := c.createBySoftlayer(agentID, stemcell, cloudProps, networks, env)
+			slVm, err = c.createBySoftlayer(agentID, stemcell, cloudProps, networks, env)
 			if err != nil {
 				return nil, bosherr.WrapError(err, "Creating vm in SoftLayer")
 			}
+
+			virtualGuestId = slVm.ID()
 			slPoolVm := &models.VM{
-				Cid:         int32(sl_vm.ID()),
+				Cid:         int32(slVm.ID()),
 				CPU:         int32(virtualGuestTemplate.StartCpus),
 				MemoryMb:    int32(virtualGuestTemplate.MaxMemory),
-				IP:          strfmt.IPv4(sl_vm.GetPrimaryBackendIP()),
-				Hostname:    sl_vm.GetFullyQualifiedDomainName(),
+				IP:          strfmt.IPv4(slVm.GetPrimaryBackendIP()),
+				Hostname:    slVm.GetFullyQualifiedDomainName(),
 				PrivateVlan: int32(virtualGuestTemplate.PrimaryBackendNetworkComponent.NetworkVlan.Id),
 				PublicVlan:  int32(virtualGuestTemplate.PrimaryNetworkComponent.NetworkVlan.Id),
 				State:       models.StateUsing,
 			}
+
 			_, err = c.softLayerVmPoolClient.AddVM(operations.NewAddVMParams().WithBody(slPoolVm))
 			if err != nil {
 				return nil, bosherr.WrapError(err, "Adding vm into pool")
 			}
-			c.logger.Info(SOFTLAYER_POOL_CREATOR_LOG_TAG, fmt.Sprintf("Added vm %d to pool successfully", sl_vm.ID()))
 
-			return sl_vm, nil
+			c.logger.Info(SOFTLAYER_POOL_CREATOR_LOG_TAG, fmt.Sprintf("Added vm %d to pool successfully", slVm.ID()))
 		}
+	}else {
+		var vm *models.VM
+
+		vm = orderVmResp.Payload.VM
+		virtualGuestId = int((*vm).Cid)
+
+		c.logger.Info(SOFTLAYER_POOL_CREATOR_LOG_TAG, fmt.Sprintf("OS reload on VirtualGuest %d using stemcell %d", virtualGuestId, stemcell.ID()))
+
+		slVm, err = c.oSReloadVMInPool(virtualGuestId, agentID, stemcell, cloudProps, networks, env)
+		if err != nil {
+			return nil, bosherr.WrapError(err, "Os reloading vm in SoftLayer")
+		}
+
+		virtualGuest, err := slhelper.GetObjectDetailsOnVirtualGuest(c.softLayerClient, virtualGuestId)
+		if err != nil {
+			return nil, bosherr.WrapError(err, fmt.Sprintf("Getting virtual guest %d details from SoftLayer", virtualGuestId))
+		}
+		deviceName := &models.VM{
+			Cid:         int32(virtualGuestId),
+			CPU:         int32(virtualGuest.StartCpus),
+			MemoryMb:    int32(virtualGuest.MaxMemory),
+			IP:          strfmt.IPv4(virtualGuest.PrimaryBackendIpAddress),
+			Hostname:    cloudProps.VmNamePrefix + "." + cloudProps.Domain,
+			PrivateVlan: int32(virtualGuest.PrimaryBackendNetworkComponent.NetworkVlan.Id),
+			PublicVlan:  int32(virtualGuest.PrimaryNetworkComponent.NetworkVlan.Id),
+			State:       models.StateUsing,
+		}
+		_, err = c.softLayerVmPoolClient.UpdateVM(operations.NewUpdateVMParams().WithBody(deviceName))
+		if err != nil {
+			return nil, bosherr.WrapErrorf(err, "Updating the hostname of vm %d in pool to using", virtualGuestId)
+		}
+
+		c.logger.Info(SOFTLAYER_POOL_CREATOR_LOG_TAG, fmt.Sprintf("vm %d using stemcell %d os reload completed", virtualGuestId, stemcell.ID()))
 	}
-	var vm *models.VM
-	var virtualGuestId int
 
-	vm = orderVmResp.Payload.VM
-	virtualGuestId = int((*vm).Cid)
-
-	c.logger.Info(SOFTLAYER_POOL_CREATOR_LOG_TAG, fmt.Sprintf("OS reload on VirtualGuest %d using stemcell %d", virtualGuestId, stemcell.ID()))
-
-	sl_vm_os, err := c.oSReloadVMInPool(virtualGuestId, agentID, stemcell, cloudProps, networks, env)
+	err = c.tagAsManage(virtualGuestId)
 	if err != nil {
-		return nil, bosherr.WrapError(err, "Os reloading vm in SoftLayer")
+		return nil, bosherr.WrapError(err, fmt.Sprintf("Tag vm `%d`", virtualGuestId))
 	}
 
-	virtualGuest, err := slhelper.GetObjectDetailsOnVirtualGuest(c.softLayerClient, virtualGuestId)
-	if err != nil {
-		return nil, bosherr.WrapError(err, fmt.Sprintf("Getting virtual guest %d details from SoftLayer", virtualGuestId))
-	}
-	deviceName := &models.VM{
-		Cid:         int32(virtualGuestId),
-		CPU:         int32(virtualGuest.StartCpus),
-		MemoryMb:    int32(virtualGuest.MaxMemory),
-		IP:          strfmt.IPv4(virtualGuest.PrimaryBackendIpAddress),
-		Hostname:    cloudProps.VmNamePrefix + "." + cloudProps.Domain,
-		PrivateVlan: int32(virtualGuest.PrimaryBackendNetworkComponent.NetworkVlan.Id),
-		PublicVlan:  int32(virtualGuest.PrimaryNetworkComponent.NetworkVlan.Id),
-		State:       models.StateUsing,
-	}
-	_, err = c.softLayerVmPoolClient.UpdateVM(operations.NewUpdateVMParams().WithBody(deviceName))
-	if err != nil {
-		return nil, bosherr.WrapErrorf(err, "Updating the hostname of vm %d in pool to using", virtualGuestId)
-	}
-
-	c.logger.Info(SOFTLAYER_POOL_CREATOR_LOG_TAG, fmt.Sprintf("vm %d using stemcell %d os reload completed", virtualGuestId, stemcell.ID()))
-
-	return sl_vm_os, nil
+	return slVm, nil
 }
 
 func (c *softLayerPoolCreator) GetAgentOptions() AgentOptions { return c.agentOptions }
@@ -426,4 +435,39 @@ func (c *softLayerPoolCreator) oSReloadVMInPool(cid int, agentID string, stemcel
 		}
 	}
 	return vm, nil
+}
+
+func (c *softLayerPoolCreator) tagAsManage(cid int) error {
+	service, err := c.softLayerClient.GetSoftLayer_Virtual_Guest_Service()
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Getting Service of SoftLayer VirtualGuest `%d`", cid)
+	}
+
+	tagReferences, err := service.GetTagReferences(cid)
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Getting TagReferences on SoftLayer VirtualGuest `%d`", cid)
+	}
+
+	existsTags := make([]string, len(tagReferences), len(tagReferences)+1)
+	tag := "vps-manage"
+	found := false
+	for index, tagReference := range tagReferences {
+		if tag == tagReference.Tag.Name {
+			found = true
+			break
+		}
+		existsTags[index] = tagReference.Tag.Name
+	}
+
+	if !found {
+		success, err := service.SetTags(cid, append(existsTags, tag))
+		if err != nil {
+			return bosherr.WrapErrorf(err, "Setting tags on SoftLayer VirtualGuest `%d`", cid)
+		}
+		if !success {
+			return bosherr.WrapErrorf(err, "Setting tags on SoftLayer VirtualGuest `%d`", cid)
+		}
+	}
+
+	return nil
 }

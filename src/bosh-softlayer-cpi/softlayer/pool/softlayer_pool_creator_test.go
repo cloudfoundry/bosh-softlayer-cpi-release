@@ -239,6 +239,44 @@ var _ = Describe("SoftlayerPoolCreator", func() {
 			})
 		})
 
+		Context("when get tags of vm error out", func() {
+			BeforeEach(func() {
+				setFakeSoftlayerClientCreateObjectTestFixturesWithTagsGettingsFalse(softLayerClient)
+
+				fakeVm.IDReturns(1234567)
+				fakePoolClient.OrderVMByFilterReturns(nil, vm.NewOrderVMByFilterNotFound())
+				fakeVmFinder.FindReturns(fakeVm, true, nil)
+				fakeVm.ConfigureNetworks2Returns(nil)
+				fakeVm.UpdateAgentEnvReturns(nil)
+
+				fakePoolClient.AddVMReturns(vm.NewAddVMOK().WithPayload("added successfully"), nil)
+			})
+
+			It("provides relevant error information", func() {
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("Getting TagReferences on SoftLayer VirtualGuest"))
+			})
+		})
+
+		Context("when set tags of vm error out", func() {
+			BeforeEach(func() {
+				setFakeSoftlayerClientCreateObjectTestFixturesWithTagsSettingsFalse(softLayerClient)
+
+				fakeVm.IDReturns(1234567)
+				fakePoolClient.OrderVMByFilterReturns(nil, vm.NewOrderVMByFilterNotFound())
+				fakeVmFinder.FindReturns(fakeVm, true, nil)
+				fakeVm.ConfigureNetworks2Returns(nil)
+				fakeVm.UpdateAgentEnvReturns(nil)
+
+				fakePoolClient.AddVMReturns(vm.NewAddVMOK().WithPayload("added successfully"), nil)
+			})
+
+			It("provides relevant error information", func() {
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("Setting tags on SoftLayer VirtualGuest"))
+			})
+		})
+
 		Context("when update vm to using error out", func() {
 			BeforeEach(func() {
 				setFakeSoftlayerClientCreateObjectTestFixturesWithEphemeralDiskSize_OS_Reload(softLayerClient)
@@ -307,7 +345,8 @@ func setFakeSoftlayerClientCreateObjectTestFixturesWithEphemeralDiskSize_OS_Relo
 		"SoftLayer_Virtual_Guest_Service_getBlockDevices.json",
 
 		"SoftLayer_Virtual_Guest_Service_getObject.json",
-		"SoftLayer_Virtual_Guest_Service_getObject.json",
+		"SoftLayer_Virtual_Guest_Service_getTagReferences.json",
+		"SoftLayer_Virtual_Guest_Service_setTags.json",
 	}
 	testhelpers.SetTestFixturesForFakeSoftLayerClient(fakeSoftLayerClient, fileNames)
 }
@@ -347,7 +386,50 @@ func setFakeSoftlayerClientCreateObjectTestFixturesWithEphemeralDiskSize(fakeSof
 		"SoftLayer_Virtual_Guest_Service_getPowerState.json",
 		"SoftLayer_Virtual_Guest_Service_getBlockDevices.json",
 
-		"SoftLayer_Virtual_Guest_Service_getObject.json",
+		"SoftLayer_Virtual_Guest_Service_getTagReferences.json",
+		"SoftLayer_Virtual_Guest_Service_setTags.json",
+	}
+	testhelpers.SetTestFixturesForFakeSoftLayerClient(fakeSoftLayerClient, fileNames)
+}
+
+func setFakeSoftlayerClientCreateObjectTestFixturesWithTagsGettingsFalse(fakeSoftLayerClient *fakeslclient.FakeSoftLayerClient) {
+	fileNames := []string{
+		"SoftLayer_Virtual_Guest_Service_createObject.json",
+
+		"SoftLayer_Virtual_Guest_Service_getLastTransaction.json",
+		"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
+		"SoftLayer_Virtual_Guest_Service_getUpgradeItemPrices.json",
+		"SoftLayer_Virtual_Guest_Service_getLocalDiskFlag_local.json",
+		"SoftLayer_Product_Order_Service_placeOrder.json",
+		"SoftLayer_Virtual_Guest_Service_getActiveTransactions.json",
+		"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
+		"SoftLayer_Virtual_Guest_Service_getLastTransaction_CloudInstanceUpgrade.json",
+		"SoftLayer_Virtual_Guest_Service_getPowerState.json",
+		"SoftLayer_Virtual_Guest_Service_getBlockDevices.json",
+
+		"SoftLayer_Virtual_Guest_Service_getTagReferences_false.json",
+		"SoftLayer_Virtual_Guest_Service_setTags.json",
+	}
+	testhelpers.SetTestFixturesForFakeSoftLayerClient(fakeSoftLayerClient, fileNames)
+}
+
+func setFakeSoftlayerClientCreateObjectTestFixturesWithTagsSettingsFalse(fakeSoftLayerClient *fakeslclient.FakeSoftLayerClient) {
+	fileNames := []string{
+		"SoftLayer_Virtual_Guest_Service_createObject.json",
+
+		"SoftLayer_Virtual_Guest_Service_getLastTransaction.json",
+		"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
+		"SoftLayer_Virtual_Guest_Service_getUpgradeItemPrices.json",
+		"SoftLayer_Virtual_Guest_Service_getLocalDiskFlag_local.json",
+		"SoftLayer_Product_Order_Service_placeOrder.json",
+		"SoftLayer_Virtual_Guest_Service_getActiveTransactions.json",
+		"SoftLayer_Virtual_Guest_Service_getActiveTransactions_None.json",
+		"SoftLayer_Virtual_Guest_Service_getLastTransaction_CloudInstanceUpgrade.json",
+		"SoftLayer_Virtual_Guest_Service_getPowerState.json",
+		"SoftLayer_Virtual_Guest_Service_getBlockDevices.json",
+
+		"SoftLayer_Virtual_Guest_Service_getTagReferences.json",
+		"SoftLayer_Virtual_Guest_Service_setTags_false.json",
 	}
 	testhelpers.SetTestFixturesForFakeSoftLayerClient(fakeSoftLayerClient, fileNames)
 }

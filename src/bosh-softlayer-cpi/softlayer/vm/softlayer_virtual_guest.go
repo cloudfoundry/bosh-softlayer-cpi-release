@@ -168,12 +168,21 @@ func (vm *softLayerVirtualGuest) SetMetadata(vmMetadata VMMetadata) error {
 		return bosherr.WrapError(err, "Creating SoftLayer VirtualGuestService from client")
 	}
 
-	success, err := virtualGuestService.SetTags(vm.ID(), tags)
-	if !success {
-		return bosherr.WrapErrorf(err, "Settings tags on SoftLayer VirtualGuest `%d`", vm.ID())
+	tagReferences, err := virtualGuestService.GetTagReferences(vm.ID())
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Getting tags on SoftLayer VirtualGuest `%d`", vm.ID())
 	}
 
+	existsTags := make([]string, len(tagReferences), len(tagReferences)+10)
+	for index, tagReference := range tagReferences {
+		existsTags[index] = tagReference.Tag.Name
+	}
+
+	success, err := virtualGuestService.SetTags(vm.ID(), append(existsTags, tags...))
 	if err != nil {
+		return bosherr.WrapErrorf(err, "Settings tags on SoftLayer VirtualGuest `%d`", vm.ID())
+	}
+	if !success {
 		return bosherr.WrapErrorf(err, "Settings tags on SoftLayer VirtualGuest `%d`", vm.ID())
 	}
 
@@ -385,8 +394,10 @@ func (vm *softLayerVirtualGuest) extractTagsFromVMMetadata(vmMetadata VMMetadata
 				status = status + "," + key + ":" + stringValue
 			}
 		}
-		tags = vm.parseTags(status)
+
 	}
+
+	tags = vm.parseTags(status)
 
 	return tags, nil
 }
