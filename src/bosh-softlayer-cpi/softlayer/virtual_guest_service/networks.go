@@ -2,6 +2,7 @@ package instance
 
 import (
 	"bosh-softlayer-cpi/registry"
+	"sort"
 )
 
 type Networks map[string]Network
@@ -37,10 +38,16 @@ func (n Networks) Validate() error {
 }
 
 func (n Networks) Network() Network {
-	for _, net := range n {
-		if !net.IsVip() {
+	var keys []string
+	for key, _ := range n {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+
+	for _, key := range keys {
+		if !n[key].IsVip() {
 			// There can only be 1 dynamic or manual network
-			return net
+			return n[key]
 		}
 	}
 

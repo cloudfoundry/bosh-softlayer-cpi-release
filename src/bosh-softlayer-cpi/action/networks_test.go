@@ -5,12 +5,20 @@ import (
 	. "github.com/onsi/gomega"
 
 	. "bosh-softlayer-cpi/action"
+	"github.com/softlayer/softlayer-go/datatypes"
+	"github.com/softlayer/softlayer-go/sl"
 )
 
 var _ = Describe("Networks", func() {
-	var ()
+	var (
+		publicVlan *datatypes.Network_Vlan
+	)
 
 	BeforeEach(func() {
+		publicVlan = &datatypes.Network_Vlan{
+			Id:           sl.Int(42345680),
+			NetworkSpace: sl.String("PUBLIC"),
+		}
 	})
 
 	Describe("Call AsInstanceServiceNetworks", func() {
@@ -30,7 +38,8 @@ var _ = Describe("Networks", func() {
 					},
 				},
 			}
-			networks.AsInstanceServiceNetworks()
+			networks.AsInstanceServiceNetworks(
+				&datatypes.Network_Vlan{})
 			ret := networks.HasManualNetwork()
 			Expect(ret).To(BeFalse())
 		})
@@ -65,7 +74,7 @@ var _ = Describe("Networks", func() {
 					},
 				},
 			}
-			networks.AsInstanceServiceNetworks()
+			networks.AsInstanceServiceNetworks(&datatypes.Network_Vlan{})
 			ret := networks.HasManualNetwork()
 			Expect(ret).To(BeTrue())
 		})
@@ -86,7 +95,7 @@ var _ = Describe("Networks", func() {
 					},
 				},
 			}
-			networks.AsInstanceServiceNetworks()
+			networks.AsInstanceServiceNetworks(publicVlan)
 			ret := networks.HasManualNetwork()
 			Expect(ret).To(BeFalse())
 		})
@@ -107,7 +116,7 @@ var _ = Describe("Networks", func() {
 					},
 				},
 			}
-			networks.AsInstanceServiceNetworks()
+			networks.AsInstanceServiceNetworks(publicVlan)
 			ret := networks.HasManualNetwork()
 			Expect(ret).To(BeFalse())
 		})

@@ -125,7 +125,7 @@ var _ = Describe("CreateVM", func() {
 				},
 			}
 
-			expectedInstanceNetworks = networks.AsInstanceServiceNetworks()
+			expectedInstanceNetworks = networks.AsInstanceServiceNetworks(&datatypes.Network_Vlan{})
 
 			expectedAgentSettings = registry.AgentSettings{
 				AgentID: "fake-agent-id",
@@ -398,7 +398,7 @@ var _ = Describe("CreateVM", func() {
 				},
 			}
 
-			expectedInstanceNetworks = networks.AsInstanceServiceNetworks()
+			expectedInstanceNetworks = networks.AsInstanceServiceNetworks(&datatypes.Network_Vlan{})
 
 			expectedAgentSettings = registry.AgentSettings{
 				AgentID: "fake-agent-id",

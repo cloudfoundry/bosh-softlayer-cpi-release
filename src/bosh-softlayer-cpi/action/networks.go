@@ -5,6 +5,7 @@ import (
 
 	"bosh-softlayer-cpi/softlayer/virtual_guest_service"
 	"fmt"
+	"github.com/softlayer/softlayer-go/datatypes"
 )
 
 const (
@@ -27,20 +28,11 @@ type Network struct {
 	CloudProperties NetworkCloudProperties `json:"cloud_properties,omitempty"`
 }
 
-func (ns Networks) AsInstanceServiceNetworks() instance.Networks {
+func (ns Networks) AsInstanceServiceNetworks(publicNetworkVlan *datatypes.Network_Vlan) instance.Networks {
 	networks := instance.Networks{}
 
 	for netName, network := range ns {
-		netSlim := instance.Network{
-			Type:    network.Type,
-			IP:      network.IP,
-			Gateway: network.Gateway,
-			Netmask: network.Netmask,
-			DNS:     network.DNS,
-		}
-
-		// set one by one
-		parseCloudProperties(networks, netName, netSlim, network.CloudProperties)
+		parseCloudProperties(networks, netName, network, publicNetworkVlan)
 	}
 
 	return networks
@@ -60,44 +52,74 @@ func (n Network) IsManual() bool {
 	return n.Type == NetworkTypeManual
 }
 
-func parseCloudProperties(networks instance.Networks, netName string, network instance.Network, cloudProperties NetworkCloudProperties) {
-	if len(cloudProperties.SubnetIds) > 0 {
-		for index, subnetId := range cloudProperties.SubnetIds {
+func parseCloudProperties(networks instance.Networks, netName string, network Network, publicNetworkVlan *datatypes.Network_Vlan) {
+	if len(network.CloudProperties.SubnetIds) > 0 {
+		for index, subnetId := range network.CloudProperties.SubnetIds {
 			var newNetName string
-			var cloudProps instance.NetworkCloudProperties
-			cloudProps = instance.NetworkCloudProperties{
-				SubnetID: subnetId,
-			}
-
-			if index > 0 {
-				newNetName = fmt.Sprintf("%s_%d", netName, index)
-				network.CloudProperties = cloudProps
-				networks[newNetName] = network
-			} else {
+			if publicNetworkVlan.Id != nil && *publicNetworkVlan.PrimarySubnetId == subnetId && network.Type != "manual" {
 				newNetName = netName
-				cloudProps.SourcePolicyRouting = cloudProperties.SourcePolicyRouting
-				network.CloudProperties = cloudProps
-				networks[newNetName] = network
+				networks[newNetName] = instance.Network{
+					Type:    network.Type,
+					IP:      network.IP,
+					Gateway: network.Gateway,
+					Netmask: network.Netmask,
+					DNS:     network.DNS,
+					CloudProperties: instance.NetworkCloudProperties{
+						SubnetID:            subnetId,
+						SourcePolicyRouting: network.CloudProperties.SourcePolicyRouting,
+					},
+					Default: network.Default,
+				}
+			} else {
+				if index != 0 {
+					newNetName = fmt.Sprintf("%s_%d", netName, index)
+				}else {
+					newNetName = netName
+				}
+				networks[newNetName] = instance.Network{
+					Type:    network.Type,
+					IP:      network.IP,
+					Gateway: network.Gateway,
+					Netmask: network.Netmask,
+					DNS:     network.DNS,
+					CloudProperties: instance.NetworkCloudProperties{
+						SubnetID: subnetId,
+					},
+				}
 			}
 		}
-	} else if len(cloudProperties.VlanIds) > 0 {
-		{
-			for index, vlanId := range cloudProperties.VlanIds {
-				var newNetName string
-				var cloudProps instance.NetworkCloudProperties
-				cloudProps = instance.NetworkCloudProperties{
-					VlanID: vlanId,
+	} else if len(network.CloudProperties.VlanIds) > 0 {
+		for index, vlanId := range network.CloudProperties.VlanIds {
+			var newNetName string
+			if publicNetworkVlan.Id != nil && *publicNetworkVlan.Id == vlanId && network.Type != "manual" {
+				newNetName = netName
+				networks[newNetName] = instance.Network{
+					Type:    network.Type,
+					IP:      network.IP,
+					Gateway: network.Gateway,
+					Netmask: network.Netmask,
+					DNS:     network.DNS,
+					CloudProperties: instance.NetworkCloudProperties{
+						VlanID:              vlanId,
+						SourcePolicyRouting: network.CloudProperties.SourcePolicyRouting,
+					},
+					Default: network.Default,
 				}
-
-				if index > 0 {
+			} else {
+				if index != 0 {
 					newNetName = fmt.Sprintf("%s_%d", netName, index)
-					network.CloudProperties = cloudProps
-					networks[newNetName] = network
-				} else {
+				}else {
 					newNetName = netName
-					cloudProps.SourcePolicyRouting = cloudProperties.SourcePolicyRouting
-					network.CloudProperties = cloudProps
-					networks[newNetName] = network
+				}
+				networks[newNetName] = instance.Network{
+					Type:    network.Type,
+					IP:      network.IP,
+					Gateway: network.Gateway,
+					Netmask: network.Netmask,
+					DNS:     network.DNS,
+					CloudProperties: instance.NetworkCloudProperties{
+						VlanID: vlanId,
+					},
 				}
 			}
 		}
