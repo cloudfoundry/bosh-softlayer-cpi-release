@@ -77,13 +77,12 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 	}
 
 	// Create VM user data
-	userDataContents, err := cv.createUserDataForInstance(agentID, cv.registryOptions)
+	userDataContents, err := cv.createUserDataForInstance(agentID, cv.registryOptions, cloudProps.DeployedByBoshCLI)
 	if err != nil {
 		return "", bosherr.WrapError(err, "Creating VM UserData")
 	}
 
 	// Inspect networks to get NetworkComponents
-	//publicVlanId, privateVlanId, err := cv.getVlanIds(networks)
 	publicNetworkComponent, privateNetworkComponent, err := cv.getNetworkComponents(networks)
 	if err != nil {
 		return "", bosherr.WrapError(err, "Getting NetworkComponents from networks settings")
@@ -406,7 +405,14 @@ func (cv CreateVM) createByOsReload(stemcellCID StemcellCID, cloudProps VMCloudP
 	return cid, nil
 }
 
-func (cv CreateVM) createUserDataForInstance(agentID string, registryOptions registry.ClientOptions) (string, error) {
+func (cv CreateVM) createUserDataForInstance(agentID string, registryOptions registry.ClientOptions, deployedByBoshCLIFlag bool) (string, error) {
+	if !deployedByBoshCLIFlag {
+		boshIP, err := cv.getLocalIPAddress()
+		if err != nil {
+			return "", bosherr.WrapError(err, "Failed to get bosh director IP address in local")
+		}
+		registryOptions.Host = boshIP
+	}
 	serverName := fmt.Sprintf("vm-%s", agentID)
 	userDataContents := registry.SoftlayerUserData{
 		Registry: registry.SoftlayerUserDataRegistryEndpoint{
@@ -427,53 +433,6 @@ func (cv CreateVM) createUserDataForInstance(agentID string, registryOptions reg
 
 	return base64.RawURLEncoding.EncodeToString(contentsBytes), nil
 }
-
-//func (cv CreateVM) getVlanIds(networks Networks) (int, int, error) {
-//	var publicVlanID, privateVlanID int
-//
-//	for name, nw := range networks {
-//		if nw.Type == "manual" {
-//			continue
-//		}
-//		for _, vlanId := range nw.CloudProperties.VlanIds {
-//			networkSpace, err := cv.getNetworkSpace(vlanId)
-//			if err != nil {
-//				return 0, 0, bosherr.WrapErrorf(err, "Network: %q, vlan id: %d", name, vlanId)
-//			}
-//
-//			switch networkSpace {
-//			case "PRIVATE":
-//				if privateVlanID == 0 {
-//					privateVlanID = vlanId
-//				} else if privateVlanID != vlanId {
-//					return 0, 0, bosherr.Error("Only one private VLAN is supported")
-//				}
-//			case "PUBLIC":
-//				if publicVlanID == 0 {
-//					publicVlanID = vlanId
-//				} else if publicVlanID != vlanId {
-//					return 0, 0, bosherr.Error("Only one public VLAN is supported")
-//				}
-//			default:
-//				return 0, 0, bosherr.Errorf("Vlan id %d: unknown network type '%s'", vlanId, networkSpace)
-//			}
-//		}
-//	}
-//
-//	if privateVlanID == 0 {
-//		return 0, 0, bosherr.Error("A private vlan is required")
-//	}
-//
-//	return publicVlanID, privateVlanID, nil
-//}
-//
-//func (cv CreateVM) getNetworkSpace(vlanID int) (string, error) {
-//	networkVlan, err := cv.virtualGuestService.GetVlan(vlanID, boslc.NETWORK_DEFAULT_VLAN)
-//	if err != nil {
-//		return "", bosherr.WrapErrorf(err, "Getting vlan info with id '%d'", vlanID)
-//	}
-//	return *networkVlan.NetworkSpace, nil
-//}
 
 func (cv CreateVM) updateHosts(path string, newIpAddress string, targetHostname string) (err error) {
 	err = os.Setenv("HOSTS_PATH", path)
@@ -550,9 +509,11 @@ func (cv CreateVM) parseMbusURL(mbusURL string, primaryBackendIpAddress string) 
 	}
 
 	// when director using dynamic network, the mbus host should be "0.0.0.0"
-	if host != "0.0.0.0" {
-		return mbusURL, nil
-	}
+	// need to testify why
+	//if host != "0.0.0.0" {
+	//	return mbusURL, nil
+	//}
+	host = host
 
 	userInfo := parsedURL.User
 	if userInfo != nil {
