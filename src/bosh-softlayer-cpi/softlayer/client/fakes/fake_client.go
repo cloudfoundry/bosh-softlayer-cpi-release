@@ -386,6 +386,20 @@ type FakeClient struct {
 		result2 bool
 		result3 error
 	}
+	SetNotesStub        func(id int, notes string) (bool, error)
+	setNotesMutex       sync.RWMutex
+	setNotesArgsForCall []struct {
+		id    int
+		notes string
+	}
+	setNotesReturns struct {
+		result1 bool
+		result2 error
+	}
+	setNotesReturnsOnCall map[int]struct {
+		result1 bool
+		result2 error
+	}
 	GetImageStub        func(imageId int, mask string) (*datatypes.Virtual_Guest_Block_Device_Template_Group, bool, error)
 	getImageMutex       sync.RWMutex
 	getImageArgsForCall []struct {
@@ -1914,6 +1928,58 @@ func (fake *FakeClient) GetNetworkStorageTargetReturnsOnCall(i int, result1 stri
 	}{result1, result2, result3}
 }
 
+func (fake *FakeClient) SetNotes(id int, notes string) (bool, error) {
+	fake.setNotesMutex.Lock()
+	ret, specificReturn := fake.setNotesReturnsOnCall[len(fake.setNotesArgsForCall)]
+	fake.setNotesArgsForCall = append(fake.setNotesArgsForCall, struct {
+		id    int
+		notes string
+	}{id, notes})
+	fake.recordInvocation("SetNotes", []interface{}{id, notes})
+	fake.setNotesMutex.Unlock()
+	if fake.SetNotesStub != nil {
+		return fake.SetNotesStub(id, notes)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	return fake.setNotesReturns.result1, fake.setNotesReturns.result2
+}
+
+func (fake *FakeClient) SetNotesCallCount() int {
+	fake.setNotesMutex.RLock()
+	defer fake.setNotesMutex.RUnlock()
+	return len(fake.setNotesArgsForCall)
+}
+
+func (fake *FakeClient) SetNotesArgsForCall(i int) (int, string) {
+	fake.setNotesMutex.RLock()
+	defer fake.setNotesMutex.RUnlock()
+	return fake.setNotesArgsForCall[i].id, fake.setNotesArgsForCall[i].notes
+}
+
+func (fake *FakeClient) SetNotesReturns(result1 bool, result2 error) {
+	fake.SetNotesStub = nil
+	fake.setNotesReturns = struct {
+		result1 bool
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeClient) SetNotesReturnsOnCall(i int, result1 bool, result2 error) {
+	fake.SetNotesStub = nil
+	if fake.setNotesReturnsOnCall == nil {
+		fake.setNotesReturnsOnCall = make(map[int]struct {
+			result1 bool
+			result2 error
+		})
+	}
+	fake.setNotesReturnsOnCall[i] = struct {
+		result1 bool
+		result2 error
+	}{result1, result2}
+}
+
 func (fake *FakeClient) GetImage(imageId int, mask string) (*datatypes.Virtual_Guest_Block_Device_Template_Group, bool, error) {
 	fake.getImageMutex.Lock()
 	ret, specificReturn := fake.getImageReturnsOnCall[len(fake.getImageArgsForCall)]
@@ -2552,6 +2618,8 @@ func (fake *FakeClient) Invocations() map[string][][]interface{} {
 	defer fake.getBlockVolumeDetailsBySoftLayerAccountMutex.RUnlock()
 	fake.getNetworkStorageTargetMutex.RLock()
 	defer fake.getNetworkStorageTargetMutex.RUnlock()
+	fake.setNotesMutex.RLock()
+	defer fake.setNotesMutex.RUnlock()
 	fake.getImageMutex.RLock()
 	defer fake.getImageMutex.RUnlock()
 	fake.getVlanMutex.RLock()

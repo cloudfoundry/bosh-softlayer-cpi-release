@@ -126,6 +126,7 @@ type Client interface {
 	GetBlockVolumeDetails(volumeId int, mask string) (*datatypes.Network_Storage, bool, error)
 	GetBlockVolumeDetailsBySoftLayerAccount(volumeId int, mask string) (datatypes.Network_Storage, error)
 	GetNetworkStorageTarget(volumeId int, mask string) (string, bool, error)
+	SetNotes(id int, notes string) (bool, error)
 	GetImage(imageId int, mask string) (*datatypes.Virtual_Guest_Block_Device_Template_Group, bool, error)
 	GetVlan(id int, mask string) (*datatypes.Network_Vlan, bool, error)
 	GetSubnet(id int, mask string) (*datatypes.Network_Subnet, bool, error)
@@ -863,6 +864,23 @@ func (c *ClientManager) GetBlockVolumeDetailsBySoftLayerAccount(volumeId int, ma
 	}
 
 	return volumes[0], nil
+}
+
+func (c *ClientManager) SetNotes(id int, notes string) (bool, error) {
+	networkStorageTemplate := &datatypes.Network_Storage{
+		Notes: sl.String(notes),
+	}
+	_, err := c.StorageService.Id(id).EditObject(networkStorageTemplate)
+	if err != nil {
+		if apiErr, ok := err.(sl.Error); ok {
+			if apiErr.Exception == SOFTLAYER_OBJECTNOTFOUND_EXCEPTION {
+				return false, nil
+			}
+			return false, err
+		}
+	}
+
+	return true, err
 }
 
 func (c *ClientManager) GetNetworkStorageTarget(volumeId int, mask string) (string, bool, error) {

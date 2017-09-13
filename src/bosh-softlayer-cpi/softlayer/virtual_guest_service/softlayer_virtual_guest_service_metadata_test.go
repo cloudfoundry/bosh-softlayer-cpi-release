@@ -96,18 +96,5 @@ var _ = Describe("Virtual Guest Service", func() {
 			Expect(err.Error()).To(ContainSubstring(fmt.Sprintf("VM '%d' not found", vmID)))
 			Expect(cli.SetTagsCallCount()).To(Equal(1))
 		})
-
-		It("Return error if metaData is empty", func() {
-			metaData = Metadata{}
-
-			cli.SetTagsReturns(
-				true,
-				nil,
-			)
-
-			err := virtualGuestService.SetMetadata(vmID, metaData)
-			Expect(err).NotTo(HaveOccurred())
-			Expect(cli.SetTagsCallCount()).To(Equal(1))
-		})
 	})
 })

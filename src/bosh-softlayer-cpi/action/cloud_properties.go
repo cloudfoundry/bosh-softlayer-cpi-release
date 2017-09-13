@@ -121,3 +121,5 @@ func timeStampForTime(now time.Time) string {
 }
 
 type VMMetadata map[string]interface{}
+
+type DiskMetadata map[string]interface{}

@@ -1461,4 +1461,55 @@ var _ = Describe("ImageHandler", func() {
 			Expect(err.Error()).To(ContainSubstring("No order id returned after placing order with size of"))
 		})
 	})
+
+	Describe("SetNotes", func() {
+		Context("when StorageService editObject call successfully", func() {
+			It("set tags successfully", func() {
+				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Network_Storage_editObject.json",
+						"statusCode": http.StatusOK,
+					},
+				}
+				err = test_helpers.SpecifyServerResps(respParas, server)
+				Expect(err).NotTo(HaveOccurred())
+
+				success, err := cli.SetNotes(diskID, `"fake-tag-key": "fake-tag-value"`)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(success).To(Equal(true))
+			})
+		})
+
+		Context("when StorageService editObject call return error", func() {
+			It("return an softlayer-go unhandled error", func() {
+				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Network_Storage_editObject_InternalError.json",
+						"statusCode": http.StatusInternalServerError,
+					},
+				}
+				err = test_helpers.SpecifyServerResps(respParas, server)
+				Expect(err).NotTo(HaveOccurred())
+
+				success, err := cli.SetTags(diskID, `"fake-tag-key": "fake-tag-value"`)
+				Expect(err).To(HaveOccurred())
+				Expect(success).To(Equal(false))
+			})
+
+			It("return an ObjectNotFoundError", func() {
+				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Network_Storage_editObject_NotFound.json",
+						"statusCode": http.StatusInternalServerError,
+					},
+				}
+				err = test_helpers.SpecifyServerResps(respParas, server)
+				Expect(err).NotTo(HaveOccurred())
+
+				success, err := cli.SetTags(diskID, `"fake-tag-key": "fake-tag-value"`)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(success).To(Equal(false))
+			})
+		})
+	})
 })

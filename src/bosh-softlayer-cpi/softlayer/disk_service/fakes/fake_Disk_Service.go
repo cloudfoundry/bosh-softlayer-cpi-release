@@ -36,6 +36,18 @@ type FakeService struct {
 	deleteReturnsOnCall map[int]struct {
 		result1 error
 	}
+	SetMetadataStub        func(id int, diskMetadata disk.Metadata) error
+	setMetadataMutex       sync.RWMutex
+	setMetadataArgsForCall []struct {
+		id           int
+		diskMetadata disk.Metadata
+	}
+	setMetadataReturns struct {
+		result1 error
+	}
+	setMetadataReturnsOnCall map[int]struct {
+		result1 error
+	}
 	FindStub        func(id int) (*datatypes.Network_Storage, error)
 	findMutex       sync.RWMutex
 	findArgsForCall []struct {
@@ -155,6 +167,55 @@ func (fake *FakeService) DeleteReturnsOnCall(i int, result1 error) {
 	}{result1}
 }
 
+func (fake *FakeService) SetMetadata(id int, diskMetadata disk.Metadata) error {
+	fake.setMetadataMutex.Lock()
+	ret, specificReturn := fake.setMetadataReturnsOnCall[len(fake.setMetadataArgsForCall)]
+	fake.setMetadataArgsForCall = append(fake.setMetadataArgsForCall, struct {
+		id           int
+		diskMetadata disk.Metadata
+	}{id, diskMetadata})
+	fake.recordInvocation("SetMetadata", []interface{}{id, diskMetadata})
+	fake.setMetadataMutex.Unlock()
+	if fake.SetMetadataStub != nil {
+		return fake.SetMetadataStub(id, diskMetadata)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fake.setMetadataReturns.result1
+}
+
+func (fake *FakeService) SetMetadataCallCount() int {
+	fake.setMetadataMutex.RLock()
+	defer fake.setMetadataMutex.RUnlock()
+	return len(fake.setMetadataArgsForCall)
+}
+
+func (fake *FakeService) SetMetadataArgsForCall(i int) (int, disk.Metadata) {
+	fake.setMetadataMutex.RLock()
+	defer fake.setMetadataMutex.RUnlock()
+	return fake.setMetadataArgsForCall[i].id, fake.setMetadataArgsForCall[i].diskMetadata
+}
+
+func (fake *FakeService) SetMetadataReturns(result1 error) {
+	fake.SetMetadataStub = nil
+	fake.setMetadataReturns = struct {
+		result1 error
+	}{result1}
+}
+
+func (fake *FakeService) SetMetadataReturnsOnCall(i int, result1 error) {
+	fake.SetMetadataStub = nil
+	if fake.setMetadataReturnsOnCall == nil {
+		fake.setMetadataReturnsOnCall = make(map[int]struct {
+			result1 error
+		})
+	}
+	fake.setMetadataReturnsOnCall[i] = struct {
+		result1 error
+	}{result1}
+}
+
 func (fake *FakeService) Find(id int) (*datatypes.Network_Storage, error) {
 	fake.findMutex.Lock()
 	ret, specificReturn := fake.findReturnsOnCall[len(fake.findArgsForCall)]
@@ -213,6 +274,8 @@ func (fake *FakeService) Invocations() map[string][][]interface{} {
 	defer fake.createMutex.RUnlock()
 	fake.deleteMutex.RLock()
 	defer fake.deleteMutex.RUnlock()
+	fake.setMetadataMutex.RLock()
+	defer fake.setMetadataMutex.RUnlock()
 	fake.findMutex.RLock()
 	defer fake.findMutex.RUnlock()
 	return fake.invocations
