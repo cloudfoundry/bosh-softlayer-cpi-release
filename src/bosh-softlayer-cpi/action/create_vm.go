@@ -77,7 +77,7 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 	}
 
 	// Create VM user data
-	userDataContents, err := cv.createUserDataForInstance(agentID, cv.registryOptions, cloudProps.DeployedByBoshCLI)
+	userDataContents, err := cv.createUserDataForInstance(agentID, cv.registryOptions)
 	if err != nil {
 		return "", bosherr.WrapError(err, "Creating VM UserData")
 	}
@@ -405,14 +405,12 @@ func (cv CreateVM) createByOsReload(stemcellCID StemcellCID, cloudProps VMCloudP
 	return cid, nil
 }
 
-func (cv CreateVM) createUserDataForInstance(agentID string, registryOptions registry.ClientOptions, deployedByBoshCLIFlag bool) (string, error) {
-	if !deployedByBoshCLIFlag {
-		boshIP, err := cv.getLocalIPAddress()
-		if err != nil {
-			return "", bosherr.WrapError(err, "Failed to get bosh director IP address in local")
-		}
-		registryOptions.Host = boshIP
+func (cv CreateVM) createUserDataForInstance(agentID string, registryOptions registry.ClientOptions) (string, error) {
+	directorIP, err := cv.getDirectorIPAddressByHost(registryOptions.Host)
+	if err != nil {
+		return "", bosherr.WrapError(err, "Failed to get bosh director IP address in local")
 	}
+	registryOptions.Host = directorIP
 	serverName := fmt.Sprintf("vm-%s", agentID)
 	userDataContents := registry.SoftlayerUserData{
 		Registry: registry.SoftlayerUserDataRegistryEndpoint{
@@ -459,30 +457,31 @@ func (cv CreateVM) updateHosts(path string, newIpAddress string, targetHostname 
 	return nil
 }
 
-func (cv CreateVM) getLocalIPAddress() (string, error) {
-	addrs, err := net.InterfaceAddrs()
-	if err != nil {
-		return "", bosherr.WrapErrorf(err, "Failed to get network interfaces")
-	}
+func (cv CreateVM) getDirectorIPAddressByHost(host string) (string, error) {
+	// check host is ip address or hostname
+	address := net.ParseIP(host)
+	if address == nil {
+		addrs, err := net.InterfaceAddrs()
+		if err != nil {
+			return "", bosherr.WrapErrorf(err, "Failed to get network interfaces")
+		}
 
-	for _, addr := range addrs {
-		if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
-			if ipnet.IP.To4() != nil {
-				return ipnet.IP.String(), nil
+		for _, addr := range addrs {
+			if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+				if ipnet.IP.To4() != nil {
+					return ipnet.IP.String(), nil
+				}
 			}
 		}
+
+		return "", bosherr.Error(fmt.Sprintf("Failed to get IP address by '%d'", host))
 	}
 
-	return "", bosherr.Error(fmt.Sprintf("Failed to get IP address"))
+	return address.String(), nil
 }
 
 func (cv CreateVM) postConfig(virtualGuestId int, agentOptions *registry.AgentOptions) error {
-	boshIP, err := cv.getLocalIPAddress()
-	if err != nil {
-		return bosherr.WrapError(err, "Failed to get IP address in local")
-	}
-
-	mbus, err := cv.parseMbusURL(agentOptions.Mbus, boshIP)
+	mbus, err := cv.parseMbusURL(agentOptions.Mbus)
 	if err != nil {
 		return bosherr.WrapError(err, "Cannot construct mbus url.")
 	}
@@ -491,12 +490,12 @@ func (cv CreateVM) postConfig(virtualGuestId int, agentOptions *registry.AgentOp
 	switch agentOptions.Blobstore.Provider {
 	case "dav":
 		davConf := instance.DavConfig(agentOptions.Blobstore.Options)
-		cv.updateDavConfig(&davConf, boshIP)
+		cv.updateDavConfig(&davConf)
 	}
 	return nil
 }
 
-func (cv CreateVM) parseMbusURL(mbusURL string, primaryBackendIpAddress string) (string, error) {
+func (cv CreateVM) parseMbusURL(mbusURL string) (string, error) {
 	parsedURL, err := url.Parse(mbusURL)
 	if err != nil {
 		return "", bosherr.WrapError(err, "Parsing Mbus URL")
@@ -508,26 +507,21 @@ func (cv CreateVM) parseMbusURL(mbusURL string, primaryBackendIpAddress string) 
 		return "", bosherr.WrapError(err, "Spliting host and port")
 	}
 
-	// when director using dynamic network, the mbus host should be "0.0.0.0"
-	// need to testify why
-	//if host != "0.0.0.0" {
-	//	return mbusURL, nil
-	//}
-	host = host
+	ipAddress, err := cv.getDirectorIPAddressByHost(host)
 
 	userInfo := parsedURL.User
 	if userInfo != nil {
 		username = userInfo.Username()
 		password, _ = userInfo.Password()
-		return fmt.Sprintf("%s://%s:%s@%s:%s", parsedURL.Scheme, username, password, primaryBackendIpAddress, port), nil
+		return fmt.Sprintf("%s://%s:%s@%s:%s", parsedURL.Scheme, username, password, ipAddress, port), nil
 	}
 
-	return fmt.Sprintf("%s://%s:%s", parsedURL.Scheme, primaryBackendIpAddress, port), nil
+	return fmt.Sprintf("%s://%s:%s", parsedURL.Scheme, ipAddress, port), nil
 }
 
-func (cv CreateVM) updateDavConfig(config *instance.DavConfig, directorIP string) (err error) {
+func (cv CreateVM) updateDavConfig(config *instance.DavConfig) (err error) {
 	url := (*config)["endpoint"].(string)
-	mbus, err := cv.parseMbusURL(url, directorIP)
+	mbus, err := cv.parseMbusURL(url)
 	if err != nil {
 		return bosherr.WrapError(err, "Parsing Mbus URL")
 	}

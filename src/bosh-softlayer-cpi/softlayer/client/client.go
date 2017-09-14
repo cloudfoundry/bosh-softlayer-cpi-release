@@ -300,7 +300,7 @@ func (c *ClientManager) WaitInstanceUntilReady(id int, until time.Time) error {
 			return err
 		}
 		if !found {
-			return bosherr.WrapErrorf(err, "SoftLayer virtual guest '%d' does not exists", id)
+			return bosherr.WrapErrorf(err, "SoftLayer virtual guest '%d' does not exist", id)
 		}
 
 		lastReload := virtualGuest.LastOperatingSystemReload
@@ -342,7 +342,7 @@ func (c *ClientManager) WaitInstanceHasActiveTransaction(id int, until time.Time
 			return err
 		}
 		if !found {
-			return bosherr.WrapErrorf(err, "SoftLayer virtual guest '%d' does not exists", id)
+			return bosherr.WrapErrorf(err, "SoftLayer virtual guest '%d' does not exist", id)
 		}
 
 		// if activeTxn != nil && activeTxn.TransactionStatus != nil && activeTxn.TransactionStatus.Name != nil {
@@ -370,7 +370,7 @@ func (c *ClientManager) WaitInstanceHasNoneActiveTransaction(id int, until time.
 			return err
 		}
 		if !found {
-			return bosherr.WrapErrorf(err, "SoftLayer virtual guest '%d' does not exists", id)
+			return bosherr.WrapErrorf(err, "SoftLayer virtual guest '%d' does not exist", id)
 		}
 
 		// if activeTxn != nil && activeTxn.TransactionStatus != nil && activeTxn.TransactionStatus.Name != nil {
@@ -459,7 +459,7 @@ func (c *ClientManager) CreateInstanceFromVPS(template *datatypes.Virtual_Guest,
 		return &datatypes.Virtual_Guest{}, err
 	}
 	if !found {
-		return &datatypes.Virtual_Guest{}, bosherr.WrapErrorf(err, "SoftLayer virtual guest '%d' does not exists", virtualGuestId)
+		return &datatypes.Virtual_Guest{}, bosherr.WrapErrorf(err, "SoftLayer virtual guest '%d' does not exist", virtualGuestId)
 	}
 
 	deviceName := &models.VM{
@@ -1551,7 +1551,7 @@ func (c *ClientManager) CreateSshKey(label *string, key *string, fingerPrint *st
 	sshKey, err := c.SecuritySshKeyService.CreateObject(templateObject)
 	if err != nil {
 		if apiErr, ok := err.(sl.Error); ok {
-			if apiErr.Exception == SOFTLAYER_PUBLIC_EXCEPTION && strings.Contains(apiErr.Message, "SSH key already exists") {
+			if apiErr.Exception == SOFTLAYER_PUBLIC_EXCEPTION && strings.Contains(apiErr.Message, "SSH key already exist") {
 				sshKeys, err := c.AccountService.Mask("id, key").Filter(filter.Path("sshKeys.key").Eq(*key).Build()).GetSshKeys()
 				if err != nil {
 					return &datatypes.Security_Ssh_Key{}, err

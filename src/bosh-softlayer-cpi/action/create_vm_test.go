@@ -260,7 +260,7 @@ var _ = Describe("CreateVM", func() {
 
 		})
 
-		It("creates the vm when deployByBoshCli=false, and mbus host 0.0.0.0", func() {
+		It("creates the vm when deployByBoshCli=false and director host is hostname", func() {
 			cloudProps = VMCloudProperties{
 				VmNamePrefix:    "fake-hostname",
 				Domain:          "fake-domain.com",
@@ -272,10 +272,10 @@ var _ = Describe("CreateVM", func() {
 			}
 
 			agentOptions = registry.AgentOptions{
-				Mbus: "nats://nats:nats@0.0.0.0:fake-port",
+				Mbus: "nats://nats:nats@fake-hostname:fake-port",
 				Blobstore: registry.BlobstoreOptions{
 					Provider: "dav",
-					Options:  map[string]interface{}{"endpoint": "http://0.0.0.0:fake-port"},
+					Options:  map[string]interface{}{"endpoint": "http://fake-hostname:fake-port"},
 				},
 			}
 
@@ -355,7 +355,7 @@ var _ = Describe("CreateVM", func() {
 			Expect(actualInstanceNetworks).To(Equal(expectedInstanceNetworks))
 		})
 
-		It("creates the vm when deployByBoshCli=false, and with mbus host not 0.0.0.0", func() {
+		It("creates the vm when deployByBoshCli=false and director host is IP address", func() {
 			cloudProps = VMCloudProperties{
 				VmNamePrefix:    "fake-hostname",
 				Domain:          "fake-domain.com",
@@ -367,59 +367,26 @@ var _ = Describe("CreateVM", func() {
 			}
 
 			agentOptions = registry.AgentOptions{
-				Mbus: "nats://nats:nats@fake-mbus:fake-port",
+				Mbus: "nats://nats:nats@10.11.12.13:fake-port",
 				Blobstore: registry.BlobstoreOptions{
 					Provider: "dav",
-					Options:  map[string]interface{}{"endpoint": "http://fake-blobstore:fake-port"},
+					Options:  map[string]interface{}{"endpoint": "http://10.11.12.13:fake-port"},
 				},
 			}
-
-			networks = Networks{
-				"fake-network-1": Network{
-					Type:    "manual",
-					IP:      "10.10.10.10",
-					Gateway: "fake-network-gateway",
-					Netmask: "fake-network-netmask",
-					DNS:     []string{"fake-network-dns"},
-					CloudProperties: NetworkCloudProperties{
-						VlanIds: []int{423456990},
-					},
-				},
-				"fake-network-2": Network{
-					Type:    "dynamic",
-					IP:      "10.10.10.10",
-					Gateway: "fake-network-gateway",
-					Netmask: "fake-network-netmask",
-					DNS:     []string{"fake-network-dns"},
-					Default: []string{"fake-network-default"},
-					CloudProperties: NetworkCloudProperties{
-						VlanIds: []int{42345678},
-					},
-				},
-			}
-
-			expectedInstanceNetworks = networks.AsInstanceServiceNetworks(&datatypes.Network_Vlan{})
 
 			expectedAgentSettings = registry.AgentSettings{
 				AgentID: "fake-agent-id",
 				Blobstore: registry.BlobstoreSettings{
 					Provider: "dav",
-					Options:  map[string]interface{}{"endpoint": "http://fake-blobstore:fake-port"},
+					Options:  map[string]interface{}{"endpoint": "http://10.11.12.13:fake-port"},
 				},
 				Disks: registry.DisksSettings{
 					System:     "",
 					Persistent: map[string]registry.PersistentSettings{},
 				},
-				Mbus: "nats://nats:nats@fake-mbus:fake-port",
+				Mbus: "nats://nats:nats@10.11.12.13:fake-port",
 				Networks: registry.NetworksSettings{
-					"fake-network-1": registry.NetworkSettings{
-						Type:    "manual",
-						IP:      "10.10.10.10",
-						Gateway: "fake-network-gateway",
-						Netmask: "fake-network-netmask",
-						DNS:     []string{"fake-network-dns"},
-					},
-					"fake-network-2": registry.NetworkSettings{
+					"fake-network-name": registry.NetworkSettings{
 						Type:    "dynamic",
 						IP:      "10.10.10.10",
 						Gateway: "fake-network-gateway",
@@ -440,25 +407,13 @@ var _ = Describe("CreateVM", func() {
 				},
 			}
 
-			vmService.ConfigureNetworksReturns(
-				instance.Networks{
-					"fake-network-1": instance.Network{
-						Type:    "manual",
-						IP:      "10.10.10.10",
-						Gateway: "fake-network-gateway",
-						Netmask: "fake-network-netmask",
-						DNS:     []string{"fake-network-dns"},
-					},
-					"fake-network-2": instance.Network{
-						Type:    "dynamic",
-						IP:      "10.10.10.10",
-						Gateway: "fake-network-gateway",
-						Netmask: "fake-network-netmask",
-						DNS:     []string{"fake-network-dns"},
-						Default: []string{"fake-network-default"},
-					},
-				},
-				nil,
+			createVM = NewCreateVM(
+				imageService,
+				vmService,
+				registryClient,
+				registryOptions,
+				agentOptions,
+				softlayerOptions,
 			)
 
 			vmCID, err = createVM.Run(agentID, stemcellCID, cloudProps, networks, disks, env)
