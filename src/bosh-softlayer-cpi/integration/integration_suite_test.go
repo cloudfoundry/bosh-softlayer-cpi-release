@@ -92,7 +92,7 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 	// Initialize session of softlayer client
 	var errOut, errOutLog bytes.Buffer
 	multiWriter := io.MultiWriter(&errOut, &errOutLog)
-	sess = client.NewSoftlayerClientSession(client.SoftlayerAPIEndpointPublicDefault, username, apiKey, false, timeout, multiWriter)
+	sess = client.NewSoftlayerClientSession(client.SoftlayerAPIEndpointPublicDefault, username, apiKey, false, timeout, retries, retryTimeout, multiWriter)
 
 	// Setup vps client
 	if cfg.Cloud.Properties.SoftLayer.EnableVps {

@@ -64,7 +64,7 @@ var _ = Describe("Virtual Guest Service", func() {
 			_, err := virtualGuestService.Find(vmID)
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("fake-client-error"))
-			Expect(softLayerClient.GetInstanceCallCount()).To(Equal(1))
+			Expect(softLayerClient.GetInstanceCallCount()).To(BeNumerically(">=", 2))
 		})
 
 		It("Return error if softLayerClient GetInstance returns non-existing", func() {

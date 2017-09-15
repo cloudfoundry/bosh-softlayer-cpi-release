@@ -43,8 +43,11 @@ var (
 	// Channel that will be used to retrieve IPs to use
 	ips chan string
 
-	trace      = false
-	timeout    = 50000
+	trace        = false
+	timeout      = 120
+	retries      = 2
+	retryTimeout = 60
+
 	cfgContent = fmt.Sprintf(
 		`{
 		  "cloud": {

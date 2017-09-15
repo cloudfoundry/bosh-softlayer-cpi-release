@@ -398,7 +398,7 @@ var _ = Describe("InstanceHandler", func() {
 
 			_, err := cli.CreateInstanceFromVPS(vgTemplate, stemcellID, []int{12345678})
 			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring("does not exists"))
+			Expect(err.Error()).To(ContainSubstring("does not exist"))
 		})
 
 		It("Return error when vpsService UpdateVM return an error", func() {

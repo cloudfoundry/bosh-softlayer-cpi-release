@@ -16,9 +16,11 @@ var _ = Describe("SoftlayerClient", func() {
 		multiWriter := io.MultiWriter(&errOut, &errOutLog)
 		username := "SL_USERNAME"
 		apiKey := "SL_API_KEY"
-		timeout := 50000
+		timeout := 300
+		retries := 1
+		retryTimout := 60
 
-		sess := boslc.NewSoftlayerClientSession(boslc.SoftlayerAPIEndpointPublicDefault, username, apiKey, false, timeout, multiWriter)
+		sess := boslc.NewSoftlayerClientSession(boslc.SoftlayerAPIEndpointPublicDefault, username, apiKey, false, timeout, retries, retryTimout, multiWriter)
 		Expect(sess.Endpoint).To(Equal(boslc.SoftlayerAPIEndpointPublicDefault))
 		Expect(sess.APIKey).To(Equal(apiKey))
 		Expect(sess.UserName).To(Equal(username))

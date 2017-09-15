@@ -73,7 +73,7 @@ func parseCloudProperties(networks instance.Networks, netName string, network Ne
 			} else {
 				if index != 0 {
 					newNetName = fmt.Sprintf("%s_%d", netName, index)
-				}else {
+				} else {
 					newNetName = netName
 				}
 				networks[newNetName] = instance.Network{
@@ -108,7 +108,7 @@ func parseCloudProperties(networks instance.Networks, netName string, network Ne
 			} else {
 				if index != 0 {
 					newNetName = fmt.Sprintf("%s_%d", netName, index)
-				}else {
+				} else {
 					newNetName = netName
 				}
 				networks[newNetName] = instance.Network{

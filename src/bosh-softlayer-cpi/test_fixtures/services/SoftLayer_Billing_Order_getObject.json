@@ -1,0 +1,13 @@
+{
+  "accountId": 244,
+  "createDate": "2017-09-18T13:02:38+08:00",
+  "id": 16885,
+  "impersonatingUserRecordId": null,
+  "modifyDate": "2017-09-18T13:03:36+08:00",
+  "orderQuoteId": null,
+  "orderTypeId": 4,
+  "presaleEventId": null,
+  "privateCloudOrderFlag": false,
+  "status": "COMPLETED",
+  "userRecordId": 247176
+}

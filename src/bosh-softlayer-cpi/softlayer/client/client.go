@@ -94,6 +94,7 @@ func NewSoftLayerClientManager(session *session.Session, vps *vpsVm.Client) *Cli
 		services.GetNetworkSubnetService(session),
 		services.GetVirtualGuestBlockDeviceTemplateGroupService(session),
 		services.GetSecuritySshKeyService(session),
+		services.GetBillingOrderService(session),
 		vps,
 	}
 }
@@ -109,7 +110,7 @@ type Client interface {
 	RebootInstance(id int, soft bool, hard bool) error
 	ReloadInstance(id int, stemcellId int, sshKeyIds []int, hostname string, domain string) error
 	UpgradeInstanceConfig(id int, cpu int, memory int, network int, privateCPU bool) error
-	UpgradeInstance(id int, cpu int, memory int, network int, privateCPU bool, additional_diskSize int) (*datatypes.Container_Product_Order_Receipt, error)
+	UpgradeInstance(id int, cpu int, memory int, network int, privateCPU bool, additional_diskSize int) (int, error)
 	WaitInstanceUntilReady(id int, until time.Time) error
 	WaitInstanceHasActiveTransaction(id int, until time.Time) error
 	WaitInstanceHasNoneActiveTransaction(id int, until time.Time) error
@@ -154,6 +155,7 @@ type ClientManager struct {
 	NetworkSubnetService  services.Network_Subnet
 	ImageService          services.Virtual_Guest_Block_Device_Template_Group
 	SecuritySshKeyService services.Security_Ssh_Key
+	BillingOrderService   services.Billing_Order
 	vpsService            *vpsVm.Client
 }
 
@@ -363,6 +365,30 @@ func (c *ClientManager) WaitInstanceHasActiveTransaction(id int, until time.Time
 	}
 }
 
+func (c *ClientManager) WaitOrderCompleted(id int, until time.Time) error {
+	if id == 0 {
+		return nil
+	}
+	for {
+		order, err := c.BillingOrderService.Id(id).Mask("id, status").GetObject()
+		if err != nil {
+			return err
+		}
+
+		if *order.Status == "COMPLETED" {
+			return nil
+		}
+
+		now := time.Now()
+		if now.After(until) {
+			return bosherr.Errorf("Waiting order with id of '%d' has been completed", id)
+		}
+
+		min := math.Min(float64(5.0), float64(until.Sub(now)))
+		time.Sleep(time.Duration(min) * time.Second)
+	}
+}
+
 func (c *ClientManager) WaitInstanceHasNoneActiveTransaction(id int, until time.Time) error {
 	for {
 		virtualGuest, found, err := c.GetInstance(id, "id, activeTransaction[id,transactionStatus.name]")
@@ -533,6 +559,8 @@ func (c *ClientManager) ReloadInstance(id int, stemcellId int, sshKeyIds []int, 
 		return err
 	}
 
+	//@TODO: 20 mins open tickets
+
 	until = time.Now().Add(time.Duration(1) * time.Hour)
 	if err = c.WaitInstanceHasActiveTransaction(*sl.Int(id), until); err != nil {
 		return bosherr.WrapError(err, "Waiting until instance has active transaction after launching os_reload")
@@ -622,7 +650,7 @@ func (c *ClientManager) DeleteInstanceFromVPS(id int) error {
 	return nil
 }
 
-func (c *ClientManager) UpgradeInstance(id int, cpu int, memory int, network int, privateCPU bool, additional_diskSize int) (*datatypes.Container_Product_Order_Receipt, error) {
+func (c *ClientManager) UpgradeInstance(id int, cpu int, memory int, network int, privateCPU bool, additional_diskSize int) (int, error) {
 	upgradeOptions := make(map[string]int)
 	public := true
 	if cpu != 0 {
@@ -644,10 +672,10 @@ func (c *ClientManager) UpgradeInstance(id int, cpu int, memory int, network int
 		Filter(filter.New(filter.Path("type.keyName").Eq(packageType)).Build()).
 		GetAllObjects()
 	if err != nil {
-		return &datatypes.Container_Product_Order_Receipt{}, err
+		return 0, err
 	}
 	if len(productPackages) == 0 {
-		return &datatypes.Container_Product_Order_Receipt{}, bosherr.Errorf("No package found for type: %s", packageType)
+		return 0, bosherr.Errorf("No package found for type: %s", packageType)
 	}
 	packageID := *productPackages[0].Id
 	packageItems, err := c.PackageService.
@@ -655,13 +683,13 @@ func (c *ClientManager) UpgradeInstance(id int, cpu int, memory int, network int
 		Mask("description,capacity,prices[id,locationGroupId,categories]").
 		GetItems()
 	if err != nil {
-		return &datatypes.Container_Product_Order_Receipt{}, err
+		return 0, err
 	}
 	var prices = make([]datatypes.Product_Item_Price, 0)
 	for option, value := range upgradeOptions {
 		priceID := getPriceIdForUpgrade(packageItems, option, value, public)
 		if priceID == -1 {
-			return &datatypes.Container_Product_Order_Receipt{},
+			return 0,
 				bosherr.Errorf("Unable to find %s option with %d", option, value)
 		}
 		prices = append(prices, datatypes.Product_Item_Price{Id: &priceID})
@@ -670,13 +698,13 @@ func (c *ClientManager) UpgradeInstance(id int, cpu int, memory int, network int
 	if additional_diskSize != 0 {
 		diskItemPrice, err := c.getUpgradeItemPriceForSecondDisk(id, additional_diskSize)
 		if err != nil {
-			return &datatypes.Container_Product_Order_Receipt{}, err
+			return 0, err
 		}
 		prices = append(prices, *diskItemPrice)
 	}
 
 	if len(prices) == 0 {
-		return &datatypes.Container_Product_Order_Receipt{}, bosherr.Error("Unable to find price for upgrade")
+		return 0, bosherr.Error("Unable to find price for upgrade")
 	}
 	order := datatypes.Container_Product_Order{
 		ComplexType: sl.String(UPGRADE_VIRTUAL_SERVER_ORDER_TYPE),
@@ -707,10 +735,22 @@ func (c *ClientManager) UpgradeInstance(id int, cpu int, memory int, network int
 	}
 	orderReceipt, err := c.OrderService.PlaceOrder(&upgradeOrder, sl.Bool(false))
 	if err != nil {
-		return &datatypes.Container_Product_Order_Receipt{}, err
+		if apiErr, ok := err.(sl.Error); ok {
+			if strings.Contains(apiErr.Message, "A current price was provided for the upgrade order") {
+				upgradeRequest, err := c.VirtualGuestService.Id(id).Mask("order[items]").GetUpgradeRequest()
+				if err != nil {
+					return 0, bosherr.WrapErrorf(err, "Get upgrade order with '%d'", id)
+				}
+				return *upgradeRequest.Order.Id, nil
+			} else {
+				return 0, bosherr.WrapErrorf(err, "Placing order with '%+v'", order)
+			}
+		} else {
+			return 0, bosherr.WrapErrorf(err, "Placing order with '%+v'", order)
+		}
 	}
 
-	return &orderReceipt, nil
+	return *orderReceipt.OrderId, nil
 }
 
 func (c *ClientManager) SetTags(id int, tags string) (bool, error) {
@@ -1467,39 +1507,19 @@ func (c *ClientManager) AttachSecondDiskToInstance(id int, diskSize int) error {
 		return bosherr.WrapError(err, "Waiting until instance has none active transaction before os_reload")
 	}
 
-	_, err = c.UpgradeInstance(id, 0, 0, 0, false, diskSize)
+	orderId, err := c.UpgradeInstance(id, 0, 0, 0, false, diskSize)
 	if err != nil {
-		if apiErr, ok := err.(sl.Error); ok {
-			if strings.Contains(apiErr.Message, "A current price was provided for the upgrade order") {
-				return nil
-			}
-			return bosherr.WrapErrorf(err, "Adding second disk with size '%d' to virutal guest of id '%d'", diskSize, id)
-		} else {
-			return bosherr.WrapErrorf(err, "Adding second disk with size '%d' to virutal guest of id '%d'", diskSize, id)
-		}
+		return bosherr.WrapErrorf(err, "Adding second disk with size '%d' to virutal guest of id '%d'", diskSize, id)
 	}
 
 	until = time.Now().Add(time.Duration(1) * time.Hour)
-	if err = c.WaitInstanceHasActiveTransaction(*sl.Int(id), until); err != nil {
-		return bosherr.WrapError(err, "Waiting until instance has active transaction after upgrading instance")
-	}
-
-	until = time.Now().Add(time.Duration(1) * time.Hour)
-	if err = c.WaitInstanceHasNoneActiveTransaction(*sl.Int(id), until); err != nil {
-		return bosherr.WrapError(err, "Waiting until instance has none active transaction after upgrading instance")
+	if err = c.WaitOrderCompleted(orderId, until); err != nil {
+		return bosherr.WrapError(err, "Waiting until order placed has been completed after upgrading instance")
 	}
 
 	until = time.Now().Add(time.Duration(1) * time.Hour)
 	if err = c.WaitInstanceUntilReady(*sl.Int(id), until); err != nil {
 		return bosherr.WrapError(err, "Waiting until instance is ready after os_reload")
-	}
-
-	blockDevices, err := c.VirtualGuestService.Id(id).GetBlockDevices()
-	if err != nil {
-		return bosherr.WrapErrorf(err, "Get the attached ephemeral disks of VirtualGuest `%d`", id)
-	}
-	if len(blockDevices) < 3 {
-		return bosherr.WrapErrorf(err, "The ephemeral disk is not attached on VirtualGuest `%d` properly, one possible reason is there is not enough disk resource.", id)
 	}
 
 	return nil
@@ -1512,23 +1532,14 @@ func (c *ClientManager) UpgradeInstanceConfig(id int, cpu int, memory int, netwo
 		return bosherr.WrapError(err, "Waiting until instance has none active transaction before os_reload")
 	}
 
-	_, err = c.UpgradeInstance(id, cpu, memory, network, privateCPU, 0)
+	orderId, err := c.UpgradeInstance(id, cpu, memory, network, privateCPU, 0)
 	if err != nil {
-		apiErr := err.(sl.Error)
-		if strings.Contains(apiErr.Message, "A current price was provided for the upgrade order") {
-			return nil
-		}
 		return bosherr.WrapErrorf(err, "Upgrading configuration to virutal guest of id '%d'", id)
 	}
 
 	until = time.Now().Add(time.Duration(1) * time.Hour)
-	if err = c.WaitInstanceHasActiveTransaction(*sl.Int(id), until); err != nil {
-		return bosherr.WrapError(err, "Waiting until instance has active transaction after upgrading instance")
-	}
-
-	until = time.Now().Add(time.Duration(1) * time.Hour)
-	if err = c.WaitInstanceHasNoneActiveTransaction(*sl.Int(id), until); err != nil {
-		return bosherr.WrapError(err, "Waiting until instance has none active transaction after upgrading instance")
+	if err = c.WaitOrderCompleted(orderId, until); err != nil {
+		return bosherr.WrapError(err, "Waiting until order placed has been completed after upgrading instance")
 	}
 
 	until = time.Now().Add(time.Duration(1) * time.Hour)

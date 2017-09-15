@@ -137,9 +137,9 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 		cid, err = cv.virtualGuestService.Create(virtualGuestTemplate, cv.softlayerOptions.EnableVps, stemcellCID.Int(), []int{cloudProps.SshKey})
 		if err != nil {
 			if _, ok := err.(api.CloudError); ok {
-				return "", err
+				return "", api.NewVMCreationFailedError(err.Error(), true)
 			}
-			return "", bosherr.WrapError(err, "Creating VM")
+			return "", api.NewVMCreationFailedError(bosherr.WrapError(err, "Creating VM").Error(), true)
 		}
 	}
 
@@ -375,16 +375,10 @@ func (cv CreateVM) createByOsReload(stemcellCID StemcellCID, cloudProps VMCloudP
 					return cid, err
 				}
 
-				if err := cv.registryClient.Delete(strconv.Itoa(*vm.Id)); err != nil {
-					return cid, bosherr.WrapErrorf(err, "Cleaning registry record '%d' before os_reload", *vm.Id)
-				}
-
 				err = cv.virtualGuestService.ReloadOS(*vm.Id, stemcellCID.Int(), []int{cloudProps.SshKey}, cloudProps.VmNamePrefix, cloudProps.Domain)
 				if err != nil {
 					return cid, err
 				}
-
-				cid = *vm.Id
 
 				if *vm.MaxCpu != cloudProps.StartCpus ||
 					*vm.MaxMemory != cloudProps.MaxMemory ||
@@ -394,6 +388,12 @@ func (cv CreateVM) createByOsReload(stemcellCID StemcellCID, cloudProps VMCloudP
 						return cid, bosherr.WrapError(err, "Upgrading VM")
 					}
 				}
+
+				if err := cv.registryClient.Delete(strconv.Itoa(*vm.Id)); err != nil {
+					return cid, bosherr.WrapErrorf(err, "Cleaning registry record '%d' before os_reload", *vm.Id)
+				}
+
+				cid = *vm.Id
 			}
 		case "vip":
 			return cid, bosherr.Error("SoftLayer Not Support VIP Networking")
