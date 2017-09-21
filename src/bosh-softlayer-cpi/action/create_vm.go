@@ -318,6 +318,10 @@ func (cv CreateVM) getNetworkComponents(networks Networks) (*datatypes.Virtual_G
 		}
 	}
 
+	if privateNetworkComponent == nil {
+		return publicNetworkComponent, privateNetworkComponent, bosherr.Error("A private network is required. Please check vlanIds")
+	}
+
 	return publicNetworkComponent, privateNetworkComponent, nil
 }
 
