@@ -753,7 +753,7 @@ var _ = Describe("CreateVM", func() {
 				Expect(actualInstanceNetworks).To(Equal(expectedInstanceNetworks))
 			})
 
-			It("Failted to create the vm with only public network", func() {
+			It("Failed to create the vm with only public network", func() {
 				networks = Networks{
 					"fake-network-name": Network{
 						Type:    "dynamic",
@@ -776,22 +776,16 @@ var _ = Describe("CreateVM", func() {
 					},
 					nil,
 				)
-				vmService.CreateReturns(
-					0,
-					api.NewVMCreationFailedError("Only the frontend VLAN was specified.", false),
-				)
 				_, err = createVM.Run(agentID, stemcellCID, cloudProps, networks, disks, env)
-				virtualGuest, _, _, _ := vmService.CreateArgsForCall(0)
 
 				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("Only the frontend VLAN was specified."))
+				Expect(err.Error()).To(ContainSubstring("A private network is required"))
 				Expect(imageService.FindCallCount()).To(Equal(1))
 				Expect(vmService.CreateSshKeyCallCount()).To(Equal(0))
 				Expect(vmService.GetVlanCallCount()).To(Equal(1))
 				Expect(vmService.FindByPrimaryBackendIpCallCount()).To(Equal(0))
 				Expect(vmService.ReloadOSCallCount()).To(Equal(0))
-				Expect(*virtualGuest.PrivateNetworkOnlyFlag).To(BeFalse())
-				Expect(vmService.CreateCallCount()).To(Equal(1))
+				Expect(vmService.CreateCallCount()).To(Equal(0))
 				Expect(vmService.ConfigureNetworksCallCount()).To(Equal(0))
 				Expect(vmService.AttachEphemeralDiskCallCount()).To(Equal(0))
 				Expect(vmService.CleanUpCallCount()).To(Equal(0))

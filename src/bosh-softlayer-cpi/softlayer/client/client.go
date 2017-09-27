@@ -1,26 +1,29 @@
 package client
 
 import (
+	"fmt"
 	"math"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
 
-	vpsVm "bosh-softlayer-cpi/softlayer/vps_service/client/vm"
-
-	"bosh-softlayer-cpi/softlayer/vps_service/models"
-	"fmt"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
+	boshlogger "github.com/cloudfoundry/bosh-utils/logger"
 	"github.com/go-openapi/strfmt"
 	"github.com/softlayer/softlayer-go/datatypes"
 	"github.com/softlayer/softlayer-go/filter"
 	"github.com/softlayer/softlayer-go/services"
 	"github.com/softlayer/softlayer-go/session"
 	"github.com/softlayer/softlayer-go/sl"
+
+	vpsVm "bosh-softlayer-cpi/softlayer/vps_service/client/vm"
+	"bosh-softlayer-cpi/softlayer/vps_service/models"
 )
 
 const (
+	softlayerClientLogTag = "SoftlayerClient"
+
 	INSTANCE_DEFAULT_MASK = "id, globalIdentifier, hostname, hourlyBillingFlag, domain, fullyQualifiedDomainName, status.name, " +
 		"powerState.name, activeTransaction, datacenter.name, account.id, " +
 		"maxCpu, maxMemory, primaryIpAddress, primaryBackendIpAddress, " +
@@ -62,6 +65,8 @@ const (
 	SOFTLAYER_OBJECTNOTFOUND_EXCEPTION              = "SoftLayer_Exception_ObjectNotFound"
 	SOFTLAYER_BLOCKINGOPERATIONINPROGRESS_EXCEPTION = "SoftLayer_Exception_Network_Storage_BlockingOperationInProgress"
 	SOFTLAYER_GROUP_ACCESSCONTROLERROR_EXCEPTION    = "SoftLayer_Exception_Network_Storage_Group_AccessControlError"
+
+	WAIT_INSTANCE_TIMEOUT = "WAIT_INSTANCE_TIMEOUT"
 )
 
 //go:generate counterfeiter -o fakes/fake_client_factory.go . ClientFactory
@@ -81,7 +86,7 @@ func (factory *clientFactory) CreateClient() Client {
 	return factory.slClient
 }
 
-func NewSoftLayerClientManager(session *session.Session, vps *vpsVm.Client) *ClientManager {
+func NewSoftLayerClientManager(session *session.Session, vps *vpsVm.Client, logger boshlogger.Logger) *ClientManager {
 	return &ClientManager{
 		services.GetVirtualGuestService(session),
 		services.GetAccountService(session),
@@ -95,7 +100,10 @@ func NewSoftLayerClientManager(session *session.Session, vps *vpsVm.Client) *Cli
 		services.GetVirtualGuestBlockDeviceTemplateGroupService(session),
 		services.GetSecuritySshKeyService(session),
 		services.GetBillingOrderService(session),
+		services.GetTicketService(session),
+		services.GetTicketSubjectService(session),
 		vps,
+		logger,
 	}
 }
 
@@ -112,6 +120,7 @@ type Client interface {
 	UpgradeInstanceConfig(id int, cpu int, memory int, network int, privateCPU bool) error
 	UpgradeInstance(id int, cpu int, memory int, network int, privateCPU bool, additional_diskSize int) (int, error)
 	WaitInstanceUntilReady(id int, until time.Time) error
+	WaitInstanceUntilReadyWithTicket(id int, until time.Time) error
 	WaitInstanceHasActiveTransaction(id int, until time.Time) error
 	WaitInstanceHasNoneActiveTransaction(id int, until time.Time) error
 	WaitVolumeProvisioningWithOrderId(orderId int, until time.Time) (*datatypes.Network_Storage, error)
@@ -141,6 +150,8 @@ type Client interface {
 
 	CreateSnapshot(volumeId int, notes string) (datatypes.Network_Storage, error)
 	DeleteSnapshot(snapshotId int) error
+
+	CreateTicket(ticketSubject *string, ticketTitle *string, contents *string, attachmentId *int, attachmentType *string) error
 }
 
 type ClientManager struct {
@@ -156,7 +167,10 @@ type ClientManager struct {
 	ImageService          services.Virtual_Guest_Block_Device_Template_Group
 	SecuritySshKeyService services.Security_Ssh_Key
 	BillingOrderService   services.Billing_Order
+	TicketService         services.Ticket
+	TicketSubjectSerivce  services.Ticket_Subject
 	vpsService            *vpsVm.Client
+	logger                boshlogger.Logger
 }
 
 func (c *ClientManager) GetInstance(id int, mask string) (*datatypes.Virtual_Guest, bool, error) {
@@ -293,8 +307,6 @@ func (c *ClientManager) GetImage(imageId int, mask string) (*datatypes.Virtual_G
 }
 
 //Check the virtual server instance is ready for use
-//param1: bool, indicate whether the instance is ready
-//param2: error, any error may happen when getting the status of the instance
 func (c *ClientManager) WaitInstanceUntilReady(id int, until time.Time) error {
 	for {
 		virtualGuest, found, err := c.GetInstance(id, "id, lastOperatingSystemReload[id,modifyDate], activeTransaction[id,transactionStatus.name], provisionDate, powerState.keyName")
@@ -335,6 +347,47 @@ func (c *ClientManager) WaitInstanceUntilReady(id int, until time.Time) error {
 		min := math.Min(float64(10.0), float64(until.Sub(now)))
 		time.Sleep(time.Duration(min) * time.Second)
 	}
+}
+
+//@TODO: The method is experimental and needed to verify.
+func (c *ClientManager) WaitInstanceUntilReadyWithTicket(id int, until time.Time) error {
+	now := time.Now()
+	halfDuration := until.Sub(now) / 2
+	ticketTime := now.Add(halfDuration)
+
+	// Wait half duration until ready, otherwise create a ticket
+	c.logger.Debug(softlayerClientLogTag, fmt.Sprintf("Waiting for intance '%d' ready unless it is over %.4f minutes to create ticket.", id,
+		halfDuration.Minutes()))
+	err := c.waitInstanceUntilReady(id, ticketTime)
+	if err != nil {
+		if strings.Contains(err.Error(), WAIT_INSTANCE_TIMEOUT) {
+			contents := fmt.Sprintf("The power state of virtual guest '%d' is not 'RUNNING' after OS reload. The ticket generated by Bosh Softlayer CPI.", id)
+
+			err = c.CreateTicket(sl.String("OS Reload Question"), sl.String("OS reload hung."),
+				sl.String(contents), sl.Int(id), sl.String("VIRTUAL_GUEST"))
+			if err != nil {
+				return bosherr.WrapError(err, "Creating ticket.")
+			}
+		} else {
+			return err
+		}
+	}
+
+	// Wait remaining  half duration until ready, otherwise throw timeout error.
+	c.logger.Debug(softlayerClientLogTag, fmt.Sprintf("Waiting for intance '%d' ready unless it is over %.4f minutes to return the timeout error.", id,
+		halfDuration.Minutes()))
+
+	err = c.waitInstanceUntilReady(id, until)
+
+	if err != nil {
+		if strings.Contains(err.Error(), WAIT_INSTANCE_TIMEOUT) {
+			return bosherr.Errorf("Power on virtual guest with id %d timeout!", id)
+		} else {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (c *ClientManager) WaitInstanceHasActiveTransaction(id int, until time.Time) error {
@@ -542,6 +595,8 @@ func (c *ClientManager) RebootInstance(id int, soft bool, hard bool) error {
 func (c *ClientManager) ReloadInstance(id int, stemcellId int, sshKeyIds []int, hostname string, domain string) error {
 	var err error
 	until := time.Now().Add(time.Duration(1) * time.Hour)
+
+	c.logger.Debug(softlayerClientLogTag, "Waiting virtual guest '%d' has none active transaction.", id)
 	if err = c.WaitInstanceHasNoneActiveTransaction(*sl.Int(id), until); err != nil {
 		return bosherr.WrapError(err, "Waiting until instance has none active transaction before os_reload")
 	}
@@ -554,12 +609,11 @@ func (c *ClientManager) ReloadInstance(id int, stemcellId int, sshKeyIds []int, 
 		config.SshKeyIds = sshKeyIds
 	}
 
-	_, err = c.VirtualGuestService.Id(id).ReloadOperatingSystem(sl.String("FORCE"), &config)
+	c.logger.Debug(softlayerClientLogTag, "Reloading operating system of virtual guest '%d'.", id)
+	_, err = c.VirtualGuestService.Id(id).Mask("id, name").ReloadOperatingSystem(sl.String("FORCE"), &config)
 	if err != nil {
 		return err
 	}
-
-	//@TODO: 20 mins open tickets
 
 	until = time.Now().Add(time.Duration(1) * time.Hour)
 	if err = c.WaitInstanceHasActiveTransaction(*sl.Int(id), until); err != nil {
@@ -567,7 +621,7 @@ func (c *ClientManager) ReloadInstance(id int, stemcellId int, sshKeyIds []int, 
 	}
 
 	until = time.Now().Add(time.Duration(4) * time.Hour)
-	if err = c.WaitInstanceUntilReady(*sl.Int(id), until); err != nil {
+	if err = c.WaitInstanceUntilReadyWithTicket(*sl.Int(id), until); err != nil {
 		return bosherr.WrapError(err, "Waiting until instance is ready after os_reload")
 	}
 
@@ -1581,6 +1635,47 @@ func (c *ClientManager) DeleteSshKey(id int) (bool, error) {
 	return c.SecuritySshKeyService.Id(id).DeleteObject()
 }
 
+func (c *ClientManager) CreateTicket(ticketSubject *string, ticketTitle *string, contents *string, attachmentId *int, attachmentType *string) error {
+	ticketSubjects, err := c.TicketSubjectSerivce.GetAllObjects()
+	if err != nil {
+		return bosherr.WrapError(err, "Getting ticket subjects.")
+	}
+
+	var subjectId *int
+	for _, subject := range ticketSubjects {
+		if *subject.Name == *ticketSubject {
+			subjectId = subject.Id
+		}
+	}
+	if subjectId == nil {
+		return bosherr.Error("Could not find suitable ticket subject.")
+	}
+
+	currentUser, err := c.AccountService.Mask("id").GetCurrentUser()
+	if err != nil {
+		return bosherr.WrapError(err, "Getting current user.")
+	}
+
+	newTicket := &datatypes.Ticket{
+		SubjectId:      subjectId,
+		AssignedUserId: currentUser.Id,
+		Title:          ticketTitle,
+	}
+
+	ticket, err := c.TicketService.CreateStandardTicket(newTicket, contents, attachmentId, nil, nil, nil, nil, attachmentType)
+	if err != nil {
+		return bosherr.WrapError(err, "Creating standard ticket.")
+	}
+
+	//The SoftLayer API defaults new ticket property statusId to 1001 (or "open").
+	if *ticket.StatusId == 1001 {
+		c.logger.Debug("Ticket '%d' is created and its status is 'OPEN'.", string(*ticket.Id))
+		return nil
+	} else {
+		return bosherr.Errorf("Ticket status is not 'OPEN': %+v", *ticket.Status.Name)
+	}
+}
+
 func (c *ClientManager) selectMaximunIopsItemPriceIdOnSize(size int) (datatypes.Product_Item_Price, error) {
 	filters := filter.New()
 	filters = append(filters, filter.Path("itemPrices.attributes.value").Eq(size))
@@ -1604,6 +1699,36 @@ func (c *ClientManager) selectMaximunIopsItemPriceIdOnSize(size int) (datatypes.
 	}
 
 	return datatypes.Product_Item_Price{}, bosherr.Errorf("No proper performance storage (iSCSI volume) for size %d", size)
+}
+
+func (c *ClientManager) waitInstanceUntilReady(id int, until time.Time) error {
+	for {
+		virtualGuest, found, err := c.GetInstance(id, "id, lastOperatingSystemReload[id,modifyDate], activeTransaction[id,transactionStatus.name], provisionDate, powerState.keyName")
+		if err != nil {
+			return err
+		}
+		if !found {
+			return bosherr.WrapErrorf(err, "SoftLayer virtual guest '%d' does not exist", id)
+		}
+
+		lastReload := virtualGuest.LastOperatingSystemReload
+		activeTxn := virtualGuest.ActiveTransaction
+		provisionDate := virtualGuest.ProvisionDate
+
+		reloading := activeTxn != nil && lastReload != nil && *activeTxn.Id == *lastReload.Id
+		if provisionDate != nil && !reloading {
+			if *virtualGuest.PowerState.KeyName == "RUNNING" {
+				return nil
+			}
+		}
+		now := time.Now()
+		if now.Before(until) {
+			return bosherr.Error(WAIT_INSTANCE_TIMEOUT)
+		}
+
+		min := math.Min(float64(10.0), float64(until.Sub(now)))
+		time.Sleep(time.Duration(min) * time.Second)
+	}
 }
 
 //func (c *ClientManager) selectSaaSMaximunIopsItemPriceIdOnSize(size int) (datatypes.Product_Item_Price, error) {

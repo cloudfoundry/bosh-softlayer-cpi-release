@@ -32,14 +32,14 @@ var _ = Describe("VM", func() {
 		      "default": {
 		        "type": "dynamic",
 		        "dns": [
-			  "8.8.8.8"
+			      "8.8.8.8"
 		        ],
 		        "default": [
 		          "dns",
 		          "gateway"
 		        ],
 		        "cloud_properties": {
-		          "vlanIds": [524956, 524954]
+		          "vlanIds": [1292653, 1292651]
 		        }
 		      }
 		    },

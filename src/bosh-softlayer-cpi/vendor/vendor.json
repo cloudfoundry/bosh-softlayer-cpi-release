@@ -191,48 +191,6 @@
 			"revisionTime": "2017-06-24T19:09:26Z"
 		},
 		{
-			"checksumSHA1": "2b8Jx8cq66ZrpgE4M0asbAwunC0=",
-			"path": "github.com/maximilien/softlayer-go/client",
-			"revision": "42356cc3e61d6c2ed97d9b3cc819ae54fd2410dc",
-			"revisionTime": "2017-07-19T06:59:10Z"
-		},
-		{
-			"checksumSHA1": "MLINP/4ftv+/byowTNRvgeYomOU=",
-			"path": "github.com/maximilien/softlayer-go/client/fakes",
-			"revision": "42356cc3e61d6c2ed97d9b3cc819ae54fd2410dc",
-			"revisionTime": "2017-07-19T06:59:10Z"
-		},
-		{
-			"checksumSHA1": "nPaYMMjIl21a30j9R2lURjb8Nts=",
-			"path": "github.com/maximilien/softlayer-go/common",
-			"revision": "42356cc3e61d6c2ed97d9b3cc819ae54fd2410dc",
-			"revisionTime": "2017-07-19T06:59:10Z"
-		},
-		{
-			"checksumSHA1": "2vO7kQsRKTafjw60D1iMwkHQsP8=",
-			"path": "github.com/maximilien/softlayer-go/data_types",
-			"revision": "42356cc3e61d6c2ed97d9b3cc819ae54fd2410dc",
-			"revisionTime": "2017-07-19T06:59:10Z"
-		},
-		{
-			"checksumSHA1": "iLJ922FM2eeqwYtWyN56vnL7egQ=",
-			"path": "github.com/maximilien/softlayer-go/services",
-			"revision": "42356cc3e61d6c2ed97d9b3cc819ae54fd2410dc",
-			"revisionTime": "2017-07-19T06:59:10Z"
-		},
-		{
-			"checksumSHA1": "rAdirobiTWcBwIYxYgySqeqhTSM=",
-			"path": "github.com/maximilien/softlayer-go/softlayer",
-			"revision": "42356cc3e61d6c2ed97d9b3cc819ae54fd2410dc",
-			"revisionTime": "2017-07-19T06:59:10Z"
-		},
-		{
-			"checksumSHA1": "TIdT4Jg+JvArPSxEA9nvYqeciDo=",
-			"path": "github.com/maximilien/softlayer-go/test_helpers",
-			"revision": "42356cc3e61d6c2ed97d9b3cc819ae54fd2410dc",
-			"revisionTime": "2017-07-19T06:59:10Z"
-		},
-		{
 			"checksumSHA1": "EHjhpHipgm+XGccrRAms9AW3Ewk=",
 			"path": "github.com/mitchellh/mapstructure",
 			"revision": "d0303fe809921458f417bcf828397a65db30a7e4",

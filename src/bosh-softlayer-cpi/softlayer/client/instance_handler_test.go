@@ -4,25 +4,35 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	boslc "bosh-softlayer-cpi/softlayer/client"
-	"bosh-softlayer-cpi/test_helpers"
+	"bytes"
+	"fmt"
+	"io"
+	"net/http"
+	"time"
+
+	boshlogger "github.com/cloudfoundry/bosh-utils/logger"
+	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
 	"github.com/onsi/gomega/ghttp"
-
-	vpsClient "bosh-softlayer-cpi/softlayer/vps_service/client"
-	vpsVm "bosh-softlayer-cpi/softlayer/vps_service/client/vm"
-	"fmt"
-	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/softlayer/softlayer-go/datatypes"
 	"github.com/softlayer/softlayer-go/session"
 	"github.com/softlayer/softlayer-go/sl"
-	"net/http"
-	"time"
+
+	api "bosh-softlayer-cpi/api"
+	slClient "bosh-softlayer-cpi/softlayer/client"
+	vpsClient "bosh-softlayer-cpi/softlayer/vps_service/client"
+	vpsVm "bosh-softlayer-cpi/softlayer/vps_service/client/vm"
+	"bosh-softlayer-cpi/test_helpers"
 )
 
-var _ = FDescribe("InstanceHandler", func() {
+var _ = Describe("InstanceHandler", func() {
 	var (
 		err error
+
+		errOut, errOutLog bytes.Buffer
+		multiWriter       io.Writer
+		logger            boshlogger.Logger
+		multiLogger       api.MultiLogger
 
 		server      *ghttp.Server
 		vpsEndPoint string
@@ -30,7 +40,7 @@ var _ = FDescribe("InstanceHandler", func() {
 
 		transportHandler *test_helpers.FakeTransportHandler
 		sess             *session.Session
-		cli              *boslc.ClientManager
+		cli              *slClient.ClientManager
 
 		vgID             int
 		vlanID           int
@@ -56,8 +66,12 @@ var _ = FDescribe("InstanceHandler", func() {
 			SoftlayerAPIEndpoint: server.URL(),
 			MaxRetries:           3,
 		}
+
+		multiWriter = io.MultiWriter(&errOut, &errOutLog)
+		logger = boshlogger.NewWriterLogger(boshlogger.LevelDebug, multiWriter, multiWriter)
+		multiLogger = api.MultiLogger{Logger: logger, LogBuff: &errOutLog}
 		sess = test_helpers.NewFakeSoftlayerSession(transportHandler)
-		cli = boslc.NewSoftLayerClientManager(sess, vps)
+		cli = slClient.NewSoftLayerClientManager(sess, vps, logger)
 
 		vgID = 25804753
 		vlanID = 1262125
@@ -125,7 +139,7 @@ var _ = FDescribe("InstanceHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				vgs, success, err := cli.GetInstance(vgID, boslc.INSTANCE_DETAIL_MASK)
+				vgs, success, err := cli.GetInstance(vgID, slClient.INSTANCE_DETAIL_MASK)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(success).To(Equal(true))
 				Expect(*vgs.Id).To(Equal(vgID))
@@ -159,7 +173,7 @@ var _ = FDescribe("InstanceHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				_, success, err := cli.GetInstance(vgID, boslc.INSTANCE_DETAIL_MASK)
+				_, success, err := cli.GetInstance(vgID, slClient.INSTANCE_DETAIL_MASK)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("fake-client-error"))
 				Expect(success).To(Equal(false))
@@ -175,7 +189,7 @@ var _ = FDescribe("InstanceHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				vgs, success, err := cli.GetInstance(vgID, boslc.INSTANCE_DETAIL_MASK)
+				vgs, success, err := cli.GetInstance(vgID, slClient.INSTANCE_DETAIL_MASK)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(success).To(Equal(false))
 				Expect((*vgs).Id).To(BeNil())
@@ -195,7 +209,7 @@ var _ = FDescribe("InstanceHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				networkVlan, success, err := cli.GetVlan(vlanID, boslc.NETWORK_DEFAULT_VLAN_MASK)
+				networkVlan, success, err := cli.GetVlan(vlanID, slClient.NETWORK_DEFAULT_VLAN_MASK)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(success).To(Equal(true))
 				Expect(*networkVlan.Id).To(Equal(vlanID))
@@ -229,7 +243,7 @@ var _ = FDescribe("InstanceHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				_, success, err := cli.GetVlan(vlanID, boslc.NETWORK_DEFAULT_VLAN_MASK)
+				_, success, err := cli.GetVlan(vlanID, slClient.NETWORK_DEFAULT_VLAN_MASK)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("fake-client-error"))
 				Expect(success).To(Equal(false))
@@ -245,7 +259,7 @@ var _ = FDescribe("InstanceHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				_, success, err := cli.GetVlan(vlanID, boslc.NETWORK_DEFAULT_VLAN_MASK)
+				_, success, err := cli.GetVlan(vlanID, slClient.NETWORK_DEFAULT_VLAN_MASK)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(success).To(Equal(false))
 			})
@@ -264,7 +278,7 @@ var _ = FDescribe("InstanceHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				networkVlan, success, err := cli.GetSubnet(subnetID, boslc.NETWORK_DEFAULT_SUBNET_MASK)
+				networkVlan, success, err := cli.GetSubnet(subnetID, slClient.NETWORK_DEFAULT_SUBNET_MASK)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(success).To(Equal(true))
 				Expect(*networkVlan.Id).To(Equal(subnetID))
@@ -315,7 +329,7 @@ var _ = FDescribe("InstanceHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				_, success, err := cli.GetSubnet(subnetID, boslc.NETWORK_DEFAULT_SUBNET_MASK)
+				_, success, err := cli.GetSubnet(subnetID, slClient.NETWORK_DEFAULT_SUBNET_MASK)
 
 				Expect(err).NotTo(HaveOccurred())
 				Expect(success).To(Equal(false))
@@ -600,6 +614,96 @@ var _ = FDescribe("InstanceHandler", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				err := cli.WaitInstanceUntilReady(vgID, time.Now())
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring(fmt.Sprintf("SoftLayer virtual guest '%d' does not exist", vgID)))
+			})
+		})
+	})
+
+	Describe("WaitInstanceUntilReadyWithTicket", func() {
+		Context("when VirtualGuestService getObject call successfully", func() {
+			It("waiting until instance ready successfully", func() {
+				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
+						"statusCode": http.StatusOK,
+					},
+				}
+				err = test_helpers.SpecifyServerResps(respParas, server)
+				Expect(err).NotTo(HaveOccurred())
+
+				err := cli.WaitInstanceUntilReadyWithTicket(vgID, time.Now().Add(1000))
+				Expect(err).NotTo(HaveOccurred())
+			})
+
+			It("return error and create ticket when time out", func() {
+				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Virtual_Guest_getObject_HasActiveTxn.json",
+						"statusCode": http.StatusOK,
+						"path":       "/SoftLayer_Virtual_Guest/25804753.json",
+						"method":     "GET",
+					},
+					{
+						"filename":   "SoftLayer_Ticket_Subject_getAllObjects.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Account_getCurrentUser.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Ticket_createStandardTicket.json",
+						"statusCode": http.StatusOK,
+					},
+				}
+				err = test_helpers.SpecifyServerResps(respParas, server)
+				Expect(err).NotTo(HaveOccurred())
+
+				err := cli.WaitInstanceUntilReadyWithTicket(vgID, time.Now().Add(3*time.Second))
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring(fmt.Sprintf("Power on virtual guest with id %d timeout!", vgID)))
+			})
+		})
+
+		Context("when VirtualGuestService getObject call return error", func() {
+			It("return an softlayer-go unhandled error", func() {
+				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Virtual_Guest_getObject_InternalError.json",
+						"statusCode": http.StatusInternalServerError,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_getObject_InternalError.json",
+						"statusCode": http.StatusInternalServerError,
+					},
+				}
+				err = test_helpers.SpecifyServerResps(respParas, server)
+				Expect(err).NotTo(HaveOccurred())
+
+				err := cli.WaitInstanceUntilReadyWithTicket(vgID, time.Now())
+				Expect(err).To(HaveOccurred())
+			})
+
+			It("return an ObjectNotFoundError", func() {
+				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Virtual_Guest_getObject_NotFound.json",
+						"statusCode": http.StatusInternalServerError,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_getObject_NotFound.json",
+						"statusCode": http.StatusInternalServerError,
+					},
+				}
+				err = test_helpers.SpecifyServerResps(respParas, server)
+				Expect(err).NotTo(HaveOccurred())
+
+				err := cli.WaitInstanceUntilReadyWithTicket(vgID, time.Now())
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring(fmt.Sprintf("SoftLayer virtual guest '%d' does not exist", vgID)))
 			})
@@ -942,7 +1046,7 @@ var _ = FDescribe("InstanceHandler", func() {
 
 	Describe("ReloadInstance", func() {
 		Context("when VirtualGuestService calls successfully", func() {
-			It("cancel instance successfully", func() {
+			It("reload instance successfully", func() {
 				respParas = []map[string]interface{}{
 					{
 						"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
@@ -954,6 +1058,10 @@ var _ = FDescribe("InstanceHandler", func() {
 					},
 					{
 						"filename":   "SoftLayer_Virtual_Guest_getObject_HasActiveTxn.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
 						"statusCode": http.StatusOK,
 					},
 					{
@@ -1103,7 +1211,7 @@ var _ = FDescribe("InstanceHandler", func() {
 				Expect(err.Error()).To(ContainSubstring("Waiting until instance is ready after os_reload"))
 			})
 
-			It("Return error when VirtualGuestService editObject call return an error", func() {
+			It("Return error when VirtualGuestService editObject call return an internal error", func() {
 				respParas = []map[string]interface{}{
 					{
 						"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
@@ -1115,6 +1223,10 @@ var _ = FDescribe("InstanceHandler", func() {
 					},
 					{
 						"filename":   "SoftLayer_Virtual_Guest_getObject_HasActiveTxn.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
 						"statusCode": http.StatusOK,
 					},
 					{
@@ -1134,7 +1246,7 @@ var _ = FDescribe("InstanceHandler", func() {
 				Expect(err.Error()).To(ContainSubstring("Editing VM hostname after OS Reload"))
 			})
 
-			It("Return error when VirtualGuestService editObject call return an error", func() {
+			It("Return error when VirtualGuestService editObject call return an object not found error", func() {
 				respParas = []map[string]interface{}{
 					{
 						"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
@@ -1146,6 +1258,10 @@ var _ = FDescribe("InstanceHandler", func() {
 					},
 					{
 						"filename":   "SoftLayer_Virtual_Guest_getObject_HasActiveTxn.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
 						"statusCode": http.StatusOK,
 					},
 					{

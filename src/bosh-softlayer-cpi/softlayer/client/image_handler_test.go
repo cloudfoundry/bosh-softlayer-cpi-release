@@ -4,28 +4,39 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	boslc "bosh-softlayer-cpi/softlayer/client"
-	"bosh-softlayer-cpi/test_helpers"
+	"bytes"
+	"io"
+	"net/http"
+
+	boshlogger "github.com/cloudfoundry/bosh-utils/logger"
+	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
 	"github.com/onsi/gomega/ghttp"
+	"github.com/softlayer/softlayer-go/session"
 
+	api "bosh-softlayer-cpi/api"
+	slClient "bosh-softlayer-cpi/softlayer/client"
 	vpsClient "bosh-softlayer-cpi/softlayer/vps_service/client"
 	vpsVm "bosh-softlayer-cpi/softlayer/vps_service/client/vm"
-	httptransport "github.com/go-openapi/runtime/client"
-	"github.com/softlayer/softlayer-go/session"
-	"net/http"
+	"bosh-softlayer-cpi/test_helpers"
 )
 
 var _ = Describe("ImageHandler", func() {
 	var (
-		err         error
+		err error
+
+		errOut, errOutLog bytes.Buffer
+		multiWriter       io.Writer
+		logger            boshlogger.Logger
+		multiLogger       api.MultiLogger
+
 		server      *ghttp.Server
 		vpsEndPoint string
 		vps         *vpsVm.Client
 
 		transportHandler *test_helpers.FakeTransportHandler
 		sess             *session.Session
-		cli              *boslc.ClientManager
+		cli              *slClient.ClientManager
 
 		imageID   int
 		respParas []map[string]interface{}
@@ -42,8 +53,12 @@ var _ = Describe("ImageHandler", func() {
 			SoftlayerAPIEndpoint: server.URL(),
 			MaxRetries:           3,
 		}
+
+		multiWriter = io.MultiWriter(&errOut, &errOutLog)
+		logger = boshlogger.NewWriterLogger(boshlogger.LevelDebug, multiWriter, multiWriter)
+		multiLogger = api.MultiLogger{Logger: logger, LogBuff: &errOutLog}
 		sess = test_helpers.NewFakeSoftlayerSession(transportHandler)
-		cli = boslc.NewSoftLayerClientManager(sess, vps)
+		cli = slClient.NewSoftLayerClientManager(sess, vps, logger)
 
 		imageID = 1335057
 	})
@@ -64,7 +79,7 @@ var _ = Describe("ImageHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				image, succ, err := cli.GetImage(imageID, boslc.IMAGE_DETAIL_MASK)
+				image, succ, err := cli.GetImage(imageID, slClient.IMAGE_DETAIL_MASK)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(succ).To(Equal(true))
 				Expect(*image.Id).To(Equal(imageID))
@@ -114,7 +129,7 @@ var _ = Describe("ImageHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				_, succ, err := cli.GetImage(imageID, boslc.IMAGE_DETAIL_MASK)
+				_, succ, err := cli.GetImage(imageID, slClient.IMAGE_DETAIL_MASK)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(succ).To(Equal(false))
 			})

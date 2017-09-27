@@ -52,7 +52,10 @@ var _ = Describe("Networks", func() {
 			tags = Tags{"fake-tag1", "fake-tag2", "fake-tag3", "fake-tag3"}
 
 			uniqueTags := tags.Unique()
-			Expect(uniqueTags).To(BeEquivalentTo(Tags{"fake-tag1", "fake-tag2", "fake-tag3"}))
+			Expect(uniqueTags).To(HaveLen(3))
+			Expect(uniqueTags).To(ContainElement("fake-tag1"))
+			Expect(uniqueTags).To(ContainElement("fake-tag2"))
+			Expect(uniqueTags).To(ContainElement("fake-tag3"))
 		})
 
 	})

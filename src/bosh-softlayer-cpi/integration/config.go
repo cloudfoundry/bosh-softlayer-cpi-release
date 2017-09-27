@@ -1,24 +1,26 @@
 package integration
 
 import (
-	"bosh-softlayer-cpi/action"
-	boshapi "bosh-softlayer-cpi/api"
-	boshdisp "bosh-softlayer-cpi/api/dispatcher"
-	"bosh-softlayer-cpi/api/transport"
-	boshcfg "bosh-softlayer-cpi/config"
-	"bosh-softlayer-cpi/softlayer/client"
-	vpsVm "bosh-softlayer-cpi/softlayer/vps_service/client/vm"
 	"bytes"
 	"encoding/json"
 	"fmt"
-	boshlogger "github.com/cloudfoundry/bosh-utils/logger"
-	"github.com/cloudfoundry/bosh-utils/uuid"
-	"github.com/softlayer/softlayer-go/session"
 	"io"
 	"io/ioutil"
 	"net/http/httptest"
 	"os"
 	"strings"
+
+	boshlogger "github.com/cloudfoundry/bosh-utils/logger"
+	"github.com/cloudfoundry/bosh-utils/uuid"
+	"github.com/softlayer/softlayer-go/session"
+
+	"bosh-softlayer-cpi/action"
+	api "bosh-softlayer-cpi/api"
+	disp "bosh-softlayer-cpi/api/dispatcher"
+	"bosh-softlayer-cpi/api/transport"
+	cfg "bosh-softlayer-cpi/config"
+	"bosh-softlayer-cpi/softlayer/client"
+	vpsVm "bosh-softlayer-cpi/softlayer/vps_service/client/vm"
 )
 
 var (
@@ -36,8 +38,8 @@ var (
 	ipAddrs      = strings.Split(envOrDefault("PRIVATE_IP", "192.168.100.102,192.168.100.103,192.168.100.104"), ",")
 
 	ts           *httptest.Server
-	cfg          boshcfg.Config
-	boshResponse boshdisp.Response
+	config       cfg.Config
+	boshResponse disp.Response
 	vps          *vpsVm.Client
 
 	// Channel that will be used to retrieve IPs to use
@@ -88,25 +90,25 @@ var (
 	// Stuff of softlayer client
 	multiWriter = io.MultiWriter(&errOut, &errOutLog)
 	logger      = boshlogger.NewWriterLogger(boshlogger.LevelDebug, multiWriter, multiWriter)
-	multiLogger = boshapi.MultiLogger{Logger: logger, LogBuff: &errOutLog}
+	multiLogger = api.MultiLogger{Logger: logger, LogBuff: &errOutLog}
 	uuidGen     = uuid.NewGenerator()
 	sess        *session.Session
 )
 
-func execCPI(request string) (boshdisp.Response, error) {
+func execCPI(request string) (disp.Response, error) {
 	var err error
 	var softlayerClient client.Client
 
-	softlayerClient = client.NewSoftLayerClientManager(sess, vps)
+	softlayerClient = client.NewSoftLayerClientManager(sess, vps, multiLogger)
 	actionFactory := action.NewConcreteFactory(
 		softlayerClient,
 		uuidGen,
-		cfg,
+		config,
 		multiLogger,
 	)
 
-	caller := boshdisp.NewJSONCaller()
-	dispatcher := boshdisp.NewJSON(actionFactory, caller, multiLogger)
+	caller := disp.NewJSONCaller()
+	dispatcher := disp.NewJSON(actionFactory, caller, multiLogger)
 
 	in.WriteString(request)
 	cli := transport.NewCLI(&in, &out, dispatcher, multiLogger)

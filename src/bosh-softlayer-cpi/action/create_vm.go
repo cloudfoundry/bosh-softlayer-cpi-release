@@ -98,6 +98,7 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 	} else {
 		instanceNetworks = networks.AsInstanceServiceNetworks(&datatypes.Network_Vlan{})
 	}
+
 	if err = instanceNetworks.Validate(); err != nil {
 		return "", bosherr.WrapError(err, "Creating VM")
 	}
@@ -478,7 +479,7 @@ func (cv CreateVM) getDirectorIPAddressByHost(host string) (string, error) {
 			}
 		}
 
-		return "", bosherr.Error(fmt.Sprintf("Failed to get IP address by '%d'", host))
+		return "", bosherr.Error(fmt.Sprintf("Failed to get IP address by '%s'", host))
 	}
 
 	return address.String(), nil

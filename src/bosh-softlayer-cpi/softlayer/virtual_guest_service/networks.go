@@ -3,8 +3,6 @@ package instance
 import (
 	"bosh-softlayer-cpi/registry"
 	"sort"
-
-	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 )
 
 type Networks map[string]Network
@@ -27,14 +25,14 @@ func (n Networks) Validate() error {
 		}
 	}
 
-	if networks != 1 {
-		return bosherr.Error("Exactly one Dynamic or Manual network must be defined")
-	}
-
-	// Network type 'vip' not supported currently()
-	if vipNetworks > 1 {
-		return bosherr.Error("Only one VIP network is allowed")
-	}
+	//if networks != 1 {
+	//	return bosherr.Error("Exactly one Dynamic or Manual network must be defined")
+	//}
+	//
+	//// Network type 'vip' not supported currently()
+	//if vipNetworks > 1 {
+	//	return bosherr.Error("Only one VIP network is allowed")
+	//}
 
 	return nil
 }
