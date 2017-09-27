@@ -8,51 +8,53 @@ import (
 
 	. "bosh-softlayer-cpi/action"
 
-	fakescommon "bosh-softlayer-cpi/softlayer/common/fakes"
+	instancefakes "bosh-softlayer-cpi/softlayer/virtual_guest_service/fakes"
+	"github.com/softlayer/softlayer-go/datatypes"
+	"github.com/softlayer/softlayer-go/sl"
 )
 
 var _ = Describe("HasVM", func() {
 	var (
-		fakeVmFinder *fakescommon.FakeVMFinder
-		action       HasVMAction
+		err   error
+		found bool
+
+		vmService *instancefakes.FakeService
+
+		hasVM HasVM
 	)
 
 	BeforeEach(func() {
-		fakeVmFinder = &fakescommon.FakeVMFinder{}
-		action = NewHasVM(fakeVmFinder)
+		vmService = &instancefakes.FakeService{}
+		hasVM = NewHasVM(vmService)
 	})
 
 	Describe("Run", func() {
-		var (
-			vmCid VMCID
-			found bool
-			err   error
-		)
-		BeforeEach(func() {
-			vmCid = VMCID(123456)
+		It("returns true if vm ID exist", func() {
+			vmService.FindReturns(
+				&datatypes.Virtual_Guest{
+					Id: sl.Int(1234567),
+				},
+				nil)
+
+			found, err = hasVM.Run(1234567)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(found).To(BeTrue())
+
+			Expect(vmService.FindCallCount()).To(Equal(1))
+			Expect(vmService.FindArgsForCall(0)).To(Equal(1234567))
 		})
 
-		JustBeforeEach(func() {
-			found, err = action.Run(vmCid)
-		})
-		Context("when has vm succeeds", func() {
-			BeforeEach(func() {
-				fakeVmFinder.FindReturns(nil, true, nil)
-			})
-			It("no error return", func() {
-				Expect(err).ToNot(HaveOccurred())
-				Expect(found).To(BeTrue())
-			})
-		})
+		It("returns an error if vmService find call returns an error", func() {
+			vmService.FindReturns(
+				&datatypes.Virtual_Guest{},
+				errors.New("fake-vm-service-error"))
 
-		Context("when has vm fails", func() {
-			BeforeEach(func() {
-				fakeVmFinder.FindReturns(nil, false, errors.New("kaboom"))
-			})
-			It("no error return", func() {
-				Expect(err).ToNot(HaveOccurred())
-				Expect(found).To(BeFalse())
-			})
+			_, err = hasVM.Run(1234567)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("fake-vm-service-error"))
+
+			Expect(vmService.FindCallCount()).To(Equal(1))
+			Expect(vmService.FindArgsForCall(0)).To(Equal(1234567))
 		})
 	})
 })

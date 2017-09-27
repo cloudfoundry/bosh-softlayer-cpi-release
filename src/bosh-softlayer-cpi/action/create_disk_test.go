@@ -8,98 +8,122 @@ import (
 
 	. "bosh-softlayer-cpi/action"
 
-	fakescommon "bosh-softlayer-cpi/softlayer/common/fakes"
-	fakedisk "bosh-softlayer-cpi/softlayer/disk/fakes"
-
-	bslcdisk "bosh-softlayer-cpi/softlayer/disk"
+	"bosh-softlayer-cpi/api"
+	diskfakes "bosh-softlayer-cpi/softlayer/disk_service/fakes"
+	instancefakes "bosh-softlayer-cpi/softlayer/virtual_guest_service/fakes"
+	"github.com/softlayer/softlayer-go/datatypes"
+	"github.com/softlayer/softlayer-go/sl"
 )
 
 var _ = Describe("CreateDisk", func() {
 	var (
-		fakeVmFinder    *fakescommon.FakeVMFinder
-		fakeVm          *fakescommon.FakeVM
-		fakeDisk        *fakedisk.FakeDisk
-		action          CreateDiskAction
-		fakeDiskCreator *fakedisk.FakeDiskCreator
+		err     error
+		diskCID string
 
-		diskCloudProp bslcdisk.DiskCloudProperties
+		diskService *diskfakes.FakeService
+		vmService   *instancefakes.FakeService
+		createDisk  CreateDisk
 	)
-
 	BeforeEach(func() {
-		fakeVmFinder = &fakescommon.FakeVMFinder{}
-		fakeVm = &fakescommon.FakeVM{}
-		fakeDiskCreator = &fakedisk.FakeDiskCreator{}
-		fakeDisk = &fakedisk.FakeDisk{}
-		action = NewCreateDisk(fakeVmFinder, fakeDiskCreator)
-		diskCloudProp = bslcdisk.DiskCloudProperties{}
+		diskService = &diskfakes.FakeService{}
+		vmService = &instancefakes.FakeService{}
+		createDisk = NewCreateDisk(diskService, vmService)
 	})
 
 	Describe("Run", func() {
 		var (
-			diskCidStr string
-			err        error
-			vmCid      VMCID
+			size       int
+			cloudProps DiskCloudProperties
+			vmCID      VMCID
 		)
-
 		BeforeEach(func() {
-			vmCid = VMCID(123456)
+			size = 32768
+			cloudProps = DiskCloudProperties{}
+			vmCID = VMCID(0)
 		})
 
-		JustBeforeEach(func() {
-			diskCidStr, err = action.Run(100, diskCloudProp, vmCid)
-		})
-
-		Context("when create disk succeeds", func() {
+		Context("when vmCID is set", func() {
 			BeforeEach(func() {
-				fakeVm.GetDataCenterIdReturns(123456)
-				fakeVmFinder.FindReturns(fakeVm, true, nil)
-				fakeDiskCreator.CreateReturns(fakeDisk, nil)
+				vmCID = VMCID(12345678)
+				cloudProps = DiskCloudProperties{
+					DataCenter: "fake-datacenter-name",
+				}
+
+				diskService.CreateReturns(
+					22345678,
+					nil,
+				)
+				vmService.FindReturns(
+					&datatypes.Virtual_Guest{
+						Id: sl.Int(1234567),
+						Datacenter: &datatypes.Location{
+							Name: sl.String("fake-datacenter-name"),
+						},
+					},
+					nil,
+				)
 			})
 
-			It("fetches vm by cid", func() {
-				Expect(fakeVmFinder.FindCallCount()).To(Equal(1))
-				actualCid := fakeVmFinder.FindArgsForCall(0)
-				Expect(actualCid).To(Equal(123456))
-			})
-
-			It("no error return", func() {
-				Expect(fakeDiskCreator.CreateCallCount()).To(Equal(1))
-				actualDiskSize, actualDiskCloudProperties, actualDataCenterId := fakeDiskCreator.CreateArgsForCall(0)
-				Expect(actualDiskSize).To(Equal(100))
-				Expect(actualDiskCloudProperties).To(Equal(diskCloudProp))
-				Expect(actualDataCenterId).To(Equal(123456))
+			It("creates the disk at the vm zone", func() {
+				diskCID, err = createDisk.Run(32768, cloudProps, vmCID)
 				Expect(err).NotTo(HaveOccurred())
-			})
-		})
-
-		Context("when find vm error out", func() {
-			BeforeEach(func() {
-				fakeVmFinder.FindReturns(nil, false, errors.New("kaboom"))
-			})
-
-			It("provides relevant error information", func() {
-				Expect(err.Error()).To(ContainSubstring("kaboom"))
-			})
-		})
-
-		Context("when find vm return false", func() {
-			BeforeEach(func() {
-				fakeVmFinder.FindReturns(nil, false, nil)
+				Expect(vmService.FindCallCount()).To(Equal(1))
+				actualCid := vmService.FindArgsForCall(0)
+				Expect(actualCid).To(Equal(12345678))
+				Expect(diskService.CreateCallCount()).To(Equal(1))
+				actualSize, _, actualLocation, _ := diskService.CreateArgsForCall(0)
+				Expect(actualSize).To(Equal(32768))
+				Expect(actualLocation).To(Equal("fake-datacenter-name"))
+				Expect(diskCID).To(Equal("22345678"))
 			})
 
-			It("provides relevant error information", func() {
+			It("returns an error if vmService find call returns an error", func() {
+				vmService.FindReturns(
+					&datatypes.Virtual_Guest{},
+					errors.New("fake-instance-service-error"),
+				)
+
+				_, err = createDisk.Run(32768, cloudProps, vmCID)
 				Expect(err).To(HaveOccurred())
-			})
-		})
-
-		Context("when create disk error out", func() {
-			BeforeEach(func() {
-				fakeVmFinder.FindReturns(fakeVm, true, nil)
-				fakeDiskCreator.CreateReturns(nil, errors.New("kaboom"))
+				Expect(err.Error()).To(ContainSubstring("fake-instance-service-error"))
+				Expect(vmService.FindCallCount()).To(Equal(1))
+				Expect(diskService.CreateCallCount()).To(Equal(0))
 			})
 
-			It("provides relevant error information", func() {
+			It("returns an error if vmService find call returns an error", func() {
+				vmService.FindReturns(
+					&datatypes.Virtual_Guest{},
+					api.NewDiskCreationFailedError("Not supported", false),
+				)
+
+				_, err = createDisk.Run(32768, cloudProps, vmCID)
 				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("Disk failed to create: "))
+				Expect(vmService.FindCallCount()).To(Equal(1))
+				Expect(diskService.CreateCallCount()).To(Equal(0))
+			})
+
+			It("returns an error if vmService create call returns an error", func() {
+				vmService.FindReturns(
+					&datatypes.Virtual_Guest{
+						Id: sl.Int(1234567),
+						Datacenter: &datatypes.Location{
+							Name: sl.String("fake-datacenter-name"),
+						},
+					},
+					nil,
+				)
+
+				diskService.CreateReturns(
+					0,
+					errors.New("fake-instance-service-error"),
+				)
+
+				_, err = createDisk.Run(32768, cloudProps, vmCID)
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("fake-instance-service-error"))
+				Expect(vmService.FindCallCount()).To(Equal(1))
+				Expect(diskService.CreateCallCount()).To(Equal(1))
 			})
 		})
 	})

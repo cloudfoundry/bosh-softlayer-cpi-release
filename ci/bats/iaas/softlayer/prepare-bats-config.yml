@@ -1,0 +1,25 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source: {repository: bosh/compiled-release}
+
+inputs:
+  - name: bosh-cpi-release
+  - name: environment
+  - name: director-state
+
+params:
+  BAT_VCAP_PASSWORD:  ""
+  SL_DATACENTER:      ""
+  SL_VLAN_PRIVATE:    ""
+  SL_VLAN_PUBLIC:     ""
+  SL_VM_DOMAIN:       ""
+  SL_VM_NAME_PREFIX:  ""
+  STEMCELL_NAME:      ""
+
+outputs:
+  - name: bats-config
+
+run:
+  path: bosh-cpi-release/ci/bats/iaas/softlayer/prepare-bats-config.sh

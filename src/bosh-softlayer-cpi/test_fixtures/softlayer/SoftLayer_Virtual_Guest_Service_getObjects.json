@@ -17,8 +17,8 @@
 	"statusId": 1,
 	"uuid": "fake-uuid",
 	"globalIdentifier": "fake-id",
-	"primaryBackendIpAddress": "10.0.0.11",
-	"primaryIpAddress": "158.0.0.1",
+	"primaryBackendIpAddress": "fake-backend-ip",
+	"primaryIpAddress": "fake-ip",
 	"location": {
 		"id": 1234567
 	},

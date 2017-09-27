@@ -1,0 +1,14 @@
+[
+    {
+        "Id": 1234,
+        "Key": "key1",
+        "Label": "label1",
+        "Notes": "notes1"
+    },
+    {
+        "Id": 1235,
+        "Key": "key2",
+        "Label": "label2",
+        "Notes": "notes2"
+    }
+]

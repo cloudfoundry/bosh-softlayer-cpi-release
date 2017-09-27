@@ -1,0 +1,68 @@
+{
+  "id": 759,
+  "isActive": 1,
+  "name": "StorageAsService",
+  "items": [
+    {
+      "keyName": "500_2000_GBS",
+      "capacity": 1000,
+      "prices": [
+        {
+          "categories": [
+            {
+              "categoryCode": "storage_as_a_service"
+            },
+            {
+              "categoryCode": "storage_block"
+            }
+          ]
+        },
+        {
+          "categories": [
+            {
+              "categoryCode": "performance_storage_space"
+            }
+          ]
+        }
+      ],
+      "attributes": [
+        {
+          "id": 98764
+        }
+      ],
+      "capacityMinimum": "500",
+      "capacityMaximum": "2000",
+      "itemCategory": {
+        "CategoryCode": "performance_storage_space"
+      }
+    },
+    {
+      "capacity": 1500,
+      "prices": [
+        {
+          "categories": [
+            {
+              "categoryCode": "performance_storage_iscsi"
+            },
+            {
+              "categoryCode": "performance_storage_iops"
+            }
+          ],
+          "capacityRestrictionMinimum": "200",
+          "capacityRestrictionMaximum": "500",
+          "capacityRestrictionType": "STORAGE_SPACE"
+        }
+      ],
+      "attributes": [
+        {
+          "id": 98764
+        }
+      ],
+      "capacityMinimum": "1000",
+      "capacityMaximum": "2000",
+      "itemCategory": {
+        "CategoryCode": "performance_storage_iops"
+      }
+    }
+  ]
+}

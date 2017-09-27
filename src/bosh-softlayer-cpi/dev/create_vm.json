@@ -2,7 +2,7 @@
   "method": "create_vm",
   "arguments": [
     "45632666-9fb1-422a-af35-2ab6102c5c1b",
-    "1618347",
+    "879741",
     {
       "vmNamePrefix": "ecpi-test",
       "domain": "softlayer.com",
@@ -17,12 +17,12 @@
       "bosh_ip": "10.112.116.127",
       "primaryNetworkComponent": {
         "networkVlan": {
-          "id": 1292653
+          "id": 524956
         }
       },
       "primaryBackendNetworkComponent": {
         "networkVlan": {
-          "id": 1292651
+          "id": 524954
         }
       },
       "sshKeys": [
@@ -34,6 +34,7 @@
     {
       "default": {
         "type": "dynamic",
+        "ip": "10.0.0.1",
         "dns": [
           "8.8.8.8",
           "10.0.80.11",

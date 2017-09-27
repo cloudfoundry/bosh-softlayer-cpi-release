@@ -6,43 +6,29 @@ import (
 
 	. "bosh-softlayer-cpi/action"
 
-	boshlog "github.com/cloudfoundry/bosh-utils/logger"
-
-	fakestem "bosh-softlayer-cpi/softlayer/stemcell/fakes"
+	imagefakes "bosh-softlayer-cpi/softlayer/stemcell_service/fakes"
 )
 
 var _ = Describe("DeleteStemcell", func() {
 	var (
-		stemcellFinder *fakestem.FakeStemcellFinder
-		action         DeleteStemcellAction
-		logger         boshlog.Logger
+		err        error
+		stemcellID StemcellCID
+
+		imageService *imagefakes.FakeService
+
+		deleteStemcell DeleteStemcellAction
 	)
 
 	BeforeEach(func() {
-		stemcellFinder = &fakestem.FakeStemcellFinder{}
-
-		logger = boshlog.NewLogger(boshlog.LevelNone)
-		action = NewDeleteStemcell(stemcellFinder, logger)
+		stemcellID = StemcellCID(12345678)
+		imageService = &imagefakes.FakeService{}
+		deleteStemcell = NewDeleteStemcell(imageService)
 	})
 
 	Describe("Run", func() {
-		var (
-			stemcellCid StemcellCID
-			err         error
-		)
-
-		BeforeEach(func() {
-			stemcellCid = StemcellCID(1234567)
-		})
-
-		JustBeforeEach(func() {
-			_, err = action.Run(stemcellCid)
-		})
-
-		Context("when delete stemcell always succeeds", func() {
-			It("no error return", func() {
-				Expect(err).NotTo(HaveOccurred())
-			})
+		It("deletes the stemcell", func() {
+			_, err = deleteStemcell.Run(stemcellID)
+			Expect(err).NotTo(HaveOccurred())
 		})
 	})
 })

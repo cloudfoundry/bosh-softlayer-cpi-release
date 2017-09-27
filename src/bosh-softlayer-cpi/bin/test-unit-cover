@@ -1,0 +1,36 @@
+#!/bin/bash
+
+(
+  set -e
+
+  base=$( cd "$( dirname "$( dirname "$0" )")" && pwd )
+  base_gopath=$( cd $base/../.. && pwd )
+  export GOPATH=$base_gopath:$GOPATH
+
+  function printStatus {
+      if [ $? -eq 0 ]; then
+          echo -e "\nSWEET SUITE SUCCESS"
+      else
+          echo -e "\nSUITE FAILURE"
+      fi
+  }
+
+  trap printStatus EXIT
+
+  echo -e "\n Cleaning build artifacts..."
+  go clean
+
+  echo -e "\n Formatting packages..."
+  go fmt $(go list ./... | grep -v /vendor/)
+
+  echo -e "\n Unit Testing packages:"
+  ginkgo -r -p --cover $base/action $base/api $base/softlayer
+
+  echo -e "\n Gathering cover profiles and send to coveralls.io..."
+  # Need check env COVERALLS_TOKEN
+  gover $base $base/gover.coverprofile
+  goveralls -coverprofile=gover.coverprofile -service=travis-ci -repotoken=$COVERALLS_TOKEN
+
+  echo -e "\n Vetting packages for potential issues..."
+  go tool vet $base/action $base/api $base/main $base/softlayer
+)

@@ -1,0 +1,18 @@
+[
+  {
+    "id": 854323,
+    "capacity": 250,
+    "item": {
+      "capacity": 250
+    },
+    "locationGroupId": 4444
+  },
+  {
+    "id": 854325,
+    "capacity": 500,
+    "item": {
+      "capacity": 500
+    },
+    "locationGroupId": 5555
+  }
+]

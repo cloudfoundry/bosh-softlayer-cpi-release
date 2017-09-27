@@ -1,0 +1,23 @@
+[
+  {
+    "id": 854323,
+    "capacity": 250,
+    "item": {
+      "capacity": 250
+    }
+  },
+  {
+    "id": 854325,
+    "capacity": 500,
+    "item": {
+      "capacity": 500
+    }
+  },
+  {
+    "id": 854327,
+    "capacity": 1000,
+    "item": {
+      "capacity": 1000
+    }
+  }
+]

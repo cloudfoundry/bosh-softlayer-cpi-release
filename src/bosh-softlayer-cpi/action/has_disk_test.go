@@ -3,79 +3,61 @@ package action_test
 import (
 	"errors"
 
-	. "bosh-softlayer-cpi/action"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	softlayerDisk "bosh-softlayer-cpi/softlayer/disk"
-	fakeDisk "bosh-softlayer-cpi/softlayer/disk/fakes"
-	boshlog "github.com/cloudfoundry/bosh-utils/logger"
-	fakeclient "github.com/maximilien/softlayer-go/client/fakes"
+	. "bosh-softlayer-cpi/action"
+
+	diskfakes "bosh-softlayer-cpi/softlayer/disk_service/fakes"
+	"github.com/softlayer/softlayer-go/datatypes"
+	"github.com/softlayer/softlayer-go/sl"
 )
 
 var _ = Describe("HasDisk", func() {
 	var (
-		fakeDiskFinder *fakeDisk.FakeDiskFinder
-		action         HasDiskAction
-		fc             *fakeclient.FakeSoftLayerClient
-		logger         boshlog.Logger
-		disk1          softlayerDisk.Disk
+		err   error
+		found bool
+
+		diskService *diskfakes.FakeService
+
+		hasDisk HasDisk
 	)
 
 	BeforeEach(func() {
-		fakeDiskFinder = &fakeDisk.FakeDiskFinder{}
-		action = NewHasDisk(fakeDiskFinder)
-		fc = fakeclient.NewFakeSoftLayerClient("fake-user", "fake-key")
-		logger = boshlog.NewLogger(boshlog.LevelNone)
-		disk1 = softlayerDisk.NewSoftLayerDisk(1234, fc, logger)
+		diskService = &diskfakes.FakeService{}
+		hasDisk = NewHasDisk(diskService)
 	})
 
 	Describe("Run", func() {
-		var (
-			diskCid DiskCID
-			found   bool
-			err     error
-		)
+		It("returns true if disk ID exist", func() {
+			diskService.FindReturns(
+				&datatypes.Network_Storage{
+					Id: sl.Int(1234567),
+				},
+				nil,
+			)
 
-		BeforeEach(func() {
-			diskCid = DiskCID(123456)
+			found, err = hasDisk.Run(1234567)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(found).To(BeTrue())
+
+			Expect(diskService.FindCallCount()).To(Equal(1))
+			Expect(diskService.FindArgsForCall(0)).To(Equal(1234567))
+
 		})
 
-		JustBeforeEach(func() {
-			found, err = action.Run(diskCid)
-		})
+		It("returns an error if diskService find call returns an error", func() {
+			diskService.FindReturns(
+				&datatypes.Network_Storage{},
+				errors.New("fake-disk-service-error"),
+			)
 
-		Context("when has disk succeeds", func() {
-			BeforeEach(func() {
-				fakeDiskFinder.FindReturns(disk1, true, nil)
-			})
+			_, err = hasDisk.Run(1234567)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("fake-disk-service-error"))
 
-			It("returns no error", func() {
-				Expect(err).ToNot(HaveOccurred())
-				Expect(found).To(BeTrue())
-			})
-		})
-
-		Context("when no error occurs but diskID is invalid", func() {
-			BeforeEach(func() {
-				fakeDiskFinder.FindReturns(nil, false, nil)
-			})
-
-			It("returns no error but still not found", func() {
-				Expect(err).ToNot(HaveOccurred())
-				Expect(found).To(BeFalse())
-			})
-		})
-
-		Context("when has disk fails", func() {
-			BeforeEach(func() {
-				fakeDiskFinder.FindReturns(nil, false, errors.New("disk not found"))
-			})
-
-			It("returns no error", func() {
-				Expect(err).To(HaveOccurred())
-				Expect(found).To(BeFalse())
-			})
+			Expect(diskService.FindCallCount()).To(Equal(1))
+			Expect(diskService.FindArgsForCall(0)).To(Equal(1234567))
 		})
 	})
 })

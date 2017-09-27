@@ -1,0 +1,4 @@
+{
+    "error": "Blocking operation in progress.",
+    "code": "SoftLayer_Exception_Network_Storage_BlockingOperationInProgress"
+}

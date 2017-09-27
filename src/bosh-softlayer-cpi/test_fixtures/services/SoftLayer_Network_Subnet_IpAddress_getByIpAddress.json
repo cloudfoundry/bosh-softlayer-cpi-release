@@ -1,0 +1,17 @@
+{
+    "id": 10776596,
+    "ipAddress": "10.40.207.172",
+    "isBroadcast": false,
+    "isGateway": false,
+    "isNetwork": true,
+    "isReserved": false,
+    "subnetId": 514990,
+    "subnet": {
+        "cidr": 30,
+        "gateway": "10.40.207.173",
+        "id": 514990,
+        "netmask": "255.255.255.252",
+        "networkIdentifier": "10.40.207.172",
+        "subnetType": "SECONDARY_ON_VLAN"
+    }
+}

@@ -8,58 +8,69 @@ import (
 
 	. "bosh-softlayer-cpi/action"
 
-	fakestem "bosh-softlayer-cpi/softlayer/stemcell/fakes"
+	"bosh-softlayer-cpi/api"
+	stemcellfakes "bosh-softlayer-cpi/softlayer/stemcell_service/fakes"
 )
 
 var _ = Describe("CreateStemcell", func() {
 	var (
-		fakeStemcellFinder *fakestem.FakeStemcellFinder
-		fakeStemcell       *fakestem.FakeStemcell
+		err         error
+		stemcellCID string
+		cloudProps  CreateStemcellCloudProps
 
-		action CreateStemcellAction
+		stemcellService *stemcellfakes.FakeService
+		createStemcell  CreateStemcellAction
 	)
 
 	BeforeEach(func() {
-		fakeStemcellFinder = &fakestem.FakeStemcellFinder{}
-		fakeStemcell = &fakestem.FakeStemcell{}
-		action = NewCreateStemcell(fakeStemcellFinder)
+		stemcellService = &stemcellfakes.FakeService{}
+		createStemcell = NewCreateStemcell(stemcellService)
 	})
 
 	Describe("Run", func() {
-		var (
-			stemcellIdStr string
-			err           error
-		)
-
-		JustBeforeEach(func() {
-			stemcellIdStr, err = action.Run("fake-path", CreateStemcellCloudProps{Uuid: "fake-stemcell-id", Id: 123456})
+		BeforeEach(func() {
+			cloudProps = CreateStemcellCloudProps{
+				Id:             12345678,
+				Uuid:           "fake-uuid",
+				DatacenterName: "fake-datacenter-name",
+			}
 		})
 
-		Context("when create stemcell succeeds", func() {
-			BeforeEach(func() {
-				fakeStemcellFinder.FindByIdReturns(fakeStemcell, nil)
-			})
+		It("creates the stemcell", func() {
+			stemcellService.FindReturns(
+				"fake-global-identifier",
+				nil,
+			)
 
-			It("find stemcell by id", func() {
-				Expect(fakeStemcellFinder.FindByIdCallCount()).To(Equal(1))
-				acutalStemcellId := fakeStemcellFinder.FindByIdArgsForCall(0)
-				Expect(acutalStemcellId).To(Equal(123456))
-			})
-
-			It("no error return", func() {
-				Expect(err).NotTo(HaveOccurred())
-			})
+			stemcellCID, err = createStemcell.Run("fake-stemcell-imagePath", cloudProps)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(stemcellService.FindCallCount()).To(Equal(1))
+			Expect(stemcellCID).To(Equal(StemcellCID(cloudProps.Id).String()))
 		})
 
-		Context("when find stemcell error return", func() {
-			BeforeEach(func() {
-				fakeStemcellFinder.FindByIdReturns(nil, errors.New("kaboom"))
-			})
+		It("returns an error if stemcellService find call returns an error", func() {
+			stemcellService.FindReturns(
+				"",
+				errors.New("fake-stemcell-service-error"),
+			)
 
-			It("provides relevant error information", func() {
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("kaboom"))
-			})
+			stemcellCID, err = createStemcell.Run("fake-stemcell-imagePath", cloudProps)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("fake-stemcell-service-error"))
+			Expect(stemcellService.FindCallCount()).To(Equal(1))
+			Expect(stemcellCID).NotTo(Equal(StemcellCID(cloudProps.Id).String()))
+		})
+
+		It("returns an error if stemcellService find returns an api error", func() {
+			stemcellService.FindReturns(
+				"",
+				api.NewStemcellkNotFoundError("fake-stemcell-imagePath", false),
+			)
+
+			_, err = createStemcell.Run("fake-stemcell-imagePath", cloudProps)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("Stemcell 'fake-stemcell-imagePath' not found"))
+			Expect(stemcellService.FindCallCount()).To(Equal(1))
 		})
 	})
 })

@@ -1,6 +1,8 @@
 package dispatcher_test
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
 
 	. "github.com/onsi/ginkgo"
@@ -8,10 +10,10 @@ import (
 
 	. "bosh-softlayer-cpi/api/dispatcher"
 
-	slhelper "bosh-softlayer-cpi/softlayer/common/helper"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
 	fakeaction "bosh-softlayer-cpi/action/fakes"
+	bgcapi "bosh-softlayer-cpi/api"
 	fakedisp "bosh-softlayer-cpi/api/dispatcher/fakes"
 	fakeapi "bosh-softlayer-cpi/api/fakes"
 )
@@ -28,7 +30,7 @@ var _ = Describe("JSON", func() {
 		actionFactory = fakeaction.NewFakeFactory()
 		caller = &fakedisp.FakeCaller{}
 		logger = boshlog.NewLogger(boshlog.LevelNone)
-		dispatcher = NewJSON(actionFactory, caller, logger)
+		dispatcher = NewJSON(actionFactory, caller, bgcapi.MultiLogger{Logger: logger, LogBuff: &bytes.Buffer{}})
 	})
 
 	Describe("Dispatch", func() {
@@ -46,6 +48,23 @@ var _ = Describe("JSON", func() {
 				dispatcher.Dispatch([]byte(`{"method":"fake-action","arguments":["fake-arg"]}`))
 				Expect(caller.CallAction).To(Equal(action))
 				Expect(caller.CallArgs).To(Equal([]interface{}{"fake-arg"}))
+
+				dispatcher.Dispatch([]byte(`{
+          "method":"fake-action",
+          "arguments":[
+            123,
+            "fake-arg",
+            [123, "fake-arg"],
+            {"fake-arg2-key":"fake-arg2-value"}
+          ]
+        }`))
+				Expect(caller.CallAction).To(Equal(action))
+				Expect(caller.CallArgs).To(Equal([]interface{}{
+					json.Number("123"),
+					"fake-arg",
+					[]interface{}{json.Number("123"), "fake-arg"},
+					map[string]interface{}{"fake-arg2-key": "fake-arg2-value"},
+				}))
 			})
 
 			Context("when running action succeeds", func() {
@@ -80,15 +99,6 @@ var _ = Describe("JSON", func() {
               },
               "log": ""
             }`))
-					})
-				})
-				Context("verify if localDiskFlagNotSet is set properly", func() {
-					It("localDiskFlagNotSet is set to true if LocalDiskFlag is not set, and false if LocalDiskFlag is set to false", func() {
-						_ = dispatcher.Dispatch([]byte(`{"method":"fake-action","arguments":["fake-arg"]}`))
-						Expect(slhelper.LocalDiskFlagNotSet).To(Equal(true))
-
-						_ = dispatcher.Dispatch([]byte(`{"method":"fake-action","arguments":["fake-arg", "localDiskFlag:false"]}`))
-						Expect(slhelper.LocalDiskFlagNotSet).To(Equal(false))
 					})
 				})
 			})

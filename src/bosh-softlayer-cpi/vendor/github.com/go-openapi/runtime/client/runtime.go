@@ -15,8 +15,12 @@
 package client
 
 import (
+	"crypto/tls"
+	"crypto/x509"
 	"fmt"
+	"io/ioutil"
 	"mime"
+	"net/http"
 	"net/http/httputil"
 	"os"
 	"path"
@@ -27,13 +31,76 @@ import (
 	"golang.org/x/net/context"
 	"golang.org/x/net/context/ctxhttp"
 
-	"crypto/tls"
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/strfmt"
-	"net"
-
-	"net/http"
 )
+
+// TLSClientOptions to configure client authentication with mutual TLS
+type TLSClientOptions struct {
+	Certificate        string
+	Key                string
+	CA                 string
+	ServerName         string
+	InsecureSkipVerify bool
+	_                  struct{}
+}
+
+// TLSClientAuth creates a tls.Config for mutual auth
+func TLSClientAuth(opts TLSClientOptions) (*tls.Config, error) {
+	// load client cert
+	cert, err := tls.LoadX509KeyPair(opts.Certificate, opts.Key)
+	if err != nil {
+		return nil, fmt.Errorf("tls client cert: %v", err)
+	}
+
+	// create client tls config
+	cfg := &tls.Config{}
+	cfg.Certificates = []tls.Certificate{cert}
+	cfg.InsecureSkipVerify = opts.InsecureSkipVerify
+
+	// When no CA certificate is provided, default to the system cert pool
+	// that way when a request is made to a server known by the system trust store,
+	// the name is still verified
+	if opts.CA != "" {
+		// load ca cert
+		caCert, err := ioutil.ReadFile(opts.CA)
+		if err != nil {
+			return nil, fmt.Errorf("tls client ca: %v", err)
+		}
+		caCertPool := x509.NewCertPool()
+		caCertPool.AppendCertsFromPEM(caCert)
+		cfg.RootCAs = caCertPool
+	}
+
+	// apply servername overrride
+	if opts.ServerName != "" {
+		cfg.InsecureSkipVerify = false
+		cfg.ServerName = opts.ServerName
+	}
+
+	cfg.BuildNameToCertificate()
+
+	return cfg, nil
+}
+
+// TLSTransport creates a http client transport suitable for mutual tls auth
+func TLSTransport(opts TLSClientOptions) (http.RoundTripper, error) {
+	cfg, err := TLSClientAuth(opts)
+	if err != nil {
+		return nil, err
+	}
+
+	return &http.Transport{TLSClientConfig: cfg}, nil
+}
+
+// TLSClient creates a http.Client for mutual auth
+func TLSClient(opts TLSClientOptions) (*http.Client, error) {
+	transport, err := TLSTransport(opts)
+	if err != nil {
+		return nil, err
+	}
+	return &http.Client{Transport: transport}, nil
+}
 
 // DefaultTimeout the default request timeout
 var DefaultTimeout = 30 * time.Second
@@ -58,6 +125,7 @@ type Runtime struct {
 	clientOnce *sync.Once
 	client     *http.Client
 	schemes    []string
+	do         func(ctx context.Context, client *http.Client, req *http.Request) (*http.Response, error)
 }
 
 // New creates a new default runtime for a swagger api runtime.Client
@@ -78,23 +146,7 @@ func New(host, basePath string, schemes []string) *Runtime {
 		runtime.TextMime:    runtime.TextProducer(),
 		runtime.DefaultMime: runtime.ByteStreamProducer(),
 	}
-
-	tr := &http.Transport{
-		Proxy: http.ProxyFromEnvironment,
-		DialContext: (&net.Dialer{
-			Timeout:   30 * time.Second,
-			KeepAlive: 30 * time.Second,
-		}).DialContext,
-		MaxIdleConns:          100,
-		IdleConnTimeout:       90 * time.Second,
-		TLSHandshakeTimeout:   10 * time.Second,
-		ExpectContinueTimeout: 1 * time.Second,
-
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-
-	rt.Transport = tr
-
+	rt.Transport = http.DefaultTransport
 	rt.Jar = nil
 	rt.Host = host
 	rt.BasePath = basePath
@@ -103,11 +155,23 @@ func New(host, basePath string, schemes []string) *Runtime {
 	if !strings.HasPrefix(rt.BasePath, "/") {
 		rt.BasePath = "/" + rt.BasePath
 	}
-	rt.Debug = os.Getenv("DEBUG") == "1"
+	rt.Debug = len(os.Getenv("DEBUG")) > 0
 	if len(schemes) > 0 {
 		rt.schemes = schemes
 	}
+	rt.do = ctxhttp.Do
 	return &rt
+}
+
+// NewWithClient allows you to create a new transport with a configured http.Client
+func NewWithClient(host, basePath string, schemes []string, client *http.Client) *Runtime {
+	rt := New(host, basePath, schemes)
+	if client != nil {
+		rt.clientOnce.Do(func() {
+			rt.client = client
+		})
+	}
+	return rt
 }
 
 func (r *Runtime) pickScheme(schemes []string) string {
@@ -166,8 +230,12 @@ func (r *Runtime) Submit(operation *runtime.ClientOperation) (interface{}, error
 
 	// TODO: pick appropriate media type
 	cmt := r.DefaultMediaType
-	if len(operation.ConsumesMediaTypes) > 0 {
-		cmt = operation.ConsumesMediaTypes[0]
+	for _, mediaType := range operation.ConsumesMediaTypes {
+		// Pick first non-empty media type
+		if mediaType != "" {
+			cmt = mediaType
+			break
+		}
 	}
 
 	req, err := request.BuildHTTP(cmt, r.Producers, r.Formats)
@@ -219,7 +287,14 @@ func (r *Runtime) Submit(operation *runtime.ClientOperation) (interface{}, error
 	}
 	defer cancel()
 
-	res, err := ctxhttp.Do(ctx, r.client, req) // make requests, by default follows 10 redirects before failing
+	client := operation.Client
+	if client == nil {
+		client = r.client
+	}
+	if r.do == nil {
+		r.do = ctxhttp.Do
+	}
+	res, err := r.do(ctx, client, req) // make requests, by default follows 10 redirects before failing
 	if err != nil {
 		return nil, err
 	}

@@ -8,82 +8,53 @@ import (
 
 	. "bosh-softlayer-cpi/action"
 
-	fakescommon "bosh-softlayer-cpi/softlayer/common/fakes"
+	"bosh-softlayer-cpi/api"
+	instancefakes "bosh-softlayer-cpi/softlayer/virtual_guest_service/fakes"
+	"fmt"
 )
 
 var _ = Describe("RebootVM", func() {
 	var (
-		fakeVmFinder *fakescommon.FakeVMFinder
-		fakeVm       *fakescommon.FakeVM
+		err       error
+		vmCID     VMCID
+		vmService *instancefakes.FakeService
 
-		action RebootVMAction
+		rebootVM RebootVM
 	)
 
 	BeforeEach(func() {
-		fakeVmFinder = &fakescommon.FakeVMFinder{}
-		fakeVm = &fakescommon.FakeVM{}
-		action = NewRebootVM(fakeVmFinder)
+		vmCID = VMCID(12345678)
+		vmService = &instancefakes.FakeService{}
+		rebootVM = NewRebootVM(vmService)
 	})
 
 	Describe("Run", func() {
-		var (
-			vmCid VMCID
-			err   error
-		)
-
-		BeforeEach(func() {
-			vmCid = VMCID(123456)
+		It("reboots the vm", func() {
+			_, err = rebootVM.Run(vmCID)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(vmService.RebootCallCount()).To(Equal(1))
 		})
 
-		JustBeforeEach(func() {
-			_, err = action.Run(vmCid)
+		It("returns an error if vmService reboot call returns an error", func() {
+			vmService.RebootReturns(
+				errors.New("fake-vm-service-error"),
+			)
+
+			_, err = rebootVM.Run(vmCID)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("fake-vm-service-error"))
+			Expect(vmService.RebootCallCount()).To(Equal(1))
 		})
 
-		Context("when reboot vm succeeds", func() {
-			BeforeEach(func() {
-				fakeVmFinder.FindReturns(fakeVm, true, nil)
-			})
+		It("returns an error if vmService reboot returns an api error", func() {
+			vmService.RebootReturns(
+				api.NewVMNotFoundError(vmCID.String()),
+			)
 
-			It("fetches vm by cid", func() {
-				Expect(fakeVmFinder.FindCallCount()).To(Equal(1))
-				actualCid := fakeVmFinder.FindArgsForCall(0)
-				Expect(actualCid).To(Equal(123456))
-			})
-
-			It("no error return", func() {
-				Expect(err).NotTo(HaveOccurred())
-			})
-		})
-
-		Context("when find vm error out", func() {
-			BeforeEach(func() {
-				fakeVmFinder.FindReturns(nil, false, errors.New("kaboom"))
-			})
-
-			It("provides relevant error information", func() {
-				Expect(err.Error()).To(ContainSubstring("kaboom"))
-			})
-		})
-
-		Context("when find vm return false", func() {
-			BeforeEach(func() {
-				fakeVmFinder.FindReturns(nil, false, nil)
-			})
-
-			It("no error return", func() {
-				Expect(err).NotTo(HaveOccurred())
-			})
-		})
-
-		Context("when reboot vm error out", func() {
-			BeforeEach(func() {
-				fakeVmFinder.FindReturns(fakeVm, true, nil)
-				fakeVm.RebootReturns(errors.New("kaboom"))
-			})
-			It("provides relevant error information", func() {
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("kaboom"))
-			})
+			_, err = rebootVM.Run(vmCID)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring(fmt.Sprintf("VM '%d' not found", vmCID)))
+			Expect(vmService.RebootCallCount()).To(Equal(1))
 		})
 	})
 })
