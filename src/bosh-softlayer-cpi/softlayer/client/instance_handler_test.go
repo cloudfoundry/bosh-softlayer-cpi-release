@@ -666,7 +666,7 @@ var _ = Describe("InstanceHandler", func() {
 
 				err := cli.WaitInstanceUntilReadyWithTicket(vgID, time.Now().Add(3*time.Second))
 				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring(fmt.Sprintf("Power on virtual guest with id %d timeout!", vgID)))
+				Expect(err.Error()).To(ContainSubstring(fmt.Sprintf("Power on virtual guest with id %d Time Out!", vgID)))
 			})
 		})
 

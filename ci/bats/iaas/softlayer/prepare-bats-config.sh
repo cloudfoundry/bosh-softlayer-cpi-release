@@ -54,7 +54,7 @@ properties:
       vlanIds:
       - ((SL_VLAN_PUBLIC))
       - ((SL_VLAN_PRIVATE))
-  password: "\$6\$3n/Y5RP0\$Jr1nLxatojY9Wlqduzwh66w8KmYxjoj9vzI62n3Mmstd5mNVnm0SS1N0YizKOTlJCY5R/DFmeWgbkrqHIMGd51"
+  password: "\$6\$Uamn2Hix6MlWro\$UijJSdv4AHPcQIh7T/2tuJAGSY6gq0bseo7wzRfMqzvnco.sPfSJbVCqijixg5VvVdZ2GbPq6uDDieoytK0be/"
   dns:
   - ((BOSH_ENVIRONMENT))
   - 8.8.8.8

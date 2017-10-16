@@ -380,6 +380,10 @@ func (cv CreateVM) createByOsReload(stemcellCID StemcellCID, cloudProps VMCloudP
 					return cid, err
 				}
 
+				if err := cv.registryClient.Delete(strconv.Itoa(*vm.Id)); err != nil {
+					return cid, bosherr.WrapErrorf(err, "Cleaning registry record '%d' before os_reload", *vm.Id)
+				}
+
 				err = cv.virtualGuestService.ReloadOS(*vm.Id, stemcellCID.Int(), []int{cloudProps.SshKey}, cloudProps.VmNamePrefix, cloudProps.Domain)
 				if err != nil {
 					return cid, err
@@ -392,10 +396,6 @@ func (cv CreateVM) createByOsReload(stemcellCID StemcellCID, cloudProps VMCloudP
 					if err != nil {
 						return cid, bosherr.WrapError(err, "Upgrading VM")
 					}
-				}
-
-				if err := cv.registryClient.Delete(strconv.Itoa(*vm.Id)); err != nil {
-					return cid, bosherr.WrapErrorf(err, "Cleaning registry record '%d' before os_reload", *vm.Id)
 				}
 
 				cid = *vm.Id
