@@ -1,4 +1,4 @@
-# BOSH Softlayer CPI Release
+# BOSH SoftLayer CPI Release
 
 * Documentation: [bosh.io/docs](https://bosh.io/docs)
 * BOSH SoftLayer CPI Slack channel: #bosh-softlayer-cpi on [https://cloudfoundry.slack.com/](https://cloudfoundry.slack.com/)
@@ -8,7 +8,7 @@
 
 ## Releases
 
-This is a BOSH release for the Softlayer CPI.
+This is a BOSH release for the SoftLayer CPI.
 
 The latest version for the SoftlLayer CPI release is here. Also, it is already available on [bosh.io](http://bosh.io).
 
@@ -34,6 +34,6 @@ For a minimalistic deployment of Cloud Foundry (diego architecture), follow the 
 
    A: We don't support it currently.
 
-2. Q: Is there any restrictions about the hostname supported by Softlayer?
+2. Q: Is there any restrictions about the hostname supported by SoftLayer?
 
    A: Yes. The hostname length can't be exactly 64. Otherwise there will be problems with ssh login.
