@@ -74,12 +74,13 @@ func NewConcreteFactory(
 			"configure_networks": NewConfigureNetworks(vmService, registryClient),
 
 			// Disk management
-			"has_disk":    NewHasDisk(diskService),
-			"create_disk": NewCreateDisk(diskService, vmService),
-			"delete_disk": NewDeleteDisk(diskService),
-			"attach_disk": NewAttachDisk(diskService, vmService, registryClient),
-			"detach_disk": NewDetachDisk(vmService, registryClient),
-			"get_disks":   NewGetDisks(vmService),
+			"has_disk":          NewHasDisk(diskService),
+			"create_disk":       NewCreateDisk(diskService, vmService),
+			"delete_disk":       NewDeleteDisk(diskService),
+			"attach_disk":       NewAttachDisk(diskService, vmService, registryClient),
+			"detach_disk":       NewDetachDisk(vmService, registryClient),
+			"get_disks":         NewGetDisks(vmService),
+			"set_disk_metadata": NewSetDiskMetadata(diskService),
 
 			// Snapshot management
 			"snapshot_disk":   NewSnapshotDisk(snapshotService, diskService),
