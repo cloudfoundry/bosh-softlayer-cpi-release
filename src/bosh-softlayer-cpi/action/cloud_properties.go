@@ -69,7 +69,7 @@ func (vmProps *VMCloudProperties) Validate() error {
 		return bosherr.Error("The property 'VmNamePrefix' must be set to create an instance")
 	}
 	if vmProps.Domain == "" {
-		return bosherr.Error("The property 'Domain' must be set to create an instance")
+		vmProps.Domain = "softlayer.com"
 	}
 	if vmProps.Datacenter == "" {
 		return bosherr.Error("The property 'Datacenter' must be set to create an instance")

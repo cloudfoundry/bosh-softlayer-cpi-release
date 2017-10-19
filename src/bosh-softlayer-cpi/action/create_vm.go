@@ -384,17 +384,17 @@ func (cv CreateVM) createByOsReload(stemcellCID StemcellCID, cloudProps VMCloudP
 					return cid, bosherr.WrapErrorf(err, "Cleaning registry record '%d' before os_reload", *vm.Id)
 				}
 
-				err = cv.virtualGuestService.ReloadOS(*vm.Id, stemcellCID.Int(), []int{cloudProps.SshKey}, cloudProps.VmNamePrefix, cloudProps.Domain)
-				if err != nil {
-					return cid, err
-				}
-
 				if *vm.MaxCpu != cloudProps.StartCpus ||
 					*vm.MaxMemory != cloudProps.MaxMemory ||
 					*vm.DedicatedAccountHostOnlyFlag != cloudProps.DedicatedAccountHostOnlyFlag {
-					err = cv.virtualGuestService.UpgradeInstance(cid, cloudProps.StartCpus, cloudProps.MaxMemory, 0, cloudProps.DedicatedAccountHostOnlyFlag)
+					err = cv.virtualGuestService.UpgradeInstance(*vm.Id, cloudProps.StartCpus, cloudProps.MaxMemory, 0, cloudProps.DedicatedAccountHostOnlyFlag)
 					if err != nil {
 						return cid, bosherr.WrapError(err, "Upgrading VM")
+					}
+				} else {
+					err = cv.virtualGuestService.ReloadOS(*vm.Id, stemcellCID.Int(), []int{cloudProps.SshKey}, cloudProps.VmNamePrefix, cloudProps.Domain)
+					if err != nil {
+						return cid, err
 					}
 				}
 
@@ -465,7 +465,7 @@ func (cv CreateVM) updateHosts(path string, newIpAddress string, targetHostname 
 func (cv CreateVM) getDirectorIPAddressByHost(host string) (string, error) {
 	// check host is ip address or hostname
 	address := net.ParseIP(host)
-	if address == nil {
+	if address == nil || address.String() == "127.0.0.1" {
 		addrs, err := net.InterfaceAddrs()
 		if err != nil {
 			return "", bosherr.WrapErrorf(err, "Failed to get network interfaces")

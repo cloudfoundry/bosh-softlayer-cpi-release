@@ -58,7 +58,7 @@ func (vg SoftlayerVirtualGuestService) FindByPrimaryBackendIp(ip string) (*datat
 }
 
 func (vg SoftlayerVirtualGuestService) FindByPrimaryIp(ip string) (*datatypes.Virtual_Guest, error) {
-	vg.logger.Debug(softlayerVirtualGuestServiceLogTag, "Finding Softlayer Virtual Guest by Primary Backend IP Address '%s' ", ip)
+	vg.logger.Debug(softlayerVirtualGuestServiceLogTag, "Finding Softlayer Virtual Guest by Primary IP Address '%s' ", ip)
 	instance, found, err := vg.softlayerClient.GetInstanceByPrimaryIpAddress(ip)
 	if err != nil {
 		return &datatypes.Virtual_Guest{}, bosherr.WrapErrorf(err, "Failed to find SoftLayer VirtualGuest with ip '%s'", ip)

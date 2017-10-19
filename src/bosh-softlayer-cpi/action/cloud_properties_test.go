@@ -46,7 +46,7 @@ var _ = Describe("ConcreteFactoryOptions", func() {
 			Expect(err.Error()).To(ContainSubstring("The property 'VmNamePrefix' must be set to create an instance"))
 		})
 
-		It("returns error if Domain is not be set", func() {
+		It("Add 'Domain' property if Domain is not be set", func() {
 			cloudProps = VMCloudProperties{
 				VmNamePrefix:      "fake-hostname",
 				StartCpus:         2,
@@ -58,8 +58,8 @@ var _ = Describe("ConcreteFactoryOptions", func() {
 			}
 
 			err := cloudProps.Validate()
-			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring("The property 'Domain' must be set to create an instance"))
+			Expect(err).NotTo(HaveOccurred())
+			Expect(cloudProps.Domain).To(Equal("softlayer.com"))
 		})
 		It("returns error if StartCpus is not be set", func() {
 			cloudProps = VMCloudProperties{
