@@ -390,11 +390,11 @@ func (cv CreateVM) createByOsReload(stemcellCID StemcellCID, cloudProps VMCloudP
 					if err != nil {
 						return cid, bosherr.WrapError(err, "Upgrading VM")
 					}
-				} else {
-					err = cv.virtualGuestService.ReloadOS(*vm.Id, stemcellCID.Int(), []int{cloudProps.SshKey}, cloudProps.VmNamePrefix, cloudProps.Domain)
-					if err != nil {
-						return cid, err
-					}
+				}
+
+				err = cv.virtualGuestService.ReloadOS(*vm.Id, stemcellCID.Int(), []int{cloudProps.SshKey}, cloudProps.VmNamePrefix, cloudProps.Domain)
+				if err != nil {
+					return cid, err
 				}
 
 				cid = *vm.Id
