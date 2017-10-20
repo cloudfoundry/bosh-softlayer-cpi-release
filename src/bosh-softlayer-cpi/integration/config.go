@@ -19,6 +19,7 @@ import (
 	disp "bosh-softlayer-cpi/api/dispatcher"
 	"bosh-softlayer-cpi/api/transport"
 	cfg "bosh-softlayer-cpi/config"
+	cpiLogger "bosh-softlayer-cpi/logger"
 	"bosh-softlayer-cpi/softlayer/client"
 	vpsVm "bosh-softlayer-cpi/softlayer/vps_service/client/vm"
 )
@@ -89,7 +90,7 @@ var (
 
 	// Stuff of softlayer client
 	multiWriter = io.MultiWriter(&errOut, &errOutLog)
-	logger      = boshlogger.NewWriterLogger(boshlogger.LevelDebug, multiWriter, multiWriter)
+	logger      = cpiLogger.NewWriterLogger(boshlogger.LevelDebug, "Integration", multiWriter, multiWriter)
 	multiLogger = api.MultiLogger{Logger: logger, LogBuff: &errOutLog}
 	uuidGen     = uuid.NewGenerator()
 	sess        *session.Session
