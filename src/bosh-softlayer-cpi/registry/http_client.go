@@ -11,7 +11,7 @@ import (
 	"time"
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
-	boshlog "github.com/cloudfoundry/bosh-utils/logger"
+	"bosh-softlayer-cpi/logger"
 )
 
 const httpClientLogTag = "RegistryHTTPClient"
@@ -21,13 +21,13 @@ const httpClientRetryDelay = 5
 // HTTPClient represents a BOSH Registry Client.
 type HTTPClient struct {
 	options ClientOptions
-	logger  boshlog.Logger
+	logger  logger.Logger
 }
 
 // NewHTTPClient creates a new BOSH Registry Client.
 func NewHTTPClient(
 	options ClientOptions,
-	logger boshlog.Logger,
+	logger logger.Logger,
 ) HTTPClient {
 	return HTTPClient{
 		options: options,

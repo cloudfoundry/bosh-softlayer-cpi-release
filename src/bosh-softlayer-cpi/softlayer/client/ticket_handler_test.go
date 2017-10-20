@@ -5,31 +5,32 @@ import (
 	. "github.com/onsi/gomega"
 
 	"bytes"
-	"io"
 	"net/http"
+	"strconv"
+	"time"
 
 	boshlogger "github.com/cloudfoundry/bosh-utils/logger"
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
 	"github.com/onsi/gomega/ghttp"
 	"github.com/softlayer/softlayer-go/session"
+	"github.com/softlayer/softlayer-go/sl"
 
 	api "bosh-softlayer-cpi/api"
+	cpiLog "bosh-softlayer-cpi/logger"
 	slClient "bosh-softlayer-cpi/softlayer/client"
 	vpsClient "bosh-softlayer-cpi/softlayer/vps_service/client"
 	vpsVm "bosh-softlayer-cpi/softlayer/vps_service/client/vm"
 	"bosh-softlayer-cpi/test_helpers"
-	"github.com/softlayer/softlayer-go/sl"
 )
 
 var _ = Describe("TicketHandler", func() {
 	var (
 		err error
 
-		errOut, errOutLog bytes.Buffer
-		multiWriter       io.Writer
-		logger            boshlogger.Logger
-		multiLogger       api.MultiLogger
+		errOutLog   bytes.Buffer
+		logger      cpiLog.Logger
+		multiLogger api.MultiLogger
 
 		server      *ghttp.Server
 		vpsEndPoint string
@@ -60,8 +61,8 @@ var _ = Describe("TicketHandler", func() {
 			MaxRetries:           3,
 		}
 
-		multiWriter = io.MultiWriter(&errOut, &errOutLog)
-		logger = boshlogger.NewWriterLogger(boshlogger.LevelDebug, multiWriter, multiWriter)
+		nanos := time.Now().Nanosecond()
+		logger = cpiLog.NewLogger(boshlogger.LevelDebug, strconv.Itoa(nanos))
 		multiLogger = api.MultiLogger{Logger: logger, LogBuff: &errOutLog}
 		sess = test_helpers.NewFakeSoftlayerSession(transportHandler)
 		cli = slClient.NewSoftLayerClientManager(sess, vps, multiLogger)

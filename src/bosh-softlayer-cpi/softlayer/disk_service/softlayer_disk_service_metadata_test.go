@@ -2,6 +2,7 @@ package disk_test
 
 import (
 	"errors"
+	"fmt"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -10,19 +11,20 @@ import (
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
 	. "bosh-softlayer-cpi/softlayer/disk_service"
-	"fmt"
+
+	cpiLog "bosh-softlayer-cpi/logger"
 )
 
 var _ = Describe("Virtual Guest Service", func() {
 	var (
 		cli         *fakeslclient.FakeClient
-		logger      boshlog.Logger
+		logger      cpiLog.Logger
 		diskService SoftlayerDiskService
 	)
 
 	BeforeEach(func() {
 		cli = &fakeslclient.FakeClient{}
-		logger = boshlog.NewLogger(boshlog.LevelNone)
+		logger = cpiLog.NewLogger(boshlog.LevelDebug, "")
 		diskService = NewSoftlayerDiskService(cli, logger)
 	})
 

@@ -6,8 +6,8 @@ import (
 
 	"bytes"
 	"fmt"
-	"io"
 	"net/http"
+	"strconv"
 	"time"
 
 	boshlogger "github.com/cloudfoundry/bosh-utils/logger"
@@ -19,6 +19,7 @@ import (
 	"github.com/softlayer/softlayer-go/sl"
 
 	api "bosh-softlayer-cpi/api"
+	cpiLog "bosh-softlayer-cpi/logger"
 	slClient "bosh-softlayer-cpi/softlayer/client"
 	vpsClient "bosh-softlayer-cpi/softlayer/vps_service/client"
 	vpsVm "bosh-softlayer-cpi/softlayer/vps_service/client/vm"
@@ -29,10 +30,9 @@ var _ = Describe("InstanceHandler", func() {
 	var (
 		err error
 
-		errOut, errOutLog bytes.Buffer
-		multiWriter       io.Writer
-		logger            boshlogger.Logger
-		multiLogger       api.MultiLogger
+		errOutLog   bytes.Buffer
+		logger      cpiLog.Logger
+		multiLogger api.MultiLogger
 
 		server      *ghttp.Server
 		vpsEndPoint string
@@ -67,8 +67,8 @@ var _ = Describe("InstanceHandler", func() {
 			MaxRetries:           3,
 		}
 
-		multiWriter = io.MultiWriter(&errOut, &errOutLog)
-		logger = boshlogger.NewWriterLogger(boshlogger.LevelDebug, multiWriter, multiWriter)
+		nanos := time.Now().Nanosecond()
+		logger = cpiLog.NewLogger(boshlogger.LevelDebug, strconv.Itoa(nanos))
 		multiLogger = api.MultiLogger{Logger: logger, LogBuff: &errOutLog}
 		sess = test_helpers.NewFakeSoftlayerSession(transportHandler)
 		cli = slClient.NewSoftLayerClientManager(sess, vps, logger)

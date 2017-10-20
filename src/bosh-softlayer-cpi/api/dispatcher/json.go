@@ -6,7 +6,7 @@ import (
 
 	bslaction "bosh-softlayer-cpi/action"
 	bslapi "bosh-softlayer-cpi/api"
-	boshlog "github.com/cloudfoundry/bosh-utils/logger"
+	"bosh-softlayer-cpi/logger"
 )
 
 const (
@@ -45,13 +45,13 @@ func (r ResponseError) Error() string {
 type JSON struct {
 	actionFactory bslaction.Factory
 	caller        Caller
-	logger        boshlog.Logger
+	logger        logger.Logger
 }
 
 func NewJSON(
 	actionFactory bslaction.Factory,
 	caller Caller,
-	logger boshlog.Logger,
+	logger logger.Logger,
 ) JSON {
 	return JSON{
 		actionFactory: actionFactory,

@@ -8,6 +8,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"strconv"
 	"time"
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
@@ -21,6 +22,7 @@ import (
 	"bosh-softlayer-cpi/api/dispatcher"
 	"bosh-softlayer-cpi/api/transport"
 	"bosh-softlayer-cpi/config"
+	cpiLog "bosh-softlayer-cpi/logger"
 	"bosh-softlayer-cpi/softlayer/client"
 	vpsClient "bosh-softlayer-cpi/softlayer/vps_service/client"
 	"bosh-softlayer-cpi/softlayer/vps_service/client/vm"
@@ -34,7 +36,7 @@ var (
 
 func main() {
 	logger, fs, uuid, outLogger := basicDeps()
-	cmdRunner := boshsys.NewExecCmdRunner(logger)
+	cmdRunner := boshsys.NewExecCmdRunner(logger.GetbasicLogger())
 	defer logger.HandlePanic("Main")
 
 	flag.Parse()
@@ -56,17 +58,19 @@ func main() {
 	}
 }
 
-func basicDeps() (boshlog.Logger, boshsys.FileSystem, boshuuid.Generator, *log.Logger) {
+func basicDeps() (cpiLog.Logger, boshsys.FileSystem, boshuuid.Generator, *log.Logger) {
 	var logBuff bytes.Buffer
 	multiWriter := io.MultiWriter(os.Stderr, bufio.NewWriter(&logBuff))
-	//logger := boshlog.NewWriterLogger(boshlog.LevelDebug, multiWriter, os.Stderr)
 	nanos := time.Now().Nanosecond()
 
-	outLogger := log.New(multiWriter, string(nanos), log.LstdFlags)
-	errLogger := log.New(os.Stderr, string(nanos), log.LstdFlags)
-	boshLogger := boshlog.New(boshlog.LevelDebug, outLogger, errLogger)
-	multiLogger := api.MultiLogger{Logger: boshLogger, LogBuff: &logBuff}
-	fs := boshsys.NewOsFileSystem(multiLogger)
+	outLogger := log.New(multiWriter, strconv.Itoa(nanos), log.LstdFlags) // For softlayer client
+	errLogger := log.New(os.Stderr, "", log.LstdFlags)
+	// @TODO test to delete
+	//boshLogger := boshlog.New(boshlog.LevelDebug, outLogger, errLogger)
+
+	cpiLogger := cpiLog.New(boshlog.LevelDebug, strconv.Itoa(nanos), outLogger, errLogger)
+	multiLogger := api.MultiLogger{Logger: cpiLogger, LogBuff: &logBuff}
+	fs := boshsys.NewOsFileSystem(cpiLogger.GetbasicLogger())
 
 	uuidGen := boshuuid.NewGenerator()
 
@@ -75,7 +79,7 @@ func basicDeps() (boshlog.Logger, boshsys.FileSystem, boshuuid.Generator, *log.L
 
 func buildDispatcher(
 	config config.Config,
-	logger boshlog.Logger,
+	logger cpiLog.Logger,
 	outLogger *log.Logger,
 	uuidGen boshuuid.Generator,
 	cmdRunner boshsys.CmdRunner,

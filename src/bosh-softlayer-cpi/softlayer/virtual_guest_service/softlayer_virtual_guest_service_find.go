@@ -34,7 +34,7 @@ func (vg SoftlayerVirtualGuestService) Find(id int) (*datatypes.Virtual_Guest, e
 			return false, nil
 		})
 	timeService := clock.NewClock()
-	timeoutRetryStrategy := boshretry.NewTimeoutRetryStrategy(1*time.Minute, 5*time.Second, execStmtRetryable, timeService, vg.logger)
+	timeoutRetryStrategy := boshretry.NewTimeoutRetryStrategy(1*time.Minute, 5*time.Second, execStmtRetryable, timeService, vg.logger.GetbasicLogger())
 	err = timeoutRetryStrategy.Try()
 	if err != nil {
 		return &datatypes.Virtual_Guest{}, err

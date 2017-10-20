@@ -9,9 +9,9 @@ import (
 
 	. "bosh-softlayer-cpi/api/transport"
 
-	boshlog "github.com/cloudfoundry/bosh-utils/logger"
-
 	fakedisp "bosh-softlayer-cpi/api/dispatcher/fakes"
+	cpilog "bosh-softlayer-cpi/logger"
+	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 )
 
 type FakeReader struct {
@@ -44,7 +44,7 @@ var _ = Describe("CLI", func() {
 		in         *FakeReader // io.Reader
 		out        *FakeWriter // io.Writer
 		dispatcher *fakedisp.FakeDispatcher
-		logger     boshlog.Logger
+		logger     cpilog.Logger
 		cli        CLI
 	)
 
@@ -52,7 +52,7 @@ var _ = Describe("CLI", func() {
 		in = &FakeReader{}
 		out = &FakeWriter{}
 		dispatcher = &fakedisp.FakeDispatcher{}
-		logger = boshlog.NewLogger(boshlog.LevelNone)
+		logger = cpilog.NewLogger(boshlog.LevelNone, "")
 		cli = NewCLI(in, out, dispatcher, logger)
 	})
 

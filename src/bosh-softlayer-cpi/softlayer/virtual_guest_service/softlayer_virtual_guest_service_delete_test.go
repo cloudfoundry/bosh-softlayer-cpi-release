@@ -6,10 +6,11 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	fakeslclient "bosh-softlayer-cpi/softlayer/client/fakes"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	fakeuuid "github.com/cloudfoundry/bosh-utils/uuid/fakes"
 
+	cpiLog "bosh-softlayer-cpi/logger"
+	fakeslclient "bosh-softlayer-cpi/softlayer/client/fakes"
 	. "bosh-softlayer-cpi/softlayer/virtual_guest_service"
 )
 
@@ -17,14 +18,14 @@ var _ = Describe("Virtual Guest Service", func() {
 	var (
 		cli                 *fakeslclient.FakeClient
 		uuidGen             *fakeuuid.FakeGenerator
-		logger              boshlog.Logger
+		logger              cpiLog.Logger
 		virtualGuestService SoftlayerVirtualGuestService
 	)
 
 	BeforeEach(func() {
 		cli = &fakeslclient.FakeClient{}
 		uuidGen = &fakeuuid.FakeGenerator{}
-		logger = boshlog.NewLogger(boshlog.LevelNone)
+		logger = cpiLog.NewLogger(boshlog.LevelDebug, "")
 		virtualGuestService = NewSoftLayerVirtualGuestService(cli, uuidGen, logger)
 	})
 

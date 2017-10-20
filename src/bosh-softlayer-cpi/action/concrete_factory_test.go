@@ -9,6 +9,7 @@ import (
 	. "bosh-softlayer-cpi/action"
 
 	"bosh-softlayer-cpi/config"
+	cpiLog "bosh-softlayer-cpi/logger"
 	"bosh-softlayer-cpi/registry"
 	bosl "bosh-softlayer-cpi/softlayer/client"
 	boslconfig "bosh-softlayer-cpi/softlayer/config"
@@ -21,7 +22,7 @@ var _ = Describe("ConcreteFactory", func() {
 	var (
 		uuidGen         *fakeuuid.FakeGenerator
 		softlayerClient bosl.Client
-		logger          boshlog.Logger
+		logger          cpiLog.Logger
 
 		cfg = config.Config{}
 
@@ -40,7 +41,7 @@ var _ = Describe("ConcreteFactory", func() {
 
 	BeforeEach(func() {
 		uuidGen = &fakeuuid.FakeGenerator{}
-		logger = boshlog.NewLogger(boshlog.LevelNone)
+		logger = cpiLog.NewLogger(boshlog.LevelNone, "")
 		cfg = config.Config{
 			Cloud: config.Cloud{
 				Properties: config.CPIProperties{

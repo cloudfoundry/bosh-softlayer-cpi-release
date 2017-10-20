@@ -4,10 +4,13 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	"errors"
+
+	boshlog "github.com/cloudfoundry/bosh-utils/logger"
+
+	cpiLog "bosh-softlayer-cpi/logger"
 	fakeslclient "bosh-softlayer-cpi/softlayer/client/fakes"
 	diskService "bosh-softlayer-cpi/softlayer/disk_service"
-	"errors"
-	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 )
 
 var _ = Describe("Disk Service Delete", func() {
@@ -17,12 +20,12 @@ var _ = Describe("Disk Service Delete", func() {
 		diskID int
 		cli    *fakeslclient.FakeClient
 		disk   diskService.SoftlayerDiskService
-		logger boshlog.Logger
+		logger cpiLog.Logger
 	)
 	BeforeEach(func() {
 		diskID = 2048
 		cli = &fakeslclient.FakeClient{}
-		logger = boshlog.NewLogger(boshlog.LevelNone)
+		logger = cpiLog.NewLogger(boshlog.LevelDebug, "")
 		disk = diskService.NewSoftlayerDiskService(cli, logger)
 	})
 

@@ -5,9 +5,9 @@ import (
 	"io/ioutil"
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
-	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
 	bslcdisp "bosh-softlayer-cpi/api/dispatcher"
+	"bosh-softlayer-cpi/logger"
 )
 
 const cliLogTag = "CLI"
@@ -16,14 +16,14 @@ type CLI struct {
 	in         io.Reader
 	out        io.Writer
 	dispatcher bslcdisp.Dispatcher
-	logger     boshlog.Logger
+	logger     logger.Logger
 }
 
 func NewCLI(
 	in io.Reader,
 	out io.Writer,
 	dispatcher bslcdisp.Dispatcher,
-	logger boshlog.Logger,
+	logger logger.Logger,
 ) CLI {
 	return CLI{
 		in:         in,

@@ -5,7 +5,8 @@ import (
 	. "github.com/onsi/gomega"
 
 	"bytes"
-	"io"
+	"strconv"
+	"time"
 
 	boshlogger "github.com/cloudfoundry/bosh-utils/logger"
 	httptransport "github.com/go-openapi/runtime/client"
@@ -13,6 +14,7 @@ import (
 	"github.com/onsi/gomega/ghttp"
 
 	api "bosh-softlayer-cpi/api"
+	"bosh-softlayer-cpi/logger"
 	slClient "bosh-softlayer-cpi/softlayer/client"
 	vpsClient "bosh-softlayer-cpi/softlayer/vps_service/client"
 	"bosh-softlayer-cpi/test_helpers"
@@ -31,9 +33,9 @@ var _ = Describe("ClientBaseTest", func() {
 			MaxRetries:           3,
 		}
 
-		var errOut, errOutLog bytes.Buffer
-		multiWriter := io.MultiWriter(&errOut, &errOutLog)
-		logger := boshlogger.NewWriterLogger(boshlogger.LevelDebug, multiWriter, multiWriter)
+		var errOutLog bytes.Buffer
+		nanos := time.Now().Nanosecond()
+		logger := logger.NewLogger(boshlogger.LevelDebug, strconv.Itoa(nanos))
 		multiLogger := api.MultiLogger{Logger: logger, LogBuff: &errOutLog}
 		sess := test_helpers.NewFakeSoftlayerSession(transportHandler)
 		cli := slClient.NewSoftLayerClientManager(sess, vps, multiLogger)

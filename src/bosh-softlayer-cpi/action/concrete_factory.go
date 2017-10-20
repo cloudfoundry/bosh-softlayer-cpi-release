@@ -2,7 +2,6 @@ package action
 
 import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
-	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	boshuuid "github.com/cloudfoundry/bosh-utils/uuid"
 
 	"bosh-softlayer-cpi/config"
@@ -11,6 +10,7 @@ import (
 	"bosh-softlayer-cpi/softlayer/snapshot_service"
 	"bosh-softlayer-cpi/softlayer/virtual_guest_service"
 
+	"bosh-softlayer-cpi/logger"
 	"bosh-softlayer-cpi/registry"
 	"bosh-softlayer-cpi/softlayer/stemcell_service"
 )
@@ -23,7 +23,7 @@ func NewConcreteFactory(
 	softlayerClient client.Client,
 	uuidGen boshuuid.Generator,
 	cfg config.Config,
-	logger boshlog.Logger,
+	logger logger.Logger,
 ) concreteFactory {
 
 	registryClient := registry.NewHTTPClient(

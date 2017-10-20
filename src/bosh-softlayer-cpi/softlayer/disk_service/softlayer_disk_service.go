@@ -1,20 +1,20 @@
 package disk
 
 import (
+	"bosh-softlayer-cpi/logger"
 	bosl "bosh-softlayer-cpi/softlayer/client"
-	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 )
 
 const softlayerDiskServiceLogTag = "SoftLayerDiskCreator"
 
 type SoftlayerDiskService struct {
 	softlayerClient bosl.Client
-	logger          boshlog.Logger
+	logger          logger.Logger
 }
 
 func NewSoftlayerDiskService(
 	softlayerClient bosl.Client,
-	logger boshlog.Logger,
+	logger logger.Logger,
 ) SoftlayerDiskService {
 	return SoftlayerDiskService{
 		softlayerClient: softlayerClient,

@@ -1,15 +1,18 @@
 package stemcell_test
 
 import (
+	"errors"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	fakeslclient "bosh-softlayer-cpi/softlayer/client/fakes"
-	stemcellService "bosh-softlayer-cpi/softlayer/stemcell_service"
-	"errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	"github.com/softlayer/softlayer-go/datatypes"
 	"github.com/softlayer/softlayer-go/sl"
+
+	cpiLog "bosh-softlayer-cpi/logger"
+	fakeslclient "bosh-softlayer-cpi/softlayer/client/fakes"
+	stemcellService "bosh-softlayer-cpi/softlayer/stemcell_service"
 )
 
 var _ = Describe("Stemcell Service", func() {
@@ -19,12 +22,12 @@ var _ = Describe("Stemcell Service", func() {
 		stemcellID int
 		cli        *fakeslclient.FakeClient
 		stemcell   stemcellService.SoftlayerStemcellService
-		logger     boshlog.Logger
+		logger     cpiLog.Logger
 	)
 	BeforeEach(func() {
 		stemcellID = 22345678
 		cli = &fakeslclient.FakeClient{}
-		logger = boshlog.NewLogger(boshlog.LevelNone)
+		logger = cpiLog.NewLogger(boshlog.LevelDebug, "")
 		stemcell = stemcellService.NewSoftlayerStemcellService(cli, logger)
 	})
 

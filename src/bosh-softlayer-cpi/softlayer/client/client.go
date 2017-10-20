@@ -9,7 +9,6 @@ import (
 	"time"
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
-	boshlogger "github.com/cloudfoundry/bosh-utils/logger"
 	"github.com/go-openapi/strfmt"
 	"github.com/softlayer/softlayer-go/datatypes"
 	"github.com/softlayer/softlayer-go/filter"
@@ -17,6 +16,7 @@ import (
 	"github.com/softlayer/softlayer-go/session"
 	"github.com/softlayer/softlayer-go/sl"
 
+	"bosh-softlayer-cpi/logger"
 	vpsVm "bosh-softlayer-cpi/softlayer/vps_service/client/vm"
 	"bosh-softlayer-cpi/softlayer/vps_service/models"
 )
@@ -84,7 +84,7 @@ func (factory *clientFactory) CreateClient() Client {
 	return factory.slClient
 }
 
-func NewSoftLayerClientManager(session *session.Session, vps *vpsVm.Client, logger boshlogger.Logger) *ClientManager {
+func NewSoftLayerClientManager(session *session.Session, vps *vpsVm.Client, logger logger.Logger) *ClientManager {
 	return &ClientManager{
 		services.GetVirtualGuestService(session),
 		services.GetAccountService(session),
@@ -168,7 +168,7 @@ type ClientManager struct {
 	TicketService         services.Ticket
 	TicketSubjectSerivce  services.Ticket_Subject
 	vpsService            *vpsVm.Client
-	logger                boshlogger.Logger
+	logger                logger.Logger
 }
 
 func (c *ClientManager) GetInstance(id int, mask string) (*datatypes.Virtual_Guest, bool, error) {
@@ -1680,7 +1680,7 @@ func (c *ClientManager) CreateTicket(ticketSubject *string, ticketTitle *string,
 
 	//The SoftLayer API defaults new ticket property statusId to 1001 (or "open").
 	if *ticket.StatusId == 1001 {
-		c.logger.Debug("Ticket '%d' is created and its status is 'OPEN'.", string(*ticket.Id))
+		c.logger.Debug(softlayerClientLogTag, "Ticket '%d' is created and its status is 'OPEN'.", strconv.Itoa(*ticket.Id))
 		return nil
 	} else {
 		return bosherr.Errorf("Ticket status is not 'OPEN': %+v", *ticket.Status.Name)
