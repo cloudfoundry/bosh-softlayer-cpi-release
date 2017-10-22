@@ -731,7 +731,7 @@ func (c *ClientManager) UpgradeInstance(id int, cpu int, memory int, network int
 	packageID := *productPackages[0].Id
 	packageItems, err := c.PackageService.
 		Id(packageID).
-		Mask("description,capacity,prices[id,locationGroupId,categories]").
+		Mask("description,capacity,prices[id,locationGroupId,categories[categoryCode]]").
 		GetItems()
 	if err != nil {
 		return 0, err

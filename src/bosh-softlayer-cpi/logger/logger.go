@@ -18,19 +18,20 @@ type Logger interface {
 	ErrorWithDetails(tag, msg string, args ...interface{})
 	HandlePanic(tag string)
 	Flush() error
-	GetbasicLogger() boshlog.Logger
+	GetBasicLogger() boshlog.Logger
+	GetSerialTagPrefix() string
 }
 
 type logger struct {
-	basicLogger     boshlog.Logger
-	serialTagPrefix string
+	basicLogger  boshlog.Logger
+	threadPrefix string
 }
 
 func New(level boshlog.LogLevel, serialTagPrefix string, out, err *log.Logger) Logger {
 	Logger := boshlog.New(level, out, err)
 	return &logger{
-		basicLogger:     Logger,
-		serialTagPrefix: serialTagPrefix,
+		basicLogger:  Logger,
+		threadPrefix: serialTagPrefix,
 	}
 }
 
@@ -47,12 +48,16 @@ func NewWriterLogger(level boshlog.LogLevel, serialTagPrefix string, out, err io
 	)
 }
 
-func (l *logger) GetbasicLogger() boshlog.Logger {
+func (l *logger) GetBasicLogger() boshlog.Logger {
 	return l.basicLogger
 }
 
+func (l *logger) GetSerialTagPrefix() string {
+	return l.threadPrefix
+}
+
 func (l *logger) Debug(tag, msg string, args ...interface{}) {
-	tag = fmt.Sprintf("%s_%s", l.serialTagPrefix, tag)
+	tag = fmt.Sprintf("%s:%s", l.threadPrefix, tag)
 	l.basicLogger.Debug(tag, msg, args...)
 }
 
@@ -62,17 +67,17 @@ func (l *logger) DebugWithDetails(tag, msg string, args ...interface{}) {
 }
 
 func (l *logger) Info(tag, msg string, args ...interface{}) {
-	tag = fmt.Sprintf("%s_%s", l.serialTagPrefix, tag)
+	tag = fmt.Sprintf("%s:%s", l.threadPrefix, tag)
 	l.basicLogger.Info(tag, msg, args...)
 }
 
 func (l *logger) Warn(tag, msg string, args ...interface{}) {
-	tag = fmt.Sprintf("%s_%s", l.serialTagPrefix, tag)
+	tag = fmt.Sprintf("%s:%s", l.threadPrefix, tag)
 	l.basicLogger.Warn(tag, msg, args...)
 }
 
 func (l *logger) Error(tag, msg string, args ...interface{}) {
-	tag = fmt.Sprintf("%s_%s", l.serialTagPrefix, tag)
+	tag = fmt.Sprintf("%s;%s", l.threadPrefix, tag)
 	l.basicLogger.Error(tag, msg, args...)
 }
 
@@ -82,7 +87,7 @@ func (l *logger) ErrorWithDetails(tag, msg string, args ...interface{}) {
 }
 
 func (l *logger) HandlePanic(tag string) {
-	tag = fmt.Sprintf("%s_%s", l.serialTagPrefix, tag)
+	tag = fmt.Sprintf("%s:%s", l.threadPrefix, tag)
 	l.basicLogger.HandlePanic(tag)
 }
 

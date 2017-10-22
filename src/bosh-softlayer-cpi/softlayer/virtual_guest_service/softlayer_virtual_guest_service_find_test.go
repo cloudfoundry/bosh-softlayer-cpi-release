@@ -28,7 +28,7 @@ var _ = Describe("Virtual Guest Service", func() {
 	BeforeEach(func() {
 		softLayerClient = &fakeslclient.FakeClient{}
 		uuidGen = &fakeuuid.FakeGenerator{}
-		logger = cpiLog.NewLogger(boshlog.LevelDebug, "")
+		logger = cpiLog.NewLogger(boshlog.LevelDebug, "vitualGuestServiceSerial")
 		virtualGuestService = NewSoftLayerVirtualGuestService(softLayerClient, uuidGen, logger)
 	})
 

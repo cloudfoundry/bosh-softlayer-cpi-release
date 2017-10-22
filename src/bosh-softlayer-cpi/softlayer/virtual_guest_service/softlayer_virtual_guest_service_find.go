@@ -1,15 +1,16 @@
 package instance
 
 import (
-	boslc "bosh-softlayer-cpi/softlayer/client"
+	"strconv"
+	"time"
+
 	"code.cloudfoundry.org/clock"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshretry "github.com/cloudfoundry/bosh-utils/retrystrategy"
+	"github.com/softlayer/softlayer-go/datatypes"
 
 	"bosh-softlayer-cpi/api"
-	"github.com/softlayer/softlayer-go/datatypes"
-	"strconv"
-	"time"
+	boslc "bosh-softlayer-cpi/softlayer/client"
 )
 
 func (vg SoftlayerVirtualGuestService) Find(id int) (*datatypes.Virtual_Guest, error) {
@@ -34,7 +35,8 @@ func (vg SoftlayerVirtualGuestService) Find(id int) (*datatypes.Virtual_Guest, e
 			return false, nil
 		})
 	timeService := clock.NewClock()
-	timeoutRetryStrategy := boshretry.NewTimeoutRetryStrategy(1*time.Minute, 5*time.Second, execStmtRetryable, timeService, vg.logger.GetbasicLogger())
+	timeoutRetryStrategy := boshretry.NewTimeoutRetryStrategy(1*time.Minute, 5*time.Second, execStmtRetryable, timeService, vg.logger.GetBasicLogger())
+	vg.changeRetryStrategyLogTag(&timeoutRetryStrategy)
 	err = timeoutRetryStrategy.Try()
 	if err != nil {
 		return &datatypes.Virtual_Guest{}, err

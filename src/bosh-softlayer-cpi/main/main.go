@@ -36,7 +36,7 @@ var (
 
 func main() {
 	logger, fs, uuid, outLogger := basicDeps()
-	cmdRunner := boshsys.NewExecCmdRunner(logger.GetbasicLogger())
+	cmdRunner := boshsys.NewExecCmdRunner(logger.GetBasicLogger())
 	defer logger.HandlePanic("Main")
 
 	flag.Parse()
@@ -63,18 +63,17 @@ func basicDeps() (cpiLog.Logger, boshsys.FileSystem, boshuuid.Generator, *log.Lo
 	multiWriter := io.MultiWriter(os.Stderr, bufio.NewWriter(&logBuff))
 	nanos := time.Now().Nanosecond()
 
-	outLogger := log.New(multiWriter, strconv.Itoa(nanos), log.LstdFlags) // For softlayer client
+	clientLogger := log.New(multiWriter, fmt.Sprintf("%09d", nanos), log.LstdFlags) // For softlayer client
+	outLogger := log.New(multiWriter, "", log.LstdFlags)
 	errLogger := log.New(os.Stderr, "", log.LstdFlags)
-	// @TODO test to delete
-	//boshLogger := boshlog.New(boshlog.LevelDebug, outLogger, errLogger)
 
 	cpiLogger := cpiLog.New(boshlog.LevelDebug, strconv.Itoa(nanos), outLogger, errLogger)
 	multiLogger := api.MultiLogger{Logger: cpiLogger, LogBuff: &logBuff}
-	fs := boshsys.NewOsFileSystem(cpiLogger.GetbasicLogger())
+	fs := boshsys.NewOsFileSystem(cpiLogger.GetBasicLogger())
 
 	uuidGen := boshuuid.NewGenerator()
 
-	return multiLogger, fs, uuidGen, outLogger
+	return multiLogger, fs, uuidGen, clientLogger
 }
 
 func buildDispatcher(

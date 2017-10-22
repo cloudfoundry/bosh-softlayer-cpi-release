@@ -10,9 +10,9 @@ import (
 	"github.com/softlayer/softlayer-go/datatypes"
 	"github.com/softlayer/softlayer-go/sl"
 
+	cpiLog "bosh-softlayer-cpi/logger"
 	fakeslclient "bosh-softlayer-cpi/softlayer/client/fakes"
 	diskService "bosh-softlayer-cpi/softlayer/disk_service"
-	cpiLog "bosh-softlayer-cpi/logger"
 )
 
 var _ = Describe("Disk Service Create", func() {

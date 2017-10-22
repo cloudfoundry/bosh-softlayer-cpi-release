@@ -1,8 +1,8 @@
 package snapshot
 
 import (
-	bosl "bosh-softlayer-cpi/softlayer/client"
 	"bosh-softlayer-cpi/logger"
+	bosl "bosh-softlayer-cpi/softlayer/client"
 )
 
 const softlayerSnapshotServiceLogTag = "SoftLayerDiskCreator"

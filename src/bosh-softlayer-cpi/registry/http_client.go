@@ -10,8 +10,8 @@ import (
 	"net/http"
 	"time"
 
-	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	"bosh-softlayer-cpi/logger"
+	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 )
 
 const httpClientLogTag = "RegistryHTTPClient"
