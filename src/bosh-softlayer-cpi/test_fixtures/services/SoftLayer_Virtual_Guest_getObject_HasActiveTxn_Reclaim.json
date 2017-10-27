@@ -1,0 +1,25 @@
+{
+  "id": 25804753,
+  "lastOperatingSystemReload": {
+    "id": 1
+  },
+  "activeTransaction": {
+    "createDate": "2017-02-15T15:57:08+08:00",
+    "elapsedSeconds": 1805,
+    "guestId": 27769943,
+    "hardwareId": null,
+    "id": 47612603,
+    "modifyDate": "2017-02-15T15:58:11+08:00",
+    "statusChangeDate": "2017-02-15T15:58:11+08:00",
+    "transactionStatus": {
+      "averageDuration": "550.37",
+      "friendlyName": "This is a buffer time in which the customer may cancel the server",
+      "name": "RECLAIM_WAIT"
+    }
+  },
+  "powerState": {
+    "name": "Running",
+    "keyName": "RUNNING"
+  },
+  "provisionDate": "2016-11-07T21:06:41-06:00"
+}

@@ -459,6 +459,9 @@ func (c *ClientManager) WaitInstanceHasNoneActiveTransaction(id int, until time.
 
 		now := time.Now()
 		if now.After(until) {
+			if virtualGuest.ActiveTransaction.TransactionStatus != nil && *virtualGuest.ActiveTransaction.TransactionStatus.Name == "RECLAIM_WAIT" {
+				return bosherr.Errorf("Instance with id of '%d' has 'RECLAIM_WAIT' transaction", id)
+			}
 			return bosherr.Errorf("Waiting instance with id of '%d' has none active transaction time out", id)
 		}
 
@@ -640,13 +643,19 @@ func (c *ClientManager) ReloadInstance(id int, stemcellId int, sshKeyIds []int, 
 
 func (c *ClientManager) CancelInstance(id int) error {
 	var err error
-	until := time.Now().Add(time.Duration(30) * time.Minute)
+	until := time.Now().Add(time.Duration(1) * time.Minute)
 	if err = c.WaitInstanceHasNoneActiveTransaction(*sl.Int(id), until); err != nil {
 		if apiErr, ok := err.(sl.Error); ok {
 			if apiErr.Exception == SOFTLAYER_OBJECTNOTFOUND_EXCEPTION {
 				return nil
 			}
 		}
+
+		if strings.Contains(err.Error(), "has 'RECLAIM_WAIT' transaction") {
+			c.logger.Warn(softlayerClientLogTag, fmt.Sprintf("Instance '%d' stays 'RECLAIM_WAIT' transaction, CPI skips to cancel it", id))
+			return nil
+		}
+
 		return bosherr.WrapError(err, "Waiting until instance has none active transaction before canceling")
 	}
 

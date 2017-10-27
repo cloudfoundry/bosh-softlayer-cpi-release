@@ -812,6 +812,25 @@ var _ = Describe("InstanceHandler", func() {
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("Waiting instance with id of '%d' has none active transaction time out", vgID))
 			})
+
+			It("return error when instance stay 'RECLAIM_WAIT' transaction", func() {
+				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Virtual_Guest_getObject_HasActiveTxn_Reclaim.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_getObject_HasActiveTxn_Reclaim.json",
+						"statusCode": http.StatusOK,
+					},
+				}
+				err = test_helpers.SpecifyServerResps(respParas, server)
+				Expect(err).NotTo(HaveOccurred())
+
+				err := cli.WaitInstanceHasNoneActiveTransaction(vgID, time.Now().Add(3000000))
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("has 'RECLAIM_WAIT' transaction"))
+			})
 		})
 
 		Context("when VirtualGuestService getObject call return error", func() {
@@ -1294,6 +1313,22 @@ var _ = Describe("InstanceHandler", func() {
 					{
 						"filename":   "SoftLayer_Virtual_Guest_deleteObject.json",
 						"statusCode": http.StatusOK,
+					},
+				}
+				err = test_helpers.SpecifyServerResps(respParas, server)
+				Expect(err).NotTo(HaveOccurred())
+
+				err := cli.CancelInstance(vgID)
+				Expect(err).NotTo(HaveOccurred())
+			})
+
+			FIt("Cancel instance successfully when instance stays 'RECLAIM_WAIT' transaction 1 minutes", func() {
+				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Virtual_Guest_getObject_HasActiveTxn_Reclaim.json",
+						"statusCode": http.StatusOK,
+						"path":       "/SoftLayer_Virtual_Guest/25804753.json",
+						"method":     "GET",
 					},
 				}
 				err = test_helpers.SpecifyServerResps(respParas, server)
