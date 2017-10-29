@@ -271,6 +271,18 @@ type FakeService struct {
 	setMetadataReturnsOnCall map[int]struct {
 		result1 error
 	}
+	UpdateInstanceUserDataStub        func(id int, userData *string) error
+	updateInstanceUserDataMutex       sync.RWMutex
+	updateInstanceUserDataArgsForCall []struct {
+		id       int
+		userData *string
+	}
+	updateInstanceUserDataReturns struct {
+		result1 error
+	}
+	updateInstanceUserDataReturnsOnCall map[int]struct {
+		result1 error
+	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
 }
@@ -1297,6 +1309,55 @@ func (fake *FakeService) SetMetadataReturnsOnCall(i int, result1 error) {
 	}{result1}
 }
 
+func (fake *FakeService) UpdateInstanceUserData(id int, userData *string) error {
+	fake.updateInstanceUserDataMutex.Lock()
+	ret, specificReturn := fake.updateInstanceUserDataReturnsOnCall[len(fake.updateInstanceUserDataArgsForCall)]
+	fake.updateInstanceUserDataArgsForCall = append(fake.updateInstanceUserDataArgsForCall, struct {
+		id       int
+		userData *string
+	}{id, userData})
+	fake.recordInvocation("UpdateInstanceUserData", []interface{}{id, userData})
+	fake.updateInstanceUserDataMutex.Unlock()
+	if fake.UpdateInstanceUserDataStub != nil {
+		return fake.UpdateInstanceUserDataStub(id, userData)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fake.updateInstanceUserDataReturns.result1
+}
+
+func (fake *FakeService) UpdateInstanceUserDataCallCount() int {
+	fake.updateInstanceUserDataMutex.RLock()
+	defer fake.updateInstanceUserDataMutex.RUnlock()
+	return len(fake.updateInstanceUserDataArgsForCall)
+}
+
+func (fake *FakeService) UpdateInstanceUserDataArgsForCall(i int) (int, *string) {
+	fake.updateInstanceUserDataMutex.RLock()
+	defer fake.updateInstanceUserDataMutex.RUnlock()
+	return fake.updateInstanceUserDataArgsForCall[i].id, fake.updateInstanceUserDataArgsForCall[i].userData
+}
+
+func (fake *FakeService) UpdateInstanceUserDataReturns(result1 error) {
+	fake.UpdateInstanceUserDataStub = nil
+	fake.updateInstanceUserDataReturns = struct {
+		result1 error
+	}{result1}
+}
+
+func (fake *FakeService) UpdateInstanceUserDataReturnsOnCall(i int, result1 error) {
+	fake.UpdateInstanceUserDataStub = nil
+	if fake.updateInstanceUserDataReturnsOnCall == nil {
+		fake.updateInstanceUserDataReturnsOnCall = make(map[int]struct {
+			result1 error
+		})
+	}
+	fake.updateInstanceUserDataReturnsOnCall[i] = struct {
+		result1 error
+	}{result1}
+}
+
 func (fake *FakeService) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
@@ -1340,6 +1401,8 @@ func (fake *FakeService) Invocations() map[string][][]interface{} {
 	defer fake.reloadOSMutex.RUnlock()
 	fake.setMetadataMutex.RLock()
 	defer fake.setMetadataMutex.RUnlock()
+	fake.updateInstanceUserDataMutex.RLock()
+	defer fake.updateInstanceUserDataMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}
 	for key, value := range fake.invocations {
 		copiedInvocations[key] = value

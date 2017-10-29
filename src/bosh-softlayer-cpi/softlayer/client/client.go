@@ -123,6 +123,7 @@ type Client interface {
 	WaitInstanceHasNoneActiveTransaction(id int, until time.Time) error
 	WaitVolumeProvisioningWithOrderId(orderId int, until time.Time) (*datatypes.Network_Storage, error)
 	SetTags(id int, tags string) (bool, error)
+	SetInstanceMetadata(id int, userData *string) (bool, error)
 	AttachSecondDiskToInstance(id int, diskSize int) error
 	GetInstanceAllowedHost(id int) (*datatypes.Network_Storage_Allowed_Host, bool, error)
 	AuthorizeHostToVolume(instance *datatypes.Virtual_Guest, volumeId int, until time.Time) (bool, error)
@@ -643,7 +644,7 @@ func (c *ClientManager) ReloadInstance(id int, stemcellId int, sshKeyIds []int, 
 
 func (c *ClientManager) CancelInstance(id int) error {
 	var err error
-	until := time.Now().Add(time.Duration(1) * time.Minute)
+	until := time.Now().Add(time.Duration(10) * time.Minute)
 	if err = c.WaitInstanceHasNoneActiveTransaction(*sl.Int(id), until); err != nil {
 		if apiErr, ok := err.(sl.Error); ok {
 			if apiErr.Exception == SOFTLAYER_OBJECTNOTFOUND_EXCEPTION {
@@ -1694,6 +1695,25 @@ func (c *ClientManager) CreateTicket(ticketSubject *string, ticketTitle *string,
 	} else {
 		return bosherr.Errorf("Ticket status is not 'OPEN': %+v", *ticket.Status.Name)
 	}
+}
+
+func (c *ClientManager) SetInstanceMetadata(id int, userData *string) (bool, error) {
+	_, err := c.VirtualGuestService.Id(id).SetUserMetadata([]string{*userData})
+	if err != nil {
+		if apiErr, ok := err.(sl.Error); ok {
+			if apiErr.Exception == SOFTLAYER_OBJECTNOTFOUND_EXCEPTION {
+				return false, nil
+			}
+			return false, err
+		}
+	}
+
+	until := time.Now().Add(time.Duration(30) * time.Minute)
+	if err := c.WaitInstanceUntilReady(id, until); err != nil {
+		return false, bosherr.WrapError(err, "Waiting until instance is ready")
+	}
+
+	return true, nil
 }
 
 func (c *ClientManager) selectMaximunIopsItemPriceIdOnSize(size int) (datatypes.Product_Item_Price, error) {

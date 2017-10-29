@@ -120,4 +120,50 @@ var _ = Describe("Virtual Guest Service", func() {
 			Expect(err.Error()).To(ContainSubstring(fmt.Sprintf("VM '%d' not found", vmID)))
 		})
 	})
+
+	Describe("Call UpdateInstanceUserData", func() {
+		var (
+			vmID     int
+			userData *string
+		)
+
+		BeforeEach(func() {
+			vmID = 12345678
+			userData = sl.String("unit-test")
+
+			cli.SetInstanceMetadataReturns(
+				true,
+				nil,
+			)
+		})
+
+		It("Update instance userData successfully", func() {
+			err := virtualGuestService.UpdateInstanceUserData(vmID, userData)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(cli.SetInstanceMetadataCallCount()).To(Equal(1))
+		})
+
+		It("Return error if softLayerClient SetInstanceMetadata call returns an error", func() {
+			cli.SetInstanceMetadataReturns(
+				false,
+				errors.New("fake-client-error"),
+			)
+
+			err := virtualGuestService.UpdateInstanceUserData(vmID, userData)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("fake-client-error"))
+			Expect(cli.SetInstanceMetadataCallCount()).To(Equal(1))
+		})
+
+		It("Return error if softLayerClient SetInstanceMetadata call returns NotFound", func() {
+			cli.SetInstanceMetadataReturns(
+				false,
+				nil,
+			)
+
+			err := virtualGuestService.UpdateInstanceUserData(vmID, userData)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring(fmt.Sprintf("VM '%d' not found", vmID)))
+		})
+	})
 })

@@ -2330,4 +2330,83 @@ var _ = Describe("InstanceHandler", func() {
 			Expect(err.Error()).To(ContainSubstring("Waiting until instance is ready after os_reload"))
 		})
 	})
+
+	Describe("SetInstanceMetadata", func() {
+		Context("when VirtualGuestService EditObject call successfully", func() {
+			It("set instance's metadata successfully", func() {
+				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Virtual_Guest_setUserMetadata.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
+						"statusCode": http.StatusOK,
+					},
+				}
+				err = test_helpers.SpecifyServerResps(respParas, server)
+				Expect(err).NotTo(HaveOccurred())
+
+				succ, err := cli.SetInstanceMetadata(vgID, sl.String("unit-test"))
+				Expect(err).NotTo(HaveOccurred())
+				Expect(succ).To(BeTrue())
+			})
+		})
+
+		Context("when VirtualGuestService EditObject call return error", func() {
+			It("edit instance successfully", func() {
+				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Virtual_Guest_setUserMetadata_InternalError.json",
+						"statusCode": http.StatusInternalServerError,
+					},
+				}
+				err = test_helpers.SpecifyServerResps(respParas, server)
+				Expect(err).NotTo(HaveOccurred())
+
+				succ, err := cli.SetInstanceMetadata(vgID, sl.String("unit-test"))
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("fake-client-error"))
+				Expect(succ).To(BeFalse())
+			})
+
+			It("edit instance successfully", func() {
+				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Virtual_Guest_setUserMetadata_NotFound.json",
+						"statusCode": http.StatusInternalServerError,
+					},
+				}
+				err = test_helpers.SpecifyServerResps(respParas, server)
+				Expect(err).NotTo(HaveOccurred())
+
+				succ, err := cli.SetInstanceMetadata(vgID, sl.String("unit-test"))
+				Expect(err).NotTo(HaveOccurred())
+				Expect(succ).To(BeFalse())
+			})
+		})
+
+		Context("when VirtualGuestService WaitInstanceUntilReady call return error", func() {
+			It("return an softlayer-go unhandled error", func() {
+				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Virtual_Guest_setUserMetadata.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_getObject_InternalError.json",
+						"statusCode": http.StatusInternalServerError,
+					},
+				}
+				err = test_helpers.SpecifyServerResps(respParas, server)
+				Expect(err).NotTo(HaveOccurred())
+
+				succ, err := cli.SetInstanceMetadata(vgID, sl.String("unit-test"))
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("Waiting until instance is ready"))
+				Expect(succ).To(BeFalse())
+				Expect(err.Error()).To(ContainSubstring("Waiting until instance is ready"))
+			})
+		})
+	})
 })

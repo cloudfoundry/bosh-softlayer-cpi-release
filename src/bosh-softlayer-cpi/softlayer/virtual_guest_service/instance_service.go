@@ -26,6 +26,7 @@ type Service interface {
 	Reboot(id int) error
 	ReloadOS(id int, stemcellID int, sshKeyIds []int, vmNamePrefix string, domain string) error
 	SetMetadata(id int, vmMetadata Metadata) error
+	UpdateInstanceUserData(id int, userData *string) error
 }
 
 type Metadata map[string]interface{}

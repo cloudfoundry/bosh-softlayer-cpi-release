@@ -61,13 +61,13 @@ func main() {
 func basicDeps() (cpiLog.Logger, boshsys.FileSystem, boshuuid.Generator, *log.Logger) {
 	var logBuff bytes.Buffer
 	multiWriter := io.MultiWriter(os.Stderr, bufio.NewWriter(&logBuff))
-	nanos := time.Now().Nanosecond()
+	nanos := fmt.Sprintf("%09d", time.Now().Nanosecond())
 
-	clientLogger := log.New(multiWriter, fmt.Sprintf("%09d", nanos), log.LstdFlags) // For softlayer client
+	clientLogger := log.New(multiWriter, nanos, log.LstdFlags) // For softlayer_client
 	outLogger := log.New(multiWriter, "", log.LstdFlags)
 	errLogger := log.New(os.Stderr, "", log.LstdFlags)
 
-	cpiLogger := cpiLog.New(boshlog.LevelDebug, strconv.Itoa(nanos), outLogger, errLogger)
+	cpiLogger := cpiLog.New(boshlog.LevelDebug, nanos, outLogger, errLogger)
 	multiLogger := api.MultiLogger{Logger: cpiLogger, LogBuff: &logBuff}
 	fs := boshsys.NewOsFileSystem(cpiLogger.GetBoshLogger())
 

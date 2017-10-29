@@ -124,7 +124,7 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 	osReloaded := false
 
 	if !cv.softlayerOptions.DisableOsReload {
-		cid, err = cv.createByOsReload(stemcellCID, cloudProps, instanceNetworks)
+		cid, err = cv.createByOsReload(stemcellCID, cloudProps, instanceNetworks, userDataContents)
 		if err != nil {
 			return "", bosherr.WrapError(err, "OS reloading VM")
 		}
@@ -359,7 +359,7 @@ func (cv CreateVM) createNetworkComponentsByVlanId(vlanId int) (*datatypes.Virtu
 	}, nil
 }
 
-func (cv CreateVM) createByOsReload(stemcellCID StemcellCID, cloudProps VMCloudProperties, instanceNetworks instance.Networks) (int, error) {
+func (cv CreateVM) createByOsReload(stemcellCID StemcellCID, cloudProps VMCloudProperties, instanceNetworks instance.Networks, userDataContents string) (int, error) {
 	cid := 0
 	for _, network := range instanceNetworks {
 		switch network.Type {
@@ -390,6 +390,11 @@ func (cv CreateVM) createByOsReload(stemcellCID StemcellCID, cloudProps VMCloudP
 					if err != nil {
 						return cid, bosherr.WrapError(err, "Upgrading VM")
 					}
+				}
+				//Update userData when OS Reload
+				err = cv.virtualGuestService.UpdateInstanceUserData(*vm.Id, sl.String(userDataContents))
+				if err != nil {
+					return cid, bosherr.WrapError(err, "Updating userData")
 				}
 
 				err = cv.virtualGuestService.ReloadOS(*vm.Id, stemcellCID.Int(), []int{cloudProps.SshKey}, cloudProps.VmNamePrefix, cloudProps.Domain)
