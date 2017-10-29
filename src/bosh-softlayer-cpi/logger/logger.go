@@ -5,8 +5,11 @@ import (
 	"io"
 	"log"
 	"os"
+	"reflect"
+	"unsafe"
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
+	boshretry "github.com/cloudfoundry/bosh-utils/retrystrategy"
 )
 
 type Logger interface {
@@ -18,19 +21,20 @@ type Logger interface {
 	ErrorWithDetails(tag, msg string, args ...interface{})
 	HandlePanic(tag string)
 	Flush() error
-	GetBasicLogger() boshlog.Logger
+	GetBoshLogger() boshlog.Logger
 	GetSerialTagPrefix() string
+	ChangeRetryStrategyLogTag(retryStrategy *boshretry.RetryStrategy) error
 }
 
 type logger struct {
-	basicLogger  boshlog.Logger
+	boshlogger   boshlog.Logger
 	threadPrefix string
 }
 
 func New(level boshlog.LogLevel, serialTagPrefix string, out, err *log.Logger) Logger {
 	Logger := boshlog.New(level, out, err)
 	return &logger{
-		basicLogger:  Logger,
+		boshlogger:   Logger,
 		threadPrefix: serialTagPrefix,
 	}
 }
@@ -48,8 +52,8 @@ func NewWriterLogger(level boshlog.LogLevel, serialTagPrefix string, out, err io
 	)
 }
 
-func (l *logger) GetBasicLogger() boshlog.Logger {
-	return l.basicLogger
+func (l *logger) GetBoshLogger() boshlog.Logger {
+	return l.boshlogger
 }
 
 func (l *logger) GetSerialTagPrefix() string {
@@ -58,7 +62,7 @@ func (l *logger) GetSerialTagPrefix() string {
 
 func (l *logger) Debug(tag, msg string, args ...interface{}) {
 	tag = fmt.Sprintf("%s:%s", l.threadPrefix, tag)
-	l.basicLogger.Debug(tag, msg, args...)
+	l.boshlogger.Debug(tag, msg, args...)
 }
 
 func (l *logger) DebugWithDetails(tag, msg string, args ...interface{}) {
@@ -68,17 +72,17 @@ func (l *logger) DebugWithDetails(tag, msg string, args ...interface{}) {
 
 func (l *logger) Info(tag, msg string, args ...interface{}) {
 	tag = fmt.Sprintf("%s:%s", l.threadPrefix, tag)
-	l.basicLogger.Info(tag, msg, args...)
+	l.boshlogger.Info(tag, msg, args...)
 }
 
 func (l *logger) Warn(tag, msg string, args ...interface{}) {
 	tag = fmt.Sprintf("%s:%s", l.threadPrefix, tag)
-	l.basicLogger.Warn(tag, msg, args...)
+	l.boshlogger.Warn(tag, msg, args...)
 }
 
 func (l *logger) Error(tag, msg string, args ...interface{}) {
 	tag = fmt.Sprintf("%s;%s", l.threadPrefix, tag)
-	l.basicLogger.Error(tag, msg, args...)
+	l.boshlogger.Error(tag, msg, args...)
 }
 
 func (l *logger) ErrorWithDetails(tag, msg string, args ...interface{}) {
@@ -88,7 +92,28 @@ func (l *logger) ErrorWithDetails(tag, msg string, args ...interface{}) {
 
 func (l *logger) HandlePanic(tag string) {
 	tag = fmt.Sprintf("%s:%s", l.threadPrefix, tag)
-	l.basicLogger.HandlePanic(tag)
+	l.boshlogger.HandlePanic(tag)
 }
 
-func (l *logger) Flush() error { return l.basicLogger.Flush() }
+func (l *logger) Flush() error { return l.boshlogger.Flush() }
+
+// it's unfriendly to change RetryStrategy().logtag
+func (l *logger) ChangeRetryStrategyLogTag(retryStrategy *boshretry.RetryStrategy) error {
+	defer func() {
+		if err := recover(); err != nil {
+			l.Warn("cpiLogger", fmt.Sprintf("Recovered from panic when ChangeRetryStrategyLogTag: %s", err))
+		}
+	}()
+
+	//retryStrategy only refer interface RetryStrategy, so add '*' to get private timeoutRetryStrategy
+	pointerVal := reflect.ValueOf(*retryStrategy)
+	val := reflect.Indirect(pointerVal)
+
+	logtag := val.FieldByName("logTag")
+	ptrToLogTag := unsafe.Pointer(logtag.UnsafeAddr())
+	realPtrToLogTag := (*string)(ptrToLogTag)
+	serialTagPrefix := fmt.Sprintf("%s:%s", l.GetSerialTagPrefix(), logtag)
+	*realPtrToLogTag = serialTagPrefix
+
+	return nil
+}

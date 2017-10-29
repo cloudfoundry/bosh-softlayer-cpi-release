@@ -36,7 +36,7 @@ var (
 
 func main() {
 	logger, fs, uuid, outLogger := basicDeps()
-	cmdRunner := boshsys.NewExecCmdRunner(logger.GetBasicLogger())
+	cmdRunner := boshsys.NewExecCmdRunner(logger.GetBoshLogger())
 	defer logger.HandlePanic("Main")
 
 	flag.Parse()
@@ -69,7 +69,7 @@ func basicDeps() (cpiLog.Logger, boshsys.FileSystem, boshuuid.Generator, *log.Lo
 
 	cpiLogger := cpiLog.New(boshlog.LevelDebug, strconv.Itoa(nanos), outLogger, errLogger)
 	multiLogger := api.MultiLogger{Logger: cpiLogger, LogBuff: &logBuff}
-	fs := boshsys.NewOsFileSystem(cpiLogger.GetBasicLogger())
+	fs := boshsys.NewOsFileSystem(cpiLogger.GetBoshLogger())
 
 	uuidGen := boshuuid.NewGenerator()
 
