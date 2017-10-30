@@ -111,6 +111,10 @@ func (vmProps VMCloudProperties) updateHostNameInCloudProps(cloudProps *VMCloudP
 	if len(timeStampPostfix) == 0 {
 		return cloudProps.VmNamePrefix
 	} else {
+		prefixLen := len(cloudProps.VmNamePrefix)
+		if prefixLen > 0 && cloudProps.VmNamePrefix[prefixLen-1] == '-' {
+			return cloudProps.VmNamePrefix + timeStampPostfix
+		}
 		return cloudProps.VmNamePrefix + "-" + timeStampPostfix
 	}
 }
