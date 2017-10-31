@@ -990,60 +990,6 @@ var _ = Describe("CreateVM", func() {
 				Expect(registryClient.UpdateCalled).To(BeFalse())
 			})
 
-			It("returns an error if property 'startCpus' is not set", func() {
-				cloudProps = VMCloudProperties{
-					VmNamePrefix:      "fake-hostname",
-					Domain:            "fake-domain.com",
-					StartCpus:         0,
-					MaxMemory:         2048,
-					MaxNetworkSpeed:   100,
-					Datacenter:        "fake-datacenter",
-					SshKey:            32345678,
-					DeployedByBoshCLI: true,
-				}
-
-				vmCID, err = createVM.Run(agentID, stemcellCID, cloudProps, networks, disks, env)
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("The property 'StartCpus' must be set to create an instance"))
-				Expect(imageService.FindCallCount()).To(Equal(0))
-				Expect(vmService.CreateSshKeyCallCount()).To(Equal(0))
-				Expect(vmService.GetVlanCallCount()).To(Equal(0))
-				Expect(vmService.FindByPrimaryBackendIpCallCount()).To(Equal(0))
-				Expect(vmService.ReloadOSCallCount()).To(Equal(0))
-				Expect(vmService.CreateCallCount()).To(Equal(0))
-				Expect(vmService.ConfigureNetworksCallCount()).To(Equal(0))
-				Expect(vmService.AttachEphemeralDiskCallCount()).To(Equal(0))
-				Expect(vmService.CleanUpCallCount()).To(Equal(0))
-				Expect(registryClient.UpdateCalled).To(BeFalse())
-			})
-
-			It("returns an error if property 'maxMemory' is not set", func() {
-				cloudProps = VMCloudProperties{
-					VmNamePrefix:      "fake-hostname",
-					Domain:            "fake-domain.com",
-					StartCpus:         2,
-					MaxMemory:         0,
-					MaxNetworkSpeed:   100,
-					Datacenter:        "fake-datacenter",
-					SshKey:            32345678,
-					DeployedByBoshCLI: true,
-				}
-
-				vmCID, err = createVM.Run(agentID, stemcellCID, cloudProps, networks, disks, env)
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("The property 'MaxMemory' must be set to create an instance"))
-				Expect(imageService.FindCallCount()).To(Equal(0))
-				Expect(vmService.CreateSshKeyCallCount()).To(Equal(0))
-				Expect(vmService.GetVlanCallCount()).To(Equal(0))
-				Expect(vmService.FindByPrimaryBackendIpCallCount()).To(Equal(0))
-				Expect(vmService.ReloadOSCallCount()).To(Equal(0))
-				Expect(vmService.CreateCallCount()).To(Equal(0))
-				Expect(vmService.ConfigureNetworksCallCount()).To(Equal(0))
-				Expect(vmService.AttachEphemeralDiskCallCount()).To(Equal(0))
-				Expect(vmService.CleanUpCallCount()).To(Equal(0))
-				Expect(registryClient.UpdateCalled).To(BeFalse())
-			})
-
 			It("returns an error if property 'datacenter' is not set", func() {
 				cloudProps = VMCloudProperties{
 					VmNamePrefix:      "fake-hostname",

@@ -76,7 +76,7 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 		cloudProps.SshKey = sshKey
 	}
 
-	userDataContents, err := cv.createUserDataForInstance(agentID, cv.registryOptions, cloudProps.DeployedByBoshCLI)
+	userDataContents, err := cv.createUserDataForInstance(agentID, &cv.registryOptions, cloudProps.DeployedByBoshCLI)
 	if err != nil {
 		return "", bosherr.WrapError(err, "Creating VM UserData")
 	}
@@ -414,7 +414,7 @@ func (cv CreateVM) createByOsReload(stemcellCID StemcellCID, cloudProps VMCloudP
 	return cid, nil
 }
 
-func (cv CreateVM) createUserDataForInstance(agentID string, registryOptions registry.ClientOptions, deployedByBoshCLI bool) (string, error) {
+func (cv CreateVM) createUserDataForInstance(agentID string, registryOptions *registry.ClientOptions, deployedByBoshCLI bool) (string, error) {
 	var directorIP string
 	var err error
 	if deployedByBoshCLI == true {

@@ -8,7 +8,6 @@ import (
 	"io"
 	"log"
 	"os"
-	"strconv"
 	"time"
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"

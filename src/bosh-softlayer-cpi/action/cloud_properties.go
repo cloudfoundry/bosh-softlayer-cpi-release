@@ -75,13 +75,13 @@ func (vmProps *VMCloudProperties) Validate() error {
 		return bosherr.Error("The property 'Datacenter' must be set to create an instance")
 	}
 	if vmProps.MaxMemory == 0 {
-		return bosherr.Error("The property 'MaxMemory' must be set to create an instance")
+		vmProps.MaxMemory = 8192
 	}
 	if vmProps.StartCpus == 0 {
-		return bosherr.Error("The property 'StartCpus' must be set to create an instance")
+		vmProps.StartCpus = 4
 	}
 	if vmProps.MaxNetworkSpeed == 0 {
-		vmProps.MaxNetworkSpeed = 10
+		vmProps.MaxNetworkSpeed = 1000
 	}
 
 	//if err := vmProps.Tags.Validate(); err != nil {
