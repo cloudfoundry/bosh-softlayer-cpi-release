@@ -30,7 +30,7 @@ type ClientOptions struct {
 	Protocol string `json:"protocol,omitempty"`
 
 	// BOSH Registry hostname
-	Host string `json:"address,omitempty"`
+	Address string `json:"address,omitempty"`
 
 	// BOSH Registry port
 	Port int `json:"port,omitempty"`
@@ -72,12 +72,12 @@ type ClientTLSOptions struct {
 
 //// Endpoint returns the BOSH Registry endpoint.
 //func (o ClientOptions) Endpoint() string {
-//	return fmt.Sprintf("%s://%s:%d", "http", o.Host, o.Port)
+//	return fmt.Sprintf("%s://%s:%d", "http", o.Address, o.Port)
 //}
 
 // EndpointWithCredentials returns the BOSH Registry endpoint including credentials.
 func (o ClientOptions) EndpointWithCredentials() string {
-	return fmt.Sprintf("%s://%s:%s@%s:%d", "http", o.HTTPOptions.User, o.HTTPOptions.Password, o.Host, o.HTTPOptions.Port)
+	return fmt.Sprintf("%s://%s:%s@%s:%d", "http", o.HTTPOptions.User, o.HTTPOptions.Password, o.Address, o.HTTPOptions.Port)
 }
 
 // Validate validates the Client options.
@@ -86,8 +86,8 @@ func (o ClientOptions) Validate() error {
 		return bosherr.Error("Must provide a non-empty Protocol")
 	}
 
-	if o.Host == "" {
-		return bosherr.Error("Must provide a non-empty Host")
+	if o.Address == "" {
+		return bosherr.Error("Must provide a non-empty Address")
 	}
 
 	if o.Port == 0 {

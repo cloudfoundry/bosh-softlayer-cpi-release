@@ -21,7 +21,7 @@ var _ = Describe("ConcreteFactoryOptions", func() {
 			},
 			Registry: registry.ClientOptions{
 				Protocol: "http",
-				Host:     "fake-host",
+				Address:  "fake-host",
 				Port:     5555,
 				Username: "fake-username",
 				Password: "fake-password",

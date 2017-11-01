@@ -47,7 +47,7 @@ var _ = Describe("ConcreteFactory", func() {
 				Properties: config.CPIProperties{
 					Registry: registry.ClientOptions{
 						Protocol: "http",
-						Host:     "fake-host",
+						Address:  "fake-host",
 						Port:     5555,
 						Username: "fake-username",
 						Password: "fake-password",
@@ -57,7 +57,7 @@ var _ = Describe("ConcreteFactory", func() {
 		}
 		registryOptions = registry.ClientOptions{
 			Protocol: "http",
-			Host:     "fake-host",
+			Address:  "fake-host",
 			Port:     5555,
 			Username: "fake-username",
 			Password: "fake-password",

@@ -55,7 +55,7 @@ var _ = Describe("CreateVM", func() {
 		registryClient = &registryfakes.FakeClient{}
 		registryOptions = registry.ClientOptions{
 			Protocol: "http",
-			Host:     "fake-registry-host",
+			Address:  "fake-registry-host",
 			Port:     25777,
 			Username: "fake-registry-username",
 			Password: "fake-registry-password",

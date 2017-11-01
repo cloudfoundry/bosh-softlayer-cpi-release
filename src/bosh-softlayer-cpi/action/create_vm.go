@@ -420,19 +420,19 @@ func (cv CreateVM) createUserDataForInstance(agentID string, registryOptions *re
 	if deployedByBoshCLI == true {
 		directorIP = "127.0.0.1"
 	} else {
-		directorIP, err = cv.getDirectorIPAddressByHost(registryOptions.Host)
+		directorIP, err = cv.getDirectorIPAddressByHost(registryOptions.Address)
 		if err != nil {
 			return "", bosherr.WrapError(err, "Failed to get bosh director IP address in local")
 		}
 	}
-	registryOptions.Host = directorIP
+	registryOptions.Address = directorIP
 	serverName := fmt.Sprintf("vm-%s", agentID)
 	userDataContents := registry.SoftlayerUserData{
 		Registry: registry.SoftlayerUserDataRegistryEndpoint{
 			Endpoint: fmt.Sprintf("http://%s:%s@%s:%d",
 				registryOptions.HTTPOptions.User,
 				registryOptions.HTTPOptions.Password,
-				registryOptions.Host,
+				registryOptions.Address,
 				registryOptions.HTTPOptions.Port),
 		},
 		Server: registry.SoftlayerUserDataServerName{
