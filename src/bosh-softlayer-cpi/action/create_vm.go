@@ -137,9 +137,9 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 		cid, err = cv.virtualGuestService.Create(virtualGuestTemplate, cv.softlayerOptions.EnableVps, stemcellCID.Int(), []int{cloudProps.SshKey})
 		if err != nil {
 			if _, ok := err.(api.CloudError); ok {
-				return "", api.NewVMCreationFailedError(err.Error(), true)
+				return "", err
 			}
-			return "", api.NewVMCreationFailedError(bosherr.WrapError(err, "Creating VM").Error(), true)
+			return "", bosherr.WrapError(err, "Creating VM")
 		}
 	}
 

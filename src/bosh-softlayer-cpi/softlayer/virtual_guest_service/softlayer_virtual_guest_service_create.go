@@ -1,10 +1,13 @@
 package instance
 
 import (
-	bosherr "github.com/cloudfoundry/bosh-utils/errors"
-
 	"fmt"
+	"strings"
+
+	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	"github.com/softlayer/softlayer-go/datatypes"
+
+	"bosh-softlayer-cpi/api"
 )
 
 func (vg SoftlayerVirtualGuestService) Create(virtualGuest *datatypes.Virtual_Guest, enableVps bool, stemcellID int, sshKeys []int) (int, error) {
@@ -16,7 +19,10 @@ func (vg SoftlayerVirtualGuestService) Create(virtualGuest *datatypes.Virtual_Gu
 		virtualGuest, err = vg.softlayerClient.CreateInstance(virtualGuest)
 	}
 	if err != nil {
-		return 0, bosherr.WrapError(err, "Creating virtualGuest")
+		if strings.Contains(err.Error(), "Time Out") {
+			return 0, api.NewVMCreationFailedError(err.Error(), true)
+		}
+		return 0, api.NewVMCreationFailedError(err.Error(), false)
 	}
 
 	return *virtualGuest.Id, nil
