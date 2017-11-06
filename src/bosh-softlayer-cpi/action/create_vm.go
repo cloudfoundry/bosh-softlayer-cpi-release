@@ -1,28 +1,26 @@
 package action
 
 import (
+	"bytes"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"net"
+	"net/url"
+	"os"
+	"strconv"
 
-	"bosh-softlayer-cpi/api"
-	"bosh-softlayer-cpi/registry"
-
-	boslc "bosh-softlayer-cpi/softlayer/client"
-	boslconfig "bosh-softlayer-cpi/softlayer/config"
-
-	"bosh-softlayer-cpi/softlayer/stemcell_service"
-	"bosh-softlayer-cpi/softlayer/virtual_guest_service"
-
-	"bytes"
 	"github.com/bluebosh/goodhosts"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	"github.com/softlayer/softlayer-go/datatypes"
 	"github.com/softlayer/softlayer-go/sl"
-	"net/url"
-	"os"
-	"strconv"
+
+	"bosh-softlayer-cpi/api"
+	"bosh-softlayer-cpi/registry"
+	boslc "bosh-softlayer-cpi/softlayer/client"
+	boslconfig "bosh-softlayer-cpi/softlayer/config"
+	"bosh-softlayer-cpi/softlayer/stemcell_service"
+	"bosh-softlayer-cpi/softlayer/virtual_guest_service"
 )
 
 type CreateVM struct {
@@ -58,7 +56,7 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 	}
 
 	// Find stemcell uuid
-	globalIdentifier, err := cv.stemcellService.Find(int(stemcellCID))
+	stemcellUuid, err := cv.stemcellService.Find(int(stemcellCID))
 	if err != nil {
 		if _, ok := err.(api.CloudError); ok {
 			return "", err
@@ -88,7 +86,7 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 	}
 
 	// Create Virtual Guest template
-	virtualGuestTemplate := cv.createVirtualGuestTemplate(globalIdentifier, *cloudProps.AsInstanceProperties(), userDataContents, publicNetworkComponent, privateNetworkComponent)
+	virtualGuestTemplate := cv.createVirtualGuestTemplate(stemcellUuid, *cloudProps.AsInstanceProperties(), userDataContents, publicNetworkComponent, privateNetworkComponent)
 
 	// Parse networks
 	var instanceNetworks instance.Networks
@@ -102,15 +100,7 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 		return "", bosherr.WrapError(err, "Creating VM")
 	}
 
-	// Extract any tags from env.bosh.groups
 	if boshenv, ok := env["bosh"]; ok {
-		if boshgroups, ok := boshenv.(map[string]interface{})["groups"]; ok {
-			for _, tag := range boshgroups.([]interface{}) {
-				// Ignore error as labels will be validated later
-				cloudProps.Tags = append(cloudProps.Tags, tag.(string))
-			}
-		}
-
 		boshenv.(map[string]interface{})["keep_root_password"] = true
 
 		// #148050011: Set vcap password in env.bosh.password through CPI
@@ -201,10 +191,10 @@ func (cv CreateVM) createVirtualGuestTemplate(stemcellUuid string, cloudProps VM
 
 	virtualGuestTemplate := &datatypes.Virtual_Guest{
 		// instance type
-		Hostname:  sl.String(cloudProps.VmNamePrefix),
+		Hostname:  sl.String(cloudProps.Hostname),
 		Domain:    sl.String(cloudProps.Domain),
-		StartCpus: sl.Int(cloudProps.StartCpus),
-		MaxMemory: sl.Int(cloudProps.MaxMemory),
+		StartCpus: sl.Int(cloudProps.Cpu),
+		MaxMemory: sl.Int(cloudProps.Memory),
 
 		// datacenter or availbility zone
 		Datacenter: &datatypes.Location{
@@ -383,10 +373,10 @@ func (cv CreateVM) createByOsReload(stemcellCID StemcellCID, cloudProps VMCloudP
 					return cid, bosherr.WrapErrorf(err, "Cleaning registry record '%d' before os_reload", *vm.Id)
 				}
 
-				if *vm.MaxCpu != cloudProps.StartCpus ||
-					*vm.MaxMemory != cloudProps.MaxMemory ||
+				if *vm.MaxCpu != cloudProps.Cpu ||
+					*vm.MaxMemory != cloudProps.Memory ||
 					*vm.DedicatedAccountHostOnlyFlag != cloudProps.DedicatedAccountHostOnlyFlag {
-					err = cv.virtualGuestService.UpgradeInstance(*vm.Id, cloudProps.StartCpus, cloudProps.MaxMemory, 0, cloudProps.DedicatedAccountHostOnlyFlag)
+					err = cv.virtualGuestService.UpgradeInstance(*vm.Id, cloudProps.Cpu, cloudProps.Memory, 0, cloudProps.DedicatedAccountHostOnlyFlag)
 					if err != nil {
 						return cid, bosherr.WrapError(err, "Upgrading VM")
 					}
@@ -397,7 +387,7 @@ func (cv CreateVM) createByOsReload(stemcellCID StemcellCID, cloudProps VMCloudP
 					return cid, bosherr.WrapError(err, "Updating userData")
 				}
 
-				err = cv.virtualGuestService.ReloadOS(*vm.Id, stemcellCID.Int(), []int{cloudProps.SshKey}, cloudProps.VmNamePrefix, cloudProps.Domain)
+				err = cv.virtualGuestService.ReloadOS(*vm.Id, stemcellCID.Int(), []int{cloudProps.SshKey}, cloudProps.HostnamePrefix, cloudProps.Domain)
 				if err != nil {
 					return cid, err
 				}

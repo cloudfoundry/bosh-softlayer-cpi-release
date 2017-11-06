@@ -10,9 +10,8 @@ import (
 	boshretry "github.com/cloudfoundry/bosh-utils/retrystrategy"
 	"github.com/softlayer/softlayer-go/datatypes"
 
-	bosl "bosh-softlayer-cpi/softlayer/client"
-
 	"bosh-softlayer-cpi/api"
+	bosl "bosh-softlayer-cpi/softlayer/client"
 )
 
 func (s SoftlayerStemcellService) Find(id int) (string, error) {

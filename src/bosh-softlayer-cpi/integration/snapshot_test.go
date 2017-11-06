@@ -15,7 +15,7 @@ var _ = Describe("Snapshot", func() {
 		By("creating a disk")
 		request := fmt.Sprintf(`{
 		  "method": "create_disk",
-		  "arguments": [20480, {"datacenter": "lon02", "snapshotSpace": 5, "iops": 500}, 0]
+		  "arguments": [20480, {"datacenter": "lon02", "snapshot_space": 5, "iops": 500}, 0]
 		}`)
 		diskCID = assertSucceedsWithResult(request).(string)
 		diskID, err := strconv.Atoi(diskCID)

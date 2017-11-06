@@ -81,7 +81,7 @@ func (l *logger) Warn(tag, msg string, args ...interface{}) {
 }
 
 func (l *logger) Error(tag, msg string, args ...interface{}) {
-	tag = fmt.Sprintf("%s;%s", l.threadPrefix, tag)
+	tag = fmt.Sprintf("%s:%s", l.threadPrefix, tag)
 	l.boshlogger.Error(tag, msg, args...)
 }
 

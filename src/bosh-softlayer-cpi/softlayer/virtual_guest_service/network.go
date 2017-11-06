@@ -11,7 +11,6 @@ type NetworkCloudProperties struct {
 	VlanID              int  `json:"vlanId"`
 	SubnetID            int  `json:"vlanId"`
 	SourcePolicyRouting bool `json:"source_policy_routing,omitempty"`
-	Tags                Tags `json:"tags,omitempty"`
 }
 
 const maxTagLength = 63

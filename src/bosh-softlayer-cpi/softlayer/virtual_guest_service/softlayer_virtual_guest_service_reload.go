@@ -6,9 +6,9 @@ import (
 	"strconv"
 )
 
-func (vg SoftlayerVirtualGuestService) ReloadOS(id int, stemcellID int, sshKeys []int, vmNamePrefix string, domain string) error {
+func (vg SoftlayerVirtualGuestService) ReloadOS(id int, stemcellID int, sshKeys []int, hostname string, domain string) error {
 	vg.logger.Debug(softlayerVirtualGuestServiceLogTag, "Reloading instance '%d'.", id)
-	return vg.softlayerClient.ReloadInstance(id, stemcellID, sshKeys, vmNamePrefix, domain)
+	return vg.softlayerClient.ReloadInstance(id, stemcellID, sshKeys, hostname, domain)
 }
 
 func (vg SoftlayerVirtualGuestService) Edit(id int, instance *datatypes.Virtual_Guest) error {

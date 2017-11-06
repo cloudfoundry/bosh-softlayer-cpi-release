@@ -921,7 +921,7 @@ var _ = Describe("InstanceHandler", func() {
 
 				_, err := cli.CreateInstance(vgTemplate)
 				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("Waiting until instance is ready"))
+				Expect(err.Error()).To(ContainSubstring("Waiting until instance has none active transaction"))
 			})
 		})
 	})

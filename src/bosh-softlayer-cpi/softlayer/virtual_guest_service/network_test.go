@@ -72,7 +72,6 @@ var _ = Describe("Networks", func() {
 				CloudProperties: NetworkCloudProperties{
 					VlanID:              42345678,
 					SourcePolicyRouting: true,
-					Tags:                []string{"fake-network-cloud-network-tag"},
 				},
 			}
 		})
@@ -113,7 +112,6 @@ var _ = Describe("Networks", func() {
 				CloudProperties: NetworkCloudProperties{
 					VlanID:              42345678,
 					SourcePolicyRouting: true,
-					Tags:                []string{"fake-network-cloud-network-tag"},
 				},
 			}
 
@@ -132,7 +130,6 @@ var _ = Describe("Networks", func() {
 				CloudProperties: NetworkCloudProperties{
 					VlanID:              42345678,
 					SourcePolicyRouting: true,
-					Tags:                []string{"fake-network-cloud-network-tag"},
 				},
 			}
 
@@ -153,7 +150,6 @@ var _ = Describe("Networks", func() {
 				CloudProperties: NetworkCloudProperties{
 					VlanID:              42345678,
 					SourcePolicyRouting: false,
-					Tags:                []string{"fake-network-cloud-network-tag"},
 				},
 			}
 		})
@@ -196,7 +192,6 @@ var _ = Describe("Networks", func() {
 				CloudProperties: NetworkCloudProperties{
 					VlanID:              42345678,
 					SourcePolicyRouting: true,
-					Tags:                []string{"fake-network-cloud-network-tag"},
 				},
 			}
 
@@ -215,7 +210,6 @@ var _ = Describe("Networks", func() {
 				CloudProperties: NetworkCloudProperties{
 					VlanID:              42345678,
 					SourcePolicyRouting: true,
-					Tags:                []string{"fake-network-cloud-network-tag"},
 				},
 			}
 
@@ -234,7 +228,6 @@ var _ = Describe("Networks", func() {
 				CloudProperties: NetworkCloudProperties{
 					VlanID:              42345678,
 					SourcePolicyRouting: true,
-					Tags:                []string{"fake-network-cloud-network-tag"},
 				},
 			}
 

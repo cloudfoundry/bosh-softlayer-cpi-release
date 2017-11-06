@@ -14,10 +14,10 @@ var _ = Describe("ConcreteFactoryOptions", func() {
 	Describe("Validate", func() {
 		BeforeEach(func() {
 			cloudProps = VMCloudProperties{
-				VmNamePrefix:      "fake-hostname",
+				HostnamePrefix:    "fake-hostname",
 				Domain:            "fake-domain.com",
-				StartCpus:         2,
-				MaxMemory:         2048,
+				Cpu:               2,
+				Memory:            2048,
 				MaxNetworkSpeed:   100,
 				Datacenter:        "fake-datacenter",
 				SshKey:            32345678,
@@ -30,11 +30,11 @@ var _ = Describe("ConcreteFactoryOptions", func() {
 			Expect(err).ToNot(HaveOccurred())
 		})
 
-		It("returns error if VmNamePrefix is not be set", func() {
+		It("returns error if HostnamePrefix is not be set", func() {
 			cloudProps = VMCloudProperties{
 				Domain:            "fake-domain.com",
-				StartCpus:         2,
-				MaxMemory:         2048,
+				Cpu:               2,
+				Memory:            2048,
 				MaxNetworkSpeed:   100,
 				Datacenter:        "fake-datacenter",
 				SshKey:            32345678,
@@ -43,14 +43,14 @@ var _ = Describe("ConcreteFactoryOptions", func() {
 
 			err := cloudProps.Validate()
 			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring("The property 'VmNamePrefix' must be set to create an instance"))
+			Expect(err.Error()).To(ContainSubstring("The property 'hostname_prefix' must be set to create an instance"))
 		})
 
 		It("Add 'Domain' property if Domain is not be set", func() {
 			cloudProps = VMCloudProperties{
-				VmNamePrefix:      "fake-hostname",
-				StartCpus:         2,
-				MaxMemory:         2048,
+				HostnamePrefix:    "fake-hostname",
+				Cpu:               2,
+				Memory:            2048,
 				MaxNetworkSpeed:   100,
 				Datacenter:        "fake-datacenter",
 				SshKey:            32345678,
@@ -64,10 +64,10 @@ var _ = Describe("ConcreteFactoryOptions", func() {
 
 		It("returns error if Datacenter is not be set", func() {
 			cloudProps = VMCloudProperties{
-				VmNamePrefix:      "fake-hostname",
+				HostnamePrefix:    "fake-hostname",
 				Domain:            "fake-domain.com",
-				StartCpus:         2,
-				MaxMemory:         2048,
+				Cpu:               2,
+				Memory:            2048,
 				MaxNetworkSpeed:   100,
 				SshKey:            32345678,
 				DeployedByBoshCLI: true,
@@ -75,7 +75,7 @@ var _ = Describe("ConcreteFactoryOptions", func() {
 
 			err := cloudProps.Validate()
 			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring("The property 'Datacenter' must be set to create an instance"))
+			Expect(err.Error()).To(ContainSubstring("The property 'datacenter' must be set to create an instance"))
 		})
 	})
 })

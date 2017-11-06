@@ -2,28 +2,25 @@ package action
 
 import (
 	"encoding/json"
-
-	instance "bosh-softlayer-cpi/softlayer/virtual_guest_service"
 	"fmt"
-	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	"time"
+
+	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 )
 
 type DiskCloudProperties struct {
-	DiskType         string `json:"type,omitempty"`
-	DataCenter       string `json:"datacenter,omitempty"`
-	Iops             int    `json:"iops,omitempty"`
-	SnapShotSpace    int    `json:"snapshotSpace,omitempty"`
-	UseHourlyPricing bool   `json:"useHourlyPricing,omitempty"`
+	DiskType      string `json:"type,omitempty"`
+	DataCenter    string `json:"datacenter,omitempty"`
+	Iops          int    `json:"iops,omitempty"`
+	SnapshotSpace int    `json:"snapshot_space,omitempty"`
 }
 
 type Environment map[string]interface{}
 
 type NetworkCloudProperties struct {
-	SubnetIds           []int         `json:"subnetIds,omitempty"`
-	VlanIds             []int         `json:"vlanIds,omitempty"`
-	SourcePolicyRouting bool          `json:"source_policy_routing,omitempty"`
-	Tags                instance.Tags `json:"tags,omitempty"`
+	SubnetIds           []int `json:"subnet_ids,omitempty"`
+	VlanIds             []int `json:"vlan_ids,omitempty"`
+	SourcePolicyRouting bool  `json:"source_policy_routing,omitempty"`
 }
 
 type SnapshotMetadata struct {
@@ -44,64 +41,57 @@ type StemcellCloudProperties struct {
 }
 
 type VMCloudProperties struct {
-	VmNamePrefix      string `json:"vmNamePrefix,omitempty"`
+	HostnamePrefix    string `json:"hostname_prefix,omitempty"`
+	Hostname          string `json:"hostname,omitempty"`
 	Domain            string `json:"domain,omitempty"`
-	StartCpus         int    `json:"startCpus,omitempty"`
-	MaxMemory         int    `json:"maxMemory,omitempty"`
-	Datacenter        string `json:"dataCenter"`
-	EphemeralDiskSize int    `json:"ephemeralDiskSize,omitempty"`
-	SshKey            int    `json:"sshKey,omitempty"`
+	Cpu               int    `json:"cpu,omitempty"`
+	Memory            int    `json:"memory,omitempty"`
+	Datacenter        string `json:"datacenter"`
+	EphemeralDiskSize int    `json:"ephemeral_disk_size,omitempty"`
+	SshKey            int    `json:"ssh_key,omitempty"`
 
-	HourlyBillingFlag            bool `json:"hourlyBillingFlag,omitempty"`
-	LocalDiskFlag                bool `json:"localDiskFlag,omitempty"`
-	DedicatedAccountHostOnlyFlag bool `json:"dedicatedAccountHostOnlyFlag,omitempty"`
-	PrivateNetworkOnlyFlag       bool `json:"privateNetworkOnlyFlag,omitempty"`
+	HourlyBillingFlag            bool `json:"hourly_billing_flag,omitempty"`
+	LocalDiskFlag                bool `json:"local_disk_flag,omitempty"`
+	DedicatedAccountHostOnlyFlag bool `json:"dedicated_account_host_only_flag,omitempty"`
 
-	DeployedByBoshCLI bool `json:"deployedByBoshCli,omitempty"`
+	DeployedByBoshCLI bool `json:"deployed_by_boshcli,omitempty"`
 
-	MaxNetworkSpeed int `json:"maxNetworkSpeed,omitempty"`
-
-	Tags instance.Tags `json:"tags,omitempty"`
+	MaxNetworkSpeed int `json:"max_network_speed,omitempty"`
 }
 
 func (vmProps *VMCloudProperties) Validate() error {
-	if vmProps.VmNamePrefix == "" {
-		return bosherr.Error("The property 'VmNamePrefix' must be set to create an instance")
+	if vmProps.HostnamePrefix == "" {
+		return bosherr.Error("The property 'hostname_prefix' must be set to create an instance")
 	}
 	if vmProps.Domain == "" {
 		vmProps.Domain = "softlayer.com"
 	}
 	if vmProps.Datacenter == "" {
-		return bosherr.Error("The property 'Datacenter' must be set to create an instance")
+		return bosherr.Error("The property 'datacenter' must be set to create an instance")
 	}
-	if vmProps.MaxMemory == 0 {
-		vmProps.MaxMemory = 8192
+	if vmProps.Memory == 0 {
+		vmProps.Memory = 8192
 	}
-	if vmProps.StartCpus == 0 {
-		vmProps.StartCpus = 4
+	if vmProps.Cpu == 0 {
+		vmProps.Cpu = 4
 	}
 	if vmProps.MaxNetworkSpeed == 0 {
 		vmProps.MaxNetworkSpeed = 1000
 	}
-
-	//if err := vmProps.Tags.Validate(); err != nil {
-	//	return err
-	//}
 
 	return nil
 }
 
 func (vmProps *VMCloudProperties) AsInstanceProperties() *VMCloudProperties {
 	if vmProps.DeployedByBoshCLI {
-		vmProps.VmNamePrefix = vmProps.updateHostNameInCloudProps(vmProps, "")
+		vmProps.Hostname = vmProps.updateHostNameInCloudProps(vmProps, "")
 	} else {
-		vmProps.VmNamePrefix = vmProps.updateHostNameInCloudProps(vmProps, timeStampForTime(time.Now().UTC()))
+		vmProps.Hostname = vmProps.updateHostNameInCloudProps(vmProps, timeStampForTime(time.Now().UTC()))
 	}
 
 	// A workaround for the issue #129 in bosh-softlayer-cpi
-	lengthOfHostName := len(vmProps.VmNamePrefix + "." + vmProps.Domain)
-	if lengthOfHostName == 64 {
-		vmProps.VmNamePrefix = vmProps.VmNamePrefix + "-1"
+	if len(vmProps.Hostname+"."+vmProps.Domain) == 64 {
+		vmProps.Hostname = vmProps.Hostname + "-1"
 	}
 
 	return vmProps
@@ -109,13 +99,13 @@ func (vmProps *VMCloudProperties) AsInstanceProperties() *VMCloudProperties {
 
 func (vmProps VMCloudProperties) updateHostNameInCloudProps(cloudProps *VMCloudProperties, timeStampPostfix string) string {
 	if len(timeStampPostfix) == 0 {
-		return cloudProps.VmNamePrefix
+		return cloudProps.HostnamePrefix
 	} else {
-		prefixLen := len(cloudProps.VmNamePrefix)
-		if prefixLen > 0 && cloudProps.VmNamePrefix[prefixLen-1] == '-' {
-			return cloudProps.VmNamePrefix + timeStampPostfix
+		prefixLen := len(cloudProps.HostnamePrefix)
+		if prefixLen > 0 && cloudProps.HostnamePrefix[prefixLen-1] == '-' {
+			return cloudProps.HostnamePrefix + timeStampPostfix
 		}
-		return cloudProps.VmNamePrefix + "-" + timeStampPostfix
+		return cloudProps.HostnamePrefix + "-" + timeStampPostfix
 	}
 }
 

@@ -38,6 +38,8 @@ const (
 		"billingItem[nextInvoiceTotalRecurringAmount, children[nextInvoiceTotalRecurringAmount]], notes, tagReferences.tag.name, networkVlans[id,vlanNumber,networkSpace], " +
 		"primaryBackendNetworkComponent[primaryIpAddress, networkVlan[id,name,vlanNumber,primaryRouter], subnets[netmask,networkIdentifier]], primaryNetworkComponent[primaryIpAddress, networkVlan[id,name,vlanNumber,primaryRouter], subnets[netmask,networkIdentifier]]"
 
+	INSTANCE_NETWORK_COMPONENTS_MASK = "primaryBackendNetworkComponent[primaryIpAddress, networkVlan[id,name,vlanNumber,primaryRouter], subnets[netmask,networkIdentifier]], primaryNetworkComponent[primaryIpAddress, networkVlan[id,name,vlanNumber,primaryRouter], subnets[netmask,networkIdentifier]]"
+
 	NETWORK_DEFAULT_VLAN_MASK   = "id,primarySubnetId,networkSpace"
 	NETWORK_DEFAULT_SUBNET_MASK = "id,networkVlanId,addressSpace"
 
@@ -355,7 +357,7 @@ func (c *ClientManager) WaitInstanceUntilReadyWithTicket(id int, until time.Time
 	ticketTime := now.Add(halfDuration)
 
 	// Wait half duration until ready, otherwise create a ticket
-	c.logger.Debug(softlayerClientLogTag, fmt.Sprintf("Waiting for intance '%d' ready unless it is over %.4f minutes to create ticket.", id,
+	c.logger.Debug(softlayerClientLogTag, fmt.Sprintf("Waiting for intance '%d' ready unless it is over %.2f minutes to create ticket.", id,
 		halfDuration.Minutes()))
 	err := c.WaitInstanceUntilReady(id, ticketTime)
 	if err != nil {
@@ -376,7 +378,7 @@ func (c *ClientManager) WaitInstanceUntilReadyWithTicket(id int, until time.Time
 	}
 
 	// Wait remaining  half duration until ready, otherwise throw timeout error.
-	c.logger.Debug(softlayerClientLogTag, fmt.Sprintf("Waiting for intance '%d' ready unless it is over %.4f minutes to return the timeout error.", id,
+	c.logger.Debug(softlayerClientLogTag, fmt.Sprintf("Waiting for intance '%d' ready unless it is over %.2f minutes to return the timeout error.", id,
 		halfDuration.Minutes()))
 
 	err = c.WaitInstanceUntilReady(id, until)
@@ -480,6 +482,9 @@ func (c *ClientManager) CreateInstance(template *datatypes.Virtual_Guest) (*data
 	until := time.Now().Add(time.Duration(4) * time.Hour)
 	if err := c.WaitInstanceUntilReady(*virtualguest.Id, until); err != nil {
 		return &datatypes.Virtual_Guest{}, bosherr.WrapError(err, "Waiting until instance is ready")
+	}
+	if err := c.WaitInstanceHasNoneActiveTransaction(*virtualguest.Id, until); err != nil {
+		return &datatypes.Virtual_Guest{}, bosherr.WrapError(err, "Waiting until instance has none active transaction")
 	}
 
 	return &virtualguest, nil

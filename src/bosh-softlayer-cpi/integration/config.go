@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"net/http/httptest"
 	"os"
@@ -15,21 +14,21 @@ import (
 	"github.com/softlayer/softlayer-go/session"
 
 	"bosh-softlayer-cpi/action"
-	api "bosh-softlayer-cpi/api"
+	"bosh-softlayer-cpi/api"
 	disp "bosh-softlayer-cpi/api/dispatcher"
 	"bosh-softlayer-cpi/api/transport"
 	cfg "bosh-softlayer-cpi/config"
-	cpiLogger "bosh-softlayer-cpi/logger"
+	cpiLog "bosh-softlayer-cpi/logger"
 	"bosh-softlayer-cpi/softlayer/client"
 	vpsVm "bosh-softlayer-cpi/softlayer/vps_service/client/vm"
 )
 
 var (
 	// A stemcell that will be created/loaded in integration_suite_test.go
-	existingStemcellId         string
-	in, out, errOut, errOutLog bytes.Buffer
-	username                   = envRequired("SL_USERNAME")
-	apiKey                     = envRequired("SL_API_KEY")
+	existingStemcellId string
+	in, out, errOutLog bytes.Buffer
+	username           = envRequired("SL_USERNAME")
+	apiKey             = envRequired("SL_API_KEY")
 
 	// Configurable defaults
 	stemcellId   = envOrDefault("STEMCELL_ID", "1633205")
@@ -89,8 +88,7 @@ var (
 		}`, username, apiKey)
 
 	// Stuff of softlayer client
-	multiWriter = io.MultiWriter(&errOut, &errOutLog)
-	logger      = cpiLogger.NewWriterLogger(boshlogger.LevelDebug, "Integration", multiWriter, multiWriter)
+	logger      = cpiLog.NewLogger(boshlogger.LevelDebug, "Integration")
 	multiLogger = api.MultiLogger{Logger: logger, LogBuff: &errOutLog}
 	uuidGen     = uuid.NewGenerator()
 	sess        *session.Session
