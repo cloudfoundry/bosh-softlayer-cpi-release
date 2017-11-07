@@ -877,6 +877,10 @@ var _ = Describe("InstanceHandler", func() {
 						"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
 						"statusCode": http.StatusOK,
 					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
+						"statusCode": http.StatusOK,
+					},
 				}
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
@@ -921,7 +925,7 @@ var _ = Describe("InstanceHandler", func() {
 
 				_, err := cli.CreateInstance(vgTemplate)
 				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("Waiting until instance has none active transaction"))
+				Expect(err.Error()).To(ContainSubstring("Waiting until instance is ready"))
 			})
 		})
 	})

@@ -23,6 +23,7 @@ import (
 	"net"
 	"os"
 	"os/user"
+	"runtime"
 	"strings"
 	"time"
 
@@ -113,6 +114,10 @@ type Session struct {
 	// will result in an error.
 	Timeout time.Duration
 
+	// The user agent to send with each API request
+	// User shouldn't be able to change or set the base user agent
+	userAgent string
+
 	// Retries is the number of times to retry a connection that failed due to a timeout.
 	Retries int
 
@@ -125,7 +130,7 @@ func init() {
 }
 
 // New creates and returns a pointer to a new session object.  It takes up to
-// three parameters, all of which are optional.  If specified, they will be
+// four parameters, all of which are optional.  If specified, they will be
 // interpreted in the following sequence:
 //
 // 1. UserName
@@ -200,9 +205,10 @@ func New(args ...interface{}) *Session {
 	}
 
 	sess := &Session{
-		UserName: values[keys["username"]],
-		APIKey:   values[keys["api_key"]],
-		Endpoint: endpointURL,
+		UserName:  values[keys["username"]],
+		APIKey:    values[keys["api_key"]],
+		Endpoint:  endpointURL,
+		userAgent: getDefaultUserAgent(),
 	}
 
 	timeout := values[keys["timeout"]]
@@ -230,6 +236,21 @@ func (r *Session) DoRequest(service string, method string, args []interface{}, o
 	}
 
 	return r.TransportHandler.DoRequest(r, service, method, args, options, pResult)
+}
+
+// AppendUserAgent allows higher level application to identify themselves by appending to the useragent string
+func (r *Session) AppendUserAgent(agent string) {
+	if r.userAgent == "" {
+		r.userAgent = getDefaultUserAgent()
+	}
+	if agent != "" {
+		r.userAgent += " " + agent
+	}
+}
+
+// ResetUserAgent resets the current user agent to the default value
+func (r *Session) ResetUserAgent() {
+	r.userAgent = getDefaultUserAgent()
 }
 
 // SetTimeout creates a copy of the session and sets the passed timeout into it
@@ -301,4 +322,12 @@ func isTimeout(err error) bool {
 	}
 
 	return false
+}
+
+func getDefaultUserAgent() string {
+	return fmt.Sprintf("softlayer-go/%s (%s;%s;%s)", sl.Version.String(),
+		runtime.Version(),
+		runtime.GOARCH,
+		runtime.GOOS,
+	)
 }

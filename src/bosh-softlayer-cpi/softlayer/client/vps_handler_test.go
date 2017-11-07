@@ -155,6 +155,10 @@ var _ = Describe("InstanceHandler", func() {
 					"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
 					"statusCode": http.StatusOK,
 				},
+				{
+					"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
+					"statusCode": http.StatusOK,
+				},
 			}
 			err = test_helpers.SpecifyServerResps(respParas, slServer)
 			Expect(err).NotTo(HaveOccurred())
@@ -281,6 +285,10 @@ var _ = Describe("InstanceHandler", func() {
 			respParas = []map[string]interface{}{
 				{
 					"filename":   "SoftLayer_Virtual_Guest_createObject.json",
+					"statusCode": http.StatusOK,
+				},
+				{
+					"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
 					"statusCode": http.StatusOK,
 				},
 				{

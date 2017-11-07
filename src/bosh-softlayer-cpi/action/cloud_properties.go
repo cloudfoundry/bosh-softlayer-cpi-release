@@ -44,6 +44,7 @@ type VMCloudProperties struct {
 	HostnamePrefix    string `json:"hostname_prefix,omitempty"`
 	Hostname          string `json:"hostname,omitempty"`
 	Domain            string `json:"domain,omitempty"`
+	FlavorKeyName     string `json:"flavor_key_name,omitempty"`
 	Cpu               int    `json:"cpu,omitempty"`
 	Memory            int    `json:"memory,omitempty"`
 	Datacenter        string `json:"datacenter"`
@@ -69,12 +70,18 @@ func (vmProps *VMCloudProperties) Validate() error {
 	if vmProps.Datacenter == "" {
 		return bosherr.Error("The property 'datacenter' must be set to create an instance")
 	}
-	if vmProps.Memory == 0 {
-		vmProps.Memory = 8192
+
+	if vmProps.FlavorKeyName != "" && (vmProps.Memory != 0 || vmProps.Cpu != 0) {
+		return bosherr.Error("The property 'flavor_key_name' can not be set with 'memory/cpu'")
+	} else {
+		if vmProps.Memory == 0 {
+			vmProps.Memory = 8192
+		}
+		if vmProps.Cpu == 0 {
+			vmProps.Cpu = 4
+		}
 	}
-	if vmProps.Cpu == 0 {
-		vmProps.Cpu = 4
-	}
+
 	if vmProps.MaxNetworkSpeed == 0 {
 		vmProps.MaxNetworkSpeed = 1000
 	}

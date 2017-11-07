@@ -238,6 +238,13 @@ func makeHTTPRequest(
 		req.SetBasicAuth(fmt.Sprintf("%d", session.UserId), session.AuthToken)
 	}
 
+	// For cases where session is built from the raw structure and not using New() , the UserAgent would be empty
+	if session.userAgent == "" {
+		session.userAgent = getDefaultUserAgent()
+	}
+
+	req.Header.Set("User-Agent", session.userAgent)
+
 	req.URL.RawQuery = encodeQuery(options)
 
 	if session.Debug {

@@ -191,10 +191,8 @@ func (cv CreateVM) createVirtualGuestTemplate(stemcellUuid string, cloudProps VM
 
 	virtualGuestTemplate := &datatypes.Virtual_Guest{
 		// instance type
-		Hostname:  sl.String(cloudProps.Hostname),
-		Domain:    sl.String(cloudProps.Domain),
-		StartCpus: sl.Int(cloudProps.Cpu),
-		MaxMemory: sl.Int(cloudProps.Memory),
+		Hostname: sl.String(cloudProps.Hostname),
+		Domain:   sl.String(cloudProps.Domain),
 
 		// datacenter or availbility zone
 		Datacenter: &datatypes.Location{
@@ -225,6 +223,15 @@ func (cv CreateVM) createVirtualGuestTemplate(stemcellUuid string, cloudProps VM
 				Value: sl.String(userData),
 			},
 		},
+	}
+
+	if cloudProps.FlavorKeyName != "" {
+		virtualGuestTemplate.SupplementalCreateObjectOptions = &datatypes.Virtual_Guest_SupplementalCreateObjectOptions{
+			FlavorKeyName: sl.String(cloudProps.FlavorKeyName),
+		}
+	} else {
+		virtualGuestTemplate.StartCpus = sl.Int(cloudProps.Cpu)
+		virtualGuestTemplate.MaxMemory = sl.Int(cloudProps.Memory)
 	}
 
 	if cloudProps.SshKey != 0 {
