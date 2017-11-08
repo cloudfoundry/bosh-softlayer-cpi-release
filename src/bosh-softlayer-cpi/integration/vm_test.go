@@ -58,6 +58,19 @@ var _ = Describe("VM", func() {
 		exists := assertSucceedsWithResult(request).(bool)
 		Expect(exists).To(Equal(true))
 
+		By("Setting the metadata")
+		request = fmt.Sprintf(`{
+		  "method": "set_vm_metadata",
+		  "arguments": [
+		    "%v",
+		    {
+		      "cpi": "softlayer-cpi",
+		      "test-job": "integration"
+		    }
+		  ]
+		}`, vmCID)
+		assertSucceeds(request)
+
 		By("rebooting the VM")
 		request = fmt.Sprintf(`{
 		  "method": "reboot_vm",

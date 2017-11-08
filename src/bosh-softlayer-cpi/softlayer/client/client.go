@@ -118,7 +118,7 @@ type Client interface {
 	RebootInstance(id int, soft bool, hard bool) error
 	ReloadInstance(id int, stemcellId int, sshKeyIds []int, hostname string, domain string) error
 	UpgradeInstanceConfig(id int, cpu int, memory int, network int, privateCPU bool) error
-	UpgradeInstance(id int, cpu int, memory int, network int, privateCPU bool, additional_diskSize int) (int, error)
+	UpgradeInstance(id int, cpu int, memory int, network int, privateCPU bool, secondDiskSize int) (int, error)
 	WaitInstanceUntilReady(id int, until time.Time) error
 	WaitInstanceUntilReadyWithTicket(id int, until time.Time) error
 	WaitInstanceHasActiveTransaction(id int, until time.Time) error
@@ -716,7 +716,7 @@ func (c *ClientManager) DeleteInstanceFromVPS(id int) error {
 	return nil
 }
 
-func (c *ClientManager) UpgradeInstance(id int, cpu int, memory int, network int, privateCPU bool, additional_diskSize int) (int, error) {
+func (c *ClientManager) UpgradeInstance(id int, cpu int, memory int, network int, privateCPU bool, secondDiskSize int) (int, error) {
 	upgradeOptions := make(map[string]int)
 	public := true
 	if cpu != 0 {
@@ -753,6 +753,7 @@ func (c *ClientManager) UpgradeInstance(id int, cpu int, memory int, network int
 	}
 	var prices = make([]datatypes.Product_Item_Price, 0)
 	for option, value := range upgradeOptions {
+		c.logger.Debug(softlayerClientLogTag, fmt.Sprintf("Find upgrade item price for '%s/%d'", option, value))
 		priceID := getPriceIdForUpgrade(packageItems, option, value, public)
 		if priceID == -1 {
 			return 0,
@@ -761,8 +762,9 @@ func (c *ClientManager) UpgradeInstance(id int, cpu int, memory int, network int
 		prices = append(prices, datatypes.Product_Item_Price{Id: &priceID})
 	}
 
-	if additional_diskSize != 0 {
-		diskItemPrice, err := c.getUpgradeItemPriceForSecondDisk(id, additional_diskSize)
+	if secondDiskSize != 0 {
+		c.logger.Debug(softlayerClientLogTag, fmt.Sprintf("Find upgrade item price for second disk: %dGB", secondDiskSize))
+		diskItemPrice, err := c.getUpgradeItemPriceForSecondDisk(id, secondDiskSize)
 		if err != nil {
 			return 0, err
 		}
@@ -799,6 +801,8 @@ func (c *ClientManager) UpgradeInstance(id int, cpu int, memory int, network int
 			},
 		},
 	}
+
+	c.logger.Debug(softlayerClientLogTag, fmt.Sprintf("Place order for vm '%d'", id))
 	orderReceipt, err := c.OrderService.PlaceOrder(&upgradeOrder, sl.Bool(false))
 	if err != nil {
 		if apiErr, ok := err.(sl.Error); ok {
@@ -848,7 +852,12 @@ func (c *ClientManager) GetInstanceAllowedHost(id int) (*datatypes.Network_Stora
 }
 
 func (c *ClientManager) getUpgradeItemPriceForSecondDisk(id int, diskSize int) (*datatypes.Product_Item_Price, error) {
-	itemPrices, err := c.VirtualGuestService.Id(id).GetUpgradeItemPrices(sl.Bool(true))
+	filters := filter.Build(
+		filter.Path("categories.categoryCode").Eq(EPHEMERAL_DISK_CATEGORY_CODE),
+	)
+	mask := "id, categories[id, categoryCode], item[description, capacity]"
+
+	itemPrices, err := c.VirtualGuestService.Id(id).Mask(mask).Filter(filters).GetUpgradeItemPrices(sl.Bool(true))
 	if err != nil {
 		return &datatypes.Product_Item_Price{}, err
 	}
@@ -872,13 +881,6 @@ func (c *ClientManager) getUpgradeItemPriceForSecondDisk(id int, diskSize int) (
 		flag := false
 		for _, category := range itemPrice.Categories {
 			if *category.CategoryCode == EPHEMERAL_DISK_CATEGORY_CODE {
-				flag = true
-				break
-			}
-		}
-
-		for _, category := range itemPrice.Item.Categories {
-			if flag || *category.CategoryCode == EPHEMERAL_DISK_CATEGORY_CODE {
 				flag = true
 				break
 			}

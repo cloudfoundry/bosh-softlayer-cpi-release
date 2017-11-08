@@ -20,7 +20,6 @@ func NewSetVMMetadata(
 }
 
 func (svm SetVMMetadata) Run(vmCID VMCID, vmMetadata VMMetadata) (interface{}, error) {
-	// @TODO retry
 	if err := svm.vmService.SetMetadata(vmCID.Int(), instance.Metadata(vmMetadata)); err != nil {
 		if _, ok := err.(api.CloudError); ok {
 			return nil, err

@@ -1,10 +1,15 @@
 package instance
 
 import (
-	"bosh-softlayer-cpi/api"
 	"bytes"
-	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	"strconv"
+	"time"
+
+	"code.cloudfoundry.org/clock"
+	bosherr "github.com/cloudfoundry/bosh-utils/errors"
+	boshretry "github.com/cloudfoundry/bosh-utils/retrystrategy"
+
+	"bosh-softlayer-cpi/api"
 )
 
 func (vg SoftlayerVirtualGuestService) SetMetadata(id int, vmMetadata Metadata) error {
@@ -13,13 +18,29 @@ func (vg SoftlayerVirtualGuestService) SetMetadata(id int, vmMetadata Metadata) 
 		return bosherr.WrapError(err, "Extracting tags from vm metadata")
 	}
 
-	found, err := vg.softlayerClient.SetTags(id, tags)
-	if err != nil {
-		return bosherr.WrapErrorf(err, "Settings tags on virtualGuest '%d'", id)
-	}
+	var (
+		found bool
+	)
+	execStmtRetryable := boshretry.NewRetryable(
+		func() (bool, error) {
+			found, err = vg.softlayerClient.SetTags(id, tags)
+			if err != nil {
+				return true, bosherr.WrapErrorf(err, "Settings tags on virtualGuest '%d'", id)
+			}
 
-	if !found {
-		return api.NewVMNotFoundError(strconv.Itoa(id))
+			if !found {
+				return false, api.NewVMNotFoundError(strconv.Itoa(id))
+			}
+
+			return false, nil
+		})
+	timeService := clock.NewClock()
+	timeoutRetryStrategy := boshretry.NewTimeoutRetryStrategy(1*time.Minute, 5*time.Second, execStmtRetryable, timeService, vg.logger.GetBoshLogger())
+	vg.logger.ChangeRetryStrategyLogTag(&timeoutRetryStrategy)
+
+	err = timeoutRetryStrategy.Try()
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -27,27 +48,11 @@ func (vg SoftlayerVirtualGuestService) SetMetadata(id int, vmMetadata Metadata) 
 
 func (vg SoftlayerVirtualGuestService) extractTagsFromVMMetadata(vmMetadata Metadata) (string, error) {
 	var tagStringBuffer bytes.Buffer
-	if val, ok := vmMetadata["deployment"]; ok {
-		tagStringBuffer.WriteString("deployment" + ":" + val.(string))
-	}
-	if val, ok := vmMetadata["director"]; ok {
+	for tagName, tagValue := range vmMetadata {
+		tagStringBuffer.WriteString(tagName + ": " + tagValue.(string))
 		tagStringBuffer.WriteString(", ")
-		tagStringBuffer.WriteString("director" + ":" + val.(string))
 	}
-
-	if val, ok := vmMetadata["compiling"]; ok {
-		tagStringBuffer.WriteString(", ")
-		tagStringBuffer.WriteString("compiling" + ":" + val.(string))
-	} else {
-		if val, ok := vmMetadata["job"]; ok {
-			tagStringBuffer.WriteString(", ")
-			tagStringBuffer.WriteString("job" + ":" + val.(string))
-		}
-		if val, ok := vmMetadata["index"]; ok {
-			tagStringBuffer.WriteString(", ")
-			tagStringBuffer.WriteString("index" + ":" + val.(string))
-		}
-	}
+	tagStringBuffer.Truncate(tagStringBuffer.Len() - 2)
 
 	return tagStringBuffer.String(), nil
 }
