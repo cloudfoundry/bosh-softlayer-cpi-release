@@ -83,7 +83,7 @@ var _ = Describe("Virtual Guest Service", func() {
 			err := virtualGuestService.SetMetadata(vmID, metaData)
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("fake-client-error"))
-			Expect(cli.SetTagsCallCount()).To(Equal(1))
+			Expect(cli.SetTagsCallCount()).To(BeNumerically(">", 1))
 		})
 
 		It("Return error if softLayerClient SetTags call returns an error", func() {

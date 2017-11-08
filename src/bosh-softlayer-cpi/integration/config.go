@@ -9,7 +9,7 @@ import (
 	"os"
 	"strings"
 
-	boshlogger "github.com/cloudfoundry/bosh-utils/logger"
+	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	"github.com/cloudfoundry/bosh-utils/uuid"
 	"github.com/softlayer/softlayer-go/session"
 
@@ -21,19 +21,22 @@ import (
 	cpiLog "bosh-softlayer-cpi/logger"
 	"bosh-softlayer-cpi/softlayer/client"
 	vpsVm "bosh-softlayer-cpi/softlayer/vps_service/client/vm"
+	"bufio"
+	"io"
+	"log"
 )
 
 var (
 	// A stemcell that will be created/loaded in integration_suite_test.go
 	existingStemcellId string
-	in, out, errOutLog bytes.Buffer
+	in, out, logBuffer bytes.Buffer
 	username           = envRequired("SL_USERNAME")
 	apiKey             = envRequired("SL_API_KEY")
 
 	// Configurable defaults
 	stemcellId   = envOrDefault("STEMCELL_ID", "1633205")
 	stemcellFile = envOrDefault("STEMCELL_FILE", "")
-	stemcellUuid = envOrDefault("DATACENTER", "ea065435-f7ec-4f1c-8f3f-2987086b1427")
+	stemcellUuid = envOrDefault("STEMCELL_UUID", "ea065435-f7ec-4f1c-8f3f-2987086b1427")
 	datacenter   = envOrDefault("DATACENTER", "lon02")
 	ipAddrs      = strings.Split(envOrDefault("PRIVATE_IP", "192.168.100.102,192.168.100.103,192.168.100.104"), ",")
 
@@ -88,8 +91,13 @@ var (
 		}`, username, apiKey)
 
 	// Stuff of softlayer client
-	logger      = cpiLog.NewLogger(boshlogger.LevelDebug, "Integration")
-	multiLogger = api.MultiLogger{Logger: logger, LogBuff: &errOutLog}
+	multiWriter  = io.MultiWriter(os.Stderr, bufio.NewWriter(&logBuffer))
+	clientLogger = log.New(multiWriter, "Integration", log.LstdFlags)
+	outLogger    = log.New(multiWriter, "", log.LstdFlags)
+	errLogger    = log.New(os.Stderr, "", log.LstdFlags)
+
+	cpiLogger   = cpiLog.New(boshlog.LevelDebug, "Integration", outLogger, errLogger)
+	multiLogger = api.MultiLogger{Logger: cpiLogger, LogBuff: &logBuffer}
 	uuidGen     = uuid.NewGenerator()
 	sess        *session.Session
 )

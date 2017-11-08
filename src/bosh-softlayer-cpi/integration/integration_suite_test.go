@@ -4,10 +4,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"bytes"
 	"fmt"
-	"io"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -91,10 +88,7 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 	Expect(err).To(BeNil())
 
 	// Initialize session of softlayer client
-	var errOut, errOutLog bytes.Buffer
-	multiWriter := io.MultiWriter(&errOut, &errOutLog)
-	outLogger := log.New(multiWriter, "it-uuid", log.LstdFlags)
-	sess = client.NewSoftlayerClientSession(client.SoftlayerAPIEndpointPublicDefault, username, apiKey, false, timeout, retries, retryTimeout, outLogger)
+	sess = client.NewSoftlayerClientSession(client.SoftlayerAPIEndpointPublicDefault, username, apiKey, true, timeout, retries, retryTimeout, clientLogger)
 
 	// Setup vps client
 	if config.Cloud.Properties.SoftLayer.EnableVps {
