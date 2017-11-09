@@ -719,6 +719,7 @@ func (c *ClientManager) DeleteInstanceFromVPS(id int) error {
 func (c *ClientManager) UpgradeInstance(id int, cpu int, memory int, network int, privateCPU bool, secondDiskSize int) (int, error) {
 	upgradeOptions := make(map[string]int)
 	public := true
+	presetId := 0
 	if cpu != 0 {
 		upgradeOptions["guest_core"] = cpu
 	}
@@ -764,13 +765,15 @@ func (c *ClientManager) UpgradeInstance(id int, cpu int, memory int, network int
 
 	if secondDiskSize != 0 {
 		c.logger.Debug(softlayerClientLogTag, fmt.Sprintf("Find upgrade item price for second disk: %dGB", secondDiskSize))
-		diskItemPrice, err := c.getUpgradeItemPriceForSecondDisk(id, secondDiskSize)
+		var diskItemPrice *datatypes.Product_Item_Price
+		diskItemPrice, presetId, err = c.getUpgradeItemPriceForSecondDisk(id, secondDiskSize)
 		if err != nil {
 			return 0, err
 		}
 		prices = append(prices, *diskItemPrice)
 	}
 
+	fmt.Println()
 	if len(prices) == 0 {
 		return 0, bosherr.Error("Unable to find price for upgrade")
 	}
@@ -793,6 +796,9 @@ func (c *ClientManager) UpgradeInstance(id int, cpu int, memory int, network int
 			},
 		},
 		PackageId: &packageID,
+	}
+	if presetId != 0 {
+		order.PresetId = sl.Int(presetId)
 	}
 	upgradeOrder := datatypes.Container_Product_Order_Virtual_Guest_Upgrade{
 		Container_Product_Order_Virtual_Guest: datatypes.Container_Product_Order_Virtual_Guest{
@@ -851,27 +857,32 @@ func (c *ClientManager) GetInstanceAllowedHost(id int) (*datatypes.Network_Stora
 	return &allowedHost, true, nil
 }
 
-func (c *ClientManager) getUpgradeItemPriceForSecondDisk(id int, diskSize int) (*datatypes.Product_Item_Price, error) {
-	filters := filter.Build(
+func (c *ClientManager) getUpgradeItemPriceForSecondDisk(id int, diskSize int) (*datatypes.Product_Item_Price, int, error) {
+	filter := filter.Build(
 		filter.Path("categories.categoryCode").Eq(EPHEMERAL_DISK_CATEGORY_CODE),
 	)
 	mask := "id, categories[id, categoryCode], item[description, capacity]"
-
-	itemPrices, err := c.VirtualGuestService.Id(id).Mask(mask).Filter(filters).GetUpgradeItemPrices(sl.Bool(true))
+	itemPrices, err := c.VirtualGuestService.Id(id).Mask(mask).Filter(filter).GetUpgradeItemPrices(sl.Bool(true))
 	if err != nil {
-		return &datatypes.Product_Item_Price{}, err
+		return &datatypes.Product_Item_Price{}, 0, err
+	}
+
+	mask = "localDiskFlag, billingItem[id, orderItem[presetId]]"
+	virtualGuest, err := c.VirtualGuestService.Id(id).Mask(mask).GetObject()
+	if err != nil {
+		if apiErr, ok := err.(sl.Error); ok {
+			if apiErr.Exception == SOFTLAYER_OBJECTNOTFOUND_EXCEPTION {
+				return &datatypes.Product_Item_Price{}, 0, nil
+			}
+			return &datatypes.Product_Item_Price{}, 0, err
+		}
 	}
 
 	var currentDiskCapacity int
 	var diskType string
 	var currentItemPrice datatypes.Product_Item_Price
 
-	diskTypeBool, err := c.VirtualGuestService.Id(id).GetLocalDiskFlag()
-	if err != nil {
-		return &datatypes.Product_Item_Price{}, err
-	}
-
-	if diskTypeBool {
+	if *virtualGuest.LocalDiskFlag {
 		diskType = "(LOCAL)"
 	} else {
 		diskType = "(SAN)"
@@ -897,10 +908,13 @@ func (c *ClientManager) getUpgradeItemPriceForSecondDisk(id int, diskSize int) (
 	}
 
 	if currentItemPrice.Id == nil {
-		return &datatypes.Product_Item_Price{}, bosherr.Errorf("No proper %s disk for size %d", diskType, diskSize)
+		return &datatypes.Product_Item_Price{}, 0, bosherr.Errorf("No proper %s disk for size %d", diskType, diskSize)
 	}
 
-	return &currentItemPrice, nil
+	if virtualGuest.BillingItem.OrderItem.PresetId == nil {
+		return &currentItemPrice, 0, nil
+	}
+	return &currentItemPrice, *virtualGuest.BillingItem.OrderItem.PresetId, nil
 }
 
 func getPriceIdForUpgrade(packageItems []datatypes.Product_Item, option string, value int, public bool) int {

@@ -1570,7 +1570,7 @@ var _ = Describe("InstanceHandler", func() {
 						"statusCode": http.StatusOK,
 					},
 					{
-						"filename":   "SoftLayer_Virtual_Guest_getLocalDiskFlag.json",
+						"filename":   "SoftLayer_Virtual_Guest_getObject_localDisk.json",
 						"statusCode": http.StatusOK,
 					},
 					{
@@ -1601,7 +1601,7 @@ var _ = Describe("InstanceHandler", func() {
 						"statusCode": http.StatusOK,
 					},
 					{
-						"filename":   "SoftLayer_Virtual_Guest_getLocalDiskFlag_False.json",
+						"filename":   "SoftLayer_Virtual_Guest_getObject_SAN.json",
 						"statusCode": http.StatusOK,
 					},
 					{
@@ -1616,7 +1616,7 @@ var _ = Describe("InstanceHandler", func() {
 				Expect(err).NotTo(HaveOccurred())
 			})
 
-			It("upgrade instance successfully when UpgradeItemPrices has another struct", func() {
+			It("upgrade instance successfully when presetId is existing", func() {
 				respParas = []map[string]interface{}{
 					{
 						"filename":   "SoftLayer_Product_Package_getAllObjects.json",
@@ -1628,11 +1628,11 @@ var _ = Describe("InstanceHandler", func() {
 					},
 					// getUpgradeItemPriceForSecondDisk
 					{
-						"filename":   "SoftLayer_Virtual_Guest_getUpgradeItemPrices_anotherStruct.json",
+						"filename":   "SoftLayer_Virtual_Guest_getUpgradeItemPrices.json",
 						"statusCode": http.StatusOK,
 					},
 					{
-						"filename":   "SoftLayer_Virtual_Guest_getLocalDiskFlag.json",
+						"filename":   "SoftLayer_Virtual_Guest_getObject_presetId.json",
 						"statusCode": http.StatusOK,
 					},
 					{
@@ -1662,7 +1662,7 @@ var _ = Describe("InstanceHandler", func() {
 						"statusCode": http.StatusOK,
 					},
 					{
-						"filename":   "SoftLayer_Virtual_Guest_getLocalDiskFlag.json",
+						"filename":   "SoftLayer_Virtual_Guest_getObject_localDisk.json",
 						"statusCode": http.StatusOK,
 					},
 				}
@@ -1769,7 +1769,7 @@ var _ = Describe("InstanceHandler", func() {
 				Expect(err.Error()).To(ContainSubstring("fake-client-error"))
 			})
 
-			It("Return error when SoftLayerVirtualGuest getLocalDiskFlag call return an error", func() {
+			It("Return error when SoftLayerVirtualGuest get localDiskFlag call return an error", func() {
 				respParas = []map[string]interface{}{
 					{
 						"filename":   "SoftLayer_Product_Package_getAllObjects.json",
@@ -1784,7 +1784,7 @@ var _ = Describe("InstanceHandler", func() {
 						"statusCode": http.StatusOK,
 					},
 					{
-						"filename":   "SoftLayer_Virtual_Guest_getLocalDiskFlag_InternalError.json",
+						"filename":   "SoftLayer_Virtual_Guest_getObject_InternalError.json",
 						"statusCode": http.StatusInternalServerError,
 					},
 				}
@@ -1811,7 +1811,7 @@ var _ = Describe("InstanceHandler", func() {
 						"statusCode": http.StatusOK,
 					},
 					{
-						"filename":   "SoftLayer_Virtual_Guest_getLocalDiskFlag.json",
+						"filename":   "SoftLayer_Virtual_Guest_getObject_localDisk.json",
 						"statusCode": http.StatusOK,
 					},
 				}
@@ -1838,7 +1838,7 @@ var _ = Describe("InstanceHandler", func() {
 						"statusCode": http.StatusOK,
 					},
 					{
-						"filename":   "SoftLayer_Virtual_Guest_getLocalDiskFlag.json",
+						"filename":   "SoftLayer_Virtual_Guest_getObject_localDisk.json",
 						"statusCode": http.StatusOK,
 					},
 					{
@@ -1983,7 +1983,7 @@ var _ = Describe("InstanceHandler", func() {
 					"statusCode": http.StatusOK,
 				},
 				{
-					"filename":   "SoftLayer_Virtual_Guest_getLocalDiskFlag.json",
+					"filename":   "SoftLayer_Virtual_Guest_getObject_localDisk.json",
 					"statusCode": http.StatusOK,
 				},
 				{
@@ -2066,7 +2066,7 @@ var _ = Describe("InstanceHandler", func() {
 					"statusCode": http.StatusOK,
 				},
 				{
-					"filename":   "SoftLayer_Virtual_Guest_getLocalDiskFlag.json",
+					"filename":   "SoftLayer_Virtual_Guest_getObject_localDisk.json",
 					"statusCode": http.StatusOK,
 				},
 				{
@@ -2116,7 +2116,7 @@ var _ = Describe("InstanceHandler", func() {
 					"statusCode": http.StatusOK,
 				},
 				{
-					"filename":   "SoftLayer_Virtual_Guest_getLocalDiskFlag.json",
+					"filename":   "SoftLayer_Virtual_Guest_getObject_localDisk.json",
 					"statusCode": http.StatusOK,
 				},
 				{
@@ -2158,7 +2158,7 @@ var _ = Describe("InstanceHandler", func() {
 					"statusCode": http.StatusOK,
 				},
 				{
-					"filename":   "SoftLayer_Virtual_Guest_getLocalDiskFlag.json",
+					"filename":   "SoftLayer_Virtual_Guest_getObject_localDisk.json",
 					"statusCode": http.StatusOK,
 				},
 				{

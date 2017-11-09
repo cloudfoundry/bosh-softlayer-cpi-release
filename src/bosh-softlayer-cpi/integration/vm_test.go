@@ -95,6 +95,7 @@ var _ = Describe("VM", func() {
 		      "hostname_prefix": "blusbosh-slcpi-integration-test",
 		      "domain": "softlayer.com",
 		      "flavor_key_name": "B1_1X2X25",
+		      "ephemeral_disk_size": 25,
 		      "max_network_speed": 100,
 		      "hourly_billing_flag": true,
 		      "dedicated_account_host_only_flag": false,

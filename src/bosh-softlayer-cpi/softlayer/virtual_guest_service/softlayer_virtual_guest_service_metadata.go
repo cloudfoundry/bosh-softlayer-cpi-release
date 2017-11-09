@@ -49,6 +49,9 @@ func (vg SoftlayerVirtualGuestService) SetMetadata(id int, vmMetadata Metadata) 
 func (vg SoftlayerVirtualGuestService) extractTagsFromVMMetadata(vmMetadata Metadata) (string, error) {
 	var tagStringBuffer bytes.Buffer
 	for tagName, tagValue := range vmMetadata {
+		if tagName == "name" {
+			continue
+		}
 		tagStringBuffer.WriteString(tagName + ": " + tagValue.(string))
 		tagStringBuffer.WriteString(", ")
 	}
