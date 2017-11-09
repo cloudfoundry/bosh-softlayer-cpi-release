@@ -128,5 +128,65 @@ var _ = Describe("VM", func() {
 		  "arguments": ["%v"]
 		}`, vmCID)
 		assertSucceeds(request)
+
+		By("creating a VM with static ip")
+		request = fmt.Sprintf(`{
+		  "method": "create_vm",
+		  "arguments": [
+		    "45632666-9fb1-422a-af35-2ab6102c5c1b",
+		    "%v",
+		    {
+		      "hostname_prefix": "blusbosh-slcpi-integration-test",
+		      "domain": "softlayer.com",
+		      "cpu": 1,
+		      "memory": 1024,
+		      "max_network_speed": 100,
+		      "ephemeral_disk_size": 20,
+		      "hourly_billing_flag": true,
+		      "local_disk_flag": true,
+		      "dedicated_account_host_only_flag": false,
+		      "datacenter": "lon02"
+		    },
+		    {
+		      "default": {
+				"cloud_properties": {
+				  "vlan_ids": [
+					524954
+				  ]
+				},
+				"dns": [
+				  "8.8.8.8"
+				],
+				"gateway": "10.112.166.129",
+				"ip": "10.112.166.30",
+				"netmask": "255.255.255.192",
+				"type": "manual"
+			  },
+		      "dynamic": {
+		        "type": "dynamic",
+		        "dns": [
+			      "8.8.8.8"
+		        ],
+		        "default": [
+		          "dns",
+		          "gateway"
+		        ],
+		        "cloud_properties": {
+		          "vlan_ids": [1292653, 1292651]
+		        }
+		      }
+		    },
+		    null,
+		    {}
+		  ]
+		}`, existingStemcellId)
+		vmCID = assertSucceedsWithResult(request).(string)
+
+		By("deleting the VM of flavor")
+		request = fmt.Sprintf(`{
+		  "method": "delete_vm",
+		  "arguments": ["%v"]
+		}`, vmCID)
+		assertSucceeds(request)
 	})
 })

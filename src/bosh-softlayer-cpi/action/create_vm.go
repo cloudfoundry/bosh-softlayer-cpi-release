@@ -380,9 +380,8 @@ func (cv CreateVM) createByOsReload(stemcellCID StemcellCID, cloudProps VMCloudP
 					return cid, bosherr.WrapErrorf(err, "Cleaning registry record '%d' before os_reload", *vm.Id)
 				}
 
-				if *vm.MaxCpu != cloudProps.Cpu ||
-					*vm.MaxMemory != cloudProps.Memory ||
-					*vm.DedicatedAccountHostOnlyFlag != cloudProps.DedicatedAccountHostOnlyFlag {
+				if cloudProps.FlavorKeyName == "" && vm.SupplementalCreateObjectOptions == nil &&
+					(*vm.MaxCpu != cloudProps.Cpu || *vm.MaxMemory != cloudProps.Memory || *vm.DedicatedAccountHostOnlyFlag != cloudProps.DedicatedAccountHostOnlyFlag) {
 					err = cv.virtualGuestService.UpgradeInstance(*vm.Id, cloudProps.Cpu, cloudProps.Memory, 0, cloudProps.DedicatedAccountHostOnlyFlag)
 					if err != nil {
 						return cid, bosherr.WrapError(err, "Upgrading VM")
