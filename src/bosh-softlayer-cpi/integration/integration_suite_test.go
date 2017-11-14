@@ -19,6 +19,7 @@ import (
 	cfg "bosh-softlayer-cpi/config"
 	"bosh-softlayer-cpi/softlayer/client"
 	vpsClient "bosh-softlayer-cpi/softlayer/vps_service/client"
+	"github.com/softlayer/softlayer-go/filter"
 )
 
 func TestIntegration(t *testing.T) {
@@ -137,18 +138,22 @@ func cleanVMs() {
 
 	// Clean up any VMs left behind from failed tests. Instances with the 'blusbosh-slcpi-integration-test' prefix will be deleted.
 	toDelete := make([]datatypes.Virtual_Guest, 0)
-	GinkgoWriter.Write([]byte("Looking for VMs with 'blusbosh-slcpi-integration-test' prefix. Matches will be deleted\n"))
-	// Clean up VMs with 'blusbosh-slcpi-integration-test' prefix hostname
-	vgs, err := accountService.GetVirtualGuests()
+	GinkgoWriter.Write([]byte("Looking for VMs with 'bluebosh-slcpi-integration-test' prefix. Matches will be deleted\n"))
+	// Clean up VMs with 'bluebosh-slcpi-integration-test' prefix hostname
+	filter := filter.Build(
+		filter.Path("virtualGuests.hostname").Eq("^= bluebosh-slcpi-integration-test"),
+	)
+	vgs, err := accountService.Filter(filter).Mask("id, hostname, fullyQualifiedDomainName").GetVirtualGuests()
 	Expect(err).To(BeNil())
 	for _, instance := range vgs {
-		if strings.Contains(*instance.Hostname, "blusbosh-slcpi-integration-test") && true {
+		if strings.Contains(*instance.Hostname, "bluebosh-slcpi-integration-test") {
 			toDelete = append(toDelete, instance)
 		}
 	}
 
 	for _, vm := range toDelete {
-		vmStatus, _ := softlayerClient.VirtualGuestService.Id(int(*vm.Id)).GetStatus()
+		vmStatus, err := softlayerClient.VirtualGuestService.Id(int(*vm.Id)).GetStatus()
+		Expect(err).To(BeNil())
 		if *vmStatus.KeyName != "DISCONNECTED" {
 			GinkgoWriter.Write([]byte(fmt.Sprintf("Deleting VM %s \n", *vm.FullyQualifiedDomainName)))
 			//_, err := softlayerClient.VirtualGuestService.Id(int(*vm.Id)).DeleteObject()

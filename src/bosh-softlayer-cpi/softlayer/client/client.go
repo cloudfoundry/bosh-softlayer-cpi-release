@@ -747,7 +747,7 @@ func (c *ClientManager) UpgradeInstance(id int, cpu int, memory int, network int
 	packageID := *productPackages[0].Id
 	packageItems, err := c.PackageService.
 		Id(packageID).
-		Mask("description,capacity,prices[id,locationGroupId,categories[categoryCode]]").
+		Mask("description, capacity, prices[id, locationGroupId, categories[categoryCode]]").
 		GetItems()
 	if err != nil {
 		return 0, err
@@ -858,11 +858,11 @@ func (c *ClientManager) GetInstanceAllowedHost(id int) (*datatypes.Network_Stora
 }
 
 func (c *ClientManager) getUpgradeItemPriceForSecondDisk(id int, diskSize int) (*datatypes.Product_Item_Price, int, error) {
-	filter := filter.Build(
-		filter.Path("categories.categoryCode").Eq(EPHEMERAL_DISK_CATEGORY_CODE),
-	)
+	//filter := filter.Build(
+	//	filter.Path("productItemPrice.categories.categoryCode").Eq(EPHEMERAL_DISK_CATEGORY_CODE),
+	//)
 	mask := "id, categories[id, categoryCode], item[description, capacity]"
-	itemPrices, err := c.VirtualGuestService.Id(id).Mask(mask).Filter(filter).GetUpgradeItemPrices(sl.Bool(true))
+	itemPrices, err := c.VirtualGuestService.Id(id).Mask(mask).GetUpgradeItemPrices(sl.Bool(true))
 	if err != nil {
 		return &datatypes.Product_Item_Price{}, 0, err
 	}
@@ -919,7 +919,7 @@ func (c *ClientManager) getUpgradeItemPriceForSecondDisk(id int, diskSize int) (
 
 func getPriceIdForUpgrade(packageItems []datatypes.Product_Item, option string, value int, public bool) int {
 	for _, item := range packageItems {
-		isPrivate := strings.HasPrefix(*item.Description, "Private")
+		isPrivate := strings.Contains(*item.Description, "Dedicated")
 		for _, price := range item.Prices {
 			if price.LocationGroupId != nil {
 				continue
@@ -933,6 +933,12 @@ func getPriceIdForUpgrade(packageItems []datatypes.Product_Item, option string, 
 						continue
 					}
 					if option == "guest_core" {
+						if public && !isPrivate {
+							return *price.Id
+						} else if !public && isPrivate {
+							return *price.Id
+						}
+					} else if option == "ram" {
 						if public && !isPrivate {
 							return *price.Id
 						} else if !public && isPrivate {

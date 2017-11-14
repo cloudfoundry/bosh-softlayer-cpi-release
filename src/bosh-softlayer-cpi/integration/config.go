@@ -100,11 +100,11 @@ var (
 	multiLogger = api.MultiLogger{Logger: cpiLogger, LogBuff: &logBuffer}
 	uuidGen     = uuid.NewGenerator()
 	sess        *session.Session
+	softlayerClient = &client.ClientManager{}
 )
 
 func execCPI(request string) (disp.Response, error) {
 	var err error
-	var softlayerClient client.Client
 
 	softlayerClient = client.NewSoftLayerClientManager(sess, vps, multiLogger)
 	actionFactory := action.NewConcreteFactory(

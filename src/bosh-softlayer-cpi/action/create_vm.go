@@ -381,8 +381,8 @@ func (cv CreateVM) createByOsReload(stemcellCID StemcellCID, cloudProps VMCloudP
 				}
 
 				if cloudProps.FlavorKeyName == "" && vm.SupplementalCreateObjectOptions == nil &&
-					(*vm.MaxCpu != cloudProps.Cpu || *vm.MaxMemory != cloudProps.Memory || *vm.DedicatedAccountHostOnlyFlag != cloudProps.DedicatedAccountHostOnlyFlag) {
-					err = cv.virtualGuestService.UpgradeInstance(*vm.Id, cloudProps.Cpu, cloudProps.Memory, 0, cloudProps.DedicatedAccountHostOnlyFlag)
+					(*vm.MaxCpu != cloudProps.Cpu || *vm.MaxMemory != cloudProps.Memory) {
+					err = cv.virtualGuestService.UpgradeInstance(*vm.Id, cloudProps.Cpu, cloudProps.Memory, 0, *vm.DedicatedAccountHostOnlyFlag)
 					if err != nil {
 						return cid, bosherr.WrapError(err, "Upgrading VM")
 					}

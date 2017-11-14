@@ -19,7 +19,7 @@ var _ = Describe("Disk", func() {
 		    "45632666-9fb1-422a-af35-2ab6102c5c1b",
 		    "%v",
 		    {
-		      "hostname_prefix": "blusbosh-slcpi-integration-test",
+		      "hostname_prefix": "bluebosh-slcpi-integration-test",
 		      "domain": "softlayer.com",
 		      "cpu": 1,
 		      "memory": 1024,

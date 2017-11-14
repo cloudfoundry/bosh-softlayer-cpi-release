@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"bosh-softlayer-cpi/registry"
-	datatypes "github.com/softlayer/softlayer-go/datatypes"
+	"github.com/softlayer/softlayer-go/datatypes"
 )
 
 func SoftlayerPrivateRoutes(gateway string) registry.Routes {
@@ -90,14 +90,14 @@ func (u *Softlayer_Ubuntu_Net) NormalizeDynamics(networkComponents datatypes.Vir
 			continue
 		}
 
-		if nw.CloudProperties.VlanID == *(networkComponents.PrimaryBackendNetworkComponent.NetworkVlan.Id) {
+		if networkComponents.PrimaryBackendNetworkComponent.NetworkVlan != nil && nw.CloudProperties.VlanID == *(networkComponents.PrimaryBackendNetworkComponent.NetworkVlan.Id) {
 			if privateDynamic != nil {
 				return nil, errors.New("multiple private dynamic networks are not supported")
 			}
 			privateDynamic = &nw
 		}
 
-		if nw.CloudProperties.VlanID == *(networkComponents.PrimaryNetworkComponent.NetworkVlan.Id) {
+		if networkComponents.PrimaryNetworkComponent.NetworkVlan != nil && nw.CloudProperties.VlanID == *(networkComponents.PrimaryNetworkComponent.NetworkVlan.Id) {
 			if publicDynamic != nil {
 				return nil, errors.New("multiple public dynamic networks are not supported")
 			}

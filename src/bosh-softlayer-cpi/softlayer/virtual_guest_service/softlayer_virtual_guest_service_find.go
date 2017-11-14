@@ -10,7 +10,6 @@ import (
 	"github.com/softlayer/softlayer-go/datatypes"
 
 	"bosh-softlayer-cpi/api"
-	boslc "bosh-softlayer-cpi/softlayer/client"
 )
 
 func (vg SoftlayerVirtualGuestService) Find(id int) (*datatypes.Virtual_Guest, error) {
@@ -23,7 +22,7 @@ func (vg SoftlayerVirtualGuestService) Find(id int) (*datatypes.Virtual_Guest, e
 	//@TODO: Need to encapsulate with stemcell find method
 	execStmtRetryable := boshretry.NewRetryable(
 		func() (bool, error) {
-			instance, found, err = vg.softlayerClient.GetInstance(id, boslc.INSTANCE_DETAIL_MASK)
+			instance, found, err = vg.softlayerClient.GetInstance(id, "id, datacenter[name], primaryBackendIpAddress, fullyQualifiedDomainName")
 			if err != nil {
 				return true, bosherr.WrapErrorf(err, "Failed to find SoftLayer VirtualGuest with id '%d'", id)
 			}
