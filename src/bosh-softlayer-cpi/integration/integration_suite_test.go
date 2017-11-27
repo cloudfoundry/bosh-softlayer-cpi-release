@@ -5,22 +5,21 @@ import (
 	. "github.com/onsi/gomega"
 
 	"fmt"
-	"testing"
-
-	"bosh-softlayer-cpi/softlayer/client"
-
-	boshcfg "bosh-softlayer-cpi/config"
-	vpsClient "bosh-softlayer-cpi/softlayer/vps_service/client"
-	"bytes"
-	httptransport "github.com/go-openapi/runtime/client"
-	"github.com/go-openapi/strfmt"
-	datatypes "github.com/softlayer/softlayer-go/datatypes"
-	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"strconv"
 	"strings"
+	"testing"
+
+	httptransport "github.com/go-openapi/runtime/client"
+	"github.com/go-openapi/strfmt"
+	datatypes "github.com/softlayer/softlayer-go/datatypes"
+
+	cfg "bosh-softlayer-cpi/config"
+	"bosh-softlayer-cpi/softlayer/client"
+	vpsClient "bosh-softlayer-cpi/softlayer/vps_service/client"
+	"github.com/softlayer/softlayer-go/filter"
 )
 
 func TestIntegration(t *testing.T) {
@@ -86,17 +85,15 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 		    }
 		  }
 		}`, username, apiKey, registerPort, ts.URL)
-	cfg, err = boshcfg.NewConfigFromString(cfgContent)
+	config, err = cfg.NewConfigFromString(cfgContent)
 	Expect(err).To(BeNil())
 
 	// Initialize session of softlayer client
-	var errOut, errOutLog bytes.Buffer
-	multiWriter := io.MultiWriter(&errOut, &errOutLog)
-	sess = client.NewSoftlayerClientSession(client.SoftlayerAPIEndpointPublicDefault, username, apiKey, false, timeout, multiWriter)
+	sess = client.NewSoftlayerClientSession(client.SoftlayerAPIEndpointPublicDefault, username, apiKey, true, timeout, retries, retryTimeout, clientLogger)
 
 	// Setup vps client
-	if cfg.Cloud.Properties.SoftLayer.EnableVps {
-		vps = vpsClient.New(httptransport.New(fmt.Sprintf("%s:%d", cfg.Cloud.Properties.SoftLayer.VpsHost, cfg.Cloud.Properties.SoftLayer.VpsPort),
+	if config.Cloud.Properties.SoftLayer.EnableVps {
+		vps = vpsClient.New(httptransport.New(fmt.Sprintf("%s:%d", config.Cloud.Properties.SoftLayer.VpsHost, config.Cloud.Properties.SoftLayer.VpsPort),
 			"v2", []string{"https"}), strfmt.Default).VM
 	}
 
@@ -136,23 +133,27 @@ var _ = SynchronizedAfterSuite(func() {}, func() {
 
 func cleanVMs() {
 	// Initialize a compute API client ImageService
-	softlayerClient := client.NewSoftLayerClientManager(sess, vps)
+	softlayerClient := client.NewSoftLayerClientManager(sess, vps, multiLogger)
 	accountService := softlayerClient.AccountService
 
 	// Clean up any VMs left behind from failed tests. Instances with the 'blusbosh-slcpi-integration-test' prefix will be deleted.
 	toDelete := make([]datatypes.Virtual_Guest, 0)
-	GinkgoWriter.Write([]byte("Looking for VMs with 'blusbosh-slcpi-integration-test' prefix. Matches will be deleted\n"))
-	// Clean up VMs with 'blusbosh-slcpi-integration-test' prefix hostname
-	vgs, err := accountService.GetVirtualGuests()
+	GinkgoWriter.Write([]byte("Looking for VMs with 'bluebosh-slcpi-integration-test' prefix. Matches will be deleted\n"))
+	// Clean up VMs with 'bluebosh-slcpi-integration-test' prefix hostname
+	filter := filter.Build(
+		filter.Path("virtualGuests.hostname").Eq("^= bluebosh-slcpi-integration-test"),
+	)
+	vgs, err := accountService.Filter(filter).Mask("id, hostname, fullyQualifiedDomainName").GetVirtualGuests()
 	Expect(err).To(BeNil())
 	for _, instance := range vgs {
-		if strings.Contains(*instance.Hostname, "blusbosh-slcpi-integration-test") && true {
+		if strings.Contains(*instance.Hostname, "bluebosh-slcpi-integration-test") {
 			toDelete = append(toDelete, instance)
 		}
 	}
 
 	for _, vm := range toDelete {
-		vmStatus, _ := softlayerClient.VirtualGuestService.Id(int(*vm.Id)).GetStatus()
+		vmStatus, err := softlayerClient.VirtualGuestService.Id(int(*vm.Id)).GetStatus()
+		Expect(err).To(BeNil())
 		if *vmStatus.KeyName != "DISCONNECTED" {
 			GinkgoWriter.Write([]byte(fmt.Sprintf("Deleting VM %s \n", *vm.FullyQualifiedDomainName)))
 			//_, err := softlayerClient.VirtualGuestService.Id(int(*vm.Id)).DeleteObject()

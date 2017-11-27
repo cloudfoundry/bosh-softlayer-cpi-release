@@ -4,25 +4,35 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	boslc "bosh-softlayer-cpi/softlayer/client"
-	"bosh-softlayer-cpi/test_helpers"
+	"bytes"
+	"fmt"
+	"net/http"
+	"strconv"
+	"time"
+
+	boshlogger "github.com/cloudfoundry/bosh-utils/logger"
+	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
 	"github.com/onsi/gomega/ghttp"
-
-	vpsClient "bosh-softlayer-cpi/softlayer/vps_service/client"
-	vpsVm "bosh-softlayer-cpi/softlayer/vps_service/client/vm"
-	"fmt"
-	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/softlayer/softlayer-go/datatypes"
 	"github.com/softlayer/softlayer-go/session"
 	"github.com/softlayer/softlayer-go/sl"
-	"net/http"
-	"time"
+
+	api "bosh-softlayer-cpi/api"
+	cpiLog "bosh-softlayer-cpi/logger"
+	slClient "bosh-softlayer-cpi/softlayer/client"
+	vpsClient "bosh-softlayer-cpi/softlayer/vps_service/client"
+	vpsVm "bosh-softlayer-cpi/softlayer/vps_service/client/vm"
+	"bosh-softlayer-cpi/test_helpers"
 )
 
 var _ = Describe("ImageHandler", func() {
 	var (
 		err error
+
+		errOutLog   bytes.Buffer
+		logger      cpiLog.Logger
+		multiLogger api.MultiLogger
 
 		server      *ghttp.Server
 		vpsEndPoint string
@@ -30,7 +40,7 @@ var _ = Describe("ImageHandler", func() {
 
 		transportHandler *test_helpers.FakeTransportHandler
 		sess             *session.Session
-		cli              *boslc.ClientManager
+		cli              *slClient.ClientManager
 
 		diskID            int
 		networkConnInfoID int
@@ -51,8 +61,12 @@ var _ = Describe("ImageHandler", func() {
 			SoftlayerAPIEndpoint: server.URL(),
 			MaxRetries:           3,
 		}
+
+		nanos := time.Now().Nanosecond()
+		logger = cpiLog.NewLogger(boshlogger.LevelDebug, strconv.Itoa(nanos))
+		multiLogger = api.MultiLogger{Logger: logger, LogBuff: &errOutLog}
 		sess = test_helpers.NewFakeSoftlayerSession(transportHandler)
-		cli = boslc.NewSoftLayerClientManager(sess, vps)
+		cli = slClient.NewSoftLayerClientManager(sess, vps, logger)
 
 		diskID = 17336531
 		networkConnInfoID = 123456789
@@ -106,7 +120,7 @@ var _ = Describe("ImageHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				networkStorage, success, err := cli.GetBlockVolumeDetails(diskID, boslc.VOLUME_DETAIL_MASK)
+				networkStorage, success, err := cli.GetBlockVolumeDetails(diskID, slClient.VOLUME_DETAIL_MASK)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(success).To(Equal(true))
 				Expect(*networkStorage.Id).To(Equal(diskID))
@@ -138,7 +152,7 @@ var _ = Describe("ImageHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				_, success, err := cli.GetBlockVolumeDetails(diskID, boslc.VOLUME_DETAIL_MASK)
+				_, success, err := cli.GetBlockVolumeDetails(diskID, slClient.VOLUME_DETAIL_MASK)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(success).To(Equal(false))
 			})
@@ -155,7 +169,7 @@ var _ = Describe("ImageHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				_, success, err := cli.GetBlockVolumeDetails(diskID, boslc.VOLUME_DETAIL_MASK)
+				_, success, err := cli.GetBlockVolumeDetails(diskID, slClient.VOLUME_DETAIL_MASK)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("fake-client-error"))
 				Expect(success).To(Equal(false))
@@ -175,7 +189,7 @@ var _ = Describe("ImageHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				networkStorage, err := cli.GetBlockVolumeDetailsBySoftLayerAccount(diskID, boslc.VOLUME_DETAIL_MASK)
+				networkStorage, err := cli.GetBlockVolumeDetailsBySoftLayerAccount(diskID, slClient.VOLUME_DETAIL_MASK)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(*networkStorage.Id).To(Equal(diskID))
 			})
@@ -205,7 +219,7 @@ var _ = Describe("ImageHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				_, err := cli.GetBlockVolumeDetailsBySoftLayerAccount(diskID, boslc.VOLUME_DETAIL_MASK)
+				_, err := cli.GetBlockVolumeDetailsBySoftLayerAccount(diskID, slClient.VOLUME_DETAIL_MASK)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("Could not find volume with id"))
 			})
@@ -220,7 +234,7 @@ var _ = Describe("ImageHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				_, err := cli.GetBlockVolumeDetailsBySoftLayerAccount(diskID, boslc.VOLUME_DETAIL_MASK)
+				_, err := cli.GetBlockVolumeDetailsBySoftLayerAccount(diskID, slClient.VOLUME_DETAIL_MASK)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("Exist more than one volume with id"))
 			})
@@ -237,7 +251,7 @@ var _ = Describe("ImageHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				_, err := cli.GetBlockVolumeDetailsBySoftLayerAccount(diskID, boslc.VOLUME_DETAIL_MASK)
+				_, err := cli.GetBlockVolumeDetailsBySoftLayerAccount(diskID, slClient.VOLUME_DETAIL_MASK)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("fake-client-error"))
 			})
@@ -256,7 +270,7 @@ var _ = Describe("ImageHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				_, success, err := cli.GetNetworkStorageTarget(networkConnInfoID, boslc.VOLUME_DETAIL_MASK)
+				_, success, err := cli.GetNetworkStorageTarget(networkConnInfoID, slClient.VOLUME_DETAIL_MASK)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(success).To(Equal(true))
 			})
@@ -286,7 +300,7 @@ var _ = Describe("ImageHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				_, success, err := cli.GetNetworkStorageTarget(networkConnInfoID, boslc.VOLUME_DETAIL_MASK)
+				_, success, err := cli.GetNetworkStorageTarget(networkConnInfoID, slClient.VOLUME_DETAIL_MASK)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(success).To(Equal(false))
 			})
@@ -303,7 +317,7 @@ var _ = Describe("ImageHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				_, success, err := cli.GetNetworkStorageTarget(networkConnInfoID, boslc.VOLUME_DETAIL_MASK)
+				_, success, err := cli.GetNetworkStorageTarget(networkConnInfoID, slClient.VOLUME_DETAIL_MASK)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("fake-client-error"))
 				Expect(success).To(Equal(false))
@@ -1459,6 +1473,57 @@ var _ = Describe("ImageHandler", func() {
 			_, err := cli.CreateVolume("dal02", 250, 0, 0)
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("No order id returned after placing order with size of"))
+		})
+	})
+
+	Describe("SetNotes", func() {
+		Context("when StorageService editObject call successfully", func() {
+			It("set tags successfully", func() {
+				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Network_Storage_editObject.json",
+						"statusCode": http.StatusOK,
+					},
+				}
+				err = test_helpers.SpecifyServerResps(respParas, server)
+				Expect(err).NotTo(HaveOccurred())
+
+				success, err := cli.SetNotes(diskID, `"fake-tag-key": "fake-tag-value"`)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(success).To(Equal(true))
+			})
+		})
+
+		Context("when StorageService editObject call return error", func() {
+			It("return an softlayer-go unhandled error", func() {
+				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Network_Storage_editObject_InternalError.json",
+						"statusCode": http.StatusInternalServerError,
+					},
+				}
+				err = test_helpers.SpecifyServerResps(respParas, server)
+				Expect(err).NotTo(HaveOccurred())
+
+				success, err := cli.SetTags(diskID, `"fake-tag-key": "fake-tag-value"`)
+				Expect(err).To(HaveOccurred())
+				Expect(success).To(Equal(false))
+			})
+
+			It("return an ObjectNotFoundError", func() {
+				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Network_Storage_editObject_NotFound.json",
+						"statusCode": http.StatusInternalServerError,
+					},
+				}
+				err = test_helpers.SpecifyServerResps(respParas, server)
+				Expect(err).NotTo(HaveOccurred())
+
+				success, err := cli.SetTags(diskID, `"fake-tag-key": "fake-tag-value"`)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(success).To(Equal(false))
+			})
 		})
 	})
 })

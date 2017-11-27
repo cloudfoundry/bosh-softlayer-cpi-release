@@ -4,21 +4,32 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	boslc "bosh-softlayer-cpi/softlayer/client"
-	"bosh-softlayer-cpi/test_helpers"
+	"bytes"
+	"net/http"
+	"strconv"
+	"time"
+
+	boshlogger "github.com/cloudfoundry/bosh-utils/logger"
+	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
 	"github.com/onsi/gomega/ghttp"
+	"github.com/softlayer/softlayer-go/session"
 
+	api "bosh-softlayer-cpi/api"
+	cpiLog "bosh-softlayer-cpi/logger"
+	slClient "bosh-softlayer-cpi/softlayer/client"
 	vpsClient "bosh-softlayer-cpi/softlayer/vps_service/client"
 	vpsVm "bosh-softlayer-cpi/softlayer/vps_service/client/vm"
-	httptransport "github.com/go-openapi/runtime/client"
-	"github.com/softlayer/softlayer-go/session"
-	"net/http"
+	"bosh-softlayer-cpi/test_helpers"
 )
 
 var _ = Describe("SecurityHandler", func() {
 	var (
 		err error
+
+		errOutLog   bytes.Buffer
+		logger      cpiLog.Logger
+		multiLogger api.MultiLogger
 
 		server      *ghttp.Server
 		vpsEndPoint string
@@ -26,7 +37,7 @@ var _ = Describe("SecurityHandler", func() {
 
 		transportHandler *test_helpers.FakeTransportHandler
 		sess             *session.Session
-		cli              *boslc.ClientManager
+		cli              *slClient.ClientManager
 
 		label       string
 		key         string
@@ -47,8 +58,12 @@ var _ = Describe("SecurityHandler", func() {
 			SoftlayerAPIEndpoint: server.URL(),
 			MaxRetries:           3,
 		}
+
+		nanos := time.Now().Nanosecond()
+		logger = cpiLog.NewLogger(boshlogger.LevelDebug, strconv.Itoa(nanos))
+		multiLogger = api.MultiLogger{Logger: logger, LogBuff: &errOutLog}
 		sess = test_helpers.NewFakeSoftlayerSession(transportHandler)
-		cli = boslc.NewSoftLayerClientManager(sess, vps)
+		cli = slClient.NewSoftLayerClientManager(sess, vps, multiLogger)
 
 		label = "fake-label"
 		key = "fake-key"

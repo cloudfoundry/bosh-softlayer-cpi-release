@@ -9,7 +9,6 @@
         'registry' => {
           'user' => p('registry.username'),
           'password' => p('registry.password'),
-          'address' => p('registry.host'),
           'http' => {
             'port' => p('registry.port'),
             'user' => p('registry.username'),
@@ -67,10 +66,17 @@
       params['cloud']['properties']['softlayer']['vps_use_ssl'] = vps_use_ssl
   end
 
+  if_p('registry.address') do |address|
+    params['cloud']['properties']['registry']['address'] = address
+  end
+  if_p('registry.host') do |host|
+    params['cloud']['properties']['registry']['address'] = host
+  end
+
   if_p('registry.endpoint') do |endpoint|
     params['cloud']['properties']['registry']['endpoint'] = endpoint
   end.else do
-    params['cloud']['properties']['registry']['endpoint'] = "http://#{p('registry.username')}:#{ERB::Util.url_encode(p('registry.password'))}@#{p('registry.host')}:#{p('registry.port')}"
+    params['cloud']['properties']['registry']['endpoint'] = "http://#{p('registry.username')}:#{ERB::Util.url_encode(p('registry.password'))}@#{params['cloud']['properties']['registry']['address']}:#{p('registry.port')}"
   end
   
   if_p('blobstore') do

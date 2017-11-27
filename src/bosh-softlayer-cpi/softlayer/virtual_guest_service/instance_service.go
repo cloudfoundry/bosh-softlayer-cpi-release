@@ -24,8 +24,9 @@ type Service interface {
 	GetVlan(id int, mask string) (*datatypes.Network_Vlan, error)
 	GetSubnet(id int, mask string) (*datatypes.Network_Subnet, error)
 	Reboot(id int) error
-	ReloadOS(id int, stemcellID int, sshKeyIds []int, vmNamePrefix string, domain string) error
+	ReloadOS(id int, stemcellID int, sshKeyIds []int, hostname string, domain string) error
 	SetMetadata(id int, vmMetadata Metadata) error
+	UpdateInstanceUserData(id int, userData *string) error
 }
 
 type Metadata map[string]interface{}

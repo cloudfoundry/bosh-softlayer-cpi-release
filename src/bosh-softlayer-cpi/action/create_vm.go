@@ -1,28 +1,26 @@
 package action
 
 import (
+	"bytes"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"net"
+	"net/url"
+	"os"
+	"strconv"
 
-	"bosh-softlayer-cpi/api"
-	"bosh-softlayer-cpi/registry"
-
-	boslc "bosh-softlayer-cpi/softlayer/client"
-	boslconfig "bosh-softlayer-cpi/softlayer/config"
-
-	"bosh-softlayer-cpi/softlayer/stemcell_service"
-	"bosh-softlayer-cpi/softlayer/virtual_guest_service"
-
-	"bytes"
 	"github.com/bluebosh/goodhosts"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	"github.com/softlayer/softlayer-go/datatypes"
 	"github.com/softlayer/softlayer-go/sl"
-	"net/url"
-	"os"
-	"strconv"
+
+	"bosh-softlayer-cpi/api"
+	"bosh-softlayer-cpi/registry"
+	boslc "bosh-softlayer-cpi/softlayer/client"
+	boslconfig "bosh-softlayer-cpi/softlayer/config"
+	"bosh-softlayer-cpi/softlayer/stemcell_service"
+	"bosh-softlayer-cpi/softlayer/virtual_guest_service"
 )
 
 type CreateVM struct {
@@ -58,7 +56,7 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 	}
 
 	// Find stemcell uuid
-	globalIdentifier, err := cv.stemcellService.Find(int(stemcellCID))
+	stemcellUuid, err := cv.stemcellService.Find(int(stemcellCID))
 	if err != nil {
 		if _, ok := err.(api.CloudError); ok {
 			return "", err
@@ -76,21 +74,19 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 		cloudProps.SshKey = sshKey
 	}
 
-	// Create VM user data
-	userDataContents, err := cv.createUserDataForInstance(agentID, cv.registryOptions)
+	userDataContents, err := cv.createUserDataForInstance(agentID, &cv.registryOptions, cloudProps.DeployedByBoshCLI)
 	if err != nil {
 		return "", bosherr.WrapError(err, "Creating VM UserData")
 	}
 
 	// Inspect networks to get NetworkComponents
-	//publicVlanId, privateVlanId, err := cv.getVlanIds(networks)
 	publicNetworkComponent, privateNetworkComponent, err := cv.getNetworkComponents(networks)
 	if err != nil {
 		return "", bosherr.WrapError(err, "Getting NetworkComponents from networks settings")
 	}
 
 	// Create Virtual Guest template
-	virtualGuestTemplate := cv.createVirtualGuestTemplate(globalIdentifier, *cloudProps.AsInstanceProperties(), userDataContents, publicNetworkComponent, privateNetworkComponent)
+	virtualGuestTemplate := cv.createVirtualGuestTemplate(stemcellUuid, *cloudProps.AsInstanceProperties(), userDataContents, publicNetworkComponent, privateNetworkComponent)
 
 	// Parse networks
 	var instanceNetworks instance.Networks
@@ -99,19 +95,12 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 	} else {
 		instanceNetworks = networks.AsInstanceServiceNetworks(&datatypes.Network_Vlan{})
 	}
+
 	if err = instanceNetworks.Validate(); err != nil {
 		return "", bosherr.WrapError(err, "Creating VM")
 	}
 
-	// Extract any tags from env.bosh.groups
 	if boshenv, ok := env["bosh"]; ok {
-		if boshgroups, ok := boshenv.(map[string]interface{})["groups"]; ok {
-			for _, tag := range boshgroups.([]interface{}) {
-				// Ignore error as labels will be validated later
-				cloudProps.Tags = append(cloudProps.Tags, tag.(string))
-			}
-		}
-
 		boshenv.(map[string]interface{})["keep_root_password"] = true
 
 		// #148050011: Set vcap password in env.bosh.password through CPI
@@ -125,7 +114,7 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 	osReloaded := false
 
 	if !cv.softlayerOptions.DisableOsReload {
-		cid, err = cv.createByOsReload(stemcellCID, cloudProps, instanceNetworks)
+		cid, err = cv.createByOsReload(stemcellCID, cloudProps, instanceNetworks, userDataContents)
 		if err != nil {
 			return "", bosherr.WrapError(err, "OS reloading VM")
 		}
@@ -202,10 +191,8 @@ func (cv CreateVM) createVirtualGuestTemplate(stemcellUuid string, cloudProps VM
 
 	virtualGuestTemplate := &datatypes.Virtual_Guest{
 		// instance type
-		Hostname:  sl.String(cloudProps.VmNamePrefix),
-		Domain:    sl.String(cloudProps.Domain),
-		StartCpus: sl.Int(cloudProps.StartCpus),
-		MaxMemory: sl.Int(cloudProps.MaxMemory),
+		Hostname: sl.String(cloudProps.Hostname),
+		Domain:   sl.String(cloudProps.Domain),
 
 		// datacenter or availbility zone
 		Datacenter: &datatypes.Location{
@@ -236,6 +223,15 @@ func (cv CreateVM) createVirtualGuestTemplate(stemcellUuid string, cloudProps VM
 				Value: sl.String(userData),
 			},
 		},
+	}
+
+	if cloudProps.FlavorKeyName != "" {
+		virtualGuestTemplate.SupplementalCreateObjectOptions = &datatypes.Virtual_Guest_SupplementalCreateObjectOptions{
+			FlavorKeyName: sl.String(cloudProps.FlavorKeyName),
+		}
+	} else {
+		virtualGuestTemplate.StartCpus = sl.Int(cloudProps.Cpu)
+		virtualGuestTemplate.MaxMemory = sl.Int(cloudProps.Memory)
 	}
 
 	if cloudProps.SshKey != 0 {
@@ -319,6 +315,10 @@ func (cv CreateVM) getNetworkComponents(networks Networks) (*datatypes.Virtual_G
 		}
 	}
 
+	if privateNetworkComponent == nil {
+		return publicNetworkComponent, privateNetworkComponent, bosherr.Error("A private network is required. Please check vlanIds")
+	}
+
 	return publicNetworkComponent, privateNetworkComponent, nil
 }
 
@@ -356,7 +356,7 @@ func (cv CreateVM) createNetworkComponentsByVlanId(vlanId int) (*datatypes.Virtu
 	}, nil
 }
 
-func (cv CreateVM) createByOsReload(stemcellCID StemcellCID, cloudProps VMCloudProperties, instanceNetworks instance.Networks) (int, error) {
+func (cv CreateVM) createByOsReload(stemcellCID StemcellCID, cloudProps VMCloudProperties, instanceNetworks instance.Networks, userDataContents string) (int, error) {
 	cid := 0
 	for _, network := range instanceNetworks {
 		switch network.Type {
@@ -380,21 +380,25 @@ func (cv CreateVM) createByOsReload(stemcellCID StemcellCID, cloudProps VMCloudP
 					return cid, bosherr.WrapErrorf(err, "Cleaning registry record '%d' before os_reload", *vm.Id)
 				}
 
-				err = cv.virtualGuestService.ReloadOS(*vm.Id, stemcellCID.Int(), []int{cloudProps.SshKey}, cloudProps.VmNamePrefix, cloudProps.Domain)
+				if cloudProps.FlavorKeyName == "" && vm.SupplementalCreateObjectOptions == nil &&
+					(*vm.MaxCpu != cloudProps.Cpu || *vm.MaxMemory != cloudProps.Memory) {
+					err = cv.virtualGuestService.UpgradeInstance(*vm.Id, cloudProps.Cpu, cloudProps.Memory, 0, *vm.DedicatedAccountHostOnlyFlag)
+					if err != nil {
+						return cid, bosherr.WrapError(err, "Upgrading VM")
+					}
+				}
+				//Update userData when OS Reload
+				err = cv.virtualGuestService.UpdateInstanceUserData(*vm.Id, sl.String(userDataContents))
+				if err != nil {
+					return cid, bosherr.WrapError(err, "Updating userData")
+				}
+
+				err = cv.virtualGuestService.ReloadOS(*vm.Id, stemcellCID.Int(), []int{cloudProps.SshKey}, cloudProps.HostnamePrefix, cloudProps.Domain)
 				if err != nil {
 					return cid, err
 				}
 
 				cid = *vm.Id
-
-				if *vm.MaxCpu != cloudProps.StartCpus ||
-					*vm.MaxMemory != cloudProps.MaxMemory ||
-					*vm.DedicatedAccountHostOnlyFlag != cloudProps.DedicatedAccountHostOnlyFlag {
-					err = cv.virtualGuestService.UpgradeInstance(cid, cloudProps.StartCpus, cloudProps.MaxMemory, 0, cloudProps.DedicatedAccountHostOnlyFlag)
-					if err != nil {
-						return cid, bosherr.WrapError(err, "Upgrading VM")
-					}
-				}
 			}
 		case "vip":
 			return cid, bosherr.Error("SoftLayer Not Support VIP Networking")
@@ -406,14 +410,25 @@ func (cv CreateVM) createByOsReload(stemcellCID StemcellCID, cloudProps VMCloudP
 	return cid, nil
 }
 
-func (cv CreateVM) createUserDataForInstance(agentID string, registryOptions registry.ClientOptions) (string, error) {
+func (cv CreateVM) createUserDataForInstance(agentID string, registryOptions *registry.ClientOptions, deployedByBoshCLI bool) (string, error) {
+	var directorIP string
+	var err error
+	if deployedByBoshCLI == true {
+		directorIP = "127.0.0.1"
+	} else {
+		directorIP, err = cv.getDirectorIPAddressByHost(registryOptions.Address)
+		if err != nil {
+			return "", bosherr.WrapError(err, "Failed to get bosh director IP address in local")
+		}
+	}
+	registryOptions.Address = directorIP
 	serverName := fmt.Sprintf("vm-%s", agentID)
 	userDataContents := registry.SoftlayerUserData{
 		Registry: registry.SoftlayerUserDataRegistryEndpoint{
 			Endpoint: fmt.Sprintf("http://%s:%s@%s:%d",
 				registryOptions.HTTPOptions.User,
 				registryOptions.HTTPOptions.Password,
-				registryOptions.Host,
+				registryOptions.Address,
 				registryOptions.HTTPOptions.Port),
 		},
 		Server: registry.SoftlayerUserDataServerName{
@@ -427,53 +442,6 @@ func (cv CreateVM) createUserDataForInstance(agentID string, registryOptions reg
 
 	return base64.RawURLEncoding.EncodeToString(contentsBytes), nil
 }
-
-//func (cv CreateVM) getVlanIds(networks Networks) (int, int, error) {
-//	var publicVlanID, privateVlanID int
-//
-//	for name, nw := range networks {
-//		if nw.Type == "manual" {
-//			continue
-//		}
-//		for _, vlanId := range nw.CloudProperties.VlanIds {
-//			networkSpace, err := cv.getNetworkSpace(vlanId)
-//			if err != nil {
-//				return 0, 0, bosherr.WrapErrorf(err, "Network: %q, vlan id: %d", name, vlanId)
-//			}
-//
-//			switch networkSpace {
-//			case "PRIVATE":
-//				if privateVlanID == 0 {
-//					privateVlanID = vlanId
-//				} else if privateVlanID != vlanId {
-//					return 0, 0, bosherr.Error("Only one private VLAN is supported")
-//				}
-//			case "PUBLIC":
-//				if publicVlanID == 0 {
-//					publicVlanID = vlanId
-//				} else if publicVlanID != vlanId {
-//					return 0, 0, bosherr.Error("Only one public VLAN is supported")
-//				}
-//			default:
-//				return 0, 0, bosherr.Errorf("Vlan id %d: unknown network type '%s'", vlanId, networkSpace)
-//			}
-//		}
-//	}
-//
-//	if privateVlanID == 0 {
-//		return 0, 0, bosherr.Error("A private vlan is required")
-//	}
-//
-//	return publicVlanID, privateVlanID, nil
-//}
-//
-//func (cv CreateVM) getNetworkSpace(vlanID int) (string, error) {
-//	networkVlan, err := cv.virtualGuestService.GetVlan(vlanID, boslc.NETWORK_DEFAULT_VLAN)
-//	if err != nil {
-//		return "", bosherr.WrapErrorf(err, "Getting vlan info with id '%d'", vlanID)
-//	}
-//	return *networkVlan.NetworkSpace, nil
-//}
 
 func (cv CreateVM) updateHosts(path string, newIpAddress string, targetHostname string) (err error) {
 	err = os.Setenv("HOSTS_PATH", path)
@@ -500,30 +468,31 @@ func (cv CreateVM) updateHosts(path string, newIpAddress string, targetHostname 
 	return nil
 }
 
-func (cv CreateVM) getLocalIPAddress() (string, error) {
-	addrs, err := net.InterfaceAddrs()
-	if err != nil {
-		return "", bosherr.WrapErrorf(err, "Failed to get network interfaces")
-	}
+func (cv CreateVM) getDirectorIPAddressByHost(host string) (string, error) {
+	// check host is ip address or hostname
+	address := net.ParseIP(host)
+	if address == nil || address.String() == "127.0.0.1" {
+		addrs, err := net.InterfaceAddrs()
+		if err != nil {
+			return "", bosherr.WrapErrorf(err, "Failed to get network interfaces")
+		}
 
-	for _, addr := range addrs {
-		if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
-			if ipnet.IP.To4() != nil {
-				return ipnet.IP.String(), nil
+		for _, addr := range addrs {
+			if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+				if ipnet.IP.To4() != nil {
+					return ipnet.IP.String(), nil
+				}
 			}
 		}
+
+		return "", bosherr.Error(fmt.Sprintf("Failed to get IP address by '%s'", host))
 	}
 
-	return "", bosherr.Error(fmt.Sprintf("Failed to get IP address"))
+	return address.String(), nil
 }
 
 func (cv CreateVM) postConfig(virtualGuestId int, agentOptions *registry.AgentOptions) error {
-	boshIP, err := cv.getLocalIPAddress()
-	if err != nil {
-		return bosherr.WrapError(err, "Failed to get IP address in local")
-	}
-
-	mbus, err := cv.parseMbusURL(agentOptions.Mbus, boshIP)
+	mbus, err := cv.parseMbusURL(agentOptions.Mbus)
 	if err != nil {
 		return bosherr.WrapError(err, "Cannot construct mbus url.")
 	}
@@ -532,12 +501,12 @@ func (cv CreateVM) postConfig(virtualGuestId int, agentOptions *registry.AgentOp
 	switch agentOptions.Blobstore.Provider {
 	case "dav":
 		davConf := instance.DavConfig(agentOptions.Blobstore.Options)
-		cv.updateDavConfig(&davConf, boshIP)
+		cv.updateDavConfig(&davConf)
 	}
 	return nil
 }
 
-func (cv CreateVM) parseMbusURL(mbusURL string, primaryBackendIpAddress string) (string, error) {
+func (cv CreateVM) parseMbusURL(mbusURL string) (string, error) {
 	parsedURL, err := url.Parse(mbusURL)
 	if err != nil {
 		return "", bosherr.WrapError(err, "Parsing Mbus URL")
@@ -549,24 +518,21 @@ func (cv CreateVM) parseMbusURL(mbusURL string, primaryBackendIpAddress string) 
 		return "", bosherr.WrapError(err, "Spliting host and port")
 	}
 
-	// when director using dynamic network, the mbus host should be "0.0.0.0"
-	if host != "0.0.0.0" {
-		return mbusURL, nil
-	}
+	ipAddress, err := cv.getDirectorIPAddressByHost(host)
 
 	userInfo := parsedURL.User
 	if userInfo != nil {
 		username = userInfo.Username()
 		password, _ = userInfo.Password()
-		return fmt.Sprintf("%s://%s:%s@%s:%s", parsedURL.Scheme, username, password, primaryBackendIpAddress, port), nil
+		return fmt.Sprintf("%s://%s:%s@%s:%s", parsedURL.Scheme, username, password, ipAddress, port), nil
 	}
 
-	return fmt.Sprintf("%s://%s:%s", parsedURL.Scheme, primaryBackendIpAddress, port), nil
+	return fmt.Sprintf("%s://%s:%s", parsedURL.Scheme, ipAddress, port), nil
 }
 
-func (cv CreateVM) updateDavConfig(config *instance.DavConfig, directorIP string) (err error) {
+func (cv CreateVM) updateDavConfig(config *instance.DavConfig) (err error) {
 	url := (*config)["endpoint"].(string)
-	mbus, err := cv.parseMbusURL(url, directorIP)
+	mbus, err := cv.parseMbusURL(url)
 	if err != nil {
 		return bosherr.WrapError(err, "Parsing Mbus URL")
 	}

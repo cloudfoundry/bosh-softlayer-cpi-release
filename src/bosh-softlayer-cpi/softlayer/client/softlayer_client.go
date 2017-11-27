@@ -1,11 +1,11 @@
 package client
 
 import (
+	"log"
 	"time"
 
+	"fmt"
 	"github.com/softlayer/softlayer-go/session"
-	"io"
-	"log"
 )
 
 const (
@@ -14,10 +14,14 @@ const (
 	SoftlayerGoLogTag                  = "softlayerGo"
 )
 
-func NewSoftlayerClientSession(apiEndpoint string, username string, password string, trace bool, timeout int, writer io.Writer) *session.Session {
-	session.Logger = log.New(writer, SoftlayerGoLogTag, log.LstdFlags)
+func NewSoftlayerClientSession(apiEndpoint string, username string, password string, trace bool, timeoutSec int, retries int, retryWaitSec int, outLogger *log.Logger) *session.Session {
+	// Use native logger's prefix as bosh logger tag
+	outLogger.SetPrefix(fmt.Sprintf("[%s:%s] ", outLogger.Prefix(), SoftlayerGoLogTag))
+	session.Logger = outLogger
 	session := session.New(username, password, apiEndpoint)
 	session.Debug = trace
-	session.Timeout = time.Duration(timeout) * time.Second
+	session.Timeout = time.Duration(timeoutSec) * time.Second
+	session.Retries = retries
+	session.RetryWait = time.Duration(retryWaitSec) * time.Second
 	return session
 }

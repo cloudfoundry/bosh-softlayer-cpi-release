@@ -16,20 +16,21 @@ import (
 	bgcapi "bosh-softlayer-cpi/api"
 	fakedisp "bosh-softlayer-cpi/api/dispatcher/fakes"
 	fakeapi "bosh-softlayer-cpi/api/fakes"
+	cpiLog "bosh-softlayer-cpi/logger"
 )
 
 var _ = Describe("JSON", func() {
 	var (
 		actionFactory *fakeaction.FakeFactory
 		caller        *fakedisp.FakeCaller
-		logger        boshlog.Logger
+		logger        cpiLog.Logger
 		dispatcher    JSON
 	)
 
 	BeforeEach(func() {
 		actionFactory = fakeaction.NewFakeFactory()
 		caller = &fakedisp.FakeCaller{}
-		logger = boshlog.NewLogger(boshlog.LevelNone)
+		logger = cpiLog.NewLogger(boshlog.LevelNone, "")
 		dispatcher = NewJSON(actionFactory, caller, bgcapi.MultiLogger{Logger: logger, LogBuff: &bytes.Buffer{}})
 	})
 

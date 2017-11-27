@@ -1,17 +1,18 @@
 package instance
 
 import (
-	boslc "bosh-softlayer-cpi/softlayer/client"
+	"strconv"
+
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
+	"github.com/softlayer/softlayer-go/datatypes"
 
 	"bosh-softlayer-cpi/api"
-	"github.com/softlayer/softlayer-go/datatypes"
-	"strconv"
+	boslc "bosh-softlayer-cpi/softlayer/client"
 )
 
 func (vg SoftlayerVirtualGuestService) ConfigureNetworks(id int, networks Networks) (Networks, error) {
 	vg.logger.Debug(softlayerVirtualGuestServiceLogTag, "Finding Softlayer Virtual Guest '%d' ", id)
-	instance, found, err := vg.softlayerClient.GetInstance(id, boslc.INSTANCE_DETAIL_MASK)
+	instance, found, err := vg.softlayerClient.GetInstance(id, boslc.INSTANCE_NETWORK_COMPONENTS_MASK)
 	if err != nil {
 		return networks, bosherr.WrapErrorf(err, "Failed to find SoftLayer VirtualGuest with id '%d'", id)
 	}

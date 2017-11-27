@@ -38,7 +38,7 @@ var validSoftLayerConfig = boslconfig.Config{
 var validClientOptions = registry.ClientOptions{
 	Username: "registry",
 	Password: "1330c82d-4bc4-4544-4a90-c2c78fa66431",
-	Host:     "127.0.0.1",
+	Address:  "127.0.0.1",
 	HTTPOptions: registry.HttpRegistryOptions{
 		Port:     8000,
 		User:     "registry",

@@ -39,7 +39,7 @@ func (sd SnapshotDisk) Run(diskCID DiskCID, metadata SnapshotMetadata) (string, 
 
 	snapshot, err := sd.snapshotService.Create(diskCID.Int(), note)
 	if err != nil {
-		return "", bosherr.WrapError(err, "Creating disk snapshot")
+		return "", bosherr.WrapErrorf(err, "Creating snapshot for disk '%s'", diskCID)
 	}
 
 	return DiskCID(snapshot).String(), nil

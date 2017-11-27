@@ -27,9 +27,6 @@
   echo -e "\n cd to base of project..."
   cd $base
 
-  echo -e "\n Creating cpi binary..."
-  go build -o out/cpi bosh-softlayer-cpi/main
-
 if [ -z "$1" ]; then
   echo -e "\n Integration Testing ALL CPI methods"
   ginkgo -r -v --noisyPendings integration

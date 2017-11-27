@@ -3,10 +3,10 @@ package api
 import (
 	"bytes"
 
-	boshlog "github.com/cloudfoundry/bosh-utils/logger"
+	"bosh-softlayer-cpi/logger"
 )
 
 type MultiLogger struct {
-	boshlog.Logger
+	logger.Logger
 	LogBuff *bytes.Buffer
 }

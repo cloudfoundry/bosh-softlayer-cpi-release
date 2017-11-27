@@ -4,25 +4,35 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	boslc "bosh-softlayer-cpi/softlayer/client"
-	"bosh-softlayer-cpi/test_helpers"
+	"bytes"
+	"fmt"
+	"net/http"
+	"strconv"
+	"time"
+
+	boshlogger "github.com/cloudfoundry/bosh-utils/logger"
+	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
 	"github.com/onsi/gomega/ghttp"
-
-	vpsClient "bosh-softlayer-cpi/softlayer/vps_service/client"
-	vpsVm "bosh-softlayer-cpi/softlayer/vps_service/client/vm"
-	"fmt"
-	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/softlayer/softlayer-go/datatypes"
 	"github.com/softlayer/softlayer-go/session"
 	"github.com/softlayer/softlayer-go/sl"
-	"net/http"
-	"time"
+
+	api "bosh-softlayer-cpi/api"
+	cpiLog "bosh-softlayer-cpi/logger"
+	slClient "bosh-softlayer-cpi/softlayer/client"
+	vpsClient "bosh-softlayer-cpi/softlayer/vps_service/client"
+	vpsVm "bosh-softlayer-cpi/softlayer/vps_service/client/vm"
+	"bosh-softlayer-cpi/test_helpers"
 )
 
 var _ = Describe("InstanceHandler", func() {
 	var (
 		err error
+
+		errOutLog   bytes.Buffer
+		logger      cpiLog.Logger
+		multiLogger api.MultiLogger
 
 		server      *ghttp.Server
 		vpsEndPoint string
@@ -30,7 +40,7 @@ var _ = Describe("InstanceHandler", func() {
 
 		transportHandler *test_helpers.FakeTransportHandler
 		sess             *session.Session
-		cli              *boslc.ClientManager
+		cli              *slClient.ClientManager
 
 		vgID             int
 		vlanID           int
@@ -56,8 +66,12 @@ var _ = Describe("InstanceHandler", func() {
 			SoftlayerAPIEndpoint: server.URL(),
 			MaxRetries:           3,
 		}
+
+		nanos := time.Now().Nanosecond()
+		logger = cpiLog.NewLogger(boshlogger.LevelDebug, strconv.Itoa(nanos))
+		multiLogger = api.MultiLogger{Logger: logger, LogBuff: &errOutLog}
 		sess = test_helpers.NewFakeSoftlayerSession(transportHandler)
-		cli = boslc.NewSoftLayerClientManager(sess, vps)
+		cli = slClient.NewSoftLayerClientManager(sess, vps, logger)
 
 		vgID = 25804753
 		vlanID = 1262125
@@ -125,7 +139,7 @@ var _ = Describe("InstanceHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				vgs, success, err := cli.GetInstance(vgID, boslc.INSTANCE_DETAIL_MASK)
+				vgs, success, err := cli.GetInstance(vgID, slClient.INSTANCE_DETAIL_MASK)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(success).To(Equal(true))
 				Expect(*vgs.Id).To(Equal(vgID))
@@ -159,7 +173,7 @@ var _ = Describe("InstanceHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				_, success, err := cli.GetInstance(vgID, boslc.INSTANCE_DETAIL_MASK)
+				_, success, err := cli.GetInstance(vgID, slClient.INSTANCE_DETAIL_MASK)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("fake-client-error"))
 				Expect(success).To(Equal(false))
@@ -175,7 +189,7 @@ var _ = Describe("InstanceHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				vgs, success, err := cli.GetInstance(vgID, boslc.INSTANCE_DETAIL_MASK)
+				vgs, success, err := cli.GetInstance(vgID, slClient.INSTANCE_DETAIL_MASK)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(success).To(Equal(false))
 				Expect((*vgs).Id).To(BeNil())
@@ -195,7 +209,7 @@ var _ = Describe("InstanceHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				networkVlan, success, err := cli.GetVlan(vlanID, boslc.NETWORK_DEFAULT_VLAN_MASK)
+				networkVlan, success, err := cli.GetVlan(vlanID, slClient.NETWORK_DEFAULT_VLAN_MASK)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(success).To(Equal(true))
 				Expect(*networkVlan.Id).To(Equal(vlanID))
@@ -229,7 +243,7 @@ var _ = Describe("InstanceHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				_, success, err := cli.GetVlan(vlanID, boslc.NETWORK_DEFAULT_VLAN_MASK)
+				_, success, err := cli.GetVlan(vlanID, slClient.NETWORK_DEFAULT_VLAN_MASK)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("fake-client-error"))
 				Expect(success).To(Equal(false))
@@ -245,7 +259,7 @@ var _ = Describe("InstanceHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				_, success, err := cli.GetVlan(vlanID, boslc.NETWORK_DEFAULT_VLAN_MASK)
+				_, success, err := cli.GetVlan(vlanID, slClient.NETWORK_DEFAULT_VLAN_MASK)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(success).To(Equal(false))
 			})
@@ -264,7 +278,7 @@ var _ = Describe("InstanceHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				networkVlan, success, err := cli.GetSubnet(subnetID, boslc.NETWORK_DEFAULT_SUBNET_MASK)
+				networkVlan, success, err := cli.GetSubnet(subnetID, slClient.NETWORK_DEFAULT_SUBNET_MASK)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(success).To(Equal(true))
 				Expect(*networkVlan.Id).To(Equal(subnetID))
@@ -315,7 +329,7 @@ var _ = Describe("InstanceHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				_, success, err := cli.GetSubnet(subnetID, boslc.NETWORK_DEFAULT_SUBNET_MASK)
+				_, success, err := cli.GetSubnet(subnetID, slClient.NETWORK_DEFAULT_SUBNET_MASK)
 
 				Expect(err).NotTo(HaveOccurred())
 				Expect(success).To(Equal(false))
@@ -601,7 +615,97 @@ var _ = Describe("InstanceHandler", func() {
 
 				err := cli.WaitInstanceUntilReady(vgID, time.Now())
 				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring(fmt.Sprintf("SoftLayer virtual guest '%d' does not exists", vgID)))
+				Expect(err.Error()).To(ContainSubstring(fmt.Sprintf("SoftLayer virtual guest '%d' does not exist", vgID)))
+			})
+		})
+	})
+
+	Describe("WaitInstanceUntilReadyWithTicket", func() {
+		Context("when VirtualGuestService getObject call successfully", func() {
+			It("waiting until instance ready successfully", func() {
+				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
+						"statusCode": http.StatusOK,
+					},
+				}
+				err = test_helpers.SpecifyServerResps(respParas, server)
+				Expect(err).NotTo(HaveOccurred())
+
+				err := cli.WaitInstanceUntilReadyWithTicket(vgID, time.Now().Add(1000))
+				Expect(err).NotTo(HaveOccurred())
+			})
+
+			It("return error and create ticket when time out", func() {
+				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Virtual_Guest_getObject_HasActiveTxn.json",
+						"statusCode": http.StatusOK,
+						"path":       "/SoftLayer_Virtual_Guest/25804753.json",
+						"method":     "GET",
+					},
+					{
+						"filename":   "SoftLayer_Ticket_Subject_getAllObjects.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Account_getCurrentUser.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Ticket_createStandardTicket.json",
+						"statusCode": http.StatusOK,
+					},
+				}
+				err = test_helpers.SpecifyServerResps(respParas, server)
+				Expect(err).NotTo(HaveOccurred())
+
+				err := cli.WaitInstanceUntilReadyWithTicket(vgID, time.Now().Add(3*time.Second))
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring(fmt.Sprintf("Power on virtual guest with id %d Time Out!", vgID)))
+			})
+		})
+
+		Context("when VirtualGuestService getObject call return error", func() {
+			It("return an softlayer-go unhandled error", func() {
+				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Virtual_Guest_getObject_InternalError.json",
+						"statusCode": http.StatusInternalServerError,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_getObject_InternalError.json",
+						"statusCode": http.StatusInternalServerError,
+					},
+				}
+				err = test_helpers.SpecifyServerResps(respParas, server)
+				Expect(err).NotTo(HaveOccurred())
+
+				err := cli.WaitInstanceUntilReadyWithTicket(vgID, time.Now())
+				Expect(err).To(HaveOccurred())
+			})
+
+			It("return an ObjectNotFoundError", func() {
+				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Virtual_Guest_getObject_NotFound.json",
+						"statusCode": http.StatusInternalServerError,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_getObject_NotFound.json",
+						"statusCode": http.StatusInternalServerError,
+					},
+				}
+				err = test_helpers.SpecifyServerResps(respParas, server)
+				Expect(err).NotTo(HaveOccurred())
+
+				err := cli.WaitInstanceUntilReadyWithTicket(vgID, time.Now())
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring(fmt.Sprintf("SoftLayer virtual guest '%d' does not exist", vgID)))
 			})
 		})
 	})
@@ -669,7 +773,7 @@ var _ = Describe("InstanceHandler", func() {
 
 				err := cli.WaitInstanceHasActiveTransaction(vgID, time.Now().Add(1000))
 				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring(fmt.Sprintf("SoftLayer virtual guest '%d' does not exists", vgID)))
+				Expect(err.Error()).To(ContainSubstring(fmt.Sprintf("SoftLayer virtual guest '%d' does not exist", vgID)))
 			})
 		})
 	})
@@ -708,6 +812,25 @@ var _ = Describe("InstanceHandler", func() {
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("Waiting instance with id of '%d' has none active transaction time out", vgID))
 			})
+
+			It("return error when instance stay 'RECLAIM_WAIT' transaction", func() {
+				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Virtual_Guest_getObject_HasActiveTxn_Reclaim.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_getObject_HasActiveTxn_Reclaim.json",
+						"statusCode": http.StatusOK,
+					},
+				}
+				err = test_helpers.SpecifyServerResps(respParas, server)
+				Expect(err).NotTo(HaveOccurred())
+
+				err := cli.WaitInstanceHasNoneActiveTransaction(vgID, time.Now().Add(3000000))
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("has 'RECLAIM_WAIT' transaction"))
+			})
 		})
 
 		Context("when VirtualGuestService getObject call return error", func() {
@@ -737,7 +860,7 @@ var _ = Describe("InstanceHandler", func() {
 
 				err := cli.WaitInstanceHasNoneActiveTransaction(vgID, time.Now().Add(1000))
 				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring(fmt.Sprintf("SoftLayer virtual guest '%d' does not exists", vgID)))
+				Expect(err.Error()).To(ContainSubstring(fmt.Sprintf("SoftLayer virtual guest '%d' does not exist", vgID)))
 			})
 		})
 	})
@@ -748,6 +871,10 @@ var _ = Describe("InstanceHandler", func() {
 				respParas = []map[string]interface{}{
 					{
 						"filename":   "SoftLayer_Virtual_Guest_createObject.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
 						"statusCode": http.StatusOK,
 					},
 					{
@@ -942,7 +1069,7 @@ var _ = Describe("InstanceHandler", func() {
 
 	Describe("ReloadInstance", func() {
 		Context("when VirtualGuestService calls successfully", func() {
-			It("cancel instance successfully", func() {
+			It("reload instance successfully", func() {
 				respParas = []map[string]interface{}{
 					{
 						"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
@@ -954,6 +1081,10 @@ var _ = Describe("InstanceHandler", func() {
 					},
 					{
 						"filename":   "SoftLayer_Virtual_Guest_getObject_HasActiveTxn.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
 						"statusCode": http.StatusOK,
 					},
 					{
@@ -1103,7 +1234,7 @@ var _ = Describe("InstanceHandler", func() {
 				Expect(err.Error()).To(ContainSubstring("Waiting until instance is ready after os_reload"))
 			})
 
-			It("Return error when VirtualGuestService editObject call return an error", func() {
+			It("Return error when VirtualGuestService editObject call return an internal error", func() {
 				respParas = []map[string]interface{}{
 					{
 						"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
@@ -1115,6 +1246,10 @@ var _ = Describe("InstanceHandler", func() {
 					},
 					{
 						"filename":   "SoftLayer_Virtual_Guest_getObject_HasActiveTxn.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
 						"statusCode": http.StatusOK,
 					},
 					{
@@ -1134,7 +1269,7 @@ var _ = Describe("InstanceHandler", func() {
 				Expect(err.Error()).To(ContainSubstring("Editing VM hostname after OS Reload"))
 			})
 
-			It("Return error when VirtualGuestService editObject call return an error", func() {
+			It("Return error when VirtualGuestService editObject call return an object not found error", func() {
 				respParas = []map[string]interface{}{
 					{
 						"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
@@ -1146,6 +1281,10 @@ var _ = Describe("InstanceHandler", func() {
 					},
 					{
 						"filename":   "SoftLayer_Virtual_Guest_getObject_HasActiveTxn.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
 						"statusCode": http.StatusOK,
 					},
 					{
@@ -1178,6 +1317,22 @@ var _ = Describe("InstanceHandler", func() {
 					{
 						"filename":   "SoftLayer_Virtual_Guest_deleteObject.json",
 						"statusCode": http.StatusOK,
+					},
+				}
+				err = test_helpers.SpecifyServerResps(respParas, server)
+				Expect(err).NotTo(HaveOccurred())
+
+				err := cli.CancelInstance(vgID)
+				Expect(err).NotTo(HaveOccurred())
+			})
+
+			It("Cancel instance successfully when instance stays 'RECLAIM_WAIT' transaction 1 minutes", func() {
+				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Virtual_Guest_getObject_HasActiveTxn_Reclaim.json",
+						"statusCode": http.StatusOK,
+						"path":       "/SoftLayer_Virtual_Guest/25804753.json",
+						"method":     "GET",
 					},
 				}
 				err = test_helpers.SpecifyServerResps(respParas, server)
@@ -1415,7 +1570,7 @@ var _ = Describe("InstanceHandler", func() {
 						"statusCode": http.StatusOK,
 					},
 					{
-						"filename":   "SoftLayer_Virtual_Guest_getLocalDiskFlag.json",
+						"filename":   "SoftLayer_Virtual_Guest_getObject_localDisk.json",
 						"statusCode": http.StatusOK,
 					},
 					{
@@ -1446,7 +1601,7 @@ var _ = Describe("InstanceHandler", func() {
 						"statusCode": http.StatusOK,
 					},
 					{
-						"filename":   "SoftLayer_Virtual_Guest_getLocalDiskFlag_False.json",
+						"filename":   "SoftLayer_Virtual_Guest_getObject_SAN.json",
 						"statusCode": http.StatusOK,
 					},
 					{
@@ -1461,7 +1616,7 @@ var _ = Describe("InstanceHandler", func() {
 				Expect(err).NotTo(HaveOccurred())
 			})
 
-			It("upgrade instance successfully when UpgradeItemPrices has another struct", func() {
+			It("upgrade instance successfully when presetId is existing", func() {
 				respParas = []map[string]interface{}{
 					{
 						"filename":   "SoftLayer_Product_Package_getAllObjects.json",
@@ -1473,11 +1628,11 @@ var _ = Describe("InstanceHandler", func() {
 					},
 					// getUpgradeItemPriceForSecondDisk
 					{
-						"filename":   "SoftLayer_Virtual_Guest_getUpgradeItemPrices_anotherStruct.json",
+						"filename":   "SoftLayer_Virtual_Guest_getUpgradeItemPrices.json",
 						"statusCode": http.StatusOK,
 					},
 					{
-						"filename":   "SoftLayer_Virtual_Guest_getLocalDiskFlag.json",
+						"filename":   "SoftLayer_Virtual_Guest_getObject_presetId.json",
 						"statusCode": http.StatusOK,
 					},
 					{
@@ -1507,7 +1662,7 @@ var _ = Describe("InstanceHandler", func() {
 						"statusCode": http.StatusOK,
 					},
 					{
-						"filename":   "SoftLayer_Virtual_Guest_getLocalDiskFlag.json",
+						"filename":   "SoftLayer_Virtual_Guest_getObject_localDisk.json",
 						"statusCode": http.StatusOK,
 					},
 				}
@@ -1614,7 +1769,7 @@ var _ = Describe("InstanceHandler", func() {
 				Expect(err.Error()).To(ContainSubstring("fake-client-error"))
 			})
 
-			It("Return error when SoftLayerVirtualGuest getLocalDiskFlag call return an error", func() {
+			It("Return error when SoftLayerVirtualGuest get localDiskFlag call return an error", func() {
 				respParas = []map[string]interface{}{
 					{
 						"filename":   "SoftLayer_Product_Package_getAllObjects.json",
@@ -1629,7 +1784,7 @@ var _ = Describe("InstanceHandler", func() {
 						"statusCode": http.StatusOK,
 					},
 					{
-						"filename":   "SoftLayer_Virtual_Guest_getLocalDiskFlag_InternalError.json",
+						"filename":   "SoftLayer_Virtual_Guest_getObject_InternalError.json",
 						"statusCode": http.StatusInternalServerError,
 					},
 				}
@@ -1656,7 +1811,7 @@ var _ = Describe("InstanceHandler", func() {
 						"statusCode": http.StatusOK,
 					},
 					{
-						"filename":   "SoftLayer_Virtual_Guest_getLocalDiskFlag.json",
+						"filename":   "SoftLayer_Virtual_Guest_getObject_localDisk.json",
 						"statusCode": http.StatusOK,
 					},
 				}
@@ -1683,7 +1838,7 @@ var _ = Describe("InstanceHandler", func() {
 						"statusCode": http.StatusOK,
 					},
 					{
-						"filename":   "SoftLayer_Virtual_Guest_getLocalDiskFlag.json",
+						"filename":   "SoftLayer_Virtual_Guest_getObject_localDisk.json",
 						"statusCode": http.StatusOK,
 					},
 					{
@@ -1828,31 +1983,21 @@ var _ = Describe("InstanceHandler", func() {
 					"statusCode": http.StatusOK,
 				},
 				{
-					"filename":   "SoftLayer_Virtual_Guest_getLocalDiskFlag.json",
+					"filename":   "SoftLayer_Virtual_Guest_getObject_localDisk.json",
 					"statusCode": http.StatusOK,
 				},
 				{
 					"filename":   "SoftLayer_Product_Order_placeOrder.json",
 					"statusCode": http.StatusOK,
 				},
-				// WaitInstanceHasActiveTransaction
+				// WaitOrderCompleted
 				{
-					"filename":   "SoftLayer_Virtual_Guest_getObject_HasActiveTxn.json",
-					"statusCode": http.StatusOK,
-				},
-				// WaitInstanceHasNoneActiveTransaction
-				{
-					"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
+					"filename":   "SoftLayer_Billing_Order_getObject.json",
 					"statusCode": http.StatusOK,
 				},
 				// WaitInstanceUntilReady
 				{
 					"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
-					"statusCode": http.StatusOK,
-				},
-				// GetBlockDevices
-				{
-					"filename":   "SoftLayer_Virtual_Guest_getBlockDevices.json",
 					"statusCode": http.StatusOK,
 				},
 			}
@@ -1921,12 +2066,26 @@ var _ = Describe("InstanceHandler", func() {
 					"statusCode": http.StatusOK,
 				},
 				{
-					"filename":   "SoftLayer_Virtual_Guest_getLocalDiskFlag.json",
+					"filename":   "SoftLayer_Virtual_Guest_getObject_localDisk.json",
 					"statusCode": http.StatusOK,
 				},
 				{
 					"filename":   "SoftLayer_Product_Order_placeOrder_Processing.json",
 					"statusCode": http.StatusInternalServerError,
+				},
+				{
+					"filename":   "SoftLayer_Virtual_Guest_getUpgradeRequest.json",
+					"statusCode": http.StatusOK,
+				},
+				// WaitOrderCompleted
+				{
+					"filename":   "SoftLayer_Billing_Order_getObject.json",
+					"statusCode": http.StatusOK,
+				},
+				// WaitInstanceUntilReady
+				{
+					"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
+					"statusCode": http.StatusOK,
 				},
 			}
 			err = test_helpers.SpecifyServerResps(respParas, server)
@@ -1957,16 +2116,16 @@ var _ = Describe("InstanceHandler", func() {
 					"statusCode": http.StatusOK,
 				},
 				{
-					"filename":   "SoftLayer_Virtual_Guest_getLocalDiskFlag.json",
+					"filename":   "SoftLayer_Virtual_Guest_getObject_localDisk.json",
 					"statusCode": http.StatusOK,
 				},
 				{
 					"filename":   "SoftLayer_Product_Order_placeOrder.json",
 					"statusCode": http.StatusOK,
 				},
-				// WaitInstanceHasActiveTransaction
+				// WaitOrderCompleted
 				{
-					"filename":   "SoftLayer_Virtual_Guest_getObject_InternalError.json",
+					"filename":   "SoftLayer_Billing_Order_getObject_InternalError.json",
 					"statusCode": http.StatusInternalServerError,
 				},
 			}
@@ -1975,54 +2134,7 @@ var _ = Describe("InstanceHandler", func() {
 
 			err := cli.AttachSecondDiskToInstance(vgID, 300)
 			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring("Waiting until instance has active transaction after upgrading instance"))
-		})
-
-		It("Return error when call WaitInstanceHasNoneActiveTransaction secondly return an error", func() {
-			respParas = []map[string]interface{}{
-				//WaitInstanceHasNoneActiveTransaction
-				{
-					"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
-					"statusCode": http.StatusOK,
-				},
-				// UpgradeInstance
-				{
-					"filename":   "SoftLayer_Product_Package_getAllObjects.json",
-					"statusCode": http.StatusOK,
-				},
-				{
-					"filename":   "SoftLayer_Product_Package_getItems.json",
-					"statusCode": http.StatusOK,
-				},
-				{
-					"filename":   "SoftLayer_Virtual_Guest_getUpgradeItemPrices.json",
-					"statusCode": http.StatusOK,
-				},
-				{
-					"filename":   "SoftLayer_Virtual_Guest_getLocalDiskFlag.json",
-					"statusCode": http.StatusOK,
-				},
-				{
-					"filename":   "SoftLayer_Product_Order_placeOrder.json",
-					"statusCode": http.StatusOK,
-				},
-				// WaitInstanceHasActiveTransaction
-				{
-					"filename":   "SoftLayer_Virtual_Guest_getObject_HasActiveTxn.json",
-					"statusCode": http.StatusOK,
-				},
-				// WaitInstanceHasNoneActiveTransaction
-				{
-					"filename":   "SoftLayer_Virtual_Guest_getObject_InternalError.json",
-					"statusCode": http.StatusInternalServerError,
-				},
-			}
-			err = test_helpers.SpecifyServerResps(respParas, server)
-			Expect(err).NotTo(HaveOccurred())
-
-			err := cli.AttachSecondDiskToInstance(vgID, 300)
-			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring("Waiting until instance has none active transaction after upgrading instance"))
+			Expect(err.Error()).To(ContainSubstring("Waiting until order placed has been completed after upgrading instance"))
 		})
 
 		It("Return error when call WaitInstanceUntilReady return an error", func() {
@@ -2046,21 +2158,16 @@ var _ = Describe("InstanceHandler", func() {
 					"statusCode": http.StatusOK,
 				},
 				{
-					"filename":   "SoftLayer_Virtual_Guest_getLocalDiskFlag.json",
+					"filename":   "SoftLayer_Virtual_Guest_getObject_localDisk.json",
 					"statusCode": http.StatusOK,
 				},
 				{
 					"filename":   "SoftLayer_Product_Order_placeOrder.json",
 					"statusCode": http.StatusOK,
 				},
-				// WaitInstanceHasActiveTransaction
+				// WaitOrderCompleted
 				{
-					"filename":   "SoftLayer_Virtual_Guest_getObject_HasActiveTxn.json",
-					"statusCode": http.StatusOK,
-				},
-				// WaitInstanceHasNoneActiveTransaction
-				{
-					"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
+					"filename":   "SoftLayer_Billing_Order_getObject.json",
 					"statusCode": http.StatusOK,
 				},
 				// WaitInstanceUntilReady
@@ -2075,120 +2182,6 @@ var _ = Describe("InstanceHandler", func() {
 			err := cli.AttachSecondDiskToInstance(vgID, 300)
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("Waiting until instance is ready after os_reload"))
-		})
-
-		It("Return error when call GetBlockDevices return an error", func() {
-			respParas = []map[string]interface{}{
-				//WaitInstanceHasNoneActiveTransaction
-				{
-					"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
-					"statusCode": http.StatusOK,
-				},
-				// UpgradeInstance
-				{
-					"filename":   "SoftLayer_Product_Package_getAllObjects.json",
-					"statusCode": http.StatusOK,
-				},
-				{
-					"filename":   "SoftLayer_Product_Package_getItems.json",
-					"statusCode": http.StatusOK,
-				},
-				{
-					"filename":   "SoftLayer_Virtual_Guest_getUpgradeItemPrices.json",
-					"statusCode": http.StatusOK,
-				},
-				{
-					"filename":   "SoftLayer_Virtual_Guest_getLocalDiskFlag.json",
-					"statusCode": http.StatusOK,
-				},
-				{
-					"filename":   "SoftLayer_Product_Order_placeOrder.json",
-					"statusCode": http.StatusOK,
-				},
-				// WaitInstanceHasActiveTransaction
-				{
-					"filename":   "SoftLayer_Virtual_Guest_getObject_HasActiveTxn.json",
-					"statusCode": http.StatusOK,
-				},
-				// WaitInstanceHasNoneActiveTransaction
-				{
-					"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
-					"statusCode": http.StatusOK,
-				},
-				// WaitInstanceUntilReady
-				{
-					"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
-					"statusCode": http.StatusOK,
-				},
-				// GetBlockDevices
-				{
-					"filename":   "SoftLayer_Virtual_Guest_getBlockDevices_InternalError.json",
-					"statusCode": http.StatusInternalServerError,
-				},
-			}
-			err = test_helpers.SpecifyServerResps(respParas, server)
-			Expect(err).NotTo(HaveOccurred())
-
-			err := cli.AttachSecondDiskToInstance(vgID, 300)
-			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring("Get the attached ephemeral disks of VirtualGuest"))
-		})
-
-		It("Return error when call GetBlockDevices return an empty blocks", func() {
-			respParas = []map[string]interface{}{
-				//WaitInstanceHasNoneActiveTransaction
-				{
-					"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
-					"statusCode": http.StatusOK,
-				},
-				// UpgradeInstance
-				{
-					"filename":   "SoftLayer_Product_Package_getAllObjects.json",
-					"statusCode": http.StatusOK,
-				},
-				{
-					"filename":   "SoftLayer_Product_Package_getItems.json",
-					"statusCode": http.StatusOK,
-				},
-				{
-					"filename":   "SoftLayer_Virtual_Guest_getUpgradeItemPrices.json",
-					"statusCode": http.StatusOK,
-				},
-				{
-					"filename":   "SoftLayer_Virtual_Guest_getLocalDiskFlag.json",
-					"statusCode": http.StatusOK,
-				},
-				{
-					"filename":   "SoftLayer_Product_Order_placeOrder.json",
-					"statusCode": http.StatusOK,
-				},
-				// WaitInstanceHasActiveTransaction
-				{
-					"filename":   "SoftLayer_Virtual_Guest_getObject_HasActiveTxn.json",
-					"statusCode": http.StatusOK,
-				},
-				// WaitInstanceHasNoneActiveTransaction
-				{
-					"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
-					"statusCode": http.StatusOK,
-				},
-				// WaitInstanceUntilReady
-				{
-					"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
-					"statusCode": http.StatusOK,
-				},
-				// GetBlockDevices
-				{
-					"filename":   "SoftLayer_Virtual_Guest_getBlockDevices_Empty.json",
-					"statusCode": http.StatusOK,
-				},
-			}
-			err = test_helpers.SpecifyServerResps(respParas, server)
-			Expect(err).NotTo(HaveOccurred())
-
-			err := cli.AttachSecondDiskToInstance(vgID, 300)
-			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring("The ephemeral disk is not attached on VirtualGuest"))
 		})
 	})
 
@@ -2213,14 +2206,9 @@ var _ = Describe("InstanceHandler", func() {
 					"filename":   "SoftLayer_Product_Order_placeOrder.json",
 					"statusCode": http.StatusOK,
 				},
-				// WaitInstanceHasActiveTransaction
+				// WaitOrderCompleted
 				{
-					"filename":   "SoftLayer_Virtual_Guest_getObject_HasActiveTxn.json",
-					"statusCode": http.StatusOK,
-				},
-				// WaitInstanceHasNoneActiveTransaction
-				{
-					"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
+					"filename":   "SoftLayer_Billing_Order_getObject.json",
 					"statusCode": http.StatusOK,
 				},
 				// WaitInstanceUntilReady
@@ -2252,34 +2240,6 @@ var _ = Describe("InstanceHandler", func() {
 			Expect(err.Error()).To(ContainSubstring("Waiting until instance has none active transaction before os_reload"))
 		})
 
-		It("Return error when call UpgradeInstance return 'a current price was provided for the upgrade order'", func() {
-			respParas = []map[string]interface{}{
-				//WaitInstanceHasNoneActiveTransaction
-				{
-					"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
-					"statusCode": http.StatusOK,
-				},
-				// UpgradeInstance
-				{
-					"filename":   "SoftLayer_Product_Package_getAllObjects.json",
-					"statusCode": http.StatusOK,
-				},
-				{
-					"filename":   "SoftLayer_Product_Package_getItems.json",
-					"statusCode": http.StatusOK,
-				},
-				{
-					"filename":   "SoftLayer_Product_Order_placeOrder_Processing.json",
-					"statusCode": http.StatusInternalServerError,
-				},
-			}
-			err = test_helpers.SpecifyServerResps(respParas, server)
-			Expect(err).NotTo(HaveOccurred())
-
-			err := cli.AttachSecondDiskToInstance(vgID, 300)
-			Expect(err).NotTo(HaveOccurred())
-		})
-
 		It("Return error when call UpgradeInstance return error", func() {
 			respParas = []map[string]interface{}{
 				//WaitInstanceHasNoneActiveTransaction
@@ -2301,7 +2261,7 @@ var _ = Describe("InstanceHandler", func() {
 			Expect(err.Error()).To(ContainSubstring("Upgrading configuration to virutal guest of"))
 		})
 
-		It("Return error when call WaitInstanceHasActiveTransaction return error", func() {
+		It("Return error when call WaitOrderCompleted return error", func() {
 			respParas = []map[string]interface{}{
 				//WaitInstanceHasNoneActiveTransaction
 				{
@@ -2319,50 +2279,11 @@ var _ = Describe("InstanceHandler", func() {
 				},
 				{
 					"filename":   "SoftLayer_Product_Order_placeOrder.json",
-					"statusCode": http.StatusOK,
-				},
-				// WaitInstanceHasActiveTransaction
-				{
-					"filename":   "SoftLayer_Virtual_Guest_getObject_InternalError.json",
-					"statusCode": http.StatusInternalServerError,
-				},
-			}
-			err = test_helpers.SpecifyServerResps(respParas, server)
-			Expect(err).NotTo(HaveOccurred())
-
-			err := cli.UpgradeInstanceConfig(vgID, 2, 0, 0, false)
-			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring("Waiting until instance has active transaction after upgrading instance"))
-		})
-
-		It("Return error when call WaitInstanceHasNoneActiveTransaction return error", func() {
-			respParas = []map[string]interface{}{
-				//WaitInstanceHasNoneActiveTransaction
-				{
-					"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
-					"statusCode": http.StatusOK,
-				},
-				// UpgradeInstance
-				{
-					"filename":   "SoftLayer_Product_Package_getAllObjects.json",
-					"statusCode": http.StatusOK,
-				},
-				{
-					"filename":   "SoftLayer_Product_Package_getItems.json",
-					"statusCode": http.StatusOK,
-				},
-				{
-					"filename":   "SoftLayer_Product_Order_placeOrder.json",
-					"statusCode": http.StatusOK,
-				},
-				// WaitInstanceHasActiveTransaction
-				{
-					"filename":   "SoftLayer_Virtual_Guest_getObject_HasActiveTxn.json",
 					"statusCode": http.StatusOK,
 				},
 				// WaitInstanceHasNoneActiveTransaction
 				{
-					"filename":   "SoftLayer_Virtual_Guest_getObject_InternalError.json",
+					"filename":   "SoftLayer_Billing_Order_getObject_InternalError.json",
 					"statusCode": http.StatusInternalServerError,
 				},
 			}
@@ -2371,7 +2292,7 @@ var _ = Describe("InstanceHandler", func() {
 
 			err := cli.UpgradeInstanceConfig(vgID, 2, 0, 0, false)
 			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring("Waiting until instance has none active transaction after upgrading instance"))
+			Expect(err.Error()).To(ContainSubstring("Waiting until order placed has been completed after upgrading instance"))
 		})
 
 		It("Return error when call WaitInstanceUntilReady return error", func() {
@@ -2394,14 +2315,9 @@ var _ = Describe("InstanceHandler", func() {
 					"filename":   "SoftLayer_Product_Order_placeOrder.json",
 					"statusCode": http.StatusOK,
 				},
-				// WaitInstanceHasActiveTransaction
+				// WaitOrderCompleted
 				{
-					"filename":   "SoftLayer_Virtual_Guest_getObject_HasActiveTxn.json",
-					"statusCode": http.StatusOK,
-				},
-				// WaitInstanceHasNoneActiveTransaction
-				{
-					"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
+					"filename":   "SoftLayer_Billing_Order_getObject.json",
 					"statusCode": http.StatusOK,
 				},
 				// WaitInstanceUntilReady
@@ -2416,6 +2332,85 @@ var _ = Describe("InstanceHandler", func() {
 			err := cli.UpgradeInstanceConfig(vgID, 2, 0, 0, false)
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("Waiting until instance is ready after os_reload"))
+		})
+	})
+
+	Describe("SetInstanceMetadata", func() {
+		Context("when VirtualGuestService EditObject call successfully", func() {
+			It("set instance's metadata successfully", func() {
+				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Virtual_Guest_setUserMetadata.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
+						"statusCode": http.StatusOK,
+					},
+				}
+				err = test_helpers.SpecifyServerResps(respParas, server)
+				Expect(err).NotTo(HaveOccurred())
+
+				succ, err := cli.SetInstanceMetadata(vgID, sl.String("unit-test"))
+				Expect(err).NotTo(HaveOccurred())
+				Expect(succ).To(BeTrue())
+			})
+		})
+
+		Context("when VirtualGuestService EditObject call return error", func() {
+			It("edit instance successfully", func() {
+				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Virtual_Guest_setUserMetadata_InternalError.json",
+						"statusCode": http.StatusInternalServerError,
+					},
+				}
+				err = test_helpers.SpecifyServerResps(respParas, server)
+				Expect(err).NotTo(HaveOccurred())
+
+				succ, err := cli.SetInstanceMetadata(vgID, sl.String("unit-test"))
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("fake-client-error"))
+				Expect(succ).To(BeFalse())
+			})
+
+			It("edit instance successfully", func() {
+				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Virtual_Guest_setUserMetadata_NotFound.json",
+						"statusCode": http.StatusInternalServerError,
+					},
+				}
+				err = test_helpers.SpecifyServerResps(respParas, server)
+				Expect(err).NotTo(HaveOccurred())
+
+				succ, err := cli.SetInstanceMetadata(vgID, sl.String("unit-test"))
+				Expect(err).NotTo(HaveOccurred())
+				Expect(succ).To(BeFalse())
+			})
+		})
+
+		Context("when VirtualGuestService WaitInstanceUntilReady call return error", func() {
+			It("return an softlayer-go unhandled error", func() {
+				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Virtual_Guest_setUserMetadata.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_getObject_InternalError.json",
+						"statusCode": http.StatusInternalServerError,
+					},
+				}
+				err = test_helpers.SpecifyServerResps(respParas, server)
+				Expect(err).NotTo(HaveOccurred())
+
+				succ, err := cli.SetInstanceMetadata(vgID, sl.String("unit-test"))
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("Waiting until instance is ready"))
+				Expect(succ).To(BeFalse())
+				Expect(err.Error()).To(ContainSubstring("Waiting until instance is ready"))
+			})
 		})
 	})
 })

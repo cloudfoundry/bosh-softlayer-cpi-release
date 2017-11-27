@@ -1,16 +1,13 @@
 package client
 
 import (
+	"fmt"
 	"math"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
 
-	vpsVm "bosh-softlayer-cpi/softlayer/vps_service/client/vm"
-
-	"bosh-softlayer-cpi/softlayer/vps_service/models"
-	"fmt"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	"github.com/go-openapi/strfmt"
 	"github.com/softlayer/softlayer-go/datatypes"
@@ -18,9 +15,15 @@ import (
 	"github.com/softlayer/softlayer-go/services"
 	"github.com/softlayer/softlayer-go/session"
 	"github.com/softlayer/softlayer-go/sl"
+
+	"bosh-softlayer-cpi/logger"
+	vpsVm "bosh-softlayer-cpi/softlayer/vps_service/client/vm"
+	"bosh-softlayer-cpi/softlayer/vps_service/models"
 )
 
 const (
+	softlayerClientLogTag = "SoftlayerClient"
+
 	INSTANCE_DEFAULT_MASK = "id, globalIdentifier, hostname, hourlyBillingFlag, domain, fullyQualifiedDomainName, status.name, " +
 		"powerState.name, activeTransaction, datacenter.name, account.id, " +
 		"maxCpu, maxMemory, primaryIpAddress, primaryBackendIpAddress, " +
@@ -34,6 +37,8 @@ const (
 		"privateNetworkOnlyFlag, dedicatedAccountHostOnlyFlag, createDate, modifyDate, " +
 		"billingItem[nextInvoiceTotalRecurringAmount, children[nextInvoiceTotalRecurringAmount]], notes, tagReferences.tag.name, networkVlans[id,vlanNumber,networkSpace], " +
 		"primaryBackendNetworkComponent[primaryIpAddress, networkVlan[id,name,vlanNumber,primaryRouter], subnets[netmask,networkIdentifier]], primaryNetworkComponent[primaryIpAddress, networkVlan[id,name,vlanNumber,primaryRouter], subnets[netmask,networkIdentifier]]"
+
+	INSTANCE_NETWORK_COMPONENTS_MASK = "primaryBackendNetworkComponent[primaryIpAddress, networkVlan[id,name,vlanNumber,primaryRouter], subnets[netmask,networkIdentifier]], primaryNetworkComponent[primaryIpAddress, networkVlan[id,name,vlanNumber,primaryRouter], subnets[netmask,networkIdentifier]]"
 
 	NETWORK_DEFAULT_VLAN_MASK   = "id,primarySubnetId,networkSpace"
 	NETWORK_DEFAULT_SUBNET_MASK = "id,networkVlanId,addressSpace"
@@ -81,7 +86,7 @@ func (factory *clientFactory) CreateClient() Client {
 	return factory.slClient
 }
 
-func NewSoftLayerClientManager(session *session.Session, vps *vpsVm.Client) *ClientManager {
+func NewSoftLayerClientManager(session *session.Session, vps *vpsVm.Client, logger logger.Logger) *ClientManager {
 	return &ClientManager{
 		services.GetVirtualGuestService(session),
 		services.GetAccountService(session),
@@ -94,7 +99,11 @@ func NewSoftLayerClientManager(session *session.Session, vps *vpsVm.Client) *Cli
 		services.GetNetworkSubnetService(session),
 		services.GetVirtualGuestBlockDeviceTemplateGroupService(session),
 		services.GetSecuritySshKeyService(session),
+		services.GetBillingOrderService(session),
+		services.GetTicketService(session),
+		services.GetTicketSubjectService(session),
 		vps,
+		logger,
 	}
 }
 
@@ -109,12 +118,14 @@ type Client interface {
 	RebootInstance(id int, soft bool, hard bool) error
 	ReloadInstance(id int, stemcellId int, sshKeyIds []int, hostname string, domain string) error
 	UpgradeInstanceConfig(id int, cpu int, memory int, network int, privateCPU bool) error
-	UpgradeInstance(id int, cpu int, memory int, network int, privateCPU bool, additional_diskSize int) (*datatypes.Container_Product_Order_Receipt, error)
+	UpgradeInstance(id int, cpu int, memory int, network int, privateCPU bool, secondDiskSize int) (int, error)
 	WaitInstanceUntilReady(id int, until time.Time) error
+	WaitInstanceUntilReadyWithTicket(id int, until time.Time) error
 	WaitInstanceHasActiveTransaction(id int, until time.Time) error
 	WaitInstanceHasNoneActiveTransaction(id int, until time.Time) error
 	WaitVolumeProvisioningWithOrderId(orderId int, until time.Time) (*datatypes.Network_Storage, error)
 	SetTags(id int, tags string) (bool, error)
+	SetInstanceMetadata(id int, userData *string) (bool, error)
 	AttachSecondDiskToInstance(id int, diskSize int) error
 	GetInstanceAllowedHost(id int) (*datatypes.Network_Storage_Allowed_Host, bool, error)
 	AuthorizeHostToVolume(instance *datatypes.Virtual_Guest, volumeId int, until time.Time) (bool, error)
@@ -126,6 +137,7 @@ type Client interface {
 	GetBlockVolumeDetails(volumeId int, mask string) (*datatypes.Network_Storage, bool, error)
 	GetBlockVolumeDetailsBySoftLayerAccount(volumeId int, mask string) (datatypes.Network_Storage, error)
 	GetNetworkStorageTarget(volumeId int, mask string) (string, bool, error)
+	SetNotes(id int, notes string) (bool, error)
 	GetImage(imageId int, mask string) (*datatypes.Virtual_Guest_Block_Device_Template_Group, bool, error)
 	GetVlan(id int, mask string) (*datatypes.Network_Vlan, bool, error)
 	GetSubnet(id int, mask string) (*datatypes.Network_Subnet, bool, error)
@@ -139,6 +151,8 @@ type Client interface {
 
 	CreateSnapshot(volumeId int, notes string) (datatypes.Network_Storage, error)
 	DeleteSnapshot(snapshotId int) error
+
+	CreateTicket(ticketSubject *string, ticketTitle *string, contents *string, attachmentId *int, attachmentType *string) error
 }
 
 type ClientManager struct {
@@ -153,7 +167,11 @@ type ClientManager struct {
 	NetworkSubnetService  services.Network_Subnet
 	ImageService          services.Virtual_Guest_Block_Device_Template_Group
 	SecuritySshKeyService services.Security_Ssh_Key
+	BillingOrderService   services.Billing_Order
+	TicketService         services.Ticket
+	TicketSubjectSerivce  services.Ticket_Subject
 	vpsService            *vpsVm.Client
+	logger                logger.Logger
 }
 
 func (c *ClientManager) GetInstance(id int, mask string) (*datatypes.Virtual_Guest, bool, error) {
@@ -290,8 +308,6 @@ func (c *ClientManager) GetImage(imageId int, mask string) (*datatypes.Virtual_G
 }
 
 //Check the virtual server instance is ready for use
-//param1: bool, indicate whether the instance is ready
-//param2: error, any error may happen when getting the status of the instance
 func (c *ClientManager) WaitInstanceUntilReady(id int, until time.Time) error {
 	for {
 		virtualGuest, found, err := c.GetInstance(id, "id, lastOperatingSystemReload[id,modifyDate], activeTransaction[id,transactionStatus.name], provisionDate, powerState.keyName")
@@ -299,7 +315,7 @@ func (c *ClientManager) WaitInstanceUntilReady(id int, until time.Time) error {
 			return err
 		}
 		if !found {
-			return bosherr.WrapErrorf(err, "SoftLayer virtual guest '%d' does not exists", id)
+			return bosherr.WrapErrorf(err, "SoftLayer virtual guest '%d' does not exist", id)
 		}
 
 		lastReload := virtualGuest.LastOperatingSystemReload
@@ -334,6 +350,46 @@ func (c *ClientManager) WaitInstanceUntilReady(id int, until time.Time) error {
 	}
 }
 
+//@TODO: The method is experimental and needed to verify.
+func (c *ClientManager) WaitInstanceUntilReadyWithTicket(id int, until time.Time) error {
+	now := time.Now()
+	halfDuration := until.Sub(now) / 2
+	ticketTime := now.Add(halfDuration)
+
+	// Wait half duration until ready, otherwise create a ticket
+	c.logger.Debug(softlayerClientLogTag, fmt.Sprintf("Waiting for intance '%d' ready unless it is over %.2f minutes to create ticket.", id,
+		halfDuration.Minutes()))
+	err := c.WaitInstanceUntilReady(id, ticketTime)
+	if err != nil {
+		if strings.Contains(err.Error(), fmt.Sprintf("Power on virtual guest with id %d Time Out!", id)) {
+			contents := fmt.Sprintf("The power state of virtual guest '%d' is not 'RUNNING' after OS reload. The ticket generated by Bosh Softlayer CPI.", id)
+
+			c.logger.Debug(softlayerClientLogTag, fmt.Sprintf("Creating ticket for intance '%d' timeout.", id))
+			err = c.CreateTicket(sl.String("OS Reload Question"), sl.String("OS reload hung."),
+				sl.String(contents), sl.Int(id), sl.String("VIRTUAL_GUEST"))
+			if err != nil {
+				c.logger.Error(softlayerClientLogTag, fmt.Sprintf("Creating ticket for intance '%d' with err : %v.", id, err))
+				//@TODO: To comment by test
+				//return bosherr.WrapError(err, "Creating ticket.")
+			}
+		} else {
+			return err
+		}
+	}
+
+	// Wait remaining  half duration until ready, otherwise throw timeout error.
+	c.logger.Debug(softlayerClientLogTag, fmt.Sprintf("Waiting for intance '%d' ready unless it is over %.2f minutes to return the timeout error.", id,
+		halfDuration.Minutes()))
+
+	err = c.WaitInstanceUntilReady(id, until)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (c *ClientManager) WaitInstanceHasActiveTransaction(id int, until time.Time) error {
 	for {
 		virtualGuest, found, err := c.GetInstance(id, "id, activeTransaction[id,transactionStatus.name]")
@@ -341,7 +397,7 @@ func (c *ClientManager) WaitInstanceHasActiveTransaction(id int, until time.Time
 			return err
 		}
 		if !found {
-			return bosherr.WrapErrorf(err, "SoftLayer virtual guest '%d' does not exists", id)
+			return bosherr.WrapErrorf(err, "SoftLayer virtual guest '%d' does not exist", id)
 		}
 
 		// if activeTxn != nil && activeTxn.TransactionStatus != nil && activeTxn.TransactionStatus.Name != nil {
@@ -362,6 +418,30 @@ func (c *ClientManager) WaitInstanceHasActiveTransaction(id int, until time.Time
 	}
 }
 
+func (c *ClientManager) WaitOrderCompleted(id int, until time.Time) error {
+	if id == 0 {
+		return nil
+	}
+	for {
+		order, err := c.BillingOrderService.Id(id).Mask("id, status").GetObject()
+		if err != nil {
+			return err
+		}
+
+		if *order.Status == "COMPLETED" {
+			return nil
+		}
+
+		now := time.Now()
+		if now.After(until) {
+			return bosherr.Errorf("Waiting order with id of '%d' has been completed", id)
+		}
+
+		min := math.Min(float64(5.0), float64(until.Sub(now)))
+		time.Sleep(time.Duration(min) * time.Second)
+	}
+}
+
 func (c *ClientManager) WaitInstanceHasNoneActiveTransaction(id int, until time.Time) error {
 	for {
 		virtualGuest, found, err := c.GetInstance(id, "id, activeTransaction[id,transactionStatus.name]")
@@ -369,7 +449,7 @@ func (c *ClientManager) WaitInstanceHasNoneActiveTransaction(id int, until time.
 			return err
 		}
 		if !found {
-			return bosherr.WrapErrorf(err, "SoftLayer virtual guest '%d' does not exists", id)
+			return bosherr.WrapErrorf(err, "SoftLayer virtual guest '%d' does not exist", id)
 		}
 
 		// if activeTxn != nil && activeTxn.TransactionStatus != nil && activeTxn.TransactionStatus.Name != nil {
@@ -382,6 +462,9 @@ func (c *ClientManager) WaitInstanceHasNoneActiveTransaction(id int, until time.
 
 		now := time.Now()
 		if now.After(until) {
+			if virtualGuest.ActiveTransaction.TransactionStatus != nil && *virtualGuest.ActiveTransaction.TransactionStatus.Name == "RECLAIM_WAIT" {
+				return bosherr.Errorf("Instance with id of '%d' has 'RECLAIM_WAIT' transaction", id)
+			}
 			return bosherr.Errorf("Waiting instance with id of '%d' has none active transaction time out", id)
 		}
 
@@ -399,6 +482,9 @@ func (c *ClientManager) CreateInstance(template *datatypes.Virtual_Guest) (*data
 	until := time.Now().Add(time.Duration(4) * time.Hour)
 	if err := c.WaitInstanceUntilReady(*virtualguest.Id, until); err != nil {
 		return &datatypes.Virtual_Guest{}, bosherr.WrapError(err, "Waiting until instance is ready")
+	}
+	if err := c.WaitInstanceHasNoneActiveTransaction(*virtualguest.Id, until); err != nil {
+		return &datatypes.Virtual_Guest{}, bosherr.WrapError(err, "Waiting until instance has none active transaction")
 	}
 
 	return &virtualguest, nil
@@ -458,7 +544,7 @@ func (c *ClientManager) CreateInstanceFromVPS(template *datatypes.Virtual_Guest,
 		return &datatypes.Virtual_Guest{}, err
 	}
 	if !found {
-		return &datatypes.Virtual_Guest{}, bosherr.WrapErrorf(err, "SoftLayer virtual guest '%d' does not exists", virtualGuestId)
+		return &datatypes.Virtual_Guest{}, bosherr.WrapErrorf(err, "SoftLayer virtual guest '%d' does not exist", virtualGuestId)
 	}
 
 	deviceName := &models.VM{
@@ -515,6 +601,8 @@ func (c *ClientManager) RebootInstance(id int, soft bool, hard bool) error {
 func (c *ClientManager) ReloadInstance(id int, stemcellId int, sshKeyIds []int, hostname string, domain string) error {
 	var err error
 	until := time.Now().Add(time.Duration(1) * time.Hour)
+
+	c.logger.Debug(softlayerClientLogTag, "Waiting virtual guest '%d' has none active transaction.", id)
 	if err = c.WaitInstanceHasNoneActiveTransaction(*sl.Int(id), until); err != nil {
 		return bosherr.WrapError(err, "Waiting until instance has none active transaction before os_reload")
 	}
@@ -527,7 +615,8 @@ func (c *ClientManager) ReloadInstance(id int, stemcellId int, sshKeyIds []int, 
 		config.SshKeyIds = sshKeyIds
 	}
 
-	_, err = c.VirtualGuestService.Id(id).ReloadOperatingSystem(sl.String("FORCE"), &config)
+	c.logger.Debug(softlayerClientLogTag, "Reloading operating system of virtual guest '%d'.", id)
+	_, err = c.VirtualGuestService.Id(id).Mask("id, name").ReloadOperatingSystem(sl.String("FORCE"), &config)
 	if err != nil {
 		return err
 	}
@@ -538,7 +627,7 @@ func (c *ClientManager) ReloadInstance(id int, stemcellId int, sshKeyIds []int, 
 	}
 
 	until = time.Now().Add(time.Duration(4) * time.Hour)
-	if err = c.WaitInstanceUntilReady(*sl.Int(id), until); err != nil {
+	if err = c.WaitInstanceUntilReadyWithTicket(*sl.Int(id), until); err != nil {
 		return bosherr.WrapError(err, "Waiting until instance is ready after os_reload")
 	}
 
@@ -560,13 +649,19 @@ func (c *ClientManager) ReloadInstance(id int, stemcellId int, sshKeyIds []int, 
 
 func (c *ClientManager) CancelInstance(id int) error {
 	var err error
-	until := time.Now().Add(time.Duration(30) * time.Minute)
+	until := time.Now().Add(time.Duration(10) * time.Minute)
 	if err = c.WaitInstanceHasNoneActiveTransaction(*sl.Int(id), until); err != nil {
 		if apiErr, ok := err.(sl.Error); ok {
 			if apiErr.Exception == SOFTLAYER_OBJECTNOTFOUND_EXCEPTION {
 				return nil
 			}
 		}
+
+		if strings.Contains(err.Error(), "has 'RECLAIM_WAIT' transaction") {
+			c.logger.Warn(softlayerClientLogTag, fmt.Sprintf("Instance '%d' stays 'RECLAIM_WAIT' transaction, CPI skips to cancel it", id))
+			return nil
+		}
+
 		return bosherr.WrapError(err, "Waiting until instance has none active transaction before canceling")
 	}
 
@@ -621,9 +716,10 @@ func (c *ClientManager) DeleteInstanceFromVPS(id int) error {
 	return nil
 }
 
-func (c *ClientManager) UpgradeInstance(id int, cpu int, memory int, network int, privateCPU bool, additional_diskSize int) (*datatypes.Container_Product_Order_Receipt, error) {
+func (c *ClientManager) UpgradeInstance(id int, cpu int, memory int, network int, privateCPU bool, secondDiskSize int) (int, error) {
 	upgradeOptions := make(map[string]int)
 	public := true
+	presetId := 0
 	if cpu != 0 {
 		upgradeOptions["guest_core"] = cpu
 	}
@@ -643,39 +739,43 @@ func (c *ClientManager) UpgradeInstance(id int, cpu int, memory int, network int
 		Filter(filter.New(filter.Path("type.keyName").Eq(packageType)).Build()).
 		GetAllObjects()
 	if err != nil {
-		return &datatypes.Container_Product_Order_Receipt{}, err
+		return 0, err
 	}
 	if len(productPackages) == 0 {
-		return &datatypes.Container_Product_Order_Receipt{}, bosherr.Errorf("No package found for type: %s", packageType)
+		return 0, bosherr.Errorf("No package found for type: %s", packageType)
 	}
 	packageID := *productPackages[0].Id
 	packageItems, err := c.PackageService.
 		Id(packageID).
-		Mask("description,capacity,prices[id,locationGroupId,categories]").
+		Mask("description, capacity, prices[id, locationGroupId, categories[categoryCode]]").
 		GetItems()
 	if err != nil {
-		return &datatypes.Container_Product_Order_Receipt{}, err
+		return 0, err
 	}
 	var prices = make([]datatypes.Product_Item_Price, 0)
 	for option, value := range upgradeOptions {
+		c.logger.Debug(softlayerClientLogTag, fmt.Sprintf("Find upgrade item price for '%s/%d'", option, value))
 		priceID := getPriceIdForUpgrade(packageItems, option, value, public)
 		if priceID == -1 {
-			return &datatypes.Container_Product_Order_Receipt{},
+			return 0,
 				bosherr.Errorf("Unable to find %s option with %d", option, value)
 		}
 		prices = append(prices, datatypes.Product_Item_Price{Id: &priceID})
 	}
 
-	if additional_diskSize != 0 {
-		diskItemPrice, err := c.getUpgradeItemPriceForSecondDisk(id, additional_diskSize)
+	if secondDiskSize != 0 {
+		c.logger.Debug(softlayerClientLogTag, fmt.Sprintf("Find upgrade item price for second disk: %dGB", secondDiskSize))
+		var diskItemPrice *datatypes.Product_Item_Price
+		diskItemPrice, presetId, err = c.getUpgradeItemPriceForSecondDisk(id, secondDiskSize)
 		if err != nil {
-			return &datatypes.Container_Product_Order_Receipt{}, err
+			return 0, err
 		}
 		prices = append(prices, *diskItemPrice)
 	}
 
+	fmt.Println()
 	if len(prices) == 0 {
-		return &datatypes.Container_Product_Order_Receipt{}, bosherr.Error("Unable to find price for upgrade")
+		return 0, bosherr.Error("Unable to find price for upgrade")
 	}
 	order := datatypes.Container_Product_Order{
 		ComplexType: sl.String(UPGRADE_VIRTUAL_SERVER_ORDER_TYPE),
@@ -697,6 +797,9 @@ func (c *ClientManager) UpgradeInstance(id int, cpu int, memory int, network int
 		},
 		PackageId: &packageID,
 	}
+	if presetId != 0 {
+		order.PresetId = sl.Int(presetId)
+	}
 	upgradeOrder := datatypes.Container_Product_Order_Virtual_Guest_Upgrade{
 		Container_Product_Order_Virtual_Guest: datatypes.Container_Product_Order_Virtual_Guest{
 			Container_Product_Order_Hardware_Server: datatypes.Container_Product_Order_Hardware_Server{
@@ -704,12 +807,26 @@ func (c *ClientManager) UpgradeInstance(id int, cpu int, memory int, network int
 			},
 		},
 	}
+
+	c.logger.Debug(softlayerClientLogTag, fmt.Sprintf("Place order for vm '%d'", id))
 	orderReceipt, err := c.OrderService.PlaceOrder(&upgradeOrder, sl.Bool(false))
 	if err != nil {
-		return &datatypes.Container_Product_Order_Receipt{}, err
+		if apiErr, ok := err.(sl.Error); ok {
+			if strings.Contains(apiErr.Message, "A current price was provided for the upgrade order") {
+				upgradeRequest, err := c.VirtualGuestService.Id(id).Mask("order[items]").GetUpgradeRequest()
+				if err != nil {
+					return 0, bosherr.WrapErrorf(err, "Get upgrade order with '%d'", id)
+				}
+				return *upgradeRequest.Order.Id, nil
+			} else {
+				return 0, bosherr.WrapErrorf(err, "Placing order with '%+v'", order)
+			}
+		} else {
+			return 0, bosherr.WrapErrorf(err, "Placing order with '%+v'", order)
+		}
 	}
 
-	return &orderReceipt, nil
+	return *orderReceipt.OrderId, nil
 }
 
 func (c *ClientManager) SetTags(id int, tags string) (bool, error) {
@@ -740,22 +857,32 @@ func (c *ClientManager) GetInstanceAllowedHost(id int) (*datatypes.Network_Stora
 	return &allowedHost, true, nil
 }
 
-func (c *ClientManager) getUpgradeItemPriceForSecondDisk(id int, diskSize int) (*datatypes.Product_Item_Price, error) {
-	itemPrices, err := c.VirtualGuestService.Id(id).GetUpgradeItemPrices(sl.Bool(true))
+func (c *ClientManager) getUpgradeItemPriceForSecondDisk(id int, diskSize int) (*datatypes.Product_Item_Price, int, error) {
+	//filter := filter.Build(
+	//	filter.Path("productItemPrice.categories.categoryCode").Eq(EPHEMERAL_DISK_CATEGORY_CODE),
+	//)
+	mask := "id, categories[id, categoryCode], item[description, capacity]"
+	itemPrices, err := c.VirtualGuestService.Id(id).Mask(mask).GetUpgradeItemPrices(sl.Bool(true))
 	if err != nil {
-		return &datatypes.Product_Item_Price{}, err
+		return &datatypes.Product_Item_Price{}, 0, err
+	}
+
+	mask = "localDiskFlag, billingItem[id, orderItem[presetId]]"
+	virtualGuest, err := c.VirtualGuestService.Id(id).Mask(mask).GetObject()
+	if err != nil {
+		if apiErr, ok := err.(sl.Error); ok {
+			if apiErr.Exception == SOFTLAYER_OBJECTNOTFOUND_EXCEPTION {
+				return &datatypes.Product_Item_Price{}, 0, nil
+			}
+			return &datatypes.Product_Item_Price{}, 0, err
+		}
 	}
 
 	var currentDiskCapacity int
 	var diskType string
 	var currentItemPrice datatypes.Product_Item_Price
 
-	diskTypeBool, err := c.VirtualGuestService.Id(id).GetLocalDiskFlag()
-	if err != nil {
-		return &datatypes.Product_Item_Price{}, err
-	}
-
-	if diskTypeBool {
+	if *virtualGuest.LocalDiskFlag {
 		diskType = "(LOCAL)"
 	} else {
 		diskType = "(SAN)"
@@ -765,13 +892,6 @@ func (c *ClientManager) getUpgradeItemPriceForSecondDisk(id int, diskSize int) (
 		flag := false
 		for _, category := range itemPrice.Categories {
 			if *category.CategoryCode == EPHEMERAL_DISK_CATEGORY_CODE {
-				flag = true
-				break
-			}
-		}
-
-		for _, category := range itemPrice.Item.Categories {
-			if flag || *category.CategoryCode == EPHEMERAL_DISK_CATEGORY_CODE {
 				flag = true
 				break
 			}
@@ -788,15 +908,18 @@ func (c *ClientManager) getUpgradeItemPriceForSecondDisk(id int, diskSize int) (
 	}
 
 	if currentItemPrice.Id == nil {
-		return &datatypes.Product_Item_Price{}, bosherr.Errorf("No proper %s disk for size %d", diskType, diskSize)
+		return &datatypes.Product_Item_Price{}, 0, bosherr.Errorf("No proper %s disk for size %d", diskType, diskSize)
 	}
 
-	return &currentItemPrice, nil
+	if virtualGuest.BillingItem.OrderItem.PresetId == nil {
+		return &currentItemPrice, 0, nil
+	}
+	return &currentItemPrice, *virtualGuest.BillingItem.OrderItem.PresetId, nil
 }
 
 func getPriceIdForUpgrade(packageItems []datatypes.Product_Item, option string, value int, public bool) int {
 	for _, item := range packageItems {
-		isPrivate := strings.HasPrefix(*item.Description, "Private")
+		isPrivate := strings.Contains(*item.Description, "Dedicated")
 		for _, price := range item.Prices {
 			if price.LocationGroupId != nil {
 				continue
@@ -810,6 +933,12 @@ func getPriceIdForUpgrade(packageItems []datatypes.Product_Item, option string, 
 						continue
 					}
 					if option == "guest_core" {
+						if public && !isPrivate {
+							return *price.Id
+						} else if !public && isPrivate {
+							return *price.Id
+						}
+					} else if option == "ram" {
 						if public && !isPrivate {
 							return *price.Id
 						} else if !public && isPrivate {
@@ -863,6 +992,23 @@ func (c *ClientManager) GetBlockVolumeDetailsBySoftLayerAccount(volumeId int, ma
 	}
 
 	return volumes[0], nil
+}
+
+func (c *ClientManager) SetNotes(id int, notes string) (bool, error) {
+	networkStorageTemplate := &datatypes.Network_Storage{
+		Notes: sl.String(notes),
+	}
+	_, err := c.StorageService.Id(id).EditObject(networkStorageTemplate)
+	if err != nil {
+		if apiErr, ok := err.(sl.Error); ok {
+			if apiErr.Exception == SOFTLAYER_OBJECTNOTFOUND_EXCEPTION {
+				return false, nil
+			}
+			return false, err
+		}
+	}
+
+	return true, err
 }
 
 func (c *ClientManager) GetNetworkStorageTarget(volumeId int, mask string) (string, bool, error) {
@@ -1065,7 +1211,20 @@ func (c *ClientManager) CreateVolume(location string, size int, iops int, snapsh
 //volumeId: The id of the volume
 //notes: The notes or "name" to assign the snapshot
 func (c *ClientManager) CreateSnapshot(volumeId int, notes string) (datatypes.Network_Storage, error) {
-	return c.StorageService.Id(volumeId).CreateSnapshot(sl.String((notes)))
+	for {
+		networkStorage, err := c.StorageService.Id(volumeId).CreateSnapshot(sl.String((notes)))
+		if err != nil {
+			apiErr := err.(sl.Error)
+			if apiErr.Exception == SOFTLAYER_PUBLIC_EXCEPTION &&
+				strings.Contains(apiErr.Message, "please try again after Volume Provisioning is complete") {
+				continue
+			}
+
+			return datatypes.Network_Storage{}, err
+		}
+
+		return networkStorage, nil
+	}
 }
 
 //Deletes the specified snapshot object.
@@ -1449,39 +1608,19 @@ func (c *ClientManager) AttachSecondDiskToInstance(id int, diskSize int) error {
 		return bosherr.WrapError(err, "Waiting until instance has none active transaction before os_reload")
 	}
 
-	_, err = c.UpgradeInstance(id, 0, 0, 0, false, diskSize)
+	orderId, err := c.UpgradeInstance(id, 0, 0, 0, false, diskSize)
 	if err != nil {
-		if apiErr, ok := err.(sl.Error); ok {
-			if strings.Contains(apiErr.Message, "A current price was provided for the upgrade order") {
-				return nil
-			}
-			return bosherr.WrapErrorf(err, "Adding second disk with size '%d' to virutal guest of id '%d'", diskSize, id)
-		} else {
-			return bosherr.WrapErrorf(err, "Adding second disk with size '%d' to virutal guest of id '%d'", diskSize, id)
-		}
+		return bosherr.WrapErrorf(err, "Adding second disk with size '%d' to virutal guest of id '%d'", diskSize, id)
 	}
 
 	until = time.Now().Add(time.Duration(1) * time.Hour)
-	if err = c.WaitInstanceHasActiveTransaction(*sl.Int(id), until); err != nil {
-		return bosherr.WrapError(err, "Waiting until instance has active transaction after upgrading instance")
-	}
-
-	until = time.Now().Add(time.Duration(1) * time.Hour)
-	if err = c.WaitInstanceHasNoneActiveTransaction(*sl.Int(id), until); err != nil {
-		return bosherr.WrapError(err, "Waiting until instance has none active transaction after upgrading instance")
+	if err = c.WaitOrderCompleted(orderId, until); err != nil {
+		return bosherr.WrapError(err, "Waiting until order placed has been completed after upgrading instance")
 	}
 
 	until = time.Now().Add(time.Duration(1) * time.Hour)
 	if err = c.WaitInstanceUntilReady(*sl.Int(id), until); err != nil {
 		return bosherr.WrapError(err, "Waiting until instance is ready after os_reload")
-	}
-
-	blockDevices, err := c.VirtualGuestService.Id(id).GetBlockDevices()
-	if err != nil {
-		return bosherr.WrapErrorf(err, "Get the attached ephemeral disks of VirtualGuest `%d`", id)
-	}
-	if len(blockDevices) < 3 {
-		return bosherr.WrapErrorf(err, "The ephemeral disk is not attached on VirtualGuest `%d` properly, one possible reason is there is not enough disk resource.", id)
 	}
 
 	return nil
@@ -1494,23 +1633,14 @@ func (c *ClientManager) UpgradeInstanceConfig(id int, cpu int, memory int, netwo
 		return bosherr.WrapError(err, "Waiting until instance has none active transaction before os_reload")
 	}
 
-	_, err = c.UpgradeInstance(id, cpu, memory, network, privateCPU, 0)
+	orderId, err := c.UpgradeInstance(id, cpu, memory, network, privateCPU, 0)
 	if err != nil {
-		apiErr := err.(sl.Error)
-		if strings.Contains(apiErr.Message, "A current price was provided for the upgrade order") {
-			return nil
-		}
 		return bosherr.WrapErrorf(err, "Upgrading configuration to virutal guest of id '%d'", id)
 	}
 
 	until = time.Now().Add(time.Duration(1) * time.Hour)
-	if err = c.WaitInstanceHasActiveTransaction(*sl.Int(id), until); err != nil {
-		return bosherr.WrapError(err, "Waiting until instance has active transaction after upgrading instance")
-	}
-
-	until = time.Now().Add(time.Duration(1) * time.Hour)
-	if err = c.WaitInstanceHasNoneActiveTransaction(*sl.Int(id), until); err != nil {
-		return bosherr.WrapError(err, "Waiting until instance has none active transaction after upgrading instance")
+	if err = c.WaitOrderCompleted(orderId, until); err != nil {
+		return bosherr.WrapError(err, "Waiting until order placed has been completed after upgrading instance")
 	}
 
 	until = time.Now().Add(time.Duration(1) * time.Hour)
@@ -1533,7 +1663,7 @@ func (c *ClientManager) CreateSshKey(label *string, key *string, fingerPrint *st
 	sshKey, err := c.SecuritySshKeyService.CreateObject(templateObject)
 	if err != nil {
 		if apiErr, ok := err.(sl.Error); ok {
-			if apiErr.Exception == SOFTLAYER_PUBLIC_EXCEPTION && strings.Contains(apiErr.Message, "SSH key already exists") {
+			if apiErr.Exception == SOFTLAYER_PUBLIC_EXCEPTION && strings.Contains(apiErr.Message, "SSH key already exist") {
 				sshKeys, err := c.AccountService.Mask("id, key").Filter(filter.Path("sshKeys.key").Eq(*key).Build()).GetSshKeys()
 				if err != nil {
 					return &datatypes.Security_Ssh_Key{}, err
@@ -1550,6 +1680,67 @@ func (c *ClientManager) CreateSshKey(label *string, key *string, fingerPrint *st
 
 func (c *ClientManager) DeleteSshKey(id int) (bool, error) {
 	return c.SecuritySshKeyService.Id(id).DeleteObject()
+}
+
+func (c *ClientManager) CreateTicket(ticketSubject *string, ticketTitle *string, contents *string, attachmentId *int, attachmentType *string) error {
+	ticketSubjects, err := c.TicketSubjectSerivce.GetAllObjects()
+	if err != nil {
+		return bosherr.WrapError(err, "Getting ticket subjects.")
+	}
+
+	var subjectId *int
+	for _, subject := range ticketSubjects {
+		if *subject.Name == *ticketSubject {
+			subjectId = subject.Id
+		}
+	}
+	if subjectId == nil {
+		return bosherr.Error("Could not find suitable ticket subject.")
+	}
+
+	currentUser, err := c.AccountService.Mask("id").GetCurrentUser()
+	if err != nil {
+		return bosherr.WrapError(err, "Getting current user.")
+	}
+
+	newTicket := &datatypes.Ticket{
+		SubjectId:      subjectId,
+		AssignedUserId: currentUser.Id,
+		Title:          ticketTitle,
+	}
+
+	emptyRootPassword := ""
+	ticket, err := c.TicketService.CreateStandardTicket(newTicket, contents, attachmentId, &emptyRootPassword, nil, nil, nil, attachmentType)
+	if err != nil {
+		return bosherr.WrapError(err, "Creating standard ticket.")
+	}
+
+	//The SoftLayer API defaults new ticket property statusId to 1001 (or "open").
+	if *ticket.StatusId == 1001 {
+		c.logger.Debug(softlayerClientLogTag, "Ticket '%d' is created and its status is 'OPEN'.", strconv.Itoa(*ticket.Id))
+		return nil
+	} else {
+		return bosherr.Errorf("Ticket status is not 'OPEN': %+v", *ticket.Status.Name)
+	}
+}
+
+func (c *ClientManager) SetInstanceMetadata(id int, userData *string) (bool, error) {
+	_, err := c.VirtualGuestService.Id(id).SetUserMetadata([]string{*userData})
+	if err != nil {
+		if apiErr, ok := err.(sl.Error); ok {
+			if apiErr.Exception == SOFTLAYER_OBJECTNOTFOUND_EXCEPTION {
+				return false, nil
+			}
+			return false, err
+		}
+	}
+
+	until := time.Now().Add(time.Duration(30) * time.Minute)
+	if err := c.WaitInstanceUntilReady(id, until); err != nil {
+		return false, bosherr.WrapError(err, "Waiting until instance is ready")
+	}
+
+	return true, nil
 }
 
 func (c *ClientManager) selectMaximunIopsItemPriceIdOnSize(size int) (datatypes.Product_Item_Price, error) {

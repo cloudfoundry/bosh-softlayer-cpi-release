@@ -1,50 +1,58 @@
 package integration
 
 import (
-	"bosh-softlayer-cpi/action"
-	boshapi "bosh-softlayer-cpi/api"
-	boshdisp "bosh-softlayer-cpi/api/dispatcher"
-	"bosh-softlayer-cpi/api/transport"
-	boshcfg "bosh-softlayer-cpi/config"
-	"bosh-softlayer-cpi/softlayer/client"
-	vpsVm "bosh-softlayer-cpi/softlayer/vps_service/client/vm"
 	"bytes"
 	"encoding/json"
 	"fmt"
-	boshlogger "github.com/cloudfoundry/bosh-utils/logger"
-	"github.com/cloudfoundry/bosh-utils/uuid"
-	"github.com/softlayer/softlayer-go/session"
-	"io"
 	"io/ioutil"
 	"net/http/httptest"
 	"os"
 	"strings"
+
+	boshlog "github.com/cloudfoundry/bosh-utils/logger"
+	"github.com/cloudfoundry/bosh-utils/uuid"
+	"github.com/softlayer/softlayer-go/session"
+
+	"bosh-softlayer-cpi/action"
+	"bosh-softlayer-cpi/api"
+	disp "bosh-softlayer-cpi/api/dispatcher"
+	"bosh-softlayer-cpi/api/transport"
+	cfg "bosh-softlayer-cpi/config"
+	cpiLog "bosh-softlayer-cpi/logger"
+	"bosh-softlayer-cpi/softlayer/client"
+	vpsVm "bosh-softlayer-cpi/softlayer/vps_service/client/vm"
+	"bufio"
+	"io"
+	"log"
 )
 
 var (
 	// A stemcell that will be created/loaded in integration_suite_test.go
-	existingStemcellId         string
-	in, out, errOut, errOutLog bytes.Buffer
-	username                   = envRequired("SL_USERNAME")
-	apiKey                     = envRequired("SL_API_KEY")
+	existingStemcellId string
+	in, out, logBuffer bytes.Buffer
+	username           = envRequired("SL_USERNAME")
+	apiKey             = envRequired("SL_API_KEY")
 
 	// Configurable defaults
 	stemcellId   = envOrDefault("STEMCELL_ID", "1633205")
 	stemcellFile = envOrDefault("STEMCELL_FILE", "")
-	stemcellUuid = envOrDefault("DATACENTER", "ea065435-f7ec-4f1c-8f3f-2987086b1427")
+	stemcellUuid = envOrDefault("STEMCELL_UUID", "ea065435-f7ec-4f1c-8f3f-2987086b1427")
 	datacenter   = envOrDefault("DATACENTER", "lon02")
 	ipAddrs      = strings.Split(envOrDefault("PRIVATE_IP", "192.168.100.102,192.168.100.103,192.168.100.104"), ",")
 
 	ts           *httptest.Server
-	cfg          boshcfg.Config
-	boshResponse boshdisp.Response
+	config       cfg.Config
+	boshResponse disp.Response
 	vps          *vpsVm.Client
 
 	// Channel that will be used to retrieve IPs to use
 	ips chan string
 
-	trace      = false
-	timeout    = 50000
+	trace        = false
+	timeout      = 120
+	retries      = 2
+	retryTimeout = 60
+
 	cfgContent = fmt.Sprintf(
 		`{
 		  "cloud": {
@@ -83,27 +91,31 @@ var (
 		}`, username, apiKey)
 
 	// Stuff of softlayer client
-	multiWriter = io.MultiWriter(&errOut, &errOutLog)
-	logger      = boshlogger.NewWriterLogger(boshlogger.LevelDebug, multiWriter, multiWriter)
-	multiLogger = boshapi.MultiLogger{Logger: logger, LogBuff: &errOutLog}
+	multiWriter  = io.MultiWriter(os.Stderr, bufio.NewWriter(&logBuffer))
+	clientLogger = log.New(multiWriter, "Integration", log.LstdFlags)
+	outLogger    = log.New(multiWriter, "", log.LstdFlags)
+	errLogger    = log.New(os.Stderr, "", log.LstdFlags)
+
+	cpiLogger   = cpiLog.New(boshlog.LevelDebug, "Integration", outLogger, errLogger)
+	multiLogger = api.MultiLogger{Logger: cpiLogger, LogBuff: &logBuffer}
 	uuidGen     = uuid.NewGenerator()
 	sess        *session.Session
+	softlayerClient = &client.ClientManager{}
 )
 
-func execCPI(request string) (boshdisp.Response, error) {
+func execCPI(request string) (disp.Response, error) {
 	var err error
-	var softlayerClient client.Client
 
-	softlayerClient = client.NewSoftLayerClientManager(sess, vps)
+	softlayerClient = client.NewSoftLayerClientManager(sess, vps, multiLogger)
 	actionFactory := action.NewConcreteFactory(
 		softlayerClient,
 		uuidGen,
-		cfg,
+		config,
 		multiLogger,
 	)
 
-	caller := boshdisp.NewJSONCaller()
-	dispatcher := boshdisp.NewJSON(actionFactory, caller, multiLogger)
+	caller := disp.NewJSONCaller()
+	dispatcher := disp.NewJSON(actionFactory, caller, multiLogger)
 
 	in.WriteString(request)
 	cli := transport.NewCLI(&in, &out, dispatcher, multiLogger)

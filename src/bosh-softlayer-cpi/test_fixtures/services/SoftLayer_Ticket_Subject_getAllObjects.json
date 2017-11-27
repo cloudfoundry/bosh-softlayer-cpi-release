@@ -1,0 +1,164 @@
+[
+  {
+    "categoryId": 3,
+    "id": 1522,
+    "name": "API Question",
+    "parentId": null
+  },
+  {
+    "categoryId": 2,
+    "id": 1001,
+    "name": "Accounting Request",
+    "parentId": null
+  },
+  {
+    "categoryId": 3,
+    "id": 1181,
+    "name": "CDN Question",
+    "parentId": null
+  },
+  {
+    "categoryId": 1,
+    "id": 1261,
+    "name": "Colocation Service Request",
+    "parentId": null
+  },
+  {
+    "categoryId": 3,
+    "id": 1041,
+    "name": "DNS Request",
+    "parentId": null
+  },
+  {
+    "categoryId": 3,
+    "id": 1201,
+    "name": "DOS\/Abuse Issue",
+    "parentId": null
+  },
+  {
+    "categoryId": 3,
+    "id": 1121,
+    "name": "Hardware Firewall Question",
+    "parentId": null
+  },
+  {
+    "categoryId": 3,
+    "id": 1021,
+    "name": "Hardware Issue",
+    "parentId": null
+  },
+  {
+    "categoryId": 3,
+    "id": 1122,
+    "name": "Hardware Load Balancer Question",
+    "parentId": null
+  },
+  {
+    "categoryId": 1,
+    "id": 1081,
+    "name": "Licensing Question",
+    "parentId": null
+  },
+  {
+    "categoryId": 3,
+    "id": 1141,
+    "name": "Mail Server Issue",
+    "parentId": null
+  },
+  {
+    "categoryId": 3,
+    "id": 1004,
+    "name": "OS Reload Question",
+    "parentId": null
+  },
+  {
+    "categoryId": 3,
+    "id": 1005,
+    "name": "Portal Information Question",
+    "parentId": null
+  },
+  {
+    "categoryId": 3,
+    "id": 1061,
+    "name": "Private Network Question",
+    "parentId": null
+  },
+  {
+    "categoryId": 3,
+    "id": 1022,
+    "name": "Public Network Question",
+    "parentId": null
+  },
+  {
+    "categoryId": 3,
+    "id": 1003,
+    "name": "Reboots and Console Access",
+    "parentId": null
+  },
+  {
+    "categoryId": 1,
+    "id": 1002,
+    "name": "Sales Request",
+    "parentId": null
+  },
+  {
+    "categoryId": 1,
+    "id": 1603,
+    "name": "Sales Request - Compute & Infrastructure",
+    "parentId": null
+  },
+  {
+    "categoryId": 1,
+    "id": 1645,
+    "name": "Sales Request - Firewall Service",
+    "parentId": null
+  },
+  {
+    "categoryId": 1,
+    "id": 1647,
+    "name": "Sales Request - General Question",
+    "parentId": null
+  },
+  {
+    "categoryId": 1,
+    "id": 1605,
+    "name": "Sales Request - Network & Security Services",
+    "parentId": null
+  },
+  {
+    "categoryId": 1,
+    "id": 1643,
+    "name": "Sales Request - Other Services",
+    "parentId": null
+  },
+  {
+    "categoryId": 1,
+    "id": 1607,
+    "name": "Sales Request - Upgrades & Add-ons",
+    "parentId": null
+  },
+  {
+    "categoryId": 3,
+    "id": 1101,
+    "name": "Security Issue",
+    "parentId": null
+  },
+  {
+    "categoryId": 3,
+    "id": 1161,
+    "name": "Storage Question",
+    "parentId": null
+  },
+  {
+    "categoryId": 3,
+    "id": 1221,
+    "name": "Transcoding Question",
+    "parentId": null
+  },
+  {
+    "categoryId": 3,
+    "id": 1482,
+    "name": "Vyatta Question",
+    "parentId": null
+  }
+]

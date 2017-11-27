@@ -19,8 +19,11 @@ package session
 import (
 	"fmt"
 	"log"
+	"math/rand"
+	"net"
 	"os"
 	"os/user"
+	"runtime"
 	"strings"
 	"time"
 
@@ -74,7 +77,10 @@ type TransportHandler interface {
 		pResult interface{}) error
 }
 
-const DefaultTimeout = time.Second * 120
+const (
+	DefaultTimeout   = time.Second * 120
+	DefaultRetryWait = time.Second * 3
+)
 
 // Session stores the information required for communication with the SoftLayer
 // API
@@ -107,10 +113,24 @@ type Session struct {
 	// session. Requests that take longer that the specified timeout
 	// will result in an error.
 	Timeout time.Duration
+
+	// The user agent to send with each API request
+	// User shouldn't be able to change or set the base user agent
+	userAgent string
+
+	// Retries is the number of times to retry a connection that failed due to a timeout.
+	Retries int
+
+	// RetryWait minimum wait time to retry a request
+	RetryWait time.Duration
+}
+
+func init() {
+	rand.Seed(time.Now().UnixNano())
 }
 
 // New creates and returns a pointer to a new session object.  It takes up to
-// three parameters, all of which are optional.  If specified, they will be
+// four parameters, all of which are optional.  If specified, they will be
 // interpreted in the following sequence:
 //
 // 1. UserName
@@ -185,9 +205,10 @@ func New(args ...interface{}) *Session {
 	}
 
 	sess := &Session{
-		UserName: values[keys["username"]],
-		APIKey:   values[keys["api_key"]],
-		Endpoint: endpointURL,
+		UserName:  values[keys["username"]],
+		APIKey:    values[keys["api_key"]],
+		Endpoint:  endpointURL,
+		userAgent: getDefaultUserAgent(),
 	}
 
 	timeout := values[keys["timeout"]]
@@ -197,6 +218,8 @@ func New(args ...interface{}) *Session {
 			sess.Timeout = timeoutDuration
 		}
 	}
+
+	sess.RetryWait = DefaultRetryWait
 
 	return sess
 }
@@ -215,6 +238,51 @@ func (r *Session) DoRequest(service string, method string, args []interface{}, o
 	return r.TransportHandler.DoRequest(r, service, method, args, options, pResult)
 }
 
+// AppendUserAgent allows higher level application to identify themselves by appending to the useragent string
+func (r *Session) AppendUserAgent(agent string) {
+	if r.userAgent == "" {
+		r.userAgent = getDefaultUserAgent()
+	}
+	if agent != "" {
+		r.userAgent += " " + agent
+	}
+}
+
+// ResetUserAgent resets the current user agent to the default value
+func (r *Session) ResetUserAgent() {
+	r.userAgent = getDefaultUserAgent()
+}
+
+// SetTimeout creates a copy of the session and sets the passed timeout into it
+// before returning it.
+func (r *Session) SetTimeout(timeout time.Duration) *Session {
+	var s Session
+	s = *r
+	s.Timeout = timeout
+
+	return &s
+}
+
+// SetRetries creates a copy of the session and sets the passed retries into it
+// before returning it.
+func (r *Session) SetRetries(retries int) *Session {
+	var s Session
+	s = *r
+	s.Retries = retries
+
+	return &s
+}
+
+// SetRetryWait creates a copy of the session and sets the passed retryWait into it
+// before returning it.
+func (r *Session) SetRetryWait(retryWait time.Duration) *Session {
+	var s Session
+	s = *r
+	s.RetryWait = retryWait
+
+	return &s
+}
+
 func envFallback(keyName string, value *string) {
 	if *value == "" {
 		*value = os.Getenv(keyName)
@@ -231,4 +299,35 @@ func getDefaultTransport(endpointURL string) TransportHandler {
 	}
 
 	return transportHandler
+}
+
+func isTimeout(err error) bool {
+	if slErr, ok := err.(sl.Error); ok {
+		switch slErr.StatusCode {
+		case 408, 504, 599:
+			return true
+		}
+	}
+
+	if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
+		return true
+	}
+
+	if netErr, ok := err.(*net.OpError); ok && netErr.Timeout() {
+		return true
+	}
+
+	if netErr, ok := err.(net.UnknownNetworkError); ok && netErr.Timeout() {
+		return true
+	}
+
+	return false
+}
+
+func getDefaultUserAgent() string {
+	return fmt.Sprintf("softlayer-go/%s (%s;%s;%s)", sl.Version.String(),
+		runtime.Version(),
+		runtime.GOARCH,
+		runtime.GOOS,
+	)
 }

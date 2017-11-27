@@ -1,9 +1,10 @@
 package instance
 
 import (
-	bosl "bosh-softlayer-cpi/softlayer/client"
-	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	boshuuid "github.com/cloudfoundry/bosh-utils/uuid"
+
+	"bosh-softlayer-cpi/logger"
+	bosl "bosh-softlayer-cpi/softlayer/client"
 )
 
 const rootUser = "root"
@@ -12,13 +13,13 @@ const softlayerVirtualGuestServiceLogTag = "SoftlayerVirtualGuestService"
 type SoftlayerVirtualGuestService struct {
 	softlayerClient bosl.Client
 	uuidGen         boshuuid.Generator
-	logger          boshlog.Logger
+	logger          logger.Logger
 }
 
 func NewSoftLayerVirtualGuestService(
 	softlayerClient bosl.Client,
 	uuidGen boshuuid.Generator,
-	logger boshlog.Logger,
+	logger logger.Logger,
 ) SoftlayerVirtualGuestService {
 	return SoftlayerVirtualGuestService{
 		softlayerClient: softlayerClient,

@@ -4,23 +4,34 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	boslc "bosh-softlayer-cpi/softlayer/client"
-	"bosh-softlayer-cpi/test_helpers"
+	"bytes"
+	"net/http"
+	"strconv"
+	"time"
+
+	boshlogger "github.com/cloudfoundry/bosh-utils/logger"
+	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
 	"github.com/onsi/gomega/ghttp"
-
-	vpsClient "bosh-softlayer-cpi/softlayer/vps_service/client"
-	vpsVm "bosh-softlayer-cpi/softlayer/vps_service/client/vm"
-	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/softlayer/softlayer-go/datatypes"
 	"github.com/softlayer/softlayer-go/session"
 	"github.com/softlayer/softlayer-go/sl"
-	"net/http"
+
+	api "bosh-softlayer-cpi/api"
+	cpiLog "bosh-softlayer-cpi/logger"
+	slClient "bosh-softlayer-cpi/softlayer/client"
+	vpsClient "bosh-softlayer-cpi/softlayer/vps_service/client"
+	vpsVm "bosh-softlayer-cpi/softlayer/vps_service/client/vm"
+	"bosh-softlayer-cpi/test_helpers"
 )
 
 var _ = Describe("SecurityHandler", func() {
 	var (
 		err error
+
+		errOutLog   bytes.Buffer
+		logger      cpiLog.Logger
+		multiLogger api.MultiLogger
 
 		server      *ghttp.Server
 		vpsEndPoint string
@@ -28,7 +39,7 @@ var _ = Describe("SecurityHandler", func() {
 
 		transportHandler *test_helpers.FakeTransportHandler
 		sess             *session.Session
-		cli              *boslc.ClientManager
+		cli              *slClient.ClientManager
 
 		label       string
 		key         string
@@ -49,8 +60,12 @@ var _ = Describe("SecurityHandler", func() {
 			SoftlayerAPIEndpoint: server.URL(),
 			MaxRetries:           3,
 		}
+
+		nanos := time.Now().Nanosecond()
+		logger = cpiLog.NewLogger(boshlogger.LevelDebug, strconv.Itoa(nanos))
+		multiLogger = api.MultiLogger{Logger: logger, LogBuff: &errOutLog}
 		sess = test_helpers.NewFakeSoftlayerSession(transportHandler)
-		cli = boslc.NewSoftLayerClientManager(sess, vps)
+		cli = slClient.NewSoftLayerClientManager(sess, vps, logger)
 
 		label = "fake-label"
 		key = "fake-key"
@@ -319,12 +334,12 @@ var _ = Describe("SecurityHandler", func() {
 
 		Describe("FindSaaSPriceByCategory", func() {
 			It("Find successfully", func() {
-				_, err := boslc.FindSaaSPriceByCategory(*productPackage, "performance_storage_iscsi")
+				_, err := slClient.FindSaaSPriceByCategory(*productPackage, "performance_storage_iscsi")
 				Expect(err).NotTo(HaveOccurred())
 			})
 
 			It("Return error when find unknown_category", func() {
-				_, err := boslc.FindSaaSPriceByCategory(*productPackage, "unknown_category")
+				_, err := slClient.FindSaaSPriceByCategory(*productPackage, "unknown_category")
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("Unable to find price storage category"))
 			})
@@ -359,7 +374,7 @@ var _ = Describe("SecurityHandler", func() {
 					},
 				}
 
-				_, err := boslc.FindSaaSPriceByCategory(*productPackage, "unknown_category")
+				_, err := slClient.FindSaaSPriceByCategory(*productPackage, "unknown_category")
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("Unable to find price storage category"))
 			})
@@ -367,12 +382,12 @@ var _ = Describe("SecurityHandler", func() {
 
 		Describe("FindSaaSPerformSpacePrice", func() {
 			It("Find successfully", func() {
-				_, err := boslc.FindSaaSPerformSpacePrice(*productPackage, 250)
+				_, err := slClient.FindSaaSPerformSpacePrice(*productPackage, 250)
 				Expect(err).NotTo(HaveOccurred())
 			})
 
 			It("Return error when find size by out of scope", func() {
-				_, err := boslc.FindSaaSPerformSpacePrice(*productPackage, 500)
+				_, err := slClient.FindSaaSPerformSpacePrice(*productPackage, 500)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("Unable to find price storage size"))
 			})
@@ -416,7 +431,7 @@ var _ = Describe("SecurityHandler", func() {
 					},
 				}
 
-				_, err := boslc.FindSaaSPerformSpacePrice(*productPackage, 250)
+				_, err := slClient.FindSaaSPerformSpacePrice(*productPackage, 250)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("Unable to find price storage size"))
 			})
@@ -462,7 +477,7 @@ var _ = Describe("SecurityHandler", func() {
 					},
 				}
 
-				_, err := boslc.FindSaaSPerformSpacePrice(*productPackage, 250)
+				_, err := slClient.FindSaaSPerformSpacePrice(*productPackage, 250)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("Unable to find price storage size"))
 			})
@@ -509,7 +524,7 @@ var _ = Describe("SecurityHandler", func() {
 					},
 				}
 
-				_, err := boslc.FindSaaSPerformSpacePrice(*productPackage, 250)
+				_, err := slClient.FindSaaSPerformSpacePrice(*productPackage, 250)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("Unable to find price storage size"))
 			})
@@ -550,7 +565,7 @@ var _ = Describe("SecurityHandler", func() {
 					},
 				}
 
-				_, err := boslc.FindSaaSPerformSpacePrice(*productPackage, 250)
+				_, err := slClient.FindSaaSPerformSpacePrice(*productPackage, 250)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("Unable to find price storage size"))
 			})
@@ -590,7 +605,7 @@ var _ = Describe("SecurityHandler", func() {
 					},
 				}
 
-				_, err := boslc.FindSaaSPerformSpacePrice(*productPackage, 250)
+				_, err := slClient.FindSaaSPerformSpacePrice(*productPackage, 250)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("Unable to find price storage size"))
 			})
@@ -598,18 +613,18 @@ var _ = Describe("SecurityHandler", func() {
 
 		Describe("FindSaaSPerformIopsPrice", func() {
 			It("Find successfully", func() {
-				_, err := boslc.FindSaaSPerformIopsPrice(*productPackage, 10, 1000)
+				_, err := slClient.FindSaaSPerformIopsPrice(*productPackage, 10, 1000)
 				Expect(err).NotTo(HaveOccurred())
 			})
 
 			It("Return error when volume size out of scope", func() {
-				_, err := boslc.FindSaaSPerformIopsPrice(*productPackage, 100, 1000)
+				_, err := slClient.FindSaaSPerformIopsPrice(*productPackage, 100, 1000)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("Unable to find price for storage space size"))
 			})
 
 			It("Return error when iops out of scope", func() {
-				_, err := boslc.FindSaaSPerformIopsPrice(*productPackage, 100, 3000)
+				_, err := slClient.FindSaaSPerformIopsPrice(*productPackage, 100, 3000)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("Unable to find price for storage space size"))
 			})
@@ -644,7 +659,7 @@ var _ = Describe("SecurityHandler", func() {
 					},
 				}
 
-				_, err := boslc.FindSaaSPerformIopsPrice(*productPackage, 10, 1000)
+				_, err := slClient.FindSaaSPerformIopsPrice(*productPackage, 10, 1000)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("Unable to find price for storage space size"))
 			})
@@ -684,7 +699,7 @@ var _ = Describe("SecurityHandler", func() {
 					},
 				}
 
-				_, err := boslc.FindSaaSPerformIopsPrice(*productPackage, 10, 1000)
+				_, err := slClient.FindSaaSPerformIopsPrice(*productPackage, 10, 1000)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("Unable to find price for storage space size"))
 			})
@@ -722,7 +737,7 @@ var _ = Describe("SecurityHandler", func() {
 					},
 				}
 
-				_, err := boslc.FindSaaSPerformIopsPrice(*productPackage, 10, 1000)
+				_, err := slClient.FindSaaSPerformIopsPrice(*productPackage, 10, 1000)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("Unable to find price for storage space size"))
 			})
@@ -758,7 +773,7 @@ var _ = Describe("SecurityHandler", func() {
 					},
 				}
 
-				_, err := boslc.FindSaaSPerformIopsPrice(*productPackage, 10, 1000)
+				_, err := slClient.FindSaaSPerformIopsPrice(*productPackage, 10, 1000)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("Unable to find price for storage space size"))
 			})
@@ -766,12 +781,12 @@ var _ = Describe("SecurityHandler", func() {
 
 		Describe("FindSaaSPriceByCategory", func() {
 			It("Find successfully", func() {
-				_, err := boslc.FindSaaSPriceByCategory(*productPackage, "storage_as_a_service")
+				_, err := slClient.FindSaaSPriceByCategory(*productPackage, "storage_as_a_service")
 				Expect(err).NotTo(HaveOccurred())
 			})
 
 			It("Return error when nable to find price storage category", func() {
-				_, err := boslc.FindSaaSPriceByCategory(*productPackage, "fake_category")
+				_, err := slClient.FindSaaSPriceByCategory(*productPackage, "fake_category")
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("Unable to find price storage category"))
 			})
@@ -811,7 +826,7 @@ var _ = Describe("SecurityHandler", func() {
 						},
 					},
 				}
-				_, err := boslc.FindSaaSPriceByCategory(*productPackage, "storage_as_a_service")
+				_, err := slClient.FindSaaSPriceByCategory(*productPackage, "storage_as_a_service")
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("Unable to find price storage category"))
 			})
@@ -819,18 +834,18 @@ var _ = Describe("SecurityHandler", func() {
 
 		Describe("FindSaaSSnapshotSpacePrice", func() {
 			It("Find successfully", func() {
-				_, err := boslc.FindSaaSSnapshotSpacePrice(*productPackage, 10, 1500)
+				_, err := slClient.FindSaaSSnapshotSpacePrice(*productPackage, 10, 1500)
 				Expect(err).NotTo(HaveOccurred())
 			})
 
 			It("Return error when size out of scope", func() {
-				_, err := boslc.FindSaaSSnapshotSpacePrice(*productPackage, 100, 1500)
+				_, err := slClient.FindSaaSSnapshotSpacePrice(*productPackage, 100, 1500)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("Unable to find price snapshot space size"))
 			})
 
 			It("Return error when iops out of scope", func() {
-				_, err := boslc.FindSaaSSnapshotSpacePrice(*productPackage, 10, 500)
+				_, err := slClient.FindSaaSSnapshotSpacePrice(*productPackage, 10, 500)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("Unable to find price snapshot space size"))
 			})
@@ -854,7 +869,7 @@ var _ = Describe("SecurityHandler", func() {
 						},
 					},
 				}
-				_, err := boslc.FindSaaSSnapshotSpacePrice(*productPackage, 10, 1500)
+				_, err := slClient.FindSaaSSnapshotSpacePrice(*productPackage, 10, 1500)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("Unable to find price snapshot space size"))
 			})
@@ -883,7 +898,7 @@ var _ = Describe("SecurityHandler", func() {
 						},
 					},
 				}
-				_, err := boslc.FindSaaSSnapshotSpacePrice(*productPackage, 10, 1500)
+				_, err := slClient.FindSaaSSnapshotSpacePrice(*productPackage, 10, 1500)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("Unable to find price snapshot space size"))
 			})
@@ -891,11 +906,11 @@ var _ = Describe("SecurityHandler", func() {
 
 		Describe("FindPerformancePrice", func() {
 			It("Find successfully", func() {
-				_, err := boslc.FindPerformancePrice(*productPackage, "performance_storage_iscsi")
+				_, err := slClient.FindPerformancePrice(*productPackage, "performance_storage_iscsi")
 				Expect(err).NotTo(HaveOccurred())
 			})
 			It("Return error when find un-existing category", func() {
-				_, err := boslc.FindSaaSPriceByCategory(*productPackage, "fake_category")
+				_, err := slClient.FindSaaSPriceByCategory(*productPackage, "fake_category")
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("Unable to find price storage category"))
 			})
@@ -930,7 +945,7 @@ var _ = Describe("SecurityHandler", func() {
 					},
 				}
 
-				_, err := boslc.FindSaaSPriceByCategory(*productPackage, "performance_storage_iscsi")
+				_, err := slClient.FindSaaSPriceByCategory(*productPackage, "performance_storage_iscsi")
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("Unable to find price storage category"))
 			})
@@ -938,11 +953,11 @@ var _ = Describe("SecurityHandler", func() {
 
 		Describe("FindPerformanceSpacePrice", func() {
 			It("Find successfully", func() {
-				_, err := boslc.FindPerformanceSpacePrice(*productPackage, 250)
+				_, err := slClient.FindPerformanceSpacePrice(*productPackage, 250)
 				Expect(err).NotTo(HaveOccurred())
 			})
 			It("Return error when size is out of scope", func() {
-				_, err := boslc.FindPerformanceSpacePrice(*productPackage, 5000)
+				_, err := slClient.FindPerformanceSpacePrice(*productPackage, 5000)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("Unable to find disk space price with size"))
 			})
@@ -977,7 +992,7 @@ var _ = Describe("SecurityHandler", func() {
 					},
 				}
 
-				_, err := boslc.FindPerformanceSpacePrice(*productPackage, 250)
+				_, err := slClient.FindPerformanceSpacePrice(*productPackage, 250)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("Unable to find disk space price with size"))
 			})
@@ -985,17 +1000,17 @@ var _ = Describe("SecurityHandler", func() {
 
 		Describe("FindPerformanceIOPSPrice", func() {
 			It("Find successfully", func() {
-				_, err := boslc.FindPerformanceIOPSPrice(*productPackage, 250, 1500)
+				_, err := slClient.FindPerformanceIOPSPrice(*productPackage, 250, 1500)
 				Expect(err).NotTo(HaveOccurred())
 			})
 			It("Return error when size is out of scope", func() {
-				_, err := boslc.FindPerformanceIOPSPrice(*productPackage, 5000, 1500)
+				_, err := slClient.FindPerformanceIOPSPrice(*productPackage, 5000, 1500)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("Unable to find price for"))
 			})
 
 			It("Return error when iops is out of scope", func() {
-				_, err := boslc.FindPerformanceIOPSPrice(*productPackage, 250, 100)
+				_, err := slClient.FindPerformanceIOPSPrice(*productPackage, 250, 100)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("Unable to find price for"))
 			})
@@ -1036,7 +1051,7 @@ var _ = Describe("SecurityHandler", func() {
 					},
 				}
 
-				_, err := boslc.FindPerformanceIOPSPrice(*productPackage, 250, 1500)
+				_, err := slClient.FindPerformanceIOPSPrice(*productPackage, 250, 1500)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("Unable to find price for"))
 			})

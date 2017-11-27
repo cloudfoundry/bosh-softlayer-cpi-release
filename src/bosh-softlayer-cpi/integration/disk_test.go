@@ -19,14 +19,14 @@ var _ = Describe("Disk", func() {
 		    "45632666-9fb1-422a-af35-2ab6102c5c1b",
 		    "%v",
 		    {
-		      "vmNamePrefix": "blusbosh-slcpi-integration-test",
+		      "hostname_prefix": "bluebosh-slcpi-integration-test",
 		      "domain": "softlayer.com",
-		      "startCpus": 1,
-		      "maxMemory": 1024,
-		      "maxNetworkSpeed": 100,
-		      "hourlyBillingFlag": true,
-		      "localDiskFlag": true,
-		      "dedicatedAccountHostOnlyFlag": false,
+		      "cpu": 1,
+		      "memory": 1024,
+		      "max_network_speed": 100,
+		      "hourly_billing_flag": true,
+		      "local_disk_flag": true,
+		      "dedicated_account_host_only_flag": false,
 		      "datacenter": "lon02"
 		    },
 		    {
@@ -40,7 +40,7 @@ var _ = Describe("Disk", func() {
 		          "gateway"
 		        ],
 		        "cloud_properties": {
-		          "vlanIds": [524956, 524954]
+		          "vlan_ids": [524956, 524954]
 		        }
 		      }
 		    },

@@ -1,27 +1,30 @@
 package main
 
 import (
+	"bufio"
+	"bytes"
 	"flag"
+	"fmt"
+	"io"
+	"log"
 	"os"
+	"time"
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	boshsys "github.com/cloudfoundry/bosh-utils/system"
 	boshuuid "github.com/cloudfoundry/bosh-utils/uuid"
+	httptransport "github.com/go-openapi/runtime/client"
+	"github.com/go-openapi/strfmt"
 
 	"bosh-softlayer-cpi/action"
 	"bosh-softlayer-cpi/api"
 	"bosh-softlayer-cpi/api/dispatcher"
 	"bosh-softlayer-cpi/api/transport"
 	"bosh-softlayer-cpi/config"
+	cpiLog "bosh-softlayer-cpi/logger"
 	"bosh-softlayer-cpi/softlayer/client"
 	vpsClient "bosh-softlayer-cpi/softlayer/vps_service/client"
 	"bosh-softlayer-cpi/softlayer/vps_service/client/vm"
-	"bufio"
-	"bytes"
-	"fmt"
-	httptransport "github.com/go-openapi/runtime/client"
-	"github.com/go-openapi/strfmt"
-	"io"
 )
 
 const logTagMain = "main"
@@ -31,8 +34,8 @@ var (
 )
 
 func main() {
-	logger, fs, uuid, writer := basicDeps()
-	cmdRunner := boshsys.NewExecCmdRunner(logger)
+	logger, fs, uuid, outLogger := basicDeps()
+	cmdRunner := boshsys.NewExecCmdRunner(logger.GetBoshLogger())
 	defer logger.HandlePanic("Main")
 
 	flag.Parse()
@@ -43,7 +46,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	dispatch := buildDispatcher(cfg, logger, writer, uuid, cmdRunner)
+	dispatch := buildDispatcher(cfg, logger, outLogger, uuid, cmdRunner)
 
 	cli := transport.NewCLI(os.Stdin, os.Stdout, dispatch, logger)
 
@@ -54,22 +57,28 @@ func main() {
 	}
 }
 
-func basicDeps() (boshlog.Logger, boshsys.FileSystem, boshuuid.Generator, io.Writer) {
+func basicDeps() (cpiLog.Logger, boshsys.FileSystem, boshuuid.Generator, *log.Logger) {
 	var logBuff bytes.Buffer
 	multiWriter := io.MultiWriter(os.Stderr, bufio.NewWriter(&logBuff))
-	logger := boshlog.NewWriterLogger(boshlog.LevelDebug, multiWriter, os.Stderr)
-	multiLogger := api.MultiLogger{Logger: logger, LogBuff: &logBuff}
-	fs := boshsys.NewOsFileSystem(multiLogger)
+	nanos := fmt.Sprintf("%09d", time.Now().Nanosecond())
+
+	clientLogger := log.New(multiWriter, nanos, log.LstdFlags) // For softlayer_client
+	outLogger := log.New(multiWriter, "", log.LstdFlags)
+	errLogger := log.New(os.Stderr, "", log.LstdFlags)
+
+	cpiLogger := cpiLog.New(boshlog.LevelDebug, nanos, outLogger, errLogger)
+	multiLogger := api.MultiLogger{Logger: cpiLogger, LogBuff: &logBuff}
+	fs := boshsys.NewOsFileSystem(cpiLogger.GetBoshLogger())
 
 	uuidGen := boshuuid.NewGenerator()
 
-	return multiLogger, fs, uuidGen, multiWriter
+	return multiLogger, fs, uuidGen, clientLogger
 }
 
 func buildDispatcher(
 	config config.Config,
-	logger boshlog.Logger,
-	writer io.Writer,
+	logger cpiLog.Logger,
+	outLogger *log.Logger,
 	uuidGen boshuuid.Generator,
 	cmdRunner boshsys.CmdRunner,
 ) dispatcher.Dispatcher {
@@ -80,7 +89,7 @@ func buildDispatcher(
 		softlayerAPIEndpoint = client.SoftlayerAPIEndpointPublicDefault
 	}
 
-	softLayerClient := client.NewSoftlayerClientSession(softlayerAPIEndpoint, config.Cloud.Properties.SoftLayer.Username, config.Cloud.Properties.SoftLayer.ApiKey, true, 300, writer)
+	softLayerClient := client.NewSoftlayerClientSession(softlayerAPIEndpoint, config.Cloud.Properties.SoftLayer.Username, config.Cloud.Properties.SoftLayer.ApiKey, true, 300, 3, 60, outLogger)
 
 	var vps *vm.Client
 	if config.Cloud.Properties.SoftLayer.EnableVps {
@@ -88,7 +97,7 @@ func buildDispatcher(
 			"v2", []string{"https"}), strfmt.Default).VM
 	}
 
-	repClientFactory := client.NewClientFactory(client.NewSoftLayerClientManager(softLayerClient, vps))
+	repClientFactory := client.NewClientFactory(client.NewSoftLayerClientManager(softLayerClient, vps, logger))
 	cli := repClientFactory.CreateClient()
 
 	actionFactory := action.NewConcreteFactory(

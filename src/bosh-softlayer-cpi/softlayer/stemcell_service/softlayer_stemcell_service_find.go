@@ -1,18 +1,17 @@
 package stemcell
 
 import (
-	"code.cloudfoundry.org/clock"
 	"fmt"
+	"strconv"
 	"time"
 
+	"code.cloudfoundry.org/clock"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshretry "github.com/cloudfoundry/bosh-utils/retrystrategy"
-
-	bosl "bosh-softlayer-cpi/softlayer/client"
+	"github.com/softlayer/softlayer-go/datatypes"
 
 	"bosh-softlayer-cpi/api"
-	"github.com/softlayer/softlayer-go/datatypes"
-	"strconv"
+	bosl "bosh-softlayer-cpi/softlayer/client"
 )
 
 func (s SoftlayerStemcellService) Find(id int) (string, error) {
@@ -35,7 +34,9 @@ func (s SoftlayerStemcellService) Find(id int) (string, error) {
 			return false, nil
 		})
 	timeService := clock.NewClock()
-	timeoutRetryStrategy := boshretry.NewTimeoutRetryStrategy(1*time.Minute, 5*time.Second, execStmtRetryable, timeService, s.logger)
+	timeoutRetryStrategy := boshretry.NewTimeoutRetryStrategy(1*time.Minute, 5*time.Second, execStmtRetryable, timeService, s.logger.GetBoshLogger())
+	s.logger.ChangeRetryStrategyLogTag(&timeoutRetryStrategy)
+
 	err = timeoutRetryStrategy.Try()
 	if err != nil {
 		return "", err

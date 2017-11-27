@@ -4,25 +4,37 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	boslc "bosh-softlayer-cpi/softlayer/client"
-	"bosh-softlayer-cpi/test_helpers"
-	"github.com/onsi/gomega/ghttp"
-
-	vpsClient "bosh-softlayer-cpi/softlayer/vps_service/client"
-	vpsVm "bosh-softlayer-cpi/softlayer/vps_service/client/vm"
+	"bytes"
 	"fmt"
+	"net/http"
+	"net/url"
+	"strconv"
+	"time"
+
+	boshlogger "github.com/cloudfoundry/bosh-utils/logger"
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
+	"github.com/onsi/gomega/ghttp"
 	"github.com/softlayer/softlayer-go/datatypes"
 	"github.com/softlayer/softlayer-go/session"
 	"github.com/softlayer/softlayer-go/sl"
-	"net/http"
-	"net/url"
+
+	api "bosh-softlayer-cpi/api"
+	cpiLog "bosh-softlayer-cpi/logger"
+	slClient "bosh-softlayer-cpi/softlayer/client"
+	vpsClient "bosh-softlayer-cpi/softlayer/vps_service/client"
+	vpsVm "bosh-softlayer-cpi/softlayer/vps_service/client/vm"
+	"bosh-softlayer-cpi/test_helpers"
 )
 
 var _ = Describe("InstanceHandler", func() {
 	var (
-		err         error
+		err error
+
+		errOutLog   bytes.Buffer
+		logger      cpiLog.Logger
+		multiLogger api.MultiLogger
+
 		server      *ghttp.Server
 		slServer    *ghttp.Server
 		vps         *vpsVm.Client
@@ -30,7 +42,7 @@ var _ = Describe("InstanceHandler", func() {
 
 		transportHandler *test_helpers.FakeTransportHandler
 		sess             *session.Session
-		cli              *boslc.ClientManager
+		cli              *slClient.ClientManager
 
 		vgID             int
 		vlanID           int
@@ -60,8 +72,12 @@ var _ = Describe("InstanceHandler", func() {
 			SoftlayerAPIEndpoint: slServer.URL(),
 			MaxRetries:           3,
 		}
+
+		nanos := time.Now().Nanosecond()
+		logger = cpiLog.NewLogger(boshlogger.LevelDebug, strconv.Itoa(nanos))
+		multiLogger = api.MultiLogger{Logger: logger, LogBuff: &errOutLog}
 		sess = test_helpers.NewFakeSoftlayerSession(transportHandler)
-		cli = boslc.NewSoftLayerClientManager(sess, vps)
+		cli = slClient.NewSoftLayerClientManager(sess, vps, multiLogger)
 
 		vgID = 25804753
 		vlanID = 1262125
@@ -139,6 +155,10 @@ var _ = Describe("InstanceHandler", func() {
 					"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
 					"statusCode": http.StatusOK,
 				},
+				{
+					"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
+					"statusCode": http.StatusOK,
+				},
 			}
 			err = test_helpers.SpecifyServerResps(respParas, slServer)
 			Expect(err).NotTo(HaveOccurred())
@@ -175,6 +195,10 @@ var _ = Describe("InstanceHandler", func() {
 				},
 				{
 					"filename":   "SoftLayer_Virtual_Guest_getObject_HasActiveTxn.json",
+					"statusCode": http.StatusOK,
+				},
+				{
+					"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
 					"statusCode": http.StatusOK,
 				},
 				{
@@ -267,6 +291,10 @@ var _ = Describe("InstanceHandler", func() {
 					"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
 					"statusCode": http.StatusOK,
 				},
+				{
+					"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
+					"statusCode": http.StatusOK,
+				},
 			}
 			err = test_helpers.SpecifyServerResps(respParas, slServer)
 			Expect(err).NotTo(HaveOccurred())
@@ -301,7 +329,7 @@ var _ = Describe("InstanceHandler", func() {
 			Expect(err.Error()).To(ContainSubstring("Reloading vm from pool"))
 		})
 
-		It("Return error when VirtualGuestService ReloadInstance return an error", func() {
+		It("Return error when VirtualGuestService GetInstance return an error", func() {
 			respParas = []map[string]interface{}{
 				// OrderVMByFilter
 				{
@@ -323,6 +351,10 @@ var _ = Describe("InstanceHandler", func() {
 				},
 				{
 					"filename":   "SoftLayer_Virtual_Guest_getObject_HasActiveTxn.json",
+					"statusCode": http.StatusOK,
+				},
+				{
+					"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
 					"statusCode": http.StatusOK,
 				},
 				{
@@ -380,6 +412,10 @@ var _ = Describe("InstanceHandler", func() {
 					"statusCode": http.StatusOK,
 				},
 				{
+					"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
+					"statusCode": http.StatusOK,
+				},
+				{
 					"filename":   "SoftLayer_Virtual_Guest_editObject.json",
 					"statusCode": http.StatusOK,
 				},
@@ -398,7 +434,7 @@ var _ = Describe("InstanceHandler", func() {
 
 			_, err := cli.CreateInstanceFromVPS(vgTemplate, stemcellID, []int{12345678})
 			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring("does not exists"))
+			Expect(err.Error()).To(ContainSubstring("does not exist"))
 		})
 
 		It("Return error when vpsService UpdateVM return an error", func() {
@@ -428,6 +464,10 @@ var _ = Describe("InstanceHandler", func() {
 				},
 				{
 					"filename":   "SoftLayer_Virtual_Guest_getObject_HasActiveTxn.json",
+					"statusCode": http.StatusOK,
+				},
+				{
+					"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
 					"statusCode": http.StatusOK,
 				},
 				{

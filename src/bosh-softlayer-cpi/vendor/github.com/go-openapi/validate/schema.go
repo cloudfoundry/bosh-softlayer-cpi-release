@@ -146,9 +146,9 @@ func (s *SchemaValidator) typeValidator() valueValidator {
 
 func (s *SchemaValidator) commonValidator() valueValidator {
 	return &basicCommonValidator{
-		Path:    s.Path,
-		In:      s.in,
-		Enum:    s.Schema.Enum,
+		Path: s.Path,
+		In:   s.in,
+		Enum: s.Schema.Enum,
 	}
 }
 
@@ -191,8 +191,8 @@ func (s *SchemaValidator) stringValidator() valueValidator {
 
 func (s *SchemaValidator) formatValidator() valueValidator {
 	return &formatValidator{
-		Path: s.Path,
-		In:   s.in,
+		Path:         s.Path,
+		In:           s.in,
 		Format:       s.Schema.Format,
 		KnownFormats: s.KnownFormats,
 	}

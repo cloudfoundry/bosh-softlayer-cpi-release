@@ -55,7 +55,7 @@ var _ = Describe("CreateVM", func() {
 		registryClient = &registryfakes.FakeClient{}
 		registryOptions = registry.ClientOptions{
 			Protocol: "http",
-			Host:     "fake-registry-host",
+			Address:  "fake-registry-host",
 			Port:     25777,
 			Username: "fake-registry-username",
 			Password: "fake-registry-password",
@@ -99,10 +99,10 @@ var _ = Describe("CreateVM", func() {
 			stemcellCID = StemcellCID(12345678)
 
 			cloudProps = VMCloudProperties{
-				VmNamePrefix:      "fake-hostname",
+				HostnamePrefix:    "fake-hostname",
 				Domain:            "fake-domain.com",
-				StartCpus:         2,
-				MaxMemory:         2048,
+				Cpu:               2,
+				Memory:            2048,
 				MaxNetworkSpeed:   100,
 				Datacenter:        "fake-datacenter",
 				SshKey:            32345678,
@@ -120,7 +120,6 @@ var _ = Describe("CreateVM", func() {
 					CloudProperties: NetworkCloudProperties{
 						VlanIds:             []int{42345678},
 						SourcePolicyRouting: true,
-						Tags:                []string{"fake-network-cloud-network-tag"},
 					},
 				},
 			}
@@ -198,7 +197,6 @@ var _ = Describe("CreateVM", func() {
 						CloudProperties: instance.NetworkCloudProperties{
 							VlanID:              42345678,
 							SourcePolicyRouting: true,
-							Tags:                []string{"fake-network-cloud-network-tag"},
 						},
 					},
 				},
@@ -260,22 +258,22 @@ var _ = Describe("CreateVM", func() {
 
 		})
 
-		It("creates the vm when deployByBoshCli=false, and mbus host 0.0.0.0", func() {
+		It("creates the vm when deployByBoshCli=false and director host is hostname", func() {
 			cloudProps = VMCloudProperties{
-				VmNamePrefix:    "fake-hostname",
+				HostnamePrefix:  "fake-hostname",
 				Domain:          "fake-domain.com",
-				StartCpus:       2,
-				MaxMemory:       2048,
+				Cpu:             2,
+				Memory:          2048,
 				MaxNetworkSpeed: 100,
 				Datacenter:      "fake-datacenter",
 				SshKey:          32345678,
 			}
 
 			agentOptions = registry.AgentOptions{
-				Mbus: "nats://nats:nats@0.0.0.0:fake-port",
+				Mbus: "nats://nats:nats@fake-hostname:fake-port",
 				Blobstore: registry.BlobstoreOptions{
 					Provider: "dav",
-					Options:  map[string]interface{}{"endpoint": "http://0.0.0.0:fake-port"},
+					Options:  map[string]interface{}{"endpoint": "http://fake-hostname:fake-port"},
 				},
 			}
 
@@ -355,71 +353,38 @@ var _ = Describe("CreateVM", func() {
 			Expect(actualInstanceNetworks).To(Equal(expectedInstanceNetworks))
 		})
 
-		It("creates the vm when deployByBoshCli=false, and with mbus host not 0.0.0.0", func() {
+		It("creates the vm when deployByBoshCli=false and director host is IP address", func() {
 			cloudProps = VMCloudProperties{
-				VmNamePrefix:    "fake-hostname",
+				HostnamePrefix:  "fake-hostname",
 				Domain:          "fake-domain.com",
-				StartCpus:       2,
-				MaxMemory:       2048,
+				Cpu:             2,
+				Memory:          2048,
 				MaxNetworkSpeed: 100,
 				Datacenter:      "fake-datacenter",
 				SshKey:          32345678,
 			}
 
 			agentOptions = registry.AgentOptions{
-				Mbus: "nats://nats:nats@fake-mbus:fake-port",
+				Mbus: "nats://nats:nats@10.11.12.13:fake-port",
 				Blobstore: registry.BlobstoreOptions{
 					Provider: "dav",
-					Options:  map[string]interface{}{"endpoint": "http://fake-blobstore:fake-port"},
+					Options:  map[string]interface{}{"endpoint": "http://10.11.12.13:fake-port"},
 				},
 			}
-
-			networks = Networks{
-				"fake-network-1": Network{
-					Type:    "manual",
-					IP:      "10.10.10.10",
-					Gateway: "fake-network-gateway",
-					Netmask: "fake-network-netmask",
-					DNS:     []string{"fake-network-dns"},
-					CloudProperties: NetworkCloudProperties{
-						VlanIds: []int{423456990},
-					},
-				},
-				"fake-network-2": Network{
-					Type:    "dynamic",
-					IP:      "10.10.10.10",
-					Gateway: "fake-network-gateway",
-					Netmask: "fake-network-netmask",
-					DNS:     []string{"fake-network-dns"},
-					Default: []string{"fake-network-default"},
-					CloudProperties: NetworkCloudProperties{
-						VlanIds: []int{42345678},
-					},
-				},
-			}
-
-			expectedInstanceNetworks = networks.AsInstanceServiceNetworks(&datatypes.Network_Vlan{})
 
 			expectedAgentSettings = registry.AgentSettings{
 				AgentID: "fake-agent-id",
 				Blobstore: registry.BlobstoreSettings{
 					Provider: "dav",
-					Options:  map[string]interface{}{"endpoint": "http://fake-blobstore:fake-port"},
+					Options:  map[string]interface{}{"endpoint": "http://10.11.12.13:fake-port"},
 				},
 				Disks: registry.DisksSettings{
 					System:     "",
 					Persistent: map[string]registry.PersistentSettings{},
 				},
-				Mbus: "nats://nats:nats@fake-mbus:fake-port",
+				Mbus: "nats://nats:nats@10.11.12.13:fake-port",
 				Networks: registry.NetworksSettings{
-					"fake-network-1": registry.NetworkSettings{
-						Type:    "manual",
-						IP:      "10.10.10.10",
-						Gateway: "fake-network-gateway",
-						Netmask: "fake-network-netmask",
-						DNS:     []string{"fake-network-dns"},
-					},
-					"fake-network-2": registry.NetworkSettings{
+					"fake-network-name": registry.NetworkSettings{
 						Type:    "dynamic",
 						IP:      "10.10.10.10",
 						Gateway: "fake-network-gateway",
@@ -440,25 +405,13 @@ var _ = Describe("CreateVM", func() {
 				},
 			}
 
-			vmService.ConfigureNetworksReturns(
-				instance.Networks{
-					"fake-network-1": instance.Network{
-						Type:    "manual",
-						IP:      "10.10.10.10",
-						Gateway: "fake-network-gateway",
-						Netmask: "fake-network-netmask",
-						DNS:     []string{"fake-network-dns"},
-					},
-					"fake-network-2": instance.Network{
-						Type:    "dynamic",
-						IP:      "10.10.10.10",
-						Gateway: "fake-network-gateway",
-						Netmask: "fake-network-netmask",
-						DNS:     []string{"fake-network-dns"},
-						Default: []string{"fake-network-default"},
-					},
-				},
-				nil,
+			createVM = NewCreateVM(
+				imageService,
+				vmService,
+				registryClient,
+				registryOptions,
+				agentOptions,
+				softlayerOptions,
 			)
 
 			vmCID, err = createVM.Run(agentID, stemcellCID, cloudProps, networks, disks, env)
@@ -483,10 +436,10 @@ var _ = Describe("CreateVM", func() {
 
 		It("creates the vm successfully when length of hostname is 64", func() {
 			cloudProps = VMCloudProperties{
-				VmNamePrefix:      "fake-randomstring-346e9mlcy90i4n57oc0zk-hostname",
+				HostnamePrefix:    "fake-randomstring-346e9mlcy90i4n57oc0zk-hostname",
 				Domain:            "fake-domain.com",
-				StartCpus:         2,
-				MaxMemory:         2048,
+				Cpu:               2,
+				Memory:            2048,
 				MaxNetworkSpeed:   100,
 				Datacenter:        "fake-datacenter",
 				SshKey:            32345678,
@@ -798,7 +751,7 @@ var _ = Describe("CreateVM", func() {
 				Expect(actualInstanceNetworks).To(Equal(expectedInstanceNetworks))
 			})
 
-			It("Failted to create the vm with only public network", func() {
+			It("Failed to create the vm with only public network", func() {
 				networks = Networks{
 					"fake-network-name": Network{
 						Type:    "dynamic",
@@ -810,7 +763,6 @@ var _ = Describe("CreateVM", func() {
 						CloudProperties: NetworkCloudProperties{
 							VlanIds:             []int{42345680},
 							SourcePolicyRouting: true,
-							Tags:                []string{"fake-network-cloud-network-tag"},
 						},
 					},
 				}
@@ -821,22 +773,16 @@ var _ = Describe("CreateVM", func() {
 					},
 					nil,
 				)
-				vmService.CreateReturns(
-					0,
-					api.NewVMCreationFailedError("Only the frontend VLAN was specified.", false),
-				)
 				_, err = createVM.Run(agentID, stemcellCID, cloudProps, networks, disks, env)
-				virtualGuest, _, _, _ := vmService.CreateArgsForCall(0)
 
 				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("Only the frontend VLAN was specified."))
+				Expect(err.Error()).To(ContainSubstring("A private network is required"))
 				Expect(imageService.FindCallCount()).To(Equal(1))
 				Expect(vmService.CreateSshKeyCallCount()).To(Equal(0))
 				Expect(vmService.GetVlanCallCount()).To(Equal(1))
 				Expect(vmService.FindByPrimaryBackendIpCallCount()).To(Equal(0))
 				Expect(vmService.ReloadOSCallCount()).To(Equal(0))
-				Expect(*virtualGuest.PrivateNetworkOnlyFlag).To(BeFalse())
-				Expect(vmService.CreateCallCount()).To(Equal(1))
+				Expect(vmService.CreateCallCount()).To(Equal(0))
 				Expect(vmService.ConfigureNetworksCallCount()).To(Equal(0))
 				Expect(vmService.AttachEphemeralDiskCallCount()).To(Equal(0))
 				Expect(vmService.CleanUpCallCount()).To(Equal(0))
@@ -956,10 +902,10 @@ var _ = Describe("CreateVM", func() {
 				}
 
 				cloudProps = VMCloudProperties{
-					VmNamePrefix:      "fake-hostname",
+					HostnamePrefix:    "fake-hostname",
 					Domain:            "fake-domain.com",
-					StartCpus:         2,
-					MaxMemory:         2048,
+					Cpu:               2,
+					Memory:            2048,
 					MaxNetworkSpeed:   100,
 					Datacenter:        "fake-datacenter",
 					SshKey:            32345678,
@@ -1016,10 +962,10 @@ var _ = Describe("CreateVM", func() {
 		Context("when required cloud properties is not set", func() {
 			It("returns an error if property 'vmNamePrefix' is not set", func() {
 				cloudProps = VMCloudProperties{
-					VmNamePrefix:      "",
+					HostnamePrefix:    "",
 					Domain:            "fake-domain.com",
-					StartCpus:         2,
-					MaxMemory:         2048,
+					Cpu:               2,
+					Memory:            2048,
 					MaxNetworkSpeed:   100,
 					Datacenter:        "fake-datacenter",
 					SshKey:            32345678,
@@ -1028,88 +974,7 @@ var _ = Describe("CreateVM", func() {
 
 				vmCID, err = createVM.Run(agentID, stemcellCID, cloudProps, networks, disks, env)
 				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("The property 'VmNamePrefix' must be set to create an instance"))
-				Expect(imageService.FindCallCount()).To(Equal(0))
-				Expect(vmService.CreateSshKeyCallCount()).To(Equal(0))
-				Expect(vmService.GetVlanCallCount()).To(Equal(0))
-				Expect(vmService.FindByPrimaryBackendIpCallCount()).To(Equal(0))
-				Expect(vmService.ReloadOSCallCount()).To(Equal(0))
-				Expect(vmService.CreateCallCount()).To(Equal(0))
-				Expect(vmService.ConfigureNetworksCallCount()).To(Equal(0))
-				Expect(vmService.AttachEphemeralDiskCallCount()).To(Equal(0))
-				Expect(vmService.CleanUpCallCount()).To(Equal(0))
-				Expect(registryClient.UpdateCalled).To(BeFalse())
-			})
-
-			It("returns an error if property 'domain' is not set", func() {
-				cloudProps = VMCloudProperties{
-					VmNamePrefix:      "fake-hostname",
-					Domain:            "",
-					StartCpus:         2,
-					MaxMemory:         2048,
-					MaxNetworkSpeed:   100,
-					Datacenter:        "fake-datacenter",
-					SshKey:            32345678,
-					DeployedByBoshCLI: true,
-				}
-
-				vmCID, err = createVM.Run(agentID, stemcellCID, cloudProps, networks, disks, env)
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("The property 'Domain' must be set to create an instance"))
-				Expect(imageService.FindCallCount()).To(Equal(0))
-				Expect(vmService.CreateSshKeyCallCount()).To(Equal(0))
-				Expect(vmService.GetVlanCallCount()).To(Equal(0))
-				Expect(vmService.FindByPrimaryBackendIpCallCount()).To(Equal(0))
-				Expect(vmService.ReloadOSCallCount()).To(Equal(0))
-				Expect(vmService.CreateCallCount()).To(Equal(0))
-				Expect(vmService.ConfigureNetworksCallCount()).To(Equal(0))
-				Expect(vmService.AttachEphemeralDiskCallCount()).To(Equal(0))
-				Expect(vmService.CleanUpCallCount()).To(Equal(0))
-				Expect(registryClient.UpdateCalled).To(BeFalse())
-			})
-
-			It("returns an error if property 'startCpus' is not set", func() {
-				cloudProps = VMCloudProperties{
-					VmNamePrefix:      "fake-hostname",
-					Domain:            "fake-domain.com",
-					StartCpus:         0,
-					MaxMemory:         2048,
-					MaxNetworkSpeed:   100,
-					Datacenter:        "fake-datacenter",
-					SshKey:            32345678,
-					DeployedByBoshCLI: true,
-				}
-
-				vmCID, err = createVM.Run(agentID, stemcellCID, cloudProps, networks, disks, env)
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("The property 'StartCpus' must be set to create an instance"))
-				Expect(imageService.FindCallCount()).To(Equal(0))
-				Expect(vmService.CreateSshKeyCallCount()).To(Equal(0))
-				Expect(vmService.GetVlanCallCount()).To(Equal(0))
-				Expect(vmService.FindByPrimaryBackendIpCallCount()).To(Equal(0))
-				Expect(vmService.ReloadOSCallCount()).To(Equal(0))
-				Expect(vmService.CreateCallCount()).To(Equal(0))
-				Expect(vmService.ConfigureNetworksCallCount()).To(Equal(0))
-				Expect(vmService.AttachEphemeralDiskCallCount()).To(Equal(0))
-				Expect(vmService.CleanUpCallCount()).To(Equal(0))
-				Expect(registryClient.UpdateCalled).To(BeFalse())
-			})
-
-			It("returns an error if property 'maxMemory' is not set", func() {
-				cloudProps = VMCloudProperties{
-					VmNamePrefix:      "fake-hostname",
-					Domain:            "fake-domain.com",
-					StartCpus:         2,
-					MaxMemory:         0,
-					MaxNetworkSpeed:   100,
-					Datacenter:        "fake-datacenter",
-					SshKey:            32345678,
-					DeployedByBoshCLI: true,
-				}
-
-				vmCID, err = createVM.Run(agentID, stemcellCID, cloudProps, networks, disks, env)
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("The property 'MaxMemory' must be set to create an instance"))
+				Expect(err.Error()).To(ContainSubstring("The property 'hostname_prefix' must be set to create an instance"))
 				Expect(imageService.FindCallCount()).To(Equal(0))
 				Expect(vmService.CreateSshKeyCallCount()).To(Equal(0))
 				Expect(vmService.GetVlanCallCount()).To(Equal(0))
@@ -1124,10 +989,10 @@ var _ = Describe("CreateVM", func() {
 
 			It("returns an error if property 'datacenter' is not set", func() {
 				cloudProps = VMCloudProperties{
-					VmNamePrefix:      "fake-hostname",
+					HostnamePrefix:    "fake-hostname",
 					Domain:            "fake-domain.com",
-					StartCpus:         2,
-					MaxMemory:         2048,
+					Cpu:               2,
+					Memory:            2048,
 					MaxNetworkSpeed:   100,
 					Datacenter:        "",
 					SshKey:            32345678,
@@ -1136,7 +1001,7 @@ var _ = Describe("CreateVM", func() {
 
 				vmCID, err = createVM.Run(agentID, stemcellCID, cloudProps, networks, disks, env)
 				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("The property 'Datacenter' must be set to create an instance"))
+				Expect(err.Error()).To(ContainSubstring("The property 'datacenter' must be set to create an instance"))
 				Expect(imageService.FindCallCount()).To(Equal(0))
 				Expect(vmService.CreateSshKeyCallCount()).To(Equal(0))
 				Expect(vmService.GetVlanCallCount()).To(Equal(0))

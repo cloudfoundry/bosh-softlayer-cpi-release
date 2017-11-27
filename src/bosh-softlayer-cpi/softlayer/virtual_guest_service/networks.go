@@ -9,7 +9,7 @@ type Networks map[string]Network
 
 func (n Networks) Validate() error {
 	var networks int
-
+	var vipNetworks int
 	for _, network := range n {
 		if err := network.Validate(); err != nil {
 			return err
@@ -20,17 +20,17 @@ func (n Networks) Validate() error {
 			networks++
 		case network.IsManual():
 			networks++
-			//case network.IsVip():
-			//	vipNetworks++
+		case network.IsVip():
+			vipNetworks++
 		}
 	}
 
 	//if networks != 1 {
 	//	return bosherr.Error("Exactly one Dynamic or Manual network must be defined")
 	//}
-
-	// Network type 'vip' not supported currently(vipNetworks int)
-	// if vipNetworks > 1 {
+	//
+	//// Network type 'vip' not supported currently()
+	//if vipNetworks > 1 {
 	//	return bosherr.Error("Only one VIP network is allowed")
 	//}
 

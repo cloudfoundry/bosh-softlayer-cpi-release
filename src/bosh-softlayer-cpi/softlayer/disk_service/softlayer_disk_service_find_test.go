@@ -4,12 +4,15 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	boslc "bosh-softlayer-cpi/softlayer/client/fakes"
-	diskService "bosh-softlayer-cpi/softlayer/disk_service"
 	"errors"
+
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	"github.com/softlayer/softlayer-go/datatypes"
 	"github.com/softlayer/softlayer-go/sl"
+
+	cpiLog "bosh-softlayer-cpi/logger"
+	boslc "bosh-softlayer-cpi/softlayer/client/fakes"
+	diskService "bosh-softlayer-cpi/softlayer/disk_service"
 )
 
 var _ = Describe("Disk Service Find", func() {
@@ -19,12 +22,12 @@ var _ = Describe("Disk Service Find", func() {
 		diskID int
 		cli    *boslc.FakeClient
 		disk   diskService.SoftlayerDiskService
-		logger boshlog.Logger
+		logger cpiLog.Logger
 	)
 	BeforeEach(func() {
 		diskID = 12345678
 		cli = &boslc.FakeClient{}
-		logger = boshlog.NewLogger(boshlog.LevelNone)
+		logger = cpiLog.NewLogger(boshlog.LevelDebug, "")
 		disk = diskService.NewSoftlayerDiskService(cli, logger)
 	})
 

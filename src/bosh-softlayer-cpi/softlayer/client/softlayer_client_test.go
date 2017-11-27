@@ -4,9 +4,11 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	boslc "bosh-softlayer-cpi/softlayer/client"
 	"bytes"
 	"io"
+	"log"
+
+	boslc "bosh-softlayer-cpi/softlayer/client"
 )
 
 var _ = Describe("SoftlayerClient", func() {
@@ -14,11 +16,14 @@ var _ = Describe("SoftlayerClient", func() {
 		// Initialize session of softlayer client
 		var errOut, errOutLog bytes.Buffer
 		multiWriter := io.MultiWriter(&errOut, &errOutLog)
+		outLogger := log.New(multiWriter, "fake-uuid", log.LstdFlags)
 		username := "SL_USERNAME"
 		apiKey := "SL_API_KEY"
-		timeout := 50000
+		timeout := 300
+		retries := 1
+		retryTimout := 60
 
-		sess := boslc.NewSoftlayerClientSession(boslc.SoftlayerAPIEndpointPublicDefault, username, apiKey, false, timeout, multiWriter)
+		sess := boslc.NewSoftlayerClientSession(boslc.SoftlayerAPIEndpointPublicDefault, username, apiKey, false, timeout, retries, retryTimout, outLogger)
 		Expect(sess.Endpoint).To(Equal(boslc.SoftlayerAPIEndpointPublicDefault))
 		Expect(sess.APIKey).To(Equal(apiKey))
 		Expect(sess.UserName).To(Equal(username))
