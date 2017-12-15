@@ -1,4 +1,4 @@
-Distinguish logs thru thread ID
+Distinguish logs by thread ID
 
 # Motivation
 
