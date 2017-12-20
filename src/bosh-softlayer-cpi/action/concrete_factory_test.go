@@ -194,6 +194,12 @@ var _ = Describe("ConcreteFactory", func() {
 		Expect(action).To(Equal(NewSetDiskMetadata(diskService)))
 	})
 
+	It("info", func() {
+		action, err := factory.Create("info")
+		Expect(err).ToNot(HaveOccurred())
+		Expect(action).To(Equal(NewInfo()))
+	})
+
 	It("ping", func() {
 		action, err := factory.Create("ping")
 		Expect(err).ToNot(HaveOccurred())
