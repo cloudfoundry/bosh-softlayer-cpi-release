@@ -38,6 +38,7 @@ func NewConcreteFactory(
 
 	stemcellService := stemcell.NewSoftlayerStemcellService(
 		softlayerClient,
+		uuidGen,
 		logger,
 	)
 

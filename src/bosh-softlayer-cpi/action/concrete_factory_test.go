@@ -79,6 +79,7 @@ var _ = Describe("ConcreteFactory", func() {
 
 		imageService = stemcell.NewSoftlayerStemcellService(
 			softlayerClient,
+			uuidGen,
 			logger,
 		)
 

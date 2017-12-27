@@ -14,12 +14,13 @@ import (
 	boshlogger "github.com/cloudfoundry/bosh-utils/logger"
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
+	"github.com/ncw/swift"
 	"github.com/onsi/gomega/ghttp"
 	"github.com/softlayer/softlayer-go/datatypes"
 	"github.com/softlayer/softlayer-go/session"
 	"github.com/softlayer/softlayer-go/sl"
 
-	api "bosh-softlayer-cpi/api"
+	"bosh-softlayer-cpi/api"
 	cpiLog "bosh-softlayer-cpi/logger"
 	slClient "bosh-softlayer-cpi/softlayer/client"
 	vpsClient "bosh-softlayer-cpi/softlayer/vps_service/client"
@@ -39,6 +40,7 @@ var _ = Describe("InstanceHandler", func() {
 		slServer    *ghttp.Server
 		vps         *vpsVm.Client
 		vpsEndPoint string
+		swiftClient *swift.Connection
 
 		transportHandler *test_helpers.FakeTransportHandler
 		sess             *session.Session
@@ -73,11 +75,13 @@ var _ = Describe("InstanceHandler", func() {
 			MaxRetries:           3,
 		}
 
+		swiftClient = &swift.Connection{}
+
 		nanos := time.Now().Nanosecond()
 		logger = cpiLog.NewLogger(boshlogger.LevelDebug, strconv.Itoa(nanos))
 		multiLogger = api.MultiLogger{Logger: logger, LogBuff: &errOutLog}
 		sess = test_helpers.NewFakeSoftlayerSession(transportHandler)
-		cli = slClient.NewSoftLayerClientManager(sess, vps, multiLogger)
+		cli = slClient.NewSoftLayerClientManager(sess, vps, swiftClient, logger)
 
 		vgID = 25804753
 		vlanID = 1262125
@@ -88,9 +92,9 @@ var _ = Describe("InstanceHandler", func() {
 		stemcellID = 12345678
 
 		vgTemplate = &datatypes.Virtual_Guest{
-			Domain:                   sl.String("wilma.org"),
-			Hostname:                 sl.String("wilma2"),
-			FullyQualifiedDomainName: sl.String("wilma2.wilma.org"),
+			Domain:                       sl.String("wilma.org"),
+			Hostname:                     sl.String("wilma2"),
+			FullyQualifiedDomainName:     sl.String("wilma2.wilma.org"),
 			MaxCpu:                       sl.Int(2),
 			StartCpus:                    sl.Int(2),
 			MaxMemory:                    sl.Int(2048),

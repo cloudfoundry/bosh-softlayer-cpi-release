@@ -66,6 +66,14 @@
       params['cloud']['properties']['softlayer']['vps_use_ssl'] = vps_use_ssl
   end
 
+  if_p('softlayer.swift_username') do |swift_username|
+      params['cloud']['properties']['softlayer']['swift_username'] = swift_username
+  end
+
+  if_p('softlayer.swift_endpoint') do |swift_endpoint|
+      params['cloud']['properties']['softlayer']['swift_endpoint'] = swift_endpoint
+  end
+
   if_p('registry.address') do |address|
     params['cloud']['properties']['registry']['address'] = address
   end

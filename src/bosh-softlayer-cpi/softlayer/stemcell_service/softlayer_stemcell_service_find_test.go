@@ -7,6 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
+	fakeuuid "github.com/cloudfoundry/bosh-utils/uuid/fakes"
 	"github.com/softlayer/softlayer-go/datatypes"
 	"github.com/softlayer/softlayer-go/sl"
 
@@ -22,13 +23,15 @@ var _ = Describe("Stemcell Service", func() {
 		stemcellID int
 		cli        *fakeslclient.FakeClient
 		stemcell   stemcellService.SoftlayerStemcellService
+		uuidGen    *fakeuuid.FakeGenerator
 		logger     cpiLog.Logger
 	)
 	BeforeEach(func() {
 		stemcellID = 22345678
 		cli = &fakeslclient.FakeClient{}
 		logger = cpiLog.NewLogger(boshlog.LevelDebug, "")
-		stemcell = stemcellService.NewSoftlayerStemcellService(cli, logger)
+		uuidGen = &fakeuuid.FakeGenerator{}
+		stemcell = stemcellService.NewSoftlayerStemcellService(cli, uuidGen, logger)
 	})
 
 	Describe("Call Find", func() {

@@ -47,6 +47,18 @@
 			"revisionTime": "2017-07-07T00:05:06Z"
 		},
 		{
+			"checksumSHA1": "WukbhwGKd/BpfuADBnWRoEXAh74=",
+			"path": "github.com/cloudfoundry/bosh-utils/fileutil",
+			"revision": "ed55b4546683cfb2a9c6177ba1bfaa8ee6b37782",
+			"revisionTime": "2017-12-26T23:42:00Z"
+		},
+		{
+			"checksumSHA1": "BkIn5/mqOV0eW1lKx106lLoC/EQ=",
+			"path": "github.com/cloudfoundry/bosh-utils/fileutil/fakes",
+			"revision": "ed55b4546683cfb2a9c6177ba1bfaa8ee6b37782",
+			"revisionTime": "2017-12-26T23:42:00Z"
+		},
+		{
 			"checksumSHA1": "TbzNl200lJFg2rpZ4V6rG8Dxvdc=",
 			"path": "github.com/cloudfoundry/bosh-utils/logger",
 			"revision": "c9f356b84a809b355b264a565216fcd7267acdf1",
@@ -155,6 +167,24 @@
 			"revisionTime": "2017-07-26T21:28:29Z"
 		},
 		{
+			"checksumSHA1": "oVTRDGkusAXFY780oodtyv3C63I=",
+			"path": "github.com/ibmjstart/swiftlygo",
+			"revision": "ee1b03689afa3f105b447dc361cb534eb5b568ec",
+			"revisionTime": "2016-12-16T15:48:42Z"
+		},
+		{
+			"checksumSHA1": "3UhU1oRZ32M//XRgOyL+ZQjaPmM=",
+			"path": "github.com/ibmjstart/swiftlygo/auth",
+			"revision": "ee1b03689afa3f105b447dc361cb534eb5b568ec",
+			"revisionTime": "2016-12-16T15:48:42Z"
+		},
+		{
+			"checksumSHA1": "HrLq4SYyRxIk416jCelM0qbzuu8=",
+			"path": "github.com/ibmjstart/swiftlygo/pipeline",
+			"revision": "ee1b03689afa3f105b447dc361cb534eb5b568ec",
+			"revisionTime": "2016-12-16T15:48:42Z"
+		},
+		{
 			"checksumSHA1": "KQhA4EQp4Ldwj9nJZnEURlE6aQw=",
 			"path": "github.com/kr/fs",
 			"revision": "2788f0dbd16903de03cb8186e5c7d97b69ad387b",
@@ -183,6 +213,18 @@
 			"path": "github.com/mitchellh/mapstructure",
 			"revision": "d0303fe809921458f417bcf828397a65db30a7e4",
 			"revisionTime": "2017-05-23T03:00:23Z"
+		},
+		{
+			"checksumSHA1": "GD1YDTb2vwz5k1FO69iuo6Xc4E0=",
+			"path": "github.com/ncw/swift",
+			"revision": "067578e41c8dd06bf557d02a92a77bd35e97c05a",
+			"revisionTime": "2017-12-08T11:35:51Z"
+		},
+		{
+			"checksumSHA1": "Sw8PIPa+KIi4QRCyJQjJ9vFnjvE=",
+			"path": "github.com/ncw/swift/rs",
+			"revision": "067578e41c8dd06bf557d02a92a77bd35e97c05a",
+			"revisionTime": "2017-12-08T11:35:51Z"
 		},
 		{
 			"checksumSHA1": "gcLub3oB+u4QrOJZcYmk/y2AP4k=",

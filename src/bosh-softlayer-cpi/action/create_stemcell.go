@@ -2,18 +2,15 @@ package action
 
 import (
 	"bosh-softlayer-cpi/api"
-	stemcell "bosh-softlayer-cpi/softlayer/stemcell_service"
+	"bosh-softlayer-cpi/softlayer/stemcell_service"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 )
 
+const softlayerInfrastructure = "softlayer"
+const bluemixInfrastructure = "bluemix"
+
 type CreateStemcellAction struct {
 	stemcellService stemcell.Service
-}
-
-type CreateStemcellCloudProps struct {
-	Id             int    `json:"virtual-disk-image-id"`
-	Uuid           string `json:"virtual-disk-image-uuid"`
-	DatacenterName string `json:"datacenter-name"`
 }
 
 func NewCreateStemcell(
@@ -23,14 +20,34 @@ func NewCreateStemcell(
 	return
 }
 
-func (a CreateStemcellAction) Run(imagePath string, stemcellCloudProps CreateStemcellCloudProps) (string, error) {
-	_, err := a.stemcellService.Find(stemcellCloudProps.Id)
-	if err != nil {
-		if _, ok := err.(api.CloudError); ok {
-			return "", err
-		}
-		return "", bosherr.WrapErrorf(err, "Creating stemcell")
+func (a CreateStemcellAction) Run(imagePath string, cloudProps StemcellCloudProperties) (string, error) {
+	var err error
+	var stemcell string
+
+	if cloudProps.Infrastructure != softlayerInfrastructure && cloudProps.Infrastructure != bluemixInfrastructure {
+		return "", bosherr.Errorf("Create stemcell: Invalid '%s' infrastructure", cloudProps.Infrastructure)
 	}
 
-	return StemcellCID(stemcellCloudProps.Id).String(), nil
+	switch {
+	case cloudProps.Id != 0:
+		_, err = a.stemcellService.Find(cloudProps.Id)
+		if err != nil {
+			if _, ok := err.(api.CloudError); ok {
+				return "", err
+			}
+			return "", bosherr.WrapErrorf(err, "Create stemcell from light-stemcell")
+		}
+		stemcell = StemcellCID(cloudProps.Id).String()
+	default:
+		stemcellId, err := a.stemcellService.CreateFromTarball(imagePath, cloudProps.DatacenterName, cloudProps.OsCode)
+		if err != nil {
+			if _, ok := err.(api.CloudError); ok {
+				return "", err
+			}
+			return "", bosherr.WrapErrorf(err, "Create stemcell from raw-stemcell")
+		}
+		stemcell = StemcellCID(stemcellId).String()
+	}
+
+	return stemcell, nil
 }
