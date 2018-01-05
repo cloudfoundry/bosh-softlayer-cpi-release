@@ -47,6 +47,18 @@ func SpecifyServerResps(respParas []map[string]interface{}, server *ghttp.Server
 					http.Header{"Content-Type": []string{"application/json"}},
 				),
 			)
+		} else if _, ok := respPara["auth"]; ok {
+			server.AppendHandlers(
+				ghttp.RespondWith(
+					respPara["statusCode"].(int),
+					[]byte(respData),
+					http.Header{
+						"Content-Type":  []string{"application/json"},
+						"X-Auth-Token":  []string{respPara["auth"].(string)},
+						"X-Storage-Url": []string{respPara["storage_url"].(string) + "/" + respPara["auth"].(string)},
+					},
+				),
+			)
 		} else {
 			server.AppendHandlers(
 				ghttp.CombineHandlers(

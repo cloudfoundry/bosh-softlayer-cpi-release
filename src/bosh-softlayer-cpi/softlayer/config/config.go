@@ -15,6 +15,9 @@ type Config struct {
 	Trace                bool   `json:"trace"`
 	VpsHost              string `json:"vps_host"`
 	VpsPort              int    `json:"vps_port"`
+	SwiftUsername        string `json:"swift_username"`
+	SwiftEndpoint        string `json:"swift_endpoint"`
+	// SWIFT password is also SoftLayer API key
 }
 
 func (c Config) Validate() error {

@@ -116,7 +116,7 @@ func (u *Softlayer_Ubuntu_Net) NormalizeDynamics(networkComponents datatypes.Vir
 		}
 	}
 
-	if publicDynamic == nil && networkComponents.PrimaryNetworkComponent.NetworkVlan.Id != nil {
+	if publicDynamic == nil && networkComponents.PrimaryNetworkComponent.NetworkVlan != nil && networkComponents.PrimaryNetworkComponent.NetworkVlan.Id != nil {
 		networks["generated-public"] = Network{
 			Type: "dynamic",
 			IP:   *(networkComponents.PrimaryNetworkComponent.PrimaryIpAddress),

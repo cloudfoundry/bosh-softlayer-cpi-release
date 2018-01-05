@@ -15,6 +15,7 @@ import (
 	boshuuid "github.com/cloudfoundry/bosh-utils/uuid"
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
+	"github.com/ncw/swift"
 
 	"bosh-softlayer-cpi/action"
 	"bosh-softlayer-cpi/api"
@@ -97,7 +98,13 @@ func buildDispatcher(
 			"v2", []string{"https"}), strfmt.Default).VM
 	}
 
-	repClientFactory := client.NewClientFactory(client.NewSoftLayerClientManager(softLayerClient, vps, logger))
+	//Swift Object Storage
+	var swiftClient *swift.Connection
+	if config.Cloud.Properties.SoftLayer.SwiftEndpoint != "" {
+		swiftClient = client.NewSwiftClient(config.Cloud.Properties.SoftLayer.SwiftEndpoint, config.Cloud.Properties.SoftLayer.SwiftUsername, config.Cloud.Properties.SoftLayer.ApiKey, 120, 3)
+	}
+
+	repClientFactory := client.NewClientFactory(client.NewSoftLayerClientManager(softLayerClient, vps, swiftClient, logger))
 	cli := repClientFactory.CreateClient()
 
 	actionFactory := action.NewConcreteFactory(

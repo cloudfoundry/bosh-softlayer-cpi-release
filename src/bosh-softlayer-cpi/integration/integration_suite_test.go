@@ -14,7 +14,8 @@ import (
 
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
-	datatypes "github.com/softlayer/softlayer-go/datatypes"
+	"github.com/ncw/swift"
+	"github.com/softlayer/softlayer-go/datatypes"
 
 	cfg "bosh-softlayer-cpi/config"
 	"bosh-softlayer-cpi/softlayer/client"
@@ -56,8 +57,10 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 		    "plugin": "softlayer",
 		    "properties": {
 		      "softlayer": {
-			"username": "%s",
-			"api_key": "%s"
+			  "username": "%s",
+			  "api_key": "%s",
+			  "swift_username": "%s",
+			  "swift_endpoint": "%s"
 		      },
 		      "registry": {
 			"user": "registry",
@@ -84,7 +87,7 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 		      }
 		    }
 		  }
-		}`, username, apiKey, registerPort, ts.URL)
+		}`, username, apiKey, swiftUsername, swiftEndpoint, registerPort, ts.URL)
 	config, err = cfg.NewConfigFromString(cfgContent)
 	Expect(err).To(BeNil())
 
@@ -106,7 +109,8 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 			  "arguments": ["%s", {
 			    "virtual-disk-image-id": %s,
 			    "virtual-disk-image-uuid": "%s",
-			    "datacenter-name": "%s"
+			    "datacenter-name": "%s",
+			    "infrastructure": "softlayer"
 			  }]
 			}`, stemcellFile, stemcellId, stemcellUuid, datacenter)
 
@@ -133,7 +137,13 @@ var _ = SynchronizedAfterSuite(func() {}, func() {
 
 func cleanVMs() {
 	// Initialize a compute API client ImageService
-	softlayerClient := client.NewSoftLayerClientManager(sess, vps, multiLogger)
+	//Swift Object Storage
+	var swiftClient *swift.Connection
+	if config.Cloud.Properties.SoftLayer.SwiftEndpoint != "" {
+		swiftClient = client.NewSwiftClient(config.Cloud.Properties.SoftLayer.SwiftEndpoint, config.Cloud.Properties.SoftLayer.SwiftUsername, config.Cloud.Properties.SoftLayer.ApiKey, 120, 3)
+	}
+
+	softlayerClient := client.NewSoftLayerClientManager(sess, vps, swiftClient, multiLogger)
 	accountService := softlayerClient.AccountService
 
 	// Clean up any VMs left behind from failed tests. Instances with the 'blusbosh-slcpi-integration-test' prefix will be deleted.

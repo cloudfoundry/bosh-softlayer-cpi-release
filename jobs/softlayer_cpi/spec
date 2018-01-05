@@ -32,7 +32,10 @@ properties:
     description: Port of vps server
   softlayer.vps_use_ssl:
     description: Whether CPI should use SSL to connect to the vps server
-
+  softlayer.swift_username:
+    description: User name of the SWIFT username
+  softlayer.swift_endpoint:
+    description: Endpoint of the SWIFT object service
 
   registry.username:
     description: User to access the Registry

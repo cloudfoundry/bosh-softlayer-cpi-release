@@ -35,9 +35,15 @@ type StemcellCloudProperties struct {
 	Infrastructure string `json:"infrastructure,omitempty"`
 	SourceURL      string `json:"source_url,omitempty"`
 
-	// URL of an existing image (Image.SelfLink)
-	ImageURL   string `json:"image_url,omitempty"`
-	SourceSha1 string `json:"raw_disk_sha1,omitempty"`
+	//// URL of an existing image (Image.SelfLink)
+	//ImageURL   string `json:"image_url,omitempty"`
+	//SourceSha1 string `json:"raw_disk_sha1,omitempty"`
+
+	Id             int    `json:"virtual-disk-image-id"`
+	Uuid           string `json:"virtual-disk-image-uuid"`
+
+	DatacenterName string `json:"datacenter-name"`
+	OsCode         string `json:"os-code"`
 }
 
 type VMCloudProperties struct {

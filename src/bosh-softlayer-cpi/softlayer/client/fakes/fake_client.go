@@ -137,15 +137,15 @@ type FakeClient struct {
 	upgradeInstanceConfigReturnsOnCall map[int]struct {
 		result1 error
 	}
-	UpgradeInstanceStub        func(id int, cpu int, memory int, network int, privateCPU bool, additional_diskSize int) (int, error)
+	UpgradeInstanceStub        func(id int, cpu int, memory int, network int, privateCPU bool, secondDiskSize int) (int, error)
 	upgradeInstanceMutex       sync.RWMutex
 	upgradeInstanceArgsForCall []struct {
-		id                  int
-		cpu                 int
-		memory              int
-		network             int
-		privateCPU          bool
-		additional_diskSize int
+		id             int
+		cpu            int
+		memory         int
+		network        int
+		privateCPU     bool
+		secondDiskSize int
 	}
 	upgradeInstanceReturns struct {
 		result1 int
@@ -597,6 +597,69 @@ type FakeClient struct {
 	}
 	createTicketReturnsOnCall map[int]struct {
 		result1 error
+	}
+	CreateSwiftContainerStub        func(containerName string) error
+	createSwiftContainerMutex       sync.RWMutex
+	createSwiftContainerArgsForCall []struct {
+		containerName string
+	}
+	createSwiftContainerReturns struct {
+		result1 error
+	}
+	createSwiftContainerReturnsOnCall map[int]struct {
+		result1 error
+	}
+	DeleteSwiftContainerStub        func(containerName string) error
+	deleteSwiftContainerMutex       sync.RWMutex
+	deleteSwiftContainerArgsForCall []struct {
+		containerName string
+	}
+	deleteSwiftContainerReturns struct {
+		result1 error
+	}
+	deleteSwiftContainerReturnsOnCall map[int]struct {
+		result1 error
+	}
+	UploadSwiftLargeObjectStub        func(containerName string, objectName string, objectFile string) error
+	uploadSwiftLargeObjectMutex       sync.RWMutex
+	uploadSwiftLargeObjectArgsForCall []struct {
+		containerName string
+		objectName    string
+		objectFile    string
+	}
+	uploadSwiftLargeObjectReturns struct {
+		result1 error
+	}
+	uploadSwiftLargeObjectReturnsOnCall map[int]struct {
+		result1 error
+	}
+	DeleteSwiftLargeObjectStub        func(containerName string, objectFileName string) error
+	deleteSwiftLargeObjectMutex       sync.RWMutex
+	deleteSwiftLargeObjectArgsForCall []struct {
+		containerName  string
+		objectFileName string
+	}
+	deleteSwiftLargeObjectReturns struct {
+		result1 error
+	}
+	deleteSwiftLargeObjectReturnsOnCall map[int]struct {
+		result1 error
+	}
+	CreateImageFromExternalSourceStub        func(imageName string, note string, cluster string, osCode string) (int, error)
+	createImageFromExternalSourceMutex       sync.RWMutex
+	createImageFromExternalSourceArgsForCall []struct {
+		imageName string
+		note      string
+		cluster   string
+		osCode    string
+	}
+	createImageFromExternalSourceReturns struct {
+		result1 int
+		result2 error
+	}
+	createImageFromExternalSourceReturnsOnCall map[int]struct {
+		result1 int
+		result2 error
 	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
@@ -1075,21 +1138,21 @@ func (fake *FakeClient) UpgradeInstanceConfigReturnsOnCall(i int, result1 error)
 	}{result1}
 }
 
-func (fake *FakeClient) UpgradeInstance(id int, cpu int, memory int, network int, privateCPU bool, additional_diskSize int) (int, error) {
+func (fake *FakeClient) UpgradeInstance(id int, cpu int, memory int, network int, privateCPU bool, secondDiskSize int) (int, error) {
 	fake.upgradeInstanceMutex.Lock()
 	ret, specificReturn := fake.upgradeInstanceReturnsOnCall[len(fake.upgradeInstanceArgsForCall)]
 	fake.upgradeInstanceArgsForCall = append(fake.upgradeInstanceArgsForCall, struct {
-		id                  int
-		cpu                 int
-		memory              int
-		network             int
-		privateCPU          bool
-		additional_diskSize int
-	}{id, cpu, memory, network, privateCPU, additional_diskSize})
-	fake.recordInvocation("UpgradeInstance", []interface{}{id, cpu, memory, network, privateCPU, additional_diskSize})
+		id             int
+		cpu            int
+		memory         int
+		network        int
+		privateCPU     bool
+		secondDiskSize int
+	}{id, cpu, memory, network, privateCPU, secondDiskSize})
+	fake.recordInvocation("UpgradeInstance", []interface{}{id, cpu, memory, network, privateCPU, secondDiskSize})
 	fake.upgradeInstanceMutex.Unlock()
 	if fake.UpgradeInstanceStub != nil {
-		return fake.UpgradeInstanceStub(id, cpu, memory, network, privateCPU, additional_diskSize)
+		return fake.UpgradeInstanceStub(id, cpu, memory, network, privateCPU, secondDiskSize)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
@@ -1106,7 +1169,7 @@ func (fake *FakeClient) UpgradeInstanceCallCount() int {
 func (fake *FakeClient) UpgradeInstanceArgsForCall(i int) (int, int, int, int, bool, int) {
 	fake.upgradeInstanceMutex.RLock()
 	defer fake.upgradeInstanceMutex.RUnlock()
-	return fake.upgradeInstanceArgsForCall[i].id, fake.upgradeInstanceArgsForCall[i].cpu, fake.upgradeInstanceArgsForCall[i].memory, fake.upgradeInstanceArgsForCall[i].network, fake.upgradeInstanceArgsForCall[i].privateCPU, fake.upgradeInstanceArgsForCall[i].additional_diskSize
+	return fake.upgradeInstanceArgsForCall[i].id, fake.upgradeInstanceArgsForCall[i].cpu, fake.upgradeInstanceArgsForCall[i].memory, fake.upgradeInstanceArgsForCall[i].network, fake.upgradeInstanceArgsForCall[i].privateCPU, fake.upgradeInstanceArgsForCall[i].secondDiskSize
 }
 
 func (fake *FakeClient) UpgradeInstanceReturns(result1 int, result2 error) {
@@ -2757,6 +2820,255 @@ func (fake *FakeClient) CreateTicketReturnsOnCall(i int, result1 error) {
 	}{result1}
 }
 
+func (fake *FakeClient) CreateSwiftContainer(containerName string) error {
+	fake.createSwiftContainerMutex.Lock()
+	ret, specificReturn := fake.createSwiftContainerReturnsOnCall[len(fake.createSwiftContainerArgsForCall)]
+	fake.createSwiftContainerArgsForCall = append(fake.createSwiftContainerArgsForCall, struct {
+		containerName string
+	}{containerName})
+	fake.recordInvocation("CreateSwiftContainer", []interface{}{containerName})
+	fake.createSwiftContainerMutex.Unlock()
+	if fake.CreateSwiftContainerStub != nil {
+		return fake.CreateSwiftContainerStub(containerName)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fake.createSwiftContainerReturns.result1
+}
+
+func (fake *FakeClient) CreateSwiftContainerCallCount() int {
+	fake.createSwiftContainerMutex.RLock()
+	defer fake.createSwiftContainerMutex.RUnlock()
+	return len(fake.createSwiftContainerArgsForCall)
+}
+
+func (fake *FakeClient) CreateSwiftContainerArgsForCall(i int) string {
+	fake.createSwiftContainerMutex.RLock()
+	defer fake.createSwiftContainerMutex.RUnlock()
+	return fake.createSwiftContainerArgsForCall[i].containerName
+}
+
+func (fake *FakeClient) CreateSwiftContainerReturns(result1 error) {
+	fake.CreateSwiftContainerStub = nil
+	fake.createSwiftContainerReturns = struct {
+		result1 error
+	}{result1}
+}
+
+func (fake *FakeClient) CreateSwiftContainerReturnsOnCall(i int, result1 error) {
+	fake.CreateSwiftContainerStub = nil
+	if fake.createSwiftContainerReturnsOnCall == nil {
+		fake.createSwiftContainerReturnsOnCall = make(map[int]struct {
+			result1 error
+		})
+	}
+	fake.createSwiftContainerReturnsOnCall[i] = struct {
+		result1 error
+	}{result1}
+}
+
+func (fake *FakeClient) DeleteSwiftContainer(containerName string) error {
+	fake.deleteSwiftContainerMutex.Lock()
+	ret, specificReturn := fake.deleteSwiftContainerReturnsOnCall[len(fake.deleteSwiftContainerArgsForCall)]
+	fake.deleteSwiftContainerArgsForCall = append(fake.deleteSwiftContainerArgsForCall, struct {
+		containerName string
+	}{containerName})
+	fake.recordInvocation("DeleteSwiftContainer", []interface{}{containerName})
+	fake.deleteSwiftContainerMutex.Unlock()
+	if fake.DeleteSwiftContainerStub != nil {
+		return fake.DeleteSwiftContainerStub(containerName)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fake.deleteSwiftContainerReturns.result1
+}
+
+func (fake *FakeClient) DeleteSwiftContainerCallCount() int {
+	fake.deleteSwiftContainerMutex.RLock()
+	defer fake.deleteSwiftContainerMutex.RUnlock()
+	return len(fake.deleteSwiftContainerArgsForCall)
+}
+
+func (fake *FakeClient) DeleteSwiftContainerArgsForCall(i int) string {
+	fake.deleteSwiftContainerMutex.RLock()
+	defer fake.deleteSwiftContainerMutex.RUnlock()
+	return fake.deleteSwiftContainerArgsForCall[i].containerName
+}
+
+func (fake *FakeClient) DeleteSwiftContainerReturns(result1 error) {
+	fake.DeleteSwiftContainerStub = nil
+	fake.deleteSwiftContainerReturns = struct {
+		result1 error
+	}{result1}
+}
+
+func (fake *FakeClient) DeleteSwiftContainerReturnsOnCall(i int, result1 error) {
+	fake.DeleteSwiftContainerStub = nil
+	if fake.deleteSwiftContainerReturnsOnCall == nil {
+		fake.deleteSwiftContainerReturnsOnCall = make(map[int]struct {
+			result1 error
+		})
+	}
+	fake.deleteSwiftContainerReturnsOnCall[i] = struct {
+		result1 error
+	}{result1}
+}
+
+func (fake *FakeClient) UploadSwiftLargeObject(containerName string, objectName string, objectFile string) error {
+	fake.uploadSwiftLargeObjectMutex.Lock()
+	ret, specificReturn := fake.uploadSwiftLargeObjectReturnsOnCall[len(fake.uploadSwiftLargeObjectArgsForCall)]
+	fake.uploadSwiftLargeObjectArgsForCall = append(fake.uploadSwiftLargeObjectArgsForCall, struct {
+		containerName string
+		objectName    string
+		objectFile    string
+	}{containerName, objectName, objectFile})
+	fake.recordInvocation("UploadSwiftLargeObject", []interface{}{containerName, objectName, objectFile})
+	fake.uploadSwiftLargeObjectMutex.Unlock()
+	if fake.UploadSwiftLargeObjectStub != nil {
+		return fake.UploadSwiftLargeObjectStub(containerName, objectName, objectFile)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fake.uploadSwiftLargeObjectReturns.result1
+}
+
+func (fake *FakeClient) UploadSwiftLargeObjectCallCount() int {
+	fake.uploadSwiftLargeObjectMutex.RLock()
+	defer fake.uploadSwiftLargeObjectMutex.RUnlock()
+	return len(fake.uploadSwiftLargeObjectArgsForCall)
+}
+
+func (fake *FakeClient) UploadSwiftLargeObjectArgsForCall(i int) (string, string, string) {
+	fake.uploadSwiftLargeObjectMutex.RLock()
+	defer fake.uploadSwiftLargeObjectMutex.RUnlock()
+	return fake.uploadSwiftLargeObjectArgsForCall[i].containerName, fake.uploadSwiftLargeObjectArgsForCall[i].objectName, fake.uploadSwiftLargeObjectArgsForCall[i].objectFile
+}
+
+func (fake *FakeClient) UploadSwiftLargeObjectReturns(result1 error) {
+	fake.UploadSwiftLargeObjectStub = nil
+	fake.uploadSwiftLargeObjectReturns = struct {
+		result1 error
+	}{result1}
+}
+
+func (fake *FakeClient) UploadSwiftLargeObjectReturnsOnCall(i int, result1 error) {
+	fake.UploadSwiftLargeObjectStub = nil
+	if fake.uploadSwiftLargeObjectReturnsOnCall == nil {
+		fake.uploadSwiftLargeObjectReturnsOnCall = make(map[int]struct {
+			result1 error
+		})
+	}
+	fake.uploadSwiftLargeObjectReturnsOnCall[i] = struct {
+		result1 error
+	}{result1}
+}
+
+func (fake *FakeClient) DeleteSwiftLargeObject(containerName string, objectFileName string) error {
+	fake.deleteSwiftLargeObjectMutex.Lock()
+	ret, specificReturn := fake.deleteSwiftLargeObjectReturnsOnCall[len(fake.deleteSwiftLargeObjectArgsForCall)]
+	fake.deleteSwiftLargeObjectArgsForCall = append(fake.deleteSwiftLargeObjectArgsForCall, struct {
+		containerName  string
+		objectFileName string
+	}{containerName, objectFileName})
+	fake.recordInvocation("DeleteSwiftLargeObject", []interface{}{containerName, objectFileName})
+	fake.deleteSwiftLargeObjectMutex.Unlock()
+	if fake.DeleteSwiftLargeObjectStub != nil {
+		return fake.DeleteSwiftLargeObjectStub(containerName, objectFileName)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fake.deleteSwiftLargeObjectReturns.result1
+}
+
+func (fake *FakeClient) DeleteSwiftLargeObjectCallCount() int {
+	fake.deleteSwiftLargeObjectMutex.RLock()
+	defer fake.deleteSwiftLargeObjectMutex.RUnlock()
+	return len(fake.deleteSwiftLargeObjectArgsForCall)
+}
+
+func (fake *FakeClient) DeleteSwiftLargeObjectArgsForCall(i int) (string, string) {
+	fake.deleteSwiftLargeObjectMutex.RLock()
+	defer fake.deleteSwiftLargeObjectMutex.RUnlock()
+	return fake.deleteSwiftLargeObjectArgsForCall[i].containerName, fake.deleteSwiftLargeObjectArgsForCall[i].objectFileName
+}
+
+func (fake *FakeClient) DeleteSwiftLargeObjectReturns(result1 error) {
+	fake.DeleteSwiftLargeObjectStub = nil
+	fake.deleteSwiftLargeObjectReturns = struct {
+		result1 error
+	}{result1}
+}
+
+func (fake *FakeClient) DeleteSwiftLargeObjectReturnsOnCall(i int, result1 error) {
+	fake.DeleteSwiftLargeObjectStub = nil
+	if fake.deleteSwiftLargeObjectReturnsOnCall == nil {
+		fake.deleteSwiftLargeObjectReturnsOnCall = make(map[int]struct {
+			result1 error
+		})
+	}
+	fake.deleteSwiftLargeObjectReturnsOnCall[i] = struct {
+		result1 error
+	}{result1}
+}
+
+func (fake *FakeClient) CreateImageFromExternalSource(imageName string, note string, cluster string, osCode string) (int, error) {
+	fake.createImageFromExternalSourceMutex.Lock()
+	ret, specificReturn := fake.createImageFromExternalSourceReturnsOnCall[len(fake.createImageFromExternalSourceArgsForCall)]
+	fake.createImageFromExternalSourceArgsForCall = append(fake.createImageFromExternalSourceArgsForCall, struct {
+		imageName string
+		note      string
+		cluster   string
+		osCode    string
+	}{imageName, note, cluster, osCode})
+	fake.recordInvocation("CreateImageFromExternalSource", []interface{}{imageName, note, cluster, osCode})
+	fake.createImageFromExternalSourceMutex.Unlock()
+	if fake.CreateImageFromExternalSourceStub != nil {
+		return fake.CreateImageFromExternalSourceStub(imageName, note, cluster, osCode)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	return fake.createImageFromExternalSourceReturns.result1, fake.createImageFromExternalSourceReturns.result2
+}
+
+func (fake *FakeClient) CreateImageFromExternalSourceCallCount() int {
+	fake.createImageFromExternalSourceMutex.RLock()
+	defer fake.createImageFromExternalSourceMutex.RUnlock()
+	return len(fake.createImageFromExternalSourceArgsForCall)
+}
+
+func (fake *FakeClient) CreateImageFromExternalSourceArgsForCall(i int) (string, string, string, string) {
+	fake.createImageFromExternalSourceMutex.RLock()
+	defer fake.createImageFromExternalSourceMutex.RUnlock()
+	return fake.createImageFromExternalSourceArgsForCall[i].imageName, fake.createImageFromExternalSourceArgsForCall[i].note, fake.createImageFromExternalSourceArgsForCall[i].cluster, fake.createImageFromExternalSourceArgsForCall[i].osCode
+}
+
+func (fake *FakeClient) CreateImageFromExternalSourceReturns(result1 int, result2 error) {
+	fake.CreateImageFromExternalSourceStub = nil
+	fake.createImageFromExternalSourceReturns = struct {
+		result1 int
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeClient) CreateImageFromExternalSourceReturnsOnCall(i int, result1 int, result2 error) {
+	fake.CreateImageFromExternalSourceStub = nil
+	if fake.createImageFromExternalSourceReturnsOnCall == nil {
+		fake.createImageFromExternalSourceReturnsOnCall = make(map[int]struct {
+			result1 int
+			result2 error
+		})
+	}
+	fake.createImageFromExternalSourceReturnsOnCall[i] = struct {
+		result1 int
+		result2 error
+	}{result1, result2}
+}
+
 func (fake *FakeClient) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
@@ -2842,6 +3154,16 @@ func (fake *FakeClient) Invocations() map[string][][]interface{} {
 	defer fake.deleteSnapshotMutex.RUnlock()
 	fake.createTicketMutex.RLock()
 	defer fake.createTicketMutex.RUnlock()
+	fake.createSwiftContainerMutex.RLock()
+	defer fake.createSwiftContainerMutex.RUnlock()
+	fake.deleteSwiftContainerMutex.RLock()
+	defer fake.deleteSwiftContainerMutex.RUnlock()
+	fake.uploadSwiftLargeObjectMutex.RLock()
+	defer fake.uploadSwiftLargeObjectMutex.RUnlock()
+	fake.deleteSwiftLargeObjectMutex.RLock()
+	defer fake.deleteSwiftLargeObjectMutex.RUnlock()
+	fake.createImageFromExternalSourceMutex.RLock()
+	defer fake.createImageFromExternalSourceMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}
 	for key, value := range fake.invocations {
 		copiedInvocations[key] = value
