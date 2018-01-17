@@ -96,10 +96,10 @@ var (
 	outLogger    = log.New(multiWriter, "", log.LstdFlags)
 	errLogger    = log.New(os.Stderr, "", log.LstdFlags)
 
-	cpiLogger   = cpiLog.New(boshlog.LevelDebug, "Integration", outLogger, errLogger)
-	multiLogger = api.MultiLogger{Logger: cpiLogger, LogBuff: &logBuffer}
-	uuidGen     = uuid.NewGenerator()
-	sess        *session.Session
+	cpiLogger       = cpiLog.New(boshlog.LevelDebug, "Integration", outLogger, errLogger)
+	multiLogger     = api.MultiLogger{Logger: cpiLogger, LogBuff: &logBuffer}
+	uuidGen         = uuid.NewGenerator()
+	sess            *session.Session
 	softlayerClient = &client.ClientManager{}
 )
 

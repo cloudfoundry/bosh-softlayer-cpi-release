@@ -87,6 +87,7 @@ func NewConcreteFactory(
 			"delete_snapshot": NewDeleteSnapshot(snapshotService),
 
 			// Others:
+			"info": NewInfo(),
 			"ping": NewPing(),
 
 			// Not implemented (others):

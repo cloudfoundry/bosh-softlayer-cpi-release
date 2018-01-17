@@ -199,7 +199,7 @@ var _ = Describe("VM", func() {
 		      "default": {
 				"cloud_properties": {
 				  "vlan_ids": [
-					524954
+					1292651
 				  ]
 				},
 				"dns": [
