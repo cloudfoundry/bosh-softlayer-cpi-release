@@ -205,9 +205,8 @@ func (cv CreateVM) createVirtualGuestTemplate(stemcellUuid string, cloudProps VM
 		},
 
 		// billing options
-		HourlyBillingFlag:            sl.Bool(cloudProps.HourlyBillingFlag),
-		LocalDiskFlag:                sl.Bool(cloudProps.LocalDiskFlag),
-		DedicatedAccountHostOnlyFlag: sl.Bool(cloudProps.DedicatedAccountHostOnlyFlag),
+		HourlyBillingFlag: sl.Bool(cloudProps.HourlyBillingFlag),
+		LocalDiskFlag:     sl.Bool(cloudProps.LocalDiskFlag),
 
 		// network components
 		NetworkComponents: []datatypes.Virtual_Guest_Network_Component{
@@ -232,6 +231,14 @@ func (cv CreateVM) createVirtualGuestTemplate(stemcellUuid string, cloudProps VM
 	} else {
 		virtualGuestTemplate.StartCpus = sl.Int(cloudProps.Cpu)
 		virtualGuestTemplate.MaxMemory = sl.Int(cloudProps.Memory)
+	}
+
+	if cloudProps.DedicatedAccountHostOnlyFlag {
+		virtualGuestTemplate.DedicatedAccountHostOnlyFlag = sl.Bool(cloudProps.DedicatedAccountHostOnlyFlag)
+	} else if cloudProps.DedicatedHostId != 0 {
+		virtualGuestTemplate.DedicatedHost = &datatypes.Virtual_DedicatedHost{
+			Id: sl.Int(cloudProps.DedicatedHostId),
+		}
 	}
 
 	if cloudProps.SshKey != 0 {

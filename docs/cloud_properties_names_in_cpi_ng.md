@@ -134,7 +134,8 @@ Vm_types schema:
       - ephemeral_disk_size** [Integer, optional]: Ephemeral disk size(in Gb) the CPI will use when creating the instance. Example: `100`.
       - hourly_billing_flag** [Boolean, optional]: If the instance is hourly billing. Default is `false`.
       - local_disk_flag** [Boolean, optional]: If the instance has at least one disk which is local to the host it runs on. Default is `false`.
-      - dedicated_account_host_only_flag** [Boolean, optional]: If the instance is to run on hosts that only have guests from the same account. Default is `false`.
+      - dedicated_account_host_only_flag** [Boolean, optional]: If the instance is to run on hosts that only have guests from the same account. Conflicts with `dedicated_host_id`. Default is `false`.
+      - dedicated_host_id** [Integer, optional]: Specifies dedicated host for the instance by its id. Conflicts with `dedicated_acc_host_only_flag`. Default is '0'.
       - deployed_by_boshcli** [Boolean, optional]: If the instance is deployed by bosh-cli. Default is `false`.
 
 sample manifest of current softlayer cpi:
