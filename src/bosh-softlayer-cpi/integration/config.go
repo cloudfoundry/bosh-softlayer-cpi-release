@@ -33,8 +33,6 @@ var (
 	in, out, logBuffer bytes.Buffer
 	username           = envRequired("SL_USERNAME")
 	apiKey             = envRequired("SL_API_KEY")
-	swiftUsername      = envRequired("SWIFT_USERNAME")
-	swiftEndpoint      = envRequired("SWIFT_ENDPOINT")
 
 	// Configurable defaults
 	stemcellId   = envOrDefault("STEMCELL_ID", "1633205") // light-bosh-stemcell-3363.24.3-softlayer-xen-ubuntu-trusty-go_agent
