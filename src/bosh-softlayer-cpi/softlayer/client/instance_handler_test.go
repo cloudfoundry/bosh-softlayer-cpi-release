@@ -11,17 +11,15 @@ import (
 	"time"
 
 	boshlogger "github.com/cloudfoundry/bosh-utils/logger"
-	httptransport "github.com/go-openapi/runtime/client"
-	"github.com/go-openapi/strfmt"
+	"github.com/ncw/swift"
 	"github.com/onsi/gomega/ghttp"
 	"github.com/softlayer/softlayer-go/datatypes"
 	"github.com/softlayer/softlayer-go/session"
 	"github.com/softlayer/softlayer-go/sl"
 
-	api "bosh-softlayer-cpi/api"
+	"bosh-softlayer-cpi/api"
 	cpiLog "bosh-softlayer-cpi/logger"
 	slClient "bosh-softlayer-cpi/softlayer/client"
-	vpsClient "bosh-softlayer-cpi/softlayer/vps_service/client"
 	vpsVm "bosh-softlayer-cpi/softlayer/vps_service/client/vm"
 	"bosh-softlayer-cpi/test_helpers"
 )
@@ -35,8 +33,8 @@ var _ = Describe("InstanceHandler", func() {
 		multiLogger api.MultiLogger
 
 		server      *ghttp.Server
-		vpsEndPoint string
 		vps         *vpsVm.Client
+		swiftClient *swift.Connection
 
 		transportHandler *test_helpers.FakeTransportHandler
 		sess             *session.Session
@@ -55,23 +53,21 @@ var _ = Describe("InstanceHandler", func() {
 		respParas  []map[string]interface{}
 	)
 	BeforeEach(func() {
-		// the fake server to setup VPS Server
 		server = ghttp.NewServer()
-		vpsEndPoint = server.URL()
-		vps = vpsClient.New(httptransport.New(vpsEndPoint,
-			"v2", []string{"http"}), strfmt.Default).VM
-
 		transportHandler = &test_helpers.FakeTransportHandler{
 			FakeServer:           server,
 			SoftlayerAPIEndpoint: server.URL(),
 			MaxRetries:           3,
 		}
 
+		vps = &vpsVm.Client{}
+		swiftClient = &swift.Connection{}
+
 		nanos := time.Now().Nanosecond()
 		logger = cpiLog.NewLogger(boshlogger.LevelDebug, strconv.Itoa(nanos))
 		multiLogger = api.MultiLogger{Logger: logger, LogBuff: &errOutLog}
 		sess = test_helpers.NewFakeSoftlayerSession(transportHandler)
-		cli = slClient.NewSoftLayerClientManager(sess, vps, logger)
+		cli = slClient.NewSoftLayerClientManager(sess, vps, swiftClient, logger)
 
 		vgID = 25804753
 		vlanID = 1262125

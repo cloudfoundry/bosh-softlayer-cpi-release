@@ -1,9 +1,8 @@
----
-golang_1.7.1/go1.7.1.linux-amd64.tar.gz:
-  object_id: 48ee2c2c-c7eb-4c31-ab67-c59ad4a4a478
-  sha: 919ab01305ada0078a9fdf8a12bb56fb0b8a1444
-  size: 81618401
-golang_1.7.1/go1.7.1.darwin-amd64.tar.gz:
-  object_id: f3007357-2404-4749-a83f-7273c208536a
-  sha: f33d5bacf2c35fe59ef76e8fc0d87d27ba0432a3
-  size: 81509752
+golang/go1.8.5.darwin-amd64.tar.gz:
+  size: 97396903
+  object_id: bea7897b-3554-4e92-7012-70a66c351081
+  sha: 16f4b97fe7232525ab1c2ee5ce595c56014a65b2
+golang/go1.8.5.linux-amd64.tar.gz:
+  size: 99077377
+  object_id: 201c94b8-019c-4a73-79d7-f3f097d7406f
+  sha: 71d2e29b7ea053e411ed4ba6200db967481ddead

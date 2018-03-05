@@ -43,7 +43,9 @@ func init() {
 // is provided.
 const DefaultEndpoint = "https://api.softlayer.com/rest/v3"
 
-// TransportHandler
+var retryableErrorCodes = []string{"SoftLayer_Exception_WebService_RateLimitExceeded"}
+
+// TransportHandler interface for the protocol-specific handling of API requests.
 type TransportHandler interface {
 	// DoRequest is the protocol-specific handler for making API requests.
 	//
@@ -114,15 +116,15 @@ type Session struct {
 	// will result in an error.
 	Timeout time.Duration
 
-	// The user agent to send with each API request
-	// User shouldn't be able to change or set the base user agent
-	userAgent string
-
 	// Retries is the number of times to retry a connection that failed due to a timeout.
 	Retries int
 
 	// RetryWait minimum wait time to retry a request
 	RetryWait time.Duration
+
+	// userAgent is the user agent to send with each API request
+	// User shouldn't be able to change or set the base user agent
+	userAgent string
 }
 
 func init() {
@@ -238,21 +240,6 @@ func (r *Session) DoRequest(service string, method string, args []interface{}, o
 	return r.TransportHandler.DoRequest(r, service, method, args, options, pResult)
 }
 
-// AppendUserAgent allows higher level application to identify themselves by appending to the useragent string
-func (r *Session) AppendUserAgent(agent string) {
-	if r.userAgent == "" {
-		r.userAgent = getDefaultUserAgent()
-	}
-	if agent != "" {
-		r.userAgent += " " + agent
-	}
-}
-
-// ResetUserAgent resets the current user agent to the default value
-func (r *Session) ResetUserAgent() {
-	r.userAgent = getDefaultUserAgent()
-}
-
 // SetTimeout creates a copy of the session and sets the passed timeout into it
 // before returning it.
 func (r *Session) SetTimeout(timeout time.Duration) *Session {
@@ -281,6 +268,23 @@ func (r *Session) SetRetryWait(retryWait time.Duration) *Session {
 	s.RetryWait = retryWait
 
 	return &s
+}
+
+// AppendUserAgent allows higher level application to identify themselves by
+// appending to the useragent string
+func (r *Session) AppendUserAgent(agent string) {
+	if r.userAgent == "" {
+		r.userAgent = getDefaultUserAgent()
+	}
+
+	if agent != "" {
+		r.userAgent += " " + agent
+	}
+}
+
+// ResetUserAgent resets the current user agent to the default value
+func (r *Session) ResetUserAgent() {
+	r.userAgent = getDefaultUserAgent()
 }
 
 func envFallback(keyName string, value *string) {
@@ -322,6 +326,21 @@ func isTimeout(err error) bool {
 	}
 
 	return false
+}
+
+func hasRetryableCode(err error) bool {
+	for _, code := range retryableErrorCodes {
+		if slErr, ok := err.(sl.Error); ok {
+			if slErr.Exception == code {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func isRetryable(err error) bool {
+	return isTimeout(err) || hasRetryableCode(err)
 }
 
 func getDefaultUserAgent() string {

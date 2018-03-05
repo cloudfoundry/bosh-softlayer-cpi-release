@@ -11,6 +11,7 @@ import (
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	"github.com/cloudfoundry/bosh-utils/uuid"
+	"github.com/ncw/swift"
 	"github.com/softlayer/softlayer-go/session"
 
 	"bosh-softlayer-cpi/action"
@@ -34,11 +35,14 @@ var (
 	apiKey             = envRequired("SL_API_KEY")
 
 	// Configurable defaults
-	stemcellId   = envOrDefault("STEMCELL_ID", "1633205")
+	stemcellId   = envOrDefault("STEMCELL_ID", "1633205") // light-bosh-stemcell-3363.24.3-softlayer-xen-ubuntu-trusty-go_agent
 	stemcellFile = envOrDefault("STEMCELL_FILE", "")
 	stemcellUuid = envOrDefault("STEMCELL_UUID", "ea065435-f7ec-4f1c-8f3f-2987086b1427")
 	datacenter   = envOrDefault("DATACENTER", "lon02")
 	ipAddrs      = strings.Split(envOrDefault("PRIVATE_IP", "192.168.100.102,192.168.100.103,192.168.100.104"), ",")
+
+	swiftUsername      = envOrDefault("SWIFT_USERNAME", "")
+	swiftEndpoint      = envOrDefault("SWIFT_ENDPOINT", "")
 
 	ts           *httptest.Server
 	config       cfg.Config
@@ -53,42 +57,7 @@ var (
 	retries      = 2
 	retryTimeout = 60
 
-	cfgContent = fmt.Sprintf(
-		`{
-		  "cloud": {
-		    "plugin": "softlayer",
-		    "properties": {
-		      "softlayer": {
-			    "username": "%s",
-			    "api_key": "%s"
-		      },
-		      "registry": {
-			    "user": "registry",
-			    "password": "1330c82d-4bc4-4544-4a90-c2c78fa66431",
-			    "address": "127.0.0.1",
-			    "http": {
-			      "port": 8000,
-			      "user": "registry",
-			      "password": "1330c82d-4bc4-4544-4a90-c2c78fa66431"
-			    },
-			    "endpoint": "http://registry:1330c82d-4bc4-4544-4a90-c2c78fa66431@127.0.0.1:8000"
-		      },
-		      "agent": {
-			    "ntp": [
-			    ],
-			    "blobstore": {
-			      "provider": "dav",
-			      "options": {
-			        "endpoint": "http://127.0.0.1:25250",
-			        "user": "agent",
-			        "password": "agent"
-			      }
-			    },
-			    "mbus": "nats://nats:nats@127.0.0.1:4222"
-		      }
-		    }
-		  }
-		}`, username, apiKey)
+	cfgContent = ""
 
 	// Stuff of softlayer client
 	multiWriter  = io.MultiWriter(os.Stderr, bufio.NewWriter(&logBuffer))
@@ -96,17 +65,24 @@ var (
 	outLogger    = log.New(multiWriter, "", log.LstdFlags)
 	errLogger    = log.New(os.Stderr, "", log.LstdFlags)
 
-	cpiLogger   = cpiLog.New(boshlog.LevelDebug, "Integration", outLogger, errLogger)
-	multiLogger = api.MultiLogger{Logger: cpiLogger, LogBuff: &logBuffer}
-	uuidGen     = uuid.NewGenerator()
-	sess        *session.Session
+	cpiLogger       = cpiLog.New(boshlog.LevelDebug, "Integration", outLogger, errLogger)
+	multiLogger     = api.MultiLogger{Logger: cpiLogger, LogBuff: &logBuffer}
+	uuidGen         = uuid.NewGenerator()
+	sess            *session.Session
 	softlayerClient = &client.ClientManager{}
 )
 
 func execCPI(request string) (disp.Response, error) {
 	var err error
 
-	softlayerClient = client.NewSoftLayerClientManager(sess, vps, multiLogger)
+	//Swift Object Storage
+	var swiftClient *swift.Connection
+
+	if config.Cloud.Properties.SoftLayer.SwiftEndpoint != "" {
+		swiftClient = client.NewSwiftClient(config.Cloud.Properties.SoftLayer.SwiftEndpoint, config.Cloud.Properties.SoftLayer.SwiftUsername, config.Cloud.Properties.SoftLayer.ApiKey, 120, 3)
+	}
+
+	softlayerClient = client.NewSoftLayerClientManager(sess, vps, swiftClient, multiLogger)
 	actionFactory := action.NewConcreteFactory(
 		softlayerClient,
 		uuidGen,

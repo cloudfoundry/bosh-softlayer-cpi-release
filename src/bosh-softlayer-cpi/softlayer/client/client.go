@@ -2,7 +2,9 @@ package client
 
 import (
 	"fmt"
+	"io"
 	"math"
+	"os"
 	"sort"
 	"strconv"
 	"strings"
@@ -10,6 +12,7 @@ import (
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	"github.com/go-openapi/strfmt"
+	"github.com/ncw/swift"
 	"github.com/softlayer/softlayer-go/datatypes"
 	"github.com/softlayer/softlayer-go/filter"
 	"github.com/softlayer/softlayer-go/services"
@@ -86,7 +89,7 @@ func (factory *clientFactory) CreateClient() Client {
 	return factory.slClient
 }
 
-func NewSoftLayerClientManager(session *session.Session, vps *vpsVm.Client, logger logger.Logger) *ClientManager {
+func NewSoftLayerClientManager(session *session.Session, vps *vpsVm.Client, swfitClient *swift.Connection, logger logger.Logger) *ClientManager {
 	return &ClientManager{
 		services.GetVirtualGuestService(session),
 		services.GetAccountService(session),
@@ -103,6 +106,7 @@ func NewSoftLayerClientManager(session *session.Session, vps *vpsVm.Client, logg
 		services.GetTicketService(session),
 		services.GetTicketSubjectService(session),
 		vps,
+		swfitClient,
 		logger,
 	}
 }
@@ -153,6 +157,13 @@ type Client interface {
 	DeleteSnapshot(snapshotId int) error
 
 	CreateTicket(ticketSubject *string, ticketTitle *string, contents *string, attachmentId *int, attachmentType *string) error
+
+	CreateSwiftContainer(containerName string) error
+	DeleteSwiftContainer(containerName string) error
+	UploadSwiftLargeObject(containerName string, objectName string, objectFile string) error
+	DeleteSwiftLargeObject(containerName string, objectFileName string) error
+
+	CreateImageFromExternalSource(imageName string, note string, cluster string, osCode string) (int, error)
 }
 
 type ClientManager struct {
@@ -171,6 +182,7 @@ type ClientManager struct {
 	TicketService         services.Ticket
 	TicketSubjectSerivce  services.Ticket_Subject
 	vpsService            *vpsVm.Client
+	swfitClient           *swift.Connection
 	logger                logger.Logger
 }
 
@@ -1741,6 +1753,143 @@ func (c *ClientManager) SetInstanceMetadata(id int, userData *string) (bool, err
 	}
 
 	return true, nil
+}
+
+func (c *ClientManager) CreateSwiftContainer(containerName string) error {
+	c.logger.Debug(softlayerClientLogTag, "Create a Swift container name '%s'", containerName)
+
+	if c.swfitClient == nil {
+		return bosherr.Error("Failed to connect the Swift server due to empty swift client")
+	}
+
+	err := c.swfitClient.ContainerCreate(containerName, nil)
+	if err != nil {
+		return bosherr.WrapError(err, "Create Swift container")
+	}
+
+	return nil
+}
+
+func (c *ClientManager) DeleteSwiftContainer(containerName string) error {
+	c.logger.Debug(softlayerClientLogTag, "Delete a Swift container '%s'", containerName)
+
+	if c.swfitClient == nil {
+		return bosherr.Error("Failed to connect the Swift server due to empty swift client")
+	}
+
+	err := c.swfitClient.ContainerDelete(containerName)
+	if err != nil {
+		return bosherr.WrapError(err, "Delete Swift container")
+	}
+
+	return nil
+}
+
+func (c *ClientManager) UploadSwiftLargeObject(containerName string, objectName string, objectFile string) error {
+	var flConcurrency int   // Concurrency of transfers
+	var flPartSize int64    // Initial size of concurrent parts, in bytes
+	var flExpireAfter int64 // Number of seconds to expire document after
+
+	flConcurrency = 10
+	flPartSize = 20971520
+	flExpireAfter = 86400 // One day
+
+	if c.swfitClient == nil {
+		return bosherr.Error("Failed to connect the Swift server due to empty swift client")
+	}
+
+	imageFile, err := os.Open(objectFile)
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Open stemcell image file")
+	}
+	defer imageFile.Close()
+
+	c.logger.Debug(softlayerClientLogTag, "Upload object '%s'", containerName+"/"+objectName)
+
+	largeObject, err := NewLargeObject(c.swfitClient, containerName+"/"+objectName, flConcurrency, flPartSize, flExpireAfter, c.logger)
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Initial object uploader")
+	}
+	if _, err = io.Copy(largeObject, imageFile); err != nil {
+		return bosherr.WrapErrorf(err, "Copy stemcell image file")
+	}
+
+	if err = largeObject.Close(); err != nil {
+		return bosherr.WrapErrorf(err, "Close writer of uploader")
+	}
+
+	return nil
+}
+
+func (c *ClientManager) DeleteSwiftLargeObject(containerName string, objectFileName string) error {
+	c.logger.Debug(softlayerClientLogTag, "Delete a Swift large object '%s/%s'", containerName, objectFileName)
+
+	if c.swfitClient == nil {
+		return bosherr.Error("Failed to connect the Swift server due to empty swift client")
+	}
+
+	err := c.swfitClient.LargeObjectDelete(containerName, objectFileName)
+	if err != nil {
+		return bosherr.WrapError(err, "Delete Swift large object")
+	}
+
+	return nil
+}
+
+func (c *ClientManager) CreateImageFromExternalSource(imageName string, note string, cluster string, osCode string) (int, error) {
+	accountName := strings.Split(c.swfitClient.UserName, ":")[0]
+	if len(accountName) <= 0 {
+		return 0, bosherr.Error("There is a problem with string separator: ':'. That is used to get swift account of swift username(e.g. 'SLOS1234-1' in 'SLOS1234-1:SL1234')")
+	}
+
+	//uri := "swift://${OBJ_STORAGE_ACC_NAME}@${SWIFT_CLUSTER}/${SWIFT_CONTAINER}/bosh-stemcell-${STEMCELL_VERSION}-softlayer.vhd"
+	uri := fmt.Sprintf("swift://%s@%s/%s/%s.vhd", accountName, cluster, imageName, imageName)
+	configuration := &datatypes.Container_Virtual_Guest_Block_Device_Template_Configuration{
+		Name: sl.String(imageName),
+		Note: sl.String(note),
+		OperatingSystemReferenceCode: sl.String(osCode),
+		Uri: sl.String(uri),
+	}
+
+	vgbdtgObject, err := c.ImageService.CreateFromExternalSource(configuration)
+	if err != nil {
+		return 0, bosherr.WrapErrorf(err, "Create image template from external source")
+	}
+
+	// Set image boot mode
+	until := time.Now().Add(time.Duration(20) * time.Second)
+	err = c.setImageBootModeAsHVM(*vgbdtgObject.Id, until)
+	if err != nil {
+		return 0, bosherr.WrapErrorf(err, "Set boot mode of image template")
+	}
+
+	return *vgbdtgObject.Id, nil
+}
+
+func (c *ClientManager) setImageBootModeAsHVM(id int, until time.Time) error {
+	for {
+		result, err := c.ImageService.Id(id).SetBootMode(sl.String("HVM"))
+		if err != nil {
+			if apiErr, ok := err.(sl.Error); ok {
+				if strings.Contains(apiErr.Message, "Unable to find the primary block device") {
+					continue
+				}
+				return bosherr.WrapErrorf(err, "Set boot mode as 'HVM'")
+			}
+
+		}
+		if result == true {
+			return nil
+		}
+
+		now := time.Now()
+		if now.After(until) {
+			return bosherr.Errorf("Set boot mode on image with id %d Time Out!", id)
+		}
+
+		min := math.Min(float64(10.0), float64(until.Sub(now)))
+		time.Sleep(time.Duration(min) * time.Second)
+	}
 }
 
 func (c *ClientManager) selectMaximunIopsItemPriceIdOnSize(size int) (datatypes.Product_Item_Price, error) {

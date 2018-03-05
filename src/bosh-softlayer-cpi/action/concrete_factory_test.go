@@ -79,6 +79,7 @@ var _ = Describe("ConcreteFactory", func() {
 
 		imageService = stemcell.NewSoftlayerStemcellService(
 			softlayerClient,
+			uuidGen,
 			logger,
 		)
 
@@ -192,6 +193,12 @@ var _ = Describe("ConcreteFactory", func() {
 		action, err := factory.Create("set_disk_metadata")
 		Expect(err).ToNot(HaveOccurred())
 		Expect(action).To(Equal(NewSetDiskMetadata(diskService)))
+	})
+
+	It("info", func() {
+		action, err := factory.Create("info")
+		Expect(err).ToNot(HaveOccurred())
+		Expect(action).To(Equal(NewInfo()))
 	})
 
 	It("ping", func() {
