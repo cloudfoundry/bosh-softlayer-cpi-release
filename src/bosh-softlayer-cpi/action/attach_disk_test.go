@@ -66,7 +66,7 @@ var _ = Describe("AttachDisk", func() {
 				nil,
 			)
 			vmService.AttachDiskReturns(
-				[]byte(`{"initiator_name":"iqn.yyyy-mm.fake-domain:fake-username","target":"10.1.22.170","username":"fake-username","password":"fake-password" }`),
+				[]byte(`{"id":"25667635","initiator_name":"iqn.yyyy-mm.fake-domain:fake-username","target":"10.1.22.170","username":"fake-username","password":"fake-password" }`),
 				nil,
 			)
 		})
