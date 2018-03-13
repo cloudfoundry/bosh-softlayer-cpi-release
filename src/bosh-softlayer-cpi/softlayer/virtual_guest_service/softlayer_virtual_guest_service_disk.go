@@ -63,7 +63,7 @@ func (vg SoftlayerVirtualGuestService) AttachDisk(id int, diskID int) ([]byte, e
 	username := *credential.Credential.Username
 	password := *credential.Credential.Password
 
-	return []byte(fmt.Sprintf(`{"id":"%d","initiator_name":"%s","target":"%s","username":"%s","password":"%s" }`,
+	return []byte(fmt.Sprintf(`{"id":"%d","iscsi_settings":{"initiator_name":"%s","target":"%s","username":"%s","password":"%s"}}`,
 		diskID,
 		initiatorName,
 		*(volume.ServiceResourceBackendIpAddress),

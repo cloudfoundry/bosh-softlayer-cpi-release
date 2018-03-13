@@ -127,7 +127,7 @@ var _ = Describe("Virtual Guest Service", func() {
 				Expect(cli.AuthorizeHostToVolumeCallCount()).To(Equal(1))
 				Expect(cli.GetAllowedHostCredentialCallCount()).To(Equal(1))
 				Expect(string(targetInfo)).To(BeEquivalentTo(fmt.Sprintf(
-					`{"id":"%d","initiator_name":"%s","target":"%s","username":"%s","password":"%s" }`,
+					`{"id":"%d","iscsi_settings":{"initiator_name":"%s","target":"%s","username":"%s","password":"%s"}}`,
 					diskID,
 					fakeStorageName,
 					fakeIpAddrs,

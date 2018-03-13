@@ -63,6 +63,10 @@ type PersistentSettings struct {
 	ID string `json:"id"`
 
 	// For iscsi setup info
+	ISCSISettings ISCSISettings `json:"iscsi_settings"`
+}
+
+type ISCSISettings struct {
 	InitiatorName string `json:"initiator_name"`
 	Target        string `json:"target"`
 	Username      string `json:"username"`

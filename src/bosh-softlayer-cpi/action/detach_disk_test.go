@@ -44,10 +44,12 @@ var _ = Describe("DetachDisk", func() {
 					Persistent: map[string]registry.PersistentSettings{
 						"22345678": {
 							ID:            "22345678",
-							InitiatorName: "iqn.yyyy-mm.fake-domain:fake-username",
-							Target:        "10.1.22.170",
-							Username:      "fake-username",
-							Password:      "fake-password",
+							ISCSISettings: registry.ISCSISettings{
+								InitiatorName: "fake-initiator-name",
+								Username:      "fake-username",
+								Password:      "fake-password",
+								Target:        "fake-target",
+							},
 						},
 					},
 				},
@@ -111,17 +113,21 @@ var _ = Describe("DetachDisk", func() {
 						Persistent: map[string]registry.PersistentSettings{
 							"22345678": {
 								ID:            "22345678",
-								InitiatorName: "iqn.yyyy-mm.fake-domain:fake-username",
-								Target:        "10.1.22.170",
-								Username:      "fake-username",
-								Password:      "fake-password",
+								ISCSISettings: registry.ISCSISettings{
+									InitiatorName: "fake-initiator-name",
+									Username:      "fake-username",
+									Password:      "fake-password",
+									Target:        "fake-target",
+								},
 							},
 							"32345678": {
 								ID:            "32345678",
-								InitiatorName: "iqn.yyyy-mm.fake-domain:fake-username",
-								Target:        "10.1.22.100",
-								Username:      "fake-username",
-								Password:      "fake-password",
+								ISCSISettings: registry.ISCSISettings{
+									InitiatorName: "fake-initiator-name",
+									Username:      "fake-username",
+									Password:      "fake-password",
+									Target:        "fake-target",
+								},
 							},
 						},
 					},
@@ -132,10 +138,12 @@ var _ = Describe("DetachDisk", func() {
 						Persistent: map[string]registry.PersistentSettings{
 							"32345678": {
 								ID:            "32345678",
-								InitiatorName: "iqn.yyyy-mm.fake-domain:fake-username",
-								Target:        "10.1.22.100",
-								Username:      "fake-username",
-								Password:      "fake-password",
+								ISCSISettings: registry.ISCSISettings{
+									InitiatorName: "fake-initiator-name",
+									Username:      "fake-username",
+									Password:      "fake-password",
+									Target:        "fake-target",
+								},
 							},
 						},
 					},
