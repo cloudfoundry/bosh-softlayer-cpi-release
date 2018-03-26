@@ -787,7 +787,6 @@ func (c *ClientManager) UpgradeInstance(id int, cpu int, memory int, network int
 		prices = append(prices, *diskItemPrice)
 	}
 
-	fmt.Println()
 	if len(prices) == 0 {
 		return 0, bosherr.Error("Unable to find price for upgrade")
 	}
