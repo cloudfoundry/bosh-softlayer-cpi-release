@@ -52,10 +52,10 @@ func (vg SoftlayerVirtualGuestService) extractTagsFromVMMetadata(vmMetadata Meta
 		if tagName == "name" {
 			continue
 		}
-		tagStringBuffer.WriteString(tagName + ": " + tagValue.(string))
-		tagStringBuffer.WriteString(", ")
+		tagStringBuffer.WriteString(tagName + ":" + tagValue.(string))
+		tagStringBuffer.WriteString(",")
 	}
-	tagStringBuffer.Truncate(tagStringBuffer.Len() - 2)
+	tagStringBuffer.Truncate(tagStringBuffer.Len() - 1)
 
 	return tagStringBuffer.String(), nil
 }

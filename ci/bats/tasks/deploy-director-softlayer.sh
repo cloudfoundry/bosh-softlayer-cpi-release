@@ -31,10 +31,11 @@ cat > cpi-replace.yml <<EOF
 EOF
 
 echo -e "\n\033[32m[INFO] Generating manifest director.yml.\033[0m"
+powerdns_yml_path=$(find ${pwd} -name powerdns.yml | head -n 1)
 bosh-cli interpolate bosh-deployment/bosh.yml \
   -o bosh-deployment/$BAT_INFRASTRUCTURE/cpi.yml \
   -o ./cpi-replace.yml \
-  -o bosh-deployment/powerdns.yml \
+  -o ${powerdns_yml_path} \
   -o bosh-deployment/jumpbox-user.yml \
   -o bosh-cpi-release/ci/bats/ops/remove-health-monitor.yml \
   -v dns_recursor_ip=8.8.8.8 \

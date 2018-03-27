@@ -631,6 +631,10 @@ var _ = Describe("CreateVM", func() {
 			})
 
 			It("creates the vm and create ssh key", func() {
+				vmService.CreateSshKeyReturns(
+					1234567,
+					nil,
+				)
 				vmCID, err = createVM.Run(agentID, stemcellCID, cloudProps, networks, disks, env)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(imageService.FindCallCount()).To(Equal(1))
