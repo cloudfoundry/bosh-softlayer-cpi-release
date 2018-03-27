@@ -28,4 +28,7 @@ pushd bosh-cpi-release
   bosh-cli create-release --name $cpi_release_name --version $semver --tarball $tarball_name --force
 popd
 
+checksum="$(sha1sum "./bosh-cpi-release/$tarball_name" | awk '{print $1}')"
+echo "$tarball_name sha1=$checksum"
+
 mv bosh-cpi-release/$tarball_name candidate/
