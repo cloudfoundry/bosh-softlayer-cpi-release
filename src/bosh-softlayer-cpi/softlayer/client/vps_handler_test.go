@@ -92,9 +92,9 @@ var _ = Describe("InstanceHandler", func() {
 		stemcellID = 12345678
 
 		vgTemplate = &datatypes.Virtual_Guest{
-			Domain:                       sl.String("wilma.org"),
-			Hostname:                     sl.String("wilma2"),
-			FullyQualifiedDomainName:     sl.String("wilma2.wilma.org"),
+			Domain:                   sl.String("wilma.org"),
+			Hostname:                 sl.String("wilma2"),
+			FullyQualifiedDomainName: sl.String("wilma2.wilma.org"),
 			MaxCpu:                       sl.Int(2),
 			StartCpus:                    sl.Int(2),
 			MaxMemory:                    sl.Int(2048),

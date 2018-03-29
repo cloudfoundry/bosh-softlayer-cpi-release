@@ -565,53 +565,53 @@ var _ = Describe("VM", func() {
 		Expect(*virtualGuest.HourlyBillingFlag).To(BeTrue())
 	})
 
-	//It("creates a VM on an dedicated host manually", func() {
-	//	var vmCID string
+	// It("creates a VM on an dedicated host manually", func() {
+	// 	var vmCID string
 	//
-	//	request := fmt.Sprintf(`{
-	//	  "method": "create_vm",
-	//	  "arguments": [
-	//	    "45632666-9fb1-422a-af35-2ab6102c5c1b",
-	//	    "%v",
-	//	    {
-	//	      "hostname_prefix": "bluebosh-slcpi-integration-test",
-	//	      "domain": "softlayer.com",
-	//	      "cpu": 1,
-	//	      "memory": 1024,
-	//	      "max_network_speed": 100,
-	//	      "ephemeral_disk_size": 20,
-	//	      "hourly_billing_flag": true,
-	//	      "local_disk_flag": false,
-	//	      "dedicated_account_host_only_flag": false,
-	//	      "datacenter": "lon02",
-	//	      "dedicated_host_id": ((host_id))
-	//	    },
-	//	    {
-	//	      "dynamic": {
-	//	        "type": "dynamic",
-	//	        "dns": [
-	//		      "8.8.8.8"
-	//	        ],
-	//	        "default": [
-	//	          "dns",
-	//	          "gateway"
-	//	        ],
-	//	        "cloud_properties": {
-	//	          "vlan_ids": [((vlan_could_reach_host_router))]
-	//	        }
-	//	      }
-	//	    },
-	//	    null,
-	//	    {}
-	//	  ]
-	//	}`, existingStemcellId)
-	//	vmCID = assertSucceedsWithResult(request).(string)
+	// 	request := fmt.Sprintf(`{
+	// 	  "method": "create_vm",
+	// 	  "arguments": [
+	// 	    "45632666-9fb1-422a-af35-2ab6102c5c1b",
+	// 	    "%v",
+	// 	    {
+	// 	      "hostname_prefix": "bluebosh-slcpi-integration-test",
+	// 	      "domain": "softlayer.com",
+	// 	      "cpu": 1,
+	// 	      "memory": 1024,
+	// 	      "max_network_speed": 100,
+	// 	      "ephemeral_disk_size": 20,
+	// 	      "hourly_billing_flag": true,
+	// 	      "local_disk_flag": false,
+	// 	      "dedicated_account_host_only_flag": false,
+	// 	      "datacenter": "lon02",
+	// 	      "dedicated_host_id": ((host_id))
+	// 	    },
+	// 	    {
+	// 	      "dynamic": {
+	// 	        "type": "dynamic",
+	// 	        "dns": [
+	// 		      "8.8.8.8"
+	// 	        ],
+	// 	        "default": [
+	// 	          "dns",
+	// 	          "gateway"
+	// 	        ],
+	// 	        "cloud_properties": {
+	// 	          "vlan_ids": [((vlan_could_reach_host_router))]
+	// 	        }
+	// 	      }
+	// 	    },
+	// 	    null,
+	// 	    {}
+	// 	  ]
+	// 	}`, existingStemcellId)
+	// 	vmCID = assertSucceedsWithResult(request).(string)
 	//
-	//	By("deleting the VM")
-	//	request = fmt.Sprintf(`{
-	//	  "method": "delete_vm",
-	//	  "arguments": ["%v"]
-	//	}`, vmCID)
-	//	assertSucceeds(request)
-	//})
+	// 	By("deleting the VM")
+	// 	request = fmt.Sprintf(`{
+	// 	  "method": "delete_vm",
+	// 	  "arguments": ["%v"]
+	// 	}`, vmCID)
+	// 	assertSucceeds(request)
+	// })
 })

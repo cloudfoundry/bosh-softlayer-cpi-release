@@ -9,7 +9,7 @@ import (
 
 type NetworkCloudProperties struct {
 	VlanID              int  `json:"vlanId"`
-	SubnetID            int  `json:"vlanId"`
+	SubnetID            int  `json:"subnetId"`
 	SourcePolicyRouting bool `json:"source_policy_routing,omitempty"`
 }
 

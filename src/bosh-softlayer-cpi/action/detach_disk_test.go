@@ -43,7 +43,7 @@ var _ = Describe("DetachDisk", func() {
 				Disks: registry.DisksSettings{
 					Persistent: map[string]registry.PersistentSettings{
 						"22345678": {
-							ID:            "22345678",
+							ID: "22345678",
 							ISCSISettings: registry.ISCSISettings{
 								InitiatorName: "fake-initiator-name",
 								Username:      "fake-username",
@@ -112,7 +112,7 @@ var _ = Describe("DetachDisk", func() {
 					Disks: registry.DisksSettings{
 						Persistent: map[string]registry.PersistentSettings{
 							"22345678": {
-								ID:            "22345678",
+								ID: "22345678",
 								ISCSISettings: registry.ISCSISettings{
 									InitiatorName: "fake-initiator-name",
 									Username:      "fake-username",
@@ -121,7 +121,7 @@ var _ = Describe("DetachDisk", func() {
 								},
 							},
 							"32345678": {
-								ID:            "32345678",
+								ID: "32345678",
 								ISCSISettings: registry.ISCSISettings{
 									InitiatorName: "fake-initiator-name",
 									Username:      "fake-username",
@@ -137,7 +137,7 @@ var _ = Describe("DetachDisk", func() {
 					Disks: registry.DisksSettings{
 						Persistent: map[string]registry.PersistentSettings{
 							"32345678": {
-								ID:            "32345678",
+								ID: "32345678",
 								ISCSISettings: registry.ISCSISettings{
 									InitiatorName: "fake-initiator-name",
 									Username:      "fake-username",

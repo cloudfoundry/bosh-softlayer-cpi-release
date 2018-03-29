@@ -25,14 +25,14 @@ func (n Networks) Validate() error {
 		}
 	}
 
-	//if networks != 1 {
-	//	return bosherr.Error("Exactly one Dynamic or Manual network must be defined")
-	//}
+	// if networks != 1 {
+	// 	return bosherr.Error("Exactly one Dynamic or Manual network must be defined")
+	// }
 	//
-	//// Network type 'vip' not supported currently()
-	//if vipNetworks > 1 {
-	//	return bosherr.Error("Only one VIP network is allowed")
-	//}
+	// // Network type 'vip' not supported currently()
+	// if vipNetworks > 1 {
+	// 	return bosherr.Error("Only one VIP network is allowed")
+	// }
 
 	return nil
 }
@@ -54,16 +54,16 @@ func (n Networks) Network() Network {
 	return Network{}
 }
 
-//func (n Networks) VipNetwork() Network {
-//	for _, net := range n {
-//		if net.IsVip() {
-//			// There can only be 1 vip network
-//			return net
-//		}
-//	}
+// func (n Networks) VipNetwork() Network {
+// 	for _, net := range n {
+// 		if net.IsVip() {
+// 			// There can only be 1 vip network
+// 			return net
+// 		}
+// 	}
 //
-//	return Network{}
-//}
+// 	return Network{}
+// }
 
 func (n Networks) DNS() []string {
 	network := n.Network()
