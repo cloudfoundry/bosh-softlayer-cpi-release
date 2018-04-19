@@ -109,6 +109,9 @@ type NetworkSettings struct {
 
 	Routes Routes `json:"routes,omitempty"`
 
+	// Does network is preconfigured
+	Preconfigured bool `json:"preconfigured"`
+
 	// Network cloud properties
 	CloudProperties map[string]interface{} `json:"cloud_properties"`
 }

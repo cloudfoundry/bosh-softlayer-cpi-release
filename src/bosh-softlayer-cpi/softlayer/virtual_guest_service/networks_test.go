@@ -231,20 +231,22 @@ var _ = Describe("Networks", func() {
 
 			expectNetworksSettings := registry.NetworksSettings{
 				"fake-network-name1": registry.NetworkSettings{
-					Type:    "dynamic",
-					IP:      "10.10.10.10",
-					Gateway: "fake-network-gateway",
-					Netmask: "fake-network-netmask",
-					DNS:     []string{"fake-network-dns1"},
-					Default: []string{"fake-network-default"},
+					Type:          "dynamic",
+					IP:            "10.10.10.10",
+					Gateway:       "fake-network-gateway",
+					Netmask:       "fake-network-netmask",
+					DNS:           []string{"fake-network-dns1"},
+					Default:       []string{"fake-network-default"},
+					Preconfigured: true,
 				},
 				"fake-network-name2": registry.NetworkSettings{
-					Type:    "manual",
-					IP:      "12.10.10.10",
-					Gateway: "fake-network-gateway",
-					Netmask: "fake-network-netmask",
-					DNS:     []string{"fake-network-dns2"},
-					Default: []string{"fake-network-default"},
+					Type:          "manual",
+					IP:            "12.10.10.10",
+					Gateway:       "fake-network-gateway",
+					Netmask:       "fake-network-netmask",
+					DNS:           []string{"fake-network-dns2"},
+					Default:       []string{"fake-network-default"},
+					Preconfigured: true,
 				},
 			}
 
