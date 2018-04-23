@@ -134,13 +134,13 @@ func (u *Softlayer_Ubuntu_Net) ComponentByNetworkName(components datatypes.Virtu
 	componentByNetwork := map[string]datatypes.Virtual_Guest_Network_Component{}
 
 	for name, network := range networks {
-		switch network.CloudProperties.VlanID {
-		case *components.PrimaryBackendNetworkComponent.NetworkVlan.Id:
+		switch {
+		case components.PrimaryBackendNetworkComponent.NetworkVlan != nil && network.CloudProperties.VlanID == *components.PrimaryBackendNetworkComponent.NetworkVlan.Id:
 			componentByNetwork[name] = *components.PrimaryBackendNetworkComponent
-		case *components.PrimaryNetworkComponent.NetworkVlan.Id:
+		case components.PrimaryNetworkComponent.NetworkVlan != nil && network.CloudProperties.VlanID == *components.PrimaryNetworkComponent.NetworkVlan.Id:
 			componentByNetwork[name] = *components.PrimaryNetworkComponent
 		default:
-			return nil, fmt.Errorf("Network %q specified a vlan id '%d' that is not associated with this virtual guest", name, network.CloudProperties.VlanID)
+			return nil, fmt.Errorf("network %q specified a vlan id '%d' that is not associated with this virtual guest", name, network.CloudProperties.VlanID)
 		}
 	}
 
