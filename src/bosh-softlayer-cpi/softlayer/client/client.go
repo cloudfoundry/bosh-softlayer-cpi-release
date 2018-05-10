@@ -11,6 +11,7 @@ import (
 	"time"
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
+	boshretry "github.com/cloudfoundry/bosh-utils/retrystrategy"
 	"github.com/go-openapi/strfmt"
 	"github.com/ncw/swift"
 	"github.com/softlayer/softlayer-go/datatypes"
@@ -40,6 +41,8 @@ const (
 		"privateNetworkOnlyFlag, dedicatedAccountHostOnlyFlag, createDate, modifyDate, " +
 		"billingItem[nextInvoiceTotalRecurringAmount, children[nextInvoiceTotalRecurringAmount]], notes, tagReferences.tag.name, networkVlans[id,vlanNumber,networkSpace], " +
 		"primaryBackendNetworkComponent[primaryIpAddress, networkVlan[id,name,vlanNumber,primaryRouter], subnets[netmask,networkIdentifier]], primaryNetworkComponent[primaryIpAddress, networkVlan[id,name,vlanNumber,primaryRouter], subnets[netmask,networkIdentifier]]"
+
+	INSTANCE_ID_MASK = "id"
 
 	INSTANCE_NETWORK_COMPONENTS_MASK = "primaryBackendNetworkComponent[primaryIpAddress, networkVlan[id,name,vlanNumber,primaryRouter], subnets[netmask,networkIdentifier]], primaryNetworkComponent[primaryIpAddress, networkVlan[id,name,vlanNumber,primaryRouter], subnets[netmask,networkIdentifier]]"
 
@@ -72,7 +75,7 @@ const (
 	SOFTLAYER_GROUP_ACCESSCONTROLERROR_EXCEPTION    = "SoftLayer_Exception_Network_Storage_Group_AccessControlError"
 )
 
-//go:generate counterfeiter -o fakes/fake_client_factory.go . ClientFactory
+// go:generate counterfeiter -o fakes/fake_client_factory.go . ClientFactory
 type ClientFactory interface {
 	CreateClient() Client
 }
@@ -111,7 +114,7 @@ func NewSoftLayerClientManager(session *session.Session, vps *vpsVm.Client, swfi
 	}
 }
 
-//go:generate counterfeiter -o fakes/fake_client.go . Client
+// go:generate counterfeiter -o fakes/fake_client.go . Client
 type Client interface {
 	CancelInstance(id int) error
 	CreateInstance(template *datatypes.Virtual_Guest) (*datatypes.Virtual_Guest, error)
@@ -319,7 +322,7 @@ func (c *ClientManager) GetImage(imageId int, mask string) (*datatypes.Virtual_G
 	return &image, true, err
 }
 
-//Check the virtual server instance is ready for use
+// Check the virtual server instance is ready for use
 func (c *ClientManager) WaitInstanceUntilReady(id int, until time.Time) error {
 	for {
 		virtualGuest, found, err := c.GetInstance(id, "id, lastOperatingSystemReload[id,modifyDate], activeTransaction[id,transactionStatus.name], provisionDate, powerState.keyName")
@@ -346,7 +349,7 @@ func (c *ClientManager) WaitInstanceUntilReady(id int, until time.Time) error {
 
 		reloading := activeTxn != nil && lastReload != nil && *activeTxn.Id == *lastReload.Id
 		if provisionDate != nil && !reloading {
-			//fmt.Println("power state:", *virtualGuest.PowerState.KeyName)
+			// fmt.Println("power state:", *virtualGuest.PowerState.KeyName)
 			if *virtualGuest.PowerState.KeyName == "RUNNING" {
 				return nil
 			}
@@ -362,7 +365,7 @@ func (c *ClientManager) WaitInstanceUntilReady(id int, until time.Time) error {
 	}
 }
 
-//@TODO: The method is experimental and needed to verify.
+// @TODO: The method is experimental and needed to verify.
 func (c *ClientManager) WaitInstanceUntilReadyWithTicket(id int, until time.Time) error {
 	now := time.Now()
 	halfDuration := until.Sub(now) / 2
@@ -381,8 +384,8 @@ func (c *ClientManager) WaitInstanceUntilReadyWithTicket(id int, until time.Time
 				sl.String(contents), sl.Int(id), sl.String("VIRTUAL_GUEST"))
 			if err != nil {
 				c.logger.Error(softlayerClientLogTag, fmt.Sprintf("Creating ticket for intance '%d' with err : %v.", id, err))
-				//@TODO: To comment by test
-				//return bosherr.WrapError(err, "Creating ticket.")
+				// @TODO: To comment by test
+				// return bosherr.WrapError(err, "Creating ticket.")
 			}
 		} else {
 			return err
@@ -785,7 +788,6 @@ func (c *ClientManager) UpgradeInstance(id int, cpu int, memory int, network int
 		prices = append(prices, *diskItemPrice)
 	}
 
-	fmt.Println()
 	if len(prices) == 0 {
 		return 0, bosherr.Error("Unable to find price for upgrade")
 	}
@@ -821,24 +823,45 @@ func (c *ClientManager) UpgradeInstance(id int, cpu int, memory int, network int
 	}
 
 	c.logger.Debug(softlayerClientLogTag, fmt.Sprintf("Place order for vm '%d'", id))
-	orderReceipt, err := c.OrderService.PlaceOrder(&upgradeOrder, sl.Bool(false))
-	if err != nil {
-		if apiErr, ok := err.(sl.Error); ok {
-			if strings.Contains(apiErr.Message, "A current price was provided for the upgrade order") {
-				upgradeRequest, err := c.VirtualGuestService.Id(id).Mask("order[items]").GetUpgradeRequest()
-				if err != nil {
-					return 0, bosherr.WrapErrorf(err, "Get upgrade order with '%d'", id)
+
+	orderId := 0
+	execPlaceOrderRetryable := boshretry.NewRetryable(
+		func() (bool, error) {
+			orderReceipt, err := c.OrderService.PlaceOrder(&upgradeOrder, sl.Bool(false))
+			if err != nil {
+				if apiErr, ok := err.(sl.Error); ok {
+					if strings.Contains(apiErr.Message, "A current price was provided for the upgrade order") {
+						upgradeRequest, err := c.VirtualGuestService.Id(id).Mask("order[items]").GetUpgradeRequest()
+						if err != nil {
+							return false, bosherr.WrapErrorf(err, "Get upgrade order with '%d'", id)
+						}
+						orderId = *upgradeRequest.Order.Id
+						return false, nil
+					} else {
+						return false, bosherr.WrapErrorf(err, "Placing order with '%+v'", order)
+					}
+				} else {
+					return false, bosherr.WrapErrorf(err, "Placing order with '%+v'", order)
 				}
-				return *upgradeRequest.Order.Id, nil
-			} else {
-				return 0, bosherr.WrapErrorf(err, "Placing order with '%+v'", order)
 			}
-		} else {
-			return 0, bosherr.WrapErrorf(err, "Placing order with '%+v'", order)
-		}
+
+			if orderReceipt.OrderId == nil {
+				return true, bosherr.Error("Unable to find order id")
+			} else {
+				orderId = *orderReceipt.OrderId
+				return false, nil
+			}
+		})
+
+	attemptRetryStrategy := boshretry.NewAttemptRetryStrategy(3, 5*time.Second, execPlaceOrderRetryable, c.logger.GetBoshLogger())
+	c.logger.ChangeRetryStrategyLogTag(&attemptRetryStrategy)
+
+	err = attemptRetryStrategy.Try()
+	if err != nil {
+		return orderId, err
 	}
 
-	return *orderReceipt.OrderId, nil
+	return orderId, nil
 }
 
 func (c *ClientManager) SetTags(id int, tags string) (bool, error) {
@@ -870,9 +893,9 @@ func (c *ClientManager) GetInstanceAllowedHost(id int) (*datatypes.Network_Stora
 }
 
 func (c *ClientManager) getUpgradeItemPriceForSecondDisk(id int, diskSize int) (*datatypes.Product_Item_Price, int, error) {
-	//filter := filter.Build(
-	//	filter.Path("productItemPrice.categories.categoryCode").Eq(EPHEMERAL_DISK_CATEGORY_CODE),
-	//)
+	// filter := filter.Build(
+	// 	filter.Path("productItemPrice.categories.categoryCode").Eq(EPHEMERAL_DISK_CATEGORY_CODE),
+	// )
 	mask := "id, categories[id, categoryCode], item[description, capacity]"
 	itemPrices, err := c.VirtualGuestService.Id(id).Mask(mask).GetUpgradeItemPrices(sl.Bool(true))
 	if err != nil {
@@ -1172,8 +1195,8 @@ func (c *ClientManager) OrderBlockVolume2(storageType string, location string, s
 		prices = append(prices, snapshotSpacePrice)
 	}
 
-	//baseTypeName := "SoftLayer_Container_Product_Order_Network_"
-	//complexType := baseTypeName + "Storage_AsAService"
+	// baseTypeName := "SoftLayer_Container_Product_Order_Network_"
+	// complexType := baseTypeName + "Storage_AsAService"
 	order := datatypes.Container_Product_Order_Network_Storage_AsAService{
 		OsFormatType: &datatypes.Network_Storage_Iscsi_OS_Type{
 			KeyName: sl.String("LINUX"),
@@ -1219,9 +1242,9 @@ func (c *ClientManager) CreateVolume(location string, size int, iops int, snapsh
 	return c.WaitVolumeProvisioningWithOrderId(*receipt.OrderId, until)
 }
 
-//Creates a snapshot on the given block volume.
-//volumeId: The id of the volume
-//notes: The notes or "name" to assign the snapshot
+// Creates a snapshot on the given block volume.
+// volumeId: The id of the volume
+// notes: The notes or "name" to assign the snapshot
 func (c *ClientManager) CreateSnapshot(volumeId int, notes string) (datatypes.Network_Storage, error) {
 	for {
 		networkStorage, err := c.StorageService.Id(volumeId).CreateSnapshot(sl.String((notes)))
@@ -1239,36 +1262,36 @@ func (c *ClientManager) CreateSnapshot(volumeId int, notes string) (datatypes.Ne
 	}
 }
 
-//Deletes the specified snapshot object.
-//snapshotId: The ID of the snapshot object to delete.
+// Deletes the specified snapshot object.
+// snapshotId: The ID of the snapshot object to delete.
 func (c *ClientManager) DeleteSnapshot(snapshotId int) error {
 	_, err := c.StorageService.Id(snapshotId).DeleteObject()
 	return err
 }
 
-//Enables snapshots for a specific block volume at a given schedule.
-//volumeId: The id of the volume
-//scheduleType: 'HOURLY'|'DAILY'|'WEEKLY'
-//retentionCount: Number of snapshots to be kept
-//minute: Minute when to take snapshot
-//hour: Hour when to take snapshot
-//dayOfWeek: Day when to take snapshot
+// Enables snapshots for a specific block volume at a given schedule.
+// volumeId: The id of the volume
+// scheduleType: 'HOURLY'|'DAILY'|'WEEKLY'
+// retentionCount: Number of snapshots to be kept
+// minute: Minute when to take snapshot
+// hour: Hour when to take snapshot
+// dayOfWeek: Day when to take snapshot
 func (c *ClientManager) EnableSnapshot(volumeId int, scheduleType string, retentionCount int, minute int, hour int, dayOfWeek string) error {
 	_, err := c.StorageService.Id(volumeId).EnableSnapshots(sl.String(scheduleType), sl.Int(retentionCount), sl.Int(minute), sl.Int(hour), sl.String(dayOfWeek))
 	return err
 }
 
-//Disables snapshots for a specific block volume at a given schedule.
-//volumeId: The id of the volume
-//scheduleType: 'HOURLY'|'DAILY'|'WEEKLY'
+// Disables snapshots for a specific block volume at a given schedule.
+// volumeId: The id of the volume
+// scheduleType: 'HOURLY'|'DAILY'|'WEEKLY'
 func (c *ClientManager) DisableSnapshots(volumeId int, scheduleType string) error {
 	_, err := c.StorageService.Id(volumeId).DisableSnapshots(sl.String(scheduleType))
 	return err
 }
 
-//Restores a specific volume from a snapshot.
-//volumeId: The id of the volume
-//snapshotId: The id of the restore point
+// Restores a specific volume from a snapshot.
+// volumeId: The id of the volume
+// snapshotId: The id of the restore point
 func (c *ClientManager) RestoreFromSnapshot(volumeId int, snapshotId int) error {
 	_, err := c.StorageService.Id(volumeId).RestoreFromSnapshot(sl.Int(snapshotId))
 	return err
@@ -1468,7 +1491,7 @@ func FindSaaSSnapshotSpacePrice(productPackage datatypes.Product_Package, size i
 	return datatypes.Product_Item_Price{}, bosherr.Errorf("Unable to find price snapshot space size: %d, iops: %d", size, iops)
 }
 
-//Find the price in the given package that has the specified category
+// Find the price in the given package that has the specified category
 func FindPerformancePrice(productPackage datatypes.Product_Package, priceCategory string) (datatypes.Product_Item_Price, error) {
 	for _, item := range productPackage.Items {
 		for _, price := range item.Prices {
@@ -1485,7 +1508,7 @@ func FindPerformancePrice(productPackage datatypes.Product_Package, priceCategor
 	return datatypes.Product_Item_Price{}, bosherr.Error("Unable to find price for performance storage")
 }
 
-//Find the price in the given package with the specified size
+// Find the price in the given package with the specified size
 func FindPerformanceSpacePrice(productPackage datatypes.Product_Package, size int) (datatypes.Product_Item_Price, error) {
 	for _, item := range productPackage.Items {
 		if int(*item.Capacity) != size {
@@ -1505,7 +1528,7 @@ func FindPerformanceSpacePrice(productPackage datatypes.Product_Package, size in
 	return datatypes.Product_Item_Price{}, bosherr.Errorf("Unable to find disk space price with size of %d for the given volume", size)
 }
 
-//Find the price in the given package with the specified size and iops
+// Find the price in the given package with the specified size and iops
 func FindPerformanceIOPSPrice(productPackage datatypes.Product_Package, size int, iops int) (datatypes.Product_Item_Price, error) {
 	for _, item := range productPackage.Items {
 		if int(*item.Capacity) != int(iops) {
@@ -1727,9 +1750,9 @@ func (c *ClientManager) CreateTicket(ticketSubject *string, ticketTitle *string,
 		return bosherr.WrapError(err, "Creating standard ticket.")
 	}
 
-	//The SoftLayer API defaults new ticket property statusId to 1001 (or "open").
+	// The SoftLayer API defaults new ticket property statusId to 1001 (or "open").
 	if *ticket.StatusId == 1001 {
-		c.logger.Debug(softlayerClientLogTag, "Ticket '%d' is created and its status is 'OPEN'.", strconv.Itoa(*ticket.Id))
+		c.logger.Debug(softlayerClientLogTag, "Ticket '%d' is created and its status is 'OPEN'.", *ticket.Id)
 		return nil
 	} else {
 		return bosherr.Errorf("Ticket status is not 'OPEN': %+v", *ticket.Status.Name)
@@ -1842,7 +1865,7 @@ func (c *ClientManager) CreateImageFromExternalSource(imageName string, note str
 		return 0, bosherr.Error("There is a problem with string separator: ':'. That is used to get swift account of swift username(e.g. 'SLOS1234-1' in 'SLOS1234-1:SL1234')")
 	}
 
-	//uri := "swift://${OBJ_STORAGE_ACC_NAME}@${SWIFT_CLUSTER}/${SWIFT_CONTAINER}/bosh-stemcell-${STEMCELL_VERSION}-softlayer.vhd"
+	// uri := "swift://${OBJ_STORAGE_ACC_NAME}@${SWIFT_CLUSTER}/${SWIFT_CONTAINER}/bosh-stemcell-${STEMCELL_VERSION}-softlayer.vhd"
 	uri := fmt.Sprintf("swift://%s@%s/%s/%s.vhd", accountName, cluster, imageName, imageName)
 	configuration := &datatypes.Container_Virtual_Guest_Block_Device_Template_Configuration{
 		Name: sl.String(imageName),
@@ -1917,55 +1940,55 @@ func (c *ClientManager) selectMaximunIopsItemPriceIdOnSize(size int) (datatypes.
 	return datatypes.Product_Item_Price{}, bosherr.Errorf("No proper performance storage (iSCSI volume) for size %d", size)
 }
 
-//func (c *ClientManager) selectSaaSMaximunIopsItemPriceIdOnSize(size int) (datatypes.Product_Item_Price, error) {
-//	filters := filter.New()
-//	filters = append(filters, filter.Path("itemPrices.attributes.value").Eq(size))
-//	filters = append(filters, filter.Path("categories.categoryCode").Eq("performance_storage_iops"))
+// func (c *ClientManager) selectSaaSMaximunIopsItemPriceIdOnSize(size int) (datatypes.Product_Item_Price, error) {
+// 	filters := filter.New()
+// 	filters = append(filters, filter.Path("itemPrices.attributes.value").Eq(size))
+// 	filters = append(filters, filter.Path("categories.categoryCode").Eq("performance_storage_iops"))
 //
-//	itemPrices, err := c.PackageService.Id(NETWORK_STORAGE_AS_SERVICE_PACKAGE_ID).Filter(filters.Build()).GetItemPrices()
-//	if err != nil {
-//		return datatypes.Product_Item_Price{}, err
-//	}
+// 	itemPrices, err := c.PackageService.Id(NETWORK_STORAGE_AS_SERVICE_PACKAGE_ID).Filter(filters.Build()).GetItemPrices()
+// 	if err != nil {
+// 		return datatypes.Product_Item_Price{}, err
+// 	}
 //
-//	if len(itemPrices) > 0 {
-//		candidates := itemsFilter(itemPrices, func(itemPrice datatypes.Product_Item_Price) bool {
-//			return itemPrice.LocationGroupId == nil
-//		})
-//		if len(candidates) > 0 {
-//			sort.Sort(Product_Item_Price_Sorted_Data(candidates))
-//			return candidates[len(candidates)-1], nil
-//		} else {
-//			return datatypes.Product_Item_Price{}, bosherr.Errorf("No proper performance storage (iSCSI volume) for size %d", size)
-//		}
-//	}
+// 	if len(itemPrices) > 0 {
+// 		candidates := itemsFilter(itemPrices, func(itemPrice datatypes.Product_Item_Price) bool {
+// 			return itemPrice.LocationGroupId == nil
+// 		})
+// 		if len(candidates) > 0 {
+// 			sort.Sort(Product_Item_Price_Sorted_Data(candidates))
+// 			return candidates[len(candidates)-1], nil
+// 		} else {
+// 			return datatypes.Product_Item_Price{}, bosherr.Errorf("No proper performance storage (iSCSI volume) for size %d", size)
+// 		}
+// 	}
 //
-//	return datatypes.Product_Item_Price{}, bosherr.Errorf("No proper performance storage (iSCSI volume)for size %d", size)
-//}
+// 	return datatypes.Product_Item_Price{}, bosherr.Errorf("No proper performance storage (iSCSI volume)for size %d", size)
+// }
 
-//func (c *ClientManager) selectMediumIopsItemPriceIdOnSize(size int) (datatypes.Product_Item_Price, error) {
-//	filters := filter.New()
-//	filters = append(filters, filter.Path("itemPrices.attributes.value").Eq(size))
-//	filters = append(filters, filter.Path("categories.categoryCode").Eq("performance_storage_iops"))
+// func (c *ClientManager) selectMediumIopsItemPriceIdOnSize(size int) (datatypes.Product_Item_Price, error) {
+// 	filters := filter.New()
+// 	filters = append(filters, filter.Path("itemPrices.attributes.value").Eq(size))
+// 	filters = append(filters, filter.Path("categories.categoryCode").Eq("performance_storage_iops"))
 //
-//	itemPrices, err := c.PackageService.Id(NETWORK_PERFORMANCE_STORAGE_PACKAGE_ID).Filter(filters.Build()).GetItemPrices()
-//	if err != nil {
-//		return datatypes.Product_Item_Price{}, err
-//	}
+// 	itemPrices, err := c.PackageService.Id(NETWORK_PERFORMANCE_STORAGE_PACKAGE_ID).Filter(filters.Build()).GetItemPrices()
+// 	if err != nil {
+// 		return datatypes.Product_Item_Price{}, err
+// 	}
 //
-//	if len(itemPrices) > 0 {
-//		candidates := itemsFilter(itemPrices, func(itemPrice datatypes.Product_Item_Price) bool {
-//			return itemPrice.LocationGroupId == nil
-//		})
-//		if len(candidates) > 0 {
-//			sort.Sort(Product_Item_Price_Sorted_Data(candidates))
-//			return candidates[len(candidates)/2], nil
-//		} else {
-//			return datatypes.Product_Item_Price{}, bosherr.Errorf("No proper performance storage (iSCSI volume) for size %d", size)
-//		}
-//	}
+// 	if len(itemPrices) > 0 {
+// 		candidates := itemsFilter(itemPrices, func(itemPrice datatypes.Product_Item_Price) bool {
+// 			return itemPrice.LocationGroupId == nil
+// 		})
+// 		if len(candidates) > 0 {
+// 			sort.Sort(Product_Item_Price_Sorted_Data(candidates))
+// 			return candidates[len(candidates)/2], nil
+// 		} else {
+// 			return datatypes.Product_Item_Price{}, bosherr.Errorf("No proper performance storage (iSCSI volume) for size %d", size)
+// 		}
+// 	}
 //
-//	return datatypes.Product_Item_Price{}, bosherr.Errorf("No proper performance storage (iSCSI volume)for size %d", size)
-//}
+// 	return datatypes.Product_Item_Price{}, bosherr.Errorf("No proper performance storage (iSCSI volume)for size %d", size)
+// }
 
 func itemsFilter(vs []datatypes.Product_Item_Price, f func(datatypes.Product_Item_Price) bool) []datatypes.Product_Item_Price {
 	vsf := make([]datatypes.Product_Item_Price, 0)

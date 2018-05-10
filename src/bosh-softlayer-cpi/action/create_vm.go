@@ -114,7 +114,7 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 	osReloaded := false
 
 	if !cv.softlayerOptions.DisableOsReload {
-		cid, err = cv.createByOsReload(stemcellCID, cloudProps, instanceNetworks, userDataContents)
+		cid, err = cv.createByOsReload(stemcellCID, virtualGuestTemplate, instanceNetworks, userDataContents)
 		if err != nil {
 			return "", bosherr.WrapError(err, "OS reloading VM")
 		}
@@ -175,7 +175,7 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 		if err != nil {
 			return "", bosherr.WrapErrorf(err, "Attaching ephemeral disk to VM with id '%d'", cid)
 		}
-		//Update VM agent settings
+		// Update VM agent settings
 		agentSettings = agentSettings.AttachEphemeralDisk(registry.DefaultEphemeralDisk)
 	}
 
@@ -323,7 +323,7 @@ func (cv CreateVM) getNetworkComponents(networks Networks) (*datatypes.Virtual_G
 	}
 
 	if privateNetworkComponent == nil {
-		return publicNetworkComponent, privateNetworkComponent, bosherr.Error("A private network is required. Please check vlanIds")
+		return publicNetworkComponent, privateNetworkComponent, bosherr.Error("A private network is required. Please check vlan_ids")
 	}
 
 	return publicNetworkComponent, privateNetworkComponent, nil
@@ -363,15 +363,16 @@ func (cv CreateVM) createNetworkComponentsByVlanId(vlanId int) (*datatypes.Virtu
 	}, nil
 }
 
-func (cv CreateVM) createByOsReload(stemcellCID StemcellCID, cloudProps VMCloudProperties, instanceNetworks instance.Networks, userDataContents string) (int, error) {
+func (cv CreateVM) createByOsReload(stemcellCID StemcellCID, template *datatypes.Virtual_Guest, instanceNetworks instance.Networks, userDataContents string) (int, error) {
 	cid := 0
 	for _, network := range instanceNetworks {
 		switch network.Type {
 		case "dynamic":
 			if len(network.IP) > 0 && cid == 0 {
 				var (
-					vm  *datatypes.Virtual_Guest
-					err error
+					vm     *datatypes.Virtual_Guest
+					sshKey int
+					err    error
 				)
 
 				if IsPrivateSubnet(net.ParseIP(network.IP)) {
@@ -387,20 +388,24 @@ func (cv CreateVM) createByOsReload(stemcellCID StemcellCID, cloudProps VMCloudP
 					return cid, bosherr.WrapErrorf(err, "Cleaning registry record '%d' before os_reload", *vm.Id)
 				}
 
-				if cloudProps.FlavorKeyName == "" && vm.SupplementalCreateObjectOptions == nil &&
-					(*vm.MaxCpu != cloudProps.Cpu || *vm.MaxMemory != cloudProps.Memory) {
-					err = cv.virtualGuestService.UpgradeInstance(*vm.Id, cloudProps.Cpu, cloudProps.Memory, 0, *vm.DedicatedAccountHostOnlyFlag)
+				if (template.SupplementalCreateObjectOptions == nil || *template.SupplementalCreateObjectOptions.FlavorKeyName == "") &&
+					vm.SupplementalCreateObjectOptions == nil &&
+					(*vm.MaxCpu != *template.StartCpus || *vm.MaxMemory != *template.MaxMemory) {
+					err = cv.virtualGuestService.UpgradeInstance(*vm.Id, *template.StartCpus, *template.MaxMemory, 0, *vm.DedicatedAccountHostOnlyFlag)
 					if err != nil {
 						return cid, bosherr.WrapError(err, "Upgrading VM")
 					}
 				}
-				//Update userData when OS Reload
+				// Update userData when OS Reload
 				err = cv.virtualGuestService.UpdateInstanceUserData(*vm.Id, sl.String(userDataContents))
 				if err != nil {
 					return cid, bosherr.WrapError(err, "Updating userData")
 				}
 
-				err = cv.virtualGuestService.ReloadOS(*vm.Id, stemcellCID.Int(), []int{cloudProps.SshKey}, cloudProps.HostnamePrefix, cloudProps.Domain)
+				if len(template.SshKeys) != 0 {
+					sshKey = *template.SshKeys[0].Id
+				}
+				err = cv.virtualGuestService.ReloadOS(*vm.Id, stemcellCID.Int(), []int{sshKey}, *template.Hostname, *template.Domain)
 				if err != nil {
 					return cid, err
 				}

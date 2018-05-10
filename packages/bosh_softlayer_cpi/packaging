@@ -18,3 +18,4 @@ make build
 # Copy BOSH SoftLayer CPI package
 mkdir -p ${BOSH_INSTALL_TARGET}/bin
 cp -a ${BOSH_COMPILE_TARGET}/go/src/bosh-softlayer-cpi/out/cpi ${BOSH_INSTALL_TARGET}/bin/
+cp version ${BOSH_INSTALL_TARGET}

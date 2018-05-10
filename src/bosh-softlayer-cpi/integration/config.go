@@ -41,8 +41,8 @@ var (
 	datacenter   = envOrDefault("DATACENTER", "lon02")
 	ipAddrs      = strings.Split(envOrDefault("PRIVATE_IP", "192.168.100.102,192.168.100.103,192.168.100.104"), ",")
 
-	swiftUsername      = envOrDefault("SWIFT_USERNAME", "")
-	swiftEndpoint      = envOrDefault("SWIFT_ENDPOINT", "")
+	swiftUsername = envOrDefault("SWIFT_USERNAME", "")
+	swiftEndpoint = envOrDefault("SWIFT_ENDPOINT", "")
 
 	ts           *httptest.Server
 	config       cfg.Config

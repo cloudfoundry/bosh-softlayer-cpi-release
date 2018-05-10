@@ -6,7 +6,7 @@ type InfoResult struct {
 
 type Info struct{}
 
-func NewInfo() Info { return Info{}}
+func NewInfo() Info { return Info{} }
 
 func (Info) Run() (InfoResult, error) {
 	return InfoResult{

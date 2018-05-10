@@ -63,6 +63,10 @@ type PersistentSettings struct {
 	ID string `json:"id"`
 
 	// For iscsi setup info
+	ISCSISettings ISCSISettings `json:"iscsi_settings"`
+}
+
+type ISCSISettings struct {
 	InitiatorName string `json:"initiator_name"`
 	Target        string `json:"target"`
 	Username      string `json:"username"`
@@ -104,6 +108,9 @@ type NetworkSettings struct {
 	Alias string `json:"alias,omitempty"`
 
 	Routes Routes `json:"routes,omitempty"`
+
+	// Does network is preconfigured
+	Preconfigured bool `json:"preconfigured"`
 
 	// Network cloud properties
 	CloudProperties map[string]interface{} `json:"cloud_properties"`
@@ -150,12 +157,10 @@ func NewAgentSettings(agentID string, vmCID string, networksSettings NetworksSet
 // AttachPersistentDisk updates the agent settings in order to add an attached persistent disk.
 func (as AgentSettings) AttachPersistentDisk(diskID string, updateSetting []byte) AgentSettings {
 	persistenDiskSettings := make(map[string]PersistentSettings)
-	if as.Disks.Persistent != nil {
-		persistenDiskSettings = as.Disks.Persistent
-	}
+
 	var persistentSetting PersistentSettings
 	json.Unmarshal(updateSetting, &persistentSetting)
-	persistentSetting.ID = diskID
+
 	persistenDiskSettings[diskID] = persistentSetting
 	as.Disks.Persistent = persistenDiskSettings
 

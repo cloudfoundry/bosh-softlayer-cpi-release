@@ -23,7 +23,7 @@ func (vg SoftlayerVirtualGuestService) AttachDisk(id int, diskID int) ([]byte, e
 		return []byte{}, bosherr.WrapErrorf(err, "Fetching disk target address with id '%d'", diskID)
 	}
 
-	instance, found, err := vg.softlayerClient.GetInstance(id, bsl.INSTANCE_DETAIL_MASK)
+	instance, found, err := vg.softlayerClient.GetInstance(id, bsl.INSTANCE_ID_MASK)
 	if err != nil {
 		return []byte{}, bosherr.WrapErrorf(err, "Fetching instance details with id '%d'", id)
 	}
@@ -63,7 +63,8 @@ func (vg SoftlayerVirtualGuestService) AttachDisk(id int, diskID int) ([]byte, e
 	username := *credential.Credential.Username
 	password := *credential.Credential.Password
 
-	return []byte(fmt.Sprintf(`{"initiator_name":"%s","target":"%s","username":"%s","password":"%s" }`,
+	return []byte(fmt.Sprintf(`{"id":"%d","iscsi_settings":{"initiator_name":"%s","target":"%s","username":"%s","password":"%s"}}`,
+		diskID,
 		initiatorName,
 		*(volume.ServiceResourceBackendIpAddress),
 		username,
@@ -86,7 +87,7 @@ func (vg SoftlayerVirtualGuestService) AttachedDisks(id int) ([]string, error) {
 }
 
 func (vg SoftlayerVirtualGuestService) DetachDisk(id int, diskID int) error {
-	instance, found, err := vg.softlayerClient.GetInstance(id, bsl.INSTANCE_DETAIL_MASK)
+	instance, found, err := vg.softlayerClient.GetInstance(id, bsl.INSTANCE_ID_MASK)
 	if err != nil {
 		return bosherr.WrapErrorf(err, "Fetching instance details with id '%d'", id)
 	}

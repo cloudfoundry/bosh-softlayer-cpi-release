@@ -56,7 +56,7 @@ var _ = Describe("Virtual Guest Service", func() {
 			Expect(cli.SetTagsCallCount()).To(Equal(1))
 		})
 
-		It("Set tags successfully with 'job,index' tag and withou 'compiling' tag", func() {
+		It("Set tags successfully with 'job,index' tag and without 'compiling' tag", func() {
 			metaData = Metadata{
 				"deployment": "fake=deployment",
 				"director":   "fake-director-uuid",

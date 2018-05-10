@@ -49,11 +49,13 @@ var _ = Describe("AttachDisk", func() {
 				Disks: registry.DisksSettings{
 					Persistent: map[string]registry.PersistentSettings{
 						"25667635": {
-							ID:            "25667635",
-							InitiatorName: "iqn.yyyy-mm.fake-domain:fake-username",
-							Target:        "10.1.22.170",
-							Username:      "fake-username",
-							Password:      "fake-password",
+							ID: "25667635",
+							ISCSISettings: registry.ISCSISettings{
+								InitiatorName: "iqn.yyyy-mm.fake-domain:fake-username",
+								Target:        "10.1.22.170",
+								Username:      "fake-username",
+								Password:      "fake-password",
+							},
 						},
 					},
 				},
@@ -66,7 +68,7 @@ var _ = Describe("AttachDisk", func() {
 				nil,
 			)
 			vmService.AttachDiskReturns(
-				[]byte(`{"initiator_name":"iqn.yyyy-mm.fake-domain:fake-username","target":"10.1.22.170","username":"fake-username","password":"fake-password" }`),
+				[]byte(`{"id":"25667635","iscsi_settings":{"initiator_name":"iqn.yyyy-mm.fake-domain:fake-username","target":"10.1.22.170","username":"fake-username","password":"fake-password"}}`),
 				nil,
 			)
 		})

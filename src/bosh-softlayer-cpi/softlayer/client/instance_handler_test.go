@@ -1461,6 +1461,37 @@ var _ = Describe("InstanceHandler", func() {
 				_, err := cli.UpgradeInstance(vgID, 2, 0, 0, true, 0)
 				Expect(err).NotTo(HaveOccurred())
 			})
+
+			It("return an error if fetch 3 times failure response", func() {
+				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Product_Package_getAllObjects.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Product_Package_getItems.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Product_Order_placeOrder_Without_Orderid.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Product_Order_placeOrder_Without_Orderid.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Product_Order_placeOrder_Without_Orderid.json",
+						"statusCode": http.StatusOK,
+					},
+				}
+				err = test_helpers.SpecifyServerResps(respParas, server)
+				Expect(err).NotTo(HaveOccurred())
+
+				_, err := cli.UpgradeInstance(vgID, 2, 0, 0, true, 0)
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("Unable to find order id"))
+			})
 		})
 
 		Context("when upgrade instance's memory", func() {
@@ -1960,7 +1991,7 @@ var _ = Describe("InstanceHandler", func() {
 	Describe("AttachSecondDiskToInstance", func() {
 		It("Attach successfully", func() {
 			respParas = []map[string]interface{}{
-				//WaitInstanceHasNoneActiveTransaction
+				// WaitInstanceHasNoneActiveTransaction
 				{
 					"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
 					"statusCode": http.StatusOK,
@@ -2006,7 +2037,7 @@ var _ = Describe("InstanceHandler", func() {
 
 		It("Return error when call WaitInstanceHasNoneActiveTransaction return an error", func() {
 			respParas = []map[string]interface{}{
-				//WaitInstanceHasNoneActiveTransaction
+				// WaitInstanceHasNoneActiveTransaction
 				{
 					"filename":   "SoftLayer_Virtual_Guest_getObject_InternalError.json",
 					"statusCode": http.StatusInternalServerError,
@@ -2022,7 +2053,7 @@ var _ = Describe("InstanceHandler", func() {
 
 		It("Return error when call UpgradeInstance return an error", func() {
 			respParas = []map[string]interface{}{
-				//WaitInstanceHasNoneActiveTransaction
+				// WaitInstanceHasNoneActiveTransaction
 				{
 					"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
 					"statusCode": http.StatusOK,
@@ -2043,7 +2074,7 @@ var _ = Describe("InstanceHandler", func() {
 
 		It("Return error when call UpgradeInstance return 'a current price was provided for the upgrade order'", func() {
 			respParas = []map[string]interface{}{
-				//WaitInstanceHasNoneActiveTransaction
+				// WaitInstanceHasNoneActiveTransaction
 				{
 					"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
 					"statusCode": http.StatusOK,
@@ -2093,7 +2124,7 @@ var _ = Describe("InstanceHandler", func() {
 
 		It("Return error when call WaitInstanceHasActiveTransaction return an error", func() {
 			respParas = []map[string]interface{}{
-				//WaitInstanceHasNoneActiveTransaction
+				// WaitInstanceHasNoneActiveTransaction
 				{
 					"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
 					"statusCode": http.StatusOK,
@@ -2135,7 +2166,7 @@ var _ = Describe("InstanceHandler", func() {
 
 		It("Return error when call WaitInstanceUntilReady return an error", func() {
 			respParas = []map[string]interface{}{
-				//WaitInstanceHasNoneActiveTransaction
+				// WaitInstanceHasNoneActiveTransaction
 				{
 					"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
 					"statusCode": http.StatusOK,
@@ -2184,7 +2215,7 @@ var _ = Describe("InstanceHandler", func() {
 	Describe("UpgradeInstanceConfig", func() {
 		It("Upgrade successfully", func() {
 			respParas = []map[string]interface{}{
-				//WaitInstanceHasNoneActiveTransaction
+				// WaitInstanceHasNoneActiveTransaction
 				{
 					"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
 					"statusCode": http.StatusOK,
@@ -2222,7 +2253,7 @@ var _ = Describe("InstanceHandler", func() {
 
 		It("Return error when call WaitInstanceHasNoneActiveTransaction return error", func() {
 			respParas = []map[string]interface{}{
-				//WaitInstanceHasNoneActiveTransaction
+				// WaitInstanceHasNoneActiveTransaction
 				{
 					"filename":   "SoftLayer_Virtual_Guest_getObject_InternalError.json",
 					"statusCode": http.StatusInternalServerError,
@@ -2238,7 +2269,7 @@ var _ = Describe("InstanceHandler", func() {
 
 		It("Return error when call UpgradeInstance return error", func() {
 			respParas = []map[string]interface{}{
-				//WaitInstanceHasNoneActiveTransaction
+				// WaitInstanceHasNoneActiveTransaction
 				{
 					"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
 					"statusCode": http.StatusOK,
@@ -2259,7 +2290,7 @@ var _ = Describe("InstanceHandler", func() {
 
 		It("Return error when call WaitOrderCompleted return error", func() {
 			respParas = []map[string]interface{}{
-				//WaitInstanceHasNoneActiveTransaction
+				// WaitInstanceHasNoneActiveTransaction
 				{
 					"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
 					"statusCode": http.StatusOK,
@@ -2293,7 +2324,7 @@ var _ = Describe("InstanceHandler", func() {
 
 		It("Return error when call WaitInstanceUntilReady return error", func() {
 			respParas = []map[string]interface{}{
-				//WaitInstanceHasNoneActiveTransaction
+				// WaitInstanceHasNoneActiveTransaction
 				{
 					"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
 					"statusCode": http.StatusOK,
