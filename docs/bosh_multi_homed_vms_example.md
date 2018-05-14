@@ -50,7 +50,7 @@ networks:
   - az: lon02
     cloud_properties:
       vlan_ids:
-      - 524956
+      - 5xxxxx
     dns:
     - 10.165.232.98
     - 8.8.8.8
@@ -62,7 +62,7 @@ networks:
   - az: lon02
     cloud_properties:
       vlan_ids:
-      - 524954
+      - 5xxxxx
     dns:
     - 10.165.232.98
     - 8.8.8.8
