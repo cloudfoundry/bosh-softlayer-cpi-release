@@ -238,7 +238,8 @@ var _ = Describe("VM", func() {
 		assertSucceeds(request)
 	})
 
-	It("can create a dedicated VM", func() {
+	// Skip for insufficient capacity
+	XIt("can create a dedicated VM", func() {
 		By("creating a VM with static ip")
 		var vmCID string
 		request := fmt.Sprintf(`{
