@@ -3,34 +3,51 @@ package action
 import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 
-	. "bosh-softlayer-cpi/softlayer/common"
-	bslcdisk "bosh-softlayer-cpi/softlayer/disk"
+	"bosh-softlayer-cpi/api"
+	"bosh-softlayer-cpi/softlayer/disk_service"
+	instance "bosh-softlayer-cpi/softlayer/virtual_guest_service"
 )
 
-type CreateDiskAction struct {
-	diskCreator bslcdisk.DiskCreator
-	vmFinder    VMFinder
+type CreateDisk struct {
+	diskService disk.Service
+	vmService   instance.Service
 }
 
 func NewCreateDisk(
-	vmFinder VMFinder,
-	diskCreator bslcdisk.DiskCreator,
-) (action CreateDiskAction) {
-	action.diskCreator = diskCreator
-	action.vmFinder = vmFinder
-	return
+	diskService disk.Service,
+	vmService instance.Service,
+) CreateDisk {
+	return CreateDisk{
+		diskService: diskService,
+		vmService:   vmService,
+	}
 }
 
-func (a CreateDiskAction) Run(size int, cloudProps bslcdisk.DiskCloudProperties, instanceId VMCID) (string, error) {
-	vm, found, err := a.vmFinder.Find(int(instanceId))
-	if err != nil || !found {
-		return "0", bosherr.WrapErrorf(err, "Not Finding vm '%s'", instanceId)
+func (cd CreateDisk) Run(size int, cloudProps DiskCloudProperties, vmCID VMCID) (string, error) {
+	// Find the VM (if provided) so we can create the disk in the same datacenter
+	var location string
+	if vmCID != 0 {
+		vm, err := cd.vmService.Find(vmCID.Int())
+		if err != nil {
+			if _, ok := err.(api.CloudError); ok {
+				return "", err
+			}
+			return "", bosherr.WrapErrorf(err, "Creating disk with size '%d'", size)
+		}
+		location = *vm.Datacenter.Name
+	} else {
+		if len(cloudProps.DataCenter) > 0 {
+			location = cloudProps.DataCenter
+		} else {
+			return "", bosherr.Errorf("Creating disk with size '%d': Invalid datacenter name specified.", size)
+		}
 	}
 
-	disk, err := a.diskCreator.Create(size, cloudProps, vm.GetDataCenterId())
+	// Create the Disk
+	disk, err := cd.diskService.Create(size, cloudProps.Iops, location, cloudProps.SnapshotSpace)
 	if err != nil {
-		return "0", bosherr.WrapErrorf(err, "Creating disk of size '%d'", size)
+		return "", bosherr.WrapErrorf(err, "Creating disk with size '%d'", size)
 	}
 
-	return DiskCID(disk.ID()).String(), nil
+	return DiskCID(disk).String(), nil
 }

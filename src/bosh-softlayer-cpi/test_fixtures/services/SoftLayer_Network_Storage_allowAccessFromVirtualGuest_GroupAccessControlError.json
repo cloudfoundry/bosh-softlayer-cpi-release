@@ -1,0 +1,4 @@
+{
+    "error": "Access denied, not yet ready for mount",
+    "code": "SoftLayer_Exception_Network_Storage_Group_AccessControlError"
+}

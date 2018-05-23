@@ -1,0 +1,33 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source: {repository: boshcpi/cpi-certification}
+
+inputs:
+  - name: bosh-deployment
+  - name: bosh-cpi-release
+  - name: cpi-release
+  - name: stemcell
+  - name: bosh-cli
+  - name: environment
+
+params:
+  BAT_INFRASTRUCTURE:      ""
+  BOSH_CLIENT:             ""
+  BOSH_CLIENT_SECRET:      ""
+  BOSH_SL_USERNAME:        ""
+  BOSH_SL_API_KEY:         ""
+  BOSH_SL_DATACENTER:      ""
+  BOSH_SL_VLAN_PUBLIC:     ""
+  BOSH_SL_VLAN_PRIVATE:    ""
+  BOSH_SL_VM_DOMAIN:       ""
+  BOSH_SL_VM_NAME_PREFIX:  ""
+
+outputs:
+  - name: director-state
+
+run:
+  path: bosh-cpi-release/ci/bats/tasks/deploy-director-softlayer.sh
+

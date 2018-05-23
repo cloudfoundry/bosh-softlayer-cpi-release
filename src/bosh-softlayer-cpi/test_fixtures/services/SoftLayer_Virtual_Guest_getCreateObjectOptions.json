@@ -1,0 +1,3421 @@
+{
+    "blockDevices": [
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": "0",
+                "recurringFee": "0",
+                "item": {
+                    "description": "25 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "0",
+                        "diskImage": {
+                            "capacity": 25
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".012",
+                "recurringFee": "7.46",
+                "item": {
+                    "description": "100 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "0",
+                        "diskImage": {
+                            "capacity": 100
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".005",
+                "recurringFee": "3.31",
+                "item": {
+                    "description": "10 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "2",
+                        "diskImage": {
+                            "capacity": 10
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".007",
+                "recurringFee": "4.14",
+                "item": {
+                    "description": "20 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "2",
+                        "diskImage": {
+                            "capacity": 20
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".007",
+                "recurringFee": "4.71",
+                "item": {
+                    "description": "25 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "2",
+                        "diskImage": {
+                            "capacity": 25
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".008",
+                "recurringFee": "4.97",
+                "item": {
+                    "description": "30 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "2",
+                        "diskImage": {
+                            "capacity": 30
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".009",
+                "recurringFee": "5.8",
+                "item": {
+                    "description": "40 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "2",
+                        "diskImage": {
+                            "capacity": 40
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".01",
+                "recurringFee": "6.63",
+                "item": {
+                    "description": "50 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "2",
+                        "diskImage": {
+                            "capacity": 50
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".011",
+                "recurringFee": "7.04",
+                "item": {
+                    "description": "75 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "2",
+                        "diskImage": {
+                            "capacity": 75
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".012",
+                "recurringFee": "7.46",
+                "item": {
+                    "description": "100 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "2",
+                        "diskImage": {
+                            "capacity": 100
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".012",
+                "recurringFee": "7.87",
+                "item": {
+                    "description": "125 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "2",
+                        "diskImage": {
+                            "capacity": 125
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".013",
+                "recurringFee": "8.29",
+                "item": {
+                    "description": "150 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "2",
+                        "diskImage": {
+                            "capacity": 150
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".014",
+                "recurringFee": "8.7",
+                "item": {
+                    "description": "175 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "2",
+                        "diskImage": {
+                            "capacity": 175
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".015",
+                "recurringFee": "9.11",
+                "item": {
+                    "description": "200 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "2",
+                        "diskImage": {
+                            "capacity": 200
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".016",
+                "recurringFee": "10.36",
+                "item": {
+                    "description": "250 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "2",
+                        "diskImage": {
+                            "capacity": 250
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".02",
+                "recurringFee": "13.46",
+                "item": {
+                    "description": "300 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "2",
+                        "diskImage": {
+                            "capacity": 300
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".025",
+                "recurringFee": "16.57",
+                "item": {
+                    "description": "350 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "2",
+                        "diskImage": {
+                            "capacity": 350
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".028",
+                "recurringFee": "18.64",
+                "item": {
+                    "description": "400 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "2",
+                        "diskImage": {
+                            "capacity": 400
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".031",
+                "recurringFee": "20.71",
+                "item": {
+                    "description": "500 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "2",
+                        "diskImage": {
+                            "capacity": 500
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".047",
+                "recurringFee": "31.07",
+                "item": {
+                    "description": "750 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "2",
+                        "diskImage": {
+                            "capacity": 750
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".062",
+                "recurringFee": "41.43",
+                "item": {
+                    "description": "1.00 TB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "2",
+                        "diskImage": {
+                            "capacity": 1000
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".094",
+                "recurringFee": "62.14",
+                "item": {
+                    "description": "1.50 TB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "2",
+                        "diskImage": {
+                            "capacity": 1500
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".125",
+                "recurringFee": "82.86",
+                "item": {
+                    "description": "2.00 TB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "2",
+                        "diskImage": {
+                            "capacity": 2000
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".005",
+                "recurringFee": "3.31",
+                "item": {
+                    "description": "10 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "3",
+                        "diskImage": {
+                            "capacity": 10
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".007",
+                "recurringFee": "4.14",
+                "item": {
+                    "description": "20 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "3",
+                        "diskImage": {
+                            "capacity": 20
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".007",
+                "recurringFee": "4.71",
+                "item": {
+                    "description": "25 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "3",
+                        "diskImage": {
+                            "capacity": 25
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".008",
+                "recurringFee": "4.97",
+                "item": {
+                    "description": "30 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "3",
+                        "diskImage": {
+                            "capacity": 30
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".009",
+                "recurringFee": "5.8",
+                "item": {
+                    "description": "40 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "3",
+                        "diskImage": {
+                            "capacity": 40
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".01",
+                "recurringFee": "6.63",
+                "item": {
+                    "description": "50 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "3",
+                        "diskImage": {
+                            "capacity": 50
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".011",
+                "recurringFee": "7.04",
+                "item": {
+                    "description": "75 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "3",
+                        "diskImage": {
+                            "capacity": 75
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".012",
+                "recurringFee": "7.46",
+                "item": {
+                    "description": "100 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "3",
+                        "diskImage": {
+                            "capacity": 100
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".012",
+                "recurringFee": "7.87",
+                "item": {
+                    "description": "125 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "3",
+                        "diskImage": {
+                            "capacity": 125
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".013",
+                "recurringFee": "8.29",
+                "item": {
+                    "description": "150 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "3",
+                        "diskImage": {
+                            "capacity": 150
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".014",
+                "recurringFee": "8.7",
+                "item": {
+                    "description": "175 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "3",
+                        "diskImage": {
+                            "capacity": 175
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".015",
+                "recurringFee": "9.11",
+                "item": {
+                    "description": "200 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "3",
+                        "diskImage": {
+                            "capacity": 200
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".016",
+                "recurringFee": "10.36",
+                "item": {
+                    "description": "250 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "3",
+                        "diskImage": {
+                            "capacity": 250
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".02",
+                "recurringFee": "13.46",
+                "item": {
+                    "description": "300 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "3",
+                        "diskImage": {
+                            "capacity": 300
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".025",
+                "recurringFee": "16.57",
+                "item": {
+                    "description": "350 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "3",
+                        "diskImage": {
+                            "capacity": 350
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".028",
+                "recurringFee": "18.64",
+                "item": {
+                    "description": "400 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "3",
+                        "diskImage": {
+                            "capacity": 400
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".031",
+                "recurringFee": "20.71",
+                "item": {
+                    "description": "500 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "3",
+                        "diskImage": {
+                            "capacity": 500
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".047",
+                "recurringFee": "31.07",
+                "item": {
+                    "description": "750 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "3",
+                        "diskImage": {
+                            "capacity": 750
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".062",
+                "recurringFee": "41.43",
+                "item": {
+                    "description": "1.00 TB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "3",
+                        "diskImage": {
+                            "capacity": 1000
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".094",
+                "recurringFee": "62.14",
+                "item": {
+                    "description": "1.50 TB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "3",
+                        "diskImage": {
+                            "capacity": 1500
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".125",
+                "recurringFee": "82.86",
+                "item": {
+                    "description": "2.00 TB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "3",
+                        "diskImage": {
+                            "capacity": 2000
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".005",
+                "recurringFee": "3.31",
+                "item": {
+                    "description": "10 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "4",
+                        "diskImage": {
+                            "capacity": 10
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".007",
+                "recurringFee": "4.14",
+                "item": {
+                    "description": "20 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "4",
+                        "diskImage": {
+                            "capacity": 20
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".007",
+                "recurringFee": "4.71",
+                "item": {
+                    "description": "25 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "4",
+                        "diskImage": {
+                            "capacity": 25
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".008",
+                "recurringFee": "4.97",
+                "item": {
+                    "description": "30 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "4",
+                        "diskImage": {
+                            "capacity": 30
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".009",
+                "recurringFee": "5.8",
+                "item": {
+                    "description": "40 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "4",
+                        "diskImage": {
+                            "capacity": 40
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".01",
+                "recurringFee": "6.63",
+                "item": {
+                    "description": "50 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "4",
+                        "diskImage": {
+                            "capacity": 50
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".011",
+                "recurringFee": "7.04",
+                "item": {
+                    "description": "75 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "4",
+                        "diskImage": {
+                            "capacity": 75
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".012",
+                "recurringFee": "7.46",
+                "item": {
+                    "description": "100 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "4",
+                        "diskImage": {
+                            "capacity": 100
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".012",
+                "recurringFee": "7.87",
+                "item": {
+                    "description": "125 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "4",
+                        "diskImage": {
+                            "capacity": 125
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".013",
+                "recurringFee": "8.29",
+                "item": {
+                    "description": "150 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "4",
+                        "diskImage": {
+                            "capacity": 150
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".014",
+                "recurringFee": "8.7",
+                "item": {
+                    "description": "175 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "4",
+                        "diskImage": {
+                            "capacity": 175
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".015",
+                "recurringFee": "9.11",
+                "item": {
+                    "description": "200 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "4",
+                        "diskImage": {
+                            "capacity": 200
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".016",
+                "recurringFee": "10.36",
+                "item": {
+                    "description": "250 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "4",
+                        "diskImage": {
+                            "capacity": 250
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".02",
+                "recurringFee": "13.46",
+                "item": {
+                    "description": "300 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "4",
+                        "diskImage": {
+                            "capacity": 300
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".025",
+                "recurringFee": "16.57",
+                "item": {
+                    "description": "350 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "4",
+                        "diskImage": {
+                            "capacity": 350
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".028",
+                "recurringFee": "18.64",
+                "item": {
+                    "description": "400 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "4",
+                        "diskImage": {
+                            "capacity": 400
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".031",
+                "recurringFee": "20.71",
+                "item": {
+                    "description": "500 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "4",
+                        "diskImage": {
+                            "capacity": 500
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".047",
+                "recurringFee": "31.07",
+                "item": {
+                    "description": "750 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "4",
+                        "diskImage": {
+                            "capacity": 750
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".062",
+                "recurringFee": "41.43",
+                "item": {
+                    "description": "1.00 TB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "4",
+                        "diskImage": {
+                            "capacity": 1000
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".094",
+                "recurringFee": "62.14",
+                "item": {
+                    "description": "1.50 TB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "4",
+                        "diskImage": {
+                            "capacity": 1500
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".125",
+                "recurringFee": "82.86",
+                "item": {
+                    "description": "2.00 TB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "4",
+                        "diskImage": {
+                            "capacity": 2000
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".005",
+                "recurringFee": "3.31",
+                "item": {
+                    "description": "10 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "5",
+                        "diskImage": {
+                            "capacity": 10
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".007",
+                "recurringFee": "4.14",
+                "item": {
+                    "description": "20 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "5",
+                        "diskImage": {
+                            "capacity": 20
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".007",
+                "recurringFee": "4.71",
+                "item": {
+                    "description": "25 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "5",
+                        "diskImage": {
+                            "capacity": 25
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".008",
+                "recurringFee": "4.97",
+                "item": {
+                    "description": "30 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "5",
+                        "diskImage": {
+                            "capacity": 30
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".009",
+                "recurringFee": "5.8",
+                "item": {
+                    "description": "40 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "5",
+                        "diskImage": {
+                            "capacity": 40
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".01",
+                "recurringFee": "6.63",
+                "item": {
+                    "description": "50 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "5",
+                        "diskImage": {
+                            "capacity": 50
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".011",
+                "recurringFee": "7.04",
+                "item": {
+                    "description": "75 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "5",
+                        "diskImage": {
+                            "capacity": 75
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".012",
+                "recurringFee": "7.46",
+                "item": {
+                    "description": "100 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "5",
+                        "diskImage": {
+                            "capacity": 100
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".012",
+                "recurringFee": "7.87",
+                "item": {
+                    "description": "125 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "5",
+                        "diskImage": {
+                            "capacity": 125
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".013",
+                "recurringFee": "8.29",
+                "item": {
+                    "description": "150 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "5",
+                        "diskImage": {
+                            "capacity": 150
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".014",
+                "recurringFee": "8.7",
+                "item": {
+                    "description": "175 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "5",
+                        "diskImage": {
+                            "capacity": 175
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".015",
+                "recurringFee": "9.11",
+                "item": {
+                    "description": "200 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "5",
+                        "diskImage": {
+                            "capacity": 200
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".016",
+                "recurringFee": "10.36",
+                "item": {
+                    "description": "250 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "5",
+                        "diskImage": {
+                            "capacity": 250
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".02",
+                "recurringFee": "13.46",
+                "item": {
+                    "description": "300 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "5",
+                        "diskImage": {
+                            "capacity": 300
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".025",
+                "recurringFee": "16.57",
+                "item": {
+                    "description": "350 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "5",
+                        "diskImage": {
+                            "capacity": 350
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".028",
+                "recurringFee": "18.64",
+                "item": {
+                    "description": "400 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "5",
+                        "diskImage": {
+                            "capacity": 400
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".031",
+                "recurringFee": "20.71",
+                "item": {
+                    "description": "500 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "5",
+                        "diskImage": {
+                            "capacity": 500
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".047",
+                "recurringFee": "31.07",
+                "item": {
+                    "description": "750 GB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "5",
+                        "diskImage": {
+                            "capacity": 750
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".062",
+                "recurringFee": "41.43",
+                "item": {
+                    "description": "1.00 TB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "5",
+                        "diskImage": {
+                            "capacity": 1000
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".094",
+                "recurringFee": "62.14",
+                "item": {
+                    "description": "1.50 TB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "5",
+                        "diskImage": {
+                            "capacity": 1500
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".125",
+                "recurringFee": "82.86",
+                "item": {
+                    "description": "2.00 TB (SAN)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "5",
+                        "diskImage": {
+                            "capacity": 2000
+                        }
+                    }
+                ],
+                "localDiskFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": "0",
+                "recurringFee": "0",
+                "item": {
+                    "description": "25 GB (LOCAL)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "0",
+                        "diskImage": {
+                            "capacity": 25
+                        }
+                    }
+                ],
+                "localDiskFlag": true
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".004",
+                "recurringFee": "2.9",
+                "item": {
+                    "description": "100 GB (LOCAL)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "0",
+                        "diskImage": {
+                            "capacity": 100
+                        }
+                    }
+                ],
+                "localDiskFlag": true
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".001",
+                "recurringFee": ".73",
+                "item": {
+                    "description": "25 GB (LOCAL)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "2",
+                        "diskImage": {
+                            "capacity": 25
+                        }
+                    }
+                ],
+                "localDiskFlag": true
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".004",
+                "recurringFee": "2.9",
+                "item": {
+                    "description": "100 GB (LOCAL)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "2",
+                        "diskImage": {
+                            "capacity": 100
+                        }
+                    }
+                ],
+                "localDiskFlag": true
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".007",
+                "recurringFee": "4.35",
+                "item": {
+                    "description": "150 GB (LOCAL)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "2",
+                        "diskImage": {
+                            "capacity": 150
+                        }
+                    }
+                ],
+                "localDiskFlag": true
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".009",
+                "recurringFee": "5.8",
+                "item": {
+                    "description": "200 GB (LOCAL)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "2",
+                        "diskImage": {
+                            "capacity": 200
+                        }
+                    }
+                ],
+                "localDiskFlag": true
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".013",
+                "recurringFee": "8.7",
+                "item": {
+                    "description": "300 GB (LOCAL)"
+                }
+            },
+            "template": {
+                "id": null,
+                "blockDevices": [
+                    {
+                        "device": "2",
+                        "diskImage": {
+                            "capacity": 300
+                        }
+                    }
+                ],
+                "localDiskFlag": true
+            }
+        }
+    ],
+    "datacenters": [
+        {
+            "template": {
+                "datacenter": {
+                    "name": "ams01"
+                }
+            }
+        },
+        {
+            "template": {
+                "datacenter": {
+                    "name": "ams03"
+                }
+            }
+        },
+        {
+            "template": {
+                "datacenter": {
+                    "name": "che01"
+                }
+            }
+        },
+        {
+            "template": {
+                "datacenter": {
+                    "name": "dal01"
+                }
+            }
+        },
+        {
+            "template": {
+                "datacenter": {
+                    "name": "dal05"
+                }
+            }
+        },
+        {
+            "template": {
+                "datacenter": {
+                    "name": "dal06"
+                }
+            }
+        },
+        {
+            "template": {
+                "datacenter": {
+                    "name": "dal09"
+                }
+            }
+        },
+        {
+            "template": {
+                "datacenter": {
+                    "name": "dal10"
+                }
+            }
+        },
+        {
+            "template": {
+                "datacenter": {
+                    "name": "fra02"
+                }
+            }
+        },
+        {
+            "template": {
+                "datacenter": {
+                    "name": "hkg02"
+                }
+            }
+        },
+        {
+            "template": {
+                "datacenter": {
+                    "name": "hou02"
+                }
+            }
+        },
+        {
+            "template": {
+                "datacenter": {
+                    "name": "lon02"
+                }
+            }
+        },
+        {
+            "template": {
+                "datacenter": {
+                    "name": "mel01"
+                }
+            }
+        },
+        {
+            "template": {
+                "datacenter": {
+                    "name": "mex01"
+                }
+            }
+        },
+        {
+            "template": {
+                "datacenter": {
+                    "name": "mil01"
+                }
+            }
+        },
+        {
+            "template": {
+                "datacenter": {
+                    "name": "mon01"
+                }
+            }
+        },
+        {
+            "template": {
+                "datacenter": {
+                    "name": "osl01"
+                }
+            }
+        },
+        {
+            "template": {
+                "datacenter": {
+                    "name": "par01"
+                }
+            }
+        },
+        {
+            "template": {
+                "datacenter": {
+                    "name": "sjc01"
+                }
+            }
+        },
+        {
+            "template": {
+                "datacenter": {
+                    "name": "sjc03"
+                }
+            }
+        },
+        {
+            "template": {
+                "datacenter": {
+                    "name": "sao01"
+                }
+            }
+        },
+        {
+            "template": {
+                "datacenter": {
+                    "name": "seo01"
+                }
+            }
+        },
+        {
+            "template": {
+                "datacenter": {
+                    "name": "sea01"
+                }
+            }
+        },
+        {
+            "template": {
+                "datacenter": {
+                    "name": "sng01"
+                }
+            }
+        },
+        {
+            "template": {
+                "datacenter": {
+                    "name": "syd01"
+                }
+            }
+        },
+        {
+            "template": {
+                "datacenter": {
+                    "name": "tok02"
+                }
+            }
+        },
+        {
+            "template": {
+                "datacenter": {
+                    "name": "tor01"
+                }
+            }
+        },
+        {
+            "template": {
+                "datacenter": {
+                    "name": "wdc01"
+                }
+            }
+        },
+        {
+            "template": {
+                "datacenter": {
+                    "name": "wdc04"
+                }
+            }
+        }
+    ],
+    "memory": [
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".011",
+                "recurringFee": "7.25",
+                "item": {
+                    "description": "1 GB"
+                }
+            },
+            "template": {
+                "maxMemory": 1024
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".022",
+                "recurringFee": "14.5",
+                "item": {
+                    "description": "2 GB"
+                }
+            },
+            "template": {
+                "maxMemory": 2048
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".044",
+                "recurringFee": "29",
+                "item": {
+                    "description": "4 GB"
+                }
+            },
+            "template": {
+                "maxMemory": 4096
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".063",
+                "recurringFee": "42.05",
+                "item": {
+                    "description": "6 GB"
+                }
+            },
+            "template": {
+                "maxMemory": 6144
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".083",
+                "recurringFee": "55.1",
+                "item": {
+                    "description": "8 GB"
+                }
+            },
+            "template": {
+                "maxMemory": 8192
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".118",
+                "recurringFee": "78.3",
+                "item": {
+                    "description": "12 GB"
+                }
+            },
+            "template": {
+                "maxMemory": 12288
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".153",
+                "recurringFee": "101.5",
+                "item": {
+                    "description": "16 GB "
+                }
+            },
+            "template": {
+                "maxMemory": 16384
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".258",
+                "recurringFee": "171.1",
+                "item": {
+                    "description": "32 GB"
+                }
+            },
+            "template": {
+                "maxMemory": 32768
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".345",
+                "recurringFee": "229.1",
+                "item": {
+                    "description": "48 GB"
+                }
+            },
+            "template": {
+                "maxMemory": 49152
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".433",
+                "recurringFee": "287.1",
+                "item": {
+                    "description": "64 GB"
+                }
+            },
+            "template": {
+                "maxMemory": 65536
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".677",
+                "recurringFee": "449.5",
+                "item": {
+                    "description": "128 GB"
+                }
+            },
+            "template": {
+                "maxMemory": 131072
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".926",
+                "recurringFee": "614.8",
+                "item": {
+                    "description": "242 GB"
+                }
+            },
+            "template": {
+                "maxMemory": 247808
+            }
+        }
+    ],
+    "networkComponents": [
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": "0",
+                "recurringFee": "0",
+                "item": {
+                    "description": "10 Mbps Public & Private Network Uplinks"
+                }
+            },
+            "template": {
+                "id": null,
+                "networkComponents": [
+                    {
+                        "maxSpeed": 10
+                    }
+                ],
+                "privateNetworkOnlyFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": "0",
+                "recurringFee": "0",
+                "item": {
+                    "description": "100 Mbps Public & Private Network Uplinks"
+                }
+            },
+            "template": {
+                "id": null,
+                "networkComponents": [
+                    {
+                        "maxSpeed": 100
+                    }
+                ],
+                "privateNetworkOnlyFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".028",
+                "recurringFee": "10",
+                "item": {
+                    "description": "1 Gbps Public & Private Network Uplinks"
+                }
+            },
+            "template": {
+                "id": null,
+                "networkComponents": [
+                    {
+                        "maxSpeed": 1000
+                    }
+                ],
+                "privateNetworkOnlyFlag": false
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": "0",
+                "recurringFee": "0",
+                "item": {
+                    "description": "10 Mbps Private Network Uplink"
+                }
+            },
+            "template": {
+                "id": null,
+                "networkComponents": [
+                    {
+                        "maxSpeed": 10
+                    }
+                ],
+                "privateNetworkOnlyFlag": true
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": "0",
+                "recurringFee": "0",
+                "item": {
+                    "description": "100 Mbps Private Network Uplink"
+                }
+            },
+            "template": {
+                "id": null,
+                "networkComponents": [
+                    {
+                        "maxSpeed": 100
+                    }
+                ],
+                "privateNetworkOnlyFlag": true
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".014",
+                "recurringFee": "5",
+                "item": {
+                    "description": "1 Gbps Private Network Uplink"
+                }
+            },
+            "template": {
+                "id": null,
+                "networkComponents": [
+                    {
+                        "maxSpeed": 1000
+                    }
+                ],
+                "privateNetworkOnlyFlag": true
+            }
+        }
+    ],
+    "operatingSystems": [
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": "0",
+                "recurringFee": "0",
+                "item": {
+                    "description": "CentOS - Latest"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "CENTOS_LATEST"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": "0",
+                "recurringFee": "0",
+                "item": {
+                    "description": "CentOS - Latest (64 bit)"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "CENTOS_LATEST_64"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": "0",
+                "recurringFee": "0",
+                "item": {
+                    "description": "CentOS - Latest (32 bit)"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "CENTOS_LATEST_32"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": "0",
+                "recurringFee": "0",
+                "item": {
+                    "description": "CentOS 7.x - Minimal Install (64 bit)"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "CENTOS_7_64"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": "0",
+                "recurringFee": "0",
+                "item": {
+                    "description": "CentOS 6.x - Minimal Install (64 bit)"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "CENTOS_6_64"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": "0",
+                "recurringFee": "0",
+                "item": {
+                    "description": "CentOS 6.x - Minimal Install (32 bit)"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "CENTOS_6_32"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": "0",
+                "recurringFee": "0",
+                "item": {
+                    "description": "CentOS 5.x - Minimal Install (64 bit)"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "CENTOS_5_64"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": "0",
+                "recurringFee": "0",
+                "item": {
+                    "description": "CentOS 5.x - Minimal Install (32 bit)"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "CENTOS_5_32"
+            }
+        },
+        {
+            "itemPrice": {
+                "recurringFee": "8.7",
+                "item": {
+                    "description": "CloudLinux - Latest"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "CLOUDLINUX_LATEST"
+            }
+        },
+        {
+            "itemPrice": {
+                "recurringFee": "8.7",
+                "item": {
+                    "description": "CloudLinux - Latest (64 bit)"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "CLOUDLINUX_LATEST_64"
+            }
+        },
+        {
+            "itemPrice": {
+                "recurringFee": "8.7",
+                "item": {
+                    "description": "CloudLinux - Latest (32 bit)"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "CLOUDLINUX_LATEST_32"
+            }
+        },
+        {
+            "itemPrice": {
+                "recurringFee": "8.7",
+                "item": {
+                    "description": "CloudLinux 6.x (64 bit)"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "CLOUDLINUX_6_64"
+            }
+        },
+        {
+            "itemPrice": {
+                "recurringFee": "8.7",
+                "item": {
+                    "description": "CloudLinux 6.x (32 bit)"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "CLOUDLINUX_6_32"
+            }
+        },
+        {
+            "itemPrice": {
+                "recurringFee": "8.7",
+                "item": {
+                    "description": "CloudLinux 5.x (64 bit)"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "CLOUDLINUX_5_64"
+            }
+        },
+        {
+            "itemPrice": {
+                "recurringFee": "8.7",
+                "item": {
+                    "description": "CloudLinux 5.x (32 bit)"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "CLOUDLINUX_5_32"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": "0",
+                "recurringFee": "0",
+                "item": {
+                    "description": "CoreOS - Latest"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "COREOS_LATEST"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": "0",
+                "recurringFee": "0",
+                "item": {
+                    "description": "CoreOS - Latest (64 bit)"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "COREOS_LATEST_64"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": "0",
+                "recurringFee": "0",
+                "item": {
+                    "description": "CoreOS Stable"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "COREOS_CURRENT_64"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": "0",
+                "recurringFee": "0",
+                "item": {
+                    "description": "Debian - Latest"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "DEBIAN_LATEST"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": "0",
+                "recurringFee": "0",
+                "item": {
+                    "description": "Debian - Latest (64 bit)"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "DEBIAN_LATEST_64"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": "0",
+                "recurringFee": "0",
+                "item": {
+                    "description": "Debian - Latest (32 bit)"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "DEBIAN_LATEST_32"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": "0",
+                "recurringFee": "0",
+                "item": {
+                    "description": "Debian GNU\/Linux 8.x jessie\/Stable - Minimal Install (64 bit)"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "DEBIAN_8_64"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": "0",
+                "recurringFee": "0",
+                "item": {
+                    "description": "Debian GNU\/Linux 8.x jessie\/Stable - Minimal Install (32 bit)"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "DEBIAN_8_32"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": "0",
+                "recurringFee": "0",
+                "item": {
+                    "description": "Debian GNU\/Linux 7.x Wheezy\/Stable - Minimal Install (64 bit)"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "DEBIAN_7_64"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": "0",
+                "recurringFee": "0",
+                "item": {
+                    "description": "Debian GNU\/Linux 7.x Wheezy\/Stable - Minimal Install (32 bit)"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "DEBIAN_7_32"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": "0",
+                "recurringFee": "0",
+                "item": {
+                    "description": "Debian GNU\/Linux 6.x Squeeze\/Stable - Minimal Install (64 bit)"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "DEBIAN_6_64"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": "0",
+                "recurringFee": "0",
+                "item": {
+                    "description": "Debian GNU\/Linux 6.x Squeeze\/Stable - Minimal Install (32 bit)"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "DEBIAN_6_32"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".058",
+                "recurringFee": "32.63",
+                "item": {
+                    "description": "Redhat EL - Latest"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "REDHAT_LATEST"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".058",
+                "recurringFee": "32.63",
+                "item": {
+                    "description": "Redhat EL - Latest (64 bit)"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "REDHAT_LATEST_64"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".058",
+                "recurringFee": "32.63",
+                "item": {
+                    "description": "Redhat EL - Latest (32 bit)"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "REDHAT_LATEST_32"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".058",
+                "recurringFee": "32.63",
+                "item": {
+                    "description": "Red Hat Enterprise Linux 7.x - Minimal Install (64 bit)"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "REDHAT_7_64"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".058",
+                "recurringFee": "32.63",
+                "item": {
+                    "description": "Red Hat Enterprise Linux 6.x - Minimal Install (64 bit)"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "REDHAT_6_64"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".058",
+                "recurringFee": "32.63",
+                "item": {
+                    "description": "Red Hat Enterprise Linux 6.x - Minimal Install (32 bit)"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "REDHAT_6_32"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".058",
+                "recurringFee": "32.63",
+                "item": {
+                    "description": "Red Hat Enterprise Linux 5.x - Minimal Install (64 bit)"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "REDHAT_5_64"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".058",
+                "recurringFee": "32.63",
+                "item": {
+                    "description": "Red Hat Enterprise Linux 5.x - Minimal Install (32 bit)"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "REDHAT_5_32"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": "0",
+                "recurringFee": "0",
+                "item": {
+                    "description": "Ubuntu - Latest"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "UBUNTU_LATEST"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": "0",
+                "recurringFee": "0",
+                "item": {
+                    "description": "Ubuntu - Latest (64 bit)"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "UBUNTU_LATEST_64"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": "0",
+                "recurringFee": "0",
+                "item": {
+                    "description": "Ubuntu - Latest (32 bit)"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "UBUNTU_LATEST_32"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": "0",
+                "recurringFee": "0",
+                "item": {
+                    "description": "Ubuntu Linux 16.04 LTS Xenial Xerus Minimal Install (64 bit) "
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "UBUNTU_16_64"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": "0",
+                "recurringFee": "0",
+                "item": {
+                    "description": "Ubuntu Linux 14.04 LTS Trusty Tahr - Minimal Install (64 bit)"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "UBUNTU_14_64"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": "0",
+                "recurringFee": "0",
+                "item": {
+                    "description": "Ubuntu Linux 14.04 LTS Trusty Tahr - Minimal Install (32 bit)"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "UBUNTU_14_32"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": "0",
+                "recurringFee": "0",
+                "item": {
+                    "description": "Ubuntu Linux 12.04 LTS Precise Pangolin - Minimal Install (64 bit)"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "UBUNTU_12_64"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": "0",
+                "recurringFee": "0",
+                "item": {
+                    "description": "Ubuntu Linux 12.04 LTS Precise Pangolin - Minimal Install (32 bit)"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "UBUNTU_12_32"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": "0",
+                "recurringFee": "0",
+                "item": {
+                    "description": "Ubuntu Linux 10.04 LTS Lucid Lynx - Minimal Install (64 bit)"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "UBUNTU_10_64"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": "0",
+                "recurringFee": "0",
+                "item": {
+                    "description": "Ubuntu Linux 10.04 LTS Lucid Lynx - Minimal Install (32 bit)"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "UBUNTU_10_32"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": "0",
+                "recurringFee": "0",
+                "item": {
+                    "description": "Vyatta Vyatta Community Edition for VSI - Latest"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "VYATTACE_LATEST"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": "0",
+                "recurringFee": "0",
+                "item": {
+                    "description": "Vyatta Vyatta Community Edition for VSI - Latest (64 bit)"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "VYATTACE_LATEST_64"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": "0",
+                "recurringFee": "0",
+                "item": {
+                    "description": "Vyatta 6.6 Community Edition (64 bit)"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "VYATTACE_6.6_64"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": "0",
+                "recurringFee": "0",
+                "item": {
+                    "description": "Vyatta 6.5 Community Edition (64 bit)"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "VYATTACE_6.5_64"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".017",
+                "recurringFee": "12.33",
+                "item": {
+                    "description": "Windows - Latest"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "WIN_LATEST"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".017",
+                "recurringFee": "12.33",
+                "item": {
+                    "description": "Windows - Latest (64 bit)"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "WIN_LATEST_64"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".024",
+                "recurringFee": "17",
+                "item": {
+                    "description": "Windows - Latest (32 bit)"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "WIN_LATEST_32"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".017",
+                "recurringFee": "12.33",
+                "item": {
+                    "description": "Windows Server 2012 R2 Standard Edition (64 bit)"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "WIN_2012-STD-R2_64"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".017",
+                "recurringFee": "12.33",
+                "item": {
+                    "description": "Windows Server 2012 Standard Edition (64 bit)"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "WIN_2012-STD_64"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".024",
+                "recurringFee": "17",
+                "item": {
+                    "description": "Windows Server 2008 Standard Edition SP2 (64bit)"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "WIN_2008-STD-SP2_64"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".024",
+                "recurringFee": "17",
+                "item": {
+                    "description": "Windows Server 2008 Standard Edition SP2 (32bit)"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "WIN_2008-STD-SP2_32"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".017",
+                "recurringFee": "12.33",
+                "item": {
+                    "description": "Windows Server 2008 R2 Standard Edition (64bit)"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "WIN_2008-STD-R2-SP1_64"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".036",
+                "recurringFee": "14.5",
+                "item": {
+                    "description": "Windows Server 2003 Standard SP2 with R2 (64 bit)"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "WIN_2003-STD-SP2-5_64"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".036",
+                "recurringFee": "14.5",
+                "item": {
+                    "description": "Windows Server 2003 Standard SP2 with R2 (32 bit)"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "WIN_2003-STD-SP2-5_32"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".036",
+                "recurringFee": "36.25",
+                "item": {
+                    "description": "Windows Server 2003 Enterprise SP2 with R2 (64 bit)"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "WIN_2003-ENT-SP2-5_64"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".036",
+                "recurringFee": "36.25",
+                "item": {
+                    "description": "Windows Server 2003 Enterprise SP2 with R2 (32 bit)"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "WIN_2003-ENT-SP2-5_32"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".131",
+                "recurringFee": "90.63",
+                "item": {
+                    "description": "Windows Server 2003 Datacenter SP2 with R2 (64 bit)"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "WIN_2003-DC-SP2-1_64"
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".131",
+                "recurringFee": "90.63",
+                "item": {
+                    "description": "Windows Server 2003 Datacenter SP2 with R2 (32 bit)"
+                }
+            },
+            "template": {
+                "id": null,
+                "operatingSystemReferenceCode": "WIN_2003-DC-SP2-1_32"
+            }
+        }
+    ],
+    "processors": [
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".017",
+                "recurringFee": "10.88",
+                "item": {
+                    "description": "1 x 2.0 GHz Core"
+                }
+            },
+            "template": {
+                "startCpus": 1
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".033",
+                "recurringFee": "21.75",
+                "item": {
+                    "description": "2 x 2.0 GHz Cores"
+                }
+            },
+            "template": {
+                "startCpus": 2
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".065",
+                "recurringFee": "43.5",
+                "item": {
+                    "description": "4 x 2.0 GHz Cores"
+                }
+            },
+            "template": {
+                "startCpus": 4
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".131",
+                "recurringFee": "87",
+                "item": {
+                    "description": "8 x 2.0 GHz Cores"
+                }
+            },
+            "template": {
+                "startCpus": 8
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".196",
+                "recurringFee": "130.5",
+                "item": {
+                    "description": "12 x 2.0 GHz Cores"
+                }
+            },
+            "template": {
+                "startCpus": 12
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".262",
+                "recurringFee": "174",
+                "item": {
+                    "description": "16 x 2.0 GHz Cores"
+                }
+            },
+            "template": {
+                "startCpus": 16
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".524",
+                "recurringFee": "348",
+                "item": {
+                    "description": "32 x 2.0 GHz Cores"
+                }
+            },
+            "template": {
+                "startCpus": 32
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".918",
+                "recurringFee": "609",
+                "item": {
+                    "description": "56 x 2.0 GHz Cores"
+                }
+            },
+            "template": {
+                "startCpus": 56
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".152",
+                "recurringFee": "100.78",
+                "item": {
+                    "description": "Private 1 x 2.0 GHz Core"
+                }
+            },
+            "template": {
+                "dedicatedAccountHostOnlyFlag": true,
+                "startCpus": 1
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".17",
+                "recurringFee": "112.38",
+                "item": {
+                    "description": "Private 2 x 2.0 GHz Cores"
+                }
+            },
+            "template": {
+                "dedicatedAccountHostOnlyFlag": true,
+                "startCpus": 2
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".185",
+                "recurringFee": "122.53",
+                "item": {
+                    "description": "Private 4 x 2.0 GHz Cores"
+                }
+            },
+            "template": {
+                "dedicatedAccountHostOnlyFlag": true,
+                "startCpus": 4
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".228",
+                "recurringFee": "151.53",
+                "item": {
+                    "description": "Private 8 x 2.0 GHz Cores"
+                }
+            },
+            "template": {
+                "dedicatedAccountHostOnlyFlag": true,
+                "startCpus": 8
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".447",
+                "recurringFee": "296.53",
+                "item": {
+                    "description": "Private 16 x 2.0 GHz Cores"
+                }
+            },
+            "template": {
+                "dedicatedAccountHostOnlyFlag": true,
+                "startCpus": 16
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": ".796",
+                "recurringFee": "528.53",
+                "item": {
+                    "description": "Private 32 x 2.0 GHz Cores"
+                }
+            },
+            "template": {
+                "dedicatedAccountHostOnlyFlag": true,
+                "startCpus": 32
+            }
+        },
+        {
+            "itemPrice": {
+                "hourlyRecurringFee": "1.321",
+                "recurringFee": "846.53",
+                "item": {
+                    "description": "Private 56 x 2.0 GHz Cores"
+                }
+            },
+            "template": {
+                "dedicatedAccountHostOnlyFlag": true,
+                "startCpus": 56
+            }
+        }
+    ]
+}

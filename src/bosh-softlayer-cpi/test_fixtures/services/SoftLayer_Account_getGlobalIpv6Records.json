@@ -1,0 +1,29 @@
+[
+    {
+        "id": 52743,
+        "ipAddress": {
+            "id": 65633739,
+            "ipAddress": "2607:f0d0:0003:0010:0000:0000:0000:0000",
+            "isBroadcast": false,
+            "isGateway": false,
+            "isNetwork": false,
+            "isReserved": false,
+            "subnetId": 426711,
+            "subnet": {
+                "broadcastAddress": "",
+                "cidr": 64,
+                "gateway": "2607:f0d0:0003:0010:0000:0000:0000:0001",
+                "id": 426711,
+                "isCustomerOwned": false,
+                "isCustomerRoutable": false,
+                "modifyDate": "2016-11-21T01:06:36-06:00",
+                "netmask": "ffff:ffff:ffff:ffff:0000:0000:0000:0000",
+                "networkIdentifier": "2607:f0d0:0003:0010:0000:0000:0000:0000",
+                "networkVlanId": null,
+                "totalIpAddresses": "18446744073709551616",
+                "usableIpAddressCount": "18446744073709551614",
+                "version": 6
+            }
+        }
+    }
+]

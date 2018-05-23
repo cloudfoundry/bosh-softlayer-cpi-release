@@ -48,7 +48,7 @@ jobs:
     plan:
     - aggregate:
       - {trigger: false, get: bosh-cpi-release, resource: bosh-cpi-release-in}
-      - {trigger: false, get: version-semver, params: {bump: {{cpi-release-bump}}}}
+      - {trigger: false, get: version-semver, params: {bump: patch}}
       - {trigger: false, get: bosh-cli, resource: bosh-cli}
 
     - task: build
@@ -141,14 +141,14 @@ resources:
   - name: bats
     type: git
     source:
-      uri: https://github.com/bluebosh/bosh-acceptance-tests
-      branch: master
+      uri: https://github.com/cloudfoundry/bosh-acceptance-tests.git
+      branch: gocli-bats
 
   - name: bosh-cpi-release-in
     type: git
     source:
       uri: git@github.com:cloudfoundry/bosh-softlayer-cpi-release.git
-      branch: master
+      branch: new_sl_with_actions
       private_key: {{github_private_key}}
       ignore_paths:
           - .final_builds/**/*.yml

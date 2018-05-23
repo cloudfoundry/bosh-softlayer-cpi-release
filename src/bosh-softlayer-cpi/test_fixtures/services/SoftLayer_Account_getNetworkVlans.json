@@ -1,0 +1,2095 @@
+[
+    {
+        "id": 275604,
+        "name": "Env3&2B Fabric Pub",
+        "vlanNumber": 1963,
+        "hardwareCount": 2,
+        "subnetCount": 5,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PUBLIC",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "fcr03a.dal05.softlayer.com",
+            "id": 122880,
+            "datacenter": {
+                "name": "dal05"
+            }
+        },
+        "totalPrimaryIpAddressCount": 18
+    },
+    {
+        "id": 275605,
+        "name": "Env3 OpenStack mgt.",
+        "vlanNumber": 1938,
+        "hardwareCount": 2,
+        "subnetCount": 2,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr03a.dal05.softlayer.com",
+            "id": 122762,
+            "datacenter": {
+                "name": "dal05"
+            }
+        },
+        "totalPrimaryIpAddressCount": 61
+    },
+    {
+        "id": 276117,
+        "name": "Env3 Fabric Priv1",
+        "vlanNumber": 1940,
+        "hardwareCount": 3,
+        "subnetCount": 6,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr03a.dal05.softlayer.com",
+            "id": 122762,
+            "datacenter": {
+                "name": "dal05"
+            }
+        },
+        "totalPrimaryIpAddressCount": 258
+    },
+    {
+        "id": 276982,
+        "name": "do not use",
+        "vlanNumber": 982,
+        "hardwareCount": 0,
+        "subnetCount": 6,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PUBLIC",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "fcr01a.dal05.softlayer.com",
+            "id": 51217,
+            "datacenter": {
+                "name": "dal05"
+            }
+        },
+        "totalPrimaryIpAddressCount": 26
+    },
+    {
+        "id": 276986,
+        "vlanNumber": 980,
+        "hardwareCount": 0,
+        "subnetCount": 2,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr01a.dal05.softlayer.com",
+            "id": 51218,
+            "datacenter": {
+                "name": "dal05"
+            }
+        },
+        "totalPrimaryIpAddressCount": 61
+    },
+    {
+        "id": 277089,
+        "name": "sjc01-stack-poc PUB",
+        "vlanNumber": 1000,
+        "hardwareCount": 0,
+        "subnetCount": 2,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PUBLIC",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "fcr02a.sjc01.softlayer.com",
+            "id": 159111,
+            "datacenter": {
+                "name": "sjc01"
+            }
+        },
+        "totalPrimaryIpAddressCount": 13
+    },
+    {
+        "id": 277090,
+        "name": "sjc01-stack-poc PRI",
+        "vlanNumber": 992,
+        "hardwareCount": 0,
+        "subnetCount": 0,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr02a.sjc01.softlayer.com",
+            "id": 159113,
+            "datacenter": {
+                "name": "sjc01"
+            }
+        },
+        "totalPrimaryIpAddressCount": 0
+    },
+    {
+        "id": 277119,
+        "vlanNumber": 2528,
+        "hardwareCount": 0,
+        "subnetCount": 2,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PUBLIC",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "fcr01a.sjc01.softlayer.com",
+            "id": 82412,
+            "datacenter": {
+                "name": "sjc01"
+            }
+        },
+        "totalPrimaryIpAddressCount": 18
+    },
+    {
+        "id": 292431,
+        "name": "Env4 DAL05 Fab Pub",
+        "vlanNumber": 1359,
+        "hardwareCount": 15,
+        "subnetCount": 15,
+        "virtualGuestCount": 179,
+        "firewallInterfaces": [],
+        "networkSpace": "PUBLIC",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "fcr03a.dal05.softlayer.com",
+            "id": 122880,
+            "datacenter": {
+                "name": "dal05"
+            }
+        },
+        "totalPrimaryIpAddressCount": 283
+    },
+    {
+        "id": 292432,
+        "name": "Env4 DAL05 Fab Pri",
+        "vlanNumber": 1963,
+        "hardwareCount": 14,
+        "subnetCount": 8,
+        "virtualGuestCount": 181,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr03a.dal05.softlayer.com",
+            "id": 122762,
+            "datacenter": {
+                "name": "dal05"
+            }
+        },
+        "totalPrimaryIpAddressCount": 378
+    },
+    {
+        "id": 293878,
+        "name": "Router Priv",
+        "vlanNumber": 1621,
+        "hardwareCount": 1,
+        "subnetCount": 1,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr04a.dal05.softlayer.com",
+            "id": 147566,
+            "datacenter": {
+                "name": "dal05"
+            }
+        },
+        "totalPrimaryIpAddressCount": 61
+    },
+    {
+        "id": 293879,
+        "name": "Router Pub",
+        "vlanNumber": 973,
+        "hardwareCount": 1,
+        "subnetCount": 2,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PUBLIC",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "fcr04a.dal05.softlayer.com",
+            "id": 147568,
+            "datacenter": {
+                "name": "dal05"
+            }
+        },
+        "totalPrimaryIpAddressCount": 5
+    },
+    {
+        "id": 298900,
+        "name": "Env2A SJC01 Fab Pub",
+        "vlanNumber": 1233,
+        "hardwareCount": 37,
+        "subnetCount": 30,
+        "virtualGuestCount": 195,
+        "firewallInterfaces": [],
+        "networkSpace": "PUBLIC",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "fcr02a.sjc01.softlayer.com",
+            "id": 159111,
+            "datacenter": {
+                "name": "sjc01"
+            }
+        },
+        "totalPrimaryIpAddressCount": 421
+    },
+    {
+        "id": 298903,
+        "name": "Env2A SJC01 Fab Pri",
+        "vlanNumber": 1234,
+        "hardwareCount": 37,
+        "subnetCount": 8,
+        "virtualGuestCount": 195,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr02a.sjc01.softlayer.com",
+            "id": 159113,
+            "datacenter": {
+                "name": "sjc01"
+            }
+        },
+        "totalPrimaryIpAddressCount": 503
+    },
+    {
+        "id": 300549,
+        "name": "Router in SJC only",
+        "vlanNumber": 1249,
+        "hardwareCount": 4,
+        "subnetCount": 1,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr02a.sjc01.softlayer.com",
+            "id": 159113,
+            "datacenter": {
+                "name": "sjc01"
+            }
+        },
+        "totalPrimaryIpAddressCount": 61
+    },
+    {
+        "id": 300550,
+        "name": "Router in SJC only",
+        "vlanNumber": 1249,
+        "hardwareCount": 4,
+        "subnetCount": 3,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PUBLIC",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "fcr02a.sjc01.softlayer.com",
+            "id": 159111,
+            "datacenter": {
+                "name": "sjc01"
+            }
+        },
+        "totalPrimaryIpAddressCount": 34
+    },
+    {
+        "id": 300590,
+        "name": "GW Transit VLAN",
+        "vlanNumber": 2091,
+        "hardwareCount": 6,
+        "subnetCount": 1,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr03a.dal05.softlayer.com",
+            "id": 122762,
+            "datacenter": {
+                "name": "dal05"
+            }
+        },
+        "totalPrimaryIpAddressCount": 61
+    },
+    {
+        "id": 300591,
+        "name": "GW Transit VLAN",
+        "vlanNumber": 2053,
+        "hardwareCount": 6,
+        "subnetCount": 3,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PUBLIC",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "fcr03a.dal05.softlayer.com",
+            "id": 122880,
+            "datacenter": {
+                "name": "dal05"
+            }
+        },
+        "totalPrimaryIpAddressCount": 34
+    },
+    {
+        "id": 310761,
+        "name": "Env2B OpenStack Mgt.",
+        "vlanNumber": 2148,
+        "hardwareCount": 0,
+        "subnetCount": 2,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr03a.dal05.softlayer.com",
+            "id": 122762,
+            "datacenter": {
+                "name": "dal05"
+            }
+        },
+        "totalPrimaryIpAddressCount": 61
+    },
+    {
+        "id": 310762,
+        "name": "Env2B VM Network",
+        "vlanNumber": 2149,
+        "hardwareCount": 0,
+        "subnetCount": 3,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr03a.dal05.softlayer.com",
+            "id": 122762,
+            "datacenter": {
+                "name": "dal05"
+            }
+        },
+        "totalPrimaryIpAddressCount": 5
+    },
+    {
+        "id": 312874,
+        "name": "SPD Public NEW!",
+        "vlanNumber": 1622,
+        "hardwareCount": 0,
+        "subnetCount": 6,
+        "virtualGuestCount": 1,
+        "firewallInterfaces": [],
+        "networkSpace": "PUBLIC",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "fcr04a.dal05.softlayer.com",
+            "id": 147568,
+            "datacenter": {
+                "name": "dal05"
+            }
+        },
+        "totalPrimaryIpAddressCount": 122
+    },
+    {
+        "id": 341134,
+        "name": "do not use",
+        "vlanNumber": 2397,
+        "hardwareCount": 0,
+        "subnetCount": 2,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PUBLIC",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "fcr01a.sjc01.softlayer.com",
+            "id": 82412,
+            "datacenter": {
+                "name": "sjc01"
+            }
+        },
+        "totalPrimaryIpAddressCount": 29
+    },
+    {
+        "id": 347872,
+        "name": "Env2A DAL06 Fab Pub",
+        "vlanNumber": 1339,
+        "hardwareCount": 14,
+        "subnetCount": 14,
+        "virtualGuestCount": 118,
+        "firewallInterfaces": [],
+        "networkSpace": "PUBLIC",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "fcr01a.dal06.softlayer.com",
+            "id": 209248,
+            "datacenter": {
+                "name": "dal06"
+            }
+        },
+        "totalPrimaryIpAddressCount": 264
+    },
+    {
+        "id": 347874,
+        "name": "Env2A DAL06 Fab Pri",
+        "vlanNumber": 1377,
+        "hardwareCount": 17,
+        "subnetCount": 8,
+        "virtualGuestCount": 133,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr01a.dal06.softlayer.com",
+            "id": 209251,
+            "datacenter": {
+                "name": "dal06"
+            }
+        },
+        "totalPrimaryIpAddressCount": 439
+    },
+    {
+        "id": 360314,
+        "name": "Env4 DAL06 Fab Pub",
+        "vlanNumber": 1407,
+        "hardwareCount": 8,
+        "subnetCount": 10,
+        "virtualGuestCount": 171,
+        "firewallInterfaces": [],
+        "networkSpace": "PUBLIC",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "fcr01a.dal06.softlayer.com",
+            "id": 209248,
+            "datacenter": {
+                "name": "dal06"
+            }
+        },
+        "totalPrimaryIpAddressCount": 372
+    },
+    {
+        "id": 360316,
+        "name": "Env4 DAL06 Fab Pri",
+        "vlanNumber": 1450,
+        "hardwareCount": 5,
+        "subnetCount": 8,
+        "virtualGuestCount": 167,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr01a.dal06.softlayer.com",
+            "id": 209251,
+            "datacenter": {
+                "name": "dal06"
+            }
+        },
+        "totalPrimaryIpAddressCount": 407
+    },
+    {
+        "id": 489696,
+        "name": "ITAU BlueMix Pub",
+        "vlanNumber": 1217,
+        "hardwareCount": 1,
+        "subnetCount": 3,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PUBLIC",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "fcr05a.wdc01.softlayer.com",
+            "id": 235748,
+            "datacenter": {
+                "name": "wdc01"
+            }
+        },
+        "totalPrimaryIpAddressCount": 61
+    },
+    {
+        "id": 489698,
+        "name": "ITAU BlueMix Priv",
+        "vlanNumber": 1290,
+        "hardwareCount": 1,
+        "subnetCount": 2,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr05a.wdc01.softlayer.com",
+            "id": 235754,
+            "datacenter": {
+                "name": "wdc01"
+            }
+        },
+        "totalPrimaryIpAddressCount": 125
+    },
+    {
+        "id": 494912,
+        "name": "Env4Test2 Fab",
+        "vlanNumber": 2033,
+        "hardwareCount": 0,
+        "subnetCount": 2,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PUBLIC",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "fcr01a.dal06.softlayer.com",
+            "id": 209248,
+            "datacenter": {
+                "name": "dal06"
+            }
+        },
+        "totalPrimaryIpAddressCount": 5
+    },
+    {
+        "id": 502890,
+        "vlanNumber": 1274,
+        "hardwareCount": 1,
+        "subnetCount": 1,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr05a.wdc01.softlayer.com",
+            "id": 235754,
+            "datacenter": {
+                "name": "wdc01"
+            }
+        },
+        "totalPrimaryIpAddressCount": 61
+    },
+    {
+        "id": 502892,
+        "name": "GW Transit VLAN",
+        "vlanNumber": 1315,
+        "hardwareCount": 1,
+        "subnetCount": 2,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PUBLIC",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "fcr05a.wdc01.softlayer.com",
+            "id": 235748,
+            "datacenter": {
+                "name": "wdc01"
+            }
+        },
+        "totalPrimaryIpAddressCount": 5
+    },
+    {
+        "id": 524954,
+        "name": "Env4 LON02 Fab Pri",
+        "vlanNumber": 797,
+        "hardwareCount": 22,
+        "subnetCount": 9,
+        "virtualGuestCount": 462,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr01a.lon02.softlayer.com",
+            "id": 253310,
+            "datacenter": {
+                "name": "lon02"
+            }
+        },
+        "totalPrimaryIpAddressCount": 1137
+    },
+    {
+        "id": 524956,
+        "name": "Env4 LON02 Fab Pub",
+        "vlanNumber": 887,
+        "hardwareCount": 22,
+        "subnetCount": 31,
+        "virtualGuestCount": 430,
+        "firewallInterfaces": [],
+        "networkSpace": "PUBLIC",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "fcr01a.lon02.softlayer.com",
+            "id": 253306,
+            "datacenter": {
+                "name": "lon02"
+            }
+        },
+        "totalPrimaryIpAddressCount": 879
+    },
+    {
+        "id": 526646,
+        "vlanNumber": 903,
+        "hardwareCount": 15,
+        "subnetCount": 2,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr01a.lon02.softlayer.com",
+            "id": 253310,
+            "datacenter": {
+                "name": "lon02"
+            }
+        },
+        "totalPrimaryIpAddressCount": 122
+    },
+    {
+        "id": 526648,
+        "name": "GW Transit VLAN",
+        "vlanNumber": 898,
+        "hardwareCount": 15,
+        "subnetCount": 4,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PUBLIC",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "fcr01a.lon02.softlayer.com",
+            "id": 253306,
+            "datacenter": {
+                "name": "lon02"
+            }
+        },
+        "totalPrimaryIpAddressCount": 55
+    },
+    {
+        "id": 562358,
+        "name": "GW Transit VLAN",
+        "vlanNumber": 1798,
+        "hardwareCount": 9,
+        "subnetCount": 1,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr01a.dal06.softlayer.com",
+            "id": 209251,
+            "datacenter": {
+                "name": "dal06"
+            }
+        },
+        "totalPrimaryIpAddressCount": 61
+    },
+    {
+        "id": 562360,
+        "name": "GW Transit VLAN",
+        "vlanNumber": 2006,
+        "hardwareCount": 9,
+        "subnetCount": 3,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PUBLIC",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "fcr01a.dal06.softlayer.com",
+            "id": 209248,
+            "datacenter": {
+                "name": "dal06"
+            }
+        },
+        "totalPrimaryIpAddressCount": 34
+    },
+    {
+        "id": 600614,
+        "name": "chen vlan test1 pri ",
+        "vlanNumber": 1235,
+        "hardwareCount": 0,
+        "subnetCount": 5,
+        "virtualGuestCount": 1,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr01a.lon02.softlayer.com",
+            "id": 253310,
+            "datacenter": {
+                "name": "lon02"
+            }
+        },
+        "totalPrimaryIpAddressCount": 13
+    },
+    {
+        "id": 600868,
+        "name": "DO NOT USE",
+        "vlanNumber": 1188,
+        "hardwareCount": 0,
+        "subnetCount": 3,
+        "virtualGuestCount": 1,
+        "firewallInterfaces": [],
+        "networkSpace": "PUBLIC",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "fcr01a.lon02.softlayer.com",
+            "id": 253306,
+            "datacenter": {
+                "name": "lon02"
+            }
+        },
+        "totalPrimaryIpAddressCount": 29
+    },
+    {
+        "id": 600870,
+        "name": "chen vlan test2 pri ",
+        "vlanNumber": 1243,
+        "hardwareCount": 0,
+        "subnetCount": 1,
+        "virtualGuestCount": 3,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr01a.lon02.softlayer.com",
+            "id": 253310,
+            "datacenter": {
+                "name": "lon02"
+            }
+        },
+        "totalPrimaryIpAddressCount": 125
+    },
+    {
+        "id": 600876,
+        "name": "chen test pub",
+        "vlanNumber": 1189,
+        "hardwareCount": 0,
+        "subnetCount": 3,
+        "virtualGuestCount": 5,
+        "firewallInterfaces": [],
+        "networkSpace": "PUBLIC",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "fcr01a.lon02.softlayer.com",
+            "id": 253306,
+            "datacenter": {
+                "name": "lon02"
+            }
+        },
+        "totalPrimaryIpAddressCount": 29
+    },
+    {
+        "id": 600918,
+        "name": "do not use",
+        "vlanNumber": 1186,
+        "hardwareCount": 0,
+        "subnetCount": 2,
+        "virtualGuestCount": 1,
+        "firewallInterfaces": [],
+        "networkSpace": "PUBLIC",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "fcr01a.lon02.softlayer.com",
+            "id": 253306,
+            "datacenter": {
+                "name": "lon02"
+            }
+        },
+        "totalPrimaryIpAddressCount": 29
+    },
+    {
+        "id": 624982,
+        "name": "do not use",
+        "vlanNumber": 1278,
+        "hardwareCount": 0,
+        "subnetCount": 1,
+        "virtualGuestCount": 2,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr01a.lon02.softlayer.com",
+            "id": 253310,
+            "datacenter": {
+                "name": "lon02"
+            }
+        },
+        "totalPrimaryIpAddressCount": 13
+    },
+    {
+        "id": 698138,
+        "name": "Env4 DAL09 Fab Pri",
+        "vlanNumber": 853,
+        "hardwareCount": 10,
+        "subnetCount": 8,
+        "virtualGuestCount": 130,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr01a.dal09.softlayer.com",
+            "id": 268674,
+            "datacenter": {
+                "name": "dal09"
+            }
+        },
+        "totalPrimaryIpAddressCount": 215
+    },
+    {
+        "id": 698142,
+        "name": "Env4 DAL09 Fab Pub",
+        "vlanNumber": 857,
+        "hardwareCount": 10,
+        "subnetCount": 11,
+        "virtualGuestCount": 122,
+        "firewallInterfaces": [],
+        "networkSpace": "PUBLIC",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "fcr01a.dal09.softlayer.com",
+            "id": 267468,
+            "datacenter": {
+                "name": "dal09"
+            }
+        },
+        "totalPrimaryIpAddressCount": 174
+    },
+    {
+        "id": 710592,
+        "name": "Do not use",
+        "vlanNumber": 1464,
+        "hardwareCount": 0,
+        "subnetCount": 1,
+        "virtualGuestCount": 3,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr01a.lon02.softlayer.com",
+            "id": 253310,
+            "datacenter": {
+                "name": "lon02"
+            }
+        },
+        "totalPrimaryIpAddressCount": 13
+    },
+    {
+        "id": 717878,
+        "name": "Env2A LON02 Fab Pri",
+        "vlanNumber": 1480,
+        "hardwareCount": 9,
+        "subnetCount": 3,
+        "virtualGuestCount": 82,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr01a.lon02.softlayer.com",
+            "id": 253310,
+            "datacenter": {
+                "name": "lon02"
+            }
+        },
+        "totalPrimaryIpAddressCount": 282
+    },
+    {
+        "id": 717888,
+        "name": "Env2A LON02 Fab Pub",
+        "vlanNumber": 1378,
+        "hardwareCount": 9,
+        "subnetCount": 5,
+        "virtualGuestCount": 79,
+        "firewallInterfaces": [],
+        "networkSpace": "PUBLIC",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "fcr01a.lon02.softlayer.com",
+            "id": 253306,
+            "datacenter": {
+                "name": "lon02"
+            }
+        },
+        "totalPrimaryIpAddressCount": 116
+    },
+    {
+        "id": 718572,
+        "name": "Transit VLAN",
+        "vlanNumber": 922,
+        "hardwareCount": 4,
+        "subnetCount": 1,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr01a.dal09.softlayer.com",
+            "id": 268674,
+            "datacenter": {
+                "name": "dal09"
+            }
+        },
+        "totalPrimaryIpAddressCount": 61
+    },
+    {
+        "id": 718574,
+        "name": "GW Transit VLAN",
+        "vlanNumber": 900,
+        "hardwareCount": 4,
+        "subnetCount": 2,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PUBLIC",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "fcr01a.dal09.softlayer.com",
+            "id": 267468,
+            "datacenter": {
+                "name": "dal09"
+            }
+        },
+        "totalPrimaryIpAddressCount": 13
+    },
+    {
+        "id": 749212,
+        "name": "Do not use",
+        "vlanNumber": 1555,
+        "hardwareCount": 0,
+        "subnetCount": 1,
+        "virtualGuestCount": 3,
+        "firewallInterfaces": [],
+        "networkSpace": "PUBLIC",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "fcr01a.hkg02.softlayer.com",
+            "id": 212463,
+            "datacenter": {
+                "name": "hkg02"
+            }
+        },
+        "totalPrimaryIpAddressCount": 29
+    },
+    {
+        "id": 749214,
+        "name": "Do not use",
+        "vlanNumber": 1422,
+        "hardwareCount": 0,
+        "subnetCount": 1,
+        "virtualGuestCount": 3,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr01a.hkg02.softlayer.com",
+            "id": 212460,
+            "datacenter": {
+                "name": "hkg02"
+            }
+        },
+        "totalPrimaryIpAddressCount": 61
+    },
+    {
+        "id": 820401,
+        "name": "LOCAL_2 DAL09 Pri",
+        "vlanNumber": 1284,
+        "hardwareCount": 4,
+        "subnetCount": 1,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr02a.dal09.softlayer.com",
+            "id": 462912,
+            "datacenter": {
+                "name": "dal09"
+            }
+        },
+        "totalPrimaryIpAddressCount": 61
+    },
+    {
+        "id": 820915,
+        "vlanNumber": 2048,
+        "hardwareCount": 0,
+        "subnetCount": 1,
+        "virtualGuestCount": 1,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr04a.dal05.softlayer.com",
+            "id": 147566,
+            "datacenter": {
+                "name": "dal05"
+            }
+        },
+        "totalPrimaryIpAddressCount": 253
+    },
+    {
+        "id": 846081,
+        "name": "Env2A DAL09 Fab Pub",
+        "vlanNumber": 1441,
+        "hardwareCount": 12,
+        "subnetCount": 12,
+        "virtualGuestCount": 127,
+        "firewallInterfaces": [],
+        "networkSpace": "PUBLIC",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "fcr02a.dal09.softlayer.com",
+            "id": 462914,
+            "datacenter": {
+                "name": "dal09"
+            }
+        },
+        "totalPrimaryIpAddressCount": 203
+    },
+    {
+        "id": 846095,
+        "name": "Env2A DAL09 Fab Pri",
+        "vlanNumber": 1514,
+        "hardwareCount": 12,
+        "subnetCount": 10,
+        "virtualGuestCount": 130,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr02a.dal09.softlayer.com",
+            "id": 462912,
+            "datacenter": {
+                "name": "dal09"
+            }
+        },
+        "totalPrimaryIpAddressCount": 407
+    },
+    {
+        "id": 846851,
+        "name": "Transit VLAN",
+        "vlanNumber": 1370,
+        "hardwareCount": 9,
+        "subnetCount": 1,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr02a.dal09.softlayer.com",
+            "id": 462912,
+            "datacenter": {
+                "name": "dal09"
+            }
+        },
+        "totalPrimaryIpAddressCount": 61
+    },
+    {
+        "id": 846853,
+        "name": "GW Transit VLAN",
+        "vlanNumber": 1325,
+        "hardwareCount": 9,
+        "subnetCount": 3,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PUBLIC",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "fcr02a.dal09.softlayer.com",
+            "id": 462914,
+            "datacenter": {
+                "name": "dal09"
+            }
+        },
+        "totalPrimaryIpAddressCount": 42
+    },
+    {
+        "id": 854275,
+        "name": "Angelo eVault",
+        "vlanNumber": 1234,
+        "hardwareCount": 0,
+        "subnetCount": 1,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr02.sea01.softlayer.com",
+            "id": 36321,
+            "datacenter": {
+                "name": "sea01"
+            }
+        },
+        "totalPrimaryIpAddressCount": 5
+    },
+    {
+        "id": 956053,
+        "name": "Jimmy Test Vlan",
+        "vlanNumber": 1237,
+        "hardwareCount": 0,
+        "subnetCount": 3,
+        "virtualGuestCount": 23,
+        "firewallInterfaces": [],
+        "networkSpace": "PUBLIC",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "fcr03a.sjc01.softlayer.com",
+            "id": 327864,
+            "datacenter": {
+                "name": "sjc01"
+            }
+        },
+        "totalPrimaryIpAddressCount": 87
+    },
+    {
+        "id": 956055,
+        "name": "Jimmy Test Vlan",
+        "vlanNumber": 1349,
+        "hardwareCount": 0,
+        "subnetCount": 1,
+        "virtualGuestCount": 23,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr03a.sjc01.softlayer.com",
+            "id": 327866,
+            "datacenter": {
+                "name": "sjc01"
+            }
+        },
+        "totalPrimaryIpAddressCount": 253
+    },
+    {
+        "id": 1067477,
+        "name": "LOCAL dal09 fab pub",
+        "vlanNumber": 808,
+        "hardwareCount": 16,
+        "subnetCount": 2,
+        "virtualGuestCount": 3,
+        "firewallInterfaces": [],
+        "networkSpace": "PUBLIC",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "fcr04a.dal09.softlayer.com",
+            "id": 696813,
+            "datacenter": {
+                "name": "dal09"
+            }
+        },
+        "totalPrimaryIpAddressCount": 29
+    },
+    {
+        "id": 1067479,
+        "name": "LOCAL dal09 fab pri",
+        "vlanNumber": 817,
+        "hardwareCount": 16,
+        "subnetCount": 7,
+        "virtualGuestCount": 3,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr04a.dal09.softlayer.com",
+            "id": 694613,
+            "datacenter": {
+                "name": "dal09"
+            }
+        },
+        "totalPrimaryIpAddressCount": 282
+    },
+    {
+        "id": 1067509,
+        "name": "Transit VLAN",
+        "vlanNumber": 819,
+        "hardwareCount": 3,
+        "subnetCount": 1,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr04a.dal09.softlayer.com",
+            "id": 694613,
+            "datacenter": {
+                "name": "dal09"
+            }
+        },
+        "totalPrimaryIpAddressCount": 61
+    },
+    {
+        "id": 1067511,
+        "name": "Transit VLAN",
+        "vlanNumber": 811,
+        "hardwareCount": 3,
+        "subnetCount": 2,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PUBLIC",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "fcr04a.dal09.softlayer.com",
+            "id": 696813,
+            "datacenter": {
+                "name": "dal09"
+            }
+        },
+        "totalPrimaryIpAddressCount": 13
+    },
+    {
+        "id": 1112635,
+        "name": "Env4 DAL09 Fab Pub2",
+        "vlanNumber": 1292,
+        "hardwareCount": 0,
+        "subnetCount": 5,
+        "virtualGuestCount": 85,
+        "firewallInterfaces": [],
+        "networkSpace": "PUBLIC",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "fcr02a.dal09.softlayer.com",
+            "id": 462914,
+            "datacenter": {
+                "name": "dal09"
+            }
+        },
+        "totalPrimaryIpAddressCount": 116
+    },
+    {
+        "id": 1112637,
+        "name": "Env4 DAL09 Fab Pri2",
+        "vlanNumber": 1954,
+        "hardwareCount": 0,
+        "subnetCount": 3,
+        "virtualGuestCount": 85,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr02a.dal09.softlayer.com",
+            "id": 462912,
+            "datacenter": {
+                "name": "dal09"
+            }
+        },
+        "totalPrimaryIpAddressCount": 282
+    },
+    {
+        "id": 1138407,
+        "name": "IPS SJC03 Fab Pub",
+        "vlanNumber": 986,
+        "hardwareCount": 6,
+        "subnetCount": 6,
+        "virtualGuestCount": 9,
+        "firewallInterfaces": [],
+        "networkSpace": "PUBLIC",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "fcr01a.sjc03.softlayer.com",
+            "id": 476552,
+            "datacenter": {
+                "name": "sjc03"
+            }
+        },
+        "totalPrimaryIpAddressCount": 29
+    },
+    {
+        "id": 1138409,
+        "name": "IPS SJC03 Fab Pri",
+        "vlanNumber": 1134,
+        "hardwareCount": 6,
+        "subnetCount": 6,
+        "virtualGuestCount": 12,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr01a.sjc03.softlayer.com",
+            "id": 476912,
+            "datacenter": {
+                "name": "sjc03"
+            }
+        },
+        "totalPrimaryIpAddressCount": 29
+    },
+    {
+        "id": 1138613,
+        "vlanNumber": 1205,
+        "hardwareCount": 2,
+        "subnetCount": 1,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr01a.sjc03.softlayer.com",
+            "id": 476912,
+            "datacenter": {
+                "name": "sjc03"
+            }
+        },
+        "totalPrimaryIpAddressCount": 61
+    },
+    {
+        "id": 1138615,
+        "vlanNumber": 1155,
+        "hardwareCount": 2,
+        "subnetCount": 2,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PUBLIC",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "fcr01a.sjc03.softlayer.com",
+            "id": 476552,
+            "datacenter": {
+                "name": "sjc03"
+            }
+        },
+        "totalPrimaryIpAddressCount": 29
+    },
+    {
+        "id": 1147891,
+        "name": "Env2A DAL06 Whisk",
+        "vlanNumber": 1931,
+        "hardwareCount": 0,
+        "subnetCount": 1,
+        "virtualGuestCount": 12,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr01a.dal06.softlayer.com",
+            "id": 209251,
+            "datacenter": {
+                "name": "dal06"
+            }
+        },
+        "totalPrimaryIpAddressCount": 29
+    },
+    {
+        "id": 1227061,
+        "name": "Env2A DAL09 Whisk",
+        "vlanNumber": 1819,
+        "hardwareCount": 0,
+        "subnetCount": 1,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr02a.dal09.softlayer.com",
+            "id": 462912,
+            "datacenter": {
+                "name": "dal09"
+            }
+        },
+        "totalPrimaryIpAddressCount": 29
+    },
+    {
+        "id": 1227859,
+        "name": "ENV4 DAL05 Whisk",
+        "vlanNumber": 1118,
+        "hardwareCount": 0,
+        "subnetCount": 1,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr03a.dal05.softlayer.com",
+            "id": 122762,
+            "datacenter": {
+                "name": "dal05"
+            }
+        },
+        "totalPrimaryIpAddressCount": 29
+    },
+    {
+        "id": 1228653,
+        "name": "ENV4 DAL09 Whisk",
+        "vlanNumber": 1265,
+        "hardwareCount": 0,
+        "subnetCount": 1,
+        "virtualGuestCount": 1,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr01a.dal09.softlayer.com",
+            "id": 268674,
+            "datacenter": {
+                "name": "dal09"
+            }
+        },
+        "totalPrimaryIpAddressCount": 29
+    },
+    {
+        "id": 1231161,
+        "name": "Env4p3 DAL09 Fab Pri",
+        "vlanNumber": 982,
+        "hardwareCount": 0,
+        "subnetCount": 2,
+        "virtualGuestCount": 5,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr03a.dal09.softlayer.com",
+            "id": 637113,
+            "datacenter": {
+                "name": "dal09"
+            }
+        },
+        "totalPrimaryIpAddressCount": 29
+    },
+    {
+        "id": 1231243,
+        "name": "Env4p4 DAL09 Fab Pri",
+        "vlanNumber": 1373,
+        "hardwareCount": 0,
+        "subnetCount": 2,
+        "virtualGuestCount": 5,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr04a.dal09.softlayer.com",
+            "id": 694613,
+            "datacenter": {
+                "name": "dal09"
+            }
+        },
+        "totalPrimaryIpAddressCount": 29
+    },
+    {
+        "id": 1231271,
+        "name": "Transit VLAN",
+        "vlanNumber": 983,
+        "hardwareCount": 4,
+        "subnetCount": 1,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr03a.dal09.softlayer.com",
+            "id": 637113,
+            "datacenter": {
+                "name": "dal09"
+            }
+        },
+        "totalPrimaryIpAddressCount": 61
+    },
+    {
+        "id": 1231273,
+        "name": "Transit VLAN",
+        "vlanNumber": 933,
+        "hardwareCount": 4,
+        "subnetCount": 3,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PUBLIC",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "fcr03a.dal09.softlayer.com",
+            "id": 632313,
+            "datacenter": {
+                "name": "dal09"
+            }
+        },
+        "totalPrimaryIpAddressCount": 34
+    },
+    {
+        "id": 1234759,
+        "name": "ENV4P3 DAL09 Whisk",
+        "vlanNumber": 992,
+        "hardwareCount": 0,
+        "subnetCount": 1,
+        "virtualGuestCount": 11,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr03a.dal09.softlayer.com",
+            "id": 637113,
+            "datacenter": {
+                "name": "dal09"
+            }
+        },
+        "totalPrimaryIpAddressCount": 29
+    },
+    {
+        "id": 1234837,
+        "name": "ENV4P4 DAL09 Whisk",
+        "vlanNumber": 1147,
+        "hardwareCount": 0,
+        "subnetCount": 1,
+        "virtualGuestCount": 11,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr04a.dal09.softlayer.com",
+            "id": 694613,
+            "datacenter": {
+                "name": "dal09"
+            }
+        },
+        "totalPrimaryIpAddressCount": 29
+    },
+    {
+        "id": 1262123,
+        "name": "ENV4SP3 DAL09 Pri",
+        "vlanNumber": 1144,
+        "hardwareCount": 1,
+        "subnetCount": 2,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr03a.dal09.softlayer.com",
+            "id": 637113,
+            "datacenter": {
+                "name": "dal09"
+            }
+        },
+        "totalPrimaryIpAddressCount": 13
+    },
+    {
+        "id": 1262125,
+        "name": "ENV4SP3 DAL09 Pub",
+        "vlanNumber": 956,
+        "hardwareCount": 1,
+        "subnetCount": 2,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PUBLIC",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "fcr03a.dal09.softlayer.com",
+            "id": 632313,
+            "datacenter": {
+                "name": "dal09"
+            }
+        },
+        "totalPrimaryIpAddressCount": 13
+    },
+    {
+        "id": 1266813,
+        "name": "DO NOT USE",
+        "vlanNumber": 1585,
+        "hardwareCount": 0,
+        "subnetCount": 0,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PUBLIC",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "fcr01a.lon02.softlayer.com",
+            "id": 253306,
+            "datacenter": {
+                "name": "lon02"
+            }
+        },
+        "totalPrimaryIpAddressCount": 0
+    },
+    {
+        "id": 1266819,
+        "name": "cfpv",
+        "vlanNumber": 1762,
+        "hardwareCount": 0,
+        "subnetCount": 1,
+        "virtualGuestCount": 1,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr01a.lon02.softlayer.com",
+            "id": 253310,
+            "datacenter": {
+                "name": "lon02"
+            }
+        },
+        "totalPrimaryIpAddressCount": 13
+    },
+    {
+        "id": 1268897,
+        "name": "cfpb- DO NOT USE",
+        "vlanNumber": 946,
+        "hardwareCount": 0,
+        "subnetCount": 1,
+        "virtualGuestCount": 1,
+        "firewallInterfaces": [],
+        "networkSpace": "PUBLIC",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "fcr01a.lon02.softlayer.com",
+            "id": 253306,
+            "datacenter": {
+                "name": "lon02"
+            }
+        },
+        "totalPrimaryIpAddressCount": 13
+    },
+    {
+        "id": 1285399,
+        "name": "ENV4SP3 DAL05 Pub",
+        "vlanNumber": 1352,
+        "hardwareCount": 1,
+        "subnetCount": 2,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PUBLIC",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "fcr03a.dal05.softlayer.com",
+            "id": 122880,
+            "datacenter": {
+                "name": "dal05"
+            }
+        },
+        "totalPrimaryIpAddressCount": 29
+    },
+    {
+        "id": 1285405,
+        "name": "ENV4SP3 DAL05 Pri",
+        "vlanNumber": 1275,
+        "hardwareCount": 1,
+        "subnetCount": 2,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr03a.dal05.softlayer.com",
+            "id": 122762,
+            "datacenter": {
+                "name": "dal05"
+            }
+        },
+        "totalPrimaryIpAddressCount": 29
+    },
+    {
+        "id": 1285407,
+        "name": "ENV4SP1 DAL06 Pub",
+        "vlanNumber": 1563,
+        "hardwareCount": 1,
+        "subnetCount": 2,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PUBLIC",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "fcr01a.dal06.softlayer.com",
+            "id": 209248,
+            "datacenter": {
+                "name": "dal06"
+            }
+        },
+        "totalPrimaryIpAddressCount": 29
+    },
+    {
+        "id": 1285409,
+        "name": "ENV4SP1 DAL06 pri",
+        "vlanNumber": 1524,
+        "hardwareCount": 1,
+        "subnetCount": 2,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr01a.dal06.softlayer.com",
+            "id": 209251,
+            "datacenter": {
+                "name": "dal06"
+            }
+        },
+        "totalPrimaryIpAddressCount": 29
+    },
+    {
+        "id": 1292651,
+        "name": "Env4 LON02 Fab Pri2",
+        "vlanNumber": 1266,
+        "hardwareCount": 5,
+        "subnetCount": 3,
+        "virtualGuestCount": 55,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr02a.lon02.softlayer.com",
+            "id": 652137,
+            "datacenter": {
+                "name": "lon02"
+            }
+        },
+        "totalPrimaryIpAddressCount": 282
+    },
+    {
+        "id": 1292653,
+        "name": "Env4 LON02 Fab Pub2",
+        "vlanNumber": 1135,
+        "hardwareCount": 5,
+        "subnetCount": 4,
+        "virtualGuestCount": 54,
+        "firewallInterfaces": [],
+        "networkSpace": "PUBLIC",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "fcr02a.lon02.softlayer.com",
+            "id": 615413,
+            "datacenter": {
+                "name": "lon02"
+            }
+        },
+        "totalPrimaryIpAddressCount": 87
+    },
+    {
+        "id": 1292673,
+        "vlanNumber": 1267,
+        "hardwareCount": 4,
+        "subnetCount": 1,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr02a.lon02.softlayer.com",
+            "id": 652137,
+            "datacenter": {
+                "name": "lon02"
+            }
+        },
+        "totalPrimaryIpAddressCount": 61
+    },
+    {
+        "id": 1292675,
+        "vlanNumber": 1136,
+        "hardwareCount": 4,
+        "subnetCount": 3,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PUBLIC",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "fcr02a.lon02.softlayer.com",
+            "id": 615413,
+            "datacenter": {
+                "name": "lon02"
+            }
+        },
+        "totalPrimaryIpAddressCount": 34
+    },
+    {
+        "id": 1294449,
+        "name": "DO NOT USE",
+        "vlanNumber": 1638,
+        "hardwareCount": 0,
+        "subnetCount": 1,
+        "virtualGuestCount": 2,
+        "firewallInterfaces": [],
+        "networkSpace": "PUBLIC",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "fcr01a.tor01.softlayer.com",
+            "id": 266412,
+            "datacenter": {
+                "name": "tor01"
+            }
+        },
+        "totalPrimaryIpAddressCount": 29
+    },
+    {
+        "id": 1294451,
+        "vlanNumber": 2143,
+        "hardwareCount": 0,
+        "subnetCount": 1,
+        "virtualGuestCount": 2,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr01a.tor01.softlayer.com",
+            "id": 266212,
+            "datacenter": {
+                "name": "tor01"
+            }
+        },
+        "totalPrimaryIpAddressCount": 61
+    },
+    {
+        "id": 1294849,
+        "name": "ENV4SP1 DAL09 Pub",
+        "vlanNumber": 1434,
+        "hardwareCount": 1,
+        "subnetCount": 2,
+        "virtualGuestCount": 1,
+        "firewallInterfaces": [],
+        "networkSpace": "PUBLIC",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "fcr01a.dal09.softlayer.com",
+            "id": 267468,
+            "datacenter": {
+                "name": "dal09"
+            }
+        },
+        "totalPrimaryIpAddressCount": 13
+    },
+    {
+        "id": 1294851,
+        "name": "ENV4SP1 DAL09 Pri",
+        "vlanNumber": 1946,
+        "hardwareCount": 1,
+        "subnetCount": 2,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr01a.dal09.softlayer.com",
+            "id": 268674,
+            "datacenter": {
+                "name": "dal09"
+            }
+        },
+        "totalPrimaryIpAddressCount": 13
+    },
+    {
+        "id": 1294853,
+        "name": "DO NOT DELETE",
+        "vlanNumber": 1908,
+        "hardwareCount": 0,
+        "subnetCount": 0,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PUBLIC",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "fcr01a.dal09.softlayer.com",
+            "id": 267468,
+            "datacenter": {
+                "name": "dal09"
+            }
+        },
+        "totalPrimaryIpAddressCount": 0
+    },
+    {
+        "id": 1294855,
+        "name": "DO NOT DELETE",
+        "vlanNumber": 2585,
+        "hardwareCount": 0,
+        "subnetCount": 0,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr01a.dal09.softlayer.com",
+            "id": 268674,
+            "datacenter": {
+                "name": "dal09"
+            }
+        },
+        "totalPrimaryIpAddressCount": 0
+    },
+    {
+        "id": 1294857,
+        "name": "ENV4SP2 DAL09 Pub",
+        "vlanNumber": 913,
+        "hardwareCount": 1,
+        "subnetCount": 2,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PUBLIC",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "fcr02a.dal09.softlayer.com",
+            "id": 462914,
+            "datacenter": {
+                "name": "dal09"
+            }
+        },
+        "totalPrimaryIpAddressCount": 13
+    },
+    {
+        "id": 1294859,
+        "name": "ENV4SP2 DAL09 Pri",
+        "vlanNumber": 821,
+        "hardwareCount": 1,
+        "subnetCount": 2,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr02a.dal09.softlayer.com",
+            "id": 462912,
+            "datacenter": {
+                "name": "dal09"
+            }
+        },
+        "totalPrimaryIpAddressCount": 13
+    },
+    {
+        "id": 1294863,
+        "name": "DO NOT DELETE",
+        "vlanNumber": 1707,
+        "hardwareCount": 0,
+        "subnetCount": 0,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr02a.dal09.softlayer.com",
+            "id": 462912,
+            "datacenter": {
+                "name": "dal09"
+            }
+        },
+        "totalPrimaryIpAddressCount": 0
+    },
+    {
+        "id": 1294865,
+        "name": "DO NOT DELETE",
+        "vlanNumber": 1577,
+        "hardwareCount": 0,
+        "subnetCount": 0,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PUBLIC",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "fcr02a.dal09.softlayer.com",
+            "id": 462914,
+            "datacenter": {
+                "name": "dal09"
+            }
+        },
+        "totalPrimaryIpAddressCount": 0
+    },
+    {
+        "id": 1299519,
+        "name": "test nextgen ys0",
+        "vlanNumber": 1509,
+        "hardwareCount": 0,
+        "subnetCount": 1,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PUBLIC",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "fcr02a.dal09.softlayer.com",
+            "id": 462914,
+            "datacenter": {
+                "name": "dal09"
+            }
+        },
+        "totalPrimaryIpAddressCount": 29
+    },
+    {
+        "id": 1302947,
+        "name": "test nextgen ys0",
+        "vlanNumber": 996,
+        "hardwareCount": 0,
+        "subnetCount": 1,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr01a.dal06.softlayer.com",
+            "id": 209251,
+            "datacenter": {
+                "name": "dal06"
+            }
+        },
+        "totalPrimaryIpAddressCount": 29
+    },
+    {
+        "id": 1303097,
+        "name": "test nextgen ys0",
+        "vlanNumber": 1301,
+        "hardwareCount": 0,
+        "subnetCount": 1,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr02a.sjc01.softlayer.com",
+            "id": 159113,
+            "datacenter": {
+                "name": "sjc01"
+            }
+        },
+        "totalPrimaryIpAddressCount": 29
+    },
+    {
+        "id": 1321051,
+        "name": "ENV4SP2 lon02  pub",
+        "vlanNumber": 1156,
+        "hardwareCount": 0,
+        "subnetCount": 2,
+        "virtualGuestCount": 1,
+        "firewallInterfaces": [],
+        "networkSpace": "PUBLIC",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "fcr02a.lon02.softlayer.com",
+            "id": 615413,
+            "datacenter": {
+                "name": "lon02"
+            }
+        },
+        "totalPrimaryIpAddressCount": 5
+    },
+    {
+        "id": 1321053,
+        "name": "ENV4SP2 lon02  pri",
+        "vlanNumber": 1290,
+        "hardwareCount": 0,
+        "subnetCount": 1,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr02a.lon02.softlayer.com",
+            "id": 652137,
+            "datacenter": {
+                "name": "lon02"
+            }
+        },
+        "totalPrimaryIpAddressCount": 0
+    },
+    {
+        "id": 1321123,
+        "name": "ENV4SP1 lon02  pub",
+        "vlanNumber": 1780,
+        "hardwareCount": 1,
+        "subnetCount": 2,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PUBLIC",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "fcr01a.lon02.softlayer.com",
+            "id": 253306,
+            "datacenter": {
+                "name": "lon02"
+            }
+        },
+        "totalPrimaryIpAddressCount": 5
+    },
+    {
+        "id": 1321129,
+        "name": "ENV4SP1 lon02  pri",
+        "vlanNumber": 989,
+        "hardwareCount": 1,
+        "subnetCount": 2,
+        "virtualGuestCount": 0,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr01a.lon02.softlayer.com",
+            "id": 253310,
+            "datacenter": {
+                "name": "lon02"
+            }
+        },
+        "totalPrimaryIpAddressCount": 5
+    },
+    {
+        "id": 1407665,
+        "name": "do not use",
+        "vlanNumber": 1184,
+        "hardwareCount": 0,
+        "subnetCount": 1,
+        "virtualGuestCount": 1,
+        "firewallInterfaces": [],
+        "networkSpace": "PUBLIC",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "fcr02a.dal06.softlayer.com",
+            "id": 512162,
+            "datacenter": {
+                "name": "dal06"
+            }
+        },
+        "totalPrimaryIpAddressCount": 29
+    },
+    {
+        "id": 1407667,
+        "vlanNumber": 1220,
+        "hardwareCount": 0,
+        "subnetCount": 1,
+        "virtualGuestCount": 1,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr02a.dal06.softlayer.com",
+            "id": 511844,
+            "datacenter": {
+                "name": "dal06"
+            }
+        },
+        "totalPrimaryIpAddressCount": 253
+    },
+    {
+        "id": 1421723,
+        "name": "DO NOT USE",
+        "vlanNumber": 1307,
+        "hardwareCount": 0,
+        "subnetCount": 1,
+        "virtualGuestCount": 1,
+        "firewallInterfaces": [],
+        "networkSpace": "PUBLIC",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "fcr01a.par01.softlayer.com",
+            "id": 299214,
+            "datacenter": {
+                "name": "par01"
+            }
+        },
+        "totalPrimaryIpAddressCount": 29
+    },
+    {
+        "id": 1421725,
+        "vlanNumber": 1419,
+        "hardwareCount": 0,
+        "subnetCount": 1,
+        "virtualGuestCount": 1,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr01a.par01.softlayer.com",
+            "id": 298590,
+            "datacenter": {
+                "name": "par01"
+            }
+        },
+        "totalPrimaryIpAddressCount": 61
+    },
+    {
+        "id": 1424991,
+        "name": "DO NOT USE",
+        "vlanNumber": 1605,
+        "hardwareCount": 0,
+        "subnetCount": 1,
+        "virtualGuestCount": 1,
+        "firewallInterfaces": [],
+        "networkSpace": "PUBLIC",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "fcr01a.tok02.softlayer.com",
+            "id": 328318,
+            "datacenter": {
+                "name": "tok02"
+            }
+        },
+        "totalPrimaryIpAddressCount": 29
+    },
+    {
+        "id": 1424993,
+        "vlanNumber": 1766,
+        "hardwareCount": 0,
+        "subnetCount": 1,
+        "virtualGuestCount": 1,
+        "firewallInterfaces": [],
+        "networkSpace": "PRIVATE",
+        "primaryRouter": {
+            "fullyQualifiedDomainName": "bcr01a.tok02.softlayer.com",
+            "id": 329260,
+            "datacenter": {
+                "name": "tok02"
+            }
+        },
+        "totalPrimaryIpAddressCount": 61
+    }
+]

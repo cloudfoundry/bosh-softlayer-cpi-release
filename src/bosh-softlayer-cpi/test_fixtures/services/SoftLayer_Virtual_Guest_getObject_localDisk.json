@@ -1,0 +1,36 @@
+{
+  "accountId": 12345678,
+  "createDate": "2017-11-08T09:27:43+08:00",
+  "dedicatedAccountHostOnlyFlag": false,
+  "domain": "softlayer.com",
+  "fullyQualifiedDomainName": "texture.softlayer.com",
+  "hostname": "texture",
+  "id": 22345678,
+  "lastPowerStateId": null,
+  "lastVerifiedDate": null,
+  "maxCpu": 4,
+  "maxCpuUnits": "CORE",
+  "maxMemory": 8192,
+  "metricPollDate": null,
+  "modifyDate": "2017-11-08T09:35:29+08:00",
+  "provisionDate": "2017-11-08T09:30:36+08:00",
+  "startCpus": 4,
+  "statusId": 1001,
+  "typeId": 1,
+  "uuid": "522c1f33-9553-4b2c-70bf-eb6613c1c805",
+  "billingItem": {
+    "id": 32345678,
+    "orderItem": {
+      "presetId": null
+    }
+  },
+  "globalIdentifier": "e1ffbf1c-b5e8-4423-bc83-26cc7dd2fd3f",
+  "localDiskFlag": true,
+  "managedResourceFlag": false,
+  "primaryBackendIpAddress": "10.10.10.10",
+  "primaryIpAddress": "169.10.10.10",
+  "status": {
+    "keyName": "ACTIVE",
+    "name": "Active"
+  }
+}

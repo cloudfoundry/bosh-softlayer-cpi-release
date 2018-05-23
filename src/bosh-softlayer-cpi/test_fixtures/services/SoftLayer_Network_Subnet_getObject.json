@@ -1,0 +1,20 @@
+{
+    "broadcastAddress": "10.40.92.71",
+    "cidr": 30,
+    "gateway": "10.40.92.69",
+    "id": 510674,
+    "isCustomerOwned": false,
+    "isCustomerRoutable": false,
+    "modifyDate": "2015-04-18T18:10:05-07:00",
+    "netmask": "255.255.255.252",
+    "networkIdentifier": "10.40.92.68",
+    "networkVlanId": 193419,
+    "sortOrder": "2",
+    "subnetType": "SECONDARY_ON_VLAN",
+    "totalIpAddresses": "4",
+    "usableIpAddressCount": "1",
+    "version": 4,
+    "billingItem":{
+        "id":12345678
+    }
+}

@@ -1,0 +1,28 @@
+{
+    "id": 1455551,
+    "billingItem": {
+        "allowCancellationFlag": 1,
+        "cancellationDate": null,
+        "categoryCode": "network_vlan",
+        "createDate": "2016-12-07T03:29:43-06:00",
+        "cycleStartDate": "2016-12-07T03:29:43-06:00",
+        "description": "Private Network Vlan",
+        "id": 140221639,
+        "laborFee": "0",
+        "laborFeeTaxRate": "0",
+        "lastBillDate": "2016-12-07T03:29:43-06:00",
+        "modifyDate": "2016-12-07T03:29:49-06:00",
+        "nextBillDate": "2017-01-01T00:00:00-06:00",
+        "notes": "VLAN 2264",
+        "oneTimeFee": "0",
+        "oneTimeFeeTaxRate": "0",
+        "orderItemId": 167108157,
+        "parentId": null,
+        "recurringFee": "16.95",
+        "recurringFeeTaxRate": "0",
+        "recurringMonths": 1,
+        "serviceProviderId": 1,
+        "setupFee": "0",
+        "setupFeeTaxRate": "0"
+    }
+}

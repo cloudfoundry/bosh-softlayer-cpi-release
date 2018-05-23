@@ -1,0 +1,18 @@
+[
+    {
+        "id": 17360371,
+        "snapshotCreationTimestamp": "2016-12-14T00:12:57-06:00",
+        "snapshotSizeBytes": "72000",
+        "storageType": {
+            "keyName": "SNAPSHOT"
+        }
+    },
+    {
+        "id": 17360367,
+        "snapshotCreationTimestamp": "2016-12-14T00:09:41-06:00",
+        "snapshotSizeBytes": "72000",
+        "storageType": {
+            "keyName": "SNAPSHOT"
+        }
+    }
+]

@@ -24,10 +24,6 @@ type ConfigTemplate struct {
 	ApiKey   string
 }
 
-type FeatureOption struct {
-	EnablePool bool
-}
-
 const templatePath = "../test_fixtures/cpi_methods"
 
 func RunCpi(rootCpiPath string, configPath string, jsonPayload string) ([]byte, error) {
@@ -92,7 +88,8 @@ func CreateTmpConfigPath(rootTemplatePath string, configPath string, username st
 		ApiKey:   apiKey,
 	}
 
-	t := template.New(filepath.Base(configPath))
+	t := template.New("config.json")
+
 	t, err := t.ParseFiles(filepath.Join(rootTemplatePath, configPath))
 	if err != nil {
 		return "", err

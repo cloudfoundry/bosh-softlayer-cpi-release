@@ -1,29 +1,26 @@
 package action
 
 import (
-	. "bosh-softlayer-cpi/softlayer/disk"
+	"bosh-softlayer-cpi/softlayer/disk_service"
 )
 
-type HasDiskAction struct {
-	diskFinder DiskFinder
+type HasDisk struct {
+	diskService disk.Service
 }
 
 func NewHasDisk(
-	diskFinder DiskFinder,
-) (action HasDiskAction) {
-	action.diskFinder = diskFinder
-	return
+	diskService disk.Service,
+) HasDisk {
+	return HasDisk{
+		diskService: diskService,
+	}
 }
 
-func (a HasDiskAction) Run(diskCID DiskCID) (bool, error) {
-	result, found, err := a.diskFinder.Find(int(diskCID))
+func (hd HasDisk) Run(diskCID DiskCID) (bool, error) {
+	_, err := hd.diskService.Find(diskCID.Int())
 	if err != nil {
 		return false, err
-	} else {
-		if result == nil {
-			return false, nil
-		}
 	}
 
-	return found, nil
+	return true, nil
 }

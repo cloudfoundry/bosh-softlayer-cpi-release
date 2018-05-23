@@ -7,58 +7,121 @@ import (
 	. "github.com/onsi/gomega"
 
 	. "bosh-softlayer-cpi/action"
-
-	fakestem "bosh-softlayer-cpi/softlayer/stemcell/fakes"
+	"bosh-softlayer-cpi/api"
+	stemcellfakes "bosh-softlayer-cpi/softlayer/stemcell_service/fakes"
 )
 
 var _ = Describe("CreateStemcell", func() {
 	var (
-		fakeStemcellFinder *fakestem.FakeStemcellFinder
-		fakeStemcell       *fakestem.FakeStemcell
+		err               error
+		createdStemcellId int
+		stemcellCID       string
+		cloudProps        StemcellCloudProperties
 
-		action CreateStemcellAction
+		stemcellService *stemcellfakes.FakeService
+		createStemcell  CreateStemcellAction
 	)
 
 	BeforeEach(func() {
-		fakeStemcellFinder = &fakestem.FakeStemcellFinder{}
-		fakeStemcell = &fakestem.FakeStemcell{}
-		action = NewCreateStemcell(fakeStemcellFinder)
+		stemcellService = &stemcellfakes.FakeService{}
+		createStemcell = NewCreateStemcell(stemcellService)
 	})
 
 	Describe("Run", func() {
-		var (
-			stemcellIdStr string
-			err           error
-		)
-
-		JustBeforeEach(func() {
-			stemcellIdStr, err = action.Run("fake-path", CreateStemcellCloudProps{Uuid: "fake-stemcell-id", Id: 123456})
-		})
-
-		Context("when create stemcell succeeds", func() {
+		Context("when infrastructure is not softlayer", func() {
 			BeforeEach(func() {
-				fakeStemcellFinder.FindByIdReturns(fakeStemcell, nil)
+				cloudProps.Infrastructure = "fake-insfrastructure"
 			})
 
-			It("find stemcell by id", func() {
-				Expect(fakeStemcellFinder.FindByIdCallCount()).To(Equal(1))
-				acutalStemcellId := fakeStemcellFinder.FindByIdArgsForCall(0)
-				Expect(acutalStemcellId).To(Equal(123456))
-			})
-
-			It("no error return", func() {
-				Expect(err).NotTo(HaveOccurred())
-			})
-		})
-
-		Context("when find stemcell error return", func() {
-			BeforeEach(func() {
-				fakeStemcellFinder.FindByIdReturns(nil, errors.New("kaboom"))
-			})
-
-			It("provides relevant error information", func() {
+			It("returns an error", func() {
+				_, err = createStemcell.Run("fake-stemcell-tarball", cloudProps)
 				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("kaboom"))
+				Expect(err.Error()).To(ContainSubstring("Invalid 'fake-insfrastructure' infrastructure"))
+				Expect(stemcellService.FindCallCount()).To(Equal(0))
+				Expect(stemcellService.CreateFromTarballCallCount()).To(Equal(0))
+			})
+		})
+
+		Context("from light-stemcell", func() {
+			BeforeEach(func() {
+				cloudProps = StemcellCloudProperties{
+					Id:             12345678,
+					Infrastructure: "softlayer",
+					Uuid:           "fake-uuid",
+					DatacenterName: "fake-datacenter-name",
+				}
+			})
+
+			It("creates the stemcell", func() {
+				stemcellService.FindReturns(
+					"fake-global-identifier",
+					nil,
+				)
+
+				stemcellCID, err = createStemcell.Run("fake-light-stemcell-imagePath", cloudProps)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(stemcellService.FindCallCount()).To(Equal(1))
+				Expect(stemcellCID).To(Equal(StemcellCID(cloudProps.Id).String()))
+			})
+
+			It("returns an error if stemcellService find call returns an error", func() {
+				stemcellService.FindReturns(
+					"",
+					errors.New("fake-stemcell-service-error"),
+				)
+
+				stemcellCID, err = createStemcell.Run("fake-stemcell-imagePath", cloudProps)
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("fake-stemcell-service-error"))
+				Expect(stemcellService.FindCallCount()).To(Equal(1))
+				Expect(stemcellCID).NotTo(Equal(StemcellCID(cloudProps.Id).String()))
+			})
+
+			It("returns an error if stemcellService find returns an api error", func() {
+				stemcellService.FindReturns(
+					"",
+					api.NewStemcellkNotFoundError("fake-stemcell-imagePath", false),
+				)
+
+				_, err = createStemcell.Run("fake-stemcell-imagePath", cloudProps)
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("Stemcell 'fake-stemcell-imagePath' not found"))
+				Expect(stemcellService.FindCallCount()).To(Equal(1))
+			})
+		})
+
+		Context("from raw-stemcell", func() {
+			BeforeEach(func() {
+				cloudProps = StemcellCloudProperties{
+					Infrastructure: "softlayer",
+					DatacenterName: "fake-datacenter",
+					OsCode:         "fake-os-code",
+				}
+				createdStemcellId = 12345678
+			})
+
+			It("creates the stemcell", func() {
+				stemcellService.CreateFromTarballReturns(
+					createdStemcellId,
+					nil,
+				)
+
+				stemcellCID, err = createStemcell.Run("fake-light-stemcell-imagePath", cloudProps)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(stemcellService.CreateFromTarballCallCount()).To(Equal(1))
+				Expect(stemcellCID).To(Equal(StemcellCID(createdStemcellId).String()))
+			})
+
+			It("returns an error if stemcellService CreateFromTarball call returns an error", func() {
+				stemcellService.CreateFromTarballReturns(
+					0,
+					errors.New("fake-stemcell-service-error"),
+				)
+
+				_, err = createStemcell.Run("fake-stemcell-imagePath", cloudProps)
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("fake-stemcell-service-error"))
+				Expect(stemcellService.CreateFromTarballCallCount()).To(Equal(1))
 			})
 		})
 	})

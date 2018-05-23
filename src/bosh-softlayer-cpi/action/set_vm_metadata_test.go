@@ -1,93 +1,75 @@
 package action_test
 
 import (
-	"encoding/json"
 	"errors"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
 	. "bosh-softlayer-cpi/action"
-	. "bosh-softlayer-cpi/softlayer/common"
-	fakescommon "bosh-softlayer-cpi/softlayer/common/fakes"
+
+	instancefakes "bosh-softlayer-cpi/softlayer/virtual_guest_service/fakes"
+
+	api "bosh-softlayer-cpi/api"
+	"bosh-softlayer-cpi/softlayer/virtual_guest_service"
+	"fmt"
 )
 
 var _ = Describe("SetVMMetadata", func() {
 	var (
-		fakeVmFinder *fakescommon.FakeVMFinder
-		fakeVm       *fakescommon.FakeVM
-		action       SetVMMetadataAction
-		metadata     VMMetadata
+		err        error
+		vmCID      VMCID
+		vmMetadata VMMetadata
+
+		vmService *instancefakes.FakeService
+
+		setVMMetadata SetVMMetadata
 	)
 
 	BeforeEach(func() {
-		fakeVmFinder = &fakescommon.FakeVMFinder{}
-		fakeVm = &fakescommon.FakeVM{}
-		action = NewSetVMMetadata(fakeVmFinder)
-
-		metadataBytes := []byte(`{
-		  "tag1": "dea",
-		  "tag2": "test-env",
-		  "tag3": "blue"
-		}`)
-
-		metadata = VMMetadata{}
-		err := json.Unmarshal(metadataBytes, &metadata)
-		Expect(err).ToNot(HaveOccurred())
+		vmCID = VMCID(12345678)
+		vmMetadata = VMMetadata{
+			"deployment": "fake-deployment",
+			"job":        "fake-job",
+			"index":      "fake-index",
+			"director":   "fake-director",
+			"id":         "fake-id",
+			"name":       "fake-name/fake-uuid",
+			"created_at": "2017-06-05T14:54:44Z",
+		}
+		vmService = &instancefakes.FakeService{}
+		setVMMetadata = NewSetVMMetadata(vmService)
 	})
 
 	Describe("Run", func() {
-		var (
-			vmCid VMCID
-			err   error
-		)
-		BeforeEach(func() {
-			vmCid = VMCID(123456)
-
+		It("set the vm metadata", func() {
+			_, err = setVMMetadata.Run(vmCID, vmMetadata)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(vmService.SetMetadataCallCount()).To(Equal(1))
+			_, actualMetadata := vmService.SetMetadataArgsForCall(0)
+			Expect(actualMetadata).To(Equal(instance.Metadata(vmMetadata)))
 		})
 
-		JustBeforeEach(func() {
-			_, err = action.Run(vmCid, metadata)
-		})
-		Context("when set vm metadata succeeds", func() {
-			BeforeEach(func() {
-				fakeVmFinder.FindReturns(fakeVm, true, nil)
-				fakeVm.SetMetadataReturns(nil)
-			})
+		It("returns an error if vmService set metadata call returns an error", func() {
+			vmService.SetMetadataReturns(
+				errors.New("fake-vm-service-error"),
+			)
 
-			It("fetches vm by cid", func() {
-				Expect(fakeVmFinder.FindCallCount()).To(Equal(1))
-				actualCid := fakeVmFinder.FindArgsForCall(0)
-				Expect(actualCid).To(Equal(123456))
-			})
-
-			It("no error return", func() {
-				Expect(fakeVm.SetMetadataCallCount()).To(Equal(1))
-				actualMetadata := fakeVm.SetMetadataArgsForCall(0)
-				Expect(actualMetadata).To(Equal(metadata))
-				Expect(err).NotTo(HaveOccurred())
-			})
+			_, err = setVMMetadata.Run(vmCID, vmMetadata)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("fake-vm-service-error"))
+			Expect(vmService.SetMetadataCallCount()).To(Equal(1))
 		})
 
-		Context("when find vm error out", func() {
-			BeforeEach(func() {
-				fakeVmFinder.FindReturns(nil, false, errors.New("kaboom"))
-			})
+		It("returns an error if vmService set metadata call returns an api error", func() {
+			vmService.SetMetadataReturns(
+				api.NewVMNotFoundError(vmCID.String()),
+			)
 
-			It("provides relevant error information", func() {
-				Expect(err.Error()).To(ContainSubstring("kaboom"))
-			})
-		})
-
-		Context("when find vm return false", func() {
-			BeforeEach(func() {
-				fakeVmFinder.FindReturns(nil, false, nil)
-			})
-
-			It("provides relevant error information", func() {
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("Finding VM"))
-			})
+			_, err = setVMMetadata.Run(vmCID, vmMetadata)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring(fmt.Sprintf("VM '%d' not found", vmCID)))
+			Expect(vmService.SetMetadataCallCount()).To(Equal(1))
 		})
 	})
 })

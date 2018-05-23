@@ -1,38 +1,53 @@
 package action
 
 import (
-	. "bosh-softlayer-cpi/softlayer/common/helper"
-	bslcstem "bosh-softlayer-cpi/softlayer/stemcell"
+	"bosh-softlayer-cpi/api"
+	"bosh-softlayer-cpi/softlayer/stemcell_service"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
-
-	"time"
 )
 
-type CreateStemcellAction struct {
-	stemcellFinder bslcstem.StemcellFinder
-}
+const softlayerInfrastructure = "softlayer"
+const bluemixInfrastructure = "bluemix"
 
-type CreateStemcellCloudProps struct {
-	Id             int    `json:"virtual-disk-image-id"`
-	Uuid           string `json:"virtual-disk-image-uuid"`
-	DatacenterName string `json:"datacenter-name"`
+type CreateStemcellAction struct {
+	stemcellService stemcell.Service
 }
 
 func NewCreateStemcell(
-	stemcellFinder bslcstem.StemcellFinder,
+	stemcellFinder stemcell.Service,
 ) (action CreateStemcellAction) {
-	action.stemcellFinder = stemcellFinder
+	action.stemcellService = stemcellFinder
 	return
 }
 
-func (a CreateStemcellAction) Run(imagePath string, stemcellCloudProps CreateStemcellCloudProps) (string, error) {
-	TIMEOUT = 30 * time.Second
-	POLLING_INTERVAL = 5 * time.Second
+func (a CreateStemcellAction) Run(imagePath string, cloudProps StemcellCloudProperties) (string, error) {
+	var err error
+	var stemcell string
 
-	stemcell, err := a.stemcellFinder.FindById(stemcellCloudProps.Id)
-	if err != nil {
-		return "0", bosherr.WrapErrorf(err, "Finding stemcell with ID '%d'", stemcellCloudProps.Id)
+	if cloudProps.Infrastructure != softlayerInfrastructure && cloudProps.Infrastructure != bluemixInfrastructure {
+		return "", bosherr.Errorf("Create stemcell: Invalid '%s' infrastructure", cloudProps.Infrastructure)
 	}
 
-	return StemcellCID(stemcell.ID()).String(), nil
+	switch {
+	case cloudProps.Id != 0:
+		_, err = a.stemcellService.Find(cloudProps.Id)
+		if err != nil {
+			if _, ok := err.(api.CloudError); ok {
+				return "", err
+			}
+			return "", bosherr.WrapErrorf(err, "Create stemcell from light-stemcell")
+		}
+		stemcell = StemcellCID(cloudProps.Id).String()
+	default:
+		stemcellId, err := a.stemcellService.CreateFromTarball(imagePath, cloudProps.DatacenterName, cloudProps.OsCode)
+		if err != nil {
+			if _, ok := err.(api.CloudError); ok {
+				return "", err
+			}
+			return "", bosherr.WrapErrorf(err, "Create stemcell from raw-stemcell")
+		}
+		stemcell = StemcellCID(stemcellId).String()
+	}
+
+	return stemcell, nil
 }

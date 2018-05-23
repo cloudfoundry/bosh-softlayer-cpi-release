@@ -1,0 +1,58 @@
+{
+    "accountId": 878273,
+    "createDate": "2016-09-21T01:15:46-07:00",
+    "id": 1335057,
+    "name": "testimage",
+    "note": "description",
+    "publicFlag": 1,
+    "blockDevicesDiskSpaceTotal": 0,
+    "children": [
+        {
+            "accountId": 878273,
+            "createDate": "2016-09-21T01:16:00-07:00",
+            "id": 1335059,
+            "name": "testimage",
+            "note": "description",
+            "parentId": 1335057,
+            "publicFlag": 1,
+            "statusId": 1,
+            "summary": "summary",
+            "transactionId": null,
+            "userRecordId": 538047,
+            "blockDevicesDiskSpaceTotal": 18308227584,
+            "datacenter": {
+                "name": "hkg02"
+            },
+            "parent": {
+                "accountId": 878273,
+                "createDate": "2016-09-21T01:15:46-07:00",
+                "id": 1335057,
+                "name": "testimage",
+                "note": "description",
+                "publicFlag": 1,
+                "blockDevicesDiskSpaceTotal": 0,
+                "children": null,
+                "flexImageFlag": false,
+                "globalIdentifier": "0bb97ee8-b28e-4601-8f55-f4a58b54f1ac",
+                "imageType": {
+                    "description": "a disk that may be replaced on upgrade",
+                    "keyName": "SYSTEM",
+                    "name": "System"
+                },
+                "status": {
+                    "name": "Active"
+                }
+            }
+        }
+    ],
+    "flexImageFlag": false,
+    "globalIdentifier": "0bb97ee8-b28e-4601-8f55-f4a58b54f1ac",
+    "imageType": {
+        "description": "a disk that may be replaced on upgrade",
+        "keyName": "SYSTEM",
+        "name": "System"
+    },
+    "status": {
+        "name": "Active"
+    }
+}

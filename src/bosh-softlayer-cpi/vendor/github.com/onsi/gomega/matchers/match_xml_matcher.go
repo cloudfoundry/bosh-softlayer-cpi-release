@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/onsi/gomega/format"
-	"golang.org/x/net/html/charset"
+	"golang.org/x/net/charset"
 )
 
 type MatchXMLMatcher struct {

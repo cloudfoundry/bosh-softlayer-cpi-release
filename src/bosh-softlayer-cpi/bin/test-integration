@@ -27,17 +27,14 @@
   echo -e "\n cd to base of project..."
   cd $base
 
-  echo -e "\n Creating cpi binary..."
-  go build -o out/cpi bosh-softlayer-cpi/main
-
 if [ -z "$1" ]; then
   echo -e "\n Integration Testing ALL CPI methods"
-  ginkgo -r -p -v --noisyPendings integration
+  ginkgo -r -v --noisyPendings integration
 else
   echo -e "\n Integration Testing for $1 methods"
   ginkgo -r -v --noisyPendings integration/$1
 fi
 
   echo -e "\n Vetting packages for potential issues..."
-  go tool vet action api common integration main test_helpers
+  go tool vet action api integration main
 )

@@ -1,0 +1,4 @@
+{
+  "error": "Unable to find object with unknown identifier of '65e2'.",
+  "code": "SoftLayer_Exception_ObjectNotFound"
+}

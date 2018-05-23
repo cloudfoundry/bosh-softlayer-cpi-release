@@ -4,8 +4,16 @@
       'plugin' => 'softlayer',
       'properties' => {
         'softlayer' => {
-          'username' => p('softlayer.username'),
-          'apiKey' => p('softlayer.apiKey'),
+          'username' => p('softlayer.username')
+        },
+        'registry' => {
+          'user' => p('registry.username'),
+          'password' => p('registry.password'),
+          'http' => {
+            'port' => p('registry.port'),
+            'user' => p('registry.username'),
+            'password' => p('registry.password')
+          }
         },
         'agent' => {
           'ntp' => p('ntp')
@@ -13,54 +21,72 @@
       }
     }
   }
-  if_p('softlayer.featureOptions') do
-    softlayer_feature_options_params = {}
-    if_p('softlayer.featureOptions.enablePool') do |enablePool|
-      softlayer_feature_options_params.merge!('enablePool' => enablePool)
-    end
-    if_p('softlayer.featureOptions.disableOsReload') do |disableOsReload|
-      softlayer_feature_options_params.merge!('disableOsReload' => disableOsReload)
-    end
-    if_p('softlayer.featureOptions.apiEndpoint') do |apiEndpoint|
-      softlayer_feature_options_params.merge!('apiEndpoint' => apiEndpoint)
-    end
-    if_p('softlayer.featureOptions.apiWaitTime') do |apiWaitTime|
-      softlayer_feature_options_params.merge!('apiWaitTime' => apiWaitTime)
-    end
-    if_p('softlayer.featureOptions.apiRetryCount') do |apiRetryCount|
-      softlayer_feature_options_params.merge!('apiRetryCount' => apiRetryCount)
-    end
-    if_p('softlayer.featureOptions.createIscsiVolumeTimeout') do |createIscsiVolumeTimeout|
-      softlayer_feature_options_params.merge!('createIscsiVolumeTimeout' => createIscsiVolumeTimeout)
-    end
-    if_p('softlayer.featureOptions.createIscsiVolumePollingInterval') do |createIscsiVolumePollingInterval|
-      softlayer_feature_options_params.merge!('createIscsiVolumePollingInterval' => createIscsiVolumePollingInterval)
-    end
-    params['cloud']['properties']['softlayer']['featureOptions'] = softlayer_feature_options_params
+
+  if_p('softlayer.api_key') do |api_key|
+    params['cloud']['properties']['softlayer']['api_key'] = api_key
   end
-  if_p('baremetal') do
-    baremetal_params = {}
-    if_p('baremetal.username') do |username|
-      baremetal_params.merge!('username' => username)
-    end
-    if_p('baremetal.password') do |password|
-      baremetal_params.merge!('password' => password)
-    end
-    if_p('baremetal.endpoint') do |endpoint|
-      baremetal_params.merge!('endpoint' => endpoint)
-    end
-    params['cloud']['properties']['baremetal'] = baremetal_params
+
+  if_p('softlayer.apiKey') do |api_key|
+    params['cloud']['properties']['softlayer']['api_key'] = api_key
   end
-  if_p('pool') do
-    pool_params = {}
-    if_p('pool.host') do |host|
-      pool_params.merge!('host' => host)
-    end
-    if_p('pool.port') do |port|
-      pool_params.merge!('port' => port)
-    end
-    params['cloud']['properties']['pool'] = pool_params
+
+  if_p('softlayer.api_endpoint') do |endpoint|
+    params['cloud']['properties']['softlayer']['api_endpoint'] = endpoint
   end
+
+  if_p('softlayer.disable_os_reload') do |osreload|
+    params['cloud']['properties']['softlayer']['disable_os_reload'] = osreload
+  end
+
+  if_p('softlayer.ssh_public_key') do |ssh_public_key|
+    params['cloud']['properties']['softlayer']['ssh_public_key'] = ssh_public_key
+  end
+
+  if_p('softlayer.ssh_public_key_fingerprint') do |ssh_public_key_fingerprint|
+    params['cloud']['properties']['softlayer']['ssh_public_key_fingerprint'] = ssh_public_key_fingerprint
+  end
+
+  if_p('softlayer.trace') do |trace|
+    params['cloud']['properties']['softlayer']['trace'] = trace
+  end
+
+  if_p('softlayer.enable_vps') do |enable_vps|
+      params['cloud']['properties']['softlayer']['enable_vps'] = enable_vps
+  end
+
+  if_p('softlayer.vps_host') do |vps_host|
+      params['cloud']['properties']['softlayer']['vps_host'] = vps_host
+  end
+
+  if_p('softlayer.vps_port') do |vps_port|
+      params['cloud']['properties']['softlayer']['vps_port'] = vps_port
+  end
+
+  if_p('softlayer.vps_use_ssl') do |vps_use_ssl|
+      params['cloud']['properties']['softlayer']['vps_use_ssl'] = vps_use_ssl
+  end
+
+  if_p('softlayer.swift_username') do |swift_username|
+      params['cloud']['properties']['softlayer']['swift_username'] = swift_username
+  end
+
+  if_p('softlayer.swift_endpoint') do |swift_endpoint|
+      params['cloud']['properties']['softlayer']['swift_endpoint'] = swift_endpoint
+  end
+
+  if_p('registry.address') do |address|
+    params['cloud']['properties']['registry']['address'] = address
+  end
+  if_p('registry.host') do |host|
+    params['cloud']['properties']['registry']['address'] = host
+  end
+
+  if_p('registry.endpoint') do |endpoint|
+    params['cloud']['properties']['registry']['endpoint'] = endpoint
+  end.else do
+    params['cloud']['properties']['registry']['endpoint'] = "http://#{p('registry.username')}:#{ERB::Util.url_encode(p('registry.password'))}@#{params['cloud']['properties']['registry']['address']}:#{p('registry.port')}"
+  end
+  
   if_p('blobstore') do
     blobstore_params = {
       'provider' => p('blobstore.provider')
@@ -93,9 +119,11 @@
     blobstore_params['options'] = options_params
     params['cloud']['properties']['agent']['blobstore'] = blobstore_params
   end
+
   if_p('agent.vcappassword') do |vcappassword|
     params['cloud']['properties']['agent']['vcappassword'] = vcappassword
   end
+
   if_p('agent.mbus') do |mbus|
     params['cloud']['properties']['agent']['mbus'] = mbus
   end.else_if_p('nats') do

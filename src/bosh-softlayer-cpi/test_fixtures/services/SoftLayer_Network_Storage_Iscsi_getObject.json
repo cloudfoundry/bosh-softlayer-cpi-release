@@ -1,0 +1,21 @@
+{
+    "capacityGb": 20,
+    "createDate": "2015-03-31T01:41:01-07:00",
+    "id": 4647689,
+    "nasType": "ISCSI",
+    "username": "IBM01SEL278444-1",
+    "billingItem": {
+        "id": 48917051
+    },
+    "mountableFlag": "1",
+    "serviceResource": {
+        "backendIpAddress": "nfsdal0501d-fz.service.softlayer.com",
+        "id": 2222,
+        "name": "PerfStor Aggr aggr_staasdal0501_p02",
+        "datacenter": {
+            "name": "dal05"
+        }
+    },
+    "serviceResourceBackendIpAddress": "10.1.154.88",
+    "serviceResourceName": "PerfStor Aggr aggr_staasdal0501_p02"
+}

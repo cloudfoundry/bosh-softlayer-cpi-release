@@ -1,9 +1,11 @@
 # BOSH Softlayer CPI Release
 
+Coverage status: [![Coverage Status](https://coveralls.io/repos/github/bluebosh/bosh-softlayer-cpi-release/badge.svg?branch=new_sl_with_actions)](https://coveralls.io/github/bluebosh/bosh-softlayer-cpi-release?branch=new_sl_with_actions)
+
 * Documentation: [bosh.io/docs](https://bosh.io/docs)
 * BOSH SoftLayer CPI Slack channel: #bosh-softlayer-cpi on [https://cloudfoundry.slack.com/](https://cloudfoundry.slack.com/)
 * Mailing list: [cf-bosh](https://lists.cloudfoundry.org/pipermail/cf-bosh)
-* CI: <https://bosh-sl-ci.bluemix.net/teams/main/pipelines/bosh:softlayer:cpi>
+* CI: <https://bosh-sl-ci.bluemix.net/teams/main/pipelines/bosh-softlayer-cpi-release-v4>
 * Roadmap: [Pivotal Tracker](https://www.pivotaltracker.com/n/projects/1344876)
 
 ## Releases

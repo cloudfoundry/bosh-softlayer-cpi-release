@@ -2,96 +2,98 @@ package action
 
 import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
-	boshlog "github.com/cloudfoundry/bosh-utils/logger"
+	boshuuid "github.com/cloudfoundry/bosh-utils/uuid"
 
-	bmsclient "github.com/cloudfoundry-community/bosh-softlayer-tools/clients"
-	slclient "github.com/maximilien/softlayer-go/client"
+	"bosh-softlayer-cpi/config"
+	"bosh-softlayer-cpi/softlayer/client"
+	"bosh-softlayer-cpi/softlayer/disk_service"
+	"bosh-softlayer-cpi/softlayer/snapshot_service"
+	"bosh-softlayer-cpi/softlayer/virtual_guest_service"
 
-	bslcdisk "bosh-softlayer-cpi/softlayer/disk"
-	bslcstem "bosh-softlayer-cpi/softlayer/stemcell"
-	bslcvm "bosh-softlayer-cpi/softlayer/vm"
-
-	apiclient "bosh-softlayer-cpi/softlayer/pool/client"
-	httptransport "github.com/go-openapi/runtime/client"
-
-	. "bosh-softlayer-cpi/softlayer/common"
-	"fmt"
-	"github.com/go-openapi/strfmt"
+	"bosh-softlayer-cpi/logger"
+	"bosh-softlayer-cpi/registry"
+	"bosh-softlayer-cpi/softlayer/stemcell_service"
 )
 
 type concreteFactory struct {
 	availableActions map[string]Action
 }
 
-func NewConcreteFactory(options ConcreteFactoryOptions, logger boshlog.Logger) concreteFactory {
-	softLayerClient := slclient.NewSoftLayerClient(options.Softlayer.Username, options.Softlayer.ApiKey)
-	baremetalClient := bmsclient.NewBmpClient(options.Baremetal.Username, options.Baremetal.Password, options.Baremetal.EndPoint, nil, "")
-	poolClient := apiclient.New(httptransport.New(fmt.Sprintf("%s:%d", options.Pool.Host, options.Pool.Port), "v2", []string{"https"}), strfmt.Default).VM
+func NewConcreteFactory(
+	softlayerClient client.Client,
+	uuidGen boshuuid.Generator,
+	cfg config.Config,
+	logger logger.Logger,
+) concreteFactory {
 
-	stemcellFinder := bslcstem.NewSoftLayerStemcellFinder(softLayerClient, logger)
-
-	agentEnvServiceFactory := NewSoftLayerAgentEnvServiceFactory(options.Registry, logger)
-
-	vmFinder := bslcvm.NewSoftLayerFinder(
-		softLayerClient,
-		baremetalClient,
-		agentEnvServiceFactory,
+	registryClient := registry.NewHTTPClient(
+		cfg.Cloud.Properties.Registry,
 		logger,
 	)
 
-	vmCreatorProvider := NewCreatorProvider(
-		softLayerClient,
-		baremetalClient,
-		poolClient,
-		options,
+	diskService := disk.NewSoftlayerDiskService(
+		softlayerClient,
 		logger,
 	)
 
-	vmDeleterProvider := NewDeleterProvider(
-		softLayerClient,
-		poolClient,
-		logger,
-		vmFinder,
-	)
-
-	diskCreator := bslcdisk.NewSoftLayerDiskCreator(
-		softLayerClient,
+	stemcellService := stemcell.NewSoftlayerStemcellService(
+		softlayerClient,
+		uuidGen,
 		logger,
 	)
 
-	diskFinder := bslcdisk.NewSoftLayerDiskFinder(
-		softLayerClient,
+	vmService := instance.NewSoftLayerVirtualGuestService(
+		softlayerClient,
+		uuidGen,
+		logger,
+	)
+
+	snapshotService := snapshot.NewSoftlayerSnapshotService(
+		softlayerClient,
 		logger,
 	)
 
 	return concreteFactory{
 		availableActions: map[string]Action{
 			// Stemcell management
-			"create_stemcell": NewCreateStemcell(stemcellFinder),
-			"delete_stemcell": NewDeleteStemcell(stemcellFinder, logger),
+			"create_stemcell": NewCreateStemcell(stemcellService),
+			"delete_stemcell": NewDeleteStemcell(stemcellService),
 
 			// VM management
-			"create_vm":          NewCreateVM(stemcellFinder, vmCreatorProvider, options),
-			"delete_vm":          NewDeleteVM(vmDeleterProvider, options),
-			"has_vm":             NewHasVM(vmFinder),
-			"reboot_vm":          NewRebootVM(vmFinder),
-			"set_vm_metadata":    NewSetVMMetadata(vmFinder),
-			"configure_networks": NewConfigureNetworks(vmFinder),
+			"create_vm": NewCreateVM(
+				stemcellService,
+				vmService,
+				registryClient,
+				cfg.Cloud.Properties.Registry,
+				cfg.Cloud.Properties.Agent,
+				cfg.Cloud.Properties.SoftLayer,
+			),
+			"delete_vm":          NewDeleteVM(vmService, registryClient, cfg.Cloud.Properties.SoftLayer),
+			"has_vm":             NewHasVM(vmService),
+			"reboot_vm":          NewRebootVM(vmService),
+			"set_vm_metadata":    NewSetVMMetadata(vmService),
+			"configure_networks": NewConfigureNetworks(vmService, registryClient),
 
 			// Disk management
-			"create_disk": NewCreateDisk(vmFinder, diskCreator),
-			"delete_disk": NewDeleteDisk(diskFinder),
-			"attach_disk": NewAttachDisk(vmFinder, diskFinder),
-			"detach_disk": NewDetachDisk(vmFinder, diskFinder),
+			"has_disk":          NewHasDisk(diskService),
+			"create_disk":       NewCreateDisk(diskService, vmService),
+			"delete_disk":       NewDeleteDisk(diskService),
+			"attach_disk":       NewAttachDisk(diskService, vmService, registryClient),
+			"detach_disk":       NewDetachDisk(vmService, registryClient),
+			"get_disks":         NewGetDisks(vmService),
+			"set_disk_metadata": NewSetDiskMetadata(diskService),
 
-			// Not implemented (disk related):
-			//   snapshot_disk
-			//   delete_snapshot
-			//   get_disks
+			// Snapshot management
+			"snapshot_disk":   NewSnapshotDisk(snapshotService, diskService),
+			"delete_snapshot": NewDeleteSnapshot(snapshotService),
+
+			// Others:
+			"info": NewInfo(),
+			"ping": NewPing(),
 
 			// Not implemented (others):
 			//   current_vm_id
-			//   ping
+			//   calculate_vm_cloud_properties
 		},
 	}
 }

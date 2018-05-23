@@ -2,7 +2,6 @@ package action
 
 import (
 	"encoding/json"
-	"errors"
 	"strconv"
 	"strings"
 )
@@ -10,16 +9,17 @@ import (
 type StemcellCID int
 type VMCID int
 type DiskCID int
+type SnapshotCID int
+
+func (stemcellCID StemcellCID) Int() int {
+	return int(stemcellCID)
+}
 
 func (stemcellCID StemcellCID) String() string {
 	return strconv.Itoa(int(stemcellCID))
 }
 
 func (stemcellCID *StemcellCID) UnmarshalJSON(data []byte) error {
-	if stemcellCID == nil {
-		return errors.New("StemcellCID: UnmarshalJSON on nil pointer")
-	}
-
 	dataString := strings.Trim(string(data), "\"")
 	intValue, err := strconv.Atoi(dataString)
 	if err != nil {
@@ -43,10 +43,6 @@ func (vmCID VMCID) Int() int {
 }
 
 func (vmCID *VMCID) UnmarshalJSON(data []byte) error {
-	if vmCID == nil {
-		return errors.New("VMCID: UnmarshalJSON on nil pointer")
-	}
-
 	dataString := strings.Trim(string(data), "\"")
 	intValue, err := strconv.Atoi(dataString)
 	if err != nil {
@@ -63,10 +59,6 @@ func (vmCID VMCID) MarshalJSON() ([]byte, error) {
 }
 
 func (diskCID *DiskCID) UnmarshalJSON(data []byte) error {
-	if diskCID == nil {
-		return errors.New("DiskCID: UnmarshalJSON on nil pointer")
-	}
-
 	dataString := strings.Trim(string(data), "\"")
 	intValue, err := strconv.Atoi(dataString)
 	if err != nil {
@@ -88,4 +80,28 @@ func (diskCID DiskCID) String() string {
 
 func (diskCID DiskCID) Int() int {
 	return int(diskCID)
+}
+
+func (snapshotCID *SnapshotCID) UnmarshalJSON(data []byte) error {
+	dataString := strings.Trim(string(data), "\"")
+	intValue, err := strconv.Atoi(dataString)
+	if err != nil {
+		return err
+	}
+
+	*snapshotCID = SnapshotCID(intValue)
+
+	return nil
+}
+
+func (snapshotCID SnapshotCID) MarshalJSON() ([]byte, error) {
+	return json.Marshal(int(snapshotCID))
+}
+
+func (snapshotCID SnapshotCID) String() string {
+	return strconv.Itoa(int(snapshotCID))
+}
+
+func (snapshotCID SnapshotCID) Int() int {
+	return int(snapshotCID)
 }

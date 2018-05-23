@@ -1,0 +1,21 @@
+[
+    {
+        "capacityGb": 20,
+        "id": 17336531,
+        "username": "IBM01SEL278444-16",
+        "activeTransactionCount": 0,
+        "lunId": "170",
+        "serviceResource": {
+            "backendIpAddress": "nfstok0201a-fz.service.softlayer.com",
+            "id": 3886,
+            "name": "Consistent Performance aggr_staastok0201_hp01",
+            "datacenter": {
+                "name": "tok02"
+            }
+        },
+        "serviceResourceBackendIpAddress": "10.3.78.67",
+        "storageType": {
+            "keyName": "ENDURANCE_BLOCK_STORAGE"
+        }
+    }
+]

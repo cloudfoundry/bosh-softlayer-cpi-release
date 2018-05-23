@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	bslcaction "bosh-softlayer-cpi/action"
+	bgcaction "bosh-softlayer-cpi/action"
 )
 
 type FakeFactory struct {
@@ -19,7 +19,7 @@ func NewFakeFactory() *FakeFactory {
 	}
 }
 
-func (f *FakeFactory) Create(method string) (bslcaction.Action, error) {
+func (f *FakeFactory) Create(method string) (bgcaction.Action, error) {
 	if err := f.registeredActionErrs[method]; err != nil {
 		return nil, err
 	}
