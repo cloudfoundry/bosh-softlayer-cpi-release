@@ -45,6 +45,8 @@ bosh-cli interpolate bosh-deployment/bosh.yml \
   --vars-store director-creds.yml \
   > director.yml
 
+export BOSH_LOG_LEVEL=DEBUG
+export BOSH_LOG_PATH=./run.log
 echo -e "\n\033[32m[INFO] Deploying director.\033[0m"
 bosh-cli create-env \
   --state director-state.json \
