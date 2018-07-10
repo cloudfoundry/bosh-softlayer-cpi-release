@@ -165,16 +165,31 @@ var _ = Describe("Virtual Guest Service", func() {
 		})
 
 		It("run successfully Id if create instance successful", func() {
+			cli.GetInstanceReturns(
+				&datatypes.Virtual_Guest{
+					Id: sl.Int(vmID),
+				},
+				true,
+				nil,
+			)
 			cli.CancelInstanceReturns(
 				nil,
 			)
 
 			err := virtualGuestService.CleanUp(vmID)
 			Expect(err).NotTo(HaveOccurred())
+			Expect(cli.GetInstanceCallCount()).To(Equal(1))
 			Expect(cli.CancelInstanceCallCount()).To(Equal(1))
 		})
 
 		It("returns error if softLayerClient create instance from VPS call", func() {
+			cli.GetInstanceReturns(
+				&datatypes.Virtual_Guest{
+					Id: sl.Int(vmID),
+				},
+				true,
+				nil,
+			)
 			cli.CancelInstanceReturns(
 				errors.New("fake-client-error"),
 			)
@@ -182,6 +197,7 @@ var _ = Describe("Virtual Guest Service", func() {
 			err := virtualGuestService.CleanUp(vmID)
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("fake-client-error"))
+			Expect(cli.GetInstanceCallCount()).To(Equal(1))
 			Expect(cli.CancelInstanceCallCount()).To(Equal(1))
 		})
 

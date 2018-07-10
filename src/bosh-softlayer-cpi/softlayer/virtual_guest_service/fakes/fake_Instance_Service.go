@@ -244,14 +244,14 @@ type FakeService struct {
 	rebootReturnsOnCall map[int]struct {
 		result1 error
 	}
-	ReloadOSStub        func(id int, stemcellID int, sshKeyIds []int, vmNamePrefix string, domain string) error
+	ReloadOSStub        func(id int, stemcellID int, sshKeyIds []int, hostname string, domain string) error
 	reloadOSMutex       sync.RWMutex
 	reloadOSArgsForCall []struct {
-		id           int
-		stemcellID   int
-		sshKeyIds    []int
-		vmNamePrefix string
-		domain       string
+		id         int
+		stemcellID int
+		sshKeyIds  []int
+		hostname   string
+		domain     string
 	}
 	reloadOSReturns struct {
 		result1 error
@@ -1203,7 +1203,7 @@ func (fake *FakeService) RebootReturnsOnCall(i int, result1 error) {
 	}{result1}
 }
 
-func (fake *FakeService) ReloadOS(id int, stemcellID int, sshKeyIds []int, vmNamePrefix string, domain string) error {
+func (fake *FakeService) ReloadOS(id int, stemcellID int, sshKeyIds []int, hostname string, domain string) error {
 	var sshKeyIdsCopy []int
 	if sshKeyIds != nil {
 		sshKeyIdsCopy = make([]int, len(sshKeyIds))
@@ -1212,16 +1212,16 @@ func (fake *FakeService) ReloadOS(id int, stemcellID int, sshKeyIds []int, vmNam
 	fake.reloadOSMutex.Lock()
 	ret, specificReturn := fake.reloadOSReturnsOnCall[len(fake.reloadOSArgsForCall)]
 	fake.reloadOSArgsForCall = append(fake.reloadOSArgsForCall, struct {
-		id           int
-		stemcellID   int
-		sshKeyIds    []int
-		vmNamePrefix string
-		domain       string
-	}{id, stemcellID, sshKeyIdsCopy, vmNamePrefix, domain})
-	fake.recordInvocation("ReloadOS", []interface{}{id, stemcellID, sshKeyIdsCopy, vmNamePrefix, domain})
+		id         int
+		stemcellID int
+		sshKeyIds  []int
+		hostname   string
+		domain     string
+	}{id, stemcellID, sshKeyIdsCopy, hostname, domain})
+	fake.recordInvocation("ReloadOS", []interface{}{id, stemcellID, sshKeyIdsCopy, hostname, domain})
 	fake.reloadOSMutex.Unlock()
 	if fake.ReloadOSStub != nil {
-		return fake.ReloadOSStub(id, stemcellID, sshKeyIds, vmNamePrefix, domain)
+		return fake.ReloadOSStub(id, stemcellID, sshKeyIds, hostname, domain)
 	}
 	if specificReturn {
 		return ret.result1
@@ -1238,7 +1238,7 @@ func (fake *FakeService) ReloadOSCallCount() int {
 func (fake *FakeService) ReloadOSArgsForCall(i int) (int, int, []int, string, string) {
 	fake.reloadOSMutex.RLock()
 	defer fake.reloadOSMutex.RUnlock()
-	return fake.reloadOSArgsForCall[i].id, fake.reloadOSArgsForCall[i].stemcellID, fake.reloadOSArgsForCall[i].sshKeyIds, fake.reloadOSArgsForCall[i].vmNamePrefix, fake.reloadOSArgsForCall[i].domain
+	return fake.reloadOSArgsForCall[i].id, fake.reloadOSArgsForCall[i].stemcellID, fake.reloadOSArgsForCall[i].sshKeyIds, fake.reloadOSArgsForCall[i].hostname, fake.reloadOSArgsForCall[i].domain
 }
 
 func (fake *FakeService) ReloadOSReturns(result1 error) {

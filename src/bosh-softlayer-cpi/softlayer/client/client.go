@@ -1868,10 +1868,10 @@ func (c *ClientManager) CreateImageFromExternalSource(imageName string, note str
 	// uri := "swift://${OBJ_STORAGE_ACC_NAME}@${SWIFT_CLUSTER}/${SWIFT_CONTAINER}/bosh-stemcell-${STEMCELL_VERSION}-softlayer.vhd"
 	uri := fmt.Sprintf("swift://%s@%s/%s/%s.vhd", accountName, cluster, imageName, imageName)
 	configuration := &datatypes.Container_Virtual_Guest_Block_Device_Template_Configuration{
-		Name: sl.String(imageName),
-		Note: sl.String(note),
+		Name:                         sl.String(imageName),
+		Note:                         sl.String(note),
 		OperatingSystemReferenceCode: sl.String(osCode),
-		Uri: sl.String(uri),
+		Uri:                          sl.String(uri),
 	}
 
 	vgbdtgObject, err := c.ImageService.CreateFromExternalSource(configuration)
