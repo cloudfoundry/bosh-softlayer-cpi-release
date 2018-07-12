@@ -1609,6 +1609,19 @@ func (c *ClientManager) AuthorizeHostToVolume(instance *datatypes.Virtual_Guest,
 }
 
 func (c *ClientManager) DeauthorizeHostToVolume(instance *datatypes.Virtual_Guest, volumeId int, until time.Time) (bool, error) {
+	instances, err := c.StorageService.Id(volumeId).Mask("id").GetAllowedVirtualGuests()
+	if err != nil {
+		apiErr := err.(sl.Error)
+		if apiErr.Exception == SOFTLAYER_OBJECTNOTFOUND_EXCEPTION {
+			return false, bosherr.Errorf("Unable to find object with id of '%d'", volumeId)
+		}
+		return false, bosherr.Errorf("Get allowed virtual guests of '%d'", volumeId)
+	}
+
+	if !containsId(instances, *instance.Id) {
+		return true, nil
+	}
+
 	for {
 		disAllowed, err := c.StorageService.Id(volumeId).RemoveAccessFromVirtualGuest(instance)
 		if err != nil {
@@ -1938,6 +1951,16 @@ func (c *ClientManager) selectMaximunIopsItemPriceIdOnSize(size int) (datatypes.
 	}
 
 	return datatypes.Product_Item_Price{}, bosherr.Errorf("No proper performance storage (iSCSI volume) for size %d", size)
+}
+
+func containsId(instances []datatypes.Virtual_Guest, instanceId int) bool {
+	for _, instance := range instances {
+		if *instance.Id == instanceId {
+			return true
+		}
+	}
+
+	return false
 }
 
 // func (c *ClientManager) selectSaaSMaximunIopsItemPriceIdOnSize(size int) (datatypes.Product_Item_Price, error) {
