@@ -16,6 +16,10 @@ type FakeClient struct {
 	UpdateCalled   bool
 	UpdateErr      error
 	UpdateSettings registry.AgentSettings
+
+	IsExistCalled bool
+	Exist         bool
+	IsExistErr    error
 }
 
 // Delete deletes the instance settings for a given instance ID.
@@ -35,4 +39,10 @@ func (c *FakeClient) Update(instanceID string, agentSettings registry.AgentSetti
 	c.UpdateCalled = true
 	c.UpdateSettings = agentSettings
 	return c.UpdateErr
+}
+
+// IsExist indicates whether the agent settings for a given instance ID exists w/i empty.
+func (c *FakeClient) IsExist(instanceID string) (bool, error) {
+	c.IsExistCalled = true
+	return c.Exist, c.IsExistErr
 }

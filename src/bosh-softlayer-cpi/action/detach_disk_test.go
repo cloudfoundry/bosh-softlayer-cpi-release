@@ -55,6 +55,8 @@ var _ = Describe("DetachDisk", func() {
 				},
 			}
 
+			registryClient.Exist = true
+
 			expectedAgentSettings = registry.AgentSettings{
 				Disks: registry.DisksSettings{
 					Persistent: map[string]registry.PersistentSettings{},
@@ -149,6 +151,30 @@ var _ = Describe("DetachDisk", func() {
 					},
 				}
 			})
+		})
+
+		It("returns nil if registry hasn't instance settings", func() {
+			registryClient.Exist = false
+
+			_, err = detachDisk.Run(vmCID, diskCID)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(vmService.DetachDiskCallCount()).To(Equal(1))
+			Expect(registryClient.IsExistCalled).To(BeTrue())
+			Expect(registryClient.FetchCalled).To(BeFalse())
+			Expect(registryClient.UpdateCalled).To(BeFalse())
+		})
+
+		It("returns error if registryClient IsExist call returns an error", func() {
+			registryClient.IsExistErr = errors.New("fake-registry-client-error")
+			registryClient.Exist = false
+
+			_, err = detachDisk.Run(vmCID, diskCID)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("fake-registry-client-error"))
+			Expect(vmService.DetachDiskCallCount()).To(Equal(1))
+			Expect(registryClient.IsExistCalled).To(BeTrue())
+			Expect(registryClient.FetchCalled).To(BeFalse())
+			Expect(registryClient.UpdateCalled).To(BeFalse())
 		})
 	})
 })
