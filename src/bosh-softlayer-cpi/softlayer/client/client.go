@@ -467,19 +467,16 @@ func (c *ClientManager) WaitInstanceHasNoneActiveTransaction(id int, until time.
 			return bosherr.WrapErrorf(err, "SoftLayer virtual guest '%d' does not exist", id)
 		}
 
-		// if activeTxn != nil && activeTxn.TransactionStatus != nil && activeTxn.TransactionStatus.Name != nil {
-		// 	fmt.Println("activeTxn: ", *activeTxn.TransactionStatus.Name)
-		// }
-
 		if virtualGuest.ActiveTransaction == nil {
 			return nil
 		}
 
+		if virtualGuest.ActiveTransaction.TransactionStatus != nil && *virtualGuest.ActiveTransaction.TransactionStatus.Name == "RECLAIM_WAIT" {
+			return bosherr.Errorf("Instance with id of '%d' has 'RECLAIM_WAIT' transaction", id)
+		}
+
 		now := time.Now()
 		if now.After(until) {
-			if virtualGuest.ActiveTransaction.TransactionStatus != nil && *virtualGuest.ActiveTransaction.TransactionStatus.Name == "RECLAIM_WAIT" {
-				return bosherr.Errorf("Instance with id of '%d' has 'RECLAIM_WAIT' transaction", id)
-			}
 			return bosherr.Errorf("Waiting instance with id of '%d' has none active transaction time out", id)
 		}
 
