@@ -2,6 +2,7 @@
 package fakes
 
 import (
+	"bosh-softlayer-cpi/registry"
 	"bosh-softlayer-cpi/softlayer/client"
 	"sync"
 	"time"
@@ -21,10 +22,11 @@ type FakeClient struct {
 	cancelInstanceReturnsOnCall map[int]struct {
 		result1 error
 	}
-	CreateInstanceStub        func(template *datatypes.Virtual_Guest) (*datatypes.Virtual_Guest, error)
+	CreateInstanceStub        func(template *datatypes.Virtual_Guest, userData *registry.SoftlayerUserData) (*datatypes.Virtual_Guest, error)
 	createInstanceMutex       sync.RWMutex
 	createInstanceArgsForCall []struct {
 		template *datatypes.Virtual_Guest
+		userData *registry.SoftlayerUserData
 	}
 	createInstanceReturns struct {
 		result1 *datatypes.Virtual_Guest
@@ -107,7 +109,7 @@ type FakeClient struct {
 	rebootInstanceReturnsOnCall map[int]struct {
 		result1 error
 	}
-	ReloadInstanceStub        func(id int, stemcellId int, sshKeyIds []int, hostname string, domain string) error
+	ReloadInstanceStub        func(id int, stemcellId int, sshKeyIds []int, hostname string, domain string, userData *registry.SoftlayerUserData) error
 	reloadInstanceMutex       sync.RWMutex
 	reloadInstanceArgsForCall []struct {
 		id         int
@@ -115,6 +117,7 @@ type FakeClient struct {
 		sshKeyIds  []int
 		hostname   string
 		domain     string
+		userData   *registry.SoftlayerUserData
 	}
 	reloadInstanceReturns struct {
 		result1 error
@@ -231,11 +234,11 @@ type FakeClient struct {
 		result1 bool
 		result2 error
 	}
-	SetInstanceMetadataStub        func(id int, userData *string) (bool, error)
+	SetInstanceMetadataStub        func(id int, encodedUserData *string) (bool, error)
 	setInstanceMetadataMutex       sync.RWMutex
 	setInstanceMetadataArgsForCall []struct {
-		id       int
-		userData *string
+		id              int
+		encodedUserData *string
 	}
 	setInstanceMetadataReturns struct {
 		result1 bool
@@ -532,12 +535,13 @@ type FakeClient struct {
 		result1 bool
 		result2 error
 	}
-	CreateInstanceFromVPSStub        func(template *datatypes.Virtual_Guest, stemcellID int, sshKeys []int) (*datatypes.Virtual_Guest, error)
+	CreateInstanceFromVPSStub        func(template *datatypes.Virtual_Guest, stemcellID int, sshKeys []int, userData *registry.SoftlayerUserData) (*datatypes.Virtual_Guest, error)
 	createInstanceFromVPSMutex       sync.RWMutex
 	createInstanceFromVPSArgsForCall []struct {
 		template   *datatypes.Virtual_Guest
 		stemcellID int
 		sshKeys    []int
+		userData   *registry.SoftlayerUserData
 	}
 	createInstanceFromVPSReturns struct {
 		result1 *datatypes.Virtual_Guest
@@ -713,16 +717,17 @@ func (fake *FakeClient) CancelInstanceReturnsOnCall(i int, result1 error) {
 	}{result1}
 }
 
-func (fake *FakeClient) CreateInstance(template *datatypes.Virtual_Guest) (*datatypes.Virtual_Guest, error) {
+func (fake *FakeClient) CreateInstance(template *datatypes.Virtual_Guest, userData *registry.SoftlayerUserData) (*datatypes.Virtual_Guest, error) {
 	fake.createInstanceMutex.Lock()
 	ret, specificReturn := fake.createInstanceReturnsOnCall[len(fake.createInstanceArgsForCall)]
 	fake.createInstanceArgsForCall = append(fake.createInstanceArgsForCall, struct {
 		template *datatypes.Virtual_Guest
-	}{template})
-	fake.recordInvocation("CreateInstance", []interface{}{template})
+		userData *registry.SoftlayerUserData
+	}{template, userData})
+	fake.recordInvocation("CreateInstance", []interface{}{template, userData})
 	fake.createInstanceMutex.Unlock()
 	if fake.CreateInstanceStub != nil {
-		return fake.CreateInstanceStub(template)
+		return fake.CreateInstanceStub(template, userData)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
@@ -736,10 +741,10 @@ func (fake *FakeClient) CreateInstanceCallCount() int {
 	return len(fake.createInstanceArgsForCall)
 }
 
-func (fake *FakeClient) CreateInstanceArgsForCall(i int) *datatypes.Virtual_Guest {
+func (fake *FakeClient) CreateInstanceArgsForCall(i int) (*datatypes.Virtual_Guest, *registry.SoftlayerUserData) {
 	fake.createInstanceMutex.RLock()
 	defer fake.createInstanceMutex.RUnlock()
-	return fake.createInstanceArgsForCall[i].template
+	return fake.createInstanceArgsForCall[i].template, fake.createInstanceArgsForCall[i].userData
 }
 
 func (fake *FakeClient) CreateInstanceReturns(result1 *datatypes.Virtual_Guest, result2 error) {
@@ -1029,7 +1034,7 @@ func (fake *FakeClient) RebootInstanceReturnsOnCall(i int, result1 error) {
 	}{result1}
 }
 
-func (fake *FakeClient) ReloadInstance(id int, stemcellId int, sshKeyIds []int, hostname string, domain string) error {
+func (fake *FakeClient) ReloadInstance(id int, stemcellId int, sshKeyIds []int, hostname string, domain string, userData *registry.SoftlayerUserData) error {
 	var sshKeyIdsCopy []int
 	if sshKeyIds != nil {
 		sshKeyIdsCopy = make([]int, len(sshKeyIds))
@@ -1043,11 +1048,12 @@ func (fake *FakeClient) ReloadInstance(id int, stemcellId int, sshKeyIds []int, 
 		sshKeyIds  []int
 		hostname   string
 		domain     string
-	}{id, stemcellId, sshKeyIdsCopy, hostname, domain})
-	fake.recordInvocation("ReloadInstance", []interface{}{id, stemcellId, sshKeyIdsCopy, hostname, domain})
+		userData   *registry.SoftlayerUserData
+	}{id, stemcellId, sshKeyIdsCopy, hostname, domain, userData})
+	fake.recordInvocation("ReloadInstance", []interface{}{id, stemcellId, sshKeyIdsCopy, hostname, domain, userData})
 	fake.reloadInstanceMutex.Unlock()
 	if fake.ReloadInstanceStub != nil {
-		return fake.ReloadInstanceStub(id, stemcellId, sshKeyIds, hostname, domain)
+		return fake.ReloadInstanceStub(id, stemcellId, sshKeyIds, hostname, domain, userData)
 	}
 	if specificReturn {
 		return ret.result1
@@ -1061,10 +1067,10 @@ func (fake *FakeClient) ReloadInstanceCallCount() int {
 	return len(fake.reloadInstanceArgsForCall)
 }
 
-func (fake *FakeClient) ReloadInstanceArgsForCall(i int) (int, int, []int, string, string) {
+func (fake *FakeClient) ReloadInstanceArgsForCall(i int) (int, int, []int, string, string, *registry.SoftlayerUserData) {
 	fake.reloadInstanceMutex.RLock()
 	defer fake.reloadInstanceMutex.RUnlock()
-	return fake.reloadInstanceArgsForCall[i].id, fake.reloadInstanceArgsForCall[i].stemcellId, fake.reloadInstanceArgsForCall[i].sshKeyIds, fake.reloadInstanceArgsForCall[i].hostname, fake.reloadInstanceArgsForCall[i].domain
+	return fake.reloadInstanceArgsForCall[i].id, fake.reloadInstanceArgsForCall[i].stemcellId, fake.reloadInstanceArgsForCall[i].sshKeyIds, fake.reloadInstanceArgsForCall[i].hostname, fake.reloadInstanceArgsForCall[i].domain, fake.reloadInstanceArgsForCall[i].userData
 }
 
 func (fake *FakeClient) ReloadInstanceReturns(result1 error) {
@@ -1494,17 +1500,17 @@ func (fake *FakeClient) SetTagsReturnsOnCall(i int, result1 bool, result2 error)
 	}{result1, result2}
 }
 
-func (fake *FakeClient) SetInstanceMetadata(id int, userData *string) (bool, error) {
+func (fake *FakeClient) SetInstanceMetadata(id int, encodedUserData *string) (bool, error) {
 	fake.setInstanceMetadataMutex.Lock()
 	ret, specificReturn := fake.setInstanceMetadataReturnsOnCall[len(fake.setInstanceMetadataArgsForCall)]
 	fake.setInstanceMetadataArgsForCall = append(fake.setInstanceMetadataArgsForCall, struct {
-		id       int
-		userData *string
-	}{id, userData})
-	fake.recordInvocation("SetInstanceMetadata", []interface{}{id, userData})
+		id              int
+		encodedUserData *string
+	}{id, encodedUserData})
+	fake.recordInvocation("SetInstanceMetadata", []interface{}{id, encodedUserData})
 	fake.setInstanceMetadataMutex.Unlock()
 	if fake.SetInstanceMetadataStub != nil {
-		return fake.SetInstanceMetadataStub(id, userData)
+		return fake.SetInstanceMetadataStub(id, encodedUserData)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
@@ -1521,7 +1527,7 @@ func (fake *FakeClient) SetInstanceMetadataCallCount() int {
 func (fake *FakeClient) SetInstanceMetadataArgsForCall(i int) (int, *string) {
 	fake.setInstanceMetadataMutex.RLock()
 	defer fake.setInstanceMetadataMutex.RUnlock()
-	return fake.setInstanceMetadataArgsForCall[i].id, fake.setInstanceMetadataArgsForCall[i].userData
+	return fake.setInstanceMetadataArgsForCall[i].id, fake.setInstanceMetadataArgsForCall[i].encodedUserData
 }
 
 func (fake *FakeClient) SetInstanceMetadataReturns(result1 bool, result2 error) {
@@ -2562,7 +2568,7 @@ func (fake *FakeClient) DeleteSshKeyReturnsOnCall(i int, result1 bool, result2 e
 	}{result1, result2}
 }
 
-func (fake *FakeClient) CreateInstanceFromVPS(template *datatypes.Virtual_Guest, stemcellID int, sshKeys []int) (*datatypes.Virtual_Guest, error) {
+func (fake *FakeClient) CreateInstanceFromVPS(template *datatypes.Virtual_Guest, stemcellID int, sshKeys []int, userData *registry.SoftlayerUserData) (*datatypes.Virtual_Guest, error) {
 	var sshKeysCopy []int
 	if sshKeys != nil {
 		sshKeysCopy = make([]int, len(sshKeys))
@@ -2574,11 +2580,12 @@ func (fake *FakeClient) CreateInstanceFromVPS(template *datatypes.Virtual_Guest,
 		template   *datatypes.Virtual_Guest
 		stemcellID int
 		sshKeys    []int
-	}{template, stemcellID, sshKeysCopy})
-	fake.recordInvocation("CreateInstanceFromVPS", []interface{}{template, stemcellID, sshKeysCopy})
+		userData   *registry.SoftlayerUserData
+	}{template, stemcellID, sshKeysCopy, userData})
+	fake.recordInvocation("CreateInstanceFromVPS", []interface{}{template, stemcellID, sshKeysCopy, userData})
 	fake.createInstanceFromVPSMutex.Unlock()
 	if fake.CreateInstanceFromVPSStub != nil {
-		return fake.CreateInstanceFromVPSStub(template, stemcellID, sshKeys)
+		return fake.CreateInstanceFromVPSStub(template, stemcellID, sshKeys, userData)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
@@ -2592,10 +2599,10 @@ func (fake *FakeClient) CreateInstanceFromVPSCallCount() int {
 	return len(fake.createInstanceFromVPSArgsForCall)
 }
 
-func (fake *FakeClient) CreateInstanceFromVPSArgsForCall(i int) (*datatypes.Virtual_Guest, int, []int) {
+func (fake *FakeClient) CreateInstanceFromVPSArgsForCall(i int) (*datatypes.Virtual_Guest, int, []int, *registry.SoftlayerUserData) {
 	fake.createInstanceFromVPSMutex.RLock()
 	defer fake.createInstanceFromVPSMutex.RUnlock()
-	return fake.createInstanceFromVPSArgsForCall[i].template, fake.createInstanceFromVPSArgsForCall[i].stemcellID, fake.createInstanceFromVPSArgsForCall[i].sshKeys
+	return fake.createInstanceFromVPSArgsForCall[i].template, fake.createInstanceFromVPSArgsForCall[i].stemcellID, fake.createInstanceFromVPSArgsForCall[i].sshKeys, fake.createInstanceFromVPSArgsForCall[i].userData
 }
 
 func (fake *FakeClient) CreateInstanceFromVPSReturns(result1 *datatypes.Virtual_Guest, result2 error) {

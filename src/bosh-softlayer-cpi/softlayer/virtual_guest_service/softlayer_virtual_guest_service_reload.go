@@ -1,14 +1,17 @@
 package instance
 
 import (
-	"bosh-softlayer-cpi/api"
-	"github.com/softlayer/softlayer-go/datatypes"
 	"strconv"
+
+	"github.com/softlayer/softlayer-go/datatypes"
+
+	"bosh-softlayer-cpi/api"
+	"bosh-softlayer-cpi/registry"
 )
 
-func (vg SoftlayerVirtualGuestService) ReloadOS(id int, stemcellID int, sshKeys []int, hostname string, domain string) error {
+func (vg SoftlayerVirtualGuestService) ReloadOS(id int, stemcellID int, sshKeys []int, hostname string, domain string, userData *registry.SoftlayerUserData) error {
 	vg.logger.Debug(softlayerVirtualGuestServiceLogTag, "Reloading instance '%d'.", id)
-	return vg.softlayerClient.ReloadInstance(id, stemcellID, sshKeys, hostname, domain)
+	return vg.softlayerClient.ReloadInstance(id, stemcellID, sshKeys, hostname, domain, userData)
 }
 
 func (vg SoftlayerVirtualGuestService) Edit(id int, instance *datatypes.Virtual_Guest) error {

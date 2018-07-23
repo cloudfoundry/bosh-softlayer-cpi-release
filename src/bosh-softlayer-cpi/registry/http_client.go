@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"time"
+
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 
 	"bosh-softlayer-cpi/logger"

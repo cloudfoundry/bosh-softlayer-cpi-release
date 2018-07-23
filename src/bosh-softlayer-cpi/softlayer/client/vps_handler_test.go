@@ -22,6 +22,7 @@ import (
 
 	"bosh-softlayer-cpi/api"
 	cpiLog "bosh-softlayer-cpi/logger"
+	"bosh-softlayer-cpi/registry"
 	slClient "bosh-softlayer-cpi/softlayer/client"
 	vpsClient "bosh-softlayer-cpi/softlayer/vps_service/client"
 	vpsVm "bosh-softlayer-cpi/softlayer/vps_service/client/vm"
@@ -55,6 +56,7 @@ var _ = Describe("InstanceHandler", func() {
 		stemcellID       int
 
 		vgTemplate *datatypes.Virtual_Guest
+		userData   *registry.SoftlayerUserData
 
 		respParas []map[string]interface{}
 	)
@@ -130,6 +132,12 @@ var _ = Describe("InstanceHandler", func() {
 				},
 			},
 		}
+
+		userData = &registry.SoftlayerUserData{
+			Registry: registry.SoftlayerUserDataRegistryEndpoint{
+				Endpoint: "http://fake-username:fake-password@fake-registry-endpoint:fake-registry-port",
+			},
+		}
 	})
 
 	AfterEach(func() {
@@ -156,6 +164,10 @@ var _ = Describe("InstanceHandler", func() {
 					"statusCode": http.StatusOK,
 				},
 				{
+					"filename":   "SoftLayer_Virtual_Guest_setUserMetadata.json",
+					"statusCode": http.StatusOK,
+				},
+				{
 					"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
 					"statusCode": http.StatusOK,
 				},
@@ -167,7 +179,7 @@ var _ = Describe("InstanceHandler", func() {
 			err = test_helpers.SpecifyServerResps(respParas, slServer)
 			Expect(err).NotTo(HaveOccurred())
 
-			vgs, err := cli.CreateInstanceFromVPS(vgTemplate, stemcellID, []int{12345678})
+			vgs, err := cli.CreateInstanceFromVPS(vgTemplate, stemcellID, []int{12345678}, userData)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(*vgs.FullyQualifiedDomainName).To(Equal(*(*vgTemplate).FullyQualifiedDomainName))
 		})
@@ -189,6 +201,10 @@ var _ = Describe("InstanceHandler", func() {
 			Expect(err).NotTo(HaveOccurred())
 			respParas = []map[string]interface{}{
 				// ReloadInstance
+				{
+					"filename":   "SoftLayer_Virtual_Guest_setUserMetadata.json",
+					"statusCode": http.StatusOK,
+				},
 				{
 					"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
 					"statusCode": http.StatusOK,
@@ -226,7 +242,7 @@ var _ = Describe("InstanceHandler", func() {
 			err = test_helpers.SpecifyServerResps(respParas, slServer)
 			Expect(err).NotTo(HaveOccurred())
 
-			vgs, err := cli.CreateInstanceFromVPS(vgTemplate, stemcellID, []int{12345678})
+			vgs, err := cli.CreateInstanceFromVPS(vgTemplate, stemcellID, []int{12345678}, userData)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(*vgs.FullyQualifiedDomainName).To(Equal(*(*vgTemplate).FullyQualifiedDomainName))
 		})
@@ -241,7 +257,7 @@ var _ = Describe("InstanceHandler", func() {
 			err = test_helpers.SpecifyServerResps(respParas, server)
 			Expect(err).NotTo(HaveOccurred())
 
-			_, err := cli.CreateInstanceFromVPS(vgTemplate, stemcellID, []int{12345678})
+			_, err := cli.CreateInstanceFromVPS(vgTemplate, stemcellID, []int{12345678}, userData)
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("Ordering vm from pool"))
 		})
@@ -268,7 +284,7 @@ var _ = Describe("InstanceHandler", func() {
 			err = test_helpers.SpecifyServerResps(respParas, slServer)
 			Expect(err).NotTo(HaveOccurred())
 
-			_, err := cli.CreateInstanceFromVPS(vgTemplate, stemcellID, []int{12345678})
+			_, err := cli.CreateInstanceFromVPS(vgTemplate, stemcellID, []int{12345678}, userData)
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("Creating VirtualGuest from SoftLayer client"))
 		})
@@ -292,6 +308,10 @@ var _ = Describe("InstanceHandler", func() {
 					"statusCode": http.StatusOK,
 				},
 				{
+					"filename":   "SoftLayer_Virtual_Guest_setUserMetadata.json",
+					"statusCode": http.StatusOK,
+				},
+				{
 					"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
 					"statusCode": http.StatusOK,
 				},
@@ -303,7 +323,7 @@ var _ = Describe("InstanceHandler", func() {
 			err = test_helpers.SpecifyServerResps(respParas, slServer)
 			Expect(err).NotTo(HaveOccurred())
 
-			_, err := cli.CreateInstanceFromVPS(vgTemplate, stemcellID, []int{12345678})
+			_, err := cli.CreateInstanceFromVPS(vgTemplate, stemcellID, []int{12345678}, userData)
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("Adding vm into pool"))
 		})
@@ -328,7 +348,7 @@ var _ = Describe("InstanceHandler", func() {
 			err = test_helpers.SpecifyServerResps(respParas, slServer)
 			Expect(err).NotTo(HaveOccurred())
 
-			_, err := cli.CreateInstanceFromVPS(vgTemplate, stemcellID, []int{12345678})
+			_, err := cli.CreateInstanceFromVPS(vgTemplate, stemcellID, []int{12345678}, userData)
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("Reloading vm from pool"))
 		})
@@ -345,6 +365,10 @@ var _ = Describe("InstanceHandler", func() {
 			Expect(err).NotTo(HaveOccurred())
 			respParas = []map[string]interface{}{
 				// ReloadInstance
+				{
+					"filename":   "SoftLayer_Virtual_Guest_setUserMetadata.json",
+					"statusCode": http.StatusOK,
+				},
 				{
 					"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
 					"statusCode": http.StatusOK,
@@ -382,7 +406,7 @@ var _ = Describe("InstanceHandler", func() {
 			err = test_helpers.SpecifyServerResps(respParas, slServer)
 			Expect(err).NotTo(HaveOccurred())
 
-			_, err := cli.CreateInstanceFromVPS(vgTemplate, stemcellID, []int{12345678})
+			_, err := cli.CreateInstanceFromVPS(vgTemplate, stemcellID, []int{12345678}, userData)
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("fake-client-error"))
 		})
@@ -399,6 +423,10 @@ var _ = Describe("InstanceHandler", func() {
 			Expect(err).NotTo(HaveOccurred())
 			respParas = []map[string]interface{}{
 				// ReloadInstance
+				{
+					"filename":   "SoftLayer_Virtual_Guest_setUserMetadata.json",
+					"statusCode": http.StatusOK,
+				},
 				{
 					"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
 					"statusCode": http.StatusOK,
@@ -436,7 +464,7 @@ var _ = Describe("InstanceHandler", func() {
 			err = test_helpers.SpecifyServerResps(respParas, slServer)
 			Expect(err).NotTo(HaveOccurred())
 
-			_, err := cli.CreateInstanceFromVPS(vgTemplate, stemcellID, []int{12345678})
+			_, err := cli.CreateInstanceFromVPS(vgTemplate, stemcellID, []int{12345678}, userData)
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("does not exist"))
 		})
@@ -458,6 +486,10 @@ var _ = Describe("InstanceHandler", func() {
 			Expect(err).NotTo(HaveOccurred())
 			respParas = []map[string]interface{}{
 				// ReloadInstance
+				{
+					"filename":   "SoftLayer_Virtual_Guest_setUserMetadata.json",
+					"statusCode": http.StatusOK,
+				},
 				{
 					"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
 					"statusCode": http.StatusOK,
@@ -495,7 +527,7 @@ var _ = Describe("InstanceHandler", func() {
 			err = test_helpers.SpecifyServerResps(respParas, slServer)
 			Expect(err).NotTo(HaveOccurred())
 
-			_, err := cli.CreateInstanceFromVPS(vgTemplate, stemcellID, []int{12345678})
+			_, err := cli.CreateInstanceFromVPS(vgTemplate, stemcellID, []int{12345678}, userData)
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("Updating the hostname of vm"))
 		})

@@ -69,10 +69,10 @@ var _ = Describe("DiskHandler", func() {
 		orderID = 11764035
 
 		vg = &datatypes.Virtual_Guest{
-			Id:                           sl.Int(12345678),
-			Domain:                       sl.String("wilma.org"),
-			Hostname:                     sl.String("wilma2"),
-			FullyQualifiedDomainName:     sl.String("wilma2.wilma.org"),
+			Id:                       sl.Int(12345678),
+			Domain:                   sl.String("wilma.org"),
+			Hostname:                 sl.String("wilma2"),
+			FullyQualifiedDomainName: sl.String("wilma2.wilma.org"),
 			MaxCpu:                       sl.Int(2),
 			StartCpus:                    sl.Int(2),
 			MaxMemory:                    sl.Int(2048),

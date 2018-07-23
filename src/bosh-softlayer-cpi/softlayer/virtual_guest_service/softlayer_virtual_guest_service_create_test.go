@@ -14,13 +14,16 @@ import (
 	"github.com/softlayer/softlayer-go/sl"
 
 	cpiLog "bosh-softlayer-cpi/logger"
+	"bosh-softlayer-cpi/registry"
 	fakeslclient "bosh-softlayer-cpi/softlayer/client/fakes"
 )
 
 var _ = Describe("Virtual Guest Service", func() {
 	var (
-		cli                 *fakeslclient.FakeClient
-		uuidGen             *fakeuuid.FakeGenerator
+		cli      *fakeslclient.FakeClient
+		uuidGen  *fakeuuid.FakeGenerator
+		userData *registry.SoftlayerUserData
+
 		logger              cpiLog.Logger
 		virtualGuestService SoftlayerVirtualGuestService
 	)
@@ -28,6 +31,11 @@ var _ = Describe("Virtual Guest Service", func() {
 	BeforeEach(func() {
 		cli = &fakeslclient.FakeClient{}
 		uuidGen = &fakeuuid.FakeGenerator{}
+		userData = &registry.SoftlayerUserData{
+			Registry: registry.SoftlayerUserDataRegistryEndpoint{
+				Endpoint: "http://fake-username:fake-password@fake-registry-endpoint:fake-registry-port",
+			},
+		}
 		logger = cpiLog.NewLogger(boshlog.LevelDebug, "")
 		virtualGuestService = NewSoftLayerVirtualGuestService(cli, uuidGen, logger)
 	})
@@ -97,7 +105,7 @@ var _ = Describe("Virtual Guest Service", func() {
 					nil,
 				)
 
-				vmID, err := virtualGuestService.Create(virtualGuest, enableVps, stemcellID, sshKeys)
+				vmID, err := virtualGuestService.Create(virtualGuest, enableVps, stemcellID, sshKeys, userData)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(cli.CreateInstanceFromVPSCallCount()).To(Equal(1))
 				Expect(cli.CreateInstanceCallCount()).To(Equal(0))
@@ -110,7 +118,7 @@ var _ = Describe("Virtual Guest Service", func() {
 					errors.New("fake-client-error"),
 				)
 
-				vmID, err := virtualGuestService.Create(virtualGuest, enableVps, stemcellID, sshKeys)
+				vmID, err := virtualGuestService.Create(virtualGuest, enableVps, stemcellID, sshKeys, userData)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("fake-client-error"))
 				Expect(cli.CreateInstanceFromVPSCallCount()).To(Equal(1))
@@ -132,7 +140,7 @@ var _ = Describe("Virtual Guest Service", func() {
 					nil,
 				)
 
-				vmID, err := virtualGuestService.Create(virtualGuest, enableVps, stemcellID, sshKeys)
+				vmID, err := virtualGuestService.Create(virtualGuest, enableVps, stemcellID, sshKeys, userData)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(cli.CreateInstanceFromVPSCallCount()).To(Equal(0))
 				Expect(cli.CreateInstanceCallCount()).To(Equal(1))
@@ -145,7 +153,7 @@ var _ = Describe("Virtual Guest Service", func() {
 					errors.New("fake-client-error"),
 				)
 
-				vmID, err := virtualGuestService.Create(virtualGuest, enableVps, stemcellID, sshKeys)
+				vmID, err := virtualGuestService.Create(virtualGuest, enableVps, stemcellID, sshKeys, userData)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("fake-client-error"))
 				Expect(cli.CreateInstanceFromVPSCallCount()).To(Equal(0))

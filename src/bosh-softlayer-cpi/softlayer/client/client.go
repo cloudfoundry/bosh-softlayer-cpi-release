@@ -1,6 +1,8 @@
 package client
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"io"
 	"math"
@@ -21,6 +23,7 @@ import (
 	"github.com/softlayer/softlayer-go/sl"
 
 	"bosh-softlayer-cpi/logger"
+	"bosh-softlayer-cpi/registry"
 	vpsVm "bosh-softlayer-cpi/softlayer/vps_service/client/vm"
 	"bosh-softlayer-cpi/softlayer/vps_service/models"
 )
@@ -73,6 +76,7 @@ const (
 	SOFTLAYER_OBJECTNOTFOUND_EXCEPTION              = "SoftLayer_Exception_ObjectNotFound"
 	SOFTLAYER_BLOCKINGOPERATIONINPROGRESS_EXCEPTION = "SoftLayer_Exception_Network_Storage_BlockingOperationInProgress"
 	SOFTLAYER_GROUP_ACCESSCONTROLERROR_EXCEPTION    = "SoftLayer_Exception_Network_Storage_Group_AccessControlError"
+	SOFTLAYER_NOTIMPLEMENTED_EXCEPTION              = "SoftLayer_Exception_NotImplemented"
 )
 
 // go:generate counterfeiter -o fakes/fake_client_factory.go . ClientFactory
@@ -117,13 +121,13 @@ func NewSoftLayerClientManager(session *session.Session, vps *vpsVm.Client, swfi
 // go:generate counterfeiter -o fakes/fake_client.go . Client
 type Client interface {
 	CancelInstance(id int) error
-	CreateInstance(template *datatypes.Virtual_Guest) (*datatypes.Virtual_Guest, error)
+	CreateInstance(template *datatypes.Virtual_Guest, userData *registry.SoftlayerUserData) (*datatypes.Virtual_Guest, error)
 	EditInstance(id int, template *datatypes.Virtual_Guest) (bool, error)
 	GetInstance(id int, mask string) (*datatypes.Virtual_Guest, bool, error)
 	GetInstanceByPrimaryBackendIpAddress(ip string) (*datatypes.Virtual_Guest, bool, error)
 	GetInstanceByPrimaryIpAddress(ip string) (*datatypes.Virtual_Guest, bool, error)
 	RebootInstance(id int, soft bool, hard bool) error
-	ReloadInstance(id int, stemcellId int, sshKeyIds []int, hostname string, domain string) error
+	ReloadInstance(id int, stemcellId int, sshKeyIds []int, hostname string, domain string, userData *registry.SoftlayerUserData) error
 	UpgradeInstanceConfig(id int, cpu int, memory int, network int, privateCPU bool) error
 	UpgradeInstance(id int, cpu int, memory int, network int, privateCPU bool, secondDiskSize int) (int, error)
 	WaitInstanceUntilReady(id int, until time.Time) error
@@ -132,7 +136,7 @@ type Client interface {
 	WaitInstanceHasNoneActiveTransaction(id int, until time.Time) error
 	WaitVolumeProvisioningWithOrderId(orderId int, until time.Time) (*datatypes.Network_Storage, error)
 	SetTags(id int, tags string) (bool, error)
-	SetInstanceMetadata(id int, userData *string) (bool, error)
+	SetInstanceMetadata(id int, encodedUserData *string) (bool, error)
 	AttachSecondDiskToInstance(id int, diskSize int) error
 	GetInstanceAllowedHost(id int) (*datatypes.Network_Storage_Allowed_Host, bool, error)
 	AuthorizeHostToVolume(instance *datatypes.Virtual_Guest, volumeId int, until time.Time) (bool, error)
@@ -153,7 +157,7 @@ type Client interface {
 	CreateSshKey(label *string, key *string, fingerPrint *string) (*datatypes.Security_Ssh_Key, error)
 	DeleteSshKey(id int) (bool, error)
 
-	CreateInstanceFromVPS(template *datatypes.Virtual_Guest, stemcellID int, sshKeys []int) (*datatypes.Virtual_Guest, error)
+	CreateInstanceFromVPS(template *datatypes.Virtual_Guest, stemcellID int, sshKeys []int, userData *registry.SoftlayerUserData) (*datatypes.Virtual_Guest, error)
 	DeleteInstanceFromVPS(id int) error
 
 	CreateSnapshot(volumeId int, notes string) (datatypes.Network_Storage, error)
@@ -485,10 +489,17 @@ func (c *ClientManager) WaitInstanceHasNoneActiveTransaction(id int, until time.
 	}
 }
 
-func (c *ClientManager) CreateInstance(template *datatypes.Virtual_Guest) (*datatypes.Virtual_Guest, error) {
+func (c *ClientManager) CreateInstance(template *datatypes.Virtual_Guest, userData *registry.SoftlayerUserData) (*datatypes.Virtual_Guest, error) {
 	virtualguest, err := c.VirtualGuestService.CreateObject(template)
 	if err != nil {
 		return &datatypes.Virtual_Guest{}, bosherr.WrapError(err, "Creating instance")
+	}
+
+	// Wait for instance ready
+	time.Sleep(90 * time.Second)
+	err = c.SetUserDataWithID(*virtualguest.Id, userData)
+	if err != nil {
+		return &datatypes.Virtual_Guest{}, bosherr.WrapErrorf(err, "Updating user data contents with instance '%d'", *virtualguest.Id)
 	}
 
 	until := time.Now().Add(time.Duration(4) * time.Hour)
@@ -502,7 +513,8 @@ func (c *ClientManager) CreateInstance(template *datatypes.Virtual_Guest) (*data
 	return &virtualguest, nil
 }
 
-func (c *ClientManager) CreateInstanceFromVPS(template *datatypes.Virtual_Guest, stemcellID int, sshKeys []int) (*datatypes.Virtual_Guest, error) {
+func (c *ClientManager) CreateInstanceFromVPS(template *datatypes.Virtual_Guest,
+	stemcellID int, sshKeys []int, userData *registry.SoftlayerUserData) (*datatypes.Virtual_Guest, error) {
 	reqFilter := &models.VMFilter{
 		CPU:         int32(*template.StartCpus),
 		MemoryMb:    int32(*template.MaxMemory),
@@ -517,7 +529,7 @@ func (c *ClientManager) CreateInstanceFromVPS(template *datatypes.Virtual_Guest,
 			return &datatypes.Virtual_Guest{}, bosherr.WrapError(err, "Ordering vm from pool")
 		} else {
 			// From createBySoftlayer implement run in cpi action
-			virtualGuest, err := c.CreateInstance(template)
+			virtualGuest, err := c.CreateInstance(template, userData)
 			if err != nil {
 				return &datatypes.Virtual_Guest{}, bosherr.WrapError(err, "Creating VirtualGuest from SoftLayer client")
 			}
@@ -546,7 +558,7 @@ func (c *ClientManager) CreateInstanceFromVPS(template *datatypes.Virtual_Guest,
 	vm = orderVmResp.Payload.VM
 	virtualGuestId = int((*vm).Cid)
 
-	err = c.ReloadInstance(virtualGuestId, stemcellID, sshKeys, *template.Hostname, *template.Domain)
+	err = c.ReloadInstance(virtualGuestId, stemcellID, sshKeys, *template.Hostname, *template.Domain, userData)
 	if err != nil {
 		return &datatypes.Virtual_Guest{}, bosherr.WrapError(err, "Reloading vm from pool")
 	}
@@ -610,9 +622,14 @@ func (c *ClientManager) RebootInstance(id int, soft bool, hard bool) error {
 	return err
 }
 
-func (c *ClientManager) ReloadInstance(id int, stemcellId int, sshKeyIds []int, hostname string, domain string) error {
+func (c *ClientManager) ReloadInstance(id int, stemcellId int, sshKeyIds []int, hostname string, domain string, userData *registry.SoftlayerUserData) error {
 	var err error
 	until := time.Now().Add(time.Duration(1) * time.Hour)
+
+	err = c.SetUserDataWithID(id, userData)
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Updating user data contents with instance '%d'", id)
+	}
 
 	c.logger.Debug(softlayerClientLogTag, "Waiting virtual guest '%d' has none active transaction.", id)
 	if err = c.WaitInstanceHasNoneActiveTransaction(*sl.Int(id), until); err != nil {
@@ -1769,20 +1786,51 @@ func (c *ClientManager) CreateTicket(ticketSubject *string, ticketTitle *string,
 	}
 }
 
-func (c *ClientManager) SetInstanceMetadata(id int, userData *string) (bool, error) {
-	_, err := c.VirtualGuestService.Id(id).SetUserMetadata([]string{*userData})
+func (c *ClientManager) SetUserDataWithID(id int, userData *registry.SoftlayerUserData) error {
+	until := time.Now().Add(90 * time.Second)
+	interval := 30 * time.Second
+
+	userData.Server = registry.SoftlayerUserDataServerName{
+		Name: strconv.Itoa(id),
+	}
+	contentsBytes, err := json.Marshal(userData)
+	if err != nil {
+		return bosherr.WrapError(err, "Preparing user data contents")
+	}
+	encodedUserData := sl.String(base64.RawURLEncoding.EncodeToString(contentsBytes))
+
+	for {
+		result, err := c.SetInstanceMetadata(id, encodedUserData)
+		if err != nil {
+			if !strings.Contains(err.Error(), "setUserMetadata is not implemented") {
+				return bosherr.WrapError(err, "Updating user data contents")
+			}
+		}
+
+		if result == true {
+			return nil
+		}
+
+		now := time.Now()
+		if now.After(until) {
+			return bosherr.Errorf("setUserMetadata on virtual guest with id %d Time Out!", id)
+		}
+
+		time.Sleep(interval)
+	}
+}
+
+func (c *ClientManager) SetInstanceMetadata(id int, encodedUserData *string) (bool, error) {
+	_, err := c.VirtualGuestService.Id(id).SetUserMetadata([]string{*encodedUserData})
 	if err != nil {
 		if apiErr, ok := err.(sl.Error); ok {
 			if apiErr.Exception == SOFTLAYER_OBJECTNOTFOUND_EXCEPTION {
 				return false, nil
+			} else if apiErr.Exception == SOFTLAYER_NOTIMPLEMENTED_EXCEPTION {
+				return false, bosherr.Error("setUserMetadata is not implemented")
 			}
 			return false, err
 		}
-	}
-
-	until := time.Now().Add(time.Duration(30) * time.Minute)
-	if err := c.WaitInstanceUntilReady(id, until); err != nil {
-		return false, bosherr.WrapError(err, "Waiting until instance is ready")
 	}
 
 	return true, nil
