@@ -82,9 +82,9 @@ var _ = Describe("InstanceHandler", func() {
 		sshKeyIds = []int{2234566}
 
 		vgTemplate = &datatypes.Virtual_Guest{
-			Domain:                       sl.String("wilma.org"),
-			Hostname:                     sl.String("wilma2"),
-			FullyQualifiedDomainName:     sl.String("wilma2.wilma.org"),
+			Domain:                   sl.String("wilma.org"),
+			Hostname:                 sl.String("wilma2"),
+			FullyQualifiedDomainName: sl.String("wilma2.wilma.org"),
 			MaxCpu:                       sl.Int(2),
 			StartCpus:                    sl.Int(2),
 			MaxMemory:                    sl.Int(2048),
@@ -1371,6 +1371,99 @@ var _ = Describe("InstanceHandler", func() {
 				err := cli.ReloadInstance(vgID, stemcellID, sshKeyIds, "fake-hostname", "fake-domain", userData)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("Failed to edit VM hostname after OS Reload"))
+			})
+
+			It("Retry reloadOS when VirtualGuestService reloadOS call return 200 with Error", func() {
+				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Virtual_Guest_setUserMetadata.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_reloadOperatingSystem_InternalError.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_reloadOperatingSystem.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_getObject_HasActiveTxn.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_editObject.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
+						"statusCode": http.StatusOK,
+					},
+				}
+				err = test_helpers.SpecifyServerResps(respParas, server)
+				Expect(err).NotTo(HaveOccurred())
+
+				err := cli.ReloadInstance(vgID, stemcellID, sshKeyIds, "fake-hostname", "fake-domain", userData)
+
+				Expect(err).NotTo(HaveOccurred())
+			})
+
+			It("Return timeout error when VirtualGuestService reloadOS call return 200 with Error", func() {
+				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Virtual_Guest_setUserMetadata.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_reloadOperatingSystem_InternalError.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_reloadOperatingSystem_InternalError.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_reloadOperatingSystem_InternalError.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_reloadOperatingSystem_InternalError.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_reloadOperatingSystem_InternalError.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_reloadOperatingSystem_InternalError.json",
+						"statusCode": http.StatusOK,
+					},
+				}
+				err = test_helpers.SpecifyServerResps(respParas, server)
+				Expect(err).NotTo(HaveOccurred())
+
+				err := cli.ReloadInstance(vgID, stemcellID, sshKeyIds, "fake-hostname", "fake-domain", userData)
+
+				Expect(err).To(HaveOccurred())
+				fmt.Println(err.Error())
+				Expect(err.Error()).To(ContainSubstring("Reloading instance"))
+				Expect(err.Error()).To(ContainSubstring("fake-client-error"))
 			})
 		})
 	})

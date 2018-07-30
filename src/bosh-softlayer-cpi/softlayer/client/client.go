@@ -624,7 +624,8 @@ func (c *ClientManager) RebootInstance(id int, soft bool, hard bool) error {
 
 func (c *ClientManager) ReloadInstance(id int, stemcellId int, sshKeyIds []int, hostname string, domain string, userData *registry.SoftlayerUserData) error {
 	var err error
-	until := time.Now().Add(time.Duration(1) * time.Hour)
+	reloadUntil := time.Now().Add(time.Duration(10) * time.Second)
+	transactionUntil := time.Now().Add(time.Duration(1) * time.Hour)
 
 	err = c.SetUserDataWithID(id, userData)
 	if err != nil {
@@ -632,7 +633,7 @@ func (c *ClientManager) ReloadInstance(id int, stemcellId int, sshKeyIds []int, 
 	}
 
 	c.logger.Debug(softlayerClientLogTag, "Waiting virtual guest '%d' has none active transaction.", id)
-	if err = c.WaitInstanceHasNoneActiveTransaction(*sl.Int(id), until); err != nil {
+	if err = c.WaitInstanceHasNoneActiveTransaction(*sl.Int(id), transactionUntil); err != nil {
 		return bosherr.WrapError(err, "Waiting until instance has none active transaction before os_reload")
 	}
 
@@ -645,18 +646,17 @@ func (c *ClientManager) ReloadInstance(id int, stemcellId int, sshKeyIds []int, 
 	}
 
 	c.logger.Debug(softlayerClientLogTag, "Reloading operating system of virtual guest '%d'.", id)
-	_, err = c.VirtualGuestService.Id(id).Mask("id, name").ReloadOperatingSystem(sl.String("FORCE"), &config)
-	if err != nil {
-		return err
+	if err = c.reloadOperatingSystemWithConfig(id, &config, reloadUntil); err != nil {
+		return bosherr.WrapErrorf(err, "Reloading operating system of virtual guest '%d'", id)
 	}
 
-	until = time.Now().Add(time.Duration(1) * time.Hour)
-	if err = c.WaitInstanceHasActiveTransaction(*sl.Int(id), until); err != nil {
+	transactionUntil = time.Now().Add(time.Duration(1) * time.Hour)
+	if err = c.WaitInstanceHasActiveTransaction(*sl.Int(id), transactionUntil); err != nil {
 		return bosherr.WrapError(err, "Waiting until instance has active transaction after launching os_reload")
 	}
 
-	until = time.Now().Add(time.Duration(4) * time.Hour)
-	if err = c.WaitInstanceUntilReadyWithTicket(*sl.Int(id), until); err != nil {
+	transactionUntil = time.Now().Add(time.Duration(4) * time.Hour)
+	if err = c.WaitInstanceUntilReadyWithTicket(*sl.Int(id), transactionUntil); err != nil {
 		return bosherr.WrapError(err, "Waiting until instance is ready after os_reload")
 	}
 
@@ -1926,10 +1926,10 @@ func (c *ClientManager) CreateImageFromExternalSource(imageName string, note str
 	// uri := "swift://${OBJ_STORAGE_ACC_NAME}@${SWIFT_CLUSTER}/${SWIFT_CONTAINER}/bosh-stemcell-${STEMCELL_VERSION}-softlayer.vhd"
 	uri := fmt.Sprintf("swift://%s@%s/%s/%s.vhd", accountName, cluster, imageName, imageName)
 	configuration := &datatypes.Container_Virtual_Guest_Block_Device_Template_Configuration{
-		Name:                         sl.String(imageName),
-		Note:                         sl.String(note),
+		Name: sl.String(imageName),
+		Note: sl.String(note),
 		OperatingSystemReferenceCode: sl.String(osCode),
-		Uri:                          sl.String(uri),
+		Uri: sl.String(uri),
 	}
 
 	vgbdtgObject, err := c.ImageService.CreateFromExternalSource(configuration)
@@ -1996,6 +1996,37 @@ func (c *ClientManager) selectMaximunIopsItemPriceIdOnSize(size int) (datatypes.
 	}
 
 	return datatypes.Product_Item_Price{}, bosherr.Errorf("No proper performance storage (iSCSI volume) for size %d", size)
+}
+
+func (c *ClientManager) reloadOperatingSystemWithConfig(id int, config *datatypes.Container_Hardware_Server_Configuration, until time.Time) error {
+	var slError sl.Error
+
+	for {
+		res, err := c.VirtualGuestService.Id(id).Mask("id, name").ReloadOperatingSystem(sl.String("FORCE"), config)
+		if err != nil {
+			return err
+		}
+		if res == "1" {
+			c.logger.Debug(softlayerClientLogTag, "Reloaded operating system of virtual guest '%d'.", id)
+			break
+		}
+
+		// Detect error: {"error":"Internal Error","code":"SoftLayer_Exception_Public"}
+		err = json.Unmarshal([]byte(res), &slError)
+		if err != nil {
+			return bosherr.WrapErrorf(err, "Reloading operating system of virtual guest '%d'", id)
+		}
+
+		now := time.Now()
+		if now.After(until) {
+			return bosherr.WrapErrorf(slError, "Reloading instance '%d' time out", id)
+		}
+
+		min := math.Min(float64(2.0), float64(until.Sub(now)))
+		time.Sleep(time.Duration(min) * time.Second)
+	}
+
+	return nil
 }
 
 func containsId(instances []datatypes.Virtual_Guest, instanceId int) bool {
