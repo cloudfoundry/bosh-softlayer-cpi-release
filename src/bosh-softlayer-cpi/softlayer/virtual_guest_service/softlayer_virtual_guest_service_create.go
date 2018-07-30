@@ -8,15 +8,16 @@ import (
 	"github.com/softlayer/softlayer-go/datatypes"
 
 	"bosh-softlayer-cpi/api"
+	"bosh-softlayer-cpi/registry"
 )
 
-func (vg SoftlayerVirtualGuestService) Create(virtualGuest *datatypes.Virtual_Guest, enableVps bool, stemcellID int, sshKeys []int) (int, error) {
+func (vg SoftlayerVirtualGuestService) Create(virtualGuest *datatypes.Virtual_Guest, enableVps bool, stemcellID int, sshKeys []int, userData *registry.SoftlayerUserData) (int, error) {
 	var err error
 
 	if enableVps {
-		virtualGuest, err = vg.softlayerClient.CreateInstanceFromVPS(virtualGuest, stemcellID, sshKeys)
+		virtualGuest, err = vg.softlayerClient.CreateInstanceFromVPS(virtualGuest, stemcellID, sshKeys, userData)
 	} else {
-		virtualGuest, err = vg.softlayerClient.CreateInstance(virtualGuest)
+		virtualGuest, err = vg.softlayerClient.CreateInstance(virtualGuest, userData)
 	}
 	if err != nil {
 		if strings.Contains(err.Error(), "Time Out") {

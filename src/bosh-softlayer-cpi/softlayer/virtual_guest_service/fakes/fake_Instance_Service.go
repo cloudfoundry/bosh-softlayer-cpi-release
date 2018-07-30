@@ -2,6 +2,7 @@
 package fakes
 
 import (
+	"bosh-softlayer-cpi/registry"
 	instance "bosh-softlayer-cpi/softlayer/virtual_guest_service"
 	"sync"
 
@@ -48,13 +49,14 @@ type FakeService struct {
 	attachEphemeralDiskReturnsOnCall map[int]struct {
 		result1 error
 	}
-	CreateStub        func(virtualGuest *datatypes.Virtual_Guest, enableVps bool, stemcellID int, sshKeys []int) (int, error)
+	CreateStub        func(virtualGuest *datatypes.Virtual_Guest, enableVps bool, stemcellID int, sshKeys []int, userData *registry.SoftlayerUserData) (int, error)
 	createMutex       sync.RWMutex
 	createArgsForCall []struct {
 		virtualGuest *datatypes.Virtual_Guest
 		enableVps    bool
 		stemcellID   int
 		sshKeys      []int
+		userData     *registry.SoftlayerUserData
 	}
 	createReturns struct {
 		result1 int
@@ -244,14 +246,15 @@ type FakeService struct {
 	rebootReturnsOnCall map[int]struct {
 		result1 error
 	}
-	ReloadOSStub        func(id int, stemcellID int, sshKeyIds []int, vmNamePrefix string, domain string) error
+	ReloadOSStub        func(id int, stemcellID int, sshKeyIds []int, hostname string, domain string, userData *registry.SoftlayerUserData) error
 	reloadOSMutex       sync.RWMutex
 	reloadOSArgsForCall []struct {
-		id           int
-		stemcellID   int
-		sshKeyIds    []int
-		vmNamePrefix string
-		domain       string
+		id         int
+		stemcellID int
+		sshKeyIds  []int
+		hostname   string
+		domain     string
+		userData   *registry.SoftlayerUserData
 	}
 	reloadOSReturns struct {
 		result1 error
@@ -439,7 +442,7 @@ func (fake *FakeService) AttachEphemeralDiskReturnsOnCall(i int, result1 error) 
 	}{result1}
 }
 
-func (fake *FakeService) Create(virtualGuest *datatypes.Virtual_Guest, enableVps bool, stemcellID int, sshKeys []int) (int, error) {
+func (fake *FakeService) Create(virtualGuest *datatypes.Virtual_Guest, enableVps bool, stemcellID int, sshKeys []int, userData *registry.SoftlayerUserData) (int, error) {
 	var sshKeysCopy []int
 	if sshKeys != nil {
 		sshKeysCopy = make([]int, len(sshKeys))
@@ -452,11 +455,12 @@ func (fake *FakeService) Create(virtualGuest *datatypes.Virtual_Guest, enableVps
 		enableVps    bool
 		stemcellID   int
 		sshKeys      []int
-	}{virtualGuest, enableVps, stemcellID, sshKeysCopy})
-	fake.recordInvocation("Create", []interface{}{virtualGuest, enableVps, stemcellID, sshKeysCopy})
+		userData     *registry.SoftlayerUserData
+	}{virtualGuest, enableVps, stemcellID, sshKeysCopy, userData})
+	fake.recordInvocation("Create", []interface{}{virtualGuest, enableVps, stemcellID, sshKeysCopy, userData})
 	fake.createMutex.Unlock()
 	if fake.CreateStub != nil {
-		return fake.CreateStub(virtualGuest, enableVps, stemcellID, sshKeys)
+		return fake.CreateStub(virtualGuest, enableVps, stemcellID, sshKeys, userData)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
@@ -470,10 +474,10 @@ func (fake *FakeService) CreateCallCount() int {
 	return len(fake.createArgsForCall)
 }
 
-func (fake *FakeService) CreateArgsForCall(i int) (*datatypes.Virtual_Guest, bool, int, []int) {
+func (fake *FakeService) CreateArgsForCall(i int) (*datatypes.Virtual_Guest, bool, int, []int, *registry.SoftlayerUserData) {
 	fake.createMutex.RLock()
 	defer fake.createMutex.RUnlock()
-	return fake.createArgsForCall[i].virtualGuest, fake.createArgsForCall[i].enableVps, fake.createArgsForCall[i].stemcellID, fake.createArgsForCall[i].sshKeys
+	return fake.createArgsForCall[i].virtualGuest, fake.createArgsForCall[i].enableVps, fake.createArgsForCall[i].stemcellID, fake.createArgsForCall[i].sshKeys, fake.createArgsForCall[i].userData
 }
 
 func (fake *FakeService) CreateReturns(result1 int, result2 error) {
@@ -1203,7 +1207,7 @@ func (fake *FakeService) RebootReturnsOnCall(i int, result1 error) {
 	}{result1}
 }
 
-func (fake *FakeService) ReloadOS(id int, stemcellID int, sshKeyIds []int, vmNamePrefix string, domain string) error {
+func (fake *FakeService) ReloadOS(id int, stemcellID int, sshKeyIds []int, hostname string, domain string, userData *registry.SoftlayerUserData) error {
 	var sshKeyIdsCopy []int
 	if sshKeyIds != nil {
 		sshKeyIdsCopy = make([]int, len(sshKeyIds))
@@ -1212,16 +1216,17 @@ func (fake *FakeService) ReloadOS(id int, stemcellID int, sshKeyIds []int, vmNam
 	fake.reloadOSMutex.Lock()
 	ret, specificReturn := fake.reloadOSReturnsOnCall[len(fake.reloadOSArgsForCall)]
 	fake.reloadOSArgsForCall = append(fake.reloadOSArgsForCall, struct {
-		id           int
-		stemcellID   int
-		sshKeyIds    []int
-		vmNamePrefix string
-		domain       string
-	}{id, stemcellID, sshKeyIdsCopy, vmNamePrefix, domain})
-	fake.recordInvocation("ReloadOS", []interface{}{id, stemcellID, sshKeyIdsCopy, vmNamePrefix, domain})
+		id         int
+		stemcellID int
+		sshKeyIds  []int
+		hostname   string
+		domain     string
+		userData   *registry.SoftlayerUserData
+	}{id, stemcellID, sshKeyIdsCopy, hostname, domain, userData})
+	fake.recordInvocation("ReloadOS", []interface{}{id, stemcellID, sshKeyIdsCopy, hostname, domain, userData})
 	fake.reloadOSMutex.Unlock()
 	if fake.ReloadOSStub != nil {
-		return fake.ReloadOSStub(id, stemcellID, sshKeyIds, vmNamePrefix, domain)
+		return fake.ReloadOSStub(id, stemcellID, sshKeyIds, hostname, domain, userData)
 	}
 	if specificReturn {
 		return ret.result1
@@ -1235,10 +1240,10 @@ func (fake *FakeService) ReloadOSCallCount() int {
 	return len(fake.reloadOSArgsForCall)
 }
 
-func (fake *FakeService) ReloadOSArgsForCall(i int) (int, int, []int, string, string) {
+func (fake *FakeService) ReloadOSArgsForCall(i int) (int, int, []int, string, string, *registry.SoftlayerUserData) {
 	fake.reloadOSMutex.RLock()
 	defer fake.reloadOSMutex.RUnlock()
-	return fake.reloadOSArgsForCall[i].id, fake.reloadOSArgsForCall[i].stemcellID, fake.reloadOSArgsForCall[i].sshKeyIds, fake.reloadOSArgsForCall[i].vmNamePrefix, fake.reloadOSArgsForCall[i].domain
+	return fake.reloadOSArgsForCall[i].id, fake.reloadOSArgsForCall[i].stemcellID, fake.reloadOSArgsForCall[i].sshKeyIds, fake.reloadOSArgsForCall[i].hostname, fake.reloadOSArgsForCall[i].domain, fake.reloadOSArgsForCall[i].userData
 }
 
 func (fake *FakeService) ReloadOSReturns(result1 error) {

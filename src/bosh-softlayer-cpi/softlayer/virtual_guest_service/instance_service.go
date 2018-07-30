@@ -2,6 +2,8 @@ package instance
 
 import (
 	"github.com/softlayer/softlayer-go/datatypes"
+
+	"bosh-softlayer-cpi/registry"
 )
 
 //go:generate counterfeiter -o fakes/fake_Instance_Service.go . Service
@@ -9,7 +11,7 @@ type Service interface {
 	AttachDisk(id int, diskID int) ([]byte, error)
 	AttachedDisks(id int) ([]string, error)
 	AttachEphemeralDisk(id int, diskSize int) error
-	Create(virtualGuest *datatypes.Virtual_Guest, enableVps bool, stemcellID int, sshKeys []int) (int, error)
+	Create(virtualGuest *datatypes.Virtual_Guest, enableVps bool, stemcellID int, sshKeys []int, userData *registry.SoftlayerUserData) (int, error)
 	UpgradeInstance(id int, cpu int, memory int, network int, privateCPU bool) error
 	ConfigureNetworks(id int, networks Networks) (Networks, error)
 	CleanUp(id int) error
@@ -24,7 +26,7 @@ type Service interface {
 	GetVlan(id int, mask string) (*datatypes.Network_Vlan, error)
 	GetSubnet(id int, mask string) (*datatypes.Network_Subnet, error)
 	Reboot(id int) error
-	ReloadOS(id int, stemcellID int, sshKeyIds []int, hostname string, domain string) error
+	ReloadOS(id int, stemcellID int, sshKeyIds []int, hostname string, domain string, userData *registry.SoftlayerUserData) error
 	SetMetadata(id int, vmMetadata Metadata) error
 	UpdateInstanceUserData(id int, userData *string) error
 }

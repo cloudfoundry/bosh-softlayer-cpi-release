@@ -838,7 +838,7 @@ var _ = Describe("CreateVM", func() {
 
 			It("creates the vm with only private network", func() {
 				vmCID, err = createVM.Run(agentID, stemcellCID, cloudProps, networks, disks, env)
-				virtualGuest, _, _, _ := vmService.CreateArgsForCall(0)
+				virtualGuest, _, _, _, _ := vmService.CreateArgsForCall(0)
 				actualCid, _ := vmService.ConfigureNetworksArgsForCall(0)
 				_, actualInstanceNetworks := vmService.ConfigureNetworksArgsForCall(0)
 

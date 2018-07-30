@@ -568,6 +568,10 @@ var _ = Describe("DiskHandler", func() {
 			It("deauthorize host to volume successfully", func() {
 				respParas = []map[string]interface{}{
 					{
+						"filename":   "SoftLayer_Network_Storage_getAllowedVirtualGuests.json",
+						"statusCode": http.StatusOK,
+					},
+					{
 						"filename":   "SoftLayer_Network_Storage_removeAccessFromVirtualGuest.json",
 						"statusCode": http.StatusOK,
 					},
@@ -584,6 +588,10 @@ var _ = Describe("DiskHandler", func() {
 			It("Return error when occur internal error", func() {
 				respParas = []map[string]interface{}{
 					{
+						"filename":   "SoftLayer_Network_Storage_getAllowedVirtualGuests.json",
+						"statusCode": http.StatusOK,
+					},
+					{
 						"filename":   "SoftLayer_Network_Storage_removeAccessFromVirtualGuest_InternalError.json",
 						"statusCode": http.StatusInternalServerError,
 					},
@@ -599,6 +607,10 @@ var _ = Describe("DiskHandler", func() {
 			It("Return error when occur object not found error", func() {
 				respParas = []map[string]interface{}{
 					{
+						"filename":   "SoftLayer_Network_Storage_getAllowedVirtualGuests.json",
+						"statusCode": http.StatusOK,
+					},
+					{
 						"filename":   "SoftLayer_Network_Storage_removeAccessFromVirtualGuest_NotFound.json",
 						"statusCode": http.StatusInternalServerError,
 					},
@@ -613,6 +625,10 @@ var _ = Describe("DiskHandler", func() {
 
 			It("Return error when timeout error", func() {
 				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Network_Storage_getAllowedVirtualGuests.json",
+						"statusCode": http.StatusOK,
+					},
 					{
 						"filename":   "SoftLayer_Network_Storage_removeAccessFromVirtualGuest_Blocking.json",
 						"statusCode": http.StatusInternalServerError,
@@ -636,6 +652,39 @@ var _ = Describe("DiskHandler", func() {
 				_, err := cli.DeauthorizeHostToVolume(vg, diskID, time.Now().Add(3000000))
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring(fmt.Sprintf("De-Authorizing instance with id '%d' to volume with id '%d' time out", *vg.Id, diskID)))
+			})
+		})
+
+		Context("when StorageService getAllowedVirtualGuests call return a list without target virtual guest", func() {
+			It("deauthorize host to volume successfully", func() {
+				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Network_Storage_getAllowedVirtualGuests_Empty.json",
+						"statusCode": http.StatusOK,
+					},
+				}
+				err = test_helpers.SpecifyServerResps(respParas, server)
+				Expect(err).NotTo(HaveOccurred())
+
+				_, err := cli.DeauthorizeHostToVolume(vg, diskID, time.Now().Add(1*time.Hour))
+				Expect(err).NotTo(HaveOccurred())
+			})
+		})
+
+		Context("when StorageService getAllowedVirtualGuests call return an error", func() {
+			It("deauthorize host to volume successfully", func() {
+				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Network_Storage_getAllowedVirtualGuests_InternalError.json",
+						"statusCode": http.StatusInternalServerError,
+					},
+				}
+				err = test_helpers.SpecifyServerResps(respParas, server)
+				Expect(err).NotTo(HaveOccurred())
+
+				_, err := cli.DeauthorizeHostToVolume(vg, diskID, time.Now().Add(1*time.Hour))
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring(fmt.Sprintf("Get allowed virtual guests of '%d'", diskID)))
 			})
 		})
 	})

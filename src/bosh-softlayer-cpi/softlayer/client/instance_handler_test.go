@@ -19,6 +19,7 @@ import (
 
 	"bosh-softlayer-cpi/api"
 	cpiLog "bosh-softlayer-cpi/logger"
+	"bosh-softlayer-cpi/registry"
 	slClient "bosh-softlayer-cpi/softlayer/client"
 	vpsVm "bosh-softlayer-cpi/softlayer/vps_service/client/vm"
 	"bosh-softlayer-cpi/test_helpers"
@@ -50,7 +51,9 @@ var _ = Describe("InstanceHandler", func() {
 		sshKeyIds        []int
 
 		vgTemplate *datatypes.Virtual_Guest
-		respParas  []map[string]interface{}
+		userData   *registry.SoftlayerUserData
+
+		respParas []map[string]interface{}
 	)
 	BeforeEach(func() {
 		server = ghttp.NewServer()
@@ -115,6 +118,12 @@ var _ = Describe("InstanceHandler", func() {
 				NetworkVlan: &datatypes.Network_Vlan{
 					Id: sl.Int(1421723),
 				},
+			},
+		}
+
+		userData = &registry.SoftlayerUserData{
+			Registry: registry.SoftlayerUserDataRegistryEndpoint{
+				Endpoint: "http://fake-username:fake-password@fake-registry-endpoint:fake-registry-port",
 			},
 		}
 	})
@@ -815,10 +824,6 @@ var _ = Describe("InstanceHandler", func() {
 						"filename":   "SoftLayer_Virtual_Guest_getObject_HasActiveTxn_Reclaim.json",
 						"statusCode": http.StatusOK,
 					},
-					{
-						"filename":   "SoftLayer_Virtual_Guest_getObject_HasActiveTxn_Reclaim.json",
-						"statusCode": http.StatusOK,
-					},
 				}
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
@@ -870,6 +875,10 @@ var _ = Describe("InstanceHandler", func() {
 						"statusCode": http.StatusOK,
 					},
 					{
+						"filename":   "SoftLayer_Virtual_Guest_setUserMetadata.json",
+						"statusCode": http.StatusOK,
+					},
+					{
 						"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
 						"statusCode": http.StatusOK,
 					},
@@ -881,7 +890,7 @@ var _ = Describe("InstanceHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				vgs, err := cli.CreateInstance(vgTemplate)
+				vgs, err := cli.CreateInstance(vgTemplate, userData)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(*vgs.FullyQualifiedDomainName).To(Equal(*(*vgTemplate).FullyQualifiedDomainName))
 			})
@@ -898,9 +907,30 @@ var _ = Describe("InstanceHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				_, err := cli.CreateInstance(vgTemplate)
+				_, err := cli.CreateInstance(vgTemplate, userData)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("Creating instance"))
+			})
+		})
+
+		Context("when Client SetUserDataWithID call return error", func() {
+			It("return an softlayer-go unhandled error", func() {
+				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Virtual_Guest_createObject.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_setUserMetadata_InternalError.json",
+						"statusCode": http.StatusInternalServerError,
+					},
+				}
+				err = test_helpers.SpecifyServerResps(respParas, server)
+				Expect(err).NotTo(HaveOccurred())
+
+				_, err := cli.CreateInstance(vgTemplate, userData)
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("Updating user data contents with instance"))
 			})
 		})
 
@@ -912,6 +942,10 @@ var _ = Describe("InstanceHandler", func() {
 						"statusCode": http.StatusOK,
 					},
 					{
+						"filename":   "SoftLayer_Virtual_Guest_setUserMetadata.json",
+						"statusCode": http.StatusOK,
+					},
+					{
 						"filename":   "SoftLayer_Virtual_Guest_getObject_InternalError.json",
 						"statusCode": http.StatusInternalServerError,
 					},
@@ -919,7 +953,7 @@ var _ = Describe("InstanceHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				_, err := cli.CreateInstance(vgTemplate)
+				_, err := cli.CreateInstance(vgTemplate, userData)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("Waiting until instance is ready"))
 			})
@@ -1068,6 +1102,10 @@ var _ = Describe("InstanceHandler", func() {
 			It("reload instance successfully", func() {
 				respParas = []map[string]interface{}{
 					{
+						"filename":   "SoftLayer_Virtual_Guest_setUserMetadata.json",
+						"statusCode": http.StatusOK,
+					},
+					{
 						"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
 						"statusCode": http.StatusOK,
 					},
@@ -1099,15 +1137,34 @@ var _ = Describe("InstanceHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				err := cli.ReloadInstance(vgID, stemcellID, sshKeyIds, "fake-hostname", "fake-domain")
+				err := cli.ReloadInstance(vgID, stemcellID, sshKeyIds, "fake-hostname", "fake-domain", userData)
 
 				Expect(err).NotTo(HaveOccurred())
 			})
 		})
 
 		Context("when VirtualGuestService calls return an error", func() {
+			It("Return error when Client SetUserDataWithID call return an error", func() {
+				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Virtual_Guest_setUserMetadata_InternalError.json",
+						"statusCode": http.StatusInternalServerError,
+					},
+				}
+				err = test_helpers.SpecifyServerResps(respParas, server)
+				Expect(err).NotTo(HaveOccurred())
+
+				err := cli.ReloadInstance(vgID, stemcellID, sshKeyIds, "fake-hostname", "fake-domain", userData)
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("Updating user data contents with instance"))
+			})
+
 			It("Return error when VirtualGuestService firstly getObject call return an error", func() {
 				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Virtual_Guest_setUserMetadata.json",
+						"statusCode": http.StatusOK,
+					},
 					{
 						"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
 						"statusCode": http.StatusInternalServerError,
@@ -1132,7 +1189,7 @@ var _ = Describe("InstanceHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				err := cli.ReloadInstance(vgID, stemcellID, sshKeyIds, "fake-hostname", "fake-domain")
+				err := cli.ReloadInstance(vgID, stemcellID, sshKeyIds, "fake-hostname", "fake-domain", userData)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("Waiting until instance has none active transaction before os_reload"))
 			})
@@ -1163,13 +1220,17 @@ var _ = Describe("InstanceHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				err := cli.ReloadInstance(vgID, stemcellID, sshKeyIds, "fake-hostname", "fake-domain")
+				err := cli.ReloadInstance(vgID, stemcellID, sshKeyIds, "fake-hostname", "fake-domain", userData)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("fake-client-error"))
 			})
 
 			It("Return error when VirtualGuestService secondly getObject call return an error", func() {
 				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Virtual_Guest_setUserMetadata.json",
+						"statusCode": http.StatusOK,
+					},
 					{
 						"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
 						"statusCode": http.StatusOK,
@@ -1194,13 +1255,17 @@ var _ = Describe("InstanceHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				err := cli.ReloadInstance(vgID, stemcellID, sshKeyIds, "fake-hostname", "fake-domain")
+				err := cli.ReloadInstance(vgID, stemcellID, sshKeyIds, "fake-hostname", "fake-domain", userData)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("Waiting until instance has active transaction after launching os_reload"))
 			})
 
 			It("Return error when VirtualGuestService thirdly getObject call return an error", func() {
 				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Virtual_Guest_setUserMetadata.json",
+						"statusCode": http.StatusOK,
+					},
 					{
 						"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
 						"statusCode": http.StatusOK,
@@ -1225,13 +1290,17 @@ var _ = Describe("InstanceHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				err := cli.ReloadInstance(vgID, stemcellID, sshKeyIds, "fake-hostname", "fake-domain")
+				err := cli.ReloadInstance(vgID, stemcellID, sshKeyIds, "fake-hostname", "fake-domain", userData)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("Waiting until instance is ready after os_reload"))
 			})
 
 			It("Return error when VirtualGuestService editObject call return an internal error", func() {
 				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Virtual_Guest_setUserMetadata.json",
+						"statusCode": http.StatusOK,
+					},
 					{
 						"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
 						"statusCode": http.StatusOK,
@@ -1260,13 +1329,17 @@ var _ = Describe("InstanceHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				err := cli.ReloadInstance(vgID, stemcellID, sshKeyIds, "fake-hostname", "fake-domain")
+				err := cli.ReloadInstance(vgID, stemcellID, sshKeyIds, "fake-hostname", "fake-domain", userData)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("Editing VM hostname after OS Reload"))
 			})
 
 			It("Return error when VirtualGuestService editObject call return an object not found error", func() {
 				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Virtual_Guest_setUserMetadata.json",
+						"statusCode": http.StatusOK,
+					},
 					{
 						"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
 						"statusCode": http.StatusOK,
@@ -1295,9 +1368,102 @@ var _ = Describe("InstanceHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				err := cli.ReloadInstance(vgID, stemcellID, sshKeyIds, "fake-hostname", "fake-domain")
+				err := cli.ReloadInstance(vgID, stemcellID, sshKeyIds, "fake-hostname", "fake-domain", userData)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("Failed to edit VM hostname after OS Reload"))
+			})
+
+			It("Retry reloadOS when VirtualGuestService reloadOS call return 200 with Error", func() {
+				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Virtual_Guest_setUserMetadata.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_reloadOperatingSystem_InternalError.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_reloadOperatingSystem.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_getObject_HasActiveTxn.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_editObject.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
+						"statusCode": http.StatusOK,
+					},
+				}
+				err = test_helpers.SpecifyServerResps(respParas, server)
+				Expect(err).NotTo(HaveOccurred())
+
+				err := cli.ReloadInstance(vgID, stemcellID, sshKeyIds, "fake-hostname", "fake-domain", userData)
+
+				Expect(err).NotTo(HaveOccurred())
+			})
+
+			It("Return timeout error when VirtualGuestService reloadOS call return 200 with Error", func() {
+				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Virtual_Guest_setUserMetadata.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_reloadOperatingSystem_InternalError.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_reloadOperatingSystem_InternalError.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_reloadOperatingSystem_InternalError.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_reloadOperatingSystem_InternalError.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_reloadOperatingSystem_InternalError.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_reloadOperatingSystem_InternalError.json",
+						"statusCode": http.StatusOK,
+					},
+				}
+				err = test_helpers.SpecifyServerResps(respParas, server)
+				Expect(err).NotTo(HaveOccurred())
+
+				err := cli.ReloadInstance(vgID, stemcellID, sshKeyIds, "fake-hostname", "fake-domain", userData)
+
+				Expect(err).To(HaveOccurred())
+				fmt.Println(err.Error())
+				Expect(err.Error()).To(ContainSubstring("Reloading instance"))
+				Expect(err.Error()).To(ContainSubstring("fake-client-error"))
 			})
 		})
 	})
@@ -2384,8 +2550,8 @@ var _ = Describe("InstanceHandler", func() {
 			})
 		})
 
-		Context("when VirtualGuestService EditObject call return error", func() {
-			It("edit instance successfully", func() {
+		Context("when VirtualGuestService SetUserMetadata call return error", func() {
+			It("failed tp set instance's metadata", func() {
 				respParas = []map[string]interface{}{
 					{
 						"filename":   "SoftLayer_Virtual_Guest_setUserMetadata_InternalError.json",
@@ -2416,27 +2582,88 @@ var _ = Describe("InstanceHandler", func() {
 				Expect(succ).To(BeFalse())
 			})
 		})
+	})
 
-		Context("when VirtualGuestService WaitInstanceUntilReady call return error", func() {
-			It("return an softlayer-go unhandled error", func() {
+	Describe("SetUserDataWithID", func() {
+		Context("when VirtualGuestService EditObject call successfully", func() {
+			It("set instance's metadata successfully", func() {
 				respParas = []map[string]interface{}{
 					{
 						"filename":   "SoftLayer_Virtual_Guest_setUserMetadata.json",
 						"statusCode": http.StatusOK,
 					},
+				}
+				err = test_helpers.SpecifyServerResps(respParas, server)
+				Expect(err).NotTo(HaveOccurred())
+
+				err := cli.SetUserDataWithID(vgID, userData)
+				Expect(err).NotTo(HaveOccurred())
+			})
+		})
+
+		Context("when VirtualGuestService SetUserMetadata call return error", func() {
+			It("set instance's metadata successfully when meet SoftLayer_Exception_NotImplemented exception", func() {
+				respParas = []map[string]interface{}{
 					{
-						"filename":   "SoftLayer_Virtual_Guest_getObject_InternalError.json",
+						"filename":   "SoftLayer_Virtual_Guest_setUserMetadata_Not_Implemented.json",
+						"statusCode": http.StatusInternalServerError,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_setUserMetadata_Not_Implemented.json",
+						"statusCode": http.StatusInternalServerError,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_setUserMetadata.json",
+						"statusCode": http.StatusCreated,
+					},
+				}
+				err = test_helpers.SpecifyServerResps(respParas, server)
+				Expect(err).NotTo(HaveOccurred())
+
+				err := cli.SetUserDataWithID(vgID, userData)
+				Expect(err).NotTo(HaveOccurred())
+			})
+
+			It("failed to set instance's metadata  when meet SoftLayer_Exception_NotImplemented exception 3 times", func() {
+				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Virtual_Guest_setUserMetadata_Not_Implemented.json",
+						"statusCode": http.StatusInternalServerError,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_setUserMetadata_Not_Implemented.json",
+						"statusCode": http.StatusInternalServerError,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_setUserMetadata_Not_Implemented.json",
+						"statusCode": http.StatusInternalServerError,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_setUserMetadata_Not_Implemented.json",
 						"statusCode": http.StatusInternalServerError,
 					},
 				}
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				succ, err := cli.SetInstanceMetadata(vgID, sl.String("unit-test"))
+				err := cli.SetUserDataWithID(vgID, userData)
 				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("Waiting until instance is ready"))
-				Expect(succ).To(BeFalse())
-				Expect(err.Error()).To(ContainSubstring("Waiting until instance is ready"))
+				Expect(err.Error()).To(ContainSubstring("Time Out!"))
+			})
+
+			It("failed to set instance's metadata", func() {
+				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Virtual_Guest_setUserMetadata_InternalError.json",
+						"statusCode": http.StatusInternalServerError,
+					},
+				}
+				err = test_helpers.SpecifyServerResps(respParas, server)
+				Expect(err).NotTo(HaveOccurred())
+
+				err := cli.SetUserDataWithID(vgID, userData)
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("fake-client-error"))
 			})
 		})
 	})

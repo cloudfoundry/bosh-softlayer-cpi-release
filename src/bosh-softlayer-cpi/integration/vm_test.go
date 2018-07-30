@@ -238,7 +238,8 @@ var _ = Describe("VM", func() {
 		assertSucceeds(request)
 	})
 
-	It("can create a dedicated VM", func() {
+	// Skip for insufficient capacity
+	XIt("can create a dedicated VM", func() {
 		By("creating a VM with static ip")
 		var vmCID string
 		request := fmt.Sprintf(`{
@@ -563,6 +564,13 @@ var _ = Describe("VM", func() {
 		Expect(*virtualGuest.StartCpus).To(Equal(1))
 		Expect(*virtualGuest.MaxMemory).To(Equal(1024))
 		Expect(*virtualGuest.HourlyBillingFlag).To(BeTrue())
+
+		By("deleting the VM")
+		request = fmt.Sprintf(`{
+		  "method": "delete_vm",
+		  "arguments": ["%v"]
+		}`, vmCID)
+		assertSucceeds(request)
 	})
 
 	// It("creates a VM on an dedicated host manually", func() {
@@ -607,11 +615,11 @@ var _ = Describe("VM", func() {
 	// 	}`, existingStemcellId)
 	// 	vmCID = assertSucceedsWithResult(request).(string)
 	//
-	// 	By("deleting the VM")
-	// 	request = fmt.Sprintf(`{
-	// 	  "method": "delete_vm",
-	// 	  "arguments": ["%v"]
-	// 	}`, vmCID)
-	// 	assertSucceeds(request)
-	// })
+	//	By("deleting the VM")
+	//	request = fmt.Sprintf(`{
+	//	  "method": "delete_vm",
+	//	  "arguments": ["%v"]
+	//	}`, vmCID)
+	//	assertSucceeds(request)
+	//})
 })

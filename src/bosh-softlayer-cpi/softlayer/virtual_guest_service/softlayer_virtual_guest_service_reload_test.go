@@ -13,14 +13,17 @@ import (
 	"github.com/softlayer/softlayer-go/sl"
 
 	cpiLog "bosh-softlayer-cpi/logger"
+	"bosh-softlayer-cpi/registry"
 	fakeslclient "bosh-softlayer-cpi/softlayer/client/fakes"
 	. "bosh-softlayer-cpi/softlayer/virtual_guest_service"
 )
 
 var _ = Describe("Virtual Guest Service", func() {
 	var (
-		cli                 *fakeslclient.FakeClient
-		uuidGen             *fakeuuid.FakeGenerator
+		cli      *fakeslclient.FakeClient
+		uuidGen  *fakeuuid.FakeGenerator
+		userData *registry.SoftlayerUserData
+
 		logger              cpiLog.Logger
 		virtualGuestService SoftlayerVirtualGuestService
 	)
@@ -28,8 +31,15 @@ var _ = Describe("Virtual Guest Service", func() {
 	BeforeEach(func() {
 		cli = &fakeslclient.FakeClient{}
 		uuidGen = &fakeuuid.FakeGenerator{}
+		userData = &registry.SoftlayerUserData{
+			Registry: registry.SoftlayerUserDataRegistryEndpoint{
+				Endpoint: "http://fake-username:fake-password@fake-registry-endpoint:fake-registry-port",
+			},
+		}
+
 		logger = cpiLog.NewLogger(boshlog.LevelNone, "")
 		virtualGuestService = NewSoftLayerVirtualGuestService(cli, uuidGen, logger)
+
 	})
 
 	Describe("Call ReloadOS", func() {
@@ -54,7 +64,7 @@ var _ = Describe("Virtual Guest Service", func() {
 		})
 
 		It("Reload instance successfully", func() {
-			err := virtualGuestService.ReloadOS(vmID, stemcellID, sshKeys, vmNamePrefix, domain)
+			err := virtualGuestService.ReloadOS(vmID, stemcellID, sshKeys, vmNamePrefix, domain, userData)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(cli.ReloadInstanceCallCount()).To(Equal(1))
 		})
@@ -64,7 +74,7 @@ var _ = Describe("Virtual Guest Service", func() {
 				errors.New("fake-client-error"),
 			)
 
-			err := virtualGuestService.ReloadOS(vmID, stemcellID, sshKeys, vmNamePrefix, domain)
+			err := virtualGuestService.ReloadOS(vmID, stemcellID, sshKeys, vmNamePrefix, domain, userData)
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("fake-client-error"))
 			Expect(cli.ReloadInstanceCallCount()).To(Equal(1))

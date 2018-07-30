@@ -10,8 +10,9 @@ import (
 	"net/http"
 	"time"
 
-	"bosh-softlayer-cpi/logger"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
+
+	"bosh-softlayer-cpi/logger"
 )
 
 const httpClientLogTag = "RegistryHTTPClient"
@@ -108,6 +109,39 @@ func (c HTTPClient) Fetch(instanceID string) (AgentSettings, error) {
 
 	c.logger.Debug(httpClientLogTag, "Received agent settings from registry endpoint '%s', contents: '%s'", endpoint, httpBody)
 	return agentSettings, nil
+}
+
+// IsExist indicates whether the agent settings for a given instance ID exists w/i empty.
+// Workaround for Bosh::Registry::InstanceNotFound error return 500 simply
+func (c HTTPClient) IsExist(instanceID string) (bool, error) {
+	var endpoint string
+	if len(c.options.Endpoint) > 0 {
+		endpoint = fmt.Sprintf("%s/instances/%s/settings", c.options.Endpoint, instanceID)
+	} else {
+		endpoint = fmt.Sprintf("%s/instances/%s/settings", c.options.EndpointWithCredentials(), instanceID)
+	}
+	c.logger.Debug(httpClientLogTag, "Fetching agent settings from registry endpoint '%s'", endpoint)
+
+	request, err := http.NewRequest("GET", endpoint, nil)
+	if err != nil {
+		return false, bosherr.WrapErrorf(err, "Creating GET request for registry endpoint '%s'", endpoint)
+	}
+
+	httpResponse, err := c.doRequest(request)
+	if err != nil {
+		return false, bosherr.WrapErrorf(err, "Fetching agent settings from registry endpoint '%s'", endpoint)
+	}
+
+	defer httpResponse.Body.Close()
+
+	if httpResponse.StatusCode != http.StatusOK {
+		if httpResponse.StatusCode == 500 {
+			return false, nil
+		}
+		return false, bosherr.Errorf("Received status code '%d' when fetching agent settings from registry endpoint '%s'", httpResponse.StatusCode, endpoint)
+	}
+
+	return true, nil
 }
 
 // Update updates the agent settings for a given instance ID. If there are not already agent settings for the instance, it will create ones.
