@@ -40,8 +40,8 @@ EOF
   git diff | cat
   git add .
 
-  git config --global user.email zhanggbj@cn.ibm.com
-  git config --global user.name zhanggbj
+  git config --global user.email "ci@localhost"
+  git config --global user.name CI
   git commit -m "New final release v $integer_version"
 popd
 
