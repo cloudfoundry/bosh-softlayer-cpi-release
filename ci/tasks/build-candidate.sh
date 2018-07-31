@@ -15,8 +15,8 @@ pushd bosh-cpi-release
     echo -e "\n\033[32m[INFO] Set GO15VENDOREXPERIMENT=1 for using go1.5.\033[0m"
     export GO15VENDOREXPERIMENT=1
 
-    echo -e "\n\033[32m[INFO] Running unit tests.\033[0m"
-    ./bin/test-unit
+    echo -e "\n\033[32m[INFO] Running unit tests and updating coverage.\033[0m"
+    ./bin/test-unit-cover
   popd > /dev/null
 
   echo $semver > src/bosh-softlayer-cpi/version

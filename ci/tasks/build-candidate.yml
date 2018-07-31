@@ -14,3 +14,5 @@ outputs:
   - name: candidate
 run:
   path: bosh-cpi-release/ci/tasks/build-candidate.sh
+params:
+  COVERALLS_TOKEN:                      replace-me
