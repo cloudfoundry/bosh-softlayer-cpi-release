@@ -1,4 +1,4 @@
-sudo: false
+sudo: true
 language: go
 go:
   - 1.7.1
