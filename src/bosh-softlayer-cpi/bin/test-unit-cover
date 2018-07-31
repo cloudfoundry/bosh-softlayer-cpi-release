@@ -33,6 +33,8 @@
   echo -e "\n Gathering cover profiles and send to coveralls.io..."
   # Need check env COVERALLS_TOKEN
   gover $base $base/gover.coverprofile
+  # Workaround for https://github.com/sozorogami/gover/issues/9
+  sed -i 's/\([0-9]\)\(bosh-softlayer-cpi\)/\1\n\2/g' $base/gover.coverprofile
   goveralls -coverprofile=gover.coverprofile -service=travis-pro -repotoken=$COVERALLS_TOKEN
 
   echo -e "\n Vetting packages for potential issues..."
