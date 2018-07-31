@@ -54,6 +54,8 @@ jobs:
 
     - task: build
       file: bosh-cpi-release/ci/tasks/build-candidate.yml
+      params:
+        COVERALLS_TOKEN: {{coveralls-token}}
 
     - put: version-semver
       params: {file: version-semver/number}

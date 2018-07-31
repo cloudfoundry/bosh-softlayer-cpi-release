@@ -7,6 +7,10 @@
   base_gopath=$( cd $base/../.. && pwd )
   export GOPATH=$base_gopath:$GOPATH
 
+  go get golang.org/x/tools/cmd/cover
+  go get github.com/modocache/gover
+  go get github.com/mattn/goveralls
+
   function printStatus {
       if [ $? -eq 0 ]; then
           echo -e "\nSWEET SUITE SUCCESS"
@@ -29,7 +33,9 @@
   echo -e "\n Gathering cover profiles and send to coveralls.io..."
   # Need check env COVERALLS_TOKEN
   gover $base $base/gover.coverprofile
-  goveralls -coverprofile=gover.coverprofile -service=travis-ci -repotoken=$COVERALLS_TOKEN
+  # Workaround for https://github.com/sozorogami/gover/issues/9
+  sed -i 's/\([0-9]\)\(bosh-softlayer-cpi\)/\1\n\2/g' $base/gover.coverprofile
+  goveralls -coverprofile=gover.coverprofile -service=travis-pro -repotoken=$COVERALLS_TOKEN
 
   echo -e "\n Vetting packages for potential issues..."
   go tool vet $base/action $base/api $base/main $base/softlayer

@@ -1,7 +1,7 @@
-sudo: true
+sudo: required
 language: go
 go:
-  - 1.7.1
+- 1.8.5
 before_install:
 - go get github.com/onsi/ginkgo/ginkgo
 - go get github.com/golang/go/src/cmd/vet
