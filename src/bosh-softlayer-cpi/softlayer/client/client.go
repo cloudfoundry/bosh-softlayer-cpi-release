@@ -1787,7 +1787,7 @@ func (c *ClientManager) CreateTicket(ticketSubject *string, ticketTitle *string,
 }
 
 func (c *ClientManager) SetUserDataWithID(id int, userData *registry.SoftlayerUserData) error {
-	until := time.Now().Add(90 * time.Second)
+	until := time.Now().Add(300 * time.Second)
 	interval := 30 * time.Second
 
 	userData.Server = registry.SoftlayerUserDataServerName{

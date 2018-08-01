@@ -8,7 +8,7 @@ check_param S3_ACCESS_KEY_ID
 check_param S3_SECRET_ACCESS_KEY
 
 source /etc/profile.d/chruby.sh
-chruby 2.2.4
+chruby 2.4.2
 
 integer_version=$( cat version-semver/number | sed 's/\.0$//;s/\.0$//' )
 echo $integer_version > promoted/integer_version

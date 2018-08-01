@@ -2624,8 +2624,36 @@ var _ = Describe("InstanceHandler", func() {
 				Expect(err).NotTo(HaveOccurred())
 			})
 
-			It("failed to set instance's metadata  when meet SoftLayer_Exception_NotImplemented exception 3 times", func() {
+			It("failed to set instance's metadata when meet SoftLayer_Exception_NotImplemented exception 11 times", func() {
 				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Virtual_Guest_setUserMetadata_Not_Implemented.json",
+						"statusCode": http.StatusInternalServerError,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_setUserMetadata_Not_Implemented.json",
+						"statusCode": http.StatusInternalServerError,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_setUserMetadata_Not_Implemented.json",
+						"statusCode": http.StatusInternalServerError,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_setUserMetadata_Not_Implemented.json",
+						"statusCode": http.StatusInternalServerError,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_setUserMetadata_Not_Implemented.json",
+						"statusCode": http.StatusInternalServerError,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_setUserMetadata_Not_Implemented.json",
+						"statusCode": http.StatusInternalServerError,
+					},
+					{
+						"filename":   "SoftLayer_Virtual_Guest_setUserMetadata_Not_Implemented.json",
+						"statusCode": http.StatusInternalServerError,
+					},
 					{
 						"filename":   "SoftLayer_Virtual_Guest_setUserMetadata_Not_Implemented.json",
 						"statusCode": http.StatusInternalServerError,
