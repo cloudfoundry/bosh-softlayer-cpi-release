@@ -1488,11 +1488,27 @@ var _ = Describe("InstanceHandler", func() {
 				Expect(err).NotTo(HaveOccurred())
 			})
 
-			It("Cancel instance successfully when instance stays 'RECLAIM_WAIT' transaction 1 minutes", func() {
+			It("Cancel instance successfully when instance stays 'RECLAIM_WAIT' transaction", func() {
 				respParas = []map[string]interface{}{
 					{
 						"filename":   "SoftLayer_Virtual_Guest_getObject_HasActiveTxn_Reclaim.json",
 						"statusCode": http.StatusOK,
+						"path":       "/SoftLayer_Virtual_Guest/25804753.json",
+						"method":     "GET",
+					},
+				}
+				err = test_helpers.SpecifyServerResps(respParas, server)
+				Expect(err).NotTo(HaveOccurred())
+
+				err := cli.CancelInstance(vgID)
+				Expect(err).NotTo(HaveOccurred())
+			})
+
+			It("Cancel instance successfully when instance does not exist", func() {
+				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Virtual_Guest_getObject_NotFound.json",
+						"statusCode": http.StatusNotFound,
 						"path":       "/SoftLayer_Virtual_Guest/25804753.json",
 						"method":     "GET",
 					},
