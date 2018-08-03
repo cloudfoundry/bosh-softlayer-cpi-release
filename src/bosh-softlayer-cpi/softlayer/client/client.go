@@ -468,7 +468,7 @@ func (c *ClientManager) WaitInstanceHasNoneActiveTransaction(id int, until time.
 			return err
 		}
 		if !found {
-			return bosherr.WrapErrorf(err, "SoftLayer virtual guest '%d' does not exist", id)
+			return bosherr.WrapErrorf(bosherr.Error(SOFTLAYER_OBJECTNOTFOUND_EXCEPTION), "SoftLayer virtual guest '%d' does not exist", id)
 		}
 
 		if virtualGuest.ActiveTransaction == nil {
@@ -680,8 +680,9 @@ func (c *ClientManager) CancelInstance(id int) error {
 	var err error
 	until := time.Now().Add(time.Duration(10) * time.Minute)
 	if err = c.WaitInstanceHasNoneActiveTransaction(*sl.Int(id), until); err != nil {
-		if apiErr, ok := err.(sl.Error); ok {
-			if apiErr.Exception == SOFTLAYER_OBJECTNOTFOUND_EXCEPTION {
+		if boshErr, ok := err.(bosherr.ComplexError); ok {
+			if strings.Contains(boshErr.Cause.Error(), SOFTLAYER_OBJECTNOTFOUND_EXCEPTION) {
+				c.logger.Warn(softlayerClientLogTag, fmt.Sprintf("Instance '%d' does not exist, CPI skips to cancel it", id))
 				return nil
 			}
 		}
