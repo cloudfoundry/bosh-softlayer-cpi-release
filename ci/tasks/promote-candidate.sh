@@ -10,6 +10,9 @@ check_param S3_SECRET_ACCESS_KEY
 source /etc/profile.d/chruby.sh
 chruby 2.4.2
 
+mv bosh-cli/bosh-cli-* /usr/local/bin/bosh-cli
+chmod +x /usr/local/bin/bosh-cli
+
 integer_version=$( cat version-semver/number | sed 's/\.0$//;s/\.0$//' )
 echo $integer_version > promoted/integer_version
 
@@ -30,10 +33,10 @@ EOF
   set -x
 
   echo "using bosh CLI version..."
-  bosh version
+  bosh-cli version
 
   echo "finalizing CPI release..."
-  bosh finalize release ${dev_release} --version $integer_version
+  bosh-cli finalize-release ${dev_release} --version $integer_version
 
   rm config/private.yml
 

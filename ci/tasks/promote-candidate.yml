@@ -5,6 +5,7 @@ inputs:
   - name: bosh-cpi-release
   - name: bosh-cpi-dev-artifacts
   - name: version-semver
+  - name: bosh-cli
 outputs:
   - name: promoted
 run:
