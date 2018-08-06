@@ -20,9 +20,10 @@ type Cloud struct {
 }
 
 type CPIProperties struct {
-	SoftLayer boslconfig.Config
-	Agent     registry.AgentOptions
-	Registry  registry.ClientOptions
+	SoftLayer        boslconfig.Config
+	Agent            registry.AgentOptions
+	Registry         registry.ClientOptions
+	EnableLegacyProp bool
 }
 
 func NewConfigFromPath(configFile string, fs boshsys.FileSystem) (Config, error) {

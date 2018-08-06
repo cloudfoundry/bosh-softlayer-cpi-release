@@ -14,15 +14,27 @@ type Caller interface {
 }
 
 // JSONCaller unmarshals call arguments with json package and calls action.Run
-type JSONCaller struct{}
+type JSONCaller struct {
+	EnableLegacyProp bool
+}
 
-func NewJSONCaller() JSONCaller {
-	return JSONCaller{}
+func NewJSONCaller(enableLegacyProp bool) JSONCaller {
+	return JSONCaller{
+		EnableLegacyProp: enableLegacyProp,
+	}
 }
 
 func (r JSONCaller) Call(action bslcaction.Action, args []interface{}) (value interface{}, err error) {
 	actionValue := reflect.ValueOf(action)
-	runMethodValue := actionValue.MethodByName("Run")
+	methodName := ""
+
+	// @TODO Find action string
+	if r.EnableLegacyProp  {
+		methodName = "RunLegacy"
+	} else {
+		methodName = "Run"
+	}
+	runMethodValue := actionValue.MethodByName(methodName)
 	if runMethodValue.Kind() != reflect.Func {
 		err = bosherr.Error("Run method not found")
 		return

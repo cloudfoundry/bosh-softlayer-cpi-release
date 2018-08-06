@@ -47,6 +47,15 @@ func NewCreateVM(
 	return
 }
 
+func (cv CreateVM) RunLegacy(agentID string, stemcellCID StemcellCID, cloudProps VMV1CloudProperties, networks Networks, diskIDs []DiskCID, env Environment) (string, error) {
+
+	newcloudProps, err := convertCloudPropeties(cloudProps)
+	if err != nil {
+		return "", err
+	}
+	return cv.Run(agentID, StemcellCID(cloudProps.BlockDeviceTemplateGroup.GlobalIdentifier), newcloudProps, networks, diskIDs, env)
+}
+
 func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMCloudProperties, networks Networks, diskIDs []DiskCID, env Environment) (string, error) {
 	// Validate VM properties
 	if err := cloudProps.Validate(); err != nil {
@@ -588,4 +597,22 @@ func inRange(r ipRange, ipAddress net.IP) bool {
 		return true
 	}
 	return false
+}
+
+func convertCloudPropeties(properties VMV1CloudProperties) (VMCloudProperties, error) {
+	// Pre-check properties
+
+	return VMCloudProperties{
+		HostnamePrefix:               properties.VmNamePrefix,
+		Hostname:                     properties.Hostname,
+		Domain:                       properties.Domain,
+		Cpu:                          properties.StartCpus,
+		Memory:                       properties.MaxMemory,
+		Datacenter:                   properties.Datacenter.Name,
+		EphemeralDiskSize:            properties.EphemeralDiskSize,
+		HourlyBillingFlag:            properties.HourlyBillingFlag,
+		LocalDiskFlag:                properties.LocalDiskFlag,
+		DedicatedAccountHostOnlyFlag: properties.DedicatedAccountHostOnlyFlag,
+		DeployedByBoshCLI:            properties.DeployedByBoshCLI,
+	}, nil
 }

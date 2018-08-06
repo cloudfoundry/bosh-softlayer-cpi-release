@@ -113,7 +113,7 @@ func buildDispatcher(
 		config,
 		logger,
 	)
-
+	config.Cloud.Properties.EnableLegacyProp
 	caller := dispatcher.NewJSONCaller()
 
 	return dispatcher.NewJSON(actionFactory, caller, logger)

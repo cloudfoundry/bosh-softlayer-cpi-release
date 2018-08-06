@@ -46,6 +46,41 @@ type StemcellCloudProperties struct {
 	OsCode         string `json:"os-code"`
 }
 
+type VMV1CloudProperties struct {
+	Hostname                 string                   `json:"hostname,omitempty"`
+	VmNamePrefix             string                   `json:"vmNamePrefix,omitempty"`
+	Domain                   string                   `json:"domain,omitempty"`
+	StartCpus                int                      `json:"startCpus,omitempty"`
+	MaxMemory                int                      `json:"maxMemory,omitempty"`
+	Datacenter               Datacenter               `json:"datacenter"`
+	BlockDeviceTemplateGroup BlockDeviceTemplateGroup `json:"blockDeviceTemplateGroup,omitempty"`
+	RootDiskSize             int                      `json:"rootDiskSize,omitempty"`
+	EphemeralDiskSize        int                      `json:"ephemeralDiskSize,omitempty"`
+
+	HourlyBillingFlag            bool `json:"hourlyBillingFlag,omitempty"`
+	LocalDiskFlag                bool `json:"localDiskFlag,omitempty"`
+	DedicatedAccountHostOnlyFlag bool `json:"dedicatedAccountHostOnlyFlag,omitempty"`
+	PrivateNetworkOnlyFlag       bool `json:"privateNetworkOnlyFlag,omitempty"`
+	//NetworkComponents              []sldatatypes.NetworkComponents            `json:"networkComponents,omitempty"`
+	//PrimaryNetworkComponent        sldatatypes.PrimaryNetworkComponent        `json:"primaryNetworkComponent,omitempty"`
+	//PrimaryBackendNetworkComponent sldatatypes.PrimaryBackendNetworkComponent `json:"primaryBackendNetworkComponent,omitempty"`
+	//BlockDevices                   []sldatatypes.BlockDevice                  `json:"blockDevices,omitempty"`
+	//UserData                       []sldatatypes.UserData                     `json:"userData,omitempty"`
+	//PostInstallScriptUri           string                                     `json:"postInstallScriptUri,omitempty"`
+
+	DeployedByBoshCLI bool `json:"deployedByBoshcli,omitempty"`
+	DisableOsReload   bool `json:"disableOsReload,omitempty"`
+}
+
+type Datacenter struct {
+	Name string
+}
+
+type BlockDeviceTemplateGroup struct {
+	//Required
+	GlobalIdentifier int `json:"globalIdentifier,omitempty"`
+}
+
 type VMCloudProperties struct {
 	HostnamePrefix    string `json:"hostname_prefix,omitempty"`
 	Hostname          string `json:"hostname,omitempty"`
