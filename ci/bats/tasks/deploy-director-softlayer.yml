@@ -9,7 +9,6 @@ inputs:
   - name: bosh-deployment
   - name: bosh-cpi-release
   - name: cpi-release
-  - name: stemcell
   - name: bosh-cli
   - name: environment
 
