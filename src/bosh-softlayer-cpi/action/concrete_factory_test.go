@@ -145,5 +145,11 @@ var _ = Describe("ConcreteFactory", func() {
 			Expect(err).To(HaveOccurred())
 			Expect(action).To(BeNil())
 		})
+
+		It("info", func() {
+			action, err := factory.Create("info")
+			Expect(action).ToNot(BeNil())
+			Expect(err).ToNot(HaveOccurred())
+		})
 	})
 })

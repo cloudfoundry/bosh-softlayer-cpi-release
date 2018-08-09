@@ -84,6 +84,7 @@ func NewConcreteFactory(options ConcreteFactoryOptions, logger boshlog.Logger) c
 			"attach_disk": NewAttachDisk(vmFinder, diskFinder),
 			"detach_disk": NewDetachDisk(vmFinder, diskFinder),
 
+			"info": NewInfo(),
 			// Not implemented (disk related):
 			//   snapshot_disk
 			//   delete_snapshot
