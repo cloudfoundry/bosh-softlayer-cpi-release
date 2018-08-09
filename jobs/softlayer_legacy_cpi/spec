@@ -1,5 +1,5 @@
 ---
-name: softlayer_cpi
+name: softlayer_legacy_cpi
 
 templates:
   cpi.erb: bin/cpi
@@ -8,26 +8,26 @@ templates:
   cpi_ctl.erb:  bin/cpi_ctl
 
 packages:
-- bosh_softlayer_cpi
+- bosh_softlayer_legacy_cpi
 
 properties:
-  softlayer.username:
+  softlayer_legacy.username:
     description: "User name of the softlayer account"
-  softlayer.apiKey:
+  softlayer_legacy.apiKey:
     description: "API key of the softlayer account"
-  softlayer.featureOptions.disableOsReload:
+  softlayer_legacy.featureOptions.disableOsReload:
     description: "Disable Os Reload flag"
-  softlayer.featureOptions.enablePool:
+  softlayer_legacy.featureOptions.enablePool:
     description: "enable pooling flag"
-  softlayer.featureOptions.apiEndpoint:
+  softlayer_legacy.featureOptions.apiEndpoint:
     description: "Softlayer API endpoint"
-  softlayer.featureOptions.apiWaitTime:
+  softlayer_legacy.featureOptions.apiWaitTime:
     description: "Retry interval of Softlayer API requests"
-  softlayer.featureOptions.apiRetryCount:
+  softlayer_legacy.featureOptions.apiRetryCount:
     description: "Retry count of Softlayer API requests"
-  softlayer.featureOptions.createIscsiVolumeTimeout:
+  softlayer_legacy.featureOptions.createIscsiVolumeTimeout:
     description: "Timeout of attaching iSCSI disk"
-  softlayer.featureOptions.createIscsiVolumePollingInterval:
+  softlayer_legacy.featureOptions.createIscsiVolumePollingInterval:
     description: "Interval of checking iSCSI disk ready"
 
   baremetal.username:

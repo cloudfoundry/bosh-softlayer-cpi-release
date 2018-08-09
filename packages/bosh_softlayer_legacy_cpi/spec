@@ -1,5 +1,5 @@
 ---
-name: bosh_softlayer_cpi
+name: bosh_softlayer_legacy_cpi
 
 dependencies:
 - golang_1.7.1

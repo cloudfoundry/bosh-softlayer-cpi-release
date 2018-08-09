@@ -1,0 +1,5 @@
+check process cpi_legacy
+  with pidfile /var/vcap/sys/run/softlayer_legacy_cpi/cpi.pid
+  start program "/var/vcap/jobs/softlayer_legacy_cpi/bin/cpi_ctl start"
+  stop program "/var/vcap/jobs/softlayer_legacy_cpi/bin/cpi_ctl stop"
+  group vcap

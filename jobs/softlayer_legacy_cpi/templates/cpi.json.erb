@@ -4,8 +4,8 @@
       'plugin' => 'softlayer',
       'properties' => {
         'softlayer' => {
-          'username' => p('softlayer.username'),
-          'apiKey' => p('softlayer.apiKey'),
+          'username' => p('softlayer_legacy.username'),
+          'apiKey' => p('softlayer_legacy.apiKey'),
         },
         'agent' => {
           'ntp' => p('ntp')
@@ -13,27 +13,27 @@
       }
     }
   }
-  if_p('softlayer.featureOptions') do
+  if_p('softlayer_legacy.featureOptions') do
     softlayer_feature_options_params = {}
     if_p('softlayer.featureOptions.enablePool') do |enablePool|
       softlayer_feature_options_params.merge!('enablePool' => enablePool)
     end
-    if_p('softlayer.featureOptions.disableOsReload') do |disableOsReload|
+    if_p('softlayer_legacy.featureOptions.disableOsReload') do |disableOsReload|
       softlayer_feature_options_params.merge!('disableOsReload' => disableOsReload)
     end
-    if_p('softlayer.featureOptions.apiEndpoint') do |apiEndpoint|
+    if_p('softlayer_legacy.featureOptions.apiEndpoint') do |apiEndpoint|
       softlayer_feature_options_params.merge!('apiEndpoint' => apiEndpoint)
     end
-    if_p('softlayer.featureOptions.apiWaitTime') do |apiWaitTime|
+    if_p('softlayer_legacy.featureOptions.apiWaitTime') do |apiWaitTime|
       softlayer_feature_options_params.merge!('apiWaitTime' => apiWaitTime)
     end
-    if_p('softlayer.featureOptions.apiRetryCount') do |apiRetryCount|
+    if_p('softlayer_legacy.featureOptions.apiRetryCount') do |apiRetryCount|
       softlayer_feature_options_params.merge!('apiRetryCount' => apiRetryCount)
     end
-    if_p('softlayer.featureOptions.createIscsiVolumeTimeout') do |createIscsiVolumeTimeout|
+    if_p('softlayer_legacy.featureOptions.createIscsiVolumeTimeout') do |createIscsiVolumeTimeout|
       softlayer_feature_options_params.merge!('createIscsiVolumeTimeout' => createIscsiVolumeTimeout)
     end
-    if_p('softlayer.featureOptions.createIscsiVolumePollingInterval') do |createIscsiVolumePollingInterval|
+    if_p('softlayer_legacy.featureOptions.createIscsiVolumePollingInterval') do |createIscsiVolumePollingInterval|
       softlayer_feature_options_params.merge!('createIscsiVolumePollingInterval' => createIscsiVolumePollingInterval)
     end
     params['cloud']['properties']['softlayer']['featureOptions'] = softlayer_feature_options_params
