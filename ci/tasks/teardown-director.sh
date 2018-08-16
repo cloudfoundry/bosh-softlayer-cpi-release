@@ -5,7 +5,7 @@ set -e -x
 source bosh-cpi-release/ci/tasks/utils.sh
 
 source /etc/profile.d/chruby.sh
-chruby 2.2.4
+chruby 2.4.4
 
 pushd deployment
   cp -r ./.bosh_init $HOME/

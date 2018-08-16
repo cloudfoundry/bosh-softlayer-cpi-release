@@ -24,7 +24,7 @@ export BOSH_AZURE_VNET_NAME=${AZURE_VNET_NAME_FOR_LIFECYCLE}
 export BOSH_AZURE_SUBNET_NAME=${AZURE_BOSH_SUBNET_NAME}
 
 source /etc/profile.d/chruby.sh
-chruby 2.2.4
+chruby 2.4.4
 
 azure login --service-principal -u ${AZURE_CLIENT_ID} -p ${AZURE_CLIENT_SECRET} --tenant ${AZURE_TENANT_ID}
 azure config mode arm

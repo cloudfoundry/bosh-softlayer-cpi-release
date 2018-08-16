@@ -35,6 +35,6 @@ RUN ruby-install ruby 2.2.4
 
 # Bundler and BOSH CLI
 RUN /bin/bash -l -c "source /etc/profile.d/chruby.sh ;  \
-                     chruby 2.2.4 ;                     \
+                     chruby 2.4.4 ;                     \
                      gem install bundler bosh_cli --no-ri --no-rdoc"
 
