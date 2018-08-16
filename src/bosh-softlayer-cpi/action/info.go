@@ -12,6 +12,7 @@ func (Info) Run() (InfoResult, error) {
 	return InfoResult{
 		StemcellFormats: []string{
 			"softlayer-light",
+			"softlayer-ovf",
 		},
 	}, nil
 }

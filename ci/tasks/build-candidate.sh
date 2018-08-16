@@ -23,6 +23,7 @@ pushd bosh-cpi-release
 
   cpi_release_name="bosh-softlayer-cpi"
   tarball_name="dev_releases/${cpi_release_name}/${cpi_release_name}-${semver}.tgz"
+  mkdir -p "dev_releases/${cpi_release_name}/"
 
   echo -e "\n\033[32m[INFO] Building CPI release.\033[0m"
   bosh-cli create-release --name $cpi_release_name --version $semver --tarball $tarball_name --force
