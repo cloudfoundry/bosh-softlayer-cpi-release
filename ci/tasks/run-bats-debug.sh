@@ -17,7 +17,7 @@ check_param BAT_DIRECTOR_IP
 DIRECTOR=$BAT_DIRECTOR_IP
 
 source /etc/profile.d/chruby.sh
-chruby 2.2.4
+chruby 2.4.4
 
 echo "DirectorIP =" $DIRECTOR
 

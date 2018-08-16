@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 source /etc/profile.d/chruby.sh
-chruby 2.1.7
+chruby 2.4.4
 
 function cp_artifacts {
   mv $HOME/.bosh director-state/

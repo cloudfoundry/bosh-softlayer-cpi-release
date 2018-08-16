@@ -8,7 +8,7 @@ check_param S3_ACCESS_KEY_ID
 check_param S3_SECRET_ACCESS_KEY
 
 source /etc/profile.d/chruby.sh
-chruby 2.4.2
+chruby 2.4.4
 
 mv bosh-cli/bosh-cli-* /usr/local/bin/bosh-cli
 chmod +x /usr/local/bin/bosh-cli
