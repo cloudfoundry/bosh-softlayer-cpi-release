@@ -13,7 +13,7 @@ chruby 2.4.4
 mv bosh-cli/bosh-cli-* /usr/local/bin/bosh-cli
 chmod +x /usr/local/bin/bosh-cli
 
-integer_version=$( cat version-semver/number | sed 's/\.0$//;s/\.0$//' )
+integer_version=$( cat version-semver/number | cut -d. -f1 )
 echo $integer_version > promoted/integer_version
 
 cp -r bosh-cpi-release promoted/repo
