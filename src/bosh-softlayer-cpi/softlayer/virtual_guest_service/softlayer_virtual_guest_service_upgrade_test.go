@@ -31,11 +31,12 @@ var _ = Describe("Virtual Guest Service", func() {
 
 	Describe("Call UpgradeInstance", func() {
 		var (
-			vmID       int
-			cpu        int
-			memory     int
-			network    int
-			privateCPU bool
+			vmID          int
+			cpu           int
+			memory        int
+			network       int
+			privateCPU    bool
+			dedicatedHost bool
 		)
 
 		BeforeEach(func() {
@@ -44,6 +45,7 @@ var _ = Describe("Virtual Guest Service", func() {
 			memory = 2048
 			network = 1000
 			privateCPU = false
+			dedicatedHost = false
 
 			cli.UpgradeInstanceConfigReturns(
 				nil,
@@ -51,7 +53,7 @@ var _ = Describe("Virtual Guest Service", func() {
 		})
 
 		It("Configure networks successfully", func() {
-			err := virtualGuestService.UpgradeInstance(vmID, cpu, memory, network, privateCPU)
+			err := virtualGuestService.UpgradeInstance(vmID, cpu, memory, network, privateCPU, dedicatedHost)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(cli.UpgradeInstanceConfigCallCount()).To(Equal(1))
 		})
@@ -61,7 +63,7 @@ var _ = Describe("Virtual Guest Service", func() {
 				errors.New("fake-client-error"),
 			)
 
-			err := virtualGuestService.UpgradeInstance(vmID, cpu, memory, network, privateCPU)
+			err := virtualGuestService.UpgradeInstance(vmID, cpu, memory, network, privateCPU, dedicatedHost)
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("fake-client-error"))
 			Expect(cli.UpgradeInstanceConfigCallCount()).To(Equal(1))

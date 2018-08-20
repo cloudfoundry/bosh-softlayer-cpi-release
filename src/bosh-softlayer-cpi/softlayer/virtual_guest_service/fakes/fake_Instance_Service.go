@@ -66,14 +66,15 @@ type FakeService struct {
 		result1 int
 		result2 error
 	}
-	UpgradeInstanceStub        func(id int, cpu int, memory int, network int, privateCPU bool) error
+	UpgradeInstanceStub        func(id int, cpu int, memory int, network int, privateCPU bool, dedicatedHost bool) error
 	upgradeInstanceMutex       sync.RWMutex
 	upgradeInstanceArgsForCall []struct {
-		id         int
-		cpu        int
-		memory     int
-		network    int
-		privateCPU bool
+		id            int
+		cpu           int
+		memory        int
+		network       int
+		privateCPU    bool
+		dedicatedHost bool
 	}
 	upgradeInstanceReturns struct {
 		result1 error
@@ -502,20 +503,21 @@ func (fake *FakeService) CreateReturnsOnCall(i int, result1 int, result2 error) 
 	}{result1, result2}
 }
 
-func (fake *FakeService) UpgradeInstance(id int, cpu int, memory int, network int, privateCPU bool) error {
+func (fake *FakeService) UpgradeInstance(id int, cpu int, memory int, network int, privateCPU bool, dedicatedHost bool) error {
 	fake.upgradeInstanceMutex.Lock()
 	ret, specificReturn := fake.upgradeInstanceReturnsOnCall[len(fake.upgradeInstanceArgsForCall)]
 	fake.upgradeInstanceArgsForCall = append(fake.upgradeInstanceArgsForCall, struct {
-		id         int
-		cpu        int
-		memory     int
-		network    int
-		privateCPU bool
-	}{id, cpu, memory, network, privateCPU})
-	fake.recordInvocation("UpgradeInstance", []interface{}{id, cpu, memory, network, privateCPU})
+		id            int
+		cpu           int
+		memory        int
+		network       int
+		privateCPU    bool
+		dedicatedHost bool
+	}{id, cpu, memory, network, privateCPU, dedicatedHost})
+	fake.recordInvocation("UpgradeInstance", []interface{}{id, cpu, memory, network, privateCPU, dedicatedHost})
 	fake.upgradeInstanceMutex.Unlock()
 	if fake.UpgradeInstanceStub != nil {
-		return fake.UpgradeInstanceStub(id, cpu, memory, network, privateCPU)
+		return fake.UpgradeInstanceStub(id, cpu, memory, network, privateCPU, dedicatedHost)
 	}
 	if specificReturn {
 		return ret.result1
@@ -529,10 +531,10 @@ func (fake *FakeService) UpgradeInstanceCallCount() int {
 	return len(fake.upgradeInstanceArgsForCall)
 }
 
-func (fake *FakeService) UpgradeInstanceArgsForCall(i int) (int, int, int, int, bool) {
+func (fake *FakeService) UpgradeInstanceArgsForCall(i int) (int, int, int, int, bool, bool) {
 	fake.upgradeInstanceMutex.RLock()
 	defer fake.upgradeInstanceMutex.RUnlock()
-	return fake.upgradeInstanceArgsForCall[i].id, fake.upgradeInstanceArgsForCall[i].cpu, fake.upgradeInstanceArgsForCall[i].memory, fake.upgradeInstanceArgsForCall[i].network, fake.upgradeInstanceArgsForCall[i].privateCPU
+	return fake.upgradeInstanceArgsForCall[i].id, fake.upgradeInstanceArgsForCall[i].cpu, fake.upgradeInstanceArgsForCall[i].memory, fake.upgradeInstanceArgsForCall[i].network, fake.upgradeInstanceArgsForCall[i].privateCPU, fake.upgradeInstanceArgsForCall[i].dedicatedHost
 }
 
 func (fake *FakeService) UpgradeInstanceReturns(result1 error) {

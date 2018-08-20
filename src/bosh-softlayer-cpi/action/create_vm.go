@@ -364,9 +364,11 @@ func (cv CreateVM) createByOsReload(stemcellCID StemcellCID, template *datatypes
 		case "dynamic":
 			if len(network.IP) > 0 && cid == 0 {
 				var (
-					vm     *datatypes.Virtual_Guest
-					sshKey int
-					err    error
+					vm            *datatypes.Virtual_Guest
+					sshKey        int
+					desiredCpu    int
+					desiredMemory int
+					err           error
 				)
 
 				if IsPrivateSubnet(net.ParseIP(network.IP)) {
@@ -383,9 +385,16 @@ func (cv CreateVM) createByOsReload(stemcellCID StemcellCID, template *datatypes
 				}
 
 				if (template.SupplementalCreateObjectOptions == nil || *template.SupplementalCreateObjectOptions.FlavorKeyName == "") &&
-					vm.SupplementalCreateObjectOptions == nil &&
-					(*vm.MaxCpu != *template.StartCpus || *vm.MaxMemory != *template.MaxMemory) {
-					err = cv.virtualGuestService.UpgradeInstance(*vm.Id, *template.StartCpus, *template.MaxMemory, 0, *vm.DedicatedAccountHostOnlyFlag)
+					vm.SupplementalCreateObjectOptions == nil {
+					if *vm.MaxCpu != *template.StartCpus {
+						desiredCpu = sl.Get(*template.StartCpus, 0).(int)
+
+					}
+					if *vm.MaxMemory != *template.MaxMemory {
+						desiredMemory = sl.Get(*template.MaxMemory, 0).(int)
+					}
+
+					err = cv.virtualGuestService.UpgradeInstance(*vm.Id, desiredCpu, desiredMemory, 0, *vm.DedicatedAccountHostOnlyFlag, vm.DedicatedHost != nil)
 					if err != nil {
 						return cid, bosherr.WrapError(err, "Upgrading VM")
 					}

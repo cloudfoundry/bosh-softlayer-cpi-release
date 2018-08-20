@@ -1599,7 +1599,7 @@ var _ = Describe("InstanceHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				_, err := cli.UpgradeInstance(vgID, 2, 0, 0, false, 0)
+				_, err := cli.UpgradeInstance(vgID, 2, 0, 0, false, false, 0)
 				Expect(err).NotTo(HaveOccurred())
 			})
 
@@ -1617,9 +1617,9 @@ var _ = Describe("InstanceHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				_, err := cli.UpgradeInstance(vgID, 7, 0, 0, false, 0)
+				_, err := cli.UpgradeInstance(vgID, 7, 0, 0, false, false, 0)
 				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("Unable to find guest_core option"))
+				Expect(err.Error()).To(ContainSubstring("Unable to find prices for upgrade"))
 			})
 
 			It("upgrade instance successfully with private", func() {
@@ -1640,7 +1640,29 @@ var _ = Describe("InstanceHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				_, err := cli.UpgradeInstance(vgID, 2, 0, 0, true, 0)
+				_, err := cli.UpgradeInstance(vgID, 2, 0, 0, true, false, 0)
+				Expect(err).NotTo(HaveOccurred())
+			})
+
+			It("upgrade instance successfully with dedicated host cores", func() {
+				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Product_Package_getAllObjects.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Product_Package_getItems.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Product_Order_placeOrder.json",
+						"statusCode": http.StatusOK,
+					},
+				}
+				err = test_helpers.SpecifyServerResps(respParas, server)
+				Expect(err).NotTo(HaveOccurred())
+
+				_, err := cli.UpgradeInstance(vgID, 2, 0, 0, false, true, 0)
 				Expect(err).NotTo(HaveOccurred())
 			})
 
@@ -1670,9 +1692,32 @@ var _ = Describe("InstanceHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				_, err := cli.UpgradeInstance(vgID, 2, 0, 0, true, 0)
+				_, err := cli.UpgradeInstance(vgID, 2, 0, 0, true, false, 0)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("Unable to find order id"))
+			})
+
+			It("return an error if privateCPU and dedicatedHost are both true", func() {
+				respParas = []map[string]interface{}{
+					{
+						"filename":   "SoftLayer_Product_Package_getAllObjects.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Product_Package_getItems.json",
+						"statusCode": http.StatusOK,
+					},
+					{
+						"filename":   "SoftLayer_Product_Order_placeOrder.json",
+						"statusCode": http.StatusOK,
+					},
+				}
+				err = test_helpers.SpecifyServerResps(respParas, server)
+				Expect(err).NotTo(HaveOccurred())
+
+				_, err := cli.UpgradeInstance(vgID, 2, 0, 0, true, true, 0)
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("Unable to find prices for upgrade"))
 			})
 		})
 
@@ -1695,7 +1740,7 @@ var _ = Describe("InstanceHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				_, err := cli.UpgradeInstance(vgID, 0, 1024*8, 0, false, 0)
+				_, err := cli.UpgradeInstance(vgID, 0, 1024*8, 0, false, false, 0)
 				Expect(err).NotTo(HaveOccurred())
 			})
 
@@ -1713,9 +1758,9 @@ var _ = Describe("InstanceHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				_, err := cli.UpgradeInstance(vgID, 0, 133333, 0, false, 0)
+				_, err := cli.UpgradeInstance(vgID, 0, 133333, 0, false, false, 0)
 				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("Unable to find ram option"))
+				Expect(err.Error()).To(ContainSubstring("Unable to find prices for upgrade"))
 			})
 		})
 
@@ -1738,7 +1783,7 @@ var _ = Describe("InstanceHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				_, err := cli.UpgradeInstance(vgID, 0, 0, 1000, false, 0)
+				_, err := cli.UpgradeInstance(vgID, 0, 0, 1000, false, false, 0)
 				Expect(err).NotTo(HaveOccurred())
 			})
 
@@ -1756,9 +1801,9 @@ var _ = Describe("InstanceHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				_, err := cli.UpgradeInstance(vgID, 0, 0, 1431, false, 0)
+				_, err := cli.UpgradeInstance(vgID, 0, 0, 1431, false, false, 0)
 				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("Unable to find port_speed option"))
+				Expect(err.Error()).To(ContainSubstring("Unable to find prices for upgrade"))
 			})
 		})
 
@@ -1790,7 +1835,7 @@ var _ = Describe("InstanceHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				_, err := cli.UpgradeInstance(vgID, 0, 0, 0, false, 300)
+				_, err := cli.UpgradeInstance(vgID, 0, 0, 0, false, false, 300)
 				Expect(err).NotTo(HaveOccurred())
 			})
 
@@ -1821,7 +1866,7 @@ var _ = Describe("InstanceHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				_, err := cli.UpgradeInstance(vgID, 0, 0, 0, false, 300)
+				_, err := cli.UpgradeInstance(vgID, 0, 0, 0, false, false, 300)
 				Expect(err).NotTo(HaveOccurred())
 			})
 
@@ -1852,7 +1897,7 @@ var _ = Describe("InstanceHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				_, err := cli.UpgradeInstance(vgID, 0, 0, 0, false, 300)
+				_, err := cli.UpgradeInstance(vgID, 0, 0, 0, false, false, 300)
 				Expect(err).NotTo(HaveOccurred())
 			})
 
@@ -1878,7 +1923,7 @@ var _ = Describe("InstanceHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				_, err := cli.UpgradeInstance(vgID, 0, 0, 0, false, 401)
+				_, err := cli.UpgradeInstance(vgID, 0, 0, 0, false, false, 401)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("No proper (LOCAL) disk"))
 			})
@@ -1899,9 +1944,9 @@ var _ = Describe("InstanceHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				_, err := cli.UpgradeInstance(vgID, 0, 0, 0, false, 0)
+				_, err := cli.UpgradeInstance(vgID, 0, 0, 0, false, false, 0)
 				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("Unable to find price for upgrade"))
+				Expect(err.Error()).To(ContainSubstring("Unable to find prices for upgrade"))
 			})
 		})
 
@@ -1916,7 +1961,7 @@ var _ = Describe("InstanceHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				_, err := cli.UpgradeInstance(vgID, 0, 0, 0, false, 300)
+				_, err := cli.UpgradeInstance(vgID, 0, 0, 0, false, false, 300)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("fake-client-error"))
 			})
@@ -1931,7 +1976,7 @@ var _ = Describe("InstanceHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				_, err := cli.UpgradeInstance(vgID, 0, 0, 0, false, 300)
+				_, err := cli.UpgradeInstance(vgID, 0, 0, 0, false, false, 300)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("No package found for type"))
 			})
@@ -1950,7 +1995,7 @@ var _ = Describe("InstanceHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				_, err := cli.UpgradeInstance(vgID, 0, 0, 0, false, 300)
+				_, err := cli.UpgradeInstance(vgID, 0, 0, 0, false, false, 300)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("fake-client-error"))
 			})
@@ -1973,7 +2018,7 @@ var _ = Describe("InstanceHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				_, err := cli.UpgradeInstance(vgID, 0, 0, 0, false, 300)
+				_, err := cli.UpgradeInstance(vgID, 0, 0, 0, false, false, 300)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("fake-client-error"))
 			})
@@ -2000,7 +2045,7 @@ var _ = Describe("InstanceHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				_, err := cli.UpgradeInstance(vgID, 0, 0, 0, false, 300)
+				_, err := cli.UpgradeInstance(vgID, 0, 0, 0, false, false, 300)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("fake-client-error"))
 			})
@@ -2027,7 +2072,7 @@ var _ = Describe("InstanceHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				_, err := cli.UpgradeInstance(vgID, 0, 0, 0, false, 401)
+				_, err := cli.UpgradeInstance(vgID, 0, 0, 0, false, false, 401)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("No proper (LOCAL) disk for size"))
 			})
@@ -2058,7 +2103,7 @@ var _ = Describe("InstanceHandler", func() {
 				err = test_helpers.SpecifyServerResps(respParas, server)
 				Expect(err).NotTo(HaveOccurred())
 
-				_, err := cli.UpgradeInstance(vgID, 0, 0, 0, false, 300)
+				_, err := cli.UpgradeInstance(vgID, 0, 0, 0, false, false, 300)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("fake-client-error"))
 			})
@@ -2429,7 +2474,7 @@ var _ = Describe("InstanceHandler", func() {
 			err = test_helpers.SpecifyServerResps(respParas, server)
 			Expect(err).NotTo(HaveOccurred())
 
-			err := cli.UpgradeInstanceConfig(vgID, 2, 0, 0, false)
+			err := cli.UpgradeInstanceConfig(vgID, 2, 0, 0, false, false)
 			Expect(err).NotTo(HaveOccurred())
 		})
 
@@ -2444,7 +2489,7 @@ var _ = Describe("InstanceHandler", func() {
 			err = test_helpers.SpecifyServerResps(respParas, server)
 			Expect(err).NotTo(HaveOccurred())
 
-			err := cli.UpgradeInstanceConfig(vgID, 2, 0, 0, false)
+			err := cli.UpgradeInstanceConfig(vgID, 2, 0, 0, false, false)
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("Waiting until instance has none active transaction before os_reload"))
 		})
@@ -2465,7 +2510,7 @@ var _ = Describe("InstanceHandler", func() {
 			err = test_helpers.SpecifyServerResps(respParas, server)
 			Expect(err).NotTo(HaveOccurred())
 
-			err := cli.UpgradeInstanceConfig(vgID, 2, 0, 0, false)
+			err := cli.UpgradeInstanceConfig(vgID, 2, 0, 0, false, false)
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("Upgrading configuration to virutal guest of"))
 		})
@@ -2499,7 +2544,7 @@ var _ = Describe("InstanceHandler", func() {
 			err = test_helpers.SpecifyServerResps(respParas, server)
 			Expect(err).NotTo(HaveOccurred())
 
-			err := cli.UpgradeInstanceConfig(vgID, 2, 0, 0, false)
+			err := cli.UpgradeInstanceConfig(vgID, 2, 0, 0, false, false)
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("Waiting until order placed has been completed after upgrading instance"))
 		})
@@ -2538,7 +2583,7 @@ var _ = Describe("InstanceHandler", func() {
 			err = test_helpers.SpecifyServerResps(respParas, server)
 			Expect(err).NotTo(HaveOccurred())
 
-			err := cli.UpgradeInstanceConfig(vgID, 2, 0, 0, false)
+			err := cli.UpgradeInstanceConfig(vgID, 2, 0, 0, false, false)
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("Waiting until instance is ready after os_reload"))
 		})
