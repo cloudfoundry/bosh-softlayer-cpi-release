@@ -464,6 +464,12 @@
 			"revisionTime": "2018-03-31T16:36:37Z"
 		},
 		{
+			"checksumSHA1": "oBE+UG7QYhzWwpS9Jb428/RgiAg=",
+			"path": "github.com/softlayer/softlayer-go/helpers/product",
+			"revision": "260589d94c7d68760bf013731508a4f2a174584f",
+			"revisionTime": "2018-08-06T15:10:55Z"
+		},
+		{
 			"checksumSHA1": "xNjupo39FsY41GSrBSQaS6sZ/Pg=",
 			"path": "github.com/softlayer/softlayer-go/services",
 			"revision": "b248bb399df4971d7911ba775b187ecee6260e75",

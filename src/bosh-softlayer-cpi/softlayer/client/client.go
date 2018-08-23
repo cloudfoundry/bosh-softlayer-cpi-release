@@ -26,6 +26,7 @@ import (
 	"bosh-softlayer-cpi/registry"
 	vpsVm "bosh-softlayer-cpi/softlayer/vps_service/client/vm"
 	"bosh-softlayer-cpi/softlayer/vps_service/models"
+	"github.com/softlayer/softlayer-go/helpers/product"
 )
 
 const (
@@ -34,14 +35,14 @@ const (
 	INSTANCE_DEFAULT_MASK = "id, globalIdentifier, hostname, hourlyBillingFlag, domain, fullyQualifiedDomainName, status.name, " +
 		"powerState.name, activeTransaction, datacenter.name, account.id, " +
 		"maxCpu, maxMemory, primaryIpAddress, primaryBackendIpAddress, " +
-		"privateNetworkOnlyFlag, dedicatedAccountHostOnlyFlag, createDate, modifyDate, " +
+		"privateNetworkOnlyFlag, dedicatedAccountHostOnlyFlag, dedicatedHost, createDate, modifyDate, " +
 		"billingItem[orderItem.order.userRecord.username, recurringFee], notes, tagReferences.tag.name"
 
 	INSTANCE_DETAIL_MASK = "id, globalIdentifier, hostname, domain, fullyQualifiedDomainName, status.name, " +
 		"powerState.name, activeTransaction, datacenter.name, " +
 		"operatingSystem[softwareLicense[softwareDescription[name,version]],passwords[username,password]], " +
 		" maxCpu, maxMemory, primaryIpAddress, primaryBackendIpAddress, " +
-		"privateNetworkOnlyFlag, dedicatedAccountHostOnlyFlag, createDate, modifyDate, " +
+		"privateNetworkOnlyFlag, dedicatedAccountHostOnlyFlag, dedicatedHost, createDate, modifyDate, " +
 		"billingItem[nextInvoiceTotalRecurringAmount, children[nextInvoiceTotalRecurringAmount]], notes, tagReferences.tag.name, networkVlans[id,vlanNumber,networkSpace], " +
 		"primaryBackendNetworkComponent[primaryIpAddress, networkVlan[id,name,vlanNumber,primaryRouter], subnets[netmask,networkIdentifier]], primaryNetworkComponent[primaryIpAddress, networkVlan[id,name,vlanNumber,primaryRouter], subnets[netmask,networkIdentifier]]"
 
@@ -128,8 +129,8 @@ type Client interface {
 	GetInstanceByPrimaryIpAddress(ip string) (*datatypes.Virtual_Guest, bool, error)
 	RebootInstance(id int, soft bool, hard bool) error
 	ReloadInstance(id int, stemcellId int, sshKeyIds []int, hostname string, domain string, userData *registry.SoftlayerUserData) error
-	UpgradeInstanceConfig(id int, cpu int, memory int, network int, privateCPU bool) error
-	UpgradeInstance(id int, cpu int, memory int, network int, privateCPU bool, secondDiskSize int) (int, error)
+	UpgradeInstanceConfig(id int, cpu int, memory int, network int, privateCPU bool, dedicatedHost bool) error
+	UpgradeInstance(id int, cpu int, memory int, network int, privateCPU bool, dedicatedHost bool, secondDiskSize int) (int, error)
 	WaitInstanceUntilReady(id int, until time.Time) error
 	WaitInstanceUntilReadyWithTicket(id int, until time.Time) error
 	WaitInstanceHasActiveTransaction(id int, until time.Time) error
@@ -746,21 +747,24 @@ func (c *ClientManager) DeleteInstanceFromVPS(id int) error {
 	return nil
 }
 
-func (c *ClientManager) UpgradeInstance(id int, cpu int, memory int, network int, privateCPU bool, secondDiskSize int) (int, error) {
-	upgradeOptions := make(map[string]int)
-	public := true
+func (c *ClientManager) UpgradeInstance(id int, cpu int, memory int, network int, privateCPU bool, dedicatedHost bool, secondDiskSize int) (int, error) {
+	upgradeOptions := make(map[string]float64)
 	presetId := 0
+	// CPI only support public network speed currently
+	forPublicNetwork := true
+
 	if cpu != 0 {
-		upgradeOptions["guest_core"] = cpu
+		upgradeOptions["guest_core"] = float64(cpu)
+		c.logger.Debug(softlayerClientLogTag, fmt.Sprintf("Upgrade item price for 'guest_core/%d'", cpu))
 	}
 	if memory != 0 {
-		upgradeOptions["ram"] = memory / 1024
+		upgradeOptions["ram"] = float64(memory / 1024)
+		c.logger.Debug(softlayerClientLogTag, fmt.Sprintf("Upgrade item price for 'ram/%d'", memory/1024))
 	}
+
 	if network != 0 {
-		upgradeOptions["port_speed"] = network
-	}
-	if privateCPU == true {
-		public = false
+		upgradeOptions["port_speed"] = float64(network)
+		c.logger.Debug(softlayerClientLogTag, fmt.Sprintf("Upgrade item price for 'port_speed/%d'", network))
 	}
 
 	packageType := "VIRTUAL_SERVER_INSTANCE"
@@ -777,21 +781,14 @@ func (c *ClientManager) UpgradeInstance(id int, cpu int, memory int, network int
 	packageID := *productPackages[0].Id
 	packageItems, err := c.PackageService.
 		Id(packageID).
-		Mask("description, capacity, prices[id, locationGroupId, categories[categoryCode]]").
+		Mask("keyName, description, capacity, prices[id, locationGroupId, categories[categoryCode]]").
 		GetItems()
 	if err != nil {
 		return 0, err
 	}
 	var prices = make([]datatypes.Product_Item_Price, 0)
-	for option, value := range upgradeOptions {
-		c.logger.Debug(softlayerClientLogTag, fmt.Sprintf("Find upgrade item price for '%s/%d'", option, value))
-		priceID := getPriceIdForUpgrade(packageItems, option, value, public)
-		if priceID == -1 {
-			return 0,
-				bosherr.Errorf("Unable to find %s option with %d", option, value)
-		}
-		prices = append(prices, datatypes.Product_Item_Price{Id: &priceID})
-	}
+
+	prices = product.SelectProductPricesByCategory(packageItems, upgradeOptions, forPublicNetwork, !privateCPU, dedicatedHost)
 
 	if secondDiskSize != 0 {
 		c.logger.Debug(softlayerClientLogTag, fmt.Sprintf("Find upgrade item price for second disk: %dGB", secondDiskSize))
@@ -804,7 +801,7 @@ func (c *ClientManager) UpgradeInstance(id int, cpu int, memory int, network int
 	}
 
 	if len(prices) == 0 {
-		return 0, bosherr.Error("Unable to find price for upgrade")
+		return 0, bosherr.Errorf("Unable to find prices for upgrade: %v", upgradeOptions)
 	}
 	order := datatypes.Container_Product_Order{
 		ComplexType: sl.String(UPGRADE_VIRTUAL_SERVER_ORDER_TYPE),
@@ -965,47 +962,6 @@ func (c *ClientManager) getUpgradeItemPriceForSecondDisk(id int, diskSize int) (
 		return &currentItemPrice, 0, nil
 	}
 	return &currentItemPrice, *virtualGuest.BillingItem.OrderItem.PresetId, nil
-}
-
-func getPriceIdForUpgrade(packageItems []datatypes.Product_Item, option string, value int, public bool) int {
-	for _, item := range packageItems {
-		isPrivate := strings.Contains(*item.Description, "Dedicated")
-		for _, price := range item.Prices {
-			if price.LocationGroupId != nil {
-				continue
-			}
-			if len(price.Categories) == 0 {
-				continue
-			}
-			for _, category := range price.Categories {
-				if item.Capacity != nil {
-					if !(*category.CategoryCode == option && strconv.FormatFloat(float64(*item.Capacity), 'f', 0, 64) == strconv.Itoa(value)) {
-						continue
-					}
-					if option == "guest_core" {
-						if public && !isPrivate {
-							return *price.Id
-						} else if !public && isPrivate {
-							return *price.Id
-						}
-					} else if option == "ram" {
-						if public && !isPrivate {
-							return *price.Id
-						} else if !public && isPrivate {
-							return *price.Id
-						}
-					} else if option == "port_speed" {
-						if strings.Contains(*item.Description, "Public") {
-							return *price.Id
-						}
-					} else {
-						return *price.Id
-					}
-				}
-			}
-		}
-	}
-	return -1
 }
 
 func (c *ClientManager) GetBlockVolumeDetails(volumeId int, mask string) (*datatypes.Network_Storage, bool, error) {
@@ -1671,7 +1627,7 @@ func (c *ClientManager) AttachSecondDiskToInstance(id int, diskSize int) error {
 		return bosherr.WrapError(err, "Waiting until instance has none active transaction before os_reload")
 	}
 
-	orderId, err := c.UpgradeInstance(id, 0, 0, 0, false, diskSize)
+	orderId, err := c.UpgradeInstance(id, 0, 0, 0, false, false, diskSize)
 	if err != nil {
 		return bosherr.WrapErrorf(err, "Adding second disk with size '%d' to virutal guest of id '%d'", diskSize, id)
 	}
@@ -1689,14 +1645,14 @@ func (c *ClientManager) AttachSecondDiskToInstance(id int, diskSize int) error {
 	return nil
 }
 
-func (c *ClientManager) UpgradeInstanceConfig(id int, cpu int, memory int, network int, privateCPU bool) error {
+func (c *ClientManager) UpgradeInstanceConfig(id int, cpu int, memory int, network int, privateCPU bool, dedicatedHost bool) error {
 	var err error
 	until := time.Now().Add(time.Duration(1) * time.Hour)
 	if err = c.WaitInstanceHasNoneActiveTransaction(*sl.Int(id), until); err != nil {
 		return bosherr.WrapError(err, "Waiting until instance has none active transaction before os_reload")
 	}
 
-	orderId, err := c.UpgradeInstance(id, cpu, memory, network, privateCPU, 0)
+	orderId, err := c.UpgradeInstance(id, cpu, memory, network, privateCPU, dedicatedHost, 0)
 	if err != nil {
 		return bosherr.WrapErrorf(err, "Upgrading configuration to virutal guest of id '%d'", id)
 	}

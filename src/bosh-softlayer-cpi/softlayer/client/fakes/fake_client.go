@@ -125,14 +125,15 @@ type FakeClient struct {
 	reloadInstanceReturnsOnCall map[int]struct {
 		result1 error
 	}
-	UpgradeInstanceConfigStub        func(id int, cpu int, memory int, network int, privateCPU bool) error
+	UpgradeInstanceConfigStub        func(id int, cpu int, memory int, network int, privateCPU bool, dedicatedHost bool) error
 	upgradeInstanceConfigMutex       sync.RWMutex
 	upgradeInstanceConfigArgsForCall []struct {
-		id         int
-		cpu        int
-		memory     int
-		network    int
-		privateCPU bool
+		id            int
+		cpu           int
+		memory        int
+		network       int
+		privateCPU    bool
+		dedicatedHost bool
 	}
 	upgradeInstanceConfigReturns struct {
 		result1 error
@@ -140,7 +141,7 @@ type FakeClient struct {
 	upgradeInstanceConfigReturnsOnCall map[int]struct {
 		result1 error
 	}
-	UpgradeInstanceStub        func(id int, cpu int, memory int, network int, privateCPU bool, secondDiskSize int) (int, error)
+	UpgradeInstanceStub        func(id int, cpu int, memory int, network int, privateCPU bool, dedicatedHost bool, secondDiskSize int) (int, error)
 	upgradeInstanceMutex       sync.RWMutex
 	upgradeInstanceArgsForCall []struct {
 		id             int
@@ -148,6 +149,7 @@ type FakeClient struct {
 		memory         int
 		network        int
 		privateCPU     bool
+		dedicatedHost  bool
 		secondDiskSize int
 	}
 	upgradeInstanceReturns struct {
@@ -1092,20 +1094,21 @@ func (fake *FakeClient) ReloadInstanceReturnsOnCall(i int, result1 error) {
 	}{result1}
 }
 
-func (fake *FakeClient) UpgradeInstanceConfig(id int, cpu int, memory int, network int, privateCPU bool) error {
+func (fake *FakeClient) UpgradeInstanceConfig(id int, cpu int, memory int, network int, privateCPU bool, dedicatedHost bool) error {
 	fake.upgradeInstanceConfigMutex.Lock()
 	ret, specificReturn := fake.upgradeInstanceConfigReturnsOnCall[len(fake.upgradeInstanceConfigArgsForCall)]
 	fake.upgradeInstanceConfigArgsForCall = append(fake.upgradeInstanceConfigArgsForCall, struct {
-		id         int
-		cpu        int
-		memory     int
-		network    int
-		privateCPU bool
-	}{id, cpu, memory, network, privateCPU})
-	fake.recordInvocation("UpgradeInstanceConfig", []interface{}{id, cpu, memory, network, privateCPU})
+		id            int
+		cpu           int
+		memory        int
+		network       int
+		privateCPU    bool
+		dedicatedHost bool
+	}{id, cpu, memory, network, privateCPU, dedicatedHost})
+	fake.recordInvocation("UpgradeInstanceConfig", []interface{}{id, cpu, memory, network, privateCPU, dedicatedHost})
 	fake.upgradeInstanceConfigMutex.Unlock()
 	if fake.UpgradeInstanceConfigStub != nil {
-		return fake.UpgradeInstanceConfigStub(id, cpu, memory, network, privateCPU)
+		return fake.UpgradeInstanceConfigStub(id, cpu, memory, network, privateCPU, dedicatedHost)
 	}
 	if specificReturn {
 		return ret.result1
@@ -1119,10 +1122,10 @@ func (fake *FakeClient) UpgradeInstanceConfigCallCount() int {
 	return len(fake.upgradeInstanceConfigArgsForCall)
 }
 
-func (fake *FakeClient) UpgradeInstanceConfigArgsForCall(i int) (int, int, int, int, bool) {
+func (fake *FakeClient) UpgradeInstanceConfigArgsForCall(i int) (int, int, int, int, bool, bool) {
 	fake.upgradeInstanceConfigMutex.RLock()
 	defer fake.upgradeInstanceConfigMutex.RUnlock()
-	return fake.upgradeInstanceConfigArgsForCall[i].id, fake.upgradeInstanceConfigArgsForCall[i].cpu, fake.upgradeInstanceConfigArgsForCall[i].memory, fake.upgradeInstanceConfigArgsForCall[i].network, fake.upgradeInstanceConfigArgsForCall[i].privateCPU
+	return fake.upgradeInstanceConfigArgsForCall[i].id, fake.upgradeInstanceConfigArgsForCall[i].cpu, fake.upgradeInstanceConfigArgsForCall[i].memory, fake.upgradeInstanceConfigArgsForCall[i].network, fake.upgradeInstanceConfigArgsForCall[i].privateCPU, fake.upgradeInstanceConfigArgsForCall[i].dedicatedHost
 }
 
 func (fake *FakeClient) UpgradeInstanceConfigReturns(result1 error) {
@@ -1144,7 +1147,7 @@ func (fake *FakeClient) UpgradeInstanceConfigReturnsOnCall(i int, result1 error)
 	}{result1}
 }
 
-func (fake *FakeClient) UpgradeInstance(id int, cpu int, memory int, network int, privateCPU bool, secondDiskSize int) (int, error) {
+func (fake *FakeClient) UpgradeInstance(id int, cpu int, memory int, network int, privateCPU bool, dedicatedHost bool, secondDiskSize int) (int, error) {
 	fake.upgradeInstanceMutex.Lock()
 	ret, specificReturn := fake.upgradeInstanceReturnsOnCall[len(fake.upgradeInstanceArgsForCall)]
 	fake.upgradeInstanceArgsForCall = append(fake.upgradeInstanceArgsForCall, struct {
@@ -1153,12 +1156,13 @@ func (fake *FakeClient) UpgradeInstance(id int, cpu int, memory int, network int
 		memory         int
 		network        int
 		privateCPU     bool
+		dedicatedHost  bool
 		secondDiskSize int
-	}{id, cpu, memory, network, privateCPU, secondDiskSize})
-	fake.recordInvocation("UpgradeInstance", []interface{}{id, cpu, memory, network, privateCPU, secondDiskSize})
+	}{id, cpu, memory, network, privateCPU, dedicatedHost, secondDiskSize})
+	fake.recordInvocation("UpgradeInstance", []interface{}{id, cpu, memory, network, privateCPU, dedicatedHost, secondDiskSize})
 	fake.upgradeInstanceMutex.Unlock()
 	if fake.UpgradeInstanceStub != nil {
-		return fake.UpgradeInstanceStub(id, cpu, memory, network, privateCPU, secondDiskSize)
+		return fake.UpgradeInstanceStub(id, cpu, memory, network, privateCPU, dedicatedHost, secondDiskSize)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
@@ -1172,10 +1176,10 @@ func (fake *FakeClient) UpgradeInstanceCallCount() int {
 	return len(fake.upgradeInstanceArgsForCall)
 }
 
-func (fake *FakeClient) UpgradeInstanceArgsForCall(i int) (int, int, int, int, bool, int) {
+func (fake *FakeClient) UpgradeInstanceArgsForCall(i int) (int, int, int, int, bool, bool, int) {
 	fake.upgradeInstanceMutex.RLock()
 	defer fake.upgradeInstanceMutex.RUnlock()
-	return fake.upgradeInstanceArgsForCall[i].id, fake.upgradeInstanceArgsForCall[i].cpu, fake.upgradeInstanceArgsForCall[i].memory, fake.upgradeInstanceArgsForCall[i].network, fake.upgradeInstanceArgsForCall[i].privateCPU, fake.upgradeInstanceArgsForCall[i].secondDiskSize
+	return fake.upgradeInstanceArgsForCall[i].id, fake.upgradeInstanceArgsForCall[i].cpu, fake.upgradeInstanceArgsForCall[i].memory, fake.upgradeInstanceArgsForCall[i].network, fake.upgradeInstanceArgsForCall[i].privateCPU, fake.upgradeInstanceArgsForCall[i].dedicatedHost, fake.upgradeInstanceArgsForCall[i].secondDiskSize
 }
 
 func (fake *FakeClient) UpgradeInstanceReturns(result1 int, result2 error) {

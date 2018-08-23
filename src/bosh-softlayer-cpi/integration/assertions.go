@@ -25,6 +25,19 @@ func assertSucceedsWithResult(request string) interface{} {
 	return response.Result
 }
 
+func assertSucceedsWithResultOrCatchCapacityError(request string) interface{} {
+	response, err := execCPI(request)
+	Expect(err).ToNot(HaveOccurred())
+	if response.Error != nil {
+		Expect(response.Error.Error()).To(ContainSubstring("There is insufficient capacity to complete the request."))
+		Expect(response.Error).To(BeNil())
+		return response.Result
+	} else {
+		Expect(response.Result).ToNot(BeNil())
+		return response.Result
+	}
+}
+
 func toStringArray(raw []interface{}) []string {
 	strings := make([]string, len(raw), len(raw))
 	for i := range raw {
