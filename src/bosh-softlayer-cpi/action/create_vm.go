@@ -394,9 +394,11 @@ func (cv CreateVM) createByOsReload(stemcellCID StemcellCID, template *datatypes
 						desiredMemory = sl.Get(*template.MaxMemory, 0).(int)
 					}
 
-					err = cv.virtualGuestService.UpgradeInstance(*vm.Id, desiredCpu, desiredMemory, 0, *vm.DedicatedAccountHostOnlyFlag, vm.DedicatedHost != nil)
-					if err != nil {
-						return cid, bosherr.WrapError(err, "Upgrading VM")
+					if desiredCpu != 0 || desiredMemory != 0 {
+						err = cv.virtualGuestService.UpgradeInstance(*vm.Id, desiredCpu, desiredMemory, 0, *vm.DedicatedAccountHostOnlyFlag, vm.DedicatedHost != nil)
+						if err != nil {
+							return cid, bosherr.WrapError(err, "Upgrading VM")
+						}
 					}
 				}
 
