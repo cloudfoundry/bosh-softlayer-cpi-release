@@ -15,7 +15,7 @@ check_param SL_VLAN_PRIVATE
 check_param BOSH_INIT_LOG_LEVEL
 
 source /etc/profile.d/chruby.sh
-chruby 2.4.4
+chruby ruby
 
 semver=`cat version-semver/number`
 cpi_release_name=bosh-softlayer-cpi

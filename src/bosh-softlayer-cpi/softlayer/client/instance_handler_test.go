@@ -2327,15 +2327,6 @@ var _ = Describe("InstanceHandler", func() {
 					"filename":   "SoftLayer_Product_Order_placeOrder_Processing.json",
 					"statusCode": http.StatusInternalServerError,
 				},
-				{
-					"filename":   "SoftLayer_Virtual_Guest_getUpgradeRequest.json",
-					"statusCode": http.StatusOK,
-				},
-				// WaitOrderCompleted
-				{
-					"filename":   "SoftLayer_Billing_Order_getObject.json",
-					"statusCode": http.StatusOK,
-				},
 				// WaitInstanceUntilReady
 				{
 					"filename":   "SoftLayer_Virtual_Guest_getObject_HasNoneActiveTxn.json",

@@ -17,7 +17,7 @@ check_param SL_VM_DOMAIN
 DIRECTOR=`cat ${PWD}/deployment/director-info`
 
 source /etc/profile.d/chruby.sh
-chruby 2.4.4
+chruby ruby
 
 echo "DirectorIP =" $DIRECTOR
 

@@ -843,11 +843,8 @@ func (c *ClientManager) UpgradeInstance(id int, cpu int, memory int, network int
 			if err != nil {
 				if apiErr, ok := err.(sl.Error); ok {
 					if strings.Contains(apiErr.Message, "A current price was provided for the upgrade order") {
-						upgradeRequest, err := c.VirtualGuestService.Id(id).Mask("order[items]").GetUpgradeRequest()
-						if err != nil {
-							return false, bosherr.WrapErrorf(err, "Get upgrade order with '%d'", id)
-						}
-						orderId = *upgradeRequest.Order.Id
+						fmt.Println("Skipping to place the order because current price is the same as what you already have on the server")
+						orderId = 0
 						return false, nil
 					} else {
 						return false, bosherr.WrapErrorf(err, "Placing order with '%+v'", order)
