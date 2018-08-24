@@ -19,7 +19,8 @@ pushd bosh-cpi-release
     ./bin/test-unit-cover
   popd > /dev/null
 
-  echo $semver > src/bosh-softlayer-cpi/version
+  integer_version=$( echo "${semver}" | cut -d. -f1 )
+  echo ${integer_version} > src/bosh-softlayer-cpi/version
 
   cpi_release_name="bosh-softlayer-cpi"
   tarball_name="dev_releases/${cpi_release_name}/${cpi_release_name}-${semver}.tgz"
