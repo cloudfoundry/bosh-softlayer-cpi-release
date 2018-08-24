@@ -843,7 +843,7 @@ func (c *ClientManager) UpgradeInstance(id int, cpu int, memory int, network int
 			if err != nil {
 				if apiErr, ok := err.(sl.Error); ok {
 					if strings.Contains(apiErr.Message, "A current price was provided for the upgrade order") {
-						fmt.Println("Skipping to place the order because current price is the same as what you already have on the server")
+						c.logger.Debug(softlayerClientLogTag, "Skipping to place the order because current price is the same as what you already have on the server")
 						orderId = 0
 						return false, nil
 					} else {
