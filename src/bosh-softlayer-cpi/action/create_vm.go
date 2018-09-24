@@ -5,10 +5,8 @@ import (
 	"fmt"
 	"net"
 	"net/url"
-	"os"
 	"strconv"
 
-	"github.com/bluebosh/goodhosts"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	"github.com/softlayer/softlayer-go/datatypes"
 	"github.com/softlayer/softlayer-go/sl"
@@ -18,7 +16,7 @@ import (
 	boslc "bosh-softlayer-cpi/softlayer/client"
 	boslconfig "bosh-softlayer-cpi/softlayer/config"
 	"bosh-softlayer-cpi/softlayer/stemcell_service"
-	"bosh-softlayer-cpi/softlayer/virtual_guest_service"
+	instance "bosh-softlayer-cpi/softlayer/virtual_guest_service"
 )
 
 type CreateVM struct {
@@ -150,19 +148,8 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 	// Create VM agent settings
 	agentNetworks := instanceNetworks.AsRegistryNetworks()
 
-	// Get object details of new VM
-	virtualGuest, err := cv.virtualGuestService.Find(cid)
-	if err != nil {
-		return "", err
-	}
-
-	if cloudProps.DeployedByBoshCLI {
-		err := cv.updateHosts("/etc/hosts", *virtualGuest.PrimaryBackendIpAddress, *virtualGuest.FullyQualifiedDomainName)
-		if err != nil {
-			return "", bosherr.WrapError(err, "Updating BOSH director hostname/IP mapping entry in /etc/hosts")
-		}
-	} else {
-		// Config mbus and blobstore options if needed
+	if !cloudProps.DeployedByBoshCLI {
+		// Configure mbus and blobstore options if needed
 		if err = cv.postConfig(cid, &cv.agentOptions); err != nil {
 			return "", bosherr.WrapError(err, "Post config")
 		}
@@ -450,31 +437,6 @@ func (cv CreateVM) createUserDataForInstance(registryOptions *registry.ClientOpt
 	}
 
 	return &userDataContents, nil
-}
-
-func (cv CreateVM) updateHosts(path string, newIpAddress string, targetHostname string) (err error) {
-	err = os.Setenv("HOSTS_PATH", path)
-	if err != nil {
-		return bosherr.WrapErrorf(err, "Set '%s' to env variable 'HOSTS_PATH'", path)
-	}
-	hosts, err := goodhosts.NewHosts()
-	if err != nil {
-		return bosherr.WrapErrorf(err, "Load hosts file")
-	}
-	err = hosts.RemoveByHostname(targetHostname)
-	if err != nil {
-		return bosherr.WrapErrorf(err, "Remove '%s' in hosts", targetHostname)
-	}
-	err = hosts.Add(newIpAddress, targetHostname)
-	if err != nil {
-		return bosherr.WrapErrorf(err, "Add '%s %s' in hosts", newIpAddress, targetHostname)
-	}
-
-	if err := hosts.Flush(); err != nil {
-		return bosherr.WrapErrorf(err, "Flush hosts file")
-	}
-
-	return nil
 }
 
 func (cv CreateVM) getDirectorIPAddressByHost(host string) (string, error) {
