@@ -64,7 +64,6 @@ EOF
 
 echo -e "\\n\\033[32m[INFO] Interpolating deployment manifest of bats.\\033[0m"
 bosh-cli interpolate \
- --vars-file environment/metadata \
  -v STEMCELL_NAME="${STEMCELL_NAME}" \
  -v SL_VM_NAME_PREFIX="${SL_VM_NAME_PREFIX}" \
  -v SL_DATACENTER="${SL_DATACENTER}" \

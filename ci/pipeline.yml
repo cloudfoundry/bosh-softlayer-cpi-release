@@ -107,8 +107,6 @@ jobs:
       resource: version-semver
       passed:
       - run-lifecycle
-    - {put: environment, params: {acquire: true}}
-
   - do:
     - <<: *deploy-director
 
@@ -120,7 +118,6 @@ jobs:
     ensure:
       do:
       - <<: *teardown
-      - {put: environment, params: {release: environment}}
 
 - name: promote-candidate
   plan:
@@ -216,11 +213,3 @@ resources:
   source:
     uri: https://github.com/bluebosh/bosh-acceptance-tests
     branch: gocli-bats
-
-- name: environment
-  type: pool
-  source:
-    pool: softlayer
-    uri: git@github.com:bluebosh/bats-concourse-pool.git
-    branch: master
-    private_key: {{bosh-src-key}}

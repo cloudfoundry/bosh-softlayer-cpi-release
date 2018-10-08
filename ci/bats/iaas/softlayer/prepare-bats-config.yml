@@ -6,7 +6,6 @@ image_resource:
 
 inputs:
   - name: bosh-cpi-release
-  - name: environment
   - name: director-state
 
 params:
