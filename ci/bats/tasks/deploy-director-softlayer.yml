@@ -10,7 +10,6 @@ inputs:
   - name: bosh-cpi-release
   - name: cpi-release
   - name: bosh-cli
-  - name: environment
 
 params:
   BAT_INFRASTRUCTURE:      ""
