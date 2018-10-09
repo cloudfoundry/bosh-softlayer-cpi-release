@@ -1,6 +1,6 @@
 ---
 groups:
-- name: lite-bosh-softlayer-cpi-release
+- name: bosh-softlayer-cpi-release
   jobs:
   - increment-version
   - build-candidate
@@ -34,7 +34,7 @@ shared:
     SL_VLAN_PUBLIC:         {{softlayer-vlan-public}}
     SL_VM_DOMAIN:           {{softlayer-vm-domain}}
     SL_VM_NAME_PREFIX:      bluebosh-bats-experimental
-    STEMCELL_NAME:          bosh-softlayer-xen-ubuntu-trusty-go_agent
+    STEMCELL_NAME:          bosh-softlayer-xen-ubuntu-xenial-go_agent
 
 - &run-bats
   task: run-bats
@@ -60,7 +60,7 @@ jobs:
   plan:
   - aggregate:
     - {trigger: false, get: bosh-cpi-release, resource: bosh-cpi-release-in}
-    - {trigger: false, get: version-semver, passed: [increment-version]}
+    - {trigger: false, get: version-semver, passed: [increment-version], params: {bump: patch}}
     - {trigger: false, get: bosh-cli, resource: bosh-cli}
 
   - task: build
@@ -96,8 +96,11 @@ jobs:
     - get: cpi-release
       resource: bosh-cpi-dev-artifacts
       passed:
-      - run-lifecycle
-    - {trigger: true, get: stemcell, resource: light-stemcell, version: {path: light-bosh-stemcell-3421.11-softlayer-xen-ubuntu-trusty-go_agent.tgz} }
+      - build-candidate
+      trigger: true
+    - get: stemcell
+      resource: light-stemcell
+      version: {path: light-bosh-stemcell-97.15-softlayer-xen-ubuntu-xenial-go_agent.tgz }
     - get: bosh-cli
     - get: bats
     - get: bosh-deployment
@@ -106,9 +109,7 @@ jobs:
       trigger: false
       resource: version-semver
       passed:
-      - run-lifecycle
-    - {put: environment, params: {acquire: true}}
-
+      - build-candidate
   - do:
     - <<: *deploy-director
 
@@ -120,7 +121,6 @@ jobs:
     ensure:
       do:
       - <<: *teardown
-      - {put: environment, params: {release: environment}}
 
 - name: promote-candidate
   plan:
@@ -139,9 +139,6 @@ jobs:
   - put: bosh-cpi-release-out
     params: {repository: promoted/repo, rebase: true, tag_prefix: "v", tag: promoted/integer_version}
 
-  - put: bosh-cpi-final-artifacts
-    params: {file: promoted/repo/releases/bosh-softlayer-cpi/*.tgz}
-
 resources:
 - name: bosh-release
   type: bosh-io-release
@@ -151,16 +148,16 @@ resources:
 - name: light-stemcell
   type: s3
   source:
-    regexp: light-bosh-stemcell-(\d+(\.\d+){1,2})-softlayer-xen-ubuntu-trusty-go_agent\.tgz
-    bucket: bosh-softlayer-stemcells-candidate-container
+    regexp: light-bosh-stemcell-(\d+(\.\d+){1,2})-softlayer-xen-ubuntu-xenial-go_agent\.tgz
+    bucket: bosh-softlayer-cpi-stemcells
     access_key_id: {{stemcell-aws-access-key}}
     secret_access_key: {{stemcell-aws-secret-key}}
 
 - name: bosh-cpi-release-in
   type: git
   source:
-    uri: git@github.com:bluebosh/bosh-softlayer-cpi-release.git
-    branch: wip_cpi_ng
+    uri: git@github.com:cloudfoundry/bosh-softlayer-cpi-release.git
+    branch: master
     private_key: {{github_private_key}}
     ignore_paths:
     - .final_builds/**/*.yml
@@ -169,7 +166,7 @@ resources:
 - name: version-semver
   type: semver
   source:
-    initial_version: 0.0.0
+    initial_version: 30.0.0
     key:               current-version
     bucket:            {{s3_pipeline_bucket_lite}}
     access_key_id:     {{stemcell-aws-access-key}}
@@ -186,23 +183,15 @@ resources:
 - name: bosh-cpi-release-out
   type: git
   source:
-    uri: git@github.com:bluebosh/bosh-softlayer-cpi-release.git
-    branch: new_sl_with_actions
+    uri: git@github.com:cloudfoundry/bosh-softlayer-cpi-release.git
+    branch: master
     private_key: {{github_private_key}}
-
-- name: bosh-cpi-final-artifacts
-  type: s3
-  source:
-    regexp: bosh-softlayer-cpi-([0-9.]+)\.tgz
-    bucket: {{s3_pipeline_bucket_lite}}
-    access_key_id: {{stemcell-aws-access-key}}
-    secret_access_key: {{stemcell-aws-secret-key}}
 
 - name: bosh-deployment
   type: git
   source:
-    uri: https://github.com/bluebosh/bosh-deployment
-    branch: new_softlayer_cpi
+    uri: https://github.com/mattcui/bosh-deployment
+    branch: master
 
 - name: bosh-cli
   type: s3
@@ -216,11 +205,3 @@ resources:
   source:
     uri: https://github.com/bluebosh/bosh-acceptance-tests
     branch: gocli-bats
-
-- name: environment
-  type: pool
-  source:
-    pool: softlayer
-    uri: git@github.com:bluebosh/bats-concourse-pool.git
-    branch: master
-    private_key: {{bosh-src-key}}
