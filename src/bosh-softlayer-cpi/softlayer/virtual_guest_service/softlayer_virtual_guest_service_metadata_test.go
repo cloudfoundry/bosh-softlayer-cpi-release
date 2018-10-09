@@ -74,6 +74,27 @@ var _ = Describe("Virtual Guest Service", func() {
 			Expect(cli.SetTagsCallCount()).To(Equal(1))
 		})
 
+		It("Set clean tags successfully if metaData contains invalid characters", func() {
+			metaData = Metadata{
+				"invalid_string": "invalid_string_+@!",
+				"valid_string":   "a-zA-Z0-9 _-.:",
+			}
+
+			cli.SetTagsReturns(
+				true,
+				nil,
+			)
+
+			err := virtualGuestService.SetMetadata(vmID, metaData)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(cli.SetTagsCallCount()).To(Equal(1))
+			_, tags := cli.SetTagsArgsForCall(0)
+			Expect(tags).To(ContainSubstring("a-zA-Z0-9 _-."))
+			Expect(tags).NotTo(ContainSubstring("+"))
+			Expect(tags).NotTo(ContainSubstring("@"))
+			Expect(tags).NotTo(ContainSubstring("!"))
+		})
+
 		It("Return error if softLayerClient SetTags call returns an error", func() {
 			cli.SetTagsReturns(
 				false,

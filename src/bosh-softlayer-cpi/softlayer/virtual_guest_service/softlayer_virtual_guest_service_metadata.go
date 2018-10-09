@@ -2,6 +2,7 @@ package instance
 
 import (
 	"bytes"
+	"regexp"
 	"strconv"
 	"time"
 
@@ -52,7 +53,16 @@ func (vg SoftlayerVirtualGuestService) extractTagsFromVMMetadata(vmMetadata Meta
 		if tagName == "name" {
 			continue
 		}
-		tagStringBuffer.WriteString(tagName + ":" + tagValue.(string))
+
+		// https://softlayer.github.io/reference/services/SoftLayer_Tag/setTags
+		// The characters permitted are A-Z, 0-9, whitespace, _ (underscore), - (hypen), . (period), and : (colon).
+		reg, err := regexp.Compile(`[^\w \-.:]+`)
+		if err != nil {
+			return "", bosherr.WrapError(err, "There is a problem with your regexp: '[^\\w \\-.:]+'. That is used to strips out all invalid characters")
+		}
+		cleanTagString := reg.ReplaceAllString(tagValue.(string), "")
+
+		tagStringBuffer.WriteString(tagName + ":" + cleanTagString)
 		tagStringBuffer.WriteString(",")
 	}
 	tagStringBuffer.Truncate(tagStringBuffer.Len() - 1)
