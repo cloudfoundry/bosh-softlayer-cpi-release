@@ -11,18 +11,17 @@ import (
 	registryfakes "bosh-softlayer-cpi/registry/fakes"
 	diskfakes "bosh-softlayer-cpi/softlayer/disk_service/fakes"
 	imagefakes "bosh-softlayer-cpi/softlayer/stemcell_service/fakes"
-	instance "bosh-softlayer-cpi/softlayer/virtual_guest_service"
 	instancefakes "bosh-softlayer-cpi/softlayer/virtual_guest_service/fakes"
 
 	"bosh-softlayer-cpi/registry"
 	boslconfig "bosh-softlayer-cpi/softlayer/config"
+	"bosh-softlayer-cpi/softlayer/virtual_guest_service"
 
 	"bosh-softlayer-cpi/api"
 	"fmt"
-	"net"
-
 	"github.com/softlayer/softlayer-go/datatypes"
 	"github.com/softlayer/softlayer-go/sl"
+	"net"
 )
 
 var _ = Describe("CreateVM", func() {
@@ -231,7 +230,7 @@ var _ = Describe("CreateVM", func() {
 			Expect(vmService.AttachEphemeralDiskCallCount()).To(Equal(0))
 			Expect(vmService.CleanUpCallCount()).To(Equal(0))
 			Expect(registryClient.UpdateCalled).To(BeTrue())
-			Expect(vmService.FindCallCount()).To(Equal(0))
+			Expect(vmService.FindCallCount()).To(Equal(1))
 			Expect(registryClient.UpdateSettings).To(Equal(expectedAgentSettings))
 			actualCid, _ := vmService.ConfigureNetworksArgsForCall(0)
 			Expect(vmCID).To(Equal(VMCID(actualCid).String()))
@@ -348,7 +347,7 @@ var _ = Describe("CreateVM", func() {
 			Expect(vmService.AttachEphemeralDiskCallCount()).To(Equal(0))
 			Expect(vmService.CleanUpCallCount()).To(Equal(0))
 			Expect(registryClient.UpdateCalled).To(BeTrue())
-			Expect(vmService.FindCallCount()).To(Equal(0))
+			Expect(vmService.FindCallCount()).To(Equal(1))
 			Expect(registryClient.UpdateSettings).To(Equal(expectedAgentSettings))
 			actualCid, _ := vmService.ConfigureNetworksArgsForCall(0)
 			Expect(vmCID).To(Equal(VMCID(actualCid).String()))
@@ -430,7 +429,7 @@ var _ = Describe("CreateVM", func() {
 			Expect(vmService.AttachEphemeralDiskCallCount()).To(Equal(0))
 			Expect(vmService.CleanUpCallCount()).To(Equal(0))
 			Expect(registryClient.UpdateCalled).To(BeTrue())
-			Expect(vmService.FindCallCount()).To(Equal(0))
+			Expect(vmService.FindCallCount()).To(Equal(1))
 			Expect(registryClient.UpdateSettings).To(Equal(expectedAgentSettings))
 			actualCid, _ := vmService.ConfigureNetworksArgsForCall(0)
 			Expect(vmCID).To(Equal(VMCID(actualCid).String()))
@@ -462,7 +461,7 @@ var _ = Describe("CreateVM", func() {
 			Expect(vmService.AttachEphemeralDiskCallCount()).To(Equal(0))
 			Expect(vmService.CleanUpCallCount()).To(Equal(0))
 			Expect(registryClient.UpdateCalled).To(BeTrue())
-			Expect(vmService.FindCallCount()).To(Equal(0))
+			Expect(vmService.FindCallCount()).To(Equal(1))
 			Expect(registryClient.UpdateSettings).To(Equal(expectedAgentSettings))
 			actualCid, _ := vmService.ConfigureNetworksArgsForCall(0)
 			Expect(vmCID).To(Equal(VMCID(actualCid).String()))
@@ -562,7 +561,7 @@ var _ = Describe("CreateVM", func() {
 			Expect(vmService.AttachEphemeralDiskCallCount()).To(Equal(0))
 			Expect(vmService.CleanUpCallCount()).To(Equal(0))
 			Expect(registryClient.UpdateCalled).To(BeTrue())
-			Expect(vmService.FindCallCount()).To(Equal(0))
+			Expect(vmService.FindCallCount()).To(Equal(1))
 			Expect(registryClient.UpdateSettings).To(Equal(expectedAgentSettings))
 			actualCid, _ := vmService.ConfigureNetworksArgsForCall(0)
 			Expect(vmCID).To(Equal(VMCID(actualCid).String()))
@@ -1197,7 +1196,7 @@ var _ = Describe("CreateVM", func() {
 				Expect(vmService.AttachEphemeralDiskCallCount()).To(Equal(0))
 				Expect(vmService.CleanUpCallCount()).To(Equal(0))
 				Expect(registryClient.UpdateCalled).To(BeTrue())
-				Expect(vmService.FindCallCount()).To(Equal(0))
+				Expect(vmService.FindCallCount()).To(Equal(1))
 				Expect(registryClient.UpdateSettings).To(BeEquivalentTo(expectedAgentSettings))
 				actualCid, _ := vmService.ConfigureNetworksArgsForCall(0)
 				Expect(vmCID).To(Equal(VMCID(actualCid).String()))
@@ -1278,7 +1277,7 @@ var _ = Describe("CreateVM", func() {
 				Expect(vmService.AttachEphemeralDiskCallCount()).To(Equal(0))
 				Expect(vmService.CleanUpCallCount()).To(Equal(0))
 				Expect(registryClient.UpdateCalled).To(BeTrue())
-				Expect(vmService.FindCallCount()).To(Equal(0))
+				Expect(vmService.FindCallCount()).To(Equal(1))
 				Expect(registryClient.UpdateSettings).To(BeEquivalentTo(expectedAgentSettings))
 				actualCid, _ := vmService.ConfigureNetworksArgsForCall(0)
 				Expect(vmCID).To(Equal(VMCID(actualCid).String()))
