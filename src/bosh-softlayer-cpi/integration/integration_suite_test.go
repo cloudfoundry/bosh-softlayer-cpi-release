@@ -167,7 +167,9 @@ func cleanVMs() {
 		if *vmStatus.KeyName != "DISCONNECTED" {
 			GinkgoWriter.Write([]byte(fmt.Sprintf("Deleting VM %s \n", *vm.FullyQualifiedDomainName)))
 			_, err := softlayerClient.VirtualGuestService.Id(int(*vm.Id)).DeleteObject()
-			Expect(err).ToNot(HaveOccurred())
+			if err != nil {
+				Expect(err.Error()).To(ContainSubstring("SoftLayer_Exception_NotFound"))
+			}
 		}
 	}
 }
