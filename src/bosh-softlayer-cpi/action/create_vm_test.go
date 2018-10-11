@@ -238,7 +238,21 @@ var _ = Describe("CreateVM", func() {
 			Expect(actualInstanceNetworks).To(Equal(expectedInstanceNetworks))
 		})
 
-		It("After creating the vm, /etc/hosts updated", func() {
+		It("After creating the vm with manual network, local /etc/hosts updated", func() {
+			networks["fake-manual-network"] = Network{
+				Type:    "manual",
+				IP:      "100.10.10.123",
+				Gateway: "fake-network-gateway",
+				Netmask: "fake-network-netmask",
+				DNS:     []string{"fake-network-dns"},
+				Default: []string{"fake-network-default"},
+				CloudProperties: NetworkCloudProperties{
+					VlanIds: []int{42345678},
+				},
+			}
+
+			expectedInstanceNetworks = networks.AsInstanceServiceNetworks(&datatypes.Network_Vlan{})
+
 			vmCID, err = createVM.Run(agentID, stemcellCID, cloudProps, networks, disks, env)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(imageService.FindCallCount()).To(Equal(1))
