@@ -2,6 +2,7 @@ package action_test
 
 import (
 	"errors"
+	"os"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -29,6 +30,7 @@ var _ = Describe("CreateVM", func() {
 		err                      error
 		vmCID                    string
 		agentID                  string
+		localDNSConfigFile       string
 		stemcellCID              StemcellCID
 		disks                    []DiskCID
 		env                      Environment
@@ -49,6 +51,9 @@ var _ = Describe("CreateVM", func() {
 	)
 
 	BeforeEach(func() {
+		localDNSConfigFile = "/tmp/hosts"
+		os.OpenFile(localDNSConfigFile, os.O_RDONLY|os.O_CREATE, os.ModePerm)
+
 		vmService = &instancefakes.FakeService{}
 		diskService = &diskfakes.FakeService{}
 		imageService = &imagefakes.FakeService{}
@@ -90,6 +95,7 @@ var _ = Describe("CreateVM", func() {
 			registryOptions,
 			agentOptions,
 			softlayerOptions,
+			localDNSConfigFile,
 		)
 	})
 
@@ -347,6 +353,7 @@ var _ = Describe("CreateVM", func() {
 				registryOptions,
 				agentOptions,
 				softlayerOptions,
+				localDNSConfigFile,
 			)
 
 			vmCID, err = createVM.Run(agentID, stemcellCID, cloudProps, networks, disks, env)
@@ -429,6 +436,7 @@ var _ = Describe("CreateVM", func() {
 				registryOptions,
 				agentOptions,
 				softlayerOptions,
+				localDNSConfigFile,
 			)
 
 			vmCID, err = createVM.Run(agentID, stemcellCID, cloudProps, networks, disks, env)
@@ -744,6 +752,7 @@ var _ = Describe("CreateVM", func() {
 					registryOptions,
 					agentOptions,
 					softlayerOptions,
+					localDNSConfigFile,
 				)
 			})
 
@@ -809,6 +818,7 @@ var _ = Describe("CreateVM", func() {
 					registryOptions,
 					agentOptions,
 					softlayerOptions,
+					localDNSConfigFile,
 				)
 
 				expectedAgentSettings = registry.AgentSettings{
@@ -1159,6 +1169,7 @@ var _ = Describe("CreateVM", func() {
 					registryOptions,
 					agentOptions,
 					softlayerOptions,
+					localDNSConfigFile,
 				)
 
 				expectedAgentSettings = registry.AgentSettings{
@@ -1240,6 +1251,7 @@ var _ = Describe("CreateVM", func() {
 					registryOptions,
 					agentOptions,
 					softlayerOptions,
+					localDNSConfigFile,
 				)
 
 				expectedAgentSettings = registry.AgentSettings{

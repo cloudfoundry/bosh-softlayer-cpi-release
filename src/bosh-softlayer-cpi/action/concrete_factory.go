@@ -26,6 +26,8 @@ func NewConcreteFactory(
 	logger logger.Logger,
 ) concreteFactory {
 
+	localDNSConfigFile := "/etc/hosts"
+
 	registryClient := registry.NewHTTPClient(
 		cfg.Cloud.Properties.Registry,
 		logger,
@@ -67,6 +69,7 @@ func NewConcreteFactory(
 				cfg.Cloud.Properties.Registry,
 				cfg.Cloud.Properties.Agent,
 				cfg.Cloud.Properties.SoftLayer,
+				localDNSConfigFile,
 			),
 			"delete_vm":          NewDeleteVM(vmService, registryClient, cfg.Cloud.Properties.SoftLayer),
 			"has_vm":             NewHasVM(vmService),

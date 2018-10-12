@@ -28,6 +28,7 @@ type CreateVM struct {
 	registryOptions     registry.ClientOptions
 	agentOptions        registry.AgentOptions
 	softlayerOptions    boslconfig.Config
+	localDNSConfigFile  string
 }
 
 func NewCreateVM(
@@ -37,6 +38,7 @@ func NewCreateVM(
 	registryOptions registry.ClientOptions,
 	agentOptions registry.AgentOptions,
 	softlayerOptions boslconfig.Config,
+	localDNSConfigurationFile string,
 ) (action CreateVM) {
 	action.stemcellService = stemcellService
 	action.virtualGuestService = virtualGuestService
@@ -44,6 +46,7 @@ func NewCreateVM(
 	action.registryOptions = registryOptions
 	action.agentOptions = agentOptions
 	action.softlayerOptions = softlayerOptions
+	action.localDNSConfigFile = localDNSConfigurationFile
 	return
 }
 
@@ -444,10 +447,10 @@ func (cv CreateVM) createUserDataForInstance(registryOptions *registry.ClientOpt
 	return &userDataContents, nil
 }
 
-func (cv CreateVM) updateHostsFile(path string, newIpAddress string, targetHostname string) (err error) {
-	err = os.Setenv("HOSTS_PATH", path)
+func (cv CreateVM) updateHostsFile(newIpAddress string, targetHostname string) (err error) {
+	err = os.Setenv("HOSTS_PATH", cv.localDNSConfigFile)
 	if err != nil {
-		return bosherr.WrapErrorf(err, "Set '%s' to env variable 'HOSTS_PATH'", path)
+		return bosherr.WrapErrorf(err, "Set '%s' to env variable 'HOSTS_PATH'", cv.localDNSConfigFile)
 	}
 	hosts, err := goodhosts.NewHosts()
 	if err != nil {
@@ -555,7 +558,7 @@ func (cv *CreateVM) updateHost(cid int, deployedByBoshCLI bool, hasManualNetwork
 
 	// Only update `/etc/hosts` when director has manual network
 	if hasManualNetwork {
-		err := cv.updateHostsFile("/etc/hosts", ipAddress, hostname)
+		err := cv.updateHostsFile(ipAddress, hostname)
 		if err != nil {
 			return bosherr.WrapError(err, "Updating BOSH director hostname/IP mapping entry in /etc/hosts")
 		}
