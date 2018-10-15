@@ -17,7 +17,7 @@ const maxTagLength = 63
 
 type Tags []string
 
-func (t Tags) Validate() error {
+func (t Tags) validate() error {
 	if len(t) > 0 {
 		pattern, _ := regexp.Compile("^[A-Za-z]+[A-Za-z0-9-]*[A-Za-z0-9]+$")
 		for _, tag := range t {
@@ -30,7 +30,7 @@ func (t Tags) Validate() error {
 	return nil
 }
 
-func (t Tags) Unique() []string {
+func (t Tags) unique() []string {
 	tagDict := make(map[string]struct{})
 	for _, tag := range t {
 		tagDict[tag] = struct{}{}
@@ -61,7 +61,7 @@ type Network struct {
 	CloudProperties NetworkCloudProperties `json:"cloud_properties,omitempty"`
 }
 
-func (n Network) HasDefaultGateway() bool {
+func (n Network) hasDefaultGateway() bool {
 	for _, val := range n.Default {
 		if val == "gateway" {
 			return true
@@ -70,13 +70,13 @@ func (n Network) HasDefaultGateway() bool {
 	return false
 }
 
-func (n Network) SourcePolicyRouting() bool {
+func (n Network) sourcePolicyRouting() bool {
 	return n.CloudProperties.SourcePolicyRouting
 }
 
-func (n Network) IsDynamic() bool { return n.Type == "dynamic" }
+func (n Network) isDynamic() bool { return n.Type == "dynamic" }
 
-func (n Network) AppendDNS(dns string) Network {
+func (n Network) appendDNS(dns string) Network {
 	if len(dns) > 0 {
 		n.DNS = append(n.DNS, dns)
 		return n
@@ -84,13 +84,13 @@ func (n Network) AppendDNS(dns string) Network {
 	return n
 }
 
-func (n Network) IsVip() bool { return n.Type == "vip" }
+func (n Network) isVip() bool { return n.Type == "vip" }
 
-func (n Network) IsManual() bool { return n.Type == "" || n.Type == "manual" }
+func (n Network) isManual() bool { return n.Type == "" || n.Type == "manual" }
 
-func (n Network) Validate() error {
+func (n Network) validate() error {
 	switch {
-	case n.IsVip():
+	case n.isVip():
 		return bosherr.Errorf("Network type '%s' not supported", n.Type)
 
 	default:

@@ -11,16 +11,16 @@ func (n Networks) Validate() error {
 	var networks int
 	var vipNetworks int
 	for _, network := range n {
-		if err := network.Validate(); err != nil {
+		if err := network.validate(); err != nil {
 			return err
 		}
 
 		switch {
-		case network.IsDynamic():
+		case network.isDynamic():
 			networks++
-		case network.IsManual():
+		case network.isManual():
 			networks++
-		case network.IsVip():
+		case network.isVip():
 			vipNetworks++
 		}
 	}
@@ -45,7 +45,7 @@ func (n Networks) Network() Network {
 	sort.Strings(keys)
 
 	for _, key := range keys {
-		if !n[key].IsVip() {
+		if !n[key].isVip() {
 			// There can only be 1 dynamic or manual network
 			return n[key]
 		}
