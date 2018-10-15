@@ -40,7 +40,7 @@ func (ns Networks) AsInstanceServiceNetworks(publicNetworkVlan *datatypes.Networ
 
 func (ns Networks) HasManualNetwork() bool {
 	for _, network := range ns {
-		if network.IsManual() {
+		if network.isManual() {
 			return true
 		}
 	}
@@ -48,7 +48,7 @@ func (ns Networks) HasManualNetwork() bool {
 	return false
 }
 
-func (n Network) IsManual() bool {
+func (n Network) isManual() bool {
 	return n.Type == NetworkTypeManual
 }
 

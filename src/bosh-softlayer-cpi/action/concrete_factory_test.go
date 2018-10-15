@@ -150,6 +150,7 @@ var _ = Describe("ConcreteFactory", func() {
 			registryOptions,
 			agentOptions,
 			softlayerOptions,
+			"/etc/hosts",
 		)))
 	})
 

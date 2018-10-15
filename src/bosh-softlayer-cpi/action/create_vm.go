@@ -28,6 +28,7 @@ type CreateVM struct {
 	registryOptions     registry.ClientOptions
 	agentOptions        registry.AgentOptions
 	softlayerOptions    boslconfig.Config
+	localDNSConfigFile  string
 }
 
 func NewCreateVM(
@@ -37,6 +38,7 @@ func NewCreateVM(
 	registryOptions registry.ClientOptions,
 	agentOptions registry.AgentOptions,
 	softlayerOptions boslconfig.Config,
+	localDNSConfigurationFile string,
 ) (action CreateVM) {
 	action.stemcellService = stemcellService
 	action.virtualGuestService = virtualGuestService
@@ -44,6 +46,7 @@ func NewCreateVM(
 	action.registryOptions = registryOptions
 	action.agentOptions = agentOptions
 	action.softlayerOptions = softlayerOptions
+	action.localDNSConfigFile = localDNSConfigurationFile
 	return
 }
 
@@ -156,16 +159,8 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 		return "", err
 	}
 
-	if cloudProps.DeployedByBoshCLI {
-		err := cv.updateHosts("/etc/hosts", *virtualGuest.PrimaryBackendIpAddress, *virtualGuest.FullyQualifiedDomainName)
-		if err != nil {
-			return "", bosherr.WrapError(err, "Updating BOSH director hostname/IP mapping entry in /etc/hosts")
-		}
-	} else {
-		// Config mbus and blobstore options if needed
-		if err = cv.postConfig(cid, &cv.agentOptions); err != nil {
-			return "", bosherr.WrapError(err, "Post config")
-		}
+	if err = cv.updateHost(cid, cloudProps.DeployedByBoshCLI, networks.HasManualNetwork(), *virtualGuest.PrimaryBackendIpAddress, *virtualGuest.FullyQualifiedDomainName); err != nil {
+		return "", bosherr.WrapError(err, "Post config")
 	}
 
 	agentSettings := registry.NewAgentSettings(agentID, instanceID, agentNetworks, registry.EnvSettings(env), cv.agentOptions)
@@ -430,7 +425,7 @@ func (cv CreateVM) createByOsReload(stemcellCID StemcellCID, template *datatypes
 func (cv CreateVM) createUserDataForInstance(registryOptions *registry.ClientOptions, deployedByBoshCLI bool) (*registry.SoftlayerUserData, error) {
 	var directorIP string
 	var err error
-	if deployedByBoshCLI == true {
+	if deployedByBoshCLI {
 		directorIP = "127.0.0.1"
 	} else {
 		directorIP, err = cv.getDirectorIPAddressByHost(registryOptions.Address)
@@ -452,10 +447,10 @@ func (cv CreateVM) createUserDataForInstance(registryOptions *registry.ClientOpt
 	return &userDataContents, nil
 }
 
-func (cv CreateVM) updateHosts(path string, newIpAddress string, targetHostname string) (err error) {
-	err = os.Setenv("HOSTS_PATH", path)
+func (cv CreateVM) updateHostsFile(newIpAddress string, targetHostname string) (err error) {
+	err = os.Setenv("HOSTS_PATH", cv.localDNSConfigFile)
 	if err != nil {
-		return bosherr.WrapErrorf(err, "Set '%s' to env variable 'HOSTS_PATH'", path)
+		return bosherr.WrapErrorf(err, "Set '%s' to env variable 'HOSTS_PATH'", cv.localDNSConfigFile)
 	}
 	hosts, err := goodhosts.NewHosts()
 	if err != nil {
@@ -547,6 +542,27 @@ func (cv CreateVM) updateDavConfig(config *instance.DavConfig) (err error) {
 	}
 
 	(*config)["endpoint"] = mbus
+
+	return nil
+}
+
+func (cv *CreateVM) updateHost(cid int, deployedByBoshCLI bool, hasManualNetwork bool, ipAddress string, hostname string) error {
+	if !deployedByBoshCLI {
+		// Config mbus and blobstore host if needed
+		if err := cv.postConfig(cid, &cv.agentOptions); err != nil {
+			return bosherr.WrapError(err, "Post config")
+		}
+
+		return nil
+	}
+
+	// Only update `/etc/hosts` when director has manual network
+	if hasManualNetwork {
+		err := cv.updateHostsFile(ipAddress, hostname)
+		if err != nil {
+			return bosherr.WrapError(err, "Updating BOSH director hostname/IP mapping entry in /etc/hosts")
+		}
+	}
 
 	return nil
 }

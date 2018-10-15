@@ -2,6 +2,7 @@ package action_test
 
 import (
 	"errors"
+	"os"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -29,6 +30,7 @@ var _ = Describe("CreateVM", func() {
 		err                      error
 		vmCID                    string
 		agentID                  string
+		localDNSConfigFile       string
 		stemcellCID              StemcellCID
 		disks                    []DiskCID
 		env                      Environment
@@ -49,6 +51,9 @@ var _ = Describe("CreateVM", func() {
 	)
 
 	BeforeEach(func() {
+		localDNSConfigFile = "/tmp/hosts"
+		os.OpenFile(localDNSConfigFile, os.O_RDONLY|os.O_CREATE, os.ModePerm)
+
 		vmService = &instancefakes.FakeService{}
 		diskService = &diskfakes.FakeService{}
 		imageService = &imagefakes.FakeService{}
@@ -90,6 +95,7 @@ var _ = Describe("CreateVM", func() {
 			registryOptions,
 			agentOptions,
 			softlayerOptions,
+			localDNSConfigFile,
 		)
 	})
 
@@ -238,7 +244,21 @@ var _ = Describe("CreateVM", func() {
 			Expect(actualInstanceNetworks).To(Equal(expectedInstanceNetworks))
 		})
 
-		It("After creating the vm, /etc/hosts updated", func() {
+		It("After creating the vm with manual network, local /etc/hosts updated", func() {
+			networks["fake-manual-network"] = Network{
+				Type:    "manual",
+				IP:      "100.10.10.123",
+				Gateway: "fake-network-gateway",
+				Netmask: "fake-network-netmask",
+				DNS:     []string{"fake-network-dns"},
+				Default: []string{"fake-network-default"},
+				CloudProperties: NetworkCloudProperties{
+					VlanIds: []int{42345678},
+				},
+			}
+
+			expectedInstanceNetworks = networks.AsInstanceServiceNetworks(&datatypes.Network_Vlan{})
+
 			vmCID, err = createVM.Run(agentID, stemcellCID, cloudProps, networks, disks, env)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(imageService.FindCallCount()).To(Equal(1))
@@ -333,6 +353,7 @@ var _ = Describe("CreateVM", func() {
 				registryOptions,
 				agentOptions,
 				softlayerOptions,
+				localDNSConfigFile,
 			)
 
 			vmCID, err = createVM.Run(agentID, stemcellCID, cloudProps, networks, disks, env)
@@ -415,6 +436,7 @@ var _ = Describe("CreateVM", func() {
 				registryOptions,
 				agentOptions,
 				softlayerOptions,
+				localDNSConfigFile,
 			)
 
 			vmCID, err = createVM.Run(agentID, stemcellCID, cloudProps, networks, disks, env)
@@ -730,6 +752,7 @@ var _ = Describe("CreateVM", func() {
 					registryOptions,
 					agentOptions,
 					softlayerOptions,
+					localDNSConfigFile,
 				)
 			})
 
@@ -795,6 +818,7 @@ var _ = Describe("CreateVM", func() {
 					registryOptions,
 					agentOptions,
 					softlayerOptions,
+					localDNSConfigFile,
 				)
 
 				expectedAgentSettings = registry.AgentSettings{
@@ -1145,6 +1169,7 @@ var _ = Describe("CreateVM", func() {
 					registryOptions,
 					agentOptions,
 					softlayerOptions,
+					localDNSConfigFile,
 				)
 
 				expectedAgentSettings = registry.AgentSettings{
@@ -1226,6 +1251,7 @@ var _ = Describe("CreateVM", func() {
 					registryOptions,
 					agentOptions,
 					softlayerOptions,
+					localDNSConfigFile,
 				)
 
 				expectedAgentSettings = registry.AgentSettings{
