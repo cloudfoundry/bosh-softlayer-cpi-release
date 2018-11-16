@@ -2275,7 +2275,7 @@ var _ = Describe("InstanceHandler", func() {
 
 			err := cli.AttachSecondDiskToInstance(vgID, 300)
 			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring("Waiting until instance has none active transaction before os_reload"))
+			Expect(err.Error()).To(ContainSubstring("Waiting until instance has none active transaction before attach ephemeral disk"))
 		})
 
 		It("Return error when call UpgradeInstance return an error", func() {
@@ -2482,7 +2482,7 @@ var _ = Describe("InstanceHandler", func() {
 
 			err := cli.UpgradeInstanceConfig(vgID, 2, 0, 0, false, false)
 			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring("Waiting until instance has none active transaction before os_reload"))
+			Expect(err.Error()).To(ContainSubstring("Waiting until instance has none active transaction before upgrade instance"))
 		})
 
 		It("Return error when call UpgradeInstance return error", func() {

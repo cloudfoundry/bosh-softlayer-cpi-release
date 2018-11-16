@@ -1624,7 +1624,7 @@ func (c *ClientManager) AttachSecondDiskToInstance(id int, diskSize int) error {
 	var err error
 	until := time.Now().Add(time.Duration(1) * time.Hour)
 	if err = c.WaitInstanceHasNoneActiveTransaction(*sl.Int(id), until); err != nil {
-		return bosherr.WrapError(err, "Waiting until instance has none active transaction before os_reload")
+		return bosherr.WrapError(err, "Waiting until instance has none active transaction before attach ephemeral disk")
 	}
 
 	orderId, err := c.UpgradeInstance(id, 0, 0, 0, false, false, diskSize)
@@ -1649,7 +1649,7 @@ func (c *ClientManager) UpgradeInstanceConfig(id int, cpu int, memory int, netwo
 	var err error
 	until := time.Now().Add(time.Duration(1) * time.Hour)
 	if err = c.WaitInstanceHasNoneActiveTransaction(*sl.Int(id), until); err != nil {
-		return bosherr.WrapError(err, "Waiting until instance has none active transaction before os_reload")
+		return bosherr.WrapError(err, "Waiting until instance has none active transaction before upgrade instance")
 	}
 
 	orderId, err := c.UpgradeInstance(id, cpu, memory, network, privateCPU, dedicatedHost, 0)
