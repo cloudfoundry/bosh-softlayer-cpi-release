@@ -779,9 +779,12 @@ func (c *ClientManager) UpgradeInstance(id int, cpu int, memory int, network int
 		return 0, bosherr.Errorf("No package found for type: %s", packageType)
 	}
 	packageID := *productPackages[0].Id
+	filters := filter.Path("items.prices.locationGroupId").IsNull().Build()
+
 	packageItems, err := c.PackageService.
 		Id(packageID).
 		Mask("keyName, description, capacity, prices[id, locationGroupId, categories[categoryCode]]").
+		Filter(filters).
 		GetItems()
 	if err != nil {
 		return 0, err
