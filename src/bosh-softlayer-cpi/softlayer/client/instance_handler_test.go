@@ -1588,7 +1588,7 @@ var _ = Describe("InstanceHandler", func() {
 						"statusCode": http.StatusOK,
 					},
 					{
-						"filename":   "SoftLayer_Product_Package_getItems.json",
+						"filename":   "SoftLayer_Virtual_Guest_getUpgradeItemPrices.json",
 						"statusCode": http.StatusOK,
 					},
 					{
@@ -1610,7 +1610,7 @@ var _ = Describe("InstanceHandler", func() {
 						"statusCode": http.StatusOK,
 					},
 					{
-						"filename":   "SoftLayer_Product_Package_getItems.json",
+						"filename":   "SoftLayer_Virtual_Guest_getUpgradeItemPrices.json",
 						"statusCode": http.StatusOK,
 					},
 				}
@@ -1629,7 +1629,7 @@ var _ = Describe("InstanceHandler", func() {
 						"statusCode": http.StatusOK,
 					},
 					{
-						"filename":   "SoftLayer_Product_Package_getItems.json",
+						"filename":   "SoftLayer_Virtual_Guest_getUpgradeItemPrices.json",
 						"statusCode": http.StatusOK,
 					},
 					{
@@ -1651,7 +1651,7 @@ var _ = Describe("InstanceHandler", func() {
 						"statusCode": http.StatusOK,
 					},
 					{
-						"filename":   "SoftLayer_Product_Package_getItems.json",
+						"filename":   "SoftLayer_Virtual_Guest_getUpgradeItemPrices.json",
 						"statusCode": http.StatusOK,
 					},
 					{
@@ -1673,7 +1673,7 @@ var _ = Describe("InstanceHandler", func() {
 						"statusCode": http.StatusOK,
 					},
 					{
-						"filename":   "SoftLayer_Product_Package_getItems.json",
+						"filename":   "SoftLayer_Virtual_Guest_getUpgradeItemPrices.json",
 						"statusCode": http.StatusOK,
 					},
 					{
@@ -1704,7 +1704,7 @@ var _ = Describe("InstanceHandler", func() {
 						"statusCode": http.StatusOK,
 					},
 					{
-						"filename":   "SoftLayer_Product_Package_getItems.json",
+						"filename":   "SoftLayer_Virtual_Guest_getUpgradeItemPrices.json",
 						"statusCode": http.StatusOK,
 					},
 					{
@@ -1729,7 +1729,7 @@ var _ = Describe("InstanceHandler", func() {
 						"statusCode": http.StatusOK,
 					},
 					{
-						"filename":   "SoftLayer_Product_Package_getItems.json",
+						"filename":   "SoftLayer_Virtual_Guest_getUpgradeItemPrices.json",
 						"statusCode": http.StatusOK,
 					},
 					{
@@ -1751,7 +1751,7 @@ var _ = Describe("InstanceHandler", func() {
 						"statusCode": http.StatusOK,
 					},
 					{
-						"filename":   "SoftLayer_Product_Package_getItems.json",
+						"filename":   "SoftLayer_Virtual_Guest_getUpgradeItemPrices.json",
 						"statusCode": http.StatusOK,
 					},
 				}
@@ -1772,7 +1772,7 @@ var _ = Describe("InstanceHandler", func() {
 						"statusCode": http.StatusOK,
 					},
 					{
-						"filename":   "SoftLayer_Product_Package_getItems.json",
+						"filename":   "SoftLayer_Virtual_Guest_getUpgradeItemPrices.json",
 						"statusCode": http.StatusOK,
 					},
 					{
@@ -1794,7 +1794,7 @@ var _ = Describe("InstanceHandler", func() {
 						"statusCode": http.StatusOK,
 					},
 					{
-						"filename":   "SoftLayer_Product_Package_getItems.json",
+						"filename":   "SoftLayer_Virtual_Guest_getUpgradeItemPrices.json",
 						"statusCode": http.StatusOK,
 					},
 				}
@@ -1812,10 +1812,6 @@ var _ = Describe("InstanceHandler", func() {
 				respParas = []map[string]interface{}{
 					{
 						"filename":   "SoftLayer_Product_Package_getAllObjects.json",
-						"statusCode": http.StatusOK,
-					},
-					{
-						"filename":   "SoftLayer_Product_Package_getItems.json",
 						"statusCode": http.StatusOK,
 					},
 					// getUpgradeItemPriceForSecondDisk
@@ -1845,10 +1841,6 @@ var _ = Describe("InstanceHandler", func() {
 						"filename":   "SoftLayer_Product_Package_getAllObjects.json",
 						"statusCode": http.StatusOK,
 					},
-					{
-						"filename":   "SoftLayer_Product_Package_getItems.json",
-						"statusCode": http.StatusOK,
-					},
 					// getUpgradeItemPriceForSecondDisk
 					{
 						"filename":   "SoftLayer_Virtual_Guest_getUpgradeItemPrices.json",
@@ -1874,10 +1866,6 @@ var _ = Describe("InstanceHandler", func() {
 				respParas = []map[string]interface{}{
 					{
 						"filename":   "SoftLayer_Product_Package_getAllObjects.json",
-						"statusCode": http.StatusOK,
-					},
-					{
-						"filename":   "SoftLayer_Product_Package_getItems.json",
 						"statusCode": http.StatusOK,
 					},
 					// getUpgradeItemPriceForSecondDisk
@@ -1908,10 +1896,6 @@ var _ = Describe("InstanceHandler", func() {
 						"statusCode": http.StatusOK,
 					},
 					{
-						"filename":   "SoftLayer_Product_Package_getItems.json",
-						"statusCode": http.StatusOK,
-					},
-					{
 						"filename":   "SoftLayer_Virtual_Guest_getUpgradeItemPrices.json",
 						"statusCode": http.StatusOK,
 					},
@@ -1937,7 +1921,7 @@ var _ = Describe("InstanceHandler", func() {
 						"statusCode": http.StatusOK,
 					},
 					{
-						"filename":   "SoftLayer_Product_Package_getItems.json",
+						"filename":   "SoftLayer_Virtual_Guest_getUpgradeItemPrices.json",
 						"statusCode": http.StatusOK,
 					},
 				}
@@ -1988,7 +1972,7 @@ var _ = Describe("InstanceHandler", func() {
 						"statusCode": http.StatusOK,
 					},
 					{
-						"filename":   "SoftLayer_Product_Package_getItems_InternalError.json",
+						"filename":   "SoftLayer_Virtual_Guest_getUpgradeItemPrices_InternalError.json",
 						"statusCode": http.StatusInternalServerError,
 					},
 				}
@@ -2007,7 +1991,7 @@ var _ = Describe("InstanceHandler", func() {
 						"statusCode": http.StatusOK,
 					},
 					{
-						"filename":   "SoftLayer_Product_Package_getItems.json",
+						"filename":   "SoftLayer_Virtual_Guest_getUpgradeItemPrices.json",
 						"statusCode": http.StatusOK,
 					},
 					{
@@ -2027,10 +2011,6 @@ var _ = Describe("InstanceHandler", func() {
 				respParas = []map[string]interface{}{
 					{
 						"filename":   "SoftLayer_Product_Package_getAllObjects.json",
-						"statusCode": http.StatusOK,
-					},
-					{
-						"filename":   "SoftLayer_Product_Package_getItems.json",
 						"statusCode": http.StatusOK,
 					},
 					{
@@ -2057,10 +2037,6 @@ var _ = Describe("InstanceHandler", func() {
 						"statusCode": http.StatusOK,
 					},
 					{
-						"filename":   "SoftLayer_Product_Package_getItems.json",
-						"statusCode": http.StatusOK,
-					},
-					{
 						"filename":   "SoftLayer_Virtual_Guest_getUpgradeItemPrices_Empty.json",
 						"statusCode": http.StatusOK,
 					},
@@ -2081,10 +2057,6 @@ var _ = Describe("InstanceHandler", func() {
 				respParas = []map[string]interface{}{
 					{
 						"filename":   "SoftLayer_Product_Package_getAllObjects.json",
-						"statusCode": http.StatusOK,
-					},
-					{
-						"filename":   "SoftLayer_Product_Package_getItems.json",
 						"statusCode": http.StatusOK,
 					},
 					{
@@ -2229,10 +2201,6 @@ var _ = Describe("InstanceHandler", func() {
 					"statusCode": http.StatusOK,
 				},
 				{
-					"filename":   "SoftLayer_Product_Package_getItems.json",
-					"statusCode": http.StatusOK,
-				},
-				{
 					"filename":   "SoftLayer_Virtual_Guest_getUpgradeItemPrices.json",
 					"statusCode": http.StatusOK,
 				},
@@ -2312,10 +2280,6 @@ var _ = Describe("InstanceHandler", func() {
 					"statusCode": http.StatusOK,
 				},
 				{
-					"filename":   "SoftLayer_Product_Package_getItems.json",
-					"statusCode": http.StatusOK,
-				},
-				{
 					"filename":   "SoftLayer_Virtual_Guest_getUpgradeItemPrices.json",
 					"statusCode": http.StatusOK,
 				},
@@ -2350,10 +2314,6 @@ var _ = Describe("InstanceHandler", func() {
 				// UpgradeInstance
 				{
 					"filename":   "SoftLayer_Product_Package_getAllObjects.json",
-					"statusCode": http.StatusOK,
-				},
-				{
-					"filename":   "SoftLayer_Product_Package_getItems.json",
 					"statusCode": http.StatusOK,
 				},
 				{
@@ -2392,10 +2352,6 @@ var _ = Describe("InstanceHandler", func() {
 				// UpgradeInstance
 				{
 					"filename":   "SoftLayer_Product_Package_getAllObjects.json",
-					"statusCode": http.StatusOK,
-				},
-				{
-					"filename":   "SoftLayer_Product_Package_getItems.json",
 					"statusCode": http.StatusOK,
 				},
 				{
@@ -2444,7 +2400,7 @@ var _ = Describe("InstanceHandler", func() {
 					"statusCode": http.StatusOK,
 				},
 				{
-					"filename":   "SoftLayer_Product_Package_getItems.json",
+					"filename":   "SoftLayer_Virtual_Guest_getUpgradeItemPrices.json",
 					"statusCode": http.StatusOK,
 				},
 				{
@@ -2519,7 +2475,7 @@ var _ = Describe("InstanceHandler", func() {
 					"statusCode": http.StatusOK,
 				},
 				{
-					"filename":   "SoftLayer_Product_Package_getItems.json",
+					"filename":   "SoftLayer_Virtual_Guest_getUpgradeItemPrices.json",
 					"statusCode": http.StatusOK,
 				},
 				{
@@ -2553,7 +2509,7 @@ var _ = Describe("InstanceHandler", func() {
 					"statusCode": http.StatusOK,
 				},
 				{
-					"filename":   "SoftLayer_Product_Package_getItems.json",
+					"filename":   "SoftLayer_Virtual_Guest_getUpgradeItemPrices.json",
 					"statusCode": http.StatusOK,
 				},
 				{

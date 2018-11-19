@@ -36,5 +36,1602 @@
       "keyName": "300_GB_PERFORMANCE_STORAGE_SPACE",
       "units": "GB"
     }
+  },
+  {
+    "id": 34869,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk2"
+      }
+    ],
+    "item": {
+      "capacity": "10",
+      "description": "10 GB (SAN)",
+      "keyName": "GUEST_DISK_10_GB_SAN"
+    }
+  },
+  {
+    "id": 25396,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk2"
+      }
+    ],
+    "item": {
+      "capacity": "20",
+      "description": "20 GB (SAN)",
+      "keyName": "GUEST_DISK_20_GB_SAN"
+    }
+  },
+  {
+    "id": 24706,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk2"
+      }
+    ],
+    "item": {
+      "capacity": "25",
+      "description": "25 GB (SAN)",
+      "keyName": "GUEST_DISK_25_GB_SAN_4"
+    }
+  },
+  {
+    "id": 35237,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk2"
+      }
+    ],
+    "item": {
+      "capacity": "30",
+      "description": "30 GB (SAN)",
+      "keyName": "GUEST_DISK_30_GB_SAN"
+    }
+  },
+  {
+    "id": 23011,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk2"
+      }
+    ],
+    "item": {
+      "capacity": "40",
+      "description": "40 GB (SAN)",
+      "keyName": "GUEST_DISK_40_GB_SAN"
+    }
+  },
+  {
+    "id": 32501,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk2"
+      }
+    ],
+    "item": {
+      "capacity": "50",
+      "description": "50 GB (SAN)",
+      "keyName": "GUEST_DISK_50_GB_SAN"
+    }
+  },
+  {
+    "id": 31347,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk2"
+      }
+    ],
+    "item": {
+      "capacity": "75",
+      "description": "75 GB (SAN)",
+      "keyName": "GUEST_DISK_75_GB_SAN"
+    }
+  },
+  {
+    "id": 29237,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk2"
+      }
+    ],
+    "item": {
+      "capacity": "100",
+      "description": "100 GB (SAN)",
+      "keyName": "GUEST_DISK_100_GB_SAN_3"
+    }
+  },
+  {
+    "id": 24417,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk2"
+      }
+    ],
+    "item": {
+      "capacity": "125",
+      "description": "125 GB (SAN)",
+      "keyName": "GUEST_DISK_125_GB_SAN"
+    }
+  },
+  {
+    "id": 23000,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk2"
+      }
+    ],
+    "item": {
+      "capacity": "175",
+      "description": "175 GB (SAN)",
+      "keyName": "GUEST_DISK_175_GB_SAN"
+    }
+  },
+  {
+    "id": 30369,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk2"
+      }
+    ],
+    "item": {
+      "capacity": "150",
+      "description": "150 GB (SAN)",
+      "keyName": "GUEST_DISK_150_GB_SAN"
+    }
+  },
+  {
+    "id": 26293,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk2"
+      }
+    ],
+    "item": {
+      "capacity": "200",
+      "description": "200 GB (SAN)",
+      "keyName": "GUEST_DISK_200_GB_SAN"
+    }
+  },
+  {
+    "id": 25780,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk2"
+      }
+    ],
+    "item": {
+      "capacity": "250",
+      "description": "250 GB (SAN)",
+      "keyName": "GUEST_DISK_250_GB_SAN"
+    }
+  },
+  {
+    "id": 22601,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk2"
+      }
+    ],
+    "item": {
+      "capacity": "300",
+      "description": "300 GB (SAN)",
+      "keyName": "GUEST_DISK_300_GB_SAN"
+    }
+  },
+
+  {
+    "id": 22690,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk2"
+      }
+    ],
+    "item": {
+      "capacity": "350",
+      "description": "350 GB (SAN)",
+      "keyName": "GUEST_DISK_350_GB_SAN"
+    }
+  },
+  {
+    "id": 31089,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk2"
+      }
+    ],
+    "item": {
+      "capacity": "400",
+      "description": "400 GB (SAN)",
+      "keyName": "GUEST_DISK_400_GB_SAN"
+    }
+  },
+  {
+    "id": 32926,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk2"
+      }
+    ],
+    "item": {
+      "capacity": "500",
+      "description": "500 GB (SAN)",
+      "keyName": "GUEST_DISK_500_GB_SAN"
+    }
+  },
+  {
+    "id": 33165,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk2"
+      }
+    ],
+    "item": {
+      "capacity": "750",
+      "description": "750 GB (SAN)",
+      "keyName": "GUEST_DISK_750_GB_SAN_2"
+    }
+  },
+  {
+    "id": 24005,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk2"
+      }
+    ],
+    "item": {
+      "capacity": "1000",
+      "description": "1.00 TB (SAN)",
+      "keyName": "GUEST_DISK_1000_GB_SAN_2"
+    }
+  },
+  {
+    "id": 29380,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk2"
+      }
+    ],
+    "item": {
+      "capacity": "1500",
+      "description": "1.50 TB (SAN)",
+      "keyName": "GUEST_DISK_1500_GB_SAN"
+    }
+  },
+  {
+    "id": 31634,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk2"
+      }
+    ],
+    "item": {
+      "capacity": "2000",
+      "description": "2.00 TB (SAN)",
+      "keyName": "GUEST_DISK_2000_GB_SAN"
+    }
+  },
+  {
+    "id": 34869,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk3",
+        "id": 93,
+        "name": "Fourth Disk",
+        "quantityLimit": 0,
+        "sortOrder": null
+      }
+    ],
+    "item": {
+      "capacity": "10",
+      "description": "10 GB (SAN)",
+      "keyName": "GUEST_DISK_10_GB_SAN"
+    }
+  },
+  {
+    "id": 25396,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk3",
+        "id": 93,
+        "name": "Fourth Disk",
+        "quantityLimit": 0,
+        "sortOrder": null
+      }
+    ],
+    "item": {
+      "capacity": "20",
+      "description": "20 GB (SAN)",
+      "keyName": "GUEST_DISK_20_GB_SAN"
+    }
+  },
+  {
+    "id": 24706,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk3",
+        "id": 93,
+        "name": "Fourth Disk",
+        "quantityLimit": 0,
+        "sortOrder": null
+      }
+    ],
+    "item": {
+      "capacity": "25",
+      "description": "25 GB (SAN)",
+      "keyName": "GUEST_DISK_25_GB_SAN_4"
+    }
+  },
+  {
+    "id": 35237,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk3",
+        "id": 93,
+        "name": "Fourth Disk",
+        "quantityLimit": 0,
+        "sortOrder": null
+      }
+    ],
+    "item": {
+      "capacity": "30",
+      "description": "30 GB (SAN)",
+      "keyName": "GUEST_DISK_30_GB_SAN"
+    }
+  },
+  {
+    "id": 23011,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk3",
+        "id": 93,
+        "name": "Fourth Disk",
+        "quantityLimit": 0,
+        "sortOrder": null
+      }
+    ],
+    "item": {
+      "capacity": "40",
+      "description": "40 GB (SAN)",
+      "keyName": "GUEST_DISK_40_GB_SAN"
+    }
+  },
+  {
+    "id": 32501,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk3",
+        "id": 93,
+        "name": "Fourth Disk",
+        "quantityLimit": 0,
+        "sortOrder": null
+      }
+    ],
+    "item": {
+      "capacity": "50",
+      "description": "50 GB (SAN)",
+      "keyName": "GUEST_DISK_50_GB_SAN"
+    }
+  },
+  {
+    "id": 31347,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk3",
+        "id": 93,
+        "name": "Fourth Disk",
+        "quantityLimit": 0,
+        "sortOrder": null
+      }
+    ],
+    "item": {
+      "capacity": "75",
+      "description": "75 GB (SAN)",
+      "keyName": "GUEST_DISK_75_GB_SAN"
+    }
+  },
+  {
+    "id": 29237,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk3",
+        "id": 93,
+        "name": "Fourth Disk",
+        "quantityLimit": 0,
+        "sortOrder": null
+      }
+    ],
+    "item": {
+      "capacity": "100",
+      "description": "100 GB (SAN)",
+      "keyName": "GUEST_DISK_100_GB_SAN_3"
+    }
+  },
+  {
+    "id": 24417,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk3",
+        "id": 93,
+        "name": "Fourth Disk",
+        "quantityLimit": 0,
+        "sortOrder": null
+      }
+    ],
+    "item": {
+      "capacity": "125",
+      "description": "125 GB (SAN)",
+      "keyName": "GUEST_DISK_125_GB_SAN"
+    }
+  },
+  {
+    "id": 23000,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk3",
+        "id": 93,
+        "name": "Fourth Disk",
+        "quantityLimit": 0,
+        "sortOrder": null
+      }
+    ],
+    "item": {
+      "capacity": "175",
+      "description": "175 GB (SAN)",
+      "keyName": "GUEST_DISK_175_GB_SAN"
+    }
+  },
+  {
+    "id": 30369,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk3",
+        "id": 93,
+        "name": "Fourth Disk",
+        "quantityLimit": 0,
+        "sortOrder": null
+      }
+    ],
+    "item": {
+      "capacity": "150",
+      "description": "150 GB (SAN)",
+      "keyName": "GUEST_DISK_150_GB_SAN"
+    }
+  },
+  {
+    "id": 26293,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk3",
+        "id": 93,
+        "name": "Fourth Disk",
+        "quantityLimit": 0,
+        "sortOrder": null
+      }
+    ],
+    "item": {
+      "capacity": "200",
+      "description": "200 GB (SAN)",
+      "keyName": "GUEST_DISK_200_GB_SAN"
+    }
+  },
+  {
+    "id": 25780,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk3",
+        "id": 93,
+        "name": "Fourth Disk",
+        "quantityLimit": 0,
+        "sortOrder": null
+      }
+    ],
+    "item": {
+      "capacity": "250",
+      "description": "250 GB (SAN)",
+      "keyName": "GUEST_DISK_250_GB_SAN"
+    }
+  },
+  {
+    "id": 22601,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk3",
+        "id": 93,
+        "name": "Fourth Disk",
+        "quantityLimit": 0,
+        "sortOrder": null
+      }
+    ],
+    "item": {
+      "capacity": "300",
+      "description": "300 GB (SAN)",
+      "keyName": "GUEST_DISK_300_GB_SAN"
+    }
+  },
+  {
+    "id": 22690,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk3",
+        "id": 93,
+        "name": "Fourth Disk",
+        "quantityLimit": 0,
+        "sortOrder": null
+      }
+    ],
+    "item": {
+      "capacity": "350",
+      "description": "350 GB (SAN)",
+      "keyName": "GUEST_DISK_350_GB_SAN"
+    }
+  },
+  {
+    "id": 31089,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk3",
+        "id": 93,
+        "name": "Fourth Disk",
+        "quantityLimit": 0,
+        "sortOrder": null
+      }
+    ],
+    "item": {
+      "capacity": "400",
+      "description": "400 GB (SAN)",
+      "keyName": "GUEST_DISK_400_GB_SAN"
+    }
+  },
+  {
+    "id": 32926,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk3",
+        "id": 93,
+        "name": "Fourth Disk",
+        "quantityLimit": 0,
+        "sortOrder": null
+      }
+    ],
+    "item": {
+      "capacity": "500",
+      "description": "500 GB (SAN)",
+      "keyName": "GUEST_DISK_500_GB_SAN"
+    }
+  },
+  {
+    "id": 33165,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk3",
+        "id": 93,
+        "name": "Fourth Disk",
+        "quantityLimit": 0,
+        "sortOrder": null
+      }
+    ],
+    "item": {
+      "capacity": "750",
+      "description": "750 GB (SAN)",
+      "keyName": "GUEST_DISK_750_GB_SAN_2"
+    }
+  },
+  {
+    "id": 24005,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk3",
+        "id": 93,
+        "name": "Fourth Disk",
+        "quantityLimit": 0,
+        "sortOrder": null
+      }
+    ],
+    "item": {
+      "capacity": "1000",
+      "description": "1.00 TB (SAN)",
+      "keyName": "GUEST_DISK_1000_GB_SAN_2"
+    }
+  },
+  {
+    "id": 29380,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk3",
+        "id": 93,
+        "name": "Fourth Disk",
+        "quantityLimit": 0,
+        "sortOrder": null
+      }
+    ],
+    "item": {
+      "capacity": "1500",
+      "description": "1.50 TB (SAN)",
+      "keyName": "GUEST_DISK_1500_GB_SAN"
+    }
+  },
+  {
+    "id": 31634,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk3",
+        "id": 93,
+        "name": "Fourth Disk",
+        "quantityLimit": 0,
+        "sortOrder": null
+      }
+    ],
+    "item": {
+      "capacity": "2000",
+      "description": "2.00 TB (SAN)",
+      "keyName": "GUEST_DISK_2000_GB_SAN"
+    }
+  },
+  {
+    "id": 34869,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk4",
+        "id": 116,
+        "name": "Fifth Disk",
+        "quantityLimit": 0,
+        "sortOrder": null
+      }
+    ],
+    "item": {
+      "capacity": "10",
+      "description": "10 GB (SAN)",
+      "keyName": "GUEST_DISK_10_GB_SAN"
+    }
+  },
+  {
+    "id": 25396,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk4",
+        "id": 116,
+        "name": "Fifth Disk",
+        "quantityLimit": 0,
+        "sortOrder": null
+      }
+    ],
+    "item": {
+      "capacity": "20",
+      "description": "20 GB (SAN)",
+      "keyName": "GUEST_DISK_20_GB_SAN"
+    }
+  },
+  {
+    "id": 24706,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk4",
+        "id": 116,
+        "name": "Fifth Disk",
+        "quantityLimit": 0,
+        "sortOrder": null
+      }
+    ],
+    "item": {
+      "capacity": "25",
+      "description": "25 GB (SAN)",
+      "keyName": "GUEST_DISK_25_GB_SAN_4"
+    }
+  },
+  {
+    "id": 35237,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk4",
+        "id": 116,
+        "name": "Fifth Disk",
+        "quantityLimit": 0,
+        "sortOrder": null
+      }
+    ],
+    "item": {
+      "capacity": "30",
+      "description": "30 GB (SAN)",
+      "keyName": "GUEST_DISK_30_GB_SAN"
+    }
+  },
+  {
+    "id": 23011,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk4",
+        "id": 116,
+        "name": "Fifth Disk",
+        "quantityLimit": 0,
+        "sortOrder": null
+      }
+    ],
+    "item": {
+      "capacity": "40",
+      "description": "40 GB (SAN)",
+      "keyName": "GUEST_DISK_40_GB_SAN"
+    }
+  },
+  {
+    "id": 32501,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk4",
+        "id": 116,
+        "name": "Fifth Disk",
+        "quantityLimit": 0,
+        "sortOrder": null
+      }
+    ],
+    "item": {
+      "capacity": "50",
+      "description": "50 GB (SAN)",
+      "keyName": "GUEST_DISK_50_GB_SAN"
+    }
+  },
+  {
+    "id": 31347,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk4",
+        "id": 116,
+        "name": "Fifth Disk",
+        "quantityLimit": 0,
+        "sortOrder": null
+      }
+    ],
+    "item": {
+      "capacity": "75",
+      "description": "75 GB (SAN)",
+      "keyName": "GUEST_DISK_75_GB_SAN"
+    }
+  },
+  {
+    "id": 29237,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk4",
+        "id": 116,
+        "name": "Fifth Disk",
+        "quantityLimit": 0,
+        "sortOrder": null
+      }
+    ],
+    "item": {
+      "capacity": "100",
+      "description": "100 GB (SAN)",
+      "keyName": "GUEST_DISK_100_GB_SAN_3"
+    }
+  },
+  {
+    "id": 24417,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk4",
+        "id": 116,
+        "name": "Fifth Disk",
+        "quantityLimit": 0,
+        "sortOrder": null
+      }
+    ],
+    "item": {
+      "capacity": "125",
+      "description": "125 GB (SAN)",
+      "keyName": "GUEST_DISK_125_GB_SAN"
+    }
+  },
+  {
+    "id": 23000,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk4",
+        "id": 116,
+        "name": "Fifth Disk",
+        "quantityLimit": 0,
+        "sortOrder": null
+      }
+    ],
+    "item": {
+      "capacity": "175",
+      "description": "175 GB (SAN)",
+      "keyName": "GUEST_DISK_175_GB_SAN"
+    }
+  },
+  {
+    "id": 30369,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk4",
+        "id": 116,
+        "name": "Fifth Disk",
+        "quantityLimit": 0,
+        "sortOrder": null
+      }
+    ],
+    "item": {
+      "capacity": "150",
+      "description": "150 GB (SAN)",
+      "keyName": "GUEST_DISK_150_GB_SAN"
+    }
+  },
+  {
+    "id": 26293,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk4",
+        "id": 116,
+        "name": "Fifth Disk",
+        "quantityLimit": 0,
+        "sortOrder": null
+      }
+    ],
+    "item": {
+      "capacity": "200",
+      "description": "200 GB (SAN)",
+      "keyName": "GUEST_DISK_200_GB_SAN"
+    }
+  },
+  {
+    "id": 25780,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk4",
+        "id": 116,
+        "name": "Fifth Disk",
+        "quantityLimit": 0,
+        "sortOrder": null
+      }
+    ],
+    "item": {
+      "capacity": "250",
+      "description": "250 GB (SAN)",
+      "keyName": "GUEST_DISK_250_GB_SAN"
+    }
+  },
+  {
+    "id": 22601,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk4",
+        "id": 116,
+        "name": "Fifth Disk",
+        "quantityLimit": 0,
+        "sortOrder": null
+      }
+    ],
+    "item": {
+      "capacity": "300",
+      "description": "300 GB (SAN)",
+      "keyName": "GUEST_DISK_300_GB_SAN"
+    }
+  },
+  {
+    "id": 22690,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk4",
+        "id": 116,
+        "name": "Fifth Disk",
+        "quantityLimit": 0,
+        "sortOrder": null
+      }
+    ],
+    "item": {
+      "capacity": "350",
+      "description": "350 GB (SAN)",
+      "keyName": "GUEST_DISK_350_GB_SAN"
+    }
+  },
+  {
+    "id": 31089,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk4",
+        "id": 116,
+        "name": "Fifth Disk",
+        "quantityLimit": 0,
+        "sortOrder": null
+      }
+    ],
+    "item": {
+      "capacity": "400",
+      "description": "400 GB (SAN)",
+      "keyName": "GUEST_DISK_400_GB_SAN"
+    }
+  },
+  {
+    "id": 32926,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk4",
+        "id": 116,
+        "name": "Fifth Disk",
+        "quantityLimit": 0,
+        "sortOrder": null
+      }
+    ],
+    "item": {
+      "capacity": "500",
+      "description": "500 GB (SAN)",
+      "keyName": "GUEST_DISK_500_GB_SAN"
+    }
+  },
+  {
+    "id": 33165,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk4",
+        "id": 116,
+        "name": "Fifth Disk",
+        "quantityLimit": 0,
+        "sortOrder": null
+      }
+    ],
+    "item": {
+      "capacity": "750",
+      "description": "750 GB (SAN)",
+      "keyName": "GUEST_DISK_750_GB_SAN_2"
+    }
+  },
+  {
+    "id": 24005,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk4",
+        "id": 116,
+        "name": "Fifth Disk",
+        "quantityLimit": 0,
+        "sortOrder": null
+      }
+    ],
+    "item": {
+      "capacity": "1000",
+      "description": "1.00 TB (SAN)",
+      "keyName": "GUEST_DISK_1000_GB_SAN_2"
+    }
+  },
+  {
+    "id": 29380,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk4",
+        "id": 116,
+        "name": "Fifth Disk",
+        "quantityLimit": 0,
+        "sortOrder": null
+      }
+    ],
+    "item": {
+      "capacity": "1500",
+      "description": "1.50 TB (SAN)",
+      "keyName": "GUEST_DISK_1500_GB_SAN"
+    }
+  },
+  {
+    "id": 31634,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk4",
+        "id": 116,
+        "name": "Fifth Disk",
+        "quantityLimit": 0,
+        "sortOrder": null
+      }
+    ],
+    "item": {
+      "capacity": "2000",
+      "description": "2.00 TB (SAN)",
+      "keyName": "GUEST_DISK_2000_GB_SAN"
+    }
+  },
+  {
+    "id": 22829,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "port_speed"
+      }
+    ],
+    "item": {
+      "capacity": "10",
+      "description": "10 Mbps Public & Private Network Uplinks",
+      "keyName": "10_MBPS_PUBLIC_PRIVATE_NETWORK_UPLINKS"
+    }
+  },
+  {
+    "id": 26737,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "port_speed"
+      }
+    ],
+    "item": {
+      "capacity": "100",
+      "description": "100 Mbps Public & Private Network Uplinks",
+      "keyName": "100_MBPS_PUBLIC_PRIVATE_NETWORK_UPLINKS"
+    }
+  },
+  {
+    "id": 24713,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "port_speed"
+      }
+    ],
+    "item": {
+      "capacity": "1000",
+      "description": "1 Gbps Public & Private Network Uplinks",
+      "keyName": "1_GBPS_PUBLIC_PRIVATE_NETWORK_UPLINKS"
+    }
+  },
+  {
+    "id": 26125,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_core"
+      }
+    ],
+    "item": {
+      "capacity": "1",
+      "description": "1 x 2.0 GHz or higher Core",
+      "keyName": "GUEST_CORE_1"
+    }
+  },
+  {
+    "id": 25752,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_core"
+      }
+    ],
+    "item": {
+      "capacity": "2",
+      "description": "2 x 2.0 GHz or higher Cores",
+      "keyName": "GUEST_CORES_2"
+    }
+  },
+  {
+    "id": 200311,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_core"
+      }
+    ],
+    "item": {
+      "capacity": "2",
+      "description": "2 x 2.0 GHz or higher Cores (Dedicated Host)",
+      "keyName": "GUEST_CORE_2_DEDICATED"
+    }
+  },
+  {
+    "id": 32985,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_core"
+      }
+    ],
+    "item": {
+      "capacity": "4",
+      "description": "4 x 2.0 GHz or higher Cores",
+      "keyName": "GUEST_CORES_4"
+    }
+  },
+  {
+    "id": 30823,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_core"
+      }
+    ],
+    "item": {
+      "capacity": "8",
+      "description": "8 x 2.0 GHz or higher Cores",
+      "keyName": "GUEST_CORES_8"
+    }
+  },
+  {
+    "id": 30868,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_core"
+      }
+    ],
+    "item": {
+      "capacity": "12",
+      "description": "12 x 2.0 GHz or higher Cores",
+      "keyName": "GUEST_CORES_12"
+    }
+  },
+  {
+    "id": 29150,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_core"
+      }
+    ],
+    "item": {
+      "capacity": "16",
+      "description": "16 x 2.0 GHz or higher Cores",
+      "keyName": "GUEST_CORES_16"
+    }
+  },
+  {
+    "id": 172497,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_core"
+      }
+    ],
+    "item": {
+      "capacity": "32",
+      "description": "32 x 2.0 GHz or higher Cores",
+      "keyName": "GUEST_CORES_32"
+    }
+  },
+  {
+    "id": 172553,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_core"
+      }
+    ],
+    "item": {
+      "capacity": "56",
+      "description": "56 x 2.0 GHz or higher Cores",
+      "keyName": "GUEST_CORES_56"
+    }
+  },
+  {
+    "id": 30556,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_core"
+      }
+    ],
+    "item": {
+      "capacity": "1",
+      "description": "1 x 2.0 GHz or higher Cores (Dedicated)",
+      "keyName": "GUEST_PRIVATE_CORE_1"
+    }
+  },
+  {
+    "id": 23494,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_core"
+      }
+    ],
+    "item": {
+      "capacity": "2",
+      "description": "2 x 2.0 GHz or higher Cores (Dedicated)",
+      "keyName": "GUEST_PRIVATE_CORES_2"
+    }
+  },
+  {
+    "id": 24886,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_core"
+      }
+    ],
+    "item": {
+      "capacity": "4",
+      "description": "4 x 2.0 GHz or higher Cores (Dedicated)",
+      "keyName": "GUEST_PRIVATE_CORES_4"
+    }
+  },
+  {
+    "id": 31664,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_core"
+      }
+    ],
+    "item": {
+      "capacity": "8",
+      "description": "8 x 2.0 GHz or higher Cores (Dedicated)",
+      "keyName": "GUEST_PRIVATE_CORES_8"
+    }
+  },
+  {
+    "id": 172469,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_core"
+      }
+    ],
+    "item": {
+      "capacity": "16",
+      "description": "16 x 2.0 GHz or higher Cores (Dedicated)",
+      "keyName": "GUEST_PRIVATE_CORES_16_2"
+    }
+  },
+  {
+    "id": 172525,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_core"
+      }
+    ],
+    "item": {
+      "capacity": "32",
+      "description": "32 x 2.0 GHz or higher Cores (Dedicated)",
+      "keyName": "GUEST_PRIVATE_CORES_32"
+    }
+  },
+  {
+    "id": 172581,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_core"
+      }
+    ],
+    "item": {
+      "capacity": "56",
+      "description": "56 x 2.0 GHz or higher Cores (Dedicated)",
+      "keyName": "GUEST_PRIVATE_CORES_56"
+    }
+  },
+  {
+    "id": 24706,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk1"
+      }
+    ],
+    "item": {
+      "capacity": "25",
+      "description": "25 GB (SAN)",
+      "keyName": "GUEST_DISK_25_GB_SAN_4"
+    }
+  },
+  {
+    "id": 29190,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk1"
+      }
+    ],
+    "item": {
+      "capacity": "25",
+      "description": "25 GB (LOCAL)",
+      "keyName": "GUEST_DISK_25_GB_LOCAL_3"
+    }
+  },
+  {
+    "id": 28030,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk1"
+      }
+    ],
+    "item": {
+      "capacity": "100",
+      "description": "100 GB (LOCAL)",
+      "keyName": "GUEST_DISK_100_GB_LOCAL_3"
+    }
+  },
+  {
+    "id": 27989,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk1"
+      }
+    ],
+    "item": {
+      "capacity": "150",
+      "description": "150 GB (LOCAL)",
+      "keyName": "GUEST_DISK_150_GB_LOCAL"
+    }
+  },
+  {
+    "id": 26445,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk1"
+      }
+    ],
+    "item": {
+      "capacity": "200",
+      "description": "200 GB (LOCAL)",
+      "keyName": "GUEST_DISK_200_GB_LOCAL"
+    }
+  },
+  {
+    "id": 26248,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk1"
+      }
+    ],
+    "item": {
+      "capacity": "300",
+      "description": "300 GB (LOCAL)",
+      "keyName": "GUEST_DISK_300_GB_LOCAL"
+    }
+  },
+  {
+    "id": 27884,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "ram"
+      }
+    ],
+    "item": {
+      "capacity": "2",
+      "description": "2 GB",
+      "keyName": "RAM_2_GB"
+    }
+  },
+  {
+    "id": 32597,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "ram"
+      }
+    ],
+    "item": {
+      "capacity": "1",
+      "description": "1 GB",
+      "keyName": "RAM_1_GB"
+    }
+  },
+  {
+    "id": 22694,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "ram"
+      }
+    ],
+    "item": {
+      "capacity": "4",
+      "description": "4 GB",
+      "keyName": "RAM_4_GB"
+    }
+  },
+  {
+    "id": 31356,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "ram"
+      }
+    ],
+    "item": {
+      "capacity": "6",
+      "description": "6 GB",
+      "keyName": "RAM_6_GB"
+    }
+  },
+  {
+    "id": 32438,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "ram"
+      }
+    ],
+    "item": {
+      "capacity": "8",
+      "description": "8 GB",
+      "keyName": "RAM_8_GB"
+    }
+  },
+  {
+    "id": 26834,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "ram"
+      }
+    ],
+    "item": {
+      "capacity": "12",
+      "description": "12 GB",
+      "keyName": "RAM_12_GB"
+    }
+  },
+  {
+    "id": 29663,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "ram"
+      }
+    ],
+    "item": {
+      "capacity": "16",
+      "description": "16 GB ",
+      "keyName": "RAM_16_GB"
+    }
+  },
+  {
+    "id": 33689,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "ram"
+      }
+    ],
+    "item": {
+      "capacity": "32",
+      "description": "32 GB",
+      "keyName": "RAM_32_GB"
+    }
+  },
+  {
+    "id": 31470,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "ram"
+      }
+    ],
+    "item": {
+      "capacity": "48",
+      "description": "48 GB",
+      "keyName": "RAM_48_GB"
+    }
+  },
+  {
+    "id": 37050,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "ram"
+      }
+    ],
+    "item": {
+      "capacity": "64",
+      "description": "64 GB",
+      "keyName": "RAM_64_GB"
+    }
+  },
+  {
+    "id": 172609,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "ram"
+      }
+    ],
+    "item": {
+      "capacity": "128",
+      "description": "128 GB",
+      "keyName": "RAM_0_UNIT_PLACEHOLDER_6"
+    }
+  },
+  {
+    "id": 172637,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "ram"
+      }
+    ],
+    "item": {
+      "capacity": "242",
+      "description": "242 GB",
+      "keyName": "RAM_0_UNIT_PLACEHOLDER_7"
+    }
+  },
+  {
+    "id": 32578,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk0"
+      }
+    ],
+    "item": {
+      "capacity": "25",
+      "description": "25 GB (SAN)",
+      "keyName": "GUEST_DISK_25_GB_SAN"
+    }
+  },
+  {
+    "id": 24013,
+    "locationGroupId": null,
+    "categories": [
+      {
+        "categoryCode": "guest_disk0"
+      }
+    ],
+    "item": {
+      "capacity": "25",
+      "description": "25 GB (LOCAL)",
+      "keyName": "GUEST_DISK_25_GB_LOCAL"
+    }
   }
 ]
