@@ -748,7 +748,7 @@ func (c *ClientManager) DeleteInstanceFromVPS(id int) error {
 }
 
 func (c *ClientManager) UpgradeInstance(id int, cpu int, memory int, network int, privateCPU bool, dedicatedHost bool, secondDiskSize int) (int, error) {
-	upgradeOptions := make(map[string]float64)
+	upgradeOptions := make(map[string]float64, 0)
 	presetId := 0
 	// CPI only support public network speed currently
 	forPublicNetwork := true
@@ -779,19 +779,22 @@ func (c *ClientManager) UpgradeInstance(id int, cpu int, memory int, network int
 		return 0, bosherr.Errorf("No package found for type: %s", packageType)
 	}
 	packageID := *productPackages[0].Id
-	filters := filter.Path("items.prices.locationGroupId").IsNull().Build()
 
-	packageItems, err := c.PackageService.
-		Id(packageID).
-		Mask("keyName, description, capacity, prices[id, locationGroupId, categories[categoryCode]]").
-		Filter(filters).
-		GetItems()
-	if err != nil {
-		return 0, err
-	}
 	var prices = make([]datatypes.Product_Item_Price, 0)
 
-	prices = product.SelectProductPricesByCategory(packageItems, upgradeOptions, forPublicNetwork, !privateCPU, dedicatedHost)
+	if len(upgradeOptions) != 0 {
+		c.logger.Debug(softlayerClientLogTag, "Find upgrade item prices for instance upgrade")
+		includeDowngradeItemPrices := true
+		packageItemPrices, err := c.VirtualGuestService.
+			Id(id).
+			Mask("id, locationGroupId, categories[categoryCode], item[keyName, description, capacity]").
+			GetUpgradeItemPrices(&includeDowngradeItemPrices)
+		if err != nil {
+			return 0, err
+		}
+
+		prices = c.selectProductPricesByCategory(packageItemPrices, upgradeOptions, forPublicNetwork, !privateCPU, dedicatedHost)
+	}
 
 	if secondDiskSize != 0 {
 		c.logger.Debug(softlayerClientLogTag, fmt.Sprintf("Find upgrade item price for second disk: %dGB", secondDiskSize))
@@ -1994,6 +1997,88 @@ func containsId(instances []datatypes.Virtual_Guest, instanceId int) bool {
 	}
 
 	return false
+}
+
+func (c *ClientManager) selectProductPricesByCategory(
+	productItemPrices []datatypes.Product_Item_Price,
+	options map[string]float64,
+	public ...bool,
+) []datatypes.Product_Item_Price {
+
+	forPublicNetwork := true
+	if len(public) > 0 {
+		forPublicNetwork = public[0]
+	}
+
+	// Check type of cores
+	forPublicCores := true
+	if len(public) > 1 {
+		forPublicCores = public[1]
+	}
+
+	forDedicatedHost := false
+	if len(public) > 2 {
+		forDedicatedHost = public[2]
+	}
+
+	// Filter product item prices based on sets of category codes and capacity numbers
+	prices := []datatypes.Product_Item_Price{}
+	priceCheck := map[string]bool{}
+	for _, productItemPrice := range productItemPrices {
+		isPrivate := strings.Contains(sl.Get(productItemPrice.Item.KeyName, "").(string), "PRIVATE")
+		isPublic := strings.Contains(sl.Get(productItemPrice.Item.Description, "Public").(string), "Public")
+		isDedicated := strings.Contains(sl.Get(productItemPrice.Item.KeyName, "").(string), "DEDICATED")
+		for _, category := range productItemPrice.Categories {
+			for categoryCode, capacity := range options {
+				if _, ok := priceCheck[categoryCode]; ok {
+					continue
+				}
+
+				if productItemPrice.Item.Capacity == nil {
+					continue
+				}
+
+				if *category.CategoryCode != categoryCode {
+					continue
+				}
+
+				if *productItemPrice.Item.Capacity != datatypes.Float64(capacity) {
+					continue
+				}
+
+				switch categoryCode {
+				case product.CPUCategoryCode:
+					if forPublicCores == isPrivate || forDedicatedHost != isDedicated {
+						continue
+					}
+				case product.NICSpeedCategoryCode:
+					if forPublicNetwork != isPublic || forDedicatedHost != isDedicated {
+						continue
+					}
+				case product.MemoryCategoryCode:
+					if forDedicatedHost != isDedicated {
+						continue
+					}
+				}
+
+				if strings.HasPrefix(categoryCode, "guest_disk") {
+					categories := productItemPrice.Categories
+					var deviceCategories []datatypes.Product_Item_Category
+					for _, reqCategory := range categories {
+						if *reqCategory.CategoryCode == categoryCode {
+							deviceCategories = append(deviceCategories, reqCategory)
+						}
+					}
+					productItemPrice.Categories = deviceCategories
+				}
+
+				prices = append(prices, productItemPrice)
+				priceCheck[categoryCode] = true
+			}
+		}
+	}
+
+	return prices
 }
 
 // func (c *ClientManager) selectSaaSMaximunIopsItemPriceIdOnSize(size int) (datatypes.Product_Item_Price, error) {
