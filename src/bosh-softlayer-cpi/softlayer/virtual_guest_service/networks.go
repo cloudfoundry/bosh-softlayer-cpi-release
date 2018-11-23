@@ -76,16 +76,15 @@ func (n Networks) AsRegistryNetworks() registry.NetworksSettings {
 
 	for netName, network := range n {
 		networksSettings[netName] = registry.NetworkSettings{
-			Type:          network.Type,
-			IP:            network.IP,
-			Mac:           network.MAC,
-			Gateway:       network.Gateway,
-			Netmask:       network.Netmask,
-			DNS:           network.DNS,
-			Default:       network.Default,
-			Alias:         network.Alias,
-			Routes:        network.Routes,
-			Preconfigured: len(network.DNS) != 0,
+			Type:    network.Type,
+			IP:      network.IP,
+			Mac:     network.MAC,
+			Gateway: network.Gateway,
+			Netmask: network.Netmask,
+			DNS:     network.DNS,
+			Default: network.Default,
+			Alias:   network.Alias,
+			Routes:  network.Routes,
 		}
 	}
 
