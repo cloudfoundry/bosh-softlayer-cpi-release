@@ -26,40 +26,85 @@ func (d SoftlayerDiskService) SetMetadata(id int, vmMetadata Metadata) error {
 }
 
 func (d SoftlayerDiskService) generateNotesFromDiskMetadata(vmMetadata Metadata) (string, error) {
-	var tagStringBuffer bytes.Buffer
+	var (
+		tagStringBuffer bytes.Buffer
+		err             error
+	)
 	if val, ok := vmMetadata["director"]; ok {
-		tagStringBuffer.WriteString("director" + ":" + val.(string))
-		tagStringBuffer.WriteString(",")
+		_, err = tagStringBuffer.WriteString("director" + ":" + val.(string))
+		if err != nil {
+			return tagStringBuffer.String(), err
+		}
+		_, err = tagStringBuffer.WriteString(",")
+		if err != nil {
+			return tagStringBuffer.String(), err
+		}
 	}
 
 	if val, ok := vmMetadata["deployment"]; ok {
-		tagStringBuffer.WriteString("deployment" + ":" + val.(string))
-		tagStringBuffer.WriteString(",")
+		_, err = tagStringBuffer.WriteString("deployment" + ":" + val.(string))
+		if err != nil {
+			return tagStringBuffer.String(), err
+		}
+		_, err = tagStringBuffer.WriteString(",")
+		if err != nil {
+			return tagStringBuffer.String(), err
+		}
 	}
 
 	if val, ok := vmMetadata["instance_id"]; ok {
-		tagStringBuffer.WriteString("instance_id" + ":" + val.(string))
-		tagStringBuffer.WriteString(",")
+		_, err = tagStringBuffer.WriteString("instance_id" + ":" + val.(string))
+		if err != nil {
+			return tagStringBuffer.String(), err
+		}
+		_, err = tagStringBuffer.WriteString(",")
+		if err != nil {
+			return tagStringBuffer.String(), err
+		}
 	}
 
 	if val, ok := vmMetadata["job"]; ok {
-		tagStringBuffer.WriteString("job" + ":" + val.(string))
-		tagStringBuffer.WriteString(",")
+		_, err = tagStringBuffer.WriteString("job" + ":" + val.(string))
+		if err != nil {
+			return tagStringBuffer.String(), err
+		}
+		_, err = tagStringBuffer.WriteString(",")
+		if err != nil {
+			return tagStringBuffer.String(), err
+		}
 	}
 
 	if val, ok := vmMetadata["instance_index"]; ok {
-		tagStringBuffer.WriteString("instance_index" + ":" + val.(string))
-		tagStringBuffer.WriteString(",")
+		_, err = tagStringBuffer.WriteString("instance_index" + ":" + val.(string))
+		if err != nil {
+			return tagStringBuffer.String(), err
+		}
+		_, err = tagStringBuffer.WriteString(",")
+		if err != nil {
+			return tagStringBuffer.String(), err
+		}
 	}
 
 	if val, ok := vmMetadata["instance_name"]; ok {
-		tagStringBuffer.WriteString("instance_name" + ":" + val.(string))
-		tagStringBuffer.WriteString(",")
+		_, err = tagStringBuffer.WriteString("instance_name" + ":" + val.(string))
+		if err != nil {
+			return tagStringBuffer.String(), err
+		}
+		_, err = tagStringBuffer.WriteString(",")
+		if err != nil {
+			return tagStringBuffer.String(), err
+		}
 	}
 
 	if val, ok := vmMetadata["attached_at"]; ok {
-		tagStringBuffer.WriteString("attached_at" + ":" + val.(string))
-		tagStringBuffer.WriteString(",")
+		_, err = tagStringBuffer.WriteString("attached_at" + ":" + val.(string))
+		if err != nil {
+			return tagStringBuffer.String(), err
+		}
+		_, err = tagStringBuffer.WriteString(",")
+		if err != nil {
+			return tagStringBuffer.String(), err
+		}
 	}
 	tagStringBuffer.Truncate(tagStringBuffer.Len() - 1)
 

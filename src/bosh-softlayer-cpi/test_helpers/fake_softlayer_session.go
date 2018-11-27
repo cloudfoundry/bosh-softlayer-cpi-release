@@ -56,10 +56,13 @@ func (h FakeTransportHandler) DoRequest(sess *session.Session, service string, m
 	var parameters []byte
 	if len(args) > 0 {
 		// parse the parameters
-		parameters, _ = json.Marshal(
+		parameters, err = json.Marshal(
 			map[string]interface{}{
 				"parameters": args,
 			})
+		if err != nil {
+			return err
+		}
 	}
 
 	// Build request path without querystring

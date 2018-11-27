@@ -37,7 +37,10 @@ func (vg SoftlayerVirtualGuestService) SetMetadata(id int, vmMetadata Metadata) 
 		})
 	timeService := clock.NewClock()
 	timeoutRetryStrategy := boshretry.NewTimeoutRetryStrategy(1*time.Minute, 5*time.Second, execStmtRetryable, timeService, vg.logger.GetBoshLogger())
-	vg.logger.ChangeRetryStrategyLogTag(&timeoutRetryStrategy)
+	err = vg.logger.ChangeRetryStrategyLogTag(&timeoutRetryStrategy)
+	if err != nil {
+		return err
+	}
 
 	err = timeoutRetryStrategy.Try()
 	if err != nil {
@@ -62,8 +65,14 @@ func (vg SoftlayerVirtualGuestService) extractTagsFromVMMetadata(vmMetadata Meta
 		}
 		cleanTagString := reg.ReplaceAllString(tagValue.(string), "")
 
-		tagStringBuffer.WriteString(tagName + ":" + cleanTagString)
-		tagStringBuffer.WriteString(",")
+		_, err = tagStringBuffer.WriteString(tagName + ":" + cleanTagString)
+		if err != nil {
+			return tagStringBuffer.String(), err
+		}
+		_, err = tagStringBuffer.WriteString(",")
+		if err != nil {
+			return tagStringBuffer.String(), err
+		}
 	}
 	tagStringBuffer.Truncate(tagStringBuffer.Len() - 1)
 

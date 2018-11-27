@@ -35,7 +35,10 @@ func (s SoftlayerStemcellService) Find(id int) (string, error) {
 		})
 	timeService := clock.NewClock()
 	timeoutRetryStrategy := boshretry.NewTimeoutRetryStrategy(1*time.Minute, 5*time.Second, execStmtRetryable, timeService, s.logger.GetBoshLogger())
-	s.logger.ChangeRetryStrategyLogTag(&timeoutRetryStrategy)
+	err = s.logger.ChangeRetryStrategyLogTag(&timeoutRetryStrategy)
+	if err != nil {
+		return "", err
+	}
 
 	err = timeoutRetryStrategy.Try()
 	if err != nil {

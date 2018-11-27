@@ -329,7 +329,7 @@ func (lo *largeObject) abort() {
 	}
 	for _, object := range objects {
 		if strings.HasPrefix(object, lo.objectName+"/"+lo.timestamp+"/") {
-			lo.c.ObjectDelete(lo.container, object)
+			err = lo.c.ObjectDelete(lo.container, object)
 			if err != nil {
 				lo.logger.Error(swiftLargeObjectLogTag, fmt.Sprintf("Delete the multipart objects: %v\n", err))
 			}

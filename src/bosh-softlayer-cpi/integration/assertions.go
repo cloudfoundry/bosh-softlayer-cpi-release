@@ -12,7 +12,8 @@ func assertSucceeds(request string) {
 }
 
 func assertFails(request string) error {
-	response, _ := execCPI(request)
+	response, err := execCPI(request)
+	Expect(err).To(HaveOccurred())
 	Expect(response.Error).ToNot(BeNil())
 	return response.Error
 }

@@ -19,7 +19,10 @@ type Tags []string
 
 func (t Tags) validate() error {
 	if len(t) > 0 {
-		pattern, _ := regexp.Compile("^[A-Za-z]+[A-Za-z0-9-]*[A-Za-z0-9]+$")
+		pattern, err := regexp.Compile("^[A-Za-z]+[A-Za-z0-9-]*[A-Za-z0-9]+$")
+		if err != nil {
+			return err
+		}
 		for _, tag := range t {
 			if len(tag) > maxTagLength || !pattern.MatchString(tag) {
 				return bosherr.Errorf("Invalid tag '%s': does not comply with RFC1035", tag)

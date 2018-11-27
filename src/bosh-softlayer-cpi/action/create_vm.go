@@ -137,9 +137,10 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 
 	instanceID := VMCID(cid).String()
 
-	// If any of the below code fails, we must delete the created cid
+	// If any of the below code fails, we must delete the created VM
 	defer func() {
 		if err != nil && !osReloaded {
+			// #nosec G104
 			cv.virtualGuestService.CleanUp(cid)
 		}
 	}()
@@ -505,7 +506,10 @@ func (cv CreateVM) postConfig(virtualGuestId int, agentOptions *registry.AgentOp
 	switch agentOptions.Blobstore.Provider {
 	case "dav":
 		davConf := instance.DavConfig(agentOptions.Blobstore.Options)
-		cv.updateDavConfig(&davConf)
+		err = cv.updateDavConfig(&davConf)
+		if err != nil {
+			return bosherr.WrapError(err, "Cannot update dav config.")
+		}
 	}
 	return nil
 }
