@@ -69,7 +69,11 @@ func (s SoftlayerStemcellService) CreateFromTarball(imagePath string, datacenter
 }
 
 func (s SoftlayerStemcellService) decompressTarBall(source string) (string, error) {
+	source = filepath.Clean(source)
+
 	s.logger.Debug(softlayerStemcellServiceLogTag, "Decompress the file '%s'", source)
+
+	// #nosec G304
 	reader, err := os.Open(source)
 	if err != nil {
 		return "", bosherr.WrapErrorf(err, "Open tarball file")

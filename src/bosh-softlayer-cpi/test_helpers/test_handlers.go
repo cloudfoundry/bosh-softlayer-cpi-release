@@ -9,17 +9,14 @@ import (
 	"github.com/onsi/gomega/ghttp"
 )
 
-func ReadJsonTestFixtures(workingDir, packageName, fileName string) ([]byte, error) {
-	return ioutil.ReadFile(filepath.Join(workingDir, "test_fixtures", packageName, fileName))
-}
-
 func readResponseDataFromFile(serviceMethodFile string) ([]byte, error) {
 	wd, err := os.Getwd()
 	if err != nil {
 		return []byte{}, err
 	}
 
-	fixture := filepath.Join(wd, "../../test_fixtures/services", serviceMethodFile)
+	fixture := filepath.Join(wd, "../../test_fixtures/services", filepath.Clean(serviceMethodFile))
+	// #nosec G304
 	resp, err := ioutil.ReadFile(fixture)
 	if err != nil {
 		return []byte{}, err

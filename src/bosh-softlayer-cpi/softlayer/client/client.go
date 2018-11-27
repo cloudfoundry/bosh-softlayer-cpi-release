@@ -7,6 +7,7 @@ import (
 	"io"
 	"math"
 	"os"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
@@ -1839,6 +1840,9 @@ func (c *ClientManager) UploadSwiftLargeObject(containerName string, objectName 
 		return bosherr.Error("Failed to connect the Swift server due to empty swift client")
 	}
 
+	objectFile = filepath.Clean(objectFile)
+
+	// #nosec G304
 	imageFile, err := os.Open(objectFile)
 	if err != nil {
 		return bosherr.WrapErrorf(err, "Open stemcell image file")

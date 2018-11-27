@@ -1,24 +1,21 @@
 package test_helpers
 
 import (
-	"encoding/json"
-	"io/ioutil"
-	"os"
-	"path/filepath"
-
-	"github.com/softlayer/softlayer-go/session"
-	"github.com/softlayer/softlayer-go/sl"
-
 	"bytes"
+	"encoding/json"
 	"fmt"
-	"github.com/onsi/gomega/ghttp"
-	"github.com/softlayer/softlayer-go/datatypes"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"reflect"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/onsi/gomega/ghttp"
+	"github.com/softlayer/softlayer-go/datatypes"
+	"github.com/softlayer/softlayer-go/session"
+	"github.com/softlayer/softlayer-go/sl"
 )
 
 const SoftLayer_WebService_RateLimitExceeded_Exception = "SoftLayer_Exception_WebService_RateLimitExceeded"
@@ -156,15 +153,6 @@ func (h FakeTransportHandler) DoRequest(sess *session.Session, service string, m
 	}
 
 	return err
-}
-
-func readJsonTestFixtures(service string, method string) ([]byte, error) {
-	wd, _ := os.Getwd()
-	fixture := filepath.Join(wd, "../..", "test_fixtures", "services", service+"_"+method+".json")
-	if fixture != "" {
-		return ioutil.ReadFile(fixture)
-	}
-	return nil, nil
 }
 
 func httpMethod(name string, args []interface{}) string {
