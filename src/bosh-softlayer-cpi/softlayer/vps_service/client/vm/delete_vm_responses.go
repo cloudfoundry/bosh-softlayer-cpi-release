@@ -60,6 +60,7 @@ type DeleteVMNoContent struct {
 }
 
 func (o *DeleteVMNoContent) Error() string {
+	// #nosec G201
 	return fmt.Sprintf("[DELETE /vms/{cid}][%d] deleteVmNoContent  %+v", 204, o.Payload)
 }
 
@@ -117,6 +118,7 @@ func (o *DeleteVMDefault) Code() int {
 }
 
 func (o *DeleteVMDefault) Error() string {
+	// #nosec G201
 	return fmt.Sprintf("[DELETE /vms/{cid}][%d] deleteVm default  %+v", o._statusCode, o.Payload)
 }
 
