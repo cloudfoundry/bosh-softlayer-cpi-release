@@ -110,6 +110,8 @@ func (l *logger) ChangeRetryStrategyLogTag(retryStrategy *boshretry.RetryStrateg
 	val := reflect.Indirect(pointerVal)
 
 	logtag := val.FieldByName("logTag")
+	// Overwrite unexported bosh-utils/retrystrategy/timeoutRetryStrategy.logger to distinguish logs
+	// #nosec G103
 	ptrToLogTag := unsafe.Pointer(logtag.UnsafeAddr())
 	realPtrToLogTag := (*string)(ptrToLogTag)
 	serialTagPrefix := fmt.Sprintf("%s:%s", l.GetSerialTagPrefix(), logtag)
