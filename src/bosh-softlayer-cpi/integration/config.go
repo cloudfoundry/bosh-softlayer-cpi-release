@@ -93,7 +93,10 @@ func execCPI(request string) (disp.Response, error) {
 	caller := disp.NewJSONCaller()
 	dispatcher := disp.NewJSON(actionFactory, caller, multiLogger)
 
-	in.WriteString(request)
+	_, err = in.WriteString(request)
+	if err != nil {
+		return boshResponse, err
+	}
 	cli := transport.NewCLI(&in, &out, dispatcher, multiLogger)
 
 	var response []byte

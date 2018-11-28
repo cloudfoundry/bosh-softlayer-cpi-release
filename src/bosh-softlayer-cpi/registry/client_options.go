@@ -57,9 +57,6 @@ type HttpRegistryOptions struct {
 
 // ClientTLSOptions are the TLS options used to create a BOSH Registry client.
 type ClientTLSOptions struct {
-	// If the Client must skip the verification of the server certificates
-	InsecureSkipVerify bool `json:"insecure_skip_verify,omitempty"`
-
 	// Certificate file (PEM format)
 	CertFile string `json:"certfile,omitempty"`
 

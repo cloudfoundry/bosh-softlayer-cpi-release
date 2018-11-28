@@ -54,7 +54,7 @@ func (ad AttachDisk) Run(vmCID VMCID, diskCID DiskCID) (interface{}, error) {
 	}
 
 	// Update VM agent settings
-	newAgentSettings := agentSettings.AttachPersistentDisk(diskCID.String(), persistentSetting)
+	newAgentSettings, err := agentSettings.AttachPersistentDisk(diskCID.String(), persistentSetting)
 	if err = ad.registryClient.Update(vmCID.String(), newAgentSettings); err != nil {
 		return nil, bosherr.WrapErrorf(err, "Attaching disk '%s' to vm '%s'", diskCID, vmCID)
 	}

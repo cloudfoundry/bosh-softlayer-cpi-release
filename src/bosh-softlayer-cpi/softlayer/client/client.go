@@ -7,6 +7,7 @@ import (
 	"io"
 	"math"
 	"os"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
@@ -869,7 +870,10 @@ func (c *ClientManager) UpgradeInstance(id int, cpu int, memory int, network int
 		})
 
 	attemptRetryStrategy := boshretry.NewAttemptRetryStrategy(3, 5*time.Second, execPlaceOrderRetryable, c.logger.GetBoshLogger())
-	c.logger.ChangeRetryStrategyLogTag(&attemptRetryStrategy)
+	err = c.logger.ChangeRetryStrategyLogTag(&attemptRetryStrategy)
+	if err != nil {
+		return orderId, err
+	}
 
 	err = attemptRetryStrategy.Try()
 	if err != nil {
@@ -1373,8 +1377,14 @@ func FindSaaSPerformSpacePrice(productPackage datatypes.Product_Package, size in
 			continue
 		}
 
-		capacityMin, _ := strconv.Atoi(*item.CapacityMinimum)
-		capacityMax, _ := strconv.Atoi(*item.CapacityMaximum)
+		capacityMin, err := strconv.Atoi(*item.CapacityMinimum)
+		if err != nil {
+			return datatypes.Product_Item_Price{}, bosherr.WrapError(err, "Convert price capacity minimum")
+		}
+		capacityMax, err := strconv.Atoi(*item.CapacityMaximum)
+		if err != nil {
+			return datatypes.Product_Item_Price{}, bosherr.WrapError(err, "Convert price capacity maximum")
+		}
 		if size < capacityMin || size > capacityMax {
 			continue
 		}
@@ -1408,8 +1418,14 @@ func FindSaaSPerformIopsPrice(productPackage datatypes.Product_Package, size int
 			continue
 		}
 
-		capacityMin, _ := strconv.Atoi(*item.CapacityMinimum)
-		capacityMax, _ := strconv.Atoi(*item.CapacityMaximum)
+		capacityMin, err := strconv.Atoi(*item.CapacityMinimum)
+		if err != nil {
+			return datatypes.Product_Item_Price{}, bosherr.WrapError(err, "Convert price capacity minimum")
+		}
+		capacityMax, err := strconv.Atoi(*item.CapacityMaximum)
+		if err != nil {
+			return datatypes.Product_Item_Price{}, bosherr.WrapError(err, "Convert price capacity maximum")
+		}
 		if iops < capacityMin || iops > capacityMax {
 			continue
 		}
@@ -1423,8 +1439,14 @@ func FindSaaSPerformIopsPrice(productPackage datatypes.Product_Package, size int
 				continue
 			}
 
-			capacityMin, _ := strconv.Atoi(*price.CapacityRestrictionMinimum)
-			capacityMax, _ := strconv.Atoi(*price.CapacityRestrictionMaximum)
+			capacityMin, err := strconv.Atoi(*price.CapacityRestrictionMinimum)
+			if err != nil {
+				return datatypes.Product_Item_Price{}, bosherr.WrapError(err, "Convert price capacity restriction minimum")
+			}
+			capacityMax, err := strconv.Atoi(*price.CapacityRestrictionMaximum)
+			if err != nil {
+				return datatypes.Product_Item_Price{}, bosherr.WrapError(err, "Convert price capacity restriction maximum")
+			}
 
 			if *price.CapacityRestrictionType != "STORAGE_SPACE" || size < capacityMin || size > capacityMax {
 				continue
@@ -1452,8 +1474,14 @@ func FindSaaSSnapshotSpacePrice(productPackage datatypes.Product_Package, size i
 				continue
 			}
 
-			capacityMin, _ := strconv.Atoi(*price.CapacityRestrictionMinimum)
-			capacityMax, _ := strconv.Atoi(*price.CapacityRestrictionMaximum)
+			capacityMin, err := strconv.Atoi(*price.CapacityRestrictionMinimum)
+			if err != nil {
+				return datatypes.Product_Item_Price{}, bosherr.WrapError(err, "Convert price capacity restriction minimum")
+			}
+			capacityMax, err := strconv.Atoi(*price.CapacityRestrictionMaximum)
+			if err != nil {
+				return datatypes.Product_Item_Price{}, bosherr.WrapError(err, "Convert price capacity restriction maximum")
+			}
 
 			if *price.CapacityRestrictionType != "IOPS" || iops < capacityMin || iops > capacityMax {
 				continue
@@ -1839,6 +1867,9 @@ func (c *ClientManager) UploadSwiftLargeObject(containerName string, objectName 
 		return bosherr.Error("Failed to connect the Swift server due to empty swift client")
 	}
 
+	objectFile = filepath.Clean(objectFile)
+
+	// #nosec G304
 	imageFile, err := os.Open(objectFile)
 	if err != nil {
 		return bosherr.WrapErrorf(err, "Open stemcell image file")

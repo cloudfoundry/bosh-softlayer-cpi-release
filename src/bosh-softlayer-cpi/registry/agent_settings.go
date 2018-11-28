@@ -152,16 +152,19 @@ func NewAgentSettings(agentID string, vmCID string, networksSettings NetworksSet
 }
 
 // AttachPersistentDisk updates the agent settings in order to add an attached persistent disk.
-func (as AgentSettings) AttachPersistentDisk(diskID string, updateSetting []byte) AgentSettings {
+func (as AgentSettings) AttachPersistentDisk(diskID string, updateSetting []byte) (AgentSettings, error) {
 	persistenDiskSettings := make(map[string]PersistentSettings)
 
 	var persistentSetting PersistentSettings
-	json.Unmarshal(updateSetting, &persistentSetting)
+	err := json.Unmarshal(updateSetting, &persistentSetting)
+	if err != nil {
+		return as, err
+	}
 
 	persistenDiskSettings[diskID] = persistentSetting
 	as.Disks.Persistent = persistenDiskSettings
 
-	return as
+	return as, nil
 }
 
 // AttachPersistentDisk updates the agent settings in order to add an attached persistent disk.

@@ -5,7 +5,7 @@ package client
 import (
 	"bytes"
 	"container/list"
-	"crypto/md5"
+	"crypto/md5" // #nosec G501
 	"encoding/base64"
 	"fmt"
 	"github.com/ncw/swift"
@@ -147,6 +147,7 @@ func NewLargeObject(c *swift.Connection, path string, concurrency int, partSize 
 	if len(pathParts) > 1 {
 		objectName = pathParts[1]
 	}
+	// #nosec G401
 	lo := largeObject{
 		c:          c,
 		container:  pathParts[0],
@@ -328,7 +329,7 @@ func (lo *largeObject) abort() {
 	}
 	for _, object := range objects {
 		if strings.HasPrefix(object, lo.objectName+"/"+lo.timestamp+"/") {
-			lo.c.ObjectDelete(lo.container, object)
+			err = lo.c.ObjectDelete(lo.container, object)
 			if err != nil {
 				lo.logger.Error(swiftLargeObjectLogTag, fmt.Sprintf("Delete the multipart objects: %v\n", err))
 			}
@@ -339,6 +340,7 @@ func (lo *largeObject) abort() {
 
 // Md5 functions
 func (lo *largeObject) md5Content(r io.ReadSeeker) (string, string, error) {
+	// #nosec G401
 	h := md5.New()
 	mw := io.MultiWriter(h, lo.md5)
 	if _, err := io.Copy(mw, r); err != nil {

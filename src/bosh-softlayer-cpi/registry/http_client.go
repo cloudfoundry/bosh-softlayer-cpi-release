@@ -221,9 +221,8 @@ func (c HTTPClient) httpClient() (http.Client, error) {
 		}
 
 		tlsConfig := &tls.Config{
-			Certificates:       []tls.Certificate{certificates},
-			InsecureSkipVerify: c.options.TLS.InsecureSkipVerify,
-			RootCAs:            certPool,
+			Certificates: []tls.Certificate{certificates},
+			RootCAs:      certPool,
 		}
 
 		httpClient.Transport = &http.Transport{TLSClientConfig: tlsConfig}
