@@ -15,9 +15,8 @@ func readResponseDataFromFile(serviceMethodFile string) ([]byte, error) {
 		return []byte{}, err
 	}
 
-	fixture := filepath.Join(wd, "../../test_fixtures/services", filepath.Clean(serviceMethodFile))
-	// #nosec G304
-	resp, err := ioutil.ReadFile(fixture)
+	fixture := filepath.Join(wd, "../../test_fixtures/services", serviceMethodFile)
+	resp, err := ioutil.ReadFile(filepath.Clean(fixture))
 	if err != nil {
 		return []byte{}, err
 	}

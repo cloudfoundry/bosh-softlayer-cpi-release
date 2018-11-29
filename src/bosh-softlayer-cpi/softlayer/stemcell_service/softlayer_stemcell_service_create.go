@@ -73,8 +73,7 @@ func (s SoftlayerStemcellService) decompressTarBall(source string) (string, erro
 
 	s.logger.Debug(softlayerStemcellServiceLogTag, "Decompress the file '%s'", source)
 
-	// #nosec G304
-	reader, err := os.Open(source)
+	reader, err := os.Open(filepath.Clean(source))
 	if err != nil {
 		return "", bosherr.WrapErrorf(err, "Open tarball file")
 	}
