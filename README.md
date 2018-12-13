@@ -24,9 +24,16 @@ Refer to [init-softlayer](docs/init-softlayer.md) to bootstrap on Softlayer.
 
 Refer to [softlayer-cpi](docs/softlayer-cpi.md) for deployment manifest samples.
 
-## Migrate from Legacy SoftLayer CPI to SoftLayer CPI NG
+## SoftLayer CPI NG
 
-For the users using legacy SoftLayer CPI who want to move to SoftLayer CPI NG, please refer to [softlayer-cpi-migration](docs/softlayer-cpi-migration.md) to do the migration.
+* Highlights of SoftLayer CPI NG: [highlight_of_cpi_ng](docs/highlight_of_cpi_ng.md)
+* Cloud properties names in SoftLayer CPI NG: [cloud_properties_names_in_cpi_ng](docs/cloud_properties_names_in_cpi_ng.md)
+* Migrate from Legacy SoftLayer CPI to SoftLayer CPI NG: [softlayer-cpi-migration](docs/softlayer-cpi-migration.md)
+
+## Recover VMs or Disks (for legacy SoftLayer CPI only)
+
+* Recover missing VMs: [recover_missing_vm](docs/recover_missing_vm.md)
+* Recover orphan disks: [recover_orphan_disk_for_legacy_cpi](docs/recover_orphan_disk_for_legacy_cpi.md)
 
 ## Frequently Asked Questions and Answers
 
