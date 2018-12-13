@@ -12,23 +12,19 @@ Coverage status: [![Coverage Status](https://coveralls.io/repos/github/cloudfoun
 
 This is a BOSH release for the SoftLayer CPI.
 
-The latest version for the SoftlLayer CPI release is here. Also, it is already available on [bosh.io](http://bosh.io).
+The latest version for the SoftlLayer CPI release is available on [bosh.io](https://bosh.io/releases/github.com/cloudfoundry/bosh-softlayer-cpi-release?all=1).
 
-To use this CPI you will need to use the SoftLayer light stemcell. it's also available on [bosh.io](http://bosh.io).
+To use this CPI you will need to use the SoftLayer light stemcell. it's also available on [bosh.io](https://bosh.io/stemcells/bosh-softlayer-xen-ubuntu-xenial-go_agent).
 
 ## Bootstrap on SoftLayer
 
-You can use bosh-init from community to bootstrap an environment.
-
-See [bosh-init-usage](docs/bosh-init-usage.md). Use the CPI and stemcells releases above to do so.
+Refer to [init-softlayer](docs/init-softlayer.md) to bootstrap on Softlayer.
 
 ## Deployment Manifests Samples
 
 For Cloud Config, see [sl-cloud-config](docs/sl-cloud-config.yml)
 
 For Concourse, follow the guide of [Cluster with BOSH](http://concourse.ci/clusters-with-bosh.html) and reference the deployment manifest sample in ```Deploying Concourse``` section.
-
-For a minimalistic deployment of Cloud Foundry (diego architecture), follow the introduction  [minimalistic_cf_deployment.md](docs/minimalistic_cf_deployment.md).
 
 ## Frequently Asked Questions and Answers
 
