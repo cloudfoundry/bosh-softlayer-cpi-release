@@ -69,14 +69,14 @@ If you don't perform this run book, Orphaned disks are deleted after some days b
 
     ### 3) Update the user_data.json and restart agent
 
-    Find device path such from `dmsetup ls` as `/dev/mapper/3600a098038303845372b4a523234692d` and replace persistent field such as: `"persistent":{"87654321":"/dev/mapper/3600a098038303845372b4a523234692d"}`
+    Find device path from `dmsetup ls` like `/dev/mapper/3600a098038303845372b4a523234692d` and replace persistent field to `"persistent":{"87654321":"/dev/mapper/3600a098038303845372b4a523234692d"}`
 
-    And restart agent
+    Restart agent
     ```
     # sv restart agent
     ```
 
-    ### 4) Update "persistent_disks" and "orphan_disks" table of bosh db
+    ### 4) Update "persistent_disks" and "orphan_disks" tables in bosh db
     Login bosh director and update bosh db: delete target disk from `orphan_disks` table and update `persistent_disks` by new record.
 
     ```
