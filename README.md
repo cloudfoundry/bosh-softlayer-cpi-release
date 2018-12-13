@@ -20,11 +20,13 @@ To use this CPI you will need to use the SoftLayer light stemcell. it's also ava
 
 Refer to [init-softlayer](docs/init-softlayer.md) to bootstrap on Softlayer.
 
-## Deployment Manifests Samples
+## Deployment Manifest Samples
 
-For Cloud Config, see [sl-cloud-config](docs/sl-cloud-config.yml)
+Refer to [softlayer-cpi](docs/softlayer-cpi.md) for deployment manifest samples.
 
-For Concourse, follow the guide of [Cluster with BOSH](http://concourse.ci/clusters-with-bosh.html) and reference the deployment manifest sample in ```Deploying Concourse``` section.
+## Migrate from Legacy SoftLayer CPI to SoftLayer CPI NG
+
+For the users using legacy SoftLayer CPI who want to move to SoftLayer CPI NG, please refer to [softlayer-cpi-migration](docs/softlayer-cpi-migration.md) to do the migration.
 
 ## Frequently Asked Questions and Answers
 
