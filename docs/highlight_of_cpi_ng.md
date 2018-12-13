@@ -53,10 +53,14 @@ These measures can significantly improve the reliability of CPI.
 - delete_snapshot: Deletes the disk snapshot
 - info: Returns information about the CPI to help the Director to make decisions on which CPI to call for certain operations in a multi CPI scenario
 
-## Simplified Props definition
+## Simplified cloud properties definition
 
 Docs: [cloud_properties_names_in_cpi_ng.md](cloud_properties_names_in_cpi_ng.md)
 
 ## Added thread id to easily distinguish all log messages for one CPI call
 
-Docs:[distinguish_logs_by_thread_ID_in_cpi_ng.md](distinguish_logs_by_thread_ID_in_cpi_ng.md)
+Docs: [distinguish_logs_by_thread_ID_in_cpi_ng.md](distinguish_logs_by_thread_ID_in_cpi_ng.md)
+
+## Supports networks split in network definition
+
+Docs: [bosh_multi_homed_vms_example.md](bosh_multi_homed_vms_example.md)
