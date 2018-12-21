@@ -29,6 +29,7 @@ Refer to [softlayer-cpi](docs/softlayer-cpi.md) for deployment manifest samples.
 * Highlights of SoftLayer CPI NG: [highlight_of_cpi_ng](docs/highlight_of_cpi_ng.md)
 * Cloud properties names in SoftLayer CPI NG: [cloud_properties_names_in_cpi_ng](docs/cloud_properties_names_in_cpi_ng.md)
 * Migrate from Legacy SoftLayer CPI to SoftLayer CPI NG: [softlayer-cpi-migration](docs/softlayer-cpi-migration.md)
+* How to use static IPs: [static-ip-example](docs/static-ip-example.md)
 
 ## Recover VMs or Disks (for legacy SoftLayer CPI only)
 
