@@ -79,7 +79,7 @@ func (a *Client) DeleteVM(params *DeleteVMParams) (*DeleteVMNoContent, error) {
 /*
 FindVmsByDeployment finds vms by deployment name
 
-Multiple deployment values can be provided with comma seperated strings
+Multiple deployment values can be provided with comma separated strings
 */
 func (a *Client) FindVmsByDeployment(params *FindVmsByDeploymentParams) (*FindVmsByDeploymentOK, error) {
 	// TODO: Validate the params before sending

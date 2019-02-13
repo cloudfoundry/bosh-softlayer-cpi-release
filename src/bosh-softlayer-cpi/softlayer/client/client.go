@@ -27,6 +27,7 @@ import (
 	"bosh-softlayer-cpi/registry"
 	vpsVm "bosh-softlayer-cpi/softlayer/vps_service/client/vm"
 	"bosh-softlayer-cpi/softlayer/vps_service/models"
+
 	"github.com/softlayer/softlayer-go/helpers/product"
 )
 
@@ -1660,7 +1661,7 @@ func (c *ClientManager) AttachSecondDiskToInstance(id int, diskSize int) error {
 
 	orderId, err := c.UpgradeInstance(id, 0, 0, 0, false, false, diskSize)
 	if err != nil {
-		return bosherr.WrapErrorf(err, "Adding second disk with size '%d' to virutal guest of id '%d'", diskSize, id)
+		return bosherr.WrapErrorf(err, "Adding second disk with size '%d' to virtual guest of id '%d'", diskSize, id)
 	}
 
 	until = time.Now().Add(time.Duration(1) * time.Hour)
@@ -1685,7 +1686,7 @@ func (c *ClientManager) UpgradeInstanceConfig(id int, cpu int, memory int, netwo
 
 	orderId, err := c.UpgradeInstance(id, cpu, memory, network, privateCPU, dedicatedHost, 0)
 	if err != nil {
-		return bosherr.WrapErrorf(err, "Upgrading configuration to virutal guest of id '%d'", id)
+		return bosherr.WrapErrorf(err, "Upgrading configuration to virtual guest of id '%d'", id)
 	}
 
 	until = time.Now().Add(time.Duration(1) * time.Hour)

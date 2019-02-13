@@ -2459,7 +2459,7 @@ var _ = Describe("InstanceHandler", func() {
 
 			err := cli.UpgradeInstanceConfig(vgID, 2, 0, 0, false, false)
 			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring("Upgrading configuration to virutal guest of"))
+			Expect(err.Error()).To(ContainSubstring("Upgrading configuration to virtual guest of"))
 		})
 
 		It("Return error when call WaitOrderCompleted return error", func() {
