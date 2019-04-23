@@ -1,9 +1,10 @@
 package action
 
 import (
+	bosherr "github.com/cloudfoundry/bosh-utils/errors"
+
 	"bosh-softlayer-cpi/api"
 	"bosh-softlayer-cpi/softlayer/disk_service"
-	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 )
 
 type DeleteDisk struct {

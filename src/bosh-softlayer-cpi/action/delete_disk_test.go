@@ -5,10 +5,9 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/softlayer/softlayer-go/datatypes"
 
 	. "bosh-softlayer-cpi/action"
-	"bosh-softlayer-cpi/api"
-	"github.com/softlayer/softlayer-go/datatypes"
 	diskfakes "bosh-softlayer-cpi/softlayer/disk_service/fakes"
 )
 
@@ -23,7 +22,7 @@ var _ = Describe("DeleteDisk", func() {
 	)
 
 	BeforeEach(func() {
-		diskCID = DiskCID(8505237)
+		diskCID = DiskCID(22345678)
 		diskService = &diskfakes.FakeService{}
 		deleteDisk = NewDeleteDisk(diskService)
 	})
@@ -47,11 +46,11 @@ var _ = Describe("DeleteDisk", func() {
 		It("return nil if diskService delete call returns an api error", func() {
 			diskService.FindReturns(
 				&datatypes.Network_Storage{},
-				api.NewDiskNotFoundError(diskCID.String(),false), 
+				errors.New("fake-disk-service-error"), 
 			)
 
 			_, err = deleteDisk.Run(diskCID)
-			Expect(err).NotTo(HaveOccurred())
+			Expect(err).To(HaveOccurred())
 			Expect(diskService.FindCallCount()).To(Equal(1))
 		})
 
