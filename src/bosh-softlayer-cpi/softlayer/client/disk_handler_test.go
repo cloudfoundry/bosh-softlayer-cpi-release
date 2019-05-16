@@ -4,7 +4,6 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"bytes"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -17,7 +16,6 @@ import (
 	"github.com/softlayer/softlayer-go/session"
 	"github.com/softlayer/softlayer-go/sl"
 
-	"bosh-softlayer-cpi/api"
 	cpiLog "bosh-softlayer-cpi/logger"
 	slClient "bosh-softlayer-cpi/softlayer/client"
 	vpsVm "bosh-softlayer-cpi/softlayer/vps_service/client/vm"
@@ -28,9 +26,7 @@ var _ = Describe("DiskHandler", func() {
 	var (
 		err error
 
-		errOutLog   bytes.Buffer
-		logger      cpiLog.Logger
-		multiLogger api.MultiLogger
+		logger cpiLog.Logger
 
 		server      *ghttp.Server
 		vps         *vpsVm.Client
@@ -60,7 +56,6 @@ var _ = Describe("DiskHandler", func() {
 
 		nanos := time.Now().Nanosecond()
 		logger = cpiLog.NewLogger(boshlogger.LevelDebug, strconv.Itoa(nanos))
-		multiLogger = api.MultiLogger{Logger: logger, LogBuff: &errOutLog}
 		sess = test_helpers.NewFakeSoftlayerSession(transportHandler)
 		cli = slClient.NewSoftLayerClientManager(sess, vps, swiftClient, logger)
 
@@ -69,10 +64,10 @@ var _ = Describe("DiskHandler", func() {
 		orderID = 11764035
 
 		vg = &datatypes.Virtual_Guest{
-			Id:                       sl.Int(12345678),
-			Domain:                   sl.String("wilma.org"),
-			Hostname:                 sl.String("wilma2"),
-			FullyQualifiedDomainName: sl.String("wilma2.wilma.org"),
+			Id:                           sl.Int(12345678),
+			Domain:                       sl.String("wilma.org"),
+			Hostname:                     sl.String("wilma2"),
+			FullyQualifiedDomainName:     sl.String("wilma2.wilma.org"),
 			MaxCpu:                       sl.Int(2),
 			StartCpus:                    sl.Int(2),
 			MaxMemory:                    sl.Int(2048),

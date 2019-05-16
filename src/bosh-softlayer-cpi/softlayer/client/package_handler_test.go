@@ -4,7 +4,6 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"bytes"
 	"net/http"
 	"strconv"
 	"time"
@@ -16,7 +15,6 @@ import (
 	"github.com/softlayer/softlayer-go/session"
 	"github.com/softlayer/softlayer-go/sl"
 
-	"bosh-softlayer-cpi/api"
 	cpiLog "bosh-softlayer-cpi/logger"
 	slClient "bosh-softlayer-cpi/softlayer/client"
 	vpsVm "bosh-softlayer-cpi/softlayer/vps_service/client/vm"
@@ -27,9 +25,7 @@ var _ = Describe("packageHandler", func() {
 	var (
 		err error
 
-		errOutLog   bytes.Buffer
-		logger      cpiLog.Logger
-		multiLogger api.MultiLogger
+		logger cpiLog.Logger
 
 		server      *ghttp.Server
 		vps         *vpsVm.Client
@@ -38,11 +34,6 @@ var _ = Describe("packageHandler", func() {
 		transportHandler *test_helpers.FakeTransportHandler
 		sess             *session.Session
 		cli              *slClient.ClientManager
-
-		label       string
-		key         string
-		fingerPrint string
-		sshKeyId    int
 
 		respParas []map[string]interface{}
 	)
@@ -59,14 +50,8 @@ var _ = Describe("packageHandler", func() {
 
 		nanos := time.Now().Nanosecond()
 		logger = cpiLog.NewLogger(boshlogger.LevelDebug, strconv.Itoa(nanos))
-		multiLogger = api.MultiLogger{Logger: logger, LogBuff: &errOutLog}
 		sess = test_helpers.NewFakeSoftlayerSession(transportHandler)
 		cli = slClient.NewSoftLayerClientManager(sess, vps, swiftClient, logger)
-
-		label = "fake-label"
-		key = "fake-key"
-		fingerPrint = "fake-fingerPrint"
-		sshKeyId = 12345678
 	})
 
 	AfterEach(func() {

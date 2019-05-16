@@ -10,7 +10,6 @@ import (
 	. "bosh-softlayer-cpi/action"
 
 	registryfakes "bosh-softlayer-cpi/registry/fakes"
-	diskfakes "bosh-softlayer-cpi/softlayer/disk_service/fakes"
 	imagefakes "bosh-softlayer-cpi/softlayer/stemcell_service/fakes"
 	instancefakes "bosh-softlayer-cpi/softlayer/virtual_guest_service/fakes"
 
@@ -43,7 +42,6 @@ var _ = Describe("CreateVM", func() {
 		expectedAgentSettings    registry.AgentSettings
 
 		vmService      *instancefakes.FakeService
-		diskService    *diskfakes.FakeService
 		imageService   *imagefakes.FakeService
 		registryClient *registryfakes.FakeClient
 
@@ -55,7 +53,6 @@ var _ = Describe("CreateVM", func() {
 		os.OpenFile(localDNSConfigFile, os.O_RDONLY|os.O_CREATE, os.ModePerm)
 
 		vmService = &instancefakes.FakeService{}
-		diskService = &diskfakes.FakeService{}
 		imageService = &imagefakes.FakeService{}
 		registryClient = &registryfakes.FakeClient{}
 		registryOptions = registry.ClientOptions{

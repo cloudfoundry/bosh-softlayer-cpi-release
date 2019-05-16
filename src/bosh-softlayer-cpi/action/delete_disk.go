@@ -25,7 +25,7 @@ func (dd DeleteDisk) Run(diskCID DiskCID) (interface{}, error) {
 		if _, ok := err.(api.CloudError); ok {
 			return nil, nil
 		}
-		return nil, bosherr.WrapErrorf(err, "Finding disk '%s' to vm '%s", diskCID)
+		return nil, bosherr.WrapErrorf(err, "Finding disk '%s'", diskCID)
 	}
 	return nil, dd.diskService.Delete(diskCID.Int())
 }

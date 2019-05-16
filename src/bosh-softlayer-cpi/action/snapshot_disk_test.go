@@ -43,11 +43,11 @@ var _ = Describe("SnapshotDisk", func() {
 		BeforeEach(func() {
 			diskService.FindReturns(
 				&datatypes.Network_Storage{
-					Id: sl.Int(2345678),
+					Id: sl.Int(diskCID.Int()),
 				},
 				nil,
 			)
-			snapshotService.CreateReturns(1234567, nil)
+			snapshotService.CreateReturns(snapshotCID.Int(), nil)
 			metadata = SnapshotMetadata{Deployment: "fake-deployment", Job: "fake-job", Index: "fake-index"}
 		})
 
