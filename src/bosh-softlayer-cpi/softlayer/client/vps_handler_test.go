@@ -4,7 +4,6 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"bytes"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -20,7 +19,6 @@ import (
 	"github.com/softlayer/softlayer-go/session"
 	"github.com/softlayer/softlayer-go/sl"
 
-	"bosh-softlayer-cpi/api"
 	cpiLog "bosh-softlayer-cpi/logger"
 	"bosh-softlayer-cpi/registry"
 	slClient "bosh-softlayer-cpi/softlayer/client"
@@ -33,27 +31,19 @@ var _ = Describe("InstanceHandler", func() {
 	var (
 		err error
 
-		errOutLog   bytes.Buffer
-		logger      cpiLog.Logger
-		multiLogger api.MultiLogger
+		logger cpiLog.Logger
 
 		server      *ghttp.Server
 		slServer    *ghttp.Server
 		vps         *vpsVm.Client
-		vpsEndPoint string
 		swiftClient *swift.Connection
 
 		transportHandler *test_helpers.FakeTransportHandler
 		sess             *session.Session
 		cli              *slClient.ClientManager
 
-		vgID             int
-		vlanID           int
-		subnetID         int
-		primaryBackendIP string
-		primaryIP        string
-		allowedHostID    int
-		stemcellID       int
+		vgID       int
+		stemcellID int
 
 		vgTemplate *datatypes.Virtual_Guest
 		userData   *registry.SoftlayerUserData
@@ -63,7 +53,6 @@ var _ = Describe("InstanceHandler", func() {
 	BeforeEach(func() {
 		// Fake VPS server
 		server = ghttp.NewServer()
-		vpsEndPoint = server.URL()
 		vpsEndPoint, err := url.Parse(server.URL())
 		Expect(err).To(BeNil())
 		vps = vpsClient.New(httptransport.New(vpsEndPoint.Host,
@@ -81,22 +70,16 @@ var _ = Describe("InstanceHandler", func() {
 
 		nanos := time.Now().Nanosecond()
 		logger = cpiLog.NewLogger(boshlogger.LevelDebug, strconv.Itoa(nanos))
-		multiLogger = api.MultiLogger{Logger: logger, LogBuff: &errOutLog}
 		sess = test_helpers.NewFakeSoftlayerSession(transportHandler)
 		cli = slClient.NewSoftLayerClientManager(sess, vps, swiftClient, logger)
 
 		vgID = 25804753
-		vlanID = 1262125
-		subnetID = 510674
-		primaryBackendIP = "10.112.172.240"
-		primaryIP = "159.8.144.5"
-		allowedHostID = 123456
 		stemcellID = 12345678
 
 		vgTemplate = &datatypes.Virtual_Guest{
-			Domain:                   sl.String("wilma.org"),
-			Hostname:                 sl.String("wilma2"),
-			FullyQualifiedDomainName: sl.String("wilma2.wilma.org"),
+			Domain:                       sl.String("wilma.org"),
+			Hostname:                     sl.String("wilma2"),
+			FullyQualifiedDomainName:     sl.String("wilma2.wilma.org"),
 			MaxCpu:                       sl.Int(2),
 			StartCpus:                    sl.Int(2),
 			MaxMemory:                    sl.Int(2048),

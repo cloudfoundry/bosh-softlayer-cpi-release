@@ -95,7 +95,7 @@ var _ = Describe("Virtual Guest Service", func() {
 		It("Find vm successfully", func() {
 			softLayerClient.GetInstanceByPrimaryBackendIpAddressReturns(
 				&datatypes.Virtual_Guest{
-					Id: sl.Int(12345678),
+					Id:                      sl.Int(12345678),
 					PrimaryBackendIpAddress: sl.String(vmIP),
 				},
 				true,

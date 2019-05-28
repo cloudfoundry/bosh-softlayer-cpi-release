@@ -16,7 +16,6 @@ var _ = Describe("GetDisks", func() {
 	var (
 		err   error
 		vmCID VMCID
-		disks []string
 
 		vmService *instancefakes.FakeService
 		getDisks  GetDisks
@@ -35,7 +34,7 @@ var _ = Describe("GetDisks", func() {
 				[]string{"fake-disk-1", "fake-disk-2"},
 				nil,
 			)
-			disks, err = getDisks.Run(vmCID)
+			_, err = getDisks.Run(vmCID)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(vmService.AttachedDisksCallCount()).To(Equal(1))
 		})
