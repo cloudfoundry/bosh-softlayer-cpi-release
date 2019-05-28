@@ -28,7 +28,7 @@
   go fmt $(go list ./... | grep -v /vendor/)
 
   echo -e "\n Unit Testing packages:"
-  ginkgo -r -p --cover $base/action $base/api $base/softlayer -skip="*softlayer_stemcell_service_create_test*"
+  ginkgo -r -p --cover $base/action $base/api $base/softlayer -skip="Stemcell Service"
 
   echo -e "\n Gathering cover profiles and send to coveralls.io..."
   # Need check env COVERALLS_TOKEN
