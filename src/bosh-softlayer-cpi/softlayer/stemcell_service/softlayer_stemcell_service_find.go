@@ -1,7 +1,6 @@
 package stemcell
 
 import (
-	"fmt"
 	"strconv"
 	"time"
 
@@ -24,7 +23,7 @@ func (s SoftlayerStemcellService) Find(id int) (string, error) {
 		func() (bool, error) {
 			vgbdtg, found, err = s.softlayerClient.GetImage(id, bosl.IMAGE_DEFAULT_MASK)
 			if err != nil {
-				return true, bosherr.WrapErrorf(err, fmt.Sprintf("Getting VirtualGuestBlockDeviceTemplateGroup with id '%d'", id))
+				return true, bosherr.WrapErrorf(err, "Getting VirtualGuestBlockDeviceTemplateGroup with id '%d'", id)
 			}
 
 			if !found {
