@@ -6,7 +6,6 @@ import (
 
 	bslaction "bosh-softlayer-cpi/action"
 	bslapi "bosh-softlayer-cpi/api"
-	"bosh-softlayer-cpi/logger"
 )
 
 const (
@@ -45,13 +44,13 @@ func (r ResponseError) Error() string {
 type JSON struct {
 	actionFactory bslaction.Factory
 	caller        Caller
-	logger        logger.Logger
+	logger        bslapi.MultiLogger
 }
 
 func NewJSON(
 	actionFactory bslaction.Factory,
 	caller Caller,
-	logger logger.Logger,
+	logger        bslapi.MultiLogger,
 ) JSON {
 	return JSON{
 		actionFactory: actionFactory,
@@ -63,14 +62,15 @@ func NewJSON(
 func (c JSON) Dispatch(reqBytes []byte) []byte {
 	var req Request
 
-	c.logger.DebugWithDetails(jsonLogTag, "Request bytes", string(reqBytes))
+	c.logger.DebugWithDetails(jsonLogTag, "Request bytes", "")
+
 	digitalDecoder := json.NewDecoder(bytes.NewReader(reqBytes))
 	digitalDecoder.UseNumber()
 	if err := digitalDecoder.Decode(&req); err != nil {
 		return c.buildCpiError("Must provide valid JSON payload")
 	}
 
-	c.logger.DebugWithDetails(jsonLogTag, "Deserialized request", req)
+	c.logger.DebugWithDetails(jsonLogTag, "Deserialized request", "")
 
 	if req.Method == "" {
 		return c.buildCpiError("Must provide method key")
@@ -92,25 +92,28 @@ func (c JSON) Dispatch(reqBytes []byte) []byte {
 
 	resp := Response{
 		Result: result,
+		Log:    c.logger.LogBuff.String(),
 	}
 
-	c.logger.DebugWithDetails(jsonLogTag, "Deserialized response", resp)
+	c.logger.DebugWithDetails(jsonLogTag, "Deserialized response", "")
 
 	respBytes, err := json.Marshal(resp)
 	if err != nil {
 		return c.buildCpiError("Failed to serialize result")
 	}
 
-	c.logger.DebugWithDetails(jsonLogTag, "Response bytes", string(respBytes))
+	c.logger.DebugWithDetails(jsonLogTag, "Response bytes", "")
 
 	return respBytes
 }
 
 func (c JSON) buildCloudError(err error) []byte {
 	respErr := Response{
+		Log:   c.logger.LogBuff.String(),
 		Error: &ResponseError{},
 	}
 
+	
 	if typedErr, ok := err.(bslapi.CloudError); ok {
 		respErr.Error.Type = typedErr.Type()
 	} else {
@@ -135,6 +138,7 @@ func (c JSON) buildCloudError(err error) []byte {
 
 func (c JSON) buildCpiError(message string) []byte {
 	respErr := Response{
+		Log: c.logger.LogBuff.String(),
 		Error: &ResponseError{
 			Type:    jsonCpiErrorType,
 			Message: message,
@@ -153,6 +157,7 @@ func (c JSON) buildCpiError(message string) []byte {
 
 func (c JSON) buildNotImplementedError() []byte {
 	respErr := Response{
+		Log: c.logger.LogBuff.String(),
 		Error: &ResponseError{
 			Type:    jsonNotImplementedErrorType,
 			Message: "Must call implemented method",

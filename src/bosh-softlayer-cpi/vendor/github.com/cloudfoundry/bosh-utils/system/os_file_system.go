@@ -187,7 +187,7 @@ func (fs *osFileSystem) ReadFile(path string) (content []byte, err error) {
 		return
 	}
 
-	fs.logger.DebugWithDetails(fs.logTag, "Read content", content)
+	fs.logger.DebugWithDetails(fs.logTag, "Read content", "")
 	return
 }
 
