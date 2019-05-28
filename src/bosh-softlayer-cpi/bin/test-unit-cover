@@ -38,5 +38,5 @@
   goveralls -coverprofile=gover.coverprofile -service=travis-pro -repotoken=$COVERALLS_TOKEN
 
   echo -e "\n Vetting packages for potential issues..."
-  go tool vet $base/action $base/api $base/main $base/softlayer
+  go vet $base/action $base/api $base/main $base/softlayer
 )
