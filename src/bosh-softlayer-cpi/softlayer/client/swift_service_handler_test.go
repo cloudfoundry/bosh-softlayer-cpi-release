@@ -4,7 +4,6 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"bytes"
 	"log"
 	"net"
 	"net/http"
@@ -19,7 +18,6 @@ import (
 	"github.com/onsi/gomega/ghttp"
 	"github.com/softlayer/softlayer-go/session"
 
-	"bosh-softlayer-cpi/api"
 	cpiLog "bosh-softlayer-cpi/logger"
 	slClient "bosh-softlayer-cpi/softlayer/client"
 	vpsVm "bosh-softlayer-cpi/softlayer/vps_service/client/vm"
@@ -30,16 +28,13 @@ var _ = Describe("SwiftServiceHandler", func() {
 	var (
 		err error
 
-		errOutLog   bytes.Buffer
-		logger      cpiLog.Logger
-		multiLogger api.MultiLogger
-		fs          boshsys.FileSystem
+		logger cpiLog.Logger
+		fs     boshsys.FileSystem
 
 		server        *ghttp.Server
 		vps           *vpsVm.Client
 		slServer      *ghttp.Server
 		swiftClient   *swift.Connection
-		swiftEndPoint string
 		swiftUsername string
 		swiftPassword string
 		timeoutSec    int
@@ -64,7 +59,6 @@ var _ = Describe("SwiftServiceHandler", func() {
 	BeforeEach(func() {
 		// Fake swift server
 		server = ghttp.NewServer()
-		swiftEndPoint = server.URL()
 		swiftEndPoint, err := url.Parse(server.URL())
 		Expect(err).To(BeNil())
 		// https://lon02.objectstorage.softlayer.net/auth/v1.0/
@@ -83,7 +77,6 @@ var _ = Describe("SwiftServiceHandler", func() {
 
 		nanos := time.Now().Nanosecond()
 		logger = cpiLog.NewLogger(boshlogger.LevelDebug, strconv.Itoa(nanos))
-		multiLogger = api.MultiLogger{Logger: logger, LogBuff: &errOutLog}
 		sess = test_helpers.NewFakeSoftlayerSession(transportHandler)
 		cli = slClient.NewSoftLayerClientManager(sess, vps, swiftClient, logger)
 

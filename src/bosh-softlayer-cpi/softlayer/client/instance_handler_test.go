@@ -4,7 +4,6 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"bytes"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -17,7 +16,6 @@ import (
 	"github.com/softlayer/softlayer-go/session"
 	"github.com/softlayer/softlayer-go/sl"
 
-	"bosh-softlayer-cpi/api"
 	cpiLog "bosh-softlayer-cpi/logger"
 	"bosh-softlayer-cpi/registry"
 	slClient "bosh-softlayer-cpi/softlayer/client"
@@ -29,9 +27,7 @@ var _ = Describe("InstanceHandler", func() {
 	var (
 		err error
 
-		errOutLog   bytes.Buffer
-		logger      cpiLog.Logger
-		multiLogger api.MultiLogger
+		logger cpiLog.Logger
 
 		server      *ghttp.Server
 		vps         *vpsVm.Client
@@ -68,7 +64,6 @@ var _ = Describe("InstanceHandler", func() {
 
 		nanos := time.Now().Nanosecond()
 		logger = cpiLog.NewLogger(boshlogger.LevelDebug, strconv.Itoa(nanos))
-		multiLogger = api.MultiLogger{Logger: logger, LogBuff: &errOutLog}
 		sess = test_helpers.NewFakeSoftlayerSession(transportHandler)
 		cli = slClient.NewSoftLayerClientManager(sess, vps, swiftClient, logger)
 
@@ -82,9 +77,9 @@ var _ = Describe("InstanceHandler", func() {
 		sshKeyIds = []int{2234566}
 
 		vgTemplate = &datatypes.Virtual_Guest{
-			Domain:                   sl.String("wilma.org"),
-			Hostname:                 sl.String("wilma2"),
-			FullyQualifiedDomainName: sl.String("wilma2.wilma.org"),
+			Domain:                       sl.String("wilma.org"),
+			Hostname:                     sl.String("wilma2"),
+			FullyQualifiedDomainName:     sl.String("wilma2.wilma.org"),
 			MaxCpu:                       sl.Int(2),
 			StartCpus:                    sl.Int(2),
 			MaxMemory:                    sl.Int(2048),
@@ -2459,7 +2454,7 @@ var _ = Describe("InstanceHandler", func() {
 
 			err := cli.UpgradeInstanceConfig(vgID, 2, 0, 0, false, false)
 			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring("Upgrading configuration to virutal guest of"))
+			Expect(err.Error()).To(ContainSubstring("Upgrading configuration to virtual guest of"))
 		})
 
 		It("Return error when call WaitOrderCompleted return error", func() {

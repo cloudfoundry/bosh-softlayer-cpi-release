@@ -1,13 +1,14 @@
 package action_test
 
 import (
+	"bosh-softlayer-cpi/api"
 	"errors"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/softlayer/softlayer-go/datatypes"
 
 	. "bosh-softlayer-cpi/action"
-
 	diskfakes "bosh-softlayer-cpi/softlayer/disk_service/fakes"
 )
 
@@ -41,6 +42,28 @@ var _ = Describe("DeleteDisk", func() {
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("fake-disk-service-error"))
 			Expect(diskService.DeleteCallCount()).To(Equal(1))
+		})
+
+		It("return nil if diskService find call returns an api error", func() {
+			diskService.FindReturns(
+				&datatypes.Network_Storage{},
+				api.NewDiskNotFoundError(diskCID.String(), true),
+			)
+
+			_, err = deleteDisk.Run(diskCID)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(diskService.FindCallCount()).To(Equal(1))
+		})
+
+		It("return an error if diskService find call returns an non-api error", func() {
+			diskService.FindReturns(
+				&datatypes.Network_Storage{},
+				errors.New("fake-disk-service-error"),
+			)
+
+			_, err = deleteDisk.Run(diskCID)
+			Expect(err).To(HaveOccurred())
+			Expect(diskService.FindCallCount()).To(Equal(1))
 		})
 	})
 })

@@ -1,8 +1,8 @@
-golang/go1.8.5.darwin-amd64.tar.gz:
-  size: 97396903
-  object_id: bea7897b-3554-4e92-7012-70a66c351081
-  sha: 16f4b97fe7232525ab1c2ee5ce595c56014a65b2
-golang/go1.8.5.linux-amd64.tar.gz:
-  size: 99077377
-  object_id: 201c94b8-019c-4a73-79d7-f3f097d7406f
-  sha: 71d2e29b7ea053e411ed4ba6200db967481ddead
+golang/go1.11.4.darwin-amd64.tar.gz:
+  size: 123637816
+  object_id: a04a658f-46e9-451a-5139-a96c3d9e7979
+  sha: sha256:48ea987fb610894b3108ecf42e7a4fd1c1e3eabcaeb570e388c75af1f1375f80
+golang/go1.11.4.linux-amd64.tar.gz:
+  size: 126643341
+  object_id: 3132762d-8366-4e14-54c0-379e292d47ce
+  sha: sha256:fb26c30e6a04ad937bbc657a1b5bba92f80096af1e8ee6da6430c045a8db3a5b

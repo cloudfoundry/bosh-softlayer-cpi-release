@@ -65,14 +65,14 @@ var _ = Describe("CreateDisk", func() {
 			})
 
 			It("creates the disk at the vm zone", func() {
-				diskCID, err = createDisk.Run(32768, cloudProps, vmCID)
+				diskCID, err = createDisk.Run(size, cloudProps, vmCID)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(vmService.FindCallCount()).To(Equal(1))
 				actualCid := vmService.FindArgsForCall(0)
 				Expect(actualCid).To(Equal(12345678))
 				Expect(diskService.CreateCallCount()).To(Equal(1))
 				actualSize, _, actualLocation, _ := diskService.CreateArgsForCall(0)
-				Expect(actualSize).To(Equal(32768))
+				Expect(actualSize).To(Equal(size))
 				Expect(actualLocation).To(Equal("fake-datacenter-name"))
 				Expect(diskCID).To(Equal("22345678"))
 			})
@@ -83,7 +83,7 @@ var _ = Describe("CreateDisk", func() {
 					errors.New("fake-instance-service-error"),
 				)
 
-				_, err = createDisk.Run(32768, cloudProps, vmCID)
+				_, err = createDisk.Run(size, cloudProps, vmCID)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("fake-instance-service-error"))
 				Expect(vmService.FindCallCount()).To(Equal(1))
@@ -96,7 +96,7 @@ var _ = Describe("CreateDisk", func() {
 					api.NewDiskCreationFailedError("Not supported", false),
 				)
 
-				_, err = createDisk.Run(32768, cloudProps, vmCID)
+				_, err = createDisk.Run(size, cloudProps, vmCID)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("Disk failed to create: "))
 				Expect(vmService.FindCallCount()).To(Equal(1))
@@ -119,7 +119,7 @@ var _ = Describe("CreateDisk", func() {
 					errors.New("fake-instance-service-error"),
 				)
 
-				_, err = createDisk.Run(32768, cloudProps, vmCID)
+				_, err = createDisk.Run(size, cloudProps, vmCID)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("fake-instance-service-error"))
 				Expect(vmService.FindCallCount()).To(Equal(1))
