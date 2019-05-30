@@ -35,9 +35,9 @@ var (
 	apiKey             = envRequired("SL_API_KEY")
 
 	// Configurable defaults
-	stemcellId   = envOrDefault("STEMCELL_ID", "1633205") // light-bosh-stemcell-3363.24.3-softlayer-xen-ubuntu-trusty-go_agent
+	stemcellId   = envOrDefault("STEMCELL_ID", "2243239") // light-bosh-stemcell-315.16-softlayer-xen-ubuntu-xenial-go_agent
 	stemcellFile = envOrDefault("STEMCELL_FILE", "")
-	stemcellUuid = envOrDefault("STEMCELL_UUID", "ea065435-f7ec-4f1c-8f3f-2987086b1427")
+	stemcellUuid = envOrDefault("STEMCELL_UUID", "796b40d9-036a-476c-9c74-f41e343020f3")
 	datacenter   = envOrDefault("DATACENTER", "lon02")
 	ipAddrs      = strings.Split(envOrDefault("PRIVATE_IP", "192.168.100.102,192.168.100.103,192.168.100.104"), ",")
 
