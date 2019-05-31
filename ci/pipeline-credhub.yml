@@ -194,7 +194,7 @@ resources:
   type: s3
   source:
     regexp: bosh-softlayer-cpi-([0-9.]+)\.tgz
-    bucket: ((s3_pipeline_bucket))
+    bucket: ((s3_pipeline_bucket_lite))
     access_key_id: ((stemcell-aws-access-key))
     secret_access_key: ((stemcell-aws-secret-key))
 

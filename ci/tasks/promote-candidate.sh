@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -e -x
+set -e
 
 source bosh-cpi-release/ci/tasks/utils.sh
 
@@ -21,7 +21,7 @@ cp -r bosh-cpi-release promoted/repo
 dev_release=$(echo $PWD/bosh-cpi-dev-artifacts/*.tgz)
 
 pushd promoted/repo
-  set +x
+  git pull
   echo creating config/private.yml with blobstore secrets
   cat > config/private.yml << EOF
 ---
@@ -31,7 +31,6 @@ blobstore:
     access_key_id: $S3_ACCESS_KEY_ID
     secret_access_key: $S3_SECRET_ACCESS_KEY
 EOF
-  set -x
 
   echo "using bosh CLI version..."
   bosh-cli --version
