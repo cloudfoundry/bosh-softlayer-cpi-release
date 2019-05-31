@@ -21,7 +21,6 @@ cp -r bosh-cpi-release promoted/repo
 dev_release=$(echo $PWD/bosh-cpi-dev-artifacts/*.tgz)
 
 pushd promoted/repo
-  git pull
   echo creating config/private.yml with blobstore secrets
   cat > config/private.yml << EOF
 ---
