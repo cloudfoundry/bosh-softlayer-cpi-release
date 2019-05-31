@@ -100,7 +100,7 @@ jobs:
       trigger: true
     - get: stemcell
       resource: light-stemcell
-      version: {path: light-bosh-stemcell-315.16-softlayer-xen-ubuntu-xenial-go_agent.tgz }
+#      version: {path: light-bosh-stemcell-315.34-softlayer-xen-ubuntu-xenial-go_agent.tgz }
     - get: bosh-cli
     - get: bats
     - get: bosh-deployment
