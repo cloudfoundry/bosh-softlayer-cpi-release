@@ -11,7 +11,7 @@ groups:
 shared:
 - &deploy-director
   task: deploy-director
-  file: bosh-cpi-release/ci/bats/tasks/deploy-director-softlayer.yml
+  file: bosh-cpi-release/ci/tasks/echo.yml
   params:
     BAT_INFRASTRUCTURE:      softlayer
     BOSH_CLIENT:             ((stemcell-test-director-username))
@@ -26,7 +26,7 @@ shared:
 
 - &prepare-bats-config
   task: prepare-bats
-  file: bosh-cpi-release/ci/bats/iaas/softlayer/prepare-bats-config.yml
+  file: bosh-cpi-release/ci/tasks/echo.yml
   params: &prepare-bats-params
     BAT_VCAP_PASSWORD:      ((bat-vcap-password))
     SL_DATACENTER:          ((softlayer-datacenter))
@@ -38,11 +38,11 @@ shared:
 
 - &run-bats
   task: run-bats
-  file: bats/ci/tasks/run-bats.yml
+  file: bosh-cpi-release/ci/tasks/echo.yml
 
 - &teardown
   task: teardown
-  file: bosh-cpi-release/ci/bats/tasks/destroy-director.yml
+  file: bosh-cpi-release/ci/tasks/echo.yml
 
 jobs:
 - name: increment-version
@@ -83,7 +83,7 @@ jobs:
     - {trigger: false, get: bosh-cpi-release, resource: bosh-cpi-release-in}
 
   - task: test
-    file: bosh-cpi-release/ci/tasks/run-lifecycle.yml
+    file: bosh-cpi-release/ci/tasks/echo.yml
     params:
       SL_USERNAME: ((softlayer-username))
       SL_API_KEY:  ((softlayer-api-key))
@@ -125,7 +125,7 @@ jobs:
 - name: promote-candidate
   plan:
   - aggregate:
-    - {trigger: true,  get: bosh-cpi-dev-artifacts}
+    - {trigger: true,  get: bosh-cpi-dev-artifacts, passed: [bats-ubuntu]}
     - {trigger: false, get: bosh-cpi-release, resource: bosh-cpi-release-in}
     - {trigger: false, get: version-semver,  resource: version-semver}
     - {trigger: false, get: bosh-cli, resource: bosh-cli}

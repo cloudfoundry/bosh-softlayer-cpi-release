@@ -1,0 +1,17 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: boshcpi/gce-cpi-release
+
+inputs:
+  - name: bosh-cpi-release
+
+run:
+  path: bosh-cpi-release/ci/tasks/echo.sh
+
+params:
+  SL_USERNAME:           replace-me
+  SL_API_KEY:            replace-me
