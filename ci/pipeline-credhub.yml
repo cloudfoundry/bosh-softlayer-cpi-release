@@ -125,7 +125,7 @@ jobs:
 - name: promote-candidate
   plan:
   - aggregate:
-    - {trigger: true,  get: bosh-cpi-dev-artifacts, passed: [bats-ubuntu]}
+    - {trigger: false,  get: bosh-cpi-dev-artifacts, passed: [bats-ubuntu]}
     - {trigger: false, get: bosh-cpi-release, resource: bosh-cpi-release-in}
     - {trigger: false, get: version-semver,  resource: version-semver, passed: [bats-ubuntu]}
     - {trigger: false, get: bosh-cli, resource: bosh-cli}
@@ -157,7 +157,7 @@ resources:
   type: git
   source:
     uri: git@github.com:cloudfoundry/bosh-softlayer-cpi-release.git
-    branch: master
+    branch: fix_pipeline
     private_key: ((github_private_key.private_key))
     ignore_paths:
     - .final_builds/**/*.yml

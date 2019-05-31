@@ -64,7 +64,7 @@ jobs:
     - {trigger: false, get: bosh-cli, resource: bosh-cli}
 
   - task: build
-    file: bosh-cpi-release/ci/tasks/build-candidate.yml
+    file: bosh-cpi-release/ci/tasks/build-candidate-skip-test.yml
     params:
       COVERALLS_TOKEN: ((coveralls-token))
 
@@ -125,7 +125,7 @@ jobs:
 - name: promote-candidate
   plan:
   - aggregate:
-    - {trigger: true,  get: bosh-cpi-dev-artifacts, passed: [bats-ubuntu]}
+    - {trigger: false,  get: bosh-cpi-dev-artifacts, passed: [bats-ubuntu]}
     - {trigger: false, get: bosh-cpi-release, resource: bosh-cpi-release-in}
     - {trigger: false, get: version-semver,  resource: version-semver}
     - {trigger: false, get: bosh-cli, resource: bosh-cli}
