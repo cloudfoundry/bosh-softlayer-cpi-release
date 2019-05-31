@@ -139,6 +139,9 @@ jobs:
   - put: bosh-cpi-release-out
     params: {repository: promoted/repo, rebase: true, tag_prefix: "v", tag: promoted/integer_version}
 
+  - put: bosh-cpi-final-artifacts
+    params: {file: promoted/repo/releases/bosh-softlayer-cpi/*.tgz}
+
 resources:
 - name: bosh-release
   type: bosh-io-release
@@ -186,6 +189,14 @@ resources:
     uri: git@github.com:cloudfoundry/bosh-softlayer-cpi-release.git
     branch: master
     private_key: ((github_private_key.private_key))
+
+- name: bosh-cpi-final-artifacts
+  type: s3
+  source:
+    regexp: bosh-softlayer-cpi-([0-9.]+)\.tgz
+    bucket: ((s3_pipeline_bucket))
+    access_key_id: ((stemcell-aws-access-key))
+    secret_access_key: ((stemcell-aws-secret-key))
 
 - name: bosh-deployment
   type: git
