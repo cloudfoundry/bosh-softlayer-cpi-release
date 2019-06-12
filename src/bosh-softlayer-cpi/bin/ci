@@ -24,10 +24,10 @@
   go fmt $(go list ./... | grep -v /vendor/)
 
   echo -e "\n Unit Testing packages:"
-  ginkgo -r -p -v -skip=“CreateFromTarball” $base/action $base/api $base/softlayer
+  ginkgo -r -p -v $base/action $base/api $base/softlayer
 
   echo -e "\n Vetting packages for potential issues..."
-  go tool vet $base/action $base/api $base/main $base/softlayer
+  go vet -v ./...
 
   echo -e "\n Running gosec for security issues..."
   gosec ./...
