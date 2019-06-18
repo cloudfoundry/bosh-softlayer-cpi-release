@@ -115,7 +115,7 @@ var _ = Describe("Config", func() {
 
 			err := config.Validate()
 			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring("Validating Cloud Properties"))
+			Expect(err.Error()).To(ContainSubstring("Validating SoftLayer configuration"))
 		})
 	})
 })
