@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"errors"
@@ -188,6 +189,27 @@ func (fs *osFileSystem) ReadFile(path string) (content []byte, err error) {
 	}
 
 	fs.logger.DebugWithDetails(fs.logTag, "Read content", content)
+	return
+}
+
+func (fs *osFileSystem) ReadFileWithRedact(path string) (content []byte, err error) {
+	fs.logger.Debug(fs.logTag, "Reading file %s", path)
+
+	file, err := fs.OpenFile(path, os.O_RDONLY, 0)
+	if err != nil {
+		err = bosherr.WrapErrorf(err, "Opening file %s", path)
+		return
+	}
+
+	defer file.Close()
+
+	content, err = ioutil.ReadAll(file)
+	if err != nil {
+		err = bosherr.WrapErrorf(err, "Reading file content %s", path)
+		return
+	}
+
+	fs.logger.DebugWithDetails(fs.logTag, "Read content", redact(content))
 	return
 }
 
@@ -380,4 +402,26 @@ func (fs *osFileSystem) runCommand(cmd string) (string, error) {
 	}
 
 	return strings.TrimSpace(stdout.String()), nil
+}
+
+func redact(bs []byte) []byte {
+	s := string(bs)
+
+	hiddenStr1 := "\"password\":\"<redact>\""
+	r1 := regexp.MustCompile(`"password":"[^"]*"`)
+	s1 := r1.ReplaceAllString(s, hiddenStr1)
+
+	hiddenStr2 := "\"api_key\":\"<redact>\""
+	r2 := regexp.MustCompile(`"api_key":"[^"]*"`)
+	s2 := r2.ReplaceAllString(s1, hiddenStr2)
+
+	hiddenStr3 := "//registry:<redact>"
+	r3 := regexp.MustCompile(`//registry:[^@]*`)
+	s3 := r3.ReplaceAllString(s2, hiddenStr3)
+
+	hiddenStr4 := "//nats:<redact>"
+	r4 := regexp.MustCompile(`//nats:[^@]*`)
+	s4 := r4.ReplaceAllString(s3, hiddenStr4)
+
+	return []byte(s4)
 }
