@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"regexp"
 	"time"
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
@@ -157,26 +158,26 @@ func (c HTTPClient) Update(instanceID string, agentSettings AgentSettings) error
 	} else {
 		endpoint = fmt.Sprintf("%s/instances/%s/settings", c.options.EndpointWithCredentials(), instanceID)
 	}
-	c.logger.Debug(httpClientLogTag, "Updating registry endpoint '%s' with agent settings '%s'", endpoint, settingsJSON)
+	c.logger.Debug(httpClientLogTag, "Updating registry endpoint '%s' with agent settings '%s'", redact([]byte(endpoint)), redact(settingsJSON))
 
 	putPayload := bytes.NewReader(settingsJSON)
 	request, err := http.NewRequest("PUT", endpoint, putPayload)
 	if err != nil {
-		return bosherr.WrapErrorf(err, "Creating PUT request for registry endpoint '%s' with agent settings '%s'", endpoint, settingsJSON)
+		return bosherr.WrapErrorf(err, "Creating PUT request for registry endpoint '%s' with agent settings '%s'", redact([]byte(endpoint)), redact(settingsJSON))
 	}
 
 	httpResponse, err := c.doRequest(request)
 	if err != nil {
-		return bosherr.WrapErrorf(err, "Updating registry endpoint '%s' with agent settings: '%s'", endpoint, settingsJSON)
+		return bosherr.WrapErrorf(err, "Updating registry endpoint '%s' with agent settings: '%s'", redact([]byte(endpoint)), redact(settingsJSON))
 	}
 
 	defer httpResponse.Body.Close()
 
 	if httpResponse.StatusCode != http.StatusOK && httpResponse.StatusCode != http.StatusCreated {
-		return bosherr.Errorf("Received status code '%d' when updating registry endpoint '%s' with agent settings: '%s'", httpResponse.StatusCode, endpoint, settingsJSON)
+		return bosherr.Errorf("Received status code '%d' when updating registry endpoint '%s' with agent settings: '%s'", httpResponse.StatusCode, redact([]byte(endpoint)), redact(settingsJSON))
 	}
 
-	c.logger.Debug(httpClientLogTag, "Updated registry endpoint '%s' with agent settings '%s'", endpoint, settingsJSON)
+	c.logger.Debug(httpClientLogTag, "Updated registry endpoint '%s' with agent settings '%s'", redact([]byte(endpoint)), redact(settingsJSON))
 	return nil
 }
 
@@ -229,4 +230,26 @@ func (c HTTPClient) httpClient() (http.Client, error) {
 	}
 
 	return httpClient, nil
+}
+
+func redact(bs []byte) []byte {
+	s := string(bs)
+
+	hiddenStr1 := "\"password\":\"<redact>\""
+	r1 := regexp.MustCompile(`"password":"[^"]*"`)
+	s1 := r1.ReplaceAllString(s, hiddenStr1)
+
+	hiddenStr2 := "\"cert\":<redact>"
+	r2 := regexp.MustCompile(`"cert":\{([^}]*)\}`)
+	s2 := r2.ReplaceAllString(s1, hiddenStr2)
+
+	hiddenStr3 := "//registry:<redact>"
+	r3 := regexp.MustCompile(`//registry:[^@]*`)
+	s3 := r3.ReplaceAllString(s2, hiddenStr3)
+
+	hiddenStr4 := "//nats:<redact>"
+	r4 := regexp.MustCompile(`//nats:[^@]*`)
+	s4 := r4.ReplaceAllString(s3, hiddenStr4)
+
+	return []byte(s4)
 }

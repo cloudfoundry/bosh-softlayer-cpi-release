@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"bytes"
 	"flag"
 	"fmt"
@@ -58,9 +57,9 @@ func main() {
 	}
 }
 
-func basicDeps() (cpiLog.Logger, boshsys.FileSystem, boshuuid.Generator, *log.Logger) {
+func basicDeps() (api.MultiLogger, boshsys.FileSystem, boshuuid.Generator, *log.Logger) {
 	var logBuff bytes.Buffer
-	multiWriter := io.MultiWriter(os.Stderr, bufio.NewWriter(&logBuff))
+	multiWriter := io.MultiWriter(os.Stderr, &logBuff)
 	nanos := fmt.Sprintf("%09d", time.Now().Nanosecond())
 
 	clientLogger := log.New(multiWriter, nanos, log.LstdFlags) // For softlayer_client
@@ -78,7 +77,7 @@ func basicDeps() (cpiLog.Logger, boshsys.FileSystem, boshuuid.Generator, *log.Lo
 
 func buildDispatcher(
 	config config.Config,
-	logger cpiLog.Logger,
+	logger api.MultiLogger,
 	outLogger *log.Logger,
 	uuidGen boshuuid.Generator,
 	cmdRunner boshsys.CmdRunner,

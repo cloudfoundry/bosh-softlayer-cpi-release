@@ -36,6 +36,7 @@ type FileSystem interface {
 
 	ReadFileString(path string) (content string, err error)
 	ReadFile(path string) (content []byte, err error)
+	ReadFileWithRedact(path string) (content []byte, err error)
 
 	FileExists(path string) bool
 	Stat(path string) (os.FileInfo, error)

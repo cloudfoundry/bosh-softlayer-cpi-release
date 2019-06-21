@@ -531,6 +531,10 @@ func (fs *FakeFileSystem) ReadFile(path string) ([]byte, error) {
 	}
 }
 
+func (fs *FakeFileSystem) ReadFileWithRedact(path string) ([]byte, error) {
+	return fs.ReadFile(path)
+}
+
 func (fs *FakeFileSystem) FileExists(path string) bool {
 	return fs.GetFileTestStat(path) != nil
 }
