@@ -4,5 +4,5 @@ name: golang
 dependencies:
 
 files:
-  - golang/go1.11.4.linux-amd64.tar.gz
-  - golang/go1.11.4.darwin-amd64.tar.gz
+  - golang_1.11.4/go1.11.4.linux-amd64.tar.gz
+  - golang_1.11.4/go1.11.4.darwin-amd64.tar.gz
