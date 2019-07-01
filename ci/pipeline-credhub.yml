@@ -157,7 +157,7 @@ resources:
   type: git
   source:
     uri: git@github.com:cloudfoundry/bosh-softlayer-cpi-release.git
-    branch: master
+    branch: fix_blobs
     private_key: ((github_private_key.private_key))
     ignore_paths:
     - .final_builds/**/*.yml
