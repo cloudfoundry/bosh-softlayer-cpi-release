@@ -63,6 +63,8 @@ builds:
     version: 2.1.0
   ee13b582-0f52-4b84-9465-4bb31ce7cb95:
     version: "6"
+  f296a985-88bf-49f7-6466-599dfc65fb00:
+    version: "42"
   f38e3cd9-627a-4c7c-b09f-a89451aaab6c:
     version: "22"
   f8436389-1a0d-48d9-40b7-6455f299c750:
