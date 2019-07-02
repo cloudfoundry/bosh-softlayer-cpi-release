@@ -45,25 +45,25 @@ func (c HTTPClient) Delete(instanceID string) error {
 	} else {
 		endpoint = fmt.Sprintf("%s/instances/%s/settings", c.options.EndpointWithCredentials(), instanceID)
 	}
-	c.logger.Debug(httpClientLogTag, "Deleting agent settings from registry endpoint '%s'", endpoint)
+	c.logger.Debug(httpClientLogTag, "Deleting agent settings from registry endpoint '%s'", redact([]byte(endpoint)))
 
 	request, err := http.NewRequest("DELETE", endpoint, nil)
 	if err != nil {
-		return bosherr.WrapErrorf(err, "Creating DELETE request for registry endpoint '%s'", endpoint)
+		return bosherr.WrapErrorf(err, "Creating DELETE request for registry endpoint '%s'", redact([]byte(endpoint)))
 	}
 
 	httpResponse, err := c.doRequest(request)
 	if err != nil {
-		return bosherr.WrapErrorf(err, "Deleting agent settings from registry endpoint '%s'", endpoint)
+		return bosherr.WrapErrorf(err, "Deleting agent settings from registry endpoint '%s'", redact([]byte(endpoint)))
 	}
 
 	defer httpResponse.Body.Close()
 
 	if httpResponse.StatusCode != http.StatusOK {
-		return bosherr.Errorf("Received status code '%d' when deleting agent settings from registry endpoint '%s'", httpResponse.StatusCode, endpoint)
+		return bosherr.Errorf("Received status code '%d' when deleting agent settings from registry endpoint '%s'", httpResponse.StatusCode, redact([]byte(endpoint)))
 	}
 
-	c.logger.Debug(httpClientLogTag, "Deleted agent settings from registry endpoint '%s'", endpoint)
+	c.logger.Debug(httpClientLogTag, "Deleted agent settings from registry endpoint '%s'", redact([]byte(endpoint)))
 	return nil
 }
 
@@ -75,40 +75,45 @@ func (c HTTPClient) Fetch(instanceID string) (AgentSettings, error) {
 	} else {
 		endpoint = fmt.Sprintf("%s/instances/%s/settings", c.options.EndpointWithCredentials(), instanceID)
 	}
-	c.logger.Debug(httpClientLogTag, "Fetching agent settings from registry endpoint '%s'", endpoint)
+	c.logger.Debug(httpClientLogTag, "Fetching agent settings from registry endpoint '%s'", redact([]byte(endpoint)))
 
 	request, err := http.NewRequest("GET", endpoint, nil)
 	if err != nil {
-		return AgentSettings{}, bosherr.WrapErrorf(err, "Creating GET request for registry endpoint '%s'", endpoint)
+		return AgentSettings{}, bosherr.WrapErrorf(err, "Creating GET request for registry endpoint '%s'", redact([]byte(endpoint)))
 	}
 
 	httpResponse, err := c.doRequest(request)
 	if err != nil {
-		return AgentSettings{}, bosherr.WrapErrorf(err, "Fetching agent settings from registry endpoint '%s'", endpoint)
+		return AgentSettings{}, bosherr.WrapErrorf(err, "Fetching agent settings from registry endpoint '%s'", redact([]byte(endpoint)))
 	}
 
 	defer httpResponse.Body.Close()
 
 	if httpResponse.StatusCode != http.StatusOK {
-		return AgentSettings{}, bosherr.Errorf("Received status code '%d' when fetching agent settings from registry endpoint '%s'", httpResponse.StatusCode, endpoint)
+		return AgentSettings{}, bosherr.Errorf("Received status code '%d' when fetching agent settings from registry endpoint '%s'", httpResponse.StatusCode, redact([]byte(endpoint)))
 	}
 
 	httpBody, err := ioutil.ReadAll(httpResponse.Body)
 	if err != nil {
-		return AgentSettings{}, bosherr.WrapErrorf(err, "Reading agent settings response from registry endpoint '%s'", endpoint)
+		return AgentSettings{}, bosherr.WrapErrorf(err, "Reading agent settings response from registry endpoint '%s'", redact([]byte(endpoint)))
 	}
 
 	var settingsResponse agentSettingsResponse
 	if err = json.Unmarshal(httpBody, &settingsResponse); err != nil {
-		return AgentSettings{}, bosherr.WrapErrorf(err, "Unmarshalling agent settings response from registry endpoint '%s', contents: '%s'", endpoint, httpBody)
+		return AgentSettings{}, bosherr.WrapErrorf(err, "Unmarshalling agent settings response from registry endpoint '%s', contents: '%s'", redact([]byte(endpoint)), httpBody)
 	}
 
 	var agentSettings AgentSettings
 	if err = json.Unmarshal([]byte(settingsResponse.Settings), &agentSettings); err != nil {
-		return AgentSettings{}, bosherr.WrapErrorf(err, "Unmarshalling agent settings response from registry endpoint '%s', contents: '%s'", endpoint, httpBody)
+		return AgentSettings{}, bosherr.WrapErrorf(err, "Unmarshalling agent settings response from registry endpoint '%s', contents: '%s'", redact([]byte(endpoint)), httpBody)
 	}
 
-	c.logger.Debug(httpClientLogTag, "Received agent settings from registry endpoint '%s', contents: '%s'", endpoint, httpBody)
+	settingsJSON, err := json.Marshal(agentSettings)
+	if err != nil {
+		return AgentSettings{}, bosherr.WrapErrorf(err, "Marshalling agent settings, contents: '%#v", agentSettings)
+	}
+
+	c.logger.Debug(httpClientLogTag, "Received agent settings from registry endpoint '%s', contents: '%s'", redact([]byte(endpoint)), redact(settingsJSON))
 	return agentSettings, nil
 }
 
@@ -121,16 +126,16 @@ func (c HTTPClient) IsExist(instanceID string) (bool, error) {
 	} else {
 		endpoint = fmt.Sprintf("%s/instances/%s/settings", c.options.EndpointWithCredentials(), instanceID)
 	}
-	c.logger.Debug(httpClientLogTag, "Fetching agent settings from registry endpoint '%s'", endpoint)
+	c.logger.Debug(httpClientLogTag, "Fetching agent settings from registry endpoint '%s'", redact([]byte(endpoint)))
 
 	request, err := http.NewRequest("GET", endpoint, nil)
 	if err != nil {
-		return false, bosherr.WrapErrorf(err, "Creating GET request for registry endpoint '%s'", endpoint)
+		return false, bosherr.WrapErrorf(err, "Creating GET request for registry endpoint '%s'", redact([]byte(endpoint)))
 	}
 
 	httpResponse, err := c.doRequest(request)
 	if err != nil {
-		return false, bosherr.WrapErrorf(err, "Fetching agent settings from registry endpoint '%s'", endpoint)
+		return false, bosherr.WrapErrorf(err, "Fetching agent settings from registry endpoint '%s'", redact([]byte(endpoint)))
 	}
 
 	defer httpResponse.Body.Close()
@@ -139,7 +144,7 @@ func (c HTTPClient) IsExist(instanceID string) (bool, error) {
 		if httpResponse.StatusCode == 500 {
 			return false, nil
 		}
-		return false, bosherr.Errorf("Received status code '%d' when fetching agent settings from registry endpoint '%s'", httpResponse.StatusCode, endpoint)
+		return false, bosherr.Errorf("Received status code '%d' when fetching agent settings from registry endpoint '%s'", httpResponse.StatusCode, redact([]byte(endpoint)))
 	}
 
 	return true, nil
