@@ -104,11 +104,6 @@ func (cv CreateVM) Run(agentID string, stemcellCID StemcellCID, cloudProps VMClo
 
 	if boshenv, ok := env["bosh"]; ok {
 		boshenv.(map[string]interface{})["keep_root_password"] = true
-
-		// #148050011: Set vcap password in env.bosh.password through CPI
-		if env["bosh"].(map[string]interface{})["password"] == nil && cv.agentOptions.VcapPassword != "" {
-			env["bosh"].(map[string]interface{})["password"] = cv.agentOptions.VcapPassword
-		}
 	}
 
 	// CID for returned VM

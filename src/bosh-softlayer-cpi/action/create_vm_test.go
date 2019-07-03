@@ -1170,7 +1170,6 @@ var _ = Describe("CreateVM", func() {
 						"bosh": map[string]interface{}{
 							"keep_root_password": true,
 							"groups":             []interface{}{"fake-tag"},
-							"password":           "fake-vcap-password-in-agent",
 						},
 					}),
 
