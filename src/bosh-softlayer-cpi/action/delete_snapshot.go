@@ -1,7 +1,7 @@
 package action
 
 import (
-	bosherr "github.com/cloudfoundry/bosh-utils/errors"
+	bosherr "github.com/bluebosh/bosh-utils/errors"
 
 	"bosh-softlayer-cpi/softlayer/snapshot_service"
 )

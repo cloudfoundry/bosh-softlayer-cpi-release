@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"errors"
-	bosherr "github.com/cloudfoundry/bosh-utils/errors"
+	bosherr "github.com/bluebosh/bosh-utils/errors"
 )
 
 func (fs *osFileSystem) homeDir(username string) (string, error) {

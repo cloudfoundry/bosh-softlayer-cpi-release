@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"code.cloudfoundry.org/clock"
-	bosherr "github.com/cloudfoundry/bosh-utils/errors"
-	boshretry "github.com/cloudfoundry/bosh-utils/retrystrategy"
+	bosherr "github.com/bluebosh/bosh-utils/errors"
+	boshretry "github.com/bluebosh/bosh-utils/retrystrategy"
 
 	"bosh-softlayer-cpi/api"
 )

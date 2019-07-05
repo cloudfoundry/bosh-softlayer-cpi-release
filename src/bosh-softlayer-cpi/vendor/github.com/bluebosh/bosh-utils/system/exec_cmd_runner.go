@@ -7,7 +7,7 @@ import (
 	"runtime"
 	"strings"
 
-	boshlog "github.com/cloudfoundry/bosh-utils/logger"
+	boshlog "github.com/bluebosh/bosh-utils/logger"
 )
 
 type execCmdRunner struct {

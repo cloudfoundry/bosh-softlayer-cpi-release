@@ -1,7 +1,7 @@
 package registry
 
 import (
-	bosherr "github.com/cloudfoundry/bosh-utils/errors"
+	bosherr "github.com/bluebosh/bosh-utils/errors"
 )
 
 // AgentOptions are the agent options passed to the the BOSH Agent (http://bosh.io/docs/bosh-components.html#agent).

@@ -3,7 +3,7 @@ package instance
 import (
 	"strconv"
 
-	bosherr "github.com/cloudfoundry/bosh-utils/errors"
+	bosherr "github.com/bluebosh/bosh-utils/errors"
 	"github.com/softlayer/softlayer-go/datatypes"
 
 	"bosh-softlayer-cpi/api"

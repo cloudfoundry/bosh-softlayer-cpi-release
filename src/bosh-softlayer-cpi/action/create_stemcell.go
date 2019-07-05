@@ -3,7 +3,7 @@ package action
 import (
 	"bosh-softlayer-cpi/api"
 	"bosh-softlayer-cpi/softlayer/stemcell_service"
-	bosherr "github.com/cloudfoundry/bosh-utils/errors"
+	bosherr "github.com/bluebosh/bosh-utils/errors"
 )
 
 const softlayerInfrastructure = "softlayer"

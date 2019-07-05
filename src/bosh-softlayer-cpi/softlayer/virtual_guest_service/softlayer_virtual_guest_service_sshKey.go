@@ -1,7 +1,7 @@
 package instance
 
 import (
-	bosherr "github.com/cloudfoundry/bosh-utils/errors"
+	bosherr "github.com/bluebosh/bosh-utils/errors"
 
 	"fmt"
 	"github.com/softlayer/softlayer-go/sl"

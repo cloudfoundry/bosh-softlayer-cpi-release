@@ -11,7 +11,7 @@ import (
 
 	fakedisp "bosh-softlayer-cpi/api/dispatcher/fakes"
 	cpilog "bosh-softlayer-cpi/logger"
-	boshlog "github.com/cloudfoundry/bosh-utils/logger"
+	boshlog "github.com/bluebosh/bosh-utils/logger"
 )
 
 type FakeReader struct {

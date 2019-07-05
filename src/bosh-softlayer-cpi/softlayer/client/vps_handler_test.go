@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"time"
 
-	boshlogger "github.com/cloudfoundry/bosh-utils/logger"
+	boshlogger "github.com/bluebosh/bosh-utils/logger"
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
 	"github.com/ncw/swift"

@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	boshlogger "github.com/cloudfoundry/bosh-utils/logger"
+	boshlogger "github.com/bluebosh/bosh-utils/logger"
 	"github.com/ncw/swift"
 	"github.com/onsi/gomega/ghttp"
 	"github.com/softlayer/softlayer-go/datatypes"

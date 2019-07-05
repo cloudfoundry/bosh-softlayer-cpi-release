@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	bosherr "github.com/cloudfoundry/bosh-utils/errors"
+	bosherr "github.com/bluebosh/bosh-utils/errors"
 
 	bsl "bosh-softlayer-cpi/softlayer/client"
 

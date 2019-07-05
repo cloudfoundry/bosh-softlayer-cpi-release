@@ -3,8 +3,8 @@ package config
 import (
 	"encoding/json"
 
-	bosherr "github.com/cloudfoundry/bosh-utils/errors"
-	boshsys "github.com/cloudfoundry/bosh-utils/system"
+	bosherr "github.com/bluebosh/bosh-utils/errors"
+	boshsys "github.com/bluebosh/bosh-utils/system"
 
 	"bosh-softlayer-cpi/registry"
 	boslconfig "bosh-softlayer-cpi/softlayer/config"

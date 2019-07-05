@@ -13,8 +13,8 @@ import (
 	. "github.com/onsi/gomega"
 
 	"code.cloudfoundry.org/clock"
-	boshlog "github.com/cloudfoundry/bosh-utils/logger"
-	boshretry "github.com/cloudfoundry/bosh-utils/retrystrategy"
+	boshlog "github.com/bluebosh/bosh-utils/logger"
+	boshretry "github.com/bluebosh/bosh-utils/retrystrategy"
 
 	. "bosh-softlayer-cpi/logger"
 )

@@ -7,8 +7,8 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	boshlog "github.com/cloudfoundry/bosh-utils/logger"
-	fakeuuid "github.com/cloudfoundry/bosh-utils/uuid/fakes"
+	boshlog "github.com/bluebosh/bosh-utils/logger"
+	fakeuuid "github.com/bluebosh/bosh-utils/uuid/fakes"
 	"github.com/softlayer/softlayer-go/datatypes"
 	"github.com/softlayer/softlayer-go/sl"
 

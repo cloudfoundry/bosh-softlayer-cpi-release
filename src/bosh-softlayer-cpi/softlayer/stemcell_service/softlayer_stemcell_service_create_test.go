@@ -8,10 +8,10 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	boshfs "github.com/cloudfoundry/bosh-utils/fileutil"
-	boshlog "github.com/cloudfoundry/bosh-utils/logger"
-	boshsys "github.com/cloudfoundry/bosh-utils/system"
-	fakeuuid "github.com/cloudfoundry/bosh-utils/uuid/fakes"
+	boshfs "github.com/bluebosh/bosh-utils/fileutil"
+	boshlog "github.com/bluebosh/bosh-utils/logger"
+	boshsys "github.com/bluebosh/bosh-utils/system"
+	fakeuuid "github.com/bluebosh/bosh-utils/uuid/fakes"
 
 	cpiLog "bosh-softlayer-cpi/logger"
 	fakeslclient "bosh-softlayer-cpi/softlayer/client/fakes"

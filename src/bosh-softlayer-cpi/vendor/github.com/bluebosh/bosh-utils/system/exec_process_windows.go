@@ -4,7 +4,7 @@ import (
 	"strings"
 	"time"
 
-	bosherr "github.com/cloudfoundry/bosh-utils/errors"
+	bosherr "github.com/bluebosh/bosh-utils/errors"
 )
 
 func (p *execProcess) Start() error {

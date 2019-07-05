@@ -12,8 +12,8 @@ import (
 	"strconv"
 	"time"
 
-	boshlogger "github.com/cloudfoundry/bosh-utils/logger"
-	boshsys "github.com/cloudfoundry/bosh-utils/system"
+	boshlogger "github.com/bluebosh/bosh-utils/logger"
+	boshsys "github.com/bluebosh/bosh-utils/system"
 	"github.com/ncw/swift"
 	"github.com/onsi/gomega/ghttp"
 	"github.com/softlayer/softlayer-go/session"

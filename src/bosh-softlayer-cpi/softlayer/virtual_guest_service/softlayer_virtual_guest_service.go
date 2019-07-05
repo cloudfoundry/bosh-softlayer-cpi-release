@@ -1,7 +1,7 @@
 package instance
 
 import (
-	boshuuid "github.com/cloudfoundry/bosh-utils/uuid"
+	boshuuid "github.com/bluebosh/bosh-utils/uuid"
 
 	"bosh-softlayer-cpi/logger"
 	bosl "bosh-softlayer-cpi/softlayer/client"

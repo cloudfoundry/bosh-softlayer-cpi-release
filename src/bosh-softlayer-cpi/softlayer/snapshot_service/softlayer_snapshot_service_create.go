@@ -1,7 +1,7 @@
 package snapshot
 
 import (
-	bosherr "github.com/cloudfoundry/bosh-utils/errors"
+	bosherr "github.com/bluebosh/bosh-utils/errors"
 )
 
 func (s SoftlayerSnapshotService) Create(diskID int, note string) (int, error) {

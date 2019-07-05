@@ -4,7 +4,7 @@ import (
 	"io"
 	"io/ioutil"
 
-	bosherr "github.com/cloudfoundry/bosh-utils/errors"
+	bosherr "github.com/bluebosh/bosh-utils/errors"
 
 	bslcdisp "bosh-softlayer-cpi/api/dispatcher"
 	"bosh-softlayer-cpi/logger"

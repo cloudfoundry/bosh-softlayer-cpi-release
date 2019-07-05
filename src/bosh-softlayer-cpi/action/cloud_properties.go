@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	bosherr "github.com/cloudfoundry/bosh-utils/errors"
+	bosherr "github.com/bluebosh/bosh-utils/errors"
 )
 
 type DiskCloudProperties struct {

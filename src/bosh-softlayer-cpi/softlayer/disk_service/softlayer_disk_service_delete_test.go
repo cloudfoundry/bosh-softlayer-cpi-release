@@ -6,7 +6,7 @@ import (
 
 	"errors"
 
-	boshlog "github.com/cloudfoundry/bosh-utils/logger"
+	boshlog "github.com/bluebosh/bosh-utils/logger"
 
 	cpiLog "bosh-softlayer-cpi/logger"
 	fakeslclient "bosh-softlayer-cpi/softlayer/client/fakes"

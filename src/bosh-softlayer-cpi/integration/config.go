@@ -9,8 +9,8 @@ import (
 	"os"
 	"strings"
 
-	boshlog "github.com/cloudfoundry/bosh-utils/logger"
-	"github.com/cloudfoundry/bosh-utils/uuid"
+	boshlog "github.com/bluebosh/bosh-utils/logger"
+	"github.com/bluebosh/bosh-utils/uuid"
 	"github.com/ncw/swift"
 	"github.com/softlayer/softlayer-go/session"
 

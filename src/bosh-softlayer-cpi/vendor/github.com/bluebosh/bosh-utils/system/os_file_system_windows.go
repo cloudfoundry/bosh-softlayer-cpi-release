@@ -9,7 +9,7 @@ import (
 	"strings"
 	"syscall"
 
-	bosherr "github.com/cloudfoundry/bosh-utils/errors"
+	bosherr "github.com/bluebosh/bosh-utils/errors"
 )
 
 func (fs *osFileSystem) currentHomeDir() (string, error) {

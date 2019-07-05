@@ -9,7 +9,7 @@ import (
 	cpiLog "bosh-softlayer-cpi/logger"
 	fakeslclient "bosh-softlayer-cpi/softlayer/client/fakes"
 	. "bosh-softlayer-cpi/softlayer/snapshot_service"
-	boshlog "github.com/cloudfoundry/bosh-utils/logger"
+	boshlog "github.com/bluebosh/bosh-utils/logger"
 )
 
 var _ = Describe("Snapshot Service", func() {

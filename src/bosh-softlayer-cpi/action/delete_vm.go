@@ -4,7 +4,7 @@ import (
 	"bosh-softlayer-cpi/api"
 	"bosh-softlayer-cpi/registry"
 	vgs "bosh-softlayer-cpi/softlayer/virtual_guest_service"
-	bosherr "github.com/cloudfoundry/bosh-utils/errors"
+	bosherr "github.com/bluebosh/bosh-utils/errors"
 
 	boslconfig "bosh-softlayer-cpi/softlayer/config"
 )

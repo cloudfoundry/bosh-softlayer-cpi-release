@@ -9,7 +9,7 @@ import (
 	"strconv"
 
 	"github.com/bluebosh/goodhosts"
-	bosherr "github.com/cloudfoundry/bosh-utils/errors"
+	bosherr "github.com/bluebosh/bosh-utils/errors"
 	"github.com/softlayer/softlayer-go/datatypes"
 	"github.com/softlayer/softlayer-go/sl"
 

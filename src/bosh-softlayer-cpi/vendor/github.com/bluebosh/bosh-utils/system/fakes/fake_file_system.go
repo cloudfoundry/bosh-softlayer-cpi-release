@@ -15,8 +15,8 @@ import (
 
 	gouuid "github.com/nu7hatch/gouuid"
 
-	bosherr "github.com/cloudfoundry/bosh-utils/errors"
-	boshsys "github.com/cloudfoundry/bosh-utils/system"
+	bosherr "github.com/bluebosh/bosh-utils/errors"
+	boshsys "github.com/bluebosh/bosh-utils/system"
 	"time"
 )
 

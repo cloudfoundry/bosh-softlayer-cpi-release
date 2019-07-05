@@ -2,7 +2,7 @@ package action
 
 import (
 	"bosh-softlayer-cpi/api"
-	bosherr "github.com/cloudfoundry/bosh-utils/errors"
+	bosherr "github.com/bluebosh/bosh-utils/errors"
 
 	"bosh-softlayer-cpi/softlayer/virtual_guest_service"
 )

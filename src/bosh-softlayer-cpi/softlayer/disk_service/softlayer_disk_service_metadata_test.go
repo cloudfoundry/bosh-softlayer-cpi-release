@@ -8,7 +8,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	fakeslclient "bosh-softlayer-cpi/softlayer/client/fakes"
-	boshlog "github.com/cloudfoundry/bosh-utils/logger"
+	boshlog "github.com/bluebosh/bosh-utils/logger"
 
 	. "bosh-softlayer-cpi/softlayer/disk_service"
 

@@ -21,6 +21,54 @@
 			"revisionTime": "2017-05-29T11:00:29Z"
 		},
 		{
+			"checksumSHA1": "Eyg7yhnR0S41+B9YvX/34IPs5+s=",
+			"path": "github.com/bluebosh/bosh-utils/errors",
+			"revision": "0d8d4dfac77dd6ffe40e4c699616ac6653d164f5",
+			"revisionTime": "2019-07-08T07:10:03Z"
+		},
+		{
+			"checksumSHA1": "Yw1jH9lOwdp/f5y3jtnqDunrXk0=",
+			"path": "github.com/bluebosh/bosh-utils/fileutil",
+			"revision": "0d8d4dfac77dd6ffe40e4c699616ac6653d164f5",
+			"revisionTime": "2019-07-08T07:10:03Z"
+		},
+		{
+			"checksumSHA1": "0HEMda6mwTo5b6XbCyRbbjoulbc=",
+			"path": "github.com/bluebosh/bosh-utils/logger",
+			"revision": "0d8d4dfac77dd6ffe40e4c699616ac6653d164f5",
+			"revisionTime": "2019-07-08T07:10:03Z"
+		},
+		{
+			"checksumSHA1": "8FLG7cDqjNpeN6qeYPdGnclyfik=",
+			"path": "github.com/bluebosh/bosh-utils/retrystrategy",
+			"revision": "0d8d4dfac77dd6ffe40e4c699616ac6653d164f5",
+			"revisionTime": "2019-07-08T07:10:03Z"
+		},
+		{
+			"checksumSHA1": "pp03jeIBv8xaPxcgSJAl6rSLT2w=",
+			"path": "github.com/bluebosh/bosh-utils/system",
+			"revision": "0d8d4dfac77dd6ffe40e4c699616ac6653d164f5",
+			"revisionTime": "2019-07-08T07:10:03Z"
+		},
+		{
+			"checksumSHA1": "TenqE08AdI2wZ/XwfpQTgBWssNA=",
+			"path": "github.com/bluebosh/bosh-utils/system/fakes",
+			"revision": "0d8d4dfac77dd6ffe40e4c699616ac6653d164f5",
+			"revisionTime": "2019-07-08T07:10:03Z"
+		},
+		{
+			"checksumSHA1": "Qh72i1oAmJ823EpCkMs7E3AxxWc=",
+			"path": "github.com/bluebosh/bosh-utils/uuid",
+			"revision": "0d8d4dfac77dd6ffe40e4c699616ac6653d164f5",
+			"revisionTime": "2019-07-08T07:10:03Z"
+		},
+		{
+			"checksumSHA1": "WwDuyFxfsdB4vsykw9DnYejjAJk=",
+			"path": "github.com/bluebosh/bosh-utils/uuid/fakes",
+			"revision": "0d8d4dfac77dd6ffe40e4c699616ac6653d164f5",
+			"revisionTime": "2019-07-08T07:10:03Z"
+		},
+		{
 			"checksumSHA1": "XcrCxsd7QvlMqQ1rZQL3uYXPkpI=",
 			"path": "github.com/bluebosh/goodhosts",
 			"revision": "a0216a00bdad6aa7b2b6c342d42b96241f239314",
@@ -28,71 +76,17 @@
 		},
 		{
 			"checksumSHA1": "I2DDeog8ML55A+drYgods2s4Y5Q=",
-			"origin": "github.com/cloudfoundry/bosh-utils/vendor/github.com/bmatcuk/doublestar",
+			"origin": "github.com/bluebosh/bosh-utils/vendor/github.com/bmatcuk/doublestar",
 			"path": "github.com/bmatcuk/doublestar",
-			"revision": "c9f356b84a809b355b264a565216fcd7267acdf1",
-			"revisionTime": "2017-07-07T00:05:06Z"
+			"revision": "0d8d4dfac77dd6ffe40e4c699616ac6653d164f5",
+			"revisionTime": "2019-07-08T07:10:03Z"
 		},
 		{
 			"checksumSHA1": "TNDMHCARKW4X2p4lc0PjO9v65p4=",
-			"origin": "github.com/cloudfoundry/bosh-utils/vendor/github.com/charlievieth/fs",
+			"origin": "github.com/bluebosh/bosh-utils/vendor/github.com/charlievieth/fs",
 			"path": "github.com/charlievieth/fs",
-			"revision": "c9f356b84a809b355b264a565216fcd7267acdf1",
-			"revisionTime": "2017-07-07T00:05:06Z"
-		},
-		{
-			"checksumSHA1": "FnR1zvUvK6aui2XELTqvuhY/T4g=",
-			"path": "github.com/cloudfoundry/bosh-utils/errors",
-			"revision": "c9f356b84a809b355b264a565216fcd7267acdf1",
-			"revisionTime": "2017-07-07T00:05:06Z"
-		},
-		{
-			"checksumSHA1": "WukbhwGKd/BpfuADBnWRoEXAh74=",
-			"path": "github.com/cloudfoundry/bosh-utils/fileutil",
-			"revision": "ed55b4546683cfb2a9c6177ba1bfaa8ee6b37782",
-			"revisionTime": "2017-12-26T23:42:00Z"
-		},
-		{
-			"checksumSHA1": "BkIn5/mqOV0eW1lKx106lLoC/EQ=",
-			"path": "github.com/cloudfoundry/bosh-utils/fileutil/fakes",
-			"revision": "ed55b4546683cfb2a9c6177ba1bfaa8ee6b37782",
-			"revisionTime": "2017-12-26T23:42:00Z"
-		},
-		{
-			"checksumSHA1": "TbzNl200lJFg2rpZ4V6rG8Dxvdc=",
-			"path": "github.com/cloudfoundry/bosh-utils/logger",
-			"revision": "c9f356b84a809b355b264a565216fcd7267acdf1",
-			"revisionTime": "2017-07-07T00:05:06Z"
-		},
-		{
-			"checksumSHA1": "0+rPDE5aGw2TP9TRAuyXwhvaBzU=",
-			"path": "github.com/cloudfoundry/bosh-utils/retrystrategy",
-			"revision": "c9f356b84a809b355b264a565216fcd7267acdf1",
-			"revisionTime": "2017-07-07T00:05:06Z"
-		},
-		{
-			"checksumSHA1": "hqrqPN4jmumQ1D5adbqxfRa9tns=",
-			"path": "github.com/cloudfoundry/bosh-utils/system",
-			"revision": "c9f356b84a809b355b264a565216fcd7267acdf1",
-			"revisionTime": "2017-07-07T00:05:06Z"
-		},
-		{
-			"checksumSHA1": "r5KcJ2fG0sM7Syw8seqH6eBqAL0=",
-			"path": "github.com/cloudfoundry/bosh-utils/system/fakes",
-			"revision": "c9f356b84a809b355b264a565216fcd7267acdf1",
-			"revisionTime": "2017-07-07T00:05:06Z"
-		},
-		{
-			"checksumSHA1": "PiQWNb57zalJJYAqz6XyjJ8rMnM=",
-			"path": "github.com/cloudfoundry/bosh-utils/uuid",
-			"revision": "833257efc00aee289992e3c49551121850208c36",
-			"revisionTime": "2017-05-18T23:57:33Z"
-		},
-		{
-			"checksumSHA1": "VNtWCzo6OSPhIXxzBHiedw5kVAQ=",
-			"path": "github.com/cloudfoundry/bosh-utils/uuid/fakes",
-			"revision": "833257efc00aee289992e3c49551121850208c36",
-			"revisionTime": "2017-05-18T23:57:33Z"
+			"revision": "0d8d4dfac77dd6ffe40e4c699616ac6653d164f5",
+			"revisionTime": "2019-07-08T07:10:03Z"
 		},
 		{
 			"checksumSHA1": "ZKKdymZaeuKSiSKOZnMD9r3+T3Y=",
@@ -228,10 +222,10 @@
 		},
 		{
 			"checksumSHA1": "gcLub3oB+u4QrOJZcYmk/y2AP4k=",
-			"origin": "github.com/cloudfoundry/bosh-utils/vendor/github.com/nu7hatch/gouuid",
+			"origin": "github.com/bluebosh/bosh-utils/vendor/github.com/nu7hatch/gouuid",
 			"path": "github.com/nu7hatch/gouuid",
-			"revision": "c9f356b84a809b355b264a565216fcd7267acdf1",
-			"revisionTime": "2017-07-07T00:05:06Z"
+			"revision": "0d8d4dfac77dd6ffe40e4c699616ac6653d164f5",
+			"revisionTime": "2019-07-08T07:10:03Z"
 		},
 		{
 			"checksumSHA1": "4Mit+gfjJxKXX/kyTnhQshYEsQA=",

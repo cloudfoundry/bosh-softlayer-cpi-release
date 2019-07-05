@@ -10,7 +10,7 @@ import (
 
 	. "bosh-softlayer-cpi/api/dispatcher"
 
-	boshlog "github.com/cloudfoundry/bosh-utils/logger"
+	boshlog "github.com/bluebosh/bosh-utils/logger"
 
 	fakeaction "bosh-softlayer-cpi/action/fakes"
 	bgcapi "bosh-softlayer-cpi/api"

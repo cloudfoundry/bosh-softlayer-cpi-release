@@ -1,6 +1,6 @@
 package instance
 
-import bosherr "github.com/cloudfoundry/bosh-utils/errors"
+import bosherr "github.com/bluebosh/bosh-utils/errors"
 
 func (vg SoftlayerVirtualGuestService) Delete(id int, enableVps bool) error {
 	_, found, err := vg.softlayerClient.GetInstance(id, "id")

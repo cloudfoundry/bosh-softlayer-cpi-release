@@ -3,7 +3,7 @@ package retrystrategy
 import (
 	"time"
 
-	boshlog "github.com/cloudfoundry/bosh-utils/logger"
+	boshlog "github.com/bluebosh/bosh-utils/logger"
 )
 
 type unlimitedRetryStrategy struct {

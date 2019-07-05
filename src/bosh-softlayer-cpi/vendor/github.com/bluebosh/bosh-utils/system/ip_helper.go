@@ -2,7 +2,7 @@ package system
 
 import (
 	"errors"
-	bosherr "github.com/cloudfoundry/bosh-utils/errors"
+	bosherr "github.com/bluebosh/bosh-utils/errors"
 	"strconv"
 	"strings"
 )

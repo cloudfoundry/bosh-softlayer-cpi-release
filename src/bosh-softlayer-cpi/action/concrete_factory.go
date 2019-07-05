@@ -1,8 +1,8 @@
 package action
 
 import (
-	bosherr "github.com/cloudfoundry/bosh-utils/errors"
-	boshuuid "github.com/cloudfoundry/bosh-utils/uuid"
+	bosherr "github.com/bluebosh/bosh-utils/errors"
+	boshuuid "github.com/bluebosh/bosh-utils/uuid"
 
 	"bosh-softlayer-cpi/config"
 	"bosh-softlayer-cpi/softlayer/client"

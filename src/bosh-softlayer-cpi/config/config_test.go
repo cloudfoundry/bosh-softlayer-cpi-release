@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	//. "bosh-softlayer-cpi/softlayer/common"
-	fakesys "github.com/cloudfoundry/bosh-utils/system/fakes"
+	fakesys "github.com/bluebosh/bosh-utils/system/fakes"
 
 	"bosh-softlayer-cpi/config"
 	"bosh-softlayer-cpi/registry"

@@ -3,7 +3,7 @@ package disk
 import (
 	"math"
 
-	bosherr "github.com/cloudfoundry/bosh-utils/errors"
+	bosherr "github.com/bluebosh/bosh-utils/errors"
 )
 
 func (d SoftlayerDiskService) Create(size int, iops int, location string, snapshotSpace int) (int, error) {

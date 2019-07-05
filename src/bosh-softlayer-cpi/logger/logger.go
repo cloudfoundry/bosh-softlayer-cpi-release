@@ -8,8 +8,8 @@ import (
 	"reflect"
 	"unsafe"
 
-	boshlog "github.com/cloudfoundry/bosh-utils/logger"
-	boshretry "github.com/cloudfoundry/bosh-utils/retrystrategy"
+	boshlog "github.com/bluebosh/bosh-utils/logger"
+	boshretry "github.com/bluebosh/bosh-utils/retrystrategy"
 )
 
 type Logger interface {
