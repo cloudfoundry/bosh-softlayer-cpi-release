@@ -2,10 +2,12 @@ package config
 
 import (
 	"encoding/json"
+	"regexp"
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshsys "github.com/cloudfoundry/bosh-utils/system"
 
+	"bosh-softlayer-cpi/logger"
 	"bosh-softlayer-cpi/registry"
 	boslconfig "bosh-softlayer-cpi/softlayer/config"
 )
@@ -25,17 +27,21 @@ type CPIProperties struct {
 	Registry  registry.ClientOptions
 }
 
-func NewConfigFromPath(configFile string, fs boshsys.FileSystem) (Config, error) {
+func NewConfigFromPath(configFile string, fs boshsys.FileSystem, logger logger.Logger) (Config, error) {
 	var config Config
 
 	if configFile == "" {
 		return config, bosherr.Errorf("Must provide a config file")
 	}
 
-	bytes, err := fs.ReadFileWithRedact(configFile)
+	logger.Debug("File System", "Reading file %s", configFile)
+
+	bytes, err := fs.ReadFileWithOpts(configFile, boshsys.ReadOpts{Quiet: true})
 	if err != nil {
 		return config, bosherr.WrapErrorf(err, "Reading config file '%s'", configFile)
 	}
+
+	logger.DebugWithDetails("File System", "Read content", string(redact(bytes)))
 
 	if err = json.Unmarshal(bytes, &config); err != nil {
 		return config, bosherr.WrapError(err, "Unmarshalling config contents")
@@ -81,4 +87,26 @@ func (c Config) Validate() error {
 	//}
 
 	return nil
+}
+
+func redact(bs []byte) []byte {
+	s := string(bs)
+
+	hiddenStr1 := "\"password\":\"<redact>\""      // replacement string
+	r1 := regexp.MustCompile(`"password":"[^"]*"`) // original string
+	s1 := r1.ReplaceAllString(s, hiddenStr1)
+
+	hiddenStr2 := "\"api_key\":\"<redact>\""
+	r2 := regexp.MustCompile(`"api_key":"[^"]*"`)
+	s2 := r2.ReplaceAllString(s1, hiddenStr2)
+
+	hiddenStr3 := "//registry:<redact>"
+	r3 := regexp.MustCompile(`//registry:[^@]*`)
+	s3 := r3.ReplaceAllString(s2, hiddenStr3)
+
+	hiddenStr4 := "//nats:<redact>"
+	r4 := regexp.MustCompile(`//nats:[^@]*`)
+	s4 := r4.ReplaceAllString(s3, hiddenStr4)
+
+	return []byte(s4)
 }

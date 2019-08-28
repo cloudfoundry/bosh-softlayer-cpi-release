@@ -51,7 +51,7 @@ type JSON struct {
 func NewJSON(
 	actionFactory bslaction.Factory,
 	caller Caller,
-	logger        bslapi.MultiLogger,
+	logger bslapi.MultiLogger,
 ) JSON {
 	return JSON{
 		actionFactory: actionFactory,

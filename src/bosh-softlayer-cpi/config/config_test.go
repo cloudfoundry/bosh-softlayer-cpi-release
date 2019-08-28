@@ -10,8 +10,10 @@ import (
 	fakesys "github.com/cloudfoundry/bosh-utils/system/fakes"
 
 	"bosh-softlayer-cpi/config"
+	cpilog "bosh-softlayer-cpi/logger"
 	"bosh-softlayer-cpi/registry"
 	boslconfig "bosh-softlayer-cpi/softlayer/config"
+	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 )
 
 var validProperties = config.CPIProperties{
@@ -58,18 +60,20 @@ var validConfig = config.Config{
 
 var _ = Describe("NewConfigFromPath", func() {
 	var (
-		fs *fakesys.FakeFileSystem
+		fs     *fakesys.FakeFileSystem
+		logger cpilog.Logger
 	)
 
 	BeforeEach(func() {
 		fs = fakesys.NewFakeFileSystem()
+		logger = cpilog.NewLogger(boshlog.LevelNone, "")
 	})
 
 	It("returns error if config is not valid", func() {
 		err := fs.WriteFileString("/config.json", "{}")
 		Expect(err).ToNot(HaveOccurred())
 
-		_, err = config.NewConfigFromPath("/config.json", fs)
+		_, err = config.NewConfigFromPath("/config.json", fs, logger)
 		Expect(err).To(HaveOccurred())
 		Expect(err.Error()).To(ContainSubstring("Validating config"))
 	})
@@ -78,7 +82,7 @@ var _ = Describe("NewConfigFromPath", func() {
 		err := fs.WriteFileString("/config.json", "-")
 		Expect(err).ToNot(HaveOccurred())
 
-		_, err = config.NewConfigFromPath("/config.json", fs)
+		_, err = config.NewConfigFromPath("/config.json", fs, logger)
 		Expect(err).To(HaveOccurred())
 		Expect(err.Error()).To(ContainSubstring("Unmarshalling config"))
 	})
@@ -89,7 +93,7 @@ var _ = Describe("NewConfigFromPath", func() {
 
 		fs.ReadFileError = errors.New("fake-read-err")
 
-		_, err = config.NewConfigFromPath("/config.json", fs)
+		_, err = config.NewConfigFromPath("/config.json", fs, logger)
 		Expect(err).To(HaveOccurred())
 		Expect(err.Error()).To(ContainSubstring("fake-read-err"))
 	})
