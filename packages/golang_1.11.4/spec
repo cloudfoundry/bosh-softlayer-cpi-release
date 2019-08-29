@@ -1,8 +1,0 @@
----
-name: golang_1.11.4
-
-dependencies:
-
-files:
-  - golang_1.11.4/go1.11.4.linux-amd64.tar.gz
-  - golang_1.11.4/go1.11.4.darwin-amd64.tar.gz

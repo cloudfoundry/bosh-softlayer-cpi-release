@@ -69,10 +69,10 @@ var _ = Describe("CreateVM", func() {
 		}
 
 		agentOptions = registry.AgentOptions{
-			Mbus: "nats://nats:nats@fake-mbus:fake-port",
+			Mbus: "nats://nats:nats@fake-mbus:1234",
 			Blobstore: registry.BlobstoreOptions{
 				Provider: "dav",
-				Options:  map[string]interface{}{"endpoint": "http://fake-blobstore:fake-port"},
+				Options:  map[string]interface{}{"endpoint": "http://fake-blobstore:1234"},
 			},
 		}
 
@@ -133,13 +133,13 @@ var _ = Describe("CreateVM", func() {
 				AgentID: "fake-agent-id",
 				Blobstore: registry.BlobstoreSettings{
 					Provider: "dav",
-					Options:  map[string]interface{}{"endpoint": "http://fake-blobstore:fake-port"},
+					Options:  map[string]interface{}{"endpoint": "http://fake-blobstore:1234"},
 				},
 				Disks: registry.DisksSettings{
 					System:     "",
 					Persistent: map[string]registry.PersistentSettings{},
 				},
-				Mbus: "nats://nats:nats@fake-mbus:fake-port",
+				Mbus: "nats://nats:nats@fake-mbus:1234",
 				Networks: registry.NetworksSettings{
 					"fake-network-name": registry.NetworkSettings{
 						Type:    "dynamic",
@@ -287,10 +287,10 @@ var _ = Describe("CreateVM", func() {
 			}
 
 			agentOptions = registry.AgentOptions{
-				Mbus: "nats://nats:nats@fake-hostname:fake-port",
+				Mbus: "nats://nats:nats@fake-hostname:1234",
 				Blobstore: registry.BlobstoreOptions{
 					Provider: "dav",
-					Options:  map[string]interface{}{"endpoint": "http://fake-hostname:fake-port"},
+					Options:  map[string]interface{}{"endpoint": "http://fake-hostname:1234"},
 				},
 			}
 
@@ -312,13 +312,13 @@ var _ = Describe("CreateVM", func() {
 				AgentID: "fake-agent-id",
 				Blobstore: registry.BlobstoreSettings{
 					Provider: "dav",
-					Options:  map[string]interface{}{"endpoint": fmt.Sprintf("http://%s:fake-port", localIpAddr)},
+					Options:  map[string]interface{}{"endpoint": fmt.Sprintf("http://%s:1234", localIpAddr)},
 				},
 				Disks: registry.DisksSettings{
 					System:     "",
 					Persistent: map[string]registry.PersistentSettings{},
 				},
-				Mbus: fmt.Sprintf("nats://nats:nats@%s:fake-port", localIpAddr),
+				Mbus: fmt.Sprintf("nats://nats:nats@%s:1234", localIpAddr),
 				Networks: registry.NetworksSettings{
 					"fake-network-name": registry.NetworkSettings{
 						Type:    "dynamic",
@@ -383,10 +383,10 @@ var _ = Describe("CreateVM", func() {
 			}
 
 			agentOptions = registry.AgentOptions{
-				Mbus: "nats://nats:nats@10.11.12.13:fake-port",
+				Mbus: "nats://nats:nats@10.11.12.13:1234",
 				Blobstore: registry.BlobstoreOptions{
 					Provider: "dav",
-					Options:  map[string]interface{}{"endpoint": "http://10.11.12.13:fake-port"},
+					Options:  map[string]interface{}{"endpoint": "http://10.11.12.13:1234"},
 				},
 			}
 
@@ -394,13 +394,13 @@ var _ = Describe("CreateVM", func() {
 				AgentID: "fake-agent-id",
 				Blobstore: registry.BlobstoreSettings{
 					Provider: "dav",
-					Options:  map[string]interface{}{"endpoint": "http://10.11.12.13:fake-port"},
+					Options:  map[string]interface{}{"endpoint": "http://10.11.12.13:1234"},
 				},
 				Disks: registry.DisksSettings{
 					System:     "",
 					Persistent: map[string]registry.PersistentSettings{},
 				},
-				Mbus: "nats://nats:nats@10.11.12.13:fake-port",
+				Mbus: "nats://nats:nats@10.11.12.13:1234",
 				Networks: registry.NetworksSettings{
 					"fake-network-name": registry.NetworkSettings{
 						Type:    "dynamic",
@@ -719,13 +719,13 @@ var _ = Describe("CreateVM", func() {
 					AgentID: "fake-agent-id",
 					Blobstore: registry.BlobstoreSettings{
 						Provider: "dav",
-						Options:  map[string]interface{}{"endpoint": "http://fake-blobstore:fake-port"},
+						Options:  map[string]interface{}{"endpoint": "http://fake-blobstore:1234"},
 					},
 					Disks: registry.DisksSettings{
 						System:     "",
 						Persistent: map[string]registry.PersistentSettings{},
 					},
-					Mbus: "nats://nats:nats@fake-mbus:fake-port",
+					Mbus: "nats://nats:nats@fake-mbus:1234",
 					Networks: registry.NetworksSettings{
 						"fake-network-name": registry.NetworkSettings{
 							Type:    "dynamic",
@@ -902,14 +902,14 @@ var _ = Describe("CreateVM", func() {
 					AgentID: "fake-agent-id",
 					Blobstore: registry.BlobstoreSettings{
 						Provider: "dav",
-						Options:  map[string]interface{}{"endpoint": "http://fake-blobstore:fake-port"},
+						Options:  map[string]interface{}{"endpoint": "http://fake-blobstore:1234"},
 					},
 					Disks: registry.DisksSettings{
 						System:     "",
 						Ephemeral:  "/dev/xvdc",
 						Persistent: map[string]registry.PersistentSettings{},
 					},
-					Mbus: "nats://nats:nats@fake-mbus:fake-port",
+					Mbus: "nats://nats:nats@fake-mbus:1234",
 					Networks: registry.NetworksSettings{
 						"fake-network-name": registry.NetworkSettings{
 							Type:    "dynamic",
@@ -1043,10 +1043,10 @@ var _ = Describe("CreateVM", func() {
 		Context("when vcap password exists in both env.bosh and agent option", func() {
 			BeforeEach(func() {
 				agentOptions = registry.AgentOptions{
-					Mbus: "nats://nats:nats@fake-mbus:fake-port",
+					Mbus: "nats://nats:nats@fake-mbus:1234",
 					Blobstore: registry.BlobstoreOptions{
 						Provider: "dav",
-						Options:  map[string]interface{}{"endpoint": "http://fake-blobstore:fake-port"},
+						Options:  map[string]interface{}{"endpoint": "http://fake-blobstore:1234"},
 					},
 					VcapPassword: "fake-vcap-password-in-agent",
 				}
@@ -1068,13 +1068,13 @@ var _ = Describe("CreateVM", func() {
 					AgentID: "fake-agent-id",
 					Blobstore: registry.BlobstoreSettings{
 						Provider: "dav",
-						Options:  map[string]interface{}{"endpoint": "http://fake-blobstore:fake-port"},
+						Options:  map[string]interface{}{"endpoint": "http://fake-blobstore:1234"},
 					},
 					Disks: registry.DisksSettings{
 						System:     "",
 						Persistent: map[string]registry.PersistentSettings{},
 					},
-					Mbus: "nats://nats:nats@fake-mbus:fake-port",
+					Mbus: "nats://nats:nats@fake-mbus:1234",
 					Networks: registry.NetworksSettings{
 						"fake-network-name": registry.NetworkSettings{
 							Type:    "dynamic",
@@ -1124,10 +1124,10 @@ var _ = Describe("CreateVM", func() {
 		Context("when env.bosh exists but does not have vcap password, vcap password exists in agent option", func() {
 			BeforeEach(func() {
 				agentOptions = registry.AgentOptions{
-					Mbus: "nats://nats:nats@fake-mbus:fake-port",
+					Mbus: "nats://nats:nats@fake-mbus:1234",
 					Blobstore: registry.BlobstoreOptions{
 						Provider: "dav",
-						Options:  map[string]interface{}{"endpoint": "http://fake-blobstore:fake-port"},
+						Options:  map[string]interface{}{"endpoint": "http://fake-blobstore:1234"},
 					},
 					VcapPassword: "fake-vcap-password-in-agent",
 				}
@@ -1149,13 +1149,13 @@ var _ = Describe("CreateVM", func() {
 					AgentID: "fake-agent-id",
 					Blobstore: registry.BlobstoreSettings{
 						Provider: "dav",
-						Options:  map[string]interface{}{"endpoint": "http://fake-blobstore:fake-port"},
+						Options:  map[string]interface{}{"endpoint": "http://fake-blobstore:1234"},
 					},
 					Disks: registry.DisksSettings{
 						System:     "",
 						Persistent: map[string]registry.PersistentSettings{},
 					},
-					Mbus: "nats://nats:nats@fake-mbus:fake-port",
+					Mbus: "nats://nats:nats@fake-mbus:1234",
 					Networks: registry.NetworksSettings{
 						"fake-network-name": registry.NetworkSettings{
 							Type:    "dynamic",

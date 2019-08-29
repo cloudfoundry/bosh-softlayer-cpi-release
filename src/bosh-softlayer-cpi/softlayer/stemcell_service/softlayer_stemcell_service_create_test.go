@@ -43,9 +43,9 @@ var _ = Describe("Stemcell Service", func() {
 
 		// create temp image tarball
 		vhdFilePath := "/tmp/image.vhd"
-		fs = boshsys.NewOsFileSystem(boshlog.New(boshlog.LevelDebug, log.New(os.Stdout, "", log.LstdFlags), log.New(os.Stderr, "", log.LstdFlags)))
+		fs = boshsys.NewOsFileSystem(boshlog.New(boshlog.LevelDebug, log.New(os.Stdout, "", log.LstdFlags)))
 		fs.WriteFileString(vhdFilePath, "")
-		cmdRunner = boshsys.NewExecCmdRunner(boshlog.New(boshlog.LevelDebug, log.New(os.Stdout, "", log.LstdFlags), log.New(os.Stderr, "", log.LstdFlags)))
+		cmdRunner = boshsys.NewExecCmdRunner(boshlog.New(boshlog.LevelDebug, log.New(os.Stdout, "", log.LstdFlags)))
 		defer func() {
 			cmdRunner.RunCommand("rm", vhdFilePath)
 		}()
@@ -226,7 +226,7 @@ var _ = Describe("Stemcell Service", func() {
 	})
 
 	AfterEach(func() {
-		cmdRunner = boshsys.NewExecCmdRunner(boshlog.New(boshlog.LevelDebug, log.New(os.Stdout, "", log.LstdFlags), log.New(os.Stderr, "", log.LstdFlags)))
+		cmdRunner = boshsys.NewExecCmdRunner(boshlog.New(boshlog.LevelDebug, log.New(os.Stdout, "", log.LstdFlags)))
 		defer func() {
 			cmdRunner.RunCommand("rm", imagePath)
 		}()

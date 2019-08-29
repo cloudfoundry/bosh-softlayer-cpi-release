@@ -32,7 +32,7 @@ type logger struct {
 }
 
 func New(level boshlog.LogLevel, serialTagPrefix string, out, err *log.Logger) Logger {
-	Logger := boshlog.New(level, out, err)
+	Logger := boshlog.New(level, out)
 	return &logger{
 		boshlogger:   Logger,
 		threadPrefix: serialTagPrefix,

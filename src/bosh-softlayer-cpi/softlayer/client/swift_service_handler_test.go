@@ -203,7 +203,7 @@ var _ = Describe("SwiftServiceHandler", func() {
 
 	Describe("UploadSwiftLargeObject", func() {
 		BeforeEach(func() {
-			fs = boshsys.NewOsFileSystem(boshlogger.New(boshlogger.LevelDebug, log.New(os.Stdout, "", log.LstdFlags), log.New(os.Stderr, "", log.LstdFlags)))
+			fs = boshsys.NewOsFileSystem(boshlogger.New(boshlogger.LevelDebug, log.New(os.Stdout, "", log.LstdFlags)))
 			fs.WriteFileString(objectFilePath, "1")
 		})
 

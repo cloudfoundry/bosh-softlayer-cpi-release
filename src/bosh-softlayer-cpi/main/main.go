@@ -40,7 +40,7 @@ func main() {
 
 	flag.Parse()
 
-	cfg, err := config.NewConfigFromPath(*configPathOpt, fs)
+	cfg, err := config.NewConfigFromPath(*configPathOpt, fs, logger)
 	if err != nil {
 		logger.Error(logTagMain, "Loading config %s", err.Error())
 		os.Exit(1)

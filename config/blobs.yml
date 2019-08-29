@@ -1,8 +1,8 @@
-golang_1.11.4/go1.11.4.darwin-amd64.tar.gz:
-  size: 123637816
-  object_id: 49f784fc-5d70-4877-78f7-ad5efed3827c
-  sha: sha256:48ea987fb610894b3108ecf42e7a4fd1c1e3eabcaeb570e388c75af1f1375f80
-golang_1.11.4/go1.11.4.linux-amd64.tar.gz:
-  size: 126643341
-  object_id: e0e48464-7098-4c33-7a43-26b79d360bce
-  sha: sha256:fb26c30e6a04ad937bbc657a1b5bba92f80096af1e8ee6da6430c045a8db3a5b
+golang_1.12.9/go1.12.9.darwin-amd64.tar.gz:
+  size: 127648296
+  object_id: 114ee289-8e75-469a-7775-c1a446f0a2e2
+  sha: sha256:4f189102b15de0be1852d03a764acb7ac5ea2c67672a6ad3a340bd18d0e04bb4
+golang_1.12.9/go1.12.9.linux-amd64.tar.gz:
+  size: 127961523
+  object_id: 8e7f1a07-fb24-4f77-61aa-612cf4ea4a61
+  sha: sha256:ac2a6efcc1f5ec8bdc0db0a988bb1d301d64b6d61b7e8d9e42f662fbb75a2b9b
