@@ -10,9 +10,11 @@ export PATH=${GOROOT}/bin:${PATH}
 
 # Build BOSH SoftLayer CPI package
 mkdir -p ${BOSH_COMPILE_TARGET}/go/src
+mkdir ${BOSH_COMPILE_TARGET}/.cache
 mv ${BOSH_COMPILE_TARGET}/bosh-softlayer-cpi ${BOSH_COMPILE_TARGET}/go/src/
 cd ${BOSH_COMPILE_TARGET}/go/src/bosh-softlayer-cpi
 export GOPATH=${BOSH_COMPILE_TARGET}/go
+export GOCACHE=${BOSH_COMPILE_TARGET}/.cache
 make build
 
 # Copy BOSH SoftLayer CPI package
