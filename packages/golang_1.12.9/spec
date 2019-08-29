@@ -1,0 +1,8 @@
+---
+name: golang_1.12.9
+
+dependencies:
+
+files:
+  - golang_1.12.9/go1.12.9.linux-amd64.tar.gz
+  - golang_1.12.9/go1.12.9.darwin-amd64.tar.gz

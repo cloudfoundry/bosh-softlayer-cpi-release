@@ -5,7 +5,7 @@ set -u # report the usage of uninitialized variables
 PACKAGES_DIR=${BOSH_PACKAGES_DIR:-/var/vcap/packages}
 
 # Set Golang dependency
-export GOROOT=$(cd "${PACKAGES_DIR}/golang_1.11.4" && pwd -P)
+export GOROOT=$(cd "${PACKAGES_DIR}/golang_1.12.9" && pwd -P)
 export PATH=${GOROOT}/bin:${PATH}
 
 # Build BOSH SoftLayer CPI package
