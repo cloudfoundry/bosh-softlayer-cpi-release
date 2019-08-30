@@ -9,6 +9,7 @@ image_resource:
 inputs:
   - name: director-state
   - name: bosh-cpi-release
+  - name: bosh-cli
 
 run:
   path: bosh-cpi-release/ci/bats/tasks/destroy-director.sh

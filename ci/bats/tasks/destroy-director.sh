@@ -2,6 +2,9 @@
 
 set -eu
 
+mv bosh-cli/bosh-cli-* /usr/local/bin/bosh-cli
+chmod +x /usr/local/bin/bosh-cli
+
 mv director-state/.bosh "$HOME"/
 
 state_path() { bosh-cli int director-state/director.yml --path="$1" ; }
