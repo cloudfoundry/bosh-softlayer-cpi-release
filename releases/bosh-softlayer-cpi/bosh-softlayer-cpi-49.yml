@@ -1,0 +1,27 @@
+name: bosh-softlayer-cpi
+version: "49"
+commit_hash: 48a9240
+uncommitted_changes: true
+jobs:
+- name: softlayer_cpi
+  version: 4c3e1650db6cdaa2e60186df8c4b6a71fd26a5149089afd72673d434493a84b8
+  fingerprint: 4c3e1650db6cdaa2e60186df8c4b6a71fd26a5149089afd72673d434493a84b8
+  sha1: sha256:225477297558ae23730d97efdc300edb887de67c132d4bfa8b32880858062e72
+  packages:
+  - bosh_softlayer_cpi
+packages:
+- name: bosh_softlayer_cpi
+  version: 619e94f707d7dd71be5c0d267dff20e758a98d92feb7d8ad9bd107191b1596c8
+  fingerprint: 619e94f707d7dd71be5c0d267dff20e758a98d92feb7d8ad9bd107191b1596c8
+  sha1: sha256:55ee63a008093ef319ef4f91ef13760d42f98075bada28d3d3aa3a2d8c26ba55
+  dependencies:
+  - golang_1.12.9
+- name: golang_1.12.9
+  version: cad19a10b4d93bc9cdb275a719db9bce51986b15b05ba685fd7a847739c7f5c1
+  fingerprint: cad19a10b4d93bc9cdb275a719db9bce51986b15b05ba685fd7a847739c7f5c1
+  sha1: sha256:1e61a2fef7ae12c876e78e6579ce989d401a5476c4a016db19cea2823c714c48
+  dependencies: []
+license:
+  version: afbd828b105eb838b3733ae72f03ad66200ca74606aeaefda6704475ed58a818
+  fingerprint: afbd828b105eb838b3733ae72f03ad66200ca74606aeaefda6704475ed58a818
+  sha1: sha256:d9e70b8f78f0f4921c4a8a63cbdf482165c24e801d2018135f65e983cbf1eb7e

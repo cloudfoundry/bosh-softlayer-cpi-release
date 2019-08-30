@@ -1,0 +1,6 @@
+builds:
+  cad19a10b4d93bc9cdb275a719db9bce51986b15b05ba685fd7a847739c7f5c1:
+    version: cad19a10b4d93bc9cdb275a719db9bce51986b15b05ba685fd7a847739c7f5c1
+    blobstore_id: ca6db41d-6d7e-4e17-4057-f5a378e65aa0
+    sha1: sha256:1e61a2fef7ae12c876e78e6579ce989d401a5476c4a016db19cea2823c714c48
+format-version: "2"
