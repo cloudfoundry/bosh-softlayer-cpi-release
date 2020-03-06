@@ -65,7 +65,13 @@ func (vg SoftlayerVirtualGuestService) extractTagsFromVMMetadata(vmMetadata Meta
 		}
 		cleanTagString := reg.ReplaceAllString(tagValue.(string), "")
 
-		_, err = tagStringBuffer.WriteString(tagName + ":" + cleanTagString)
+		regColon, err := regexp.Compile(`[:]+`)
+		if err != nil {
+			return "", bosherr.WrapError(err, "There is a problem with your regexp: '[:]+'. That is used to strips out all ':' characters")
+		}
+		convertedTagString := regColon.ReplaceAllString(cleanTagString, "-")
+
+		_, err = tagStringBuffer.WriteString(tagName + ":" + convertedTagString)
 		if err != nil {
 			return tagStringBuffer.String(), err
 		}

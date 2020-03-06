@@ -3,6 +3,7 @@ package instance_test
 import (
 	"errors"
 	"fmt"
+	"regexp"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -93,6 +94,27 @@ var _ = Describe("Virtual Guest Service", func() {
 			Expect(tags).NotTo(ContainSubstring("+"))
 			Expect(tags).NotTo(ContainSubstring("@"))
 			Expect(tags).NotTo(ContainSubstring("!"))
+		})
+
+		It("Set converted tags successfully if metaData contains multiple colons", func() {
+			metaData = Metadata{
+				"created_at": "2020-02-12T02:54:06Z",
+			}
+
+			cli.SetTagsReturns(
+				true,
+				nil,
+			)
+
+			err := virtualGuestService.SetMetadata(vmID, metaData)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(cli.SetTagsCallCount()).To(Equal(1))
+			_, tags := cli.SetTagsArgsForCall(0)
+			Expect(tags).To(ContainSubstring("2020-02-12T02-54-06Z"))
+
+			rep := regexp.MustCompile(":")
+			matches := rep.FindAllStringIndex(tags, -1)
+			Expect(len(matches)).To(Equal(1))
 		})
 
 		It("Return error if softLayerClient SetTags call returns an error", func() {
