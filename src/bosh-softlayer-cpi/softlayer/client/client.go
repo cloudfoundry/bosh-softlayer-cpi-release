@@ -1872,7 +1872,7 @@ func (c *ClientManager) UploadSwiftLargeObject(containerName string, objectName 
 	if err != nil {
 		return bosherr.WrapErrorf(err, "Open stemcell image file")
 	}
-	defer imageFile.Close()
+	defer imageFile.Close()	// #nosec G307
 
 	c.logger.Debug(softlayerClientLogTag, "Upload object '%s'", containerName+"/"+objectName)
 

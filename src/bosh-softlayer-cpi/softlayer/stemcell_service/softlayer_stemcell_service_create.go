@@ -77,7 +77,7 @@ func (s SoftlayerStemcellService) decompressTarBall(source string) (string, erro
 	if err != nil {
 		return "", bosherr.WrapErrorf(err, "Open tarball file")
 	}
-	defer reader.Close()
+	defer reader.Close()	// #nosec G307
 
 	archive, err := gzip.NewReader(reader)
 	if err != nil {
@@ -91,9 +91,9 @@ func (s SoftlayerStemcellService) decompressTarBall(source string) (string, erro
 	if err != nil {
 		return "", bosherr.WrapErrorf(err, "Create image file")
 	}
-	defer writer.Close()
+	defer writer.Close()	// // #nosec G307
 
-	_, err = io.Copy(writer, archive)
+	_, err = io.Copy(writer, archive)	// #nosec G110
 	if err != nil {
 		return "", bosherr.WrapErrorf(err, "Copy decompressed image data")
 	}
