@@ -100,6 +100,7 @@ jobs:
       trigger: true
     - get: stemcell
       resource: light-stemcell
+      version: {path: light-bosh-stemcell-315.34-softlayer-xen-ubuntu-xenial-go_agent.tgz }
     - get: bosh-cli
     - get: bats
     - get: bosh-deployment
@@ -147,8 +148,8 @@ resources:
 - name: light-stemcell
   type: s3
   source:
-    bucket: bosh-softlayer-stemcells-candidate-container
-    regexp: light-bosh-stemcell-(.*)-softlayer-xen-ubuntu-xenial-go_agent.tgz
+    regexp: light-bosh-stemcell-(\d+(\.\d+){1,2})-softlayer-xen-ubuntu-xenial-go_agent\.tgz
+    bucket: bosh-softlayer-cpi-stemcells
     access_key_id: ((stemcell-aws-access-key))
     secret_access_key: ((stemcell-aws-secret-key))
 
@@ -204,5 +205,5 @@ resources:
 - name: bats
   type: git
   source:
-    uri: https://github.com/gu-bin/bosh-acceptance-tests.git
-    branch: master
+    uri: https://github.com/bluebosh/bosh-acceptance-tests
+    branch: gocli-bats

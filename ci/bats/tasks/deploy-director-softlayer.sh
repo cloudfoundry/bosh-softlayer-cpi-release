@@ -65,3 +65,57 @@ bosh-cli create-env \
   --state director-state.json \
   --vars-store director-creds.yml \
   director.yml
+
+cat > cloud_config.yml <<EOF
+---
+azs:
+- cloud_properties:
+    datacenter: lon02
+  cpi: softlayer
+  name: z1
+compilation:
+  az: z1
+  network: default
+  reuse_compilation_vms: true
+  vm_type: default
+  workers: 2
+networks:
+- name: default
+  subnets:
+  - az: z1
+    cloud_properties:
+      security_groups:
+      - default
+      - cf
+      vlan_ids:
+      - 1292653
+      - 1292651
+    dns:
+    - 10.0.80.11
+    - 10.0.80.12
+  type: dynamic
+vm_types:
+- cloud_properties:
+    cpu: 2
+    ephemeral_disk_size: 100
+    hostname_prefix: slcpi-default-
+    hourly_billing_flag: true
+    local_disk_flag: true
+    memory: 4096
+  name: default
+
+EOF
+
+cat > cpi_config.yml <<EOF
+---
+cpis:
+- name: softlayer
+  type: softlayer
+
+EOF
+
+export BOSH_CLIENT=admin
+export BOSH_CLIENT_SECRET=$(bosh-cli int director-creds.yml --path /admin_password)
+bosh-cli -e ${director_ip} --ca-cert <(bosh-cli int director-creds.yml --path /director_ssl/ca) alias-env ${director_ip}
+bosh-cli -e ${director_ip} -n update-cloud-config cloud_config.yml
+bosh-cli -e ${director_ip} -n update-cpi-config cpi_config.yml

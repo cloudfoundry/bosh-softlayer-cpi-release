@@ -20,16 +20,15 @@ export BOSH_CLIENT_SECRET="$( creds_path /admin_password )"
 export BOSH_CA_CERT="$( creds_path /director_ssl/ca )"
 export BOSH_GW_HOST="$( jq -r ".current_ip" director-state/director-state.json 2>/dev/null )"
 export BOSH_GW_USER="jumpbox"
+export BOSH_OS_BATS=false
+
 export BAT_PRIVATE_KEY="$( creds_path /jumpbox_ssh/private_key )"
-
 export BAT_DNS_HOST="$( jq -r ".current_ip" director-state/director-state.json 2>/dev/null )"
-
 export BAT_INFRASTRUCTURE=softlayer
 export BAT_NETWORKING=dynamic
-
-export BAT_RSPEC_FLAGS="--tag ~vip_networking --tag ~manual_networking --tag ~root_partition --tag ~raw_ephemeral_storage"
-
+export BAT_RSPEC_FLAGS="--tag ~vip_networking --tag ~manual_networking --tag ~root_partition --tag ~raw_ephemeral_storage --tag ~multiple_manual_networks"
 export BAT_DIRECTOR=$( jq -r ".current_ip" director-state/director-state.json 2>/dev/null )
+export BAT_DEBUG_MODE=true
 EOF
 
 cat > interpolate.yml <<EOF
@@ -54,9 +53,8 @@ properties:
       vlan_ids:
       - ((SL_VLAN_PUBLIC))
       - ((SL_VLAN_PRIVATE))
-  password: "\$6\$Uamn2Hix6MlWro\$UijJSdv4AHPcQIh7T/2tuJAGSY6gq0bseo7wzRfMqzvnco.sPfSJbVCqijixg5VvVdZ2GbPq6uDDieoytK0be/"
+  password: "\$1\$LxAOw3r5\$XUpSO1fAIsT5SOl8bEeHF0"
   dns:
-  - ((BOSH_ENVIRONMENT))
   - 8.8.8.8
   - 10.0.80.11
   - 10.0.80.12
@@ -68,7 +66,6 @@ bosh-cli interpolate \
  -v SL_VM_NAME_PREFIX="${SL_VM_NAME_PREFIX}" \
  -v SL_DATACENTER="${SL_DATACENTER}" \
  -v SL_VM_DOMAIN="${SL_VM_DOMAIN}" \
- -v BOSH_ENVIRONMENT="$( jq -r ".current_ip" director-state/director-state.json 2>/dev/null )" \
  -v SL_VLAN_PUBLIC="${SL_VLAN_PUBLIC}" \
  -v SL_VLAN_PRIVATE="${SL_VLAN_PRIVATE}" \
  interpolate.yml \
