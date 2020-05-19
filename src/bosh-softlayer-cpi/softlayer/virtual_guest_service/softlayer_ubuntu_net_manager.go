@@ -94,14 +94,14 @@ func (u *Softlayer_Ubuntu_Net) NormalizeDynamics(networkComponents datatypes.Vir
 			if privateDynamic != nil {
 				return nil, errors.New("multiple private dynamic networks are not supported")
 			}
-			privateDynamic = &nw
+			privateDynamic = &nw	// #nosec G601
 		}
 
 		if networkComponents.PrimaryNetworkComponent.NetworkVlan != nil && nw.CloudProperties.VlanID == *(networkComponents.PrimaryNetworkComponent.NetworkVlan.Id) {
 			if publicDynamic != nil {
 				return nil, errors.New("multiple public dynamic networks are not supported")
 			}
-			publicDynamic = &nw
+			publicDynamic = &nw		// #nosec G601
 		}
 	}
 
