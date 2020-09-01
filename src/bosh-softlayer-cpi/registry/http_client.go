@@ -226,6 +226,7 @@ func (c HTTPClient) httpClient() (http.Client, error) {
 			}
 		}
 
+		// #nosec G402
 		tlsConfig := &tls.Config{
 			Certificates: []tls.Certificate{certificates},
 			RootCAs:      certPool,
